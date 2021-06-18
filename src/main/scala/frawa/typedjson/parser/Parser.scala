@@ -13,7 +13,7 @@ trait Parser {
 }
 
 object Parser {
-  def parse(json: String)(implicit parser: Parser): Either[String, Value] = {
+  def apply(json: String)(implicit parser: Parser): Either[String, Value] = {
     parser.parse(json)
   }
 }
