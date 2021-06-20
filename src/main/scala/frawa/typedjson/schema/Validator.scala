@@ -14,7 +14,8 @@ case class Error(error: ValidationError, pointer: Pointer = Pointer.empty) {
 }
 
 trait ValidationError
-case class TypeError(expected: String) extends ValidationError
+case class TypeMismatch(expected: String) extends ValidationError
+case class FalseSchema()                  extends ValidationError
 
 trait Validator {
   def validate(value: Value): Option[Seq[Error]]
@@ -33,28 +34,28 @@ object Validator {
 case class NullValidator() extends Validator {
   override def validate(value: Value): Option[Seq[Error]] = value match {
     case NullValue => None
-    case _         => Option(Seq(Error(TypeError("null"))))
+    case _         => Option(Seq(Error(TypeMismatch("null"))))
   }
 }
 
 case class BooleanValidator() extends Validator {
   override def validate(value: Value): Option[Seq[Error]] = value match {
-    case BoolValue(_) => None
-    case _            => Option(Seq(Error(TypeError("boolean"))))
+    case BoolValue(value) => if (value) None else Option(Seq(Error(FalseSchema())))
+    case _                => Option(Seq(Error(TypeMismatch("boolean"))))
   }
 }
 
 case class StringValidator() extends Validator {
   override def validate(value: Value): Option[Seq[Error]] = value match {
     case StringValue(_) => None
-    case _              => Option(Seq(Error(TypeError("string"))))
+    case _              => Option(Seq(Error(TypeMismatch("string"))))
   }
 }
 
 case class NumberValidator() extends Validator {
   override def validate(value: Value): Option[Seq[Error]] = value match {
     case NumberValue(_) => None
-    case _              => Option(Seq(Error(TypeError("number"))))
+    case _              => Option(Seq(Error(TypeMismatch("number"))))
   }
 }
 
@@ -70,7 +71,7 @@ case class ArrayValidator(itemValidator: Validator) extends Validator {
               .map(errors => errors.map(_.prefix(prefix)))
           })
           .map(_.flatten)
-      case _ => Option(Seq(Error(TypeError("array"))))
+      case _ => Option(Seq(Error(TypeMismatch("array"))))
     }
   }
 }
