@@ -6,6 +6,7 @@ import frawa.typedjson.parser.BoolValue
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.NumberValue
 import frawa.typedjson.parser.ArrayValue
+import frawa.typedjson.parser.ObjectValue
 
 case class Error(error: ValidationError, pointer: Pointer = Pointer.empty) {
   def prefix(prefix: Pointer): Error = {
@@ -14,8 +15,9 @@ case class Error(error: ValidationError, pointer: Pointer = Pointer.empty) {
 }
 
 trait ValidationError
-case class TypeMismatch(expected: String) extends ValidationError
-case class FalseSchema()                  extends ValidationError
+case class TypeMismatch(expected: String)  extends ValidationError
+case class FalseSchema()                   extends ValidationError
+case class UnexpectedProperty(key: String) extends ValidationError
 
 trait Validator {
   def validate(value: Value): Option[Seq[Error]]
@@ -28,6 +30,15 @@ object Validator {
     case StringSchema       => Right(StringValidator())
     case NumberSchema       => Right(NumberValidator())
     case ArraySchema(items) => Validator(items).map(ArrayValidator(_))
+    case ObjectSchema(properties) =>
+      Helper
+        .sequence(properties.map { case (key, schema) =>
+          Validator(schema).map((key, _))
+        }.toSeq)
+        .map(_.toMap)
+        .map(
+          ObjectValidator(_)
+        )
   }
 }
 
@@ -59,14 +70,14 @@ case class NumberValidator() extends Validator {
   }
 }
 
-case class ArrayValidator(itemValidator: Validator) extends Validator {
+case class ArrayValidator(itemsValidator: Validator) extends Validator {
   override def validate(value: Value): Option[Seq[Error]] = {
     value match {
       case ArrayValue(items) =>
         Helper
           .sequence(items.zipWithIndex.map { case (item, index) =>
             lazy val prefix = Pointer.empty / index
-            itemValidator
+            itemsValidator
               .validate(item)
               .map(errors => errors.map(_.prefix(prefix)))
           })
@@ -76,8 +87,40 @@ case class ArrayValidator(itemValidator: Validator) extends Validator {
   }
 }
 
+case class ObjectValidator(propertiesValidator: Map[String, Validator]) extends Validator {
+  override def validate(value: Value): Option[Seq[Error]] = {
+    value match {
+      case ObjectValue(properties) => {
+        val validations = properties.map { case (key1, value1) =>
+          lazy val prefix = Pointer.empty / key1
+          propertiesValidator
+            .get(key1)
+            .map(validator =>
+              validator
+                .validate(value1)
+                .map(errors => errors.map(_.prefix(prefix)))
+            )
+            .getOrElse(Option(Seq(Error(UnexpectedProperty(key1)))))
+        }.toSeq
+        Helper
+          .sequence(validations)
+          .map(_.flatten)
+      }
+      case _ => Option(Seq(Error(TypeMismatch("object"))))
+    }
+  }
+}
 object Helper {
   def sequence[T](options: Seq[Option[T]]): Option[Seq[T]] = {
-    options.foldLeft(Option(Seq.empty[T]))((acc, v) => acc.flatMap(acc => v.map(acc :+ _)))
+    options.foldLeft(Option(Seq.empty[T]))((acc, v) => v.flatMap(v => acc.map(_ :+ v).orElse(Option(Seq(v)))))
+  }
+  def sequence[E, T](eithers: Seq[Either[E, T]]): Either[E, Seq[T]] = {
+    // TODO continue over Left?
+    eithers.foldLeft[Either[E, Seq[T]]](Right[E, Seq[T]](Seq()))((acc, v) => acc.flatMap(acc => v.map(acc :+ _)))
+  }
+
+  def debugTraceValue[T](title: String): T => T = { v =>
+    println(title, v)
+    v
   }
 }

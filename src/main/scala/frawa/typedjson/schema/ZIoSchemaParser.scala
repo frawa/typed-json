@@ -29,6 +29,12 @@ object SchemaDecoders {
               .map(_.as[Schema])
               .map(items => items.map(ArraySchema(_)))
               .getOrElse((Left(s"missing 'items'")))
+          case Json.Str("object") =>
+            fields
+              .get("properties")
+              .map(_.as[Map[String, Schema]])
+              .map(items => items.map(ObjectSchema(_)))
+              .getOrElse((Left(s"missing 'properties'")))
           case _ => Left(s"unknown type '${t}'")
         }
       }

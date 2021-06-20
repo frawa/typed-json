@@ -6,11 +6,12 @@ import frawa.typedjson.parser.ObjectValue
 
 trait Schema
 
-case object NullSchema                extends Schema
-case object BooleanSchema             extends Schema
-case object StringSchema              extends Schema
-case object NumberSchema              extends Schema
-case class ArraySchema(items: Schema) extends Schema
+case object NullSchema                                   extends Schema
+case object BooleanSchema                                extends Schema
+case object StringSchema                                 extends Schema
+case object NumberSchema                                 extends Schema
+case class ArraySchema(items: Schema)                    extends Schema
+case class ObjectSchema(properties: Map[String, Schema]) extends Schema
 
 trait SchemaParser {
   def parse(json: String): Either[String, Schema]

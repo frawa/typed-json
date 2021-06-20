@@ -69,12 +69,58 @@ class ValidatorTest extends FunSuite {
     assertEquals(result, Right(Some(Seq(Error(TypeMismatch("number"), Pointer(0))))))
   }
 
-  // test("object") {
-  //   val schema    = SchemaParser("""{"type": "object", "items": { "type": "number"} }""")
-  //   val validator = schema.flatMap(Validator(_))
-  //   val result    = validator.flatMap(validator => Parser("""[13]""").map(validator.validate(_)))
-  //   assertEquals(result, Right(None))
-  //   val result2 = validator.flatMap(validator => Parser("""null""").map(validator.validate(_)))
-  //   assertEquals(result2, Right(Some(Seq(Error(TypeError("array"))))))
-  // }
+  test("object") {
+    val schema    = SchemaParser("""{
+                                |"type": "object", 
+                                |"properties": { 
+                                |  "toto": { "type": "number" },
+                                |  "titi": { "type": "string" }
+                                |} 
+                                |}
+                                |""".stripMargin)
+    val validator = schema.flatMap(Validator(_))
+    val result    = validator.flatMap(validator => Parser("""{
+                                                         |"toto": 13,
+                                                         |"titi": "hello"
+                                                         |}
+                                                         |""".stripMargin).map(validator.validate(_)))
+    assertEquals(result, Right(None))
+    val result2 = validator.flatMap(validator => Parser("""null""").map(validator.validate(_)))
+    assertEquals(result2, Right(Some(Seq(Error(TypeMismatch("object"))))))
+  }
+
+  test("object property type") {
+    val schema    = SchemaParser("""{
+                                |"type": "object", 
+                                |"properties": { 
+                                |  "toto": { "type": "number" },
+                                |  "titi": { "type": "string" }
+                                |} 
+                                |}
+                                |""".stripMargin)
+    val validator = schema.flatMap(Validator(_))
+    val result    = validator.flatMap(validator => Parser("""{
+                                                         |"toto": 13,
+                                                         |"titi": true
+                                                         |}
+                                                         |""".stripMargin).map(validator.validate(_)))
+    assertEquals(result, Right(Some(Seq(Error(TypeMismatch("string"), Pointer.empty / "titi")))))
+  }
+
+  test("object unknown property") {
+    val schema    = SchemaParser("""{
+                                |"type": "object", 
+                                |"properties": { 
+                                |  "toto": { "type": "number" },
+                                |  "titi": { "type": "string" }
+                                |} 
+                                |}
+                                |""".stripMargin)
+    val validator = schema.flatMap(Validator(_))
+    val result    = validator.flatMap(validator => Parser("""{
+                                                         |"gnu": 13
+                                                         |}
+                                                         |""".stripMargin).map(validator.validate(_)))
+    assertEquals(result, Right(Some(Seq(Error(UnexpectedProperty("gnu"))))))
+  }
 }
