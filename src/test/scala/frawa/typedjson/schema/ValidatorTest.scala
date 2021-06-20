@@ -16,7 +16,7 @@ class ValidatorTest extends FunSuite {
     val result    = validator.flatMap(validator => Parser("""null""").map(validator.validate(_)))
     assertEquals(result, Right(None))
     val result2 = validator.flatMap(validator => Parser("""13""").map(validator.validate(_)))
-    assertEquals(result2, Right(Some(Seq(TypeError("null")))))
+    assertEquals(result2, Right(Some(Seq(Error(TypeError("null"))))))
   }
 
   test("boolean") {
@@ -25,7 +25,7 @@ class ValidatorTest extends FunSuite {
     val result    = validator.flatMap(validator => Parser("""true""").map(validator.validate(_)))
     assertEquals(result, Right(None))
     val result2 = validator.flatMap(validator => Parser("""13""").map(validator.validate(_)))
-    assertEquals(result2, Right(Some(Seq(TypeError("boolean")))))
+    assertEquals(result2, Right(Some(Seq(Error(TypeError("boolean"))))))
   }
 
   test("string") {
@@ -34,7 +34,7 @@ class ValidatorTest extends FunSuite {
     val result    = validator.flatMap(validator => Parser(""""hello"""").map(validator.validate(_)))
     assertEquals(result, Right(None))
     val result2 = validator.flatMap(validator => Parser("""13""").map(validator.validate(_)))
-    assertEquals(result2, Right(Some(Seq(TypeError("string")))))
+    assertEquals(result2, Right(Some(Seq(Error(TypeError("string"))))))
   }
 
   test("number") {
@@ -43,7 +43,7 @@ class ValidatorTest extends FunSuite {
     val result    = validator.flatMap(validator => Parser("""13""").map(validator.validate(_)))
     assertEquals(result, Right(None))
     val result2 = validator.flatMap(validator => Parser("""null""").map(validator.validate(_)))
-    assertEquals(result2, Right(Some(Seq(TypeError("number")))))
+    assertEquals(result2, Right(Some(Seq(Error(TypeError("number"))))))
   }
 
   test("array") {
@@ -52,13 +52,13 @@ class ValidatorTest extends FunSuite {
     val result    = validator.flatMap(validator => Parser("""[13]""").map(validator.validate(_)))
     assertEquals(result, Right(None))
     val result2 = validator.flatMap(validator => Parser("""null""").map(validator.validate(_)))
-    assertEquals(result2, Right(Some(Seq(TypeError("array")))))
+    assertEquals(result2, Right(Some(Seq(Error(TypeError("array"))))))
   }
 
   test("array item") {
     val schema    = SchemaParser("""{"type": "array", "items": { "type": "number"} }""")
     val validator = schema.flatMap(Validator(_))
     val result    = validator.flatMap(validator => Parser("""[true]""").map(validator.validate(_)))
-    assertEquals(result, Right(Some(Seq(TypeError("number")))))
+    assertEquals(result, Right(Some(Seq(Error(TypeError("number"), Pointer(0))))))
   }
 }

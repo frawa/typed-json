@@ -7,8 +7,14 @@ import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.NumberValue
 import frawa.typedjson.parser.ArrayValue
 
-trait Error
-case class TypeError(expected: String) extends Error
+case class Error(error: ValidationError, pointer: Pointer = Pointer.empty) {
+  def prefix(prefix: Pointer): Error = {
+    Error(error, prefix / pointer)
+  }
+}
+
+trait ValidationError
+case class TypeError(expected: String) extends ValidationError
 
 trait Validator {
   def validate(value: Value): Option[Seq[Error]]
@@ -27,36 +33,44 @@ object Validator {
 case class NullValidator() extends Validator {
   override def validate(value: Value): Option[Seq[Error]] = value match {
     case NullValue => None
-    case _         => Option(Seq(TypeError("null")))
+    case _         => Option(Seq(Error(TypeError("null"))))
   }
 }
 
 case class BooleanValidator() extends Validator {
   override def validate(value: Value): Option[Seq[Error]] = value match {
     case BoolValue(_) => None
-    case _            => Option(Seq(TypeError("boolean")))
+    case _            => Option(Seq(Error(TypeError("boolean"))))
   }
 }
 
 case class StringValidator() extends Validator {
   override def validate(value: Value): Option[Seq[Error]] = value match {
     case StringValue(_) => None
-    case _              => Option(Seq(TypeError("string")))
+    case _              => Option(Seq(Error(TypeError("string"))))
   }
 }
 
 case class NumberValidator() extends Validator {
   override def validate(value: Value): Option[Seq[Error]] = value match {
     case NumberValue(_) => None
-    case _              => Option(Seq(TypeError("number")))
+    case _              => Option(Seq(Error(TypeError("number"))))
   }
 }
 
 case class ArrayValidator(itemValidator: Validator) extends Validator {
   override def validate(value: Value): Option[Seq[Error]] = {
     value match {
-      case ArrayValue(items) => Helper.sequence(items.map(item => itemValidator.validate(item))).map(_.flatten)
-      case _                 => Option(Seq(TypeError("array")))
+      case ArrayValue(items) =>
+        Helper
+          .sequence(items.zipWithIndex.map { case (item, index) =>
+            lazy val prefix = Pointer.empty / index
+            itemValidator
+              .validate(item)
+              .map(errors => errors.map(_.prefix(prefix)))
+          })
+          .map(_.flatten)
+      case _ => Option(Seq(Error(TypeError("array"))))
     }
   }
 }

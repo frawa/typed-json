@@ -1,7 +1,9 @@
 package frawa.typedjson.schema
 
 object Pointer {
-  def empty = new Pointer(Nil)
+  def empty                         = new Pointer(Nil)
+  def apply(index: Int): Pointer    = Pointer.empty / index
+  def apply(field: String): Pointer = Pointer.empty / field
 }
 
 case class Pointer(segments: Seq[Token]) {
