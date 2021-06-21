@@ -155,12 +155,6 @@ case class ObjectValidator(propertiesValidator: Map[String, Validator]) extends 
   }
 }
 object Helper {
-
-  def sequence[E, T](eithers: Seq[Either[E, T]]): Either[E, Seq[T]] = {
-    // TODO continue over Left?
-    eithers.foldLeft[Either[E, Seq[T]]](Right[E, Seq[T]](Seq()))((acc, v) => acc.flatMap(acc => v.map(acc :+ _)))
-  }
-
   def debugTraceValue[T](title: String): T => T = { v =>
     println(title, v)
     v
