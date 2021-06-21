@@ -18,6 +18,7 @@ trait ValidationError
 case class TypeMismatch(expected: String)  extends ValidationError
 case class FalseSchema()                   extends ValidationError
 case class UnexpectedProperty(key: String) extends ValidationError
+case class MissingProperty(key: String)    extends ValidationError
 
 trait Validator {
   def validate(value: Value): Option[Seq[Error]]
@@ -102,8 +103,12 @@ case class ObjectValidator(propertiesValidator: Map[String, Validator]) extends 
             )
             .getOrElse(Option(Seq(Error(UnexpectedProperty(key1)))))
         }.toSeq
+        val missing = propertiesValidator.keySet
+          .diff(properties.keySet)
+          .map(key => Error(MissingProperty(key)))
+        val okOrMissing = if (missing.isEmpty) None else Option(missing)
         Helper
-          .sequence(validations)
+          .sequence(validations :+ okOrMissing)
           .map(_.flatten)
       }
       case _ => Option(Seq(Error(TypeMismatch("object"))))
@@ -112,7 +117,13 @@ case class ObjectValidator(propertiesValidator: Map[String, Validator]) extends 
 }
 object Helper {
   def sequence[T](options: Seq[Option[T]]): Option[Seq[T]] = {
-    options.foldLeft(Option(Seq.empty[T]))((acc, v) => v.flatMap(v => acc.map(_ :+ v).orElse(Option(Seq(v)))))
+    options.foldLeft(Option.empty[Seq[T]])((acc, v) =>
+      v.flatMap(v =>
+        acc
+          .map(_ :+ v)
+          .orElse(Option(Seq(v)))
+      ).orElse(acc)
+    )
   }
   def sequence[E, T](eithers: Seq[Either[E, T]]): Either[E, Seq[T]] = {
     // TODO continue over Left?

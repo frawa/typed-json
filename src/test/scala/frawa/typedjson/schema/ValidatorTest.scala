@@ -118,9 +118,28 @@ class ValidatorTest extends FunSuite {
                                 |""".stripMargin)
     val validator = schema.flatMap(Validator(_))
     val result    = validator.flatMap(validator => Parser("""{
-                                                         |"gnu": 13
+                                                         |"gnu": true,
+                                                         |"toto": 13,
+                                                         |"titi": "foo"
                                                          |}
                                                          |""".stripMargin).map(validator.validate(_)))
     assertEquals(result, Right(Some(Seq(Error(UnexpectedProperty("gnu"))))))
+  }
+
+  test("object missing property") {
+    val schema    = SchemaParser("""{
+                                |"type": "object", 
+                                |"properties": { 
+                                |  "toto": { "type": "number" },
+                                |  "titi": { "type": "string" }
+                                |} 
+                                |}
+                                |""".stripMargin)
+    val validator = schema.flatMap(Validator(_))
+    val result    = validator.flatMap(validator => Parser("""{
+                                                         |"toto": 13
+                                                         |}
+                                                         |""".stripMargin).map(validator.validate(_)))
+    assertEquals(result, Right(Some(Seq(Error(MissingProperty("titi"))))))
   }
 }
