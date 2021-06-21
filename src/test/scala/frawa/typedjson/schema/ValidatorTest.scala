@@ -10,139 +10,189 @@ class ValidatorTest extends FunSuite {
   implicit val zioParser       = new ZioParser();
   implicit val zioSchemaParser = new ZioSchemaParser();
 
+  private def testValidator(text: String)(f: Validator => Unit) {
+    val withValidator = for {
+      schema <- SchemaParser(text)
+      validator = Validator(schema)
+    } yield {
+      f(validator)
+    }
+    withValidator.swap
+      .map(message => fail("no validator", clues(clue(message))))
+      .swap
+  }
+
+  private def assertValidate(text: String, validator: Validator)(f: ValidationResult => Unit) = {
+    val withParsed = for {
+      result <- Parser(text).map(validator.validate(_))
+    } yield {
+      f(result)
+    }
+    withParsed.swap
+      .map(message => fail("parsing failed", clues(clue(message))))
+      .swap
+  }
+
   test("null") {
-    val schema    = SchemaParser("""{"type": "null"}""")
-    val validator = schema.flatMap(Validator(_))
-    val result    = validator.flatMap(validator => Parser("""null""").map(validator.validate(_)))
-    assertEquals(result.map(_.valid), Right(true))
-    val result2 = validator.flatMap(validator => Parser("""13""").map(validator.validate(_)))
-    assertEquals(result2.map(_.errors), Right(Seq(ValidationError(TypeMismatch("null")))))
+    testValidator("""{"type": "null"}""") { validator =>
+      val result = Parser("""null""").map(validator.validate(_))
+      assertValidate("""null""", validator) { result =>
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""13""", validator) { result =>
+        assertEquals(result.errors, Seq(ValidationError(TypeMismatch("null"))))
+      }
+    }
   }
 
   test("boolean") {
-    val schema    = SchemaParser("""{"type": "boolean"}""")
-    val validator = schema.flatMap(Validator(_))
-    val result    = validator.flatMap(validator => Parser("""true""").map(validator.validate(_)))
-    assertEquals(result.map(_.valid), Right(true))
-    val result2 = validator.flatMap(validator => Parser("""13""").map(validator.validate(_)))
-    assertEquals(result2.map(_.errors), Right(Seq(ValidationError(TypeMismatch("boolean")))))
+    testValidator("""{"type": "boolean"}""") { validator =>
+      assertValidate("""true""", validator) { result =>
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""13""", validator) { result =>
+        assertEquals(result.errors, Seq(ValidationError(TypeMismatch("boolean"))))
+      }
+    }
   }
 
   test("boolean false") {
-    val schema    = SchemaParser("""{"type": "boolean"}""")
-    val validator = schema.flatMap(Validator(_))
-    val result    = validator.flatMap(validator => Parser("""false""").map(validator.validate(_)))
-    assertEquals(result.map(_.errors), Right(Seq(ValidationError(FalseSchema()))))
+    testValidator("""{"type": "boolean"}""") { validator =>
+      assertValidate("""false""", validator) { result =>
+        assertEquals(result.errors, Seq(ValidationError(FalseSchema())))
+      }
+    }
   }
 
   test("string") {
-    val schema    = SchemaParser("""{"type": "string"}""")
-    val validator = schema.flatMap(Validator(_))
-    val result    = validator.flatMap(validator => Parser(""""hello"""").map(validator.validate(_)))
-    assertEquals(result.map(_.valid), Right(true))
-    val result2 = validator.flatMap(validator => Parser("""13""").map(validator.validate(_)))
-    assertEquals(result2.map(_.errors), Right(Seq(ValidationError(TypeMismatch("string")))))
+    testValidator("""{"type": "string"}""") { validator =>
+      assertValidate(""""hello"""", validator) { result =>
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""13""", validator) { result =>
+        assertEquals(result.errors, Seq(ValidationError(TypeMismatch("string"))))
+      }
+    }
   }
 
   test("number") {
-    val schema    = SchemaParser("""{"type": "number"}""")
-    val validator = schema.flatMap(Validator(_))
-    val result    = validator.flatMap(validator => Parser("""13""").map(validator.validate(_)))
-    assertEquals(result.map(_.valid), Right(true))
-    val result2 = validator.flatMap(validator => Parser("""null""").map(validator.validate(_)))
-    assertEquals(result2.map(_.errors), Right(Seq(ValidationError(TypeMismatch("number")))))
+    testValidator("""{"type": "number"}""") { validator =>
+      assertValidate("""13""", validator) { result =>
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""null""", validator) { result =>
+        assertEquals(result.errors, Seq(ValidationError(TypeMismatch("number"))))
+      }
+    }
   }
 
   test("array") {
-    val schema    = SchemaParser("""{"type": "array", "items": { "type": "number"} }""")
-    val validator = schema.flatMap(Validator(_))
-    val result    = validator.flatMap(validator => Parser("""[13]""").map(validator.validate(_)))
-    assertEquals(result.map(_.valid), Right(true))
-    val result2 = validator.flatMap(validator => Parser("""null""").map(validator.validate(_)))
-    assertEquals(result2.map(_.errors), Right(Seq(ValidationError(TypeMismatch("array")))))
+    testValidator("""{"type": "array", "items": { "type": "number"} }""") { validator =>
+      assertValidate("""[13]""", validator) { result =>
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""null""", validator) { result =>
+        assertEquals(result.errors, Seq(ValidationError(TypeMismatch("array"))))
+      }
+    }
   }
 
   test("array item") {
-    val schema    = SchemaParser("""{"type": "array", "items": { "type": "number"} }""")
-    val validator = schema.flatMap(Validator(_))
-    val result    = validator.flatMap(validator => Parser("""[true]""").map(validator.validate(_)))
-    assertEquals(result.map(_.errors), Right(Seq(ValidationError(TypeMismatch("number"), Pointer(0)))))
+    testValidator("""{"type": "array", "items": { "type": "number"} }""") { validator =>
+      assertValidate("""[true]""", validator) { result =>
+        assertEquals(result.errors, Seq(ValidationError(TypeMismatch("number"), Pointer(0))))
+      }
+    }
   }
 
   test("object") {
-    val schema    = SchemaParser("""{
-                                |"type": "object", 
-                                |"properties": { 
-                                |  "toto": { "type": "number" },
-                                |  "titi": { "type": "string" }
-                                |} 
-                                |}
-                                |""".stripMargin)
-    val validator = schema.flatMap(Validator(_))
-    val result    = validator.flatMap(validator => Parser("""{
-                                                         |"toto": 13,
-                                                         |"titi": "hello"
-                                                         |}
-                                                         |""".stripMargin).map(validator.validate(_)))
-    assertEquals(result.map(_.valid), Right(true))
-    val result2 = validator.flatMap(validator => Parser("""null""").map(validator.validate(_)))
-    assertEquals(result2.map(_.errors), Right(Seq(ValidationError(TypeMismatch("object")))))
+    testValidator("""{
+                    |"type": "object", 
+                    |"properties": { 
+                    |  "toto": { "type": "number" },
+                    |  "titi": { "type": "string" }
+                    |} 
+                    |}
+                    |""".stripMargin) { validator =>
+      assertValidate(
+        """{
+          |"toto": 13,
+          |"titi": "hello"
+          |}
+          |"""".stripMargin,
+        validator
+      ) { result =>
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""null""", validator) { result =>
+        assertEquals(result.errors, Seq(ValidationError(TypeMismatch("object"))))
+      }
+    }
   }
 
   test("object property type") {
-    val schema    = SchemaParser("""{
-                                |"type": "object", 
-                                |"properties": { 
-                                |  "toto": { "type": "number" },
-                                |  "titi": { "type": "string" }
-                                |} 
-                                |}
-                                |""".stripMargin)
-    val validator = schema.flatMap(Validator(_))
-    val result    = validator.flatMap(validator => Parser("""{
-                                                         |"toto": 13,
-                                                         |"titi": true
-                                                         |}
-                                                         |""".stripMargin).map(validator.validate(_)))
-    assertEquals(
-      result.map(_.errors),
-      Right(Seq(ValidationError(TypeMismatch("string"), Pointer.empty / "titi")))
-    )
+    testValidator("""{
+                    |"type": "object", 
+                    |"properties": { 
+                    |  "toto": { "type": "number" },
+                    |  "titi": { "type": "string" }
+                    |} 
+                    |}
+                    |""".stripMargin) { validator =>
+      assertValidate(
+        """{
+          |"toto": 13,
+          |"titi": true
+          |}
+          |""".stripMargin,
+        validator
+      ) { result =>
+        assertEquals(result.errors, Seq(ValidationError(TypeMismatch("string"), Pointer.empty / "titi")))
+      }
+    }
   }
 
   test("object unknown property") {
-    val schema    = SchemaParser("""{
-                                |"type": "object", 
-                                |"properties": { 
-                                |  "toto": { "type": "number" },
-                                |  "titi": { "type": "string" }
-                                |} 
-                                |}
-                                |""".stripMargin)
-    val validator = schema.flatMap(Validator(_))
-    val result    = validator.flatMap(validator => Parser("""{
-                                                         |"gnu": true,
-                                                         |"toto": 13,
-                                                         |"titi": "foo"
-                                                         |}
-                                                         |""".stripMargin).map(validator.validate(_)))
-    assertEquals(result.map(_.errors), Right(Seq(ValidationError(UnexpectedProperty("gnu")))))
+    testValidator("""{
+                    |"type": "object", 
+                    |"properties": { 
+                    |  "toto": { "type": "number" },
+                    |  "titi": { "type": "string" }
+                    |} 
+                    |}
+                    |""".stripMargin) { validator =>
+      assertValidate(
+        """{
+          |"gnu": true,
+          |"toto": 13,
+          |"titi": "foo"
+          |}
+          |""".stripMargin,
+        validator
+      ) { result =>
+        assertEquals(result.errors, Seq(ValidationError(UnexpectedProperty("gnu"))))
+      }
+    }
   }
 
   test("object missing property") {
-    val schema    = SchemaParser("""{
-                                |"type": "object", 
-                                |"properties": { 
-                                |  "toto": { "type": "number" },
-                                |  "titi": { "type": "string" }
-                                |} 
-                                |}
-                                |""".stripMargin)
-    val validator = schema.flatMap(Validator(_))
-    val result    = validator.flatMap(validator => Parser("""{
-                                                         |"toto": 13
-                                                         |}
-                                                         |""".stripMargin).map(validator.validate(_)))
-    assertEquals(result.map(_.errors), Right(Seq(ValidationError(MissingProperty("titi")))))
+    testValidator("""{
+                    |"type": "object", 
+                    |"properties": { 
+                    |  "toto": { "type": "number" },
+                    |  "titi": { "type": "string" }
+                    |} 
+                    |}
+                    |""".stripMargin) { validator =>
+      assertValidate(
+        """{
+          |"toto": 13
+          |}
+          |""".stripMargin,
+        validator
+      ) { result =>
+        assertEquals(result.errors, Seq(ValidationError(MissingProperty("titi"))))
+      }
+    }
   }
 }

@@ -63,21 +63,19 @@ trait Validator {
 }
 
 object Validator {
-  def apply(schema: Schema): Either[String, Validator] = schema match {
-    case NullSchema         => Right(NullValidator())
-    case BooleanSchema      => Right(BooleanValidator())
-    case StringSchema       => Right(StringValidator())
-    case NumberSchema       => Right(NumberValidator())
-    case ArraySchema(items) => Validator(items).map(ArrayValidator(_))
+  def apply(schema: Schema): Validator = schema match {
+    case NullSchema         => (NullValidator())
+    case BooleanSchema      => (BooleanValidator())
+    case StringSchema       => (StringValidator())
+    case NumberSchema       => (NumberValidator())
+    case ArraySchema(items) => ArrayValidator(Validator(items))
     case ObjectSchema(properties) =>
-      Helper
-        .sequence(properties.map { case (key, schema) =>
-          Validator(schema).map((key, _))
-        }.toSeq)
-        .map(_.toMap)
-        .map(
-          ObjectValidator(_)
-        )
+      ObjectValidator(
+        properties.view
+          .mapValues(Validator(_))
+          .toMap
+      )
+
   }
 }
 
