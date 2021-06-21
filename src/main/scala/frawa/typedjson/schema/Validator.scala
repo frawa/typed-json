@@ -8,20 +8,46 @@ import frawa.typedjson.parser.NumberValue
 import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue
 
-case class Error(error: ValidationError, pointer: Pointer = Pointer.empty) {
-  def prefix(prefix: Pointer): Error = {
-    Error(error, prefix / pointer)
+case class ValidationError(reason: ValidationErrorReason, pointer: Pointer = Pointer.empty) {
+  def prefix(prefix: Pointer): ValidationError = {
+    ValidationError(reason, prefix / pointer)
   }
 }
 
-trait ValidationError
-case class TypeMismatch(expected: String)  extends ValidationError
-case class FalseSchema()                   extends ValidationError
-case class UnexpectedProperty(key: String) extends ValidationError
-case class MissingProperty(key: String)    extends ValidationError
+trait ValidationErrorReason
+case class TypeMismatch(expected: String)  extends ValidationErrorReason
+case class FalseSchema()                   extends ValidationErrorReason
+case class UnexpectedProperty(key: String) extends ValidationErrorReason
+case class MissingProperty(key: String)    extends ValidationErrorReason
+
+trait ValidationResult {
+  val valid: Boolean
+  val errors: Seq[ValidationError]
+  def and(other: ValidationResult): ValidationResult = ValidationResult.and(this, other)
+}
+case object ValidationValid extends ValidationResult {
+  val valid  = true
+  val errors = Seq()
+}
+case class ValidationInvalid(errors: Seq[ValidationError]) extends ValidationResult {
+  val valid = false
+}
+
+object ValidationResult {
+  def valid(): ValidationResult                         = ValidationValid
+  def invalid(error: ValidationError): ValidationResult = ValidationInvalid(Seq(error))
+
+  def and(a: ValidationResult, b: ValidationResult): ValidationResult = {
+    if (a.valid && b.valid) {
+      ValidationValid
+    } else {
+      ValidationInvalid(a.errors ++ b.errors)
+    }
+  }
+}
 
 trait Validator {
-  def validate(value: Value): Option[Seq[Error]]
+  def validate(value: Value): Option[Seq[ValidationError]]
 }
 
 object Validator {
@@ -44,35 +70,35 @@ object Validator {
 }
 
 case class NullValidator() extends Validator {
-  override def validate(value: Value): Option[Seq[Error]] = value match {
+  override def validate(value: Value): Option[Seq[ValidationError]] = value match {
     case NullValue => None
-    case _         => Option(Seq(Error(TypeMismatch("null"))))
+    case _         => Option(Seq(ValidationError(TypeMismatch("null"))))
   }
 }
 
 case class BooleanValidator() extends Validator {
-  override def validate(value: Value): Option[Seq[Error]] = value match {
-    case BoolValue(value) => if (value) None else Option(Seq(Error(FalseSchema())))
-    case _                => Option(Seq(Error(TypeMismatch("boolean"))))
+  override def validate(value: Value): Option[Seq[ValidationError]] = value match {
+    case BoolValue(value) => if (value) None else Option(Seq(ValidationError(FalseSchema())))
+    case _                => Option(Seq(ValidationError(TypeMismatch("boolean"))))
   }
 }
 
 case class StringValidator() extends Validator {
-  override def validate(value: Value): Option[Seq[Error]] = value match {
+  override def validate(value: Value): Option[Seq[ValidationError]] = value match {
     case StringValue(_) => None
-    case _              => Option(Seq(Error(TypeMismatch("string"))))
+    case _              => Option(Seq(ValidationError(TypeMismatch("string"))))
   }
 }
 
 case class NumberValidator() extends Validator {
-  override def validate(value: Value): Option[Seq[Error]] = value match {
+  override def validate(value: Value): Option[Seq[ValidationError]] = value match {
     case NumberValue(_) => None
-    case _              => Option(Seq(Error(TypeMismatch("number"))))
+    case _              => Option(Seq(ValidationError(TypeMismatch("number"))))
   }
 }
 
 case class ArrayValidator(itemsValidator: Validator) extends Validator {
-  override def validate(value: Value): Option[Seq[Error]] = {
+  override def validate(value: Value): Option[Seq[ValidationError]] = {
     value match {
       case ArrayValue(items) =>
         Helper
@@ -83,13 +109,13 @@ case class ArrayValidator(itemsValidator: Validator) extends Validator {
               .map(errors => errors.map(_.prefix(prefix)))
           })
           .map(_.flatten)
-      case _ => Option(Seq(Error(TypeMismatch("array"))))
+      case _ => Option(Seq(ValidationError(TypeMismatch("array"))))
     }
   }
 }
 
 case class ObjectValidator(propertiesValidator: Map[String, Validator]) extends Validator {
-  override def validate(value: Value): Option[Seq[Error]] = {
+  override def validate(value: Value): Option[Seq[ValidationError]] = {
     value match {
       case ObjectValue(properties) => {
         val validations = properties.map { case (key1, value1) =>
@@ -101,17 +127,17 @@ case class ObjectValidator(propertiesValidator: Map[String, Validator]) extends 
                 .validate(value1)
                 .map(errors => errors.map(_.prefix(prefix)))
             )
-            .getOrElse(Option(Seq(Error(UnexpectedProperty(key1)))))
+            .getOrElse(Option(Seq(ValidationError(UnexpectedProperty(key1)))))
         }.toSeq
         val missing = propertiesValidator.keySet
           .diff(properties.keySet)
-          .map(key => Error(MissingProperty(key)))
+          .map(key => ValidationError(MissingProperty(key)))
         val okOrMissing = if (missing.isEmpty) None else Option(missing)
         Helper
           .sequence(validations :+ okOrMissing)
           .map(_.flatten)
       }
-      case _ => Option(Seq(Error(TypeMismatch("object"))))
+      case _ => Option(Seq(ValidationError(TypeMismatch("object"))))
     }
   }
 }
