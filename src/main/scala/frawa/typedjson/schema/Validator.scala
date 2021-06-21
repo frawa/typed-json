@@ -157,15 +157,7 @@ case class ObjectValidator(propertiesValidator: Map[String, Validator]) extends 
   }
 }
 object Helper {
-  def sequence[T](options: Seq[Option[T]]): Option[Seq[T]] = {
-    options.foldLeft(Option.empty[Seq[T]])((acc, v) =>
-      v.flatMap(v =>
-        acc
-          .map(_ :+ v)
-          .orElse(Option(Seq(v)))
-      ).orElse(acc)
-    )
-  }
+
   def sequence[E, T](eithers: Seq[Either[E, T]]): Either[E, Seq[T]] = {
     // TODO continue over Left?
     eithers.foldLeft[Either[E, Seq[T]]](Right[E, Seq[T]](Seq()))((acc, v) => acc.flatMap(acc => v.map(acc :+ _)))
