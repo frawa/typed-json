@@ -14,59 +14,59 @@ class ValidatorTest extends FunSuite {
     val schema    = SchemaParser("""{"type": "null"}""")
     val validator = schema.flatMap(Validator(_))
     val result    = validator.flatMap(validator => Parser("""null""").map(validator.validate(_)))
-    assertEquals(result, Right(None))
+    assertEquals(result.map(_.valid), Right(true))
     val result2 = validator.flatMap(validator => Parser("""13""").map(validator.validate(_)))
-    assertEquals(result2, Right(Some(Seq(ValidationError(TypeMismatch("null"))))))
+    assertEquals(result2.map(_.errors), Right(Seq(ValidationError(TypeMismatch("null")))))
   }
 
   test("boolean") {
     val schema    = SchemaParser("""{"type": "boolean"}""")
     val validator = schema.flatMap(Validator(_))
     val result    = validator.flatMap(validator => Parser("""true""").map(validator.validate(_)))
-    assertEquals(result, Right(None))
+    assertEquals(result.map(_.valid), Right(true))
     val result2 = validator.flatMap(validator => Parser("""13""").map(validator.validate(_)))
-    assertEquals(result2, Right(Some(Seq(ValidationError(TypeMismatch("boolean"))))))
+    assertEquals(result2.map(_.errors), Right(Seq(ValidationError(TypeMismatch("boolean")))))
   }
 
   test("boolean false") {
     val schema    = SchemaParser("""{"type": "boolean"}""")
     val validator = schema.flatMap(Validator(_))
     val result    = validator.flatMap(validator => Parser("""false""").map(validator.validate(_)))
-    assertEquals(result, Right(Some(Seq(ValidationError(FalseSchema())))))
+    assertEquals(result.map(_.errors), Right(Seq(ValidationError(FalseSchema()))))
   }
 
   test("string") {
     val schema    = SchemaParser("""{"type": "string"}""")
     val validator = schema.flatMap(Validator(_))
     val result    = validator.flatMap(validator => Parser(""""hello"""").map(validator.validate(_)))
-    assertEquals(result, Right(None))
+    assertEquals(result.map(_.valid), Right(true))
     val result2 = validator.flatMap(validator => Parser("""13""").map(validator.validate(_)))
-    assertEquals(result2, Right(Some(Seq(ValidationError(TypeMismatch("string"))))))
+    assertEquals(result2.map(_.errors), Right(Seq(ValidationError(TypeMismatch("string")))))
   }
 
   test("number") {
     val schema    = SchemaParser("""{"type": "number"}""")
     val validator = schema.flatMap(Validator(_))
     val result    = validator.flatMap(validator => Parser("""13""").map(validator.validate(_)))
-    assertEquals(result, Right(None))
+    assertEquals(result.map(_.valid), Right(true))
     val result2 = validator.flatMap(validator => Parser("""null""").map(validator.validate(_)))
-    assertEquals(result2, Right(Some(Seq(ValidationError(TypeMismatch("number"))))))
+    assertEquals(result2.map(_.errors), Right(Seq(ValidationError(TypeMismatch("number")))))
   }
 
   test("array") {
     val schema    = SchemaParser("""{"type": "array", "items": { "type": "number"} }""")
     val validator = schema.flatMap(Validator(_))
     val result    = validator.flatMap(validator => Parser("""[13]""").map(validator.validate(_)))
-    assertEquals(result, Right(None))
+    assertEquals(result.map(_.valid), Right(true))
     val result2 = validator.flatMap(validator => Parser("""null""").map(validator.validate(_)))
-    assertEquals(result2, Right(Some(Seq(ValidationError(TypeMismatch("array"))))))
+    assertEquals(result2.map(_.errors), Right(Seq(ValidationError(TypeMismatch("array")))))
   }
 
   test("array item") {
     val schema    = SchemaParser("""{"type": "array", "items": { "type": "number"} }""")
     val validator = schema.flatMap(Validator(_))
     val result    = validator.flatMap(validator => Parser("""[true]""").map(validator.validate(_)))
-    assertEquals(result, Right(Some(Seq(ValidationError(TypeMismatch("number"), Pointer(0))))))
+    assertEquals(result.map(_.errors), Right(Seq(ValidationError(TypeMismatch("number"), Pointer(0)))))
   }
 
   test("object") {
@@ -84,9 +84,9 @@ class ValidatorTest extends FunSuite {
                                                          |"titi": "hello"
                                                          |}
                                                          |""".stripMargin).map(validator.validate(_)))
-    assertEquals(result, Right(None))
+    assertEquals(result.map(_.valid), Right(true))
     val result2 = validator.flatMap(validator => Parser("""null""").map(validator.validate(_)))
-    assertEquals(result2, Right(Some(Seq(ValidationError(TypeMismatch("object"))))))
+    assertEquals(result2.map(_.errors), Right(Seq(ValidationError(TypeMismatch("object")))))
   }
 
   test("object property type") {
@@ -104,7 +104,10 @@ class ValidatorTest extends FunSuite {
                                                          |"titi": true
                                                          |}
                                                          |""".stripMargin).map(validator.validate(_)))
-    assertEquals(result, Right(Some(Seq(ValidationError(TypeMismatch("string"), Pointer.empty / "titi")))))
+    assertEquals(
+      result.map(_.errors),
+      Right(Seq(ValidationError(TypeMismatch("string"), Pointer.empty / "titi")))
+    )
   }
 
   test("object unknown property") {
@@ -123,7 +126,7 @@ class ValidatorTest extends FunSuite {
                                                          |"titi": "foo"
                                                          |}
                                                          |""".stripMargin).map(validator.validate(_)))
-    assertEquals(result, Right(Some(Seq(ValidationError(UnexpectedProperty("gnu"))))))
+    assertEquals(result.map(_.errors), Right(Seq(ValidationError(UnexpectedProperty("gnu")))))
   }
 
   test("object missing property") {
@@ -140,6 +143,6 @@ class ValidatorTest extends FunSuite {
                                                          |"toto": 13
                                                          |}
                                                          |""".stripMargin).map(validator.validate(_)))
-    assertEquals(result, Right(Some(Seq(ValidationError(MissingProperty("titi"))))))
+    assertEquals(result.map(_.errors), Right(Seq(ValidationError(MissingProperty("titi")))))
   }
 }

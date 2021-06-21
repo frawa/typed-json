@@ -24,6 +24,7 @@ trait ValidationResult {
   val valid: Boolean
   val errors: Seq[ValidationError]
   def and(other: ValidationResult): ValidationResult = ValidationResult.and(this, other)
+  def prefix(pointer: Pointer)                       = ValidationResult.prefix(this, pointer)
 }
 case object ValidationValid extends ValidationResult {
   val valid  = true
@@ -34,6 +35,9 @@ case class ValidationInvalid(errors: Seq[ValidationError]) extends ValidationRes
 }
 
 object ValidationResult {
+  def apply(errors: Seq[ValidationError]): ValidationResult =
+    if (errors.isEmpty) ValidationValid else ValidationInvalid(errors)
+
   def valid(): ValidationResult                         = ValidationValid
   def invalid(error: ValidationError): ValidationResult = ValidationInvalid(Seq(error))
 
@@ -44,10 +48,18 @@ object ValidationResult {
       ValidationInvalid(a.errors ++ b.errors)
     }
   }
+
+  def prefix(a: ValidationResult, prefix: Pointer): ValidationResult = {
+    if (a.valid) {
+      a
+    } else {
+      ValidationInvalid(a.errors.map(_.prefix(prefix)))
+    }
+  }
 }
 
 trait Validator {
-  def validate(value: Value): Option[Seq[ValidationError]]
+  def validate(value: Value): ValidationResult
 }
 
 object Validator {
@@ -70,74 +82,77 @@ object Validator {
 }
 
 case class NullValidator() extends Validator {
-  override def validate(value: Value): Option[Seq[ValidationError]] = value match {
-    case NullValue => None
-    case _         => Option(Seq(ValidationError(TypeMismatch("null"))))
+  override def validate(value: Value): ValidationResult = value match {
+    case NullValue => ValidationResult.valid()
+    case _         => ValidationResult.invalid(ValidationError(TypeMismatch("null")))
   }
 }
 
 case class BooleanValidator() extends Validator {
-  override def validate(value: Value): Option[Seq[ValidationError]] = value match {
-    case BoolValue(value) => if (value) None else Option(Seq(ValidationError(FalseSchema())))
-    case _                => Option(Seq(ValidationError(TypeMismatch("boolean"))))
+  override def validate(value: Value): ValidationResult = value match {
+    case BoolValue(value) =>
+      if (value) ValidationResult.valid() else ValidationResult.invalid(ValidationError(FalseSchema()))
+    case _ => ValidationResult.invalid(ValidationError(TypeMismatch("boolean")))
   }
 }
 
 case class StringValidator() extends Validator {
-  override def validate(value: Value): Option[Seq[ValidationError]] = value match {
-    case StringValue(_) => None
-    case _              => Option(Seq(ValidationError(TypeMismatch("string"))))
+  override def validate(value: Value): ValidationResult = value match {
+    case StringValue(_) => ValidationResult.valid()
+    case _              => ValidationResult.invalid(ValidationError(TypeMismatch("string")))
   }
 }
 
 case class NumberValidator() extends Validator {
-  override def validate(value: Value): Option[Seq[ValidationError]] = value match {
-    case NumberValue(_) => None
-    case _              => Option(Seq(ValidationError(TypeMismatch("number"))))
+  override def validate(value: Value): ValidationResult = value match {
+    case NumberValue(_) => ValidationResult.valid()
+    case _              => ValidationResult.invalid(ValidationError(TypeMismatch("number")))
   }
 }
 
 case class ArrayValidator(itemsValidator: Validator) extends Validator {
-  override def validate(value: Value): Option[Seq[ValidationError]] = {
+  override def validate(value: Value): ValidationResult = {
     value match {
       case ArrayValue(items) =>
-        Helper
-          .sequence(items.zipWithIndex.map { case (item, index) =>
+        items.zipWithIndex
+          .map { case (item, index) =>
             lazy val prefix = Pointer.empty / index
             itemsValidator
               .validate(item)
-              .map(errors => errors.map(_.prefix(prefix)))
-          })
-          .map(_.flatten)
-      case _ => Option(Seq(ValidationError(TypeMismatch("array"))))
+              .prefix(prefix)
+          }
+          .reduce(_.and(_))
+      case _ => ValidationResult.invalid(ValidationError(TypeMismatch("array")))
     }
   }
 }
 
 case class ObjectValidator(propertiesValidator: Map[String, Validator]) extends Validator {
-  override def validate(value: Value): Option[Seq[ValidationError]] = {
+  override def validate(value: Value): ValidationResult = {
     value match {
       case ObjectValue(properties) => {
-        val validations = properties.map { case (key1, value1) =>
-          lazy val prefix = Pointer.empty / key1
-          propertiesValidator
-            .get(key1)
-            .map(validator =>
-              validator
-                .validate(value1)
-                .map(errors => errors.map(_.prefix(prefix)))
-            )
-            .getOrElse(Option(Seq(ValidationError(UnexpectedProperty(key1)))))
-        }.toSeq
+        val validations = properties
+          .map { case (key1, value1) =>
+            lazy val prefix = Pointer.empty / key1
+            propertiesValidator
+              .get(key1)
+              .map(validator =>
+                validator
+                  .validate(value1)
+                  .prefix(prefix)
+              )
+              .getOrElse(ValidationResult.invalid(ValidationError(UnexpectedProperty(key1))))
+          }
+          .toSeq
+          .reduce(_.and(_))
         val missing = propertiesValidator.keySet
           .diff(properties.keySet)
           .map(key => ValidationError(MissingProperty(key)))
-        val okOrMissing = if (missing.isEmpty) None else Option(missing)
-        Helper
-          .sequence(validations :+ okOrMissing)
-          .map(_.flatten)
+          .toSeq
+        val okOrMissing = ValidationResult(missing)
+        validations.and(okOrMissing)
       }
-      case _ => Option(Seq(ValidationError(TypeMismatch("object"))))
+      case _ => ValidationResult.invalid(ValidationError(TypeMismatch("object")))
     }
   }
 }
