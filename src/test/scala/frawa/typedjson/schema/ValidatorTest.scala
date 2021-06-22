@@ -59,7 +59,7 @@ class ValidatorTest extends FunSuite {
   test("boolean false") {
     testValidator("""{"type": "boolean"}""") { validator =>
       assertValidate("""false""", validator) { result =>
-        assertEquals(result.errors, Seq(ValidationError(FalseSchema())))
+        assertEquals(result.errors, Seq(ValidationError(FalseSchemaReason())))
       }
     }
   }
@@ -192,6 +192,49 @@ class ValidatorTest extends FunSuite {
         validator
       ) { result =>
         assertEquals(result.errors, Seq(ValidationError(MissingProperty("titi"))))
+      }
+    }
+  }
+
+  test("true schema") {
+    testValidator("""true""".stripMargin) { validator =>
+      assertValidate(
+        """{
+          |"toto": 13
+          |}
+          |""".stripMargin,
+        validator
+      ) { result =>
+        assertEquals(result.valid, true)
+      }
+    }
+  }
+
+  test("empty schema") {
+    testValidator("""{}""".stripMargin) { validator =>
+      assertValidate(
+        """{
+          |"toto": 13
+          |}
+          |""".stripMargin,
+        validator
+      ) { result =>
+        assertEquals(result.valid, true)
+      }
+    }
+  }
+
+  test("false schema") {
+    testValidator("""false""".stripMargin) { validator =>
+      assertValidate(
+        """{
+          |"toto": 13
+          |}
+          |""".stripMargin,
+        validator
+      ) { result =>
+        assertEquals(result.valid, false)
+        assertEquals(result.errors, Seq(ValidationError(FalseSchemaReason())))
       }
     }
   }

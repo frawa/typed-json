@@ -16,7 +16,7 @@ case class ValidationError(reason: ValidationErrorReason, pointer: Pointer = Poi
 
 trait ValidationErrorReason
 case class TypeMismatch(expected: String)  extends ValidationErrorReason
-case class FalseSchema()                   extends ValidationErrorReason
+case class FalseSchemaReason()             extends ValidationErrorReason
 case class UnexpectedProperty(key: String) extends ValidationErrorReason
 case class MissingProperty(key: String)    extends ValidationErrorReason
 
@@ -64,10 +64,12 @@ trait Validator {
 
 object Validator {
   def apply(schema: Schema): Validator = schema match {
-    case NullSchema         => (NullValidator())
-    case BooleanSchema      => (BooleanValidator())
-    case StringSchema       => (StringValidator())
-    case NumberSchema       => (NumberValidator())
+    case NullSchema         => NullValidator()
+    case TrueSchema         => AlwaysValidator(true)
+    case FalseSchema        => AlwaysValidator(false)
+    case BooleanSchema      => BooleanValidator()
+    case StringSchema       => StringValidator()
+    case NumberSchema       => NumberValidator()
     case ArraySchema(items) => ArrayValidator(Validator(items))
     case ObjectSchema(properties) =>
       ObjectValidator(
@@ -86,10 +88,19 @@ case class NullValidator() extends Validator {
   }
 }
 
+case class AlwaysValidator(valid: Boolean) extends Validator {
+  override def validate(value: Value): ValidationResult = if (valid) {
+    ValidationResult.valid()
+  } else {
+    ValidationResult.invalid(ValidationError(FalseSchemaReason()))
+  }
+}
+
 case class BooleanValidator() extends Validator {
   override def validate(value: Value): ValidationResult = value match {
     case BoolValue(value) =>
-      if (value) ValidationResult.valid() else ValidationResult.invalid(ValidationError(FalseSchema()))
+      if (value) ValidationResult.valid() else ValidationResult.invalid(ValidationError(FalseSchemaReason()))
+    //
     case _ => ValidationResult.invalid(ValidationError(TypeMismatch("boolean")))
   }
 }

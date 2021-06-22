@@ -7,6 +7,8 @@ import frawa.typedjson.parser.ObjectValue
 trait Schema
 
 case object NullSchema                                   extends Schema
+case object TrueSchema                                   extends Schema
+case object FalseSchema                                  extends Schema
 case object BooleanSchema                                extends Schema
 case object StringSchema                                 extends Schema
 case object NumberSchema                                 extends Schema
