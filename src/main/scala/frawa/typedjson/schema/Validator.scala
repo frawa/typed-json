@@ -19,6 +19,7 @@ case class TypeMismatch(expected: String)  extends ValidationErrorReason
 case class FalseSchemaReason()             extends ValidationErrorReason
 case class UnexpectedProperty(key: String) extends ValidationErrorReason
 case class MissingProperty(key: String)    extends ValidationErrorReason
+case class MissingRef(ref: String)         extends ValidationErrorReason
 
 trait ValidationResult {
   val valid: Boolean
@@ -59,7 +60,8 @@ object ValidationResult {
 }
 
 trait Validator {
-  def validate(value: Value): ValidationResult
+  type Dereferencer = String => Option[Validator]
+  def validate(value: Value)(implicit dereference: Dereferencer): ValidationResult
 }
 
 object Validator {
@@ -77,19 +79,25 @@ object Validator {
           .mapValues(Validator(_))
           .toMap
       )
-    case RootSchema(_, schema, _) => Validator(schema)
+    case RootSchema(_, schema, defs) => RootSchemaValidator(Validator(schema), defs.view.mapValues(Validator(_)).toMap)
+    case RefSchema(ref)              => RefValidator(ref)
+  }
+
+  def validate(validator: Validator)(value: Value): ValidationResult = {
+    implicit val dereference: String => Option[Validator] = ref => None
+    validator.validate(value)
   }
 }
 
 case class NullValidator() extends Validator {
-  override def validate(value: Value): ValidationResult = value match {
+  override def validate(value: Value)(implicit dereference: Dereferencer): ValidationResult = value match {
     case NullValue => ValidationResult.valid()
     case _         => ValidationResult.invalid(ValidationError(TypeMismatch("null")))
   }
 }
 
 case class AlwaysValidator(valid: Boolean) extends Validator {
-  override def validate(value: Value): ValidationResult = if (valid) {
+  override def validate(value: Value)(implicit dereference: Dereferencer): ValidationResult = if (valid) {
     ValidationResult.valid()
   } else {
     ValidationResult.invalid(ValidationError(FalseSchemaReason()))
@@ -97,7 +105,7 @@ case class AlwaysValidator(valid: Boolean) extends Validator {
 }
 
 case class BooleanValidator() extends Validator {
-  override def validate(value: Value): ValidationResult = value match {
+  override def validate(value: Value)(implicit dereference: Dereferencer): ValidationResult = value match {
     case BoolValue(value) =>
       if (value) ValidationResult.valid() else ValidationResult.invalid(ValidationError(FalseSchemaReason()))
     //
@@ -106,21 +114,21 @@ case class BooleanValidator() extends Validator {
 }
 
 case class StringValidator() extends Validator {
-  override def validate(value: Value): ValidationResult = value match {
+  override def validate(value: Value)(implicit dereference: Dereferencer): ValidationResult = value match {
     case StringValue(_) => ValidationResult.valid()
     case _              => ValidationResult.invalid(ValidationError(TypeMismatch("string")))
   }
 }
 
 case class NumberValidator() extends Validator {
-  override def validate(value: Value): ValidationResult = value match {
+  override def validate(value: Value)(implicit dereference: Dereferencer): ValidationResult = value match {
     case NumberValue(_) => ValidationResult.valid()
     case _              => ValidationResult.invalid(ValidationError(TypeMismatch("number")))
   }
 }
 
 case class ArrayValidator(itemsValidator: Validator) extends Validator {
-  override def validate(value: Value): ValidationResult = {
+  override def validate(value: Value)(implicit dereference: Dereferencer): ValidationResult = {
     value match {
       case ArrayValue(items) =>
         items.zipWithIndex
@@ -137,7 +145,7 @@ case class ArrayValidator(itemsValidator: Validator) extends Validator {
 }
 
 case class ObjectValidator(propertiesValidator: Map[String, Validator]) extends Validator {
-  override def validate(value: Value): ValidationResult = {
+  override def validate(value: Value)(implicit dereference: Dereferencer): ValidationResult = {
     value match {
       case ObjectValue(properties) => {
         val validations = properties
@@ -165,6 +173,27 @@ case class ObjectValidator(propertiesValidator: Map[String, Validator]) extends 
     }
   }
 }
+
+case class RootSchemaValidator(validator: Validator, defs: Map[String, Validator]) extends Validator {
+  override def validate(value: Value)(implicit dereference: Dereferencer): ValidationResult =
+    validator.validate(value)(dereferenceDefs)
+
+  private def dereferenceDefs(ref: String): Option[Validator] =
+    defs.get(relativeize(ref))
+
+  private def relativeize(ref: String): String = if (ref.startsWith("#/$defs/"))
+    ref.substring("#/$defs/".length())
+  else
+    ref
+}
+
+case class RefValidator(ref: String) extends Validator {
+  override def validate(value: Value)(implicit dereference: Dereferencer): ValidationResult =
+    dereference(ref)
+      .map(_.validate(value))
+      .getOrElse(ValidationResult.invalid(ValidationError(MissingRef(ref))))
+}
+
 object Helper {
   def debugTraceValue[T](title: String): T => T = { v =>
     println(title, v)

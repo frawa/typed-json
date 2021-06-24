@@ -10,9 +10,9 @@ class ValidatorTest extends FunSuite {
   implicit val zioParser    = new ZioParser();
   implicit val schemaParser = SchemaValueDecoder;
 
-  private def testValidator(text: String)(f: Validator => Unit) {
+  private def testParsedValidator(text: String, parse: String => Either[String, Schema])(f: Validator => Unit) {
     val withValidator = for {
-      schema <- SchemaParser.schema(text)
+      schema <- parse(text)
       validator = Validator(schema)
     } yield {
       f(validator)
@@ -22,9 +22,18 @@ class ValidatorTest extends FunSuite {
       .swap
   }
 
+  private def testValidator(text: String)(f: Validator => Unit) {
+    testParsedValidator(text, SchemaParser.schema)(f)
+  }
+
+  private def testRootValidator(text: String)(f: Validator => Unit) {
+    testParsedValidator(text, SchemaParser.apply)(f)
+  }
+
   private def assertValidate(text: String, validator: Validator)(f: ValidationResult => Unit) = {
     val withParsed = for {
-      result <- Parser(text).map(validator.validate(_))
+      value <- Parser(text)
+      result = Validator.validate(validator)(value)
     } yield {
       f(result)
     }
@@ -35,7 +44,7 @@ class ValidatorTest extends FunSuite {
 
   test("null") {
     testValidator("""{"type": "null"}""") { validator =>
-      val result = Parser("""null""").map(validator.validate(_))
+      val result = Parser("""null""").map(Validator.validate(validator)(_))
       assertValidate("""null""", validator) { result =>
         assertEquals(result.valid, true)
       }
@@ -235,6 +244,39 @@ class ValidatorTest extends FunSuite {
       ) { result =>
         assertEquals(result.valid, false)
         assertEquals(result.errors, Seq(ValidationError(FalseSchemaReason())))
+      }
+    }
+  }
+
+  test("$ref schema") {
+    testValidator("""{
+                    |"$ref": "#/$defs/toto"
+                    |}
+                    |""".stripMargin) { validator =>
+      assertValidate(
+        """true""".stripMargin,
+        validator
+      ) { result =>
+        assertEquals(result.valid, false)
+        assertEquals(result.errors, Seq(ValidationError(MissingRef("#/$defs/toto"))))
+      }
+    }
+  }
+
+  test("dereference $ref schema") {
+    testRootValidator("""{
+                        |"$id": "id13",
+                        |"$ref": "#/$defs/toto",
+                        |"$defs": {
+                        |  "toto": { "type": "number" }
+                        |}
+                        |}
+                        |""".stripMargin) { validator =>
+      assertValidate(
+        """1313""".stripMargin,
+        validator
+      ) { result =>
+        assertEquals(result.valid, true)
       }
     }
   }

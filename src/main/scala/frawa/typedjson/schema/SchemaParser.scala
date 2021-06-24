@@ -18,6 +18,7 @@ case object NumberSchema                                                     ext
 case class ArraySchema(items: Schema)                                        extends Schema
 case class ObjectSchema(properties: Map[String, Schema])                     extends Schema
 case class RootSchema(id: String, schema: Schema, defs: Map[String, Schema]) extends Schema
+case class RefSchema(ref: String)                                            extends Schema
 
 trait SchemaParser {
   def parseRoot(json: String)(implicit parser: Parser): Either[String, RootSchema]
@@ -84,8 +85,10 @@ object SchemaValueDecoder extends SchemaParser {
       case t @ _     => failure(s"unknown type $t")
     }
 
+  val refSchema: Decoder[Schema] = property("$ref")(string).map(RefSchema(_))
+
   val schema: Decoder[Schema] = {
-    orElse(typedSchema)(booleanSchema)
+    orElse(orElse(typedSchema)(refSchema))(booleanSchema)
   }
 
 }
