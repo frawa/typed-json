@@ -7,12 +7,12 @@ import frawa.typedjson.parser.Parser
 // see https://json-schema.org/draft/2020-12/json-schema-core.html
 
 class ValidatorTest extends FunSuite {
-  implicit val zioParser       = new ZioParser();
-  implicit val zioSchemaParser = new ZioSchemaParser();
+  implicit val zioParser    = new ZioParser();
+  implicit val schemaParser = SchemaValueDecoder;
 
   private def testValidator(text: String)(f: Validator => Unit) {
     val withValidator = for {
-      schema <- SchemaParser(text)
+      schema <- SchemaParser.schema(text)
       validator = Validator(schema)
     } yield {
       f(validator)

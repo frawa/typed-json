@@ -77,7 +77,7 @@ object Validator {
           .mapValues(Validator(_))
           .toMap
       )
-
+    case RootSchema(_, schema, _) => Validator(schema)
   }
 }
 
