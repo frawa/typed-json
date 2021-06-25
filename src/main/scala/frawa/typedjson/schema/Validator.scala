@@ -15,16 +15,19 @@ case class ValidationError(reason: ValidationErrorReason, pointer: Pointer = Poi
 }
 
 trait ValidationErrorReason
-case class TypeMismatch(expected: String)  extends ValidationErrorReason
-case class FalseSchemaReason()             extends ValidationErrorReason
-case class UnexpectedProperty(key: String) extends ValidationErrorReason
-case class MissingProperty(key: String)    extends ValidationErrorReason
-case class MissingRef(ref: String)         extends ValidationErrorReason
+case class TypeMismatch(expected: String)                      extends ValidationErrorReason
+case class FalseSchemaReason()                                 extends ValidationErrorReason
+case class UnexpectedProperty(key: String)                     extends ValidationErrorReason
+case class MissingProperty(key: String)                        extends ValidationErrorReason
+case class MissingRef(ref: String)                             extends ValidationErrorReason
+case class NotOneOf(valid: Int, results: Seq[ValidationError]) extends ValidationErrorReason
+case class NotInvalid()                                        extends ValidationErrorReason
 
 trait ValidationResult {
   val valid: Boolean
   val errors: Seq[ValidationError]
   def and(other: ValidationResult): ValidationResult = ValidationResult.and(this, other)
+  def or(other: ValidationResult): ValidationResult  = ValidationResult.or(this, other)
   def prefix(pointer: Pointer)                       = ValidationResult.prefix(this, pointer)
 }
 case object ValidationValid extends ValidationResult {
@@ -44,6 +47,14 @@ object ValidationResult {
 
   def and(a: ValidationResult, b: ValidationResult): ValidationResult = {
     if (a.valid && b.valid) {
+      ValidationValid
+    } else {
+      ValidationInvalid(a.errors ++ b.errors)
+    }
+  }
+
+  def or(a: ValidationResult, b: ValidationResult): ValidationResult = {
+    if (a.valid || b.valid) {
       ValidationValid
     } else {
       ValidationInvalid(a.errors ++ b.errors)
@@ -81,6 +92,16 @@ object Validator {
       )
     case RootSchema(_, schema, defs) => RootSchemaValidator(Validator(schema), defs.view.mapValues(Validator(_)).toMap)
     case RefSchema(ref)              => RefValidator(ref)
+    case SchemaWithApplicators(schema, allOf, anyOf, oneOf, notOp) =>
+      AllOfValidator(
+        Seq(
+          Validator(schema),
+          AllOfValidator(allOf.map(Validator(_))),
+          AnyOfValidator(anyOf.map(Validator(_))),
+          OneOfValidator(oneOf.map(Validator(_))),
+          notOp.map(schema => NotValidator(Validator(schema))).getOrElse(AlwaysValidator(true))
+        )
+      )
   }
 
   def validate(validator: Validator)(value: Value): ValidationResult = {
@@ -194,6 +215,45 @@ case class RefValidator(ref: String) extends Validator {
       .getOrElse(ValidationResult.invalid(ValidationError(MissingRef(ref))))
 }
 
+case class AllOfValidator(vs: Seq[Validator]) extends Validator {
+  override def validate(value: Value)(implicit dereference: Dereferencer): ValidationResult =
+    vs.map(_.validate(value))
+      .reduceOption(_.and(_))
+      .getOrElse(ValidationResult.valid())
+}
+
+case class AnyOfValidator(vs: Seq[Validator]) extends Validator {
+  override def validate(value: Value)(implicit dereference: Dereferencer): ValidationResult =
+    vs.map(_.validate(value))
+      .reduceOption(_.or(_))
+      .getOrElse(ValidationResult.valid())
+}
+
+case class OneOfValidator(vs: Seq[Validator]) extends Validator {
+  override def validate(value: Value)(implicit dereference: Dereferencer): ValidationResult = {
+    if (vs.isEmpty) {
+      return ValidationResult.valid()
+    }
+    val results    = vs.map(_.validate(value))
+    val countValid = results.count(_.valid)
+    if (countValid == 1) {
+      ValidationResult.valid()
+    } else {
+      ValidationResult.invalid(ValidationError(NotOneOf(countValid, results.flatMap((_.errors)))))
+    }
+  }
+}
+
+case class NotValidator(v: Validator) extends Validator {
+  override def validate(value: Value)(implicit dereference: Dereferencer): ValidationResult = {
+    val result = v.validate(value)
+    if (result.valid) {
+      ValidationResult.invalid(ValidationError(NotInvalid()))
+    } else {
+      ValidationResult.valid()
+    }
+  }
+}
 object Helper {
   def debugTraceValue[T](title: String): T => T = { v =>
     println(title, v)

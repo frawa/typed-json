@@ -280,4 +280,188 @@ class ValidatorTest extends FunSuite {
       }
     }
   }
+
+  test("allOf") {
+    testValidator("""{
+                    |"allOf": [
+                    |  { "type": "number" }
+                    |]
+                    |}
+                    |""".stripMargin) { validator =>
+      assertValidate(
+        """1313""".stripMargin,
+        validator
+      ) { result =>
+        assertEquals(result.valid, true)
+      }
+    }
+  }
+
+  test("impossible allOf") {
+    testValidator("""{
+                    |"allOf": [
+                    |  { "type": "number" },
+                    |  { "type": "string" }
+                    |]
+                    |}
+                    |""".stripMargin) { validator =>
+      assertValidate(
+        """1313""".stripMargin,
+        validator
+      ) { result =>
+        assertEquals(result.valid, false)
+        assertEquals(result.errors, Seq(ValidationError(TypeMismatch("string"))))
+      }
+    }
+  }
+
+  test("anyOf") {
+    testValidator("""{
+                    |"anyOf": [
+                    |  { "type": "number" },
+                    |  { "type": "string" }
+                    |]
+                    |}
+                    |""".stripMargin) { validator =>
+      assertValidate(
+        """1313""".stripMargin,
+        validator
+      ) { result =>
+        assertEquals(result.valid, true)
+      }
+    }
+  }
+
+  test("failed anyOf") {
+    testValidator("""{
+                    |"anyOf": [
+                    |  { "type": "number" },
+                    |  { "type": "string" }
+                    |]
+                    |}
+                    |""".stripMargin) { validator =>
+      assertValidate(
+        """true""".stripMargin,
+        validator
+      ) { result =>
+        assertEquals(result.valid, false)
+        assertEquals(
+          result.errors,
+          Seq(
+            ValidationError(TypeMismatch("number")),
+            ValidationError(TypeMismatch("string"))
+          )
+        )
+      }
+    }
+  }
+
+  test("oneOf") {
+    testValidator("""{
+                    |"anyOf": [
+                    |  { "type": "number" },
+                    |  { "type": "string" }
+                    |]
+                    |}
+                    |""".stripMargin) { validator =>
+      assertValidate(
+        """1313""".stripMargin,
+        validator
+      ) { result =>
+        assertEquals(result.valid, true)
+      }
+    }
+  }
+
+  test("failed oneOf: none") {
+    testValidator("""{
+                    |"oneOf": [
+                    |  { "type": "string" },
+                    |  { "type": "boolean" }
+                    |]
+                    |}
+                    |""".stripMargin) { validator =>
+      assertValidate(
+        """1313""".stripMargin,
+        validator
+      ) { result =>
+        assertEquals(result.valid, false)
+        assertEquals(
+          result.errors,
+          Seq(
+            ValidationError(
+              NotOneOf(
+                0,
+                List(
+                  ValidationError(
+                    TypeMismatch("string")
+                  ),
+                  ValidationError(
+                    TypeMismatch("boolean")
+                  )
+                )
+              )
+            )
+          )
+        )
+      }
+    }
+  }
+
+  test("failed oneOf: two") {
+    testValidator("""{
+                    |"oneOf": [
+                    |  { "type": "number" },
+                    |  { "type": "number" }
+                    |]
+                    |}
+                    |""".stripMargin) { validator =>
+      assertValidate(
+        """1313""".stripMargin,
+        validator
+      ) { result =>
+        assertEquals(result.valid, false)
+        assertEquals(
+          result.errors,
+          Seq(
+            ValidationError(
+              NotOneOf(
+                2,
+                Nil
+              )
+            )
+          )
+        )
+      }
+    }
+  }
+
+  test("not") {
+    testValidator("""{
+                    |"not": { "type": "number" }
+                    |}
+                    |""".stripMargin) { validator =>
+      assertValidate(
+        """true""".stripMargin,
+        validator
+      ) { result =>
+        assertEquals(result.valid, true)
+      }
+    }
+  }
+
+  test("failed not") {
+    testValidator("""{
+                    |"not": { "type": "number" }
+                    |}
+                    |""".stripMargin) { validator =>
+      assertValidate(
+        """1313""".stripMargin,
+        validator
+      ) { result =>
+        assertEquals(result.valid, false)
+        assertEquals(result.errors, Seq(ValidationError(NotInvalid())))
+      }
+    }
+  }
 }

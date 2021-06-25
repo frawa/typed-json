@@ -19,6 +19,13 @@ case class ArraySchema(items: Schema)                                        ext
 case class ObjectSchema(properties: Map[String, Schema])                     extends Schema
 case class RootSchema(id: String, schema: Schema, defs: Map[String, Schema]) extends Schema
 case class RefSchema(ref: String)                                            extends Schema
+case class SchemaWithApplicators(
+    schema: Schema,
+    allOf: Seq[Schema],
+    anyOf: Seq[Schema],
+    oneOf: Seq[Schema],
+    notOp: Option[Schema]
+) extends Schema
 
 trait SchemaParser {
   def parseRoot(json: String)(implicit parser: Parser): Either[String, RootSchema]
@@ -60,36 +67,39 @@ object SchemaValueDecoder extends SchemaParser {
 
   val booleanSchema: Decoder[Schema] = value =>
     value match {
-      case ObjectValue(properties) =>
-        if (properties.isEmpty)
-          Right(TrueSchema)
-        else
-          Left("not a schema'")
+      case ObjectValue(_) =>
+        Right(TrueSchema)
       case BoolValue(v) =>
         Right(
           if (v)
-            TrueSchema
+            (TrueSchema)
           else
-            FalseSchema
+            (FalseSchema)
         )
     }
 
-  val typedSchema: Decoder[Schema] = property("type")(string)
-    .flatMap {
-      case "null"    => success(NullSchema)
-      case "boolean" => success(BooleanSchema)
-      case "string"  => success(StringSchema)
-      case "number"  => success(NumberSchema)
-      case "array"   => property("items")(schema).map(ArraySchema(_))
-      case "object"  => property("properties")(map(schema)).map(ObjectSchema(_))
-      case t @ _     => failure(s"unknown type $t")
-    }
-
-  val refSchema: Decoder[Schema] = property("$ref")(string).map(RefSchema(_))
-
-  val schema: Decoder[Schema] = {
-    orElse(orElse(typedSchema)(refSchema))(booleanSchema)
+  def typedSchema(`type`: String): Decoder[Schema] = `type` match {
+    case "null"    => success(NullSchema)
+    case "boolean" => success(BooleanSchema)
+    case "string"  => success(StringSchema)
+    case "number"  => success(NumberSchema)
+    case "array"   => property("items")(schema).map(ArraySchema(_))
+    case "object"  => property("properties")(map(schema)).map(ObjectSchema(_))
+    case t @ _     => failure(s"unknown type $t")
   }
+
+  val refSchema: Decoder[Option[Schema]] = optionalProperty("$ref")(string).map(s => s.map(RefSchema(_)))
+
+  val schema: Decoder[Schema] = for {
+    typedSchema <- ifObject(optionalProperty("type")(string)).flatMap(t => option(t.flatten.map(t => typedSchema(t))))
+    refSchema   <- ifObject(refSchema).map(_.flatten)
+    boolSchema  <- booleanSchema
+    allOf       <- ifObject(optionalProperty("allOf")(seq(schema))).map(_.flatten).map(_.getOrElse(Seq()))
+    anyOf       <- ifObject(optionalProperty("anyOf")(seq(schema))).map(_.flatten).map(_.getOrElse(Seq()))
+    oneOf       <- ifObject(optionalProperty("oneOf")(seq(schema))).map(_.flatten).map(_.getOrElse(Seq()))
+    notOp       <- ifObject(optionalProperty("not")(schema)).map(_.flatten)
+    s = typedSchema.orElse(refSchema).getOrElse(boolSchema)
+  } yield SchemaWithApplicators(s, allOf, anyOf, oneOf, notOp)
 
 }
 
@@ -115,6 +125,12 @@ object Decoding {
       case _                 => Left("not an array")
     }
 
+  def option[T](d: Option[Decoder[T]]): Decoder[Option[T]] = value =>
+    d match {
+      case Some(d) => d.decode(value).map(Some(_))
+      case _       => Right(None)
+    }
+
   def map[K, V](d: Decoder[V]): Decoder[Map[String, V]] = value =>
     value match {
       case ObjectValue(properties) =>
@@ -126,6 +142,12 @@ object Decoding {
       case _ => Left("not a map")
     }
 
+  def ifObject[T](d: Decoder[T]): Decoder[Option[T]] = value =>
+    value match {
+      case ObjectValue(_) => d.decode(value).map(Some(_))
+      case _              => Right(None)
+    }
+
   def property[T](key: String)(d: Decoder[T]): Decoder[T] = value =>
     value match {
       case ObjectValue(properties) =>
@@ -133,7 +155,7 @@ object Decoding {
           .get(key)
           .map(d.decode)
           .getOrElse(Left(s"missing property '$key'"))
-      case _ => Left("not an object")
+      case _ => Left(s"not an object ${value} with ${key}")
     }
 
   def optionalProperty[T](key: String)(d: Decoder[T]): Decoder[Option[T]] = value =>
@@ -144,7 +166,7 @@ object Decoding {
           .map(d.decode)
           .map(_.map(Option(_)))
           .getOrElse(Right(None))
-      case _ => Left("not an object")
+      case _ => Left(s"not an object ${value} with ${key}")
     }
 
   def andThen[S, T](d: Decoder[S])(f: S => Decoder[T]): Decoder[T] = value => {
