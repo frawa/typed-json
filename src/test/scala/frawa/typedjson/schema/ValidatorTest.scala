@@ -10,30 +10,31 @@ class ValidatorTest extends FunSuite {
   implicit val zioParser    = new ZioParser();
   implicit val schemaParser = SchemaValueDecoder;
 
-  private def testParsedValidator(text: String, parse: String => Either[String, Schema])(f: Validator => Unit) {
-    val withValidator = for {
+  private def testParsedSchema(text: String, parse: String => Either[String, Schema])(f: Schema => Unit) {
+    val withSchema = for {
       schema <- parse(text)
-      validator = Validator(schema)
     } yield {
-      f(validator)
+      f(schema)
     }
-    withValidator.swap
-      .map(message => fail("no validator", clues(clue(message))))
+    withSchema.swap
+      .map(message => fail("no schema", clues(clue(message))))
       .swap
   }
 
-  private def testValidator(text: String)(f: Validator => Unit) {
-    testParsedValidator(text, SchemaParser.schema)(f)
+  private def testSchema(text: String)(f: Schema => Unit) {
+    testParsedSchema(text, SchemaParser.schema)(f)
   }
 
-  private def testRootValidator(text: String)(f: Validator => Unit) {
-    testParsedValidator(text, SchemaParser.apply)(f)
+  private def testRootSchema(text: String)(f: Schema => Unit) {
+    testParsedSchema(text, SchemaParser.apply)(f)
   }
 
-  private def assertValidate(text: String, validator: Validator)(f: ValidationResult => Unit) = {
+  private def assertValidate(text: String)(schema: Schema)(
+      f: ValidationResult => Unit
+  ) = {
     val withParsed = for {
       value <- Parser(text)
-      result = Validator.validate(validator)(value)
+      result = Validator.validate(schema)(value)
     } yield {
       f(result)
     }
@@ -43,205 +44,183 @@ class ValidatorTest extends FunSuite {
   }
 
   test("null") {
-    testValidator("""{"type": "null"}""") { validator =>
-      val result = Parser("""null""").map(Validator.validate(validator)(_))
-      assertValidate("""null""", validator) { result =>
+    testSchema("""{"type": "null"}""") { schema =>
+      assertValidate("""null""")(schema) { result =>
         assertEquals(result.valid, true)
       }
-      assertValidate("""13""", validator) { result =>
+      assertValidate("""13""")(schema) { result =>
         assertEquals(result.errors, Seq(ValidationError(TypeMismatch("null"))))
       }
     }
   }
 
   test("boolean") {
-    testValidator("""{"type": "boolean"}""") { validator =>
-      assertValidate("""true""", validator) { result =>
+    testSchema("""{"type": "boolean"}""") { schema =>
+      assertValidate("""true""")(schema) { result =>
         assertEquals(result.valid, true)
       }
-      assertValidate("""13""", validator) { result =>
+      assertValidate("""13""")(schema) { result =>
         assertEquals(result.errors, Seq(ValidationError(TypeMismatch("boolean"))))
       }
     }
   }
 
   test("boolean false") {
-    testValidator("""{"type": "boolean"}""") { validator =>
-      assertValidate("""false""", validator) { result =>
+    testSchema("""{"type": "boolean"}""") { schema =>
+      assertValidate("""false""")(schema) { result =>
         assertEquals(result.errors, Seq(ValidationError(FalseSchemaReason())))
       }
     }
   }
 
   test("string") {
-    testValidator("""{"type": "string"}""") { validator =>
-      assertValidate(""""hello"""", validator) { result =>
+    testSchema("""{"type": "string"}""") { schema =>
+      assertValidate(""""hello"""")(schema) { result =>
         assertEquals(result.valid, true)
       }
-      assertValidate("""13""", validator) { result =>
+      assertValidate("""13""")(schema) { result =>
         assertEquals(result.errors, Seq(ValidationError(TypeMismatch("string"))))
       }
     }
   }
 
   test("number") {
-    testValidator("""{"type": "number"}""") { validator =>
-      assertValidate("""13""", validator) { result =>
+    testSchema("""{"type": "number"}""") { schema =>
+      assertValidate("""13""")(schema) { result =>
         assertEquals(result.valid, true)
       }
-      assertValidate("""null""", validator) { result =>
+      assertValidate("""null""")(schema) { result =>
         assertEquals(result.errors, Seq(ValidationError(TypeMismatch("number"))))
       }
     }
   }
 
   test("array") {
-    testValidator("""{"type": "array", "items": { "type": "number"} }""") { validator =>
-      assertValidate("""[13]""", validator) { result =>
+    testSchema("""{"type": "array", "items": { "type": "number"} }""") { schema =>
+      assertValidate("""[13]""")(schema) { result =>
         assertEquals(result.valid, true)
       }
-      assertValidate("""null""", validator) { result =>
+      assertValidate("""null""")(schema) { result =>
         assertEquals(result.errors, Seq(ValidationError(TypeMismatch("array"))))
       }
     }
   }
 
   test("array item") {
-    testValidator("""{"type": "array", "items": { "type": "number"} }""") { validator =>
-      assertValidate("""[true]""", validator) { result =>
+    testSchema("""{"type": "array", "items": { "type": "number"} }""") { schema =>
+      assertValidate("""[true]""")(schema) { result =>
         assertEquals(result.errors, Seq(ValidationError(TypeMismatch("number"), Pointer(0))))
       }
     }
   }
 
   test("object") {
-    testValidator("""{
-                    |"type": "object", 
-                    |"properties": { 
-                    |  "toto": { "type": "number" },
-                    |  "titi": { "type": "string" }
-                    |} 
-                    |}
-                    |""".stripMargin) { validator =>
-      assertValidate(
-        """{
-          |"toto": 13,
-          |"titi": "hello"
-          |}
-          |"""".stripMargin,
-        validator
-      ) { result =>
+    testSchema("""{
+                 |"type": "object", 
+                 |"properties": { 
+                 |  "toto": { "type": "number" },
+                 |  "titi": { "type": "string" }
+                 |} 
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""{
+                       |"toto": 13,
+                       |"titi": "hello"
+                       |}
+                       |"""".stripMargin)(schema) { result =>
         assertEquals(result.valid, true)
       }
-      assertValidate("""null""", validator) { result =>
+      assertValidate("""null""")(schema) { result =>
         assertEquals(result.errors, Seq(ValidationError(TypeMismatch("object"))))
       }
     }
   }
 
   test("object property type") {
-    testValidator("""{
-                    |"type": "object", 
-                    |"properties": { 
-                    |  "toto": { "type": "number" },
-                    |  "titi": { "type": "string" }
-                    |} 
-                    |}
-                    |""".stripMargin) { validator =>
-      assertValidate(
-        """{
-          |"toto": 13,
-          |"titi": true
-          |}
-          |""".stripMargin,
-        validator
-      ) { result =>
+    testSchema("""{
+                 |"type": "object", 
+                 |"properties": { 
+                 |  "toto": { "type": "number" },
+                 |  "titi": { "type": "string" }
+                 |} 
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""{
+                       |"toto": 13,
+                       |"titi": true
+                       |}
+                       |""".stripMargin)(schema) { result =>
         assertEquals(result.errors, Seq(ValidationError(TypeMismatch("string"), Pointer.empty / "titi")))
       }
     }
   }
 
   test("object unknown property") {
-    testValidator("""{
-                    |"type": "object", 
-                    |"properties": { 
-                    |  "toto": { "type": "number" },
-                    |  "titi": { "type": "string" }
-                    |} 
-                    |}
-                    |""".stripMargin) { validator =>
-      assertValidate(
-        """{
-          |"gnu": true,
-          |"toto": 13,
-          |"titi": "foo"
-          |}
-          |""".stripMargin,
-        validator
-      ) { result =>
+    testSchema("""{
+                 |"type": "object", 
+                 |"properties": { 
+                 |  "toto": { "type": "number" },
+                 |  "titi": { "type": "string" }
+                 |} 
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""{
+                       |"gnu": true,
+                       |"toto": 13,
+                       |"titi": "foo"
+                       |}
+                       |""".stripMargin)(schema) { result =>
         assertEquals(result.errors, Seq(ValidationError(UnexpectedProperty("gnu"))))
       }
     }
   }
 
   test("object missing property") {
-    testValidator("""{
-                    |"type": "object", 
-                    |"properties": { 
-                    |  "toto": { "type": "number" },
-                    |  "titi": { "type": "string" }
-                    |} 
-                    |}
-                    |""".stripMargin) { validator =>
-      assertValidate(
-        """{
-          |"toto": 13
-          |}
-          |""".stripMargin,
-        validator
-      ) { result =>
+    testSchema("""{
+                 |"type": "object", 
+                 |"properties": { 
+                 |  "toto": { "type": "number" },
+                 |  "titi": { "type": "string" }
+                 |} 
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""{
+                       |"toto": 13
+                       |}
+                       |""".stripMargin)(schema) { result =>
         assertEquals(result.errors, Seq(ValidationError(MissingProperty("titi"))))
       }
     }
   }
 
   test("true schema") {
-    testValidator("""true""".stripMargin) { validator =>
-      assertValidate(
-        """{
-          |"toto": 13
-          |}
-          |""".stripMargin,
-        validator
-      ) { result =>
+    testSchema("""true""".stripMargin) { schema =>
+      assertValidate("""{
+                       |"toto": 13
+                       |}
+                       |""".stripMargin)(schema) { result =>
         assertEquals(result.valid, true)
       }
     }
   }
 
   test("empty schema") {
-    testValidator("""{}""".stripMargin) { validator =>
-      assertValidate(
-        """{
-          |"toto": 13
-          |}
-          |""".stripMargin,
-        validator
-      ) { result =>
+    testSchema("""{}""".stripMargin) { schema =>
+      assertValidate("""{
+                       |"toto": 13
+                       |}
+                       |""".stripMargin)(schema) { result =>
         assertEquals(result.valid, true)
       }
     }
   }
 
   test("false schema") {
-    testValidator("""false""".stripMargin) { validator =>
-      assertValidate(
-        """{
-          |"toto": 13
-          |}
-          |""".stripMargin,
-        validator
-      ) { result =>
+    testSchema("""false""".stripMargin) { schema =>
+      assertValidate("""{
+                       |"toto": 13
+                       |}
+                       |""".stripMargin)(schema) { result =>
         assertEquals(result.valid, false)
         assertEquals(result.errors, Seq(ValidationError(FalseSchemaReason())))
       }
@@ -249,14 +228,11 @@ class ValidatorTest extends FunSuite {
   }
 
   test("$ref schema") {
-    testValidator("""{
-                    |"$ref": "#/$defs/toto"
-                    |}
-                    |""".stripMargin) { validator =>
-      assertValidate(
-        """true""".stripMargin,
-        validator
-      ) { result =>
+    testSchema("""{
+                 |"$ref": "#/$defs/toto"
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""true""".stripMargin)(schema) { result =>
         assertEquals(result.valid, false)
         assertEquals(result.errors, Seq(ValidationError(MissingRef("#/$defs/toto"))))
       }
@@ -264,51 +240,42 @@ class ValidatorTest extends FunSuite {
   }
 
   test("dereference $ref schema") {
-    testRootValidator("""{
-                        |"$id": "id13",
-                        |"$ref": "#/$defs/toto",
-                        |"$defs": {
-                        |  "toto": { "type": "number" }
-                        |}
-                        |}
-                        |""".stripMargin) { validator =>
-      assertValidate(
-        """1313""".stripMargin,
-        validator
-      ) { result =>
+    testRootSchema("""{
+                     |"$id": "id13",
+                     |"$ref": "#/$defs/toto",
+                     |"$defs": {
+                     |  "toto": { "type": "number" }
+                     |}
+                     |}
+                     |""".stripMargin) { schema =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
         assertEquals(result.valid, true)
       }
     }
   }
 
   test("allOf") {
-    testValidator("""{
-                    |"allOf": [
-                    |  { "type": "number" }
-                    |]
-                    |}
-                    |""".stripMargin) { validator =>
-      assertValidate(
-        """1313""".stripMargin,
-        validator
-      ) { result =>
+    testSchema("""{
+                 |"allOf": [
+                 |  { "type": "number" }
+                 |]
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
         assertEquals(result.valid, true)
       }
     }
   }
 
   test("impossible allOf") {
-    testValidator("""{
-                    |"allOf": [
-                    |  { "type": "number" },
-                    |  { "type": "string" }
-                    |]
-                    |}
-                    |""".stripMargin) { validator =>
-      assertValidate(
-        """1313""".stripMargin,
-        validator
-      ) { result =>
+    testSchema("""{
+                 |"allOf": [
+                 |  { "type": "number" },
+                 |  { "type": "string" }
+                 |]
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
         assertEquals(result.valid, false)
         assertEquals(result.errors, Seq(ValidationError(TypeMismatch("string"))))
       }
@@ -316,34 +283,28 @@ class ValidatorTest extends FunSuite {
   }
 
   test("anyOf") {
-    testValidator("""{
-                    |"anyOf": [
-                    |  { "type": "number" },
-                    |  { "type": "string" }
-                    |]
-                    |}
-                    |""".stripMargin) { validator =>
-      assertValidate(
-        """1313""".stripMargin,
-        validator
-      ) { result =>
+    testSchema("""{
+                 |"anyOf": [
+                 |  { "type": "number" },
+                 |  { "type": "string" }
+                 |]
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
         assertEquals(result.valid, true)
       }
     }
   }
 
   test("failed anyOf") {
-    testValidator("""{
-                    |"anyOf": [
-                    |  { "type": "number" },
-                    |  { "type": "string" }
-                    |]
-                    |}
-                    |""".stripMargin) { validator =>
-      assertValidate(
-        """true""".stripMargin,
-        validator
-      ) { result =>
+    testSchema("""{
+                 |"anyOf": [
+                 |  { "type": "number" },
+                 |  { "type": "string" }
+                 |]
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""true""".stripMargin)(schema) { result =>
         assertEquals(result.valid, false)
         assertEquals(
           result.errors,
@@ -357,49 +318,43 @@ class ValidatorTest extends FunSuite {
   }
 
   test("oneOf") {
-    testValidator("""{
-                    |"anyOf": [
-                    |  { "type": "number" },
-                    |  { "type": "string" }
-                    |]
-                    |}
-                    |""".stripMargin) { validator =>
-      assertValidate(
-        """1313""".stripMargin,
-        validator
-      ) { result =>
+    testSchema("""{
+                 |"anyOf": [
+                 |  { "type": "number" },
+                 |  { "type": "string" }
+                 |]
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
         assertEquals(result.valid, true)
       }
     }
   }
 
   test("failed oneOf: none") {
-    testValidator("""{
-                    |"oneOf": [
-                    |  { "type": "string" },
-                    |  { "type": "boolean" }
-                    |]
-                    |}
-                    |""".stripMargin) { validator =>
-      assertValidate(
-        """1313""".stripMargin,
-        validator
-      ) { result =>
+    testSchema("""{
+                 |"oneOf": [
+                 |  { "type": "string" },
+                 |  { "type": "boolean" }
+                 |]
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
         assertEquals(result.valid, false)
         assertEquals(
           result.errors,
           Seq(
             ValidationError(
               NotOneOf(
-                0,
-                List(
-                  ValidationError(
-                    TypeMismatch("string")
-                  ),
-                  ValidationError(
-                    TypeMismatch("boolean")
-                  )
-                )
+                0
+                // List(
+                //   ValidationError(
+                //     TypeMismatch("string")
+                //   ),
+                //   ValidationError(
+                //     TypeMismatch("boolean")
+                //   )
+                // )
               )
             )
           )
@@ -409,25 +364,22 @@ class ValidatorTest extends FunSuite {
   }
 
   test("failed oneOf: two") {
-    testValidator("""{
-                    |"oneOf": [
-                    |  { "type": "number" },
-                    |  { "type": "number" }
-                    |]
-                    |}
-                    |""".stripMargin) { validator =>
-      assertValidate(
-        """1313""".stripMargin,
-        validator
-      ) { result =>
+    testSchema("""{
+                 |"oneOf": [
+                 |  { "type": "number" },
+                 |  { "type": "number" }
+                 |]
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
         assertEquals(result.valid, false)
         assertEquals(
           result.errors,
           Seq(
             ValidationError(
               NotOneOf(
-                2,
-                Nil
+                2
+                // Nil
               )
             )
           )
@@ -437,28 +389,22 @@ class ValidatorTest extends FunSuite {
   }
 
   test("not") {
-    testValidator("""{
-                    |"not": { "type": "number" }
-                    |}
-                    |""".stripMargin) { validator =>
-      assertValidate(
-        """true""".stripMargin,
-        validator
-      ) { result =>
+    testSchema("""{
+                 |"not": { "type": "number" }
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""true""".stripMargin)(schema) { result =>
         assertEquals(result.valid, true)
       }
     }
   }
 
   test("failed not") {
-    testValidator("""{
-                    |"not": { "type": "number" }
-                    |}
-                    |""".stripMargin) { validator =>
-      assertValidate(
-        """1313""".stripMargin,
-        validator
-      ) { result =>
+    testSchema("""{
+                 |"not": { "type": "number" }
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
         assertEquals(result.valid, false)
         assertEquals(result.errors, Seq(ValidationError(NotInvalid())))
       }
