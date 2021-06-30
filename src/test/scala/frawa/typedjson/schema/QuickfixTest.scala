@@ -8,22 +8,21 @@ class QuickfixTest extends FunSuite {
   implicit val zioParser    = new ZioParser();
   implicit val schemaParser = SchemaValueDecoder;
 
-  private def testQuickfix(text: String)(f: Quickfix => Unit) {
-    val withQuickfix = for {
+  private def testSchema(text: String)(f: Schema => Unit) {
+    val withSchema = for {
       schema <- SchemaParser(text)
-      quickfix = Quickfix(schema)
     } yield {
-      f(quickfix)
+      f(schema)
     }
-    withQuickfix.swap
-      .map(message => fail("no quickfix", clues(clue(message))))
+    withSchema.swap
+      .map(message => fail("no schema", clues(clue(message))))
       .swap
   }
 
-  private def assertQuickfix(text: String, quickfix: Quickfix)(f: QuickfixResult => Unit) = {
+  private def assertQuickfix(text: String)(schema: Schema)(f: QuickfixResult => Unit) = {
     val withParsed = for {
       value <- Parser(text)
-      result = Quickfix.fixes(quickfix)(value)
+      result = Quickfix.fixes(schema)(value)
     } yield {
       f(result)
     }
@@ -33,23 +32,22 @@ class QuickfixTest extends FunSuite {
   }
 
   test("object add missing property") {
-    testQuickfix("""{
-                   |"$id": "testme",
-                   |"type": "object", 
-                   |"properties": { 
-                   |  "toto": { "type": "number" },
-                   |  "titi": { "type": "string" }
-                   |} 
-                   |}
-                   |""".stripMargin) { quickfix =>
-      assertQuickfix(
-        """{
-          |"toto": 13
-          |}
-          |""".stripMargin,
-        quickfix
+    testSchema("""{
+                 |"$id": "testme",
+                 |"type": "object", 
+                 |"properties": { 
+                 |  "toto": { "type": "number" },
+                 |  "titi": { "type": "string" }
+                 |} 
+                 |}
+                 |""".stripMargin) { schema =>
+      assertQuickfix("""{
+                       |"toto": 13
+                       |}
+                       |""".stripMargin)(
+        schema
       ) { result =>
-        assertEquals(result.fixes, Seq(AddProperty(Pointer.empty, "titi")))
+        assertEquals(result, QuickfixResultFixes(Seq(AddProperty(Pointer.empty, "titi"))))
       }
     }
   }
