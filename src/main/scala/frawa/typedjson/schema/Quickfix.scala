@@ -27,32 +27,31 @@ case class QuickfixResultFixes(fixes: Seq[QuickfixItem])                 extends
 case class QuickfixResultAlternatives(alternatives: Seq[QuickfixResult]) extends QuickfixResult
 
 object QuickfixResultFactory extends EvalResultFactory[QuickfixResult] {
+  def init(): QuickfixResult = QuickfixResultEmpty
 
-  override def valid(): QuickfixResult = QuickfixResultEmpty
-
-  override def invalid(reason: Reason): QuickfixResult = reason match {
+  override def create(observation: Observation): QuickfixResult = observation match {
     case MissingProperty(key) => QuickfixResultFixes(Seq(AddProperty(Pointer.empty, key)))
+    case _                    => QuickfixResultEmpty
   }
 
-  override def isValid(a: QuickfixResult): Boolean = a == QuickfixResultEmpty
+  def prefix(prefix: Pointer, result: QuickfixResult): QuickfixResult = result match {
+    case QuickfixResultFixes(fixes) => QuickfixResultFixes(fixes.map(_.prefix(prefix)))
+    case _                          => QuickfixResultEmpty
+  }
 
-  override def prefix(pointer: Pointer, a: QuickfixResult): QuickfixResult = {
-    a match {
-      case QuickfixResultFixes(fixes) => QuickfixResultFixes(fixes.map(_.prefix(pointer)))
-      case _                          => a
+  def allOf(results: Seq[QuickfixResult]): QuickfixResult = {
+    val fixes = results.flatMap {
+      case QuickfixResultFixes(fixes) => fixes
+      case _                          => Seq()
+    }
+    if (fixes.isEmpty) {
+      QuickfixResultEmpty
+    } else {
+      QuickfixResultFixes(fixes)
     }
   }
 
-  override def and(a: QuickfixResult, b: QuickfixResult): QuickfixResult = {
-    (a, b) match {
-      case (QuickfixResultFixes(fa), QuickfixResultFixes(fb)) => QuickfixResultFixes(fa ++ fb)
-      case (QuickfixResultFixes(_), _)                        => a
-      case (_, QuickfixResultFixes(_))                        => b
-      case _                                                  => QuickfixResultEmpty
-    }
-  }
-
-  def or(a: QuickfixResult, b: QuickfixResult): QuickfixResult = {
-    QuickfixResultEmpty
-  }
+  def anyOf(results: Seq[QuickfixResult]): QuickfixResult = QuickfixResultEmpty
+  def oneOf(results: Seq[QuickfixResult]): QuickfixResult = QuickfixResultEmpty
+  def not(result: QuickfixResult): QuickfixResult         = QuickfixResultEmpty
 }

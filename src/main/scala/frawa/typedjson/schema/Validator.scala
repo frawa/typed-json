@@ -8,55 +8,69 @@ import frawa.typedjson.parser.NumberValue
 import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue
 
-case class ValidationError(reason: Reason, pointer: Pointer = Pointer.empty) {
-  def prefix(prefix: Pointer): ValidationError = {
-    ValidationError(reason, prefix / pointer)
-  }
-}
-
 trait ValidationResult {
   val valid: Boolean
-  val errors: Seq[ValidationError]
+  val errors: Seq[ValidationResult.Error]
+  def prefix(prefix: Pointer): ValidationResult
 }
+
+object ValidationResult {
+  type Error = WithPointer[Observation]
+}
+
 case object ValidationValid extends ValidationResult {
-  val valid  = true
-  val errors = Seq()
+  val valid                                     = true
+  val errors                                    = Seq()
+  def prefix(prefix: Pointer): ValidationResult = this
 }
-case class ValidationInvalid(errors: Seq[ValidationError]) extends ValidationResult {
-  val valid = false
+case class ValidationInvalid(errors: Seq[ValidationResult.Error]) extends ValidationResult {
+  val valid                                     = false
+  def prefix(prefix: Pointer): ValidationResult = ValidationInvalid(errors.map(_.prefix(prefix)))
 }
 
 object ValidationResultFactory extends EvalResultFactory[ValidationResult] {
+  override def init(): ValidationResult = ValidationValid
 
-  override def valid(): ValidationResult = ValidationValid
-
-  override def invalid(reason: Reason): ValidationResult = ValidationInvalid(
-    Seq(ValidationError(reason))
+  override def create(observation: Observation): ValidationResult = ValidationInvalid(
+    Seq(WithPointer(observation))
   )
 
-  override def isValid(a: ValidationResult): Boolean = a == ValidationValid
+  private def isValid(result: ValidationResult): Boolean = result == ValidationValid
 
-  override def prefix(pointer: Pointer, a: ValidationResult): ValidationResult = {
-    if (a.valid) {
-      a
+  override def prefix(prefix: Pointer, result: ValidationResult): ValidationResult = result.prefix(prefix)
+
+  override def allOf(results: Seq[ValidationResult]): ValidationResult = {
+    if (results.isEmpty || results.forall(isValid(_))) {
+      ValidationValid
     } else {
-      ValidationInvalid(a.errors.map(_.prefix(pointer)))
+      ValidationInvalid(results.flatMap(_.errors))
     }
   }
 
-  override def and(a: ValidationResult, b: ValidationResult): ValidationResult = {
-    if (a.valid && b.valid) {
+  override def anyOf(results: Seq[ValidationResult]): ValidationResult = {
+    if (results.isEmpty || results.exists(isValid(_))) {
       ValidationValid
     } else {
-      ValidationInvalid(a.errors ++ b.errors)
+      ValidationInvalid(results.flatMap(_.errors))
     }
   }
 
-  def or(a: ValidationResult, b: ValidationResult): ValidationResult = {
-    if (a.valid || b.valid) {
+  override def oneOf(results: Seq[ValidationResult]): ValidationResult = {
+    val count = results.count(isValid(_))
+    if (count == 1) {
+      ValidationValid
+    } else if (count == 0) {
+      ValidationInvalid(results.flatMap(_.errors))
+    } else {
+      ValidationInvalid(Seq(WithPointer(NotOneOf(count))))
+    }
+  }
+
+  override def not(result: ValidationResult): ValidationResult = {
+    if (!isValid(result)) {
       ValidationValid
     } else {
-      ValidationInvalid(a.errors ++ b.errors)
+      ValidationInvalid(Seq(WithPointer(NotInvalid())))
     }
   }
 }

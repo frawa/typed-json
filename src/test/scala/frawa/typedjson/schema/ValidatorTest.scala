@@ -3,10 +3,12 @@ package frawa.typedjson.schema
 import munit._
 import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.parser.Parser
+import ValidationResult.{Error}
 
 // see https://json-schema.org/draft/2020-12/json-schema-core.html
 
 class ValidatorTest extends FunSuite {
+
   implicit val zioParser    = new ZioParser();
   implicit val schemaParser = SchemaValueDecoder;
 
@@ -49,7 +51,7 @@ class ValidatorTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate("""13""")(schema) { result =>
-        assertEquals(result.errors, Seq(ValidationError(TypeMismatch("null"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("null"))))
       }
     }
   }
@@ -60,7 +62,7 @@ class ValidatorTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate("""13""")(schema) { result =>
-        assertEquals(result.errors, Seq(ValidationError(TypeMismatch("boolean"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("boolean"))))
       }
     }
   }
@@ -68,7 +70,7 @@ class ValidatorTest extends FunSuite {
   test("boolean false") {
     testSchema("""{"type": "boolean"}""") { schema =>
       assertValidate("""false""")(schema) { result =>
-        assertEquals(result.errors, Seq(ValidationError(FalseSchemaReason())))
+        assertEquals(result.errors, Seq(WithPointer(FalseSchemaReason())))
       }
     }
   }
@@ -79,7 +81,7 @@ class ValidatorTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate("""13""")(schema) { result =>
-        assertEquals(result.errors, Seq(ValidationError(TypeMismatch("string"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("string"))))
       }
     }
   }
@@ -90,7 +92,7 @@ class ValidatorTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate("""null""")(schema) { result =>
-        assertEquals(result.errors, Seq(ValidationError(TypeMismatch("number"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("number"))))
       }
     }
   }
@@ -101,7 +103,7 @@ class ValidatorTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate("""null""")(schema) { result =>
-        assertEquals(result.errors, Seq(ValidationError(TypeMismatch("array"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("array"))))
       }
     }
   }
@@ -109,7 +111,7 @@ class ValidatorTest extends FunSuite {
   test("array item") {
     testSchema("""{"type": "array", "items": { "type": "number"} }""") { schema =>
       assertValidate("""[true]""")(schema) { result =>
-        assertEquals(result.errors, Seq(ValidationError(TypeMismatch("number"), Pointer(0))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("number"), Pointer(0))))
       }
     }
   }
@@ -131,7 +133,7 @@ class ValidatorTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate("""null""")(schema) { result =>
-        assertEquals(result.errors, Seq(ValidationError(TypeMismatch("object"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("object"))))
       }
     }
   }
@@ -150,7 +152,7 @@ class ValidatorTest extends FunSuite {
                        |"titi": true
                        |}
                        |""".stripMargin)(schema) { result =>
-        assertEquals(result.errors, Seq(ValidationError(TypeMismatch("string"), Pointer.empty / "titi")))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / "titi")))
       }
     }
   }
@@ -170,7 +172,7 @@ class ValidatorTest extends FunSuite {
                        |"titi": "foo"
                        |}
                        |""".stripMargin)(schema) { result =>
-        assertEquals(result.errors, Seq(ValidationError(UnexpectedProperty("gnu"))))
+        assertEquals(result.errors, Seq(WithPointer(UnexpectedProperty("gnu"))))
       }
     }
   }
@@ -188,7 +190,7 @@ class ValidatorTest extends FunSuite {
                        |"toto": 13
                        |}
                        |""".stripMargin)(schema) { result =>
-        assertEquals(result.errors, Seq(ValidationError(MissingProperty("titi"))))
+        assertEquals(result.errors, Seq(WithPointer(MissingProperty("titi"))))
       }
     }
   }
@@ -222,7 +224,7 @@ class ValidatorTest extends FunSuite {
                        |}
                        |""".stripMargin)(schema) { result =>
         assertEquals(result.valid, false)
-        assertEquals(result.errors, Seq(ValidationError(FalseSchemaReason())))
+        assertEquals(result.errors, Seq(WithPointer(FalseSchemaReason())))
       }
     }
   }
@@ -234,7 +236,7 @@ class ValidatorTest extends FunSuite {
                  |""".stripMargin) { schema =>
       assertValidate("""true""".stripMargin)(schema) { result =>
         assertEquals(result.valid, false)
-        assertEquals(result.errors, Seq(ValidationError(MissingRef("#/$defs/toto"))))
+        assertEquals(result.errors, Seq(WithPointer(MissingRef("#/$defs/toto"))))
       }
     }
   }
@@ -277,7 +279,7 @@ class ValidatorTest extends FunSuite {
                  |""".stripMargin) { schema =>
       assertValidate("""1313""".stripMargin)(schema) { result =>
         assertEquals(result.valid, false)
-        assertEquals(result.errors, Seq(ValidationError(TypeMismatch("string"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("string"))))
       }
     }
   }
@@ -309,8 +311,8 @@ class ValidatorTest extends FunSuite {
         assertEquals(
           result.errors,
           Seq(
-            ValidationError(TypeMismatch("number")),
-            ValidationError(TypeMismatch("string"))
+            WithPointer(TypeMismatch("number")),
+            WithPointer(TypeMismatch("string"))
           )
         )
       }
@@ -344,19 +346,8 @@ class ValidatorTest extends FunSuite {
         assertEquals(
           result.errors,
           Seq(
-            ValidationError(
-              NotOneOf(
-                0
-                // List(
-                //   ValidationError(
-                //     TypeMismatch("string")
-                //   ),
-                //   ValidationError(
-                //     TypeMismatch("boolean")
-                //   )
-                // )
-              )
-            )
+            WithPointer(TypeMismatch("string")),
+            WithPointer(TypeMismatch("boolean"))
           )
         )
       }
@@ -376,12 +367,7 @@ class ValidatorTest extends FunSuite {
         assertEquals(
           result.errors,
           Seq(
-            ValidationError(
-              NotOneOf(
-                2
-                // Nil
-              )
-            )
+            WithPointer(NotOneOf(2))
           )
         )
       }
@@ -406,7 +392,7 @@ class ValidatorTest extends FunSuite {
                  |""".stripMargin) { schema =>
       assertValidate("""1313""".stripMargin)(schema) { result =>
         assertEquals(result.valid, false)
-        assertEquals(result.errors, Seq(ValidationError(NotInvalid())))
+        assertEquals(result.errors, Seq(WithPointer(NotInvalid())))
       }
     }
   }
