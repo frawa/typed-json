@@ -18,13 +18,18 @@ trait QuickfixItem {
   def prefix(pointer: Pointer): QuickfixItem
 }
 case class AddProperty(pointer: Pointer, key: String) extends QuickfixItem {
-  override def prefix(p: Pointer): QuickfixItem = AddProperty(p / pointer, key)
+  override def prefix(prefix: Pointer): QuickfixItem = AddProperty(prefix / pointer, key)
+}
+
+case class QuickfixItemGroup(items: Seq[QuickfixItem]) extends QuickfixItem {
+  def prefix(pointer: Pointer): QuickfixItem = {
+    QuickfixItemGroup(items.map(_.prefix(pointer)))
+  }
 }
 
 trait QuickfixResult
-case object QuickfixResultEmpty                                          extends QuickfixResult
-case class QuickfixResultFixes(fixes: Seq[QuickfixItem])                 extends QuickfixResult
-case class QuickfixResultAlternatives(alternatives: Seq[QuickfixResult]) extends QuickfixResult
+case object QuickfixResultEmpty                          extends QuickfixResult
+case class QuickfixResultFixes(fixes: Seq[QuickfixItem]) extends QuickfixResult
 
 object QuickfixResultFactory extends EvalResultFactory[QuickfixResult] {
   def init(): QuickfixResult = QuickfixResultEmpty
@@ -43,6 +48,15 @@ object QuickfixResultFactory extends EvalResultFactory[QuickfixResult] {
     }
   }
 
+  private def groupLeafItems(items: Seq[QuickfixItem]): Seq[QuickfixItem] = {
+    val (groups, leafs) = items.partition(_.isInstanceOf[QuickfixItemGroup])
+    if (leafs.isEmpty) {
+      groups
+    } else {
+      groups :+ QuickfixItemGroup(leafs)
+    }
+  }
+
   def allOf(results: Seq[QuickfixResult]): QuickfixResult = {
     val fixes = results.flatMap {
       case QuickfixResultFixes(fixes) => fixes
@@ -55,7 +69,18 @@ object QuickfixResultFactory extends EvalResultFactory[QuickfixResult] {
     }
   }
 
-  def anyOf(results: Seq[QuickfixResult]): QuickfixResult = QuickfixResultEmpty
-  def oneOf(results: Seq[QuickfixResult]): QuickfixResult = QuickfixResultEmpty
+  def anyOf(results: Seq[QuickfixResult]): QuickfixResult = {
+    val fixes = results.flatMap {
+      case QuickfixResultFixes(fixes) => groupLeafItems(fixes)
+      case _                          => Seq()
+    }
+    if (fixes.isEmpty) {
+      QuickfixResultEmpty
+    } else {
+      QuickfixResultFixes(fixes)
+    }
+  }
+
+  def oneOf(results: Seq[QuickfixResult]): QuickfixResult = anyOf(results)
   def not(result: QuickfixResult): QuickfixResult         = QuickfixResultEmpty
 }

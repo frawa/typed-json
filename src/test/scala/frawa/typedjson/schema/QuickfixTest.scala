@@ -87,4 +87,35 @@ class QuickfixTest extends FunSuite {
       }
     }
   }
+
+  test("anyOf raises two groups") {
+    testSchema("""{
+                 |"$id": "testme",
+                 |"anyOf": [{
+                 |  "type": "object", 
+                 |  "properties": { 
+                 |    "toto": { "type": "number" }
+                 |  }},{ 
+                 |  "type": "object", 
+                 |  "properties": { 
+                 |    "titi": { "type": "string" }
+                 |  }}
+                 |]
+                 |}
+                 |""".stripMargin) { schema =>
+      assertQuickfix("""{}""".stripMargin)(
+        schema
+      ) { result =>
+        assertEquals(
+          result,
+          QuickfixResultFixes(
+            Seq(
+              QuickfixItemGroup(Seq(AddProperty(Pointer.empty, "toto"))),
+              QuickfixItemGroup(Seq(AddProperty(Pointer.empty, "titi")))
+            )
+          )
+        )
+      }
+    }
+  }
 }
