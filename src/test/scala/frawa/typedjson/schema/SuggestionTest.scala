@@ -82,7 +82,7 @@ class SuggestTest extends FunSuite {
     }
   }
 
-  test("suggest more") {
+  test("suggest several values") {
     testSchema("""{
                  |"$id": "testme",
                  |"type": "object", 
@@ -133,9 +133,53 @@ class SuggestTest extends FunSuite {
       }
     }
   }
+
+  test("do not merge suggestions for one value") {
+    testSchema("""{
+                 |"$id": "testme",
+                 |"type": "object", 
+                 |"properties": { 
+                 |  "foo": { 
+                 |    "type": "object", 
+                 |    "properties": { 
+                 |      "bar": { "type": "number" },
+                 |      "gnu": { "type": "number" }
+                 |    }
+                 |  }
+                 |} 
+                 |}
+                 |""".stripMargin) { schema =>
+      assertSuggest(
+        """{
+          |"foo": {}
+          |}
+          |""".stripMargin
+      )(
+        schema
+      ) { result =>
+        assertEquals(
+          result,
+          SuggestionResult(
+            Seq(
+              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NullValue)))),
+              ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> NullValue))))
+            )
+          )
+        )
+      }
+      assertSuggest(
+        """{
+          |"foo": { "bar": 13 }
+          |}
+          |""".stripMargin
+      )(
+        schema
+      ) { result =>
+        assertEquals(result, SuggestionResult(Seq(ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> NullValue)))))))
+      }
+    }
+  }
 // TODO
-// - suggest at given pointer
-// - suggest at non-existing pointer
 // - suggest existing property
 // - suggest contant property value
 

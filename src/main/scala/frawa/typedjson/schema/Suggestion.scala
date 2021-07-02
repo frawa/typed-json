@@ -52,9 +52,18 @@ object SuggestionResultFactory extends EvalResultFactory[SuggestionResult] {
     SuggestionResult(suggestions)
   }
 
-  def anyOf(results: Seq[SuggestionResult]): SuggestionResult = allOf(results)
+  // def allOf(results: Seq[SuggestionResult]): SuggestionResult = {
+  //   val properties = results.flatMap(_.suggestions).flatMap { case ObjectValue(properties) => properties }.toMap
+  //   println("FW", results, properties)
+  //   if (properties.isEmpty) {
+  //     init()
+  //   } else {
+  //     SuggestionResult(Seq(ObjectValue(properties)))
+  //   }
+  // }
 
-  def oneOf(results: Seq[SuggestionResult]): SuggestionResult = anyOf(results)
+  def anyOf(results: Seq[SuggestionResult]): SuggestionResult = allOf(results)
+  def oneOf(results: Seq[SuggestionResult]): SuggestionResult = allOf(results)
   def not(result: SuggestionResult): SuggestionResult         = init()
   def ifThenElse(
       ifResult: SuggestionResult,
