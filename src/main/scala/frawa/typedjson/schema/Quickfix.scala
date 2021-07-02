@@ -17,8 +17,8 @@ object Quickfix {
 trait QuickfixItem {
   def prefix(pointer: Pointer): QuickfixItem
 }
-case class AddProperty(pointer: Pointer, key: String) extends QuickfixItem {
-  override def prefix(prefix: Pointer): QuickfixItem = AddProperty(prefix / pointer, key)
+case class AddProperties(pointer: Pointer, keys: Seq[String]) extends QuickfixItem {
+  override def prefix(prefix: Pointer): QuickfixItem = AddProperties(prefix / pointer, keys)
 }
 
 case class QuickfixItemGroup(items: Seq[QuickfixItem]) extends QuickfixItem {
@@ -36,8 +36,8 @@ object QuickfixResultFactory extends EvalResultFactory[QuickfixResult] {
 
   override def create(observation: Observation): QuickfixResult = {
     observation match {
-      case MissingProperty(key) => QuickfixResultFixes(Seq(AddProperty(Pointer.empty, key)))
-      case _                    => QuickfixResultEmpty
+      case MissingProperties(keys) => QuickfixResultFixes(Seq(AddProperties(Pointer.empty, keys)))
+      case _                       => QuickfixResultEmpty
     }
   }
 

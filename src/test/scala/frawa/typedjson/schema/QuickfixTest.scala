@@ -47,7 +47,7 @@ class QuickfixTest extends FunSuite {
                        |""".stripMargin)(
         schema
       ) { result =>
-        assertEquals(result, QuickfixResultFixes(Seq(AddProperty(Pointer.empty, "titi"))))
+        assertEquals(result, QuickfixResultFixes(Seq(AddProperties(Pointer.empty, Seq("titi")))))
       }
     }
   }
@@ -79,8 +79,8 @@ class QuickfixTest extends FunSuite {
           result,
           QuickfixResultFixes(
             Seq(
-              AddProperty(Pointer.empty / "foo", "bar"),
-              AddProperty(Pointer.empty, "titi")
+              AddProperties(Pointer.empty / "foo", Seq("bar")),
+              AddProperties(Pointer.empty, Seq("titi"))
             )
           )
         )
@@ -110,8 +110,8 @@ class QuickfixTest extends FunSuite {
           result,
           QuickfixResultFixes(
             Seq(
-              QuickfixItemGroup(Seq(AddProperty(Pointer.empty, "toto"))),
-              QuickfixItemGroup(Seq(AddProperty(Pointer.empty, "titi")))
+              QuickfixItemGroup(Seq(AddProperties(Pointer.empty, Seq("toto")))),
+              QuickfixItemGroup(Seq(AddProperties(Pointer.empty, Seq("titi"))))
             )
           )
         )

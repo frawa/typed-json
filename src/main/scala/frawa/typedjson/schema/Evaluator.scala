@@ -9,13 +9,13 @@ import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue
 
 trait Observation
-case class TypeMismatch(expected: String)  extends Observation
-case class FalseSchemaReason()             extends Observation
-case class UnexpectedProperty(key: String) extends Observation
-case class MissingProperty(key: String)    extends Observation
-case class MissingRef(ref: String)         extends Observation
-case class NotOneOf(valid: Int)            extends Observation // ??? only in Validator?
-case class NotInvalid()                    extends Observation // ??? only in Validator?
+case class TypeMismatch(expected: String)       extends Observation
+case class FalseSchemaReason()                  extends Observation
+case class UnexpectedProperty(key: String)      extends Observation
+case class MissingProperties(keys: Seq[String]) extends Observation
+case class MissingRef(ref: String)              extends Observation
+case class NotOneOf(valid: Int)                 extends Observation // ??? only in Validator?
+case class NotInvalid()                         extends Observation // ??? only in Validator?
 
 trait EvalResultFactory[R] {
   def init(): R
@@ -143,12 +143,14 @@ case class ObjectEvaluator[R](propertiesEvaluators: Map[String, Evaluator[R]])(i
             .map(factory.prefix(prefix, _))
             .getOrElse(factory.create(UnexpectedProperty(key1)))
         }.toSeq
-        val missing = propertiesEvaluators.keySet
+        val missingKeys = propertiesEvaluators.keySet
           .diff(properties.keySet)
-          .map(key => MissingProperty(key))
-          .map(factory.create(_))
           .toSeq
-        factory.allOf(validations ++ missing)
+        if (missingKeys.isEmpty) {
+          factory.allOf(validations)
+        } else {
+          factory.allOf(validations :+ factory.create(MissingProperties(missingKeys)))
+        }
       }
       case _ => factory.create(TypeMismatch("object"))
     }

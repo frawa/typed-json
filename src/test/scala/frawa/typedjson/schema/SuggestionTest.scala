@@ -134,7 +134,7 @@ class SuggestTest extends FunSuite {
     }
   }
 
-  test("do not merge suggestions for one value") {
+  test("suggestions for several properties") {
     testSchema("""{
                  |"$id": "testme",
                  |"type": "object", 
@@ -161,8 +161,7 @@ class SuggestTest extends FunSuite {
           result,
           SuggestionResult(
             Seq(
-              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NullValue)))),
-              ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> NullValue))))
+              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NullValue, "gnu" -> NullValue))))
             )
           )
         )
