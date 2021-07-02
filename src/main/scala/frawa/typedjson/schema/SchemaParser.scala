@@ -102,8 +102,14 @@ object SchemaValueDecoder extends SchemaParser {
     oneOf       <- ifObject(optionalProperty("oneOf")(seq(schema))).map(_.flatten).map(_.getOrElse(Seq()))
     notOp       <- ifObject(optionalProperty("not")(schema)).map(_.flatten)
     ifThenElse  <- ifObject(ifThenElse).map(_.flatten)
-    s = typedSchema.orElse(refSchema).getOrElse(boolSchema)
-  } yield SchemaWithApplicators(s, allOf, anyOf, oneOf, notOp, ifThenElse)
+    s           = typedSchema.orElse(refSchema).getOrElse(boolSchema)
+    sWith       = SchemaWithApplicators(s, allOf, anyOf, oneOf, notOp, ifThenElse)
+    withoutWith = Seq(allOf, anyOf, oneOf, notOp.toSeq, ifThenElse.toSeq).flatMap(identity).isEmpty
+  } yield
+    if (withoutWith)
+      s
+    else
+      sWith
 
   val ifThenElse: Decoder[Option[IfThenElseSchema]] = for {
     ifSchema   <- optionalProperty("if")(schema)

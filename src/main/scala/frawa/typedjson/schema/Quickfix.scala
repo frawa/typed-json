@@ -36,8 +36,9 @@ object QuickfixResultFactory extends EvalResultFactory[QuickfixResult] {
 
   override def create(observation: Observation): QuickfixResult = {
     observation match {
-      case MissingProperties(keys) => QuickfixResultFixes(Seq(AddProperties(Pointer.empty, keys)))
-      case _                       => QuickfixResultEmpty
+      case MissingProperties(properties) =>
+        QuickfixResultFixes(Seq(AddProperties(Pointer.empty, properties.keySet.toSeq)))
+      case _ => QuickfixResultEmpty
     }
   }
 

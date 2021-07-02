@@ -190,7 +190,7 @@ class ValidatorTest extends FunSuite {
                        |"toto": 13
                        |}
                        |""".stripMargin)(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(MissingProperties(Seq("titi")))))
+        assertEquals(result.errors, Seq(WithPointer(MissingProperties(Map("titi" -> StringSchema)))))
       }
     }
   }

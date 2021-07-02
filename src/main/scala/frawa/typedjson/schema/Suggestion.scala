@@ -25,8 +25,9 @@ object SuggestionResultFactory extends EvalResultFactory[SuggestionResult] {
 
   override def create(observation: Observation): SuggestionResult = {
     observation match {
-      case MissingProperties(keys) => SuggestionResult(Seq(ObjectValue(keys.map(_ -> NullValue).toMap)))
-      case _                       => init()
+      case MissingProperties(properties) =>
+        SuggestionResult(Seq(ObjectValue(properties.keySet.map(_ -> NullValue).toMap)))
+      case _ => init()
     }
   }
 
