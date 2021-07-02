@@ -29,14 +29,18 @@ case class QuickfixResultAlternatives(alternatives: Seq[QuickfixResult]) extends
 object QuickfixResultFactory extends EvalResultFactory[QuickfixResult] {
   def init(): QuickfixResult = QuickfixResultEmpty
 
-  override def create(observation: Observation): QuickfixResult = observation match {
-    case MissingProperty(key) => QuickfixResultFixes(Seq(AddProperty(Pointer.empty, key)))
-    case _                    => QuickfixResultEmpty
+  override def create(observation: Observation): QuickfixResult = {
+    observation match {
+      case MissingProperty(key) => QuickfixResultFixes(Seq(AddProperty(Pointer.empty, key)))
+      case _                    => QuickfixResultEmpty
+    }
   }
 
-  def prefix(prefix: Pointer, result: QuickfixResult): QuickfixResult = result match {
-    case QuickfixResultFixes(fixes) => QuickfixResultFixes(fixes.map(_.prefix(prefix)))
-    case _                          => QuickfixResultEmpty
+  def prefix(prefix: Pointer, result: QuickfixResult): QuickfixResult = {
+    result match {
+      case QuickfixResultFixes(fixes) => QuickfixResultFixes(fixes.map(_.prefix(prefix)))
+      case _                          => QuickfixResultEmpty
+    }
   }
 
   def allOf(results: Seq[QuickfixResult]): QuickfixResult = {

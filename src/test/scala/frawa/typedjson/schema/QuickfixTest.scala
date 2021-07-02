@@ -51,4 +51,40 @@ class QuickfixTest extends FunSuite {
       }
     }
   }
+
+  test("object add deep missing property") {
+    testSchema("""{
+                 |"$id": "testme",
+                 |"type": "object", 
+                 |"properties": { 
+                 |  "toto": { "type": "number" },
+                 |  "titi": { "type": "string" },
+                 |  "foo": { 
+                 |    "type": "object",
+                 |    "properties": {
+                 |      "bar": { "type": "boolean" }
+                 |    } 
+                 |  }
+                 |} 
+                 |}
+                 |""".stripMargin) { schema =>
+      assertQuickfix("""{
+                       |"toto": 13,
+                       |"foo": {}
+                       |}
+                       |""".stripMargin)(
+        schema
+      ) { result =>
+        assertEquals(
+          result,
+          QuickfixResultFixes(
+            Seq(
+              AddProperty(Pointer.empty / "foo", "bar"),
+              AddProperty(Pointer.empty, "titi")
+            )
+          )
+        )
+      }
+    }
+  }
 }
