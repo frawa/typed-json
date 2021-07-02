@@ -5,6 +5,9 @@ import shapeless.the
 import frawa.typedjson.parser.ObjectValue
 import frawa.typedjson.parser.NullValue
 import frawa.typedjson.parser.ArrayValue
+import frawa.typedjson.parser.BoolValue
+import frawa.typedjson.parser.StringValue
+import frawa.typedjson.parser.NumberValue
 
 trait Suggestion {
   type Dereferencer = String => Option[Quickfix]
@@ -26,7 +29,9 @@ object SuggestionResultFactory extends EvalResultFactory[SuggestionResult] {
   override def create(observation: Observation): SuggestionResult = {
     observation match {
       case MissingProperties(properties) =>
-        SuggestionResult(Seq(ObjectValue(properties.keySet.map(_ -> NullValue).toMap)))
+        SuggestionResult(Seq(ObjectValue(properties.map { case (key, schema) =>
+          key -> DefaultValues(schema)
+        }.toMap)))
       case _ => init()
     }
   }
@@ -72,4 +77,21 @@ object SuggestionResultFactory extends EvalResultFactory[SuggestionResult] {
       elseResult: SuggestionResult
   ): SuggestionResult =
     allOf(Seq(ifResult, thenResult, elseResult))
+}
+
+object DefaultValues {
+  // TODO use evaluators instead
+  def apply(schema: Schema): Value = schema match {
+    case NullSchema                                   => NullValue
+    case TrueSchema                                   => BoolValue(true)
+    case FalseSchema                                  => BoolValue(false)
+    case BooleanSchema                                => BoolValue(true)
+    case StringSchema                                 => StringValue("")
+    case NumberSchema                                 => NumberValue(0)
+    case ArraySchema(items)                           => ArrayValue(Seq())
+    case ObjectSchema(properties)                     => ObjectValue(Map())
+    case RootSchema(_, schema, _)                     => apply(schema)
+    case RefSchema(ref)                               => NullValue // TODO pass dereferenced schema
+    case SchemaWithApplicators(schema, _, _, _, _, _) => apply(schema)
+  }
 }

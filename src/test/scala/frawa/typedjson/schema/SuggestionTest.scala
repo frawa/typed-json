@@ -3,7 +3,7 @@ package frawa.typedjson.schema
 import munit.FunSuite
 import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.parser.Parser
-import frawa.typedjson.parser.{ObjectValue, NullValue}
+import frawa.typedjson.parser.{ObjectValue, NullValue, NumberValue, StringValue}
 
 class SuggestTest extends FunSuite {
   implicit val zioParser    = new ZioParser();
@@ -50,7 +50,7 @@ class SuggestTest extends FunSuite {
       )(
         schema
       ) { result =>
-        assertEquals(result, SuggestionResult(Seq(ObjectValue(Map("titi" -> NullValue)))))
+        assertEquals(result, SuggestionResult(Seq(ObjectValue(Map("titi" -> StringValue(""))))))
       }
     }
   }
@@ -77,7 +77,10 @@ class SuggestTest extends FunSuite {
       )(
         schema
       ) { result =>
-        assertEquals(result, SuggestionResult(Seq(ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NullValue)))))))
+        assertEquals(
+          result,
+          SuggestionResult(Seq(ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0)))))))
+        )
       }
     }
   }
@@ -114,8 +117,8 @@ class SuggestTest extends FunSuite {
           result,
           SuggestionResult(
             Seq(
-              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NullValue)))),
-              ObjectValue(Map("gnu" -> NullValue))
+              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0))))),
+              ObjectValue(Map("gnu" -> ObjectValue(Map())))
             )
           )
         )
@@ -129,7 +132,10 @@ class SuggestTest extends FunSuite {
       )(
         schema
       ) { result =>
-        assertEquals(result, SuggestionResult(Seq(ObjectValue(Map("gnu" -> ObjectValue(Map("toto" -> NullValue)))))))
+        assertEquals(
+          result,
+          SuggestionResult(Seq(ObjectValue(Map("gnu" -> ObjectValue(Map("toto" -> StringValue("")))))))
+        )
       }
     }
   }
@@ -161,7 +167,7 @@ class SuggestTest extends FunSuite {
           result,
           SuggestionResult(
             Seq(
-              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NullValue, "gnu" -> NullValue))))
+              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0), "gnu" -> NumberValue(0)))))
             )
           )
         )
@@ -174,7 +180,10 @@ class SuggestTest extends FunSuite {
       )(
         schema
       ) { result =>
-        assertEquals(result, SuggestionResult(Seq(ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> NullValue)))))))
+        assertEquals(
+          result,
+          SuggestionResult(Seq(ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> NumberValue(0)))))))
+        )
       }
     }
   }
