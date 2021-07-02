@@ -1,6 +1,7 @@
 package frawa.typedjson.schema
 
 import frawa.typedjson.parser.Value
+import shapeless.the
 
 trait Suggestion {
   type Dereferencer = String => Option[Quickfix]
@@ -37,4 +38,10 @@ case class SuggestionResultFactory(val at: Pointer) extends EvalResultFactory[Su
 
   def oneOf(results: Seq[SuggestionResult]): SuggestionResult = anyOf(results)
   def not(result: SuggestionResult): SuggestionResult         = init()
+  def ifThenElse(
+      ifResult: SuggestionResult,
+      thenResult: SuggestionResult,
+      elseResult: SuggestionResult
+  ): SuggestionResult =
+    allOf(Seq(ifResult, thenResult, elseResult))
 }

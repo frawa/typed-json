@@ -83,4 +83,10 @@ object QuickfixResultFactory extends EvalResultFactory[QuickfixResult] {
 
   def oneOf(results: Seq[QuickfixResult]): QuickfixResult = anyOf(results)
   def not(result: QuickfixResult): QuickfixResult         = init()
+  def ifThenElse(
+      ifResult: QuickfixResult,
+      thenResult: QuickfixResult,
+      elseResult: QuickfixResult
+  ): QuickfixResult =
+    allOf(Seq(ifResult, thenResult, elseResult))
 }

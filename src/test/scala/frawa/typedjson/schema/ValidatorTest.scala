@@ -396,6 +396,27 @@ class ValidatorTest extends FunSuite {
       }
     }
   }
+
+  test("if/then/else nop") {
+    testSchema("""{
+                 |"if": { "type": "number" },
+                 |"then": { "type": "number" },
+                 |"else": { "type": "string" }
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertEquals(result.valid, true)
+      }
+      assertValidate(""""string"""".stripMargin)(schema) { result =>
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""null""".stripMargin)(schema) { result =>
+        assertEquals(result.valid, false)
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("string"))))
+      }
+    }
+  }
+
   // TODO
   // - if/then/else
 }

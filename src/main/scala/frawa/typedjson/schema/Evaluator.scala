@@ -25,6 +25,7 @@ trait EvalResultFactory[R] {
   def anyOf(results: Seq[R]): R
   def oneOf(results: Seq[R]): R
   def not(result: R): R
+  def ifThenElse(ifResult: R, thenResult: R, elseResult: R): R
 }
 
 case class WithPointer[+R](result: R, pointer: Pointer = Pointer.empty) {
@@ -54,14 +55,23 @@ object Evaluator {
     case RootSchema(_, schema, defs) =>
       RootSchemaEvaluator[R](Evaluator[R](schema), defs.view.mapValues(Evaluator[R](_)).toMap)
     case RefSchema(ref) => RefEvaluator[R](ref)
-    case SchemaWithApplicators(schema, allOf, anyOf, oneOf, notOp) =>
+    case SchemaWithApplicators(schema, allOf, anyOf, oneOf, notOp, ifThenElse) =>
       AllOfEvaluator(
         Seq(
           Evaluator(schema),
-          AllOfEvaluator(allOf.map(Evaluator(_))),
-          AnyOfEvaluator(anyOf.map(Evaluator(_))),
-          if (oneOf.nonEmpty) OneOfEvaluator(oneOf.map(Evaluator(_))) else AlwaysEvaluator(true),
-          notOp.map(schema => NotEvaluator(Evaluator(schema))).getOrElse(AlwaysEvaluator(true))
+          Helper.mapNonEmpty(allOf)(Evaluator(_)).map(AllOfEvaluator(_)).getOrElse(AlwaysEvaluator(true)),
+          Helper.mapNonEmpty(anyOf)(Evaluator(_)).map(AnyOfEvaluator(_)).getOrElse(AlwaysEvaluator(true)),
+          Helper.mapNonEmpty(oneOf)(Evaluator(_)).map(OneOfEvaluator(_)).getOrElse(AlwaysEvaluator(true)),
+          notOp.map(schema => NotEvaluator(Evaluator(schema))).getOrElse(AlwaysEvaluator(true)),
+          ifThenElse
+            .map(ifThenElse =>
+              IfThenElseEvaluator(
+                Evaluator(ifThenElse.ifSchema),
+                Evaluator(ifThenElse.thenSchema),
+                Evaluator(ifThenElse.elseSchema)
+              )
+            )
+            .getOrElse(AlwaysEvaluator(true))
         )
       )
   }
@@ -203,7 +213,24 @@ case class NotEvaluator[R](e: Evaluator[R])(implicit factory: EvalResultFactory[
     // }
   }
 }
+
+case class IfThenElseEvaluator[R](ifE: Evaluator[R], thenE: Evaluator[R], elseE: Evaluator[R])(implicit
+    factory: EvalResultFactory[R]
+) extends Evaluator[R] {
+  override def eval(value: Value)(implicit dereference: Dereferencer): R = {
+    factory.ifThenElse(ifE.eval(value), thenE.eval(value), elseE.eval(value))
+  }
+}
+
 object Helper {
+
+  def mapNonEmpty[T, S](as: Seq[T])(f: T => S): Option[Seq[S]] =
+    if (as.isEmpty) {
+      None
+    } else {
+      Some(as.map(f))
+    }
+
   def debugTraceValue[T](title: String): T => T = { v =>
     println(title, v)
     v

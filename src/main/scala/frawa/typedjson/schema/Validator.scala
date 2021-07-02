@@ -73,6 +73,18 @@ object ValidationResultFactory extends EvalResultFactory[ValidationResult] {
       ValidationInvalid(Seq(WithPointer(NotInvalid())))
     }
   }
+
+  override def ifThenElse(
+      ifResult: ValidationResult,
+      thenResult: ValidationResult,
+      elseResult: ValidationResult
+  ): ValidationResult = {
+    if (isValid(ifResult)) {
+      thenResult
+    } else {
+      elseResult
+    }
+  }
 }
 
 trait Validator {

@@ -24,8 +24,11 @@ case class SchemaWithApplicators(
     allOf: Seq[Schema],
     anyOf: Seq[Schema],
     oneOf: Seq[Schema],
-    notOp: Option[Schema]
+    notOp: Option[Schema],
+    ifThenElse: Option[IfThenElseSchema]
 ) extends Schema
+
+case class IfThenElseSchema(ifSchema: Schema, thenSchema: Schema, elseSchema: Schema)
 
 trait SchemaParser {
   def parseRoot(json: String)(implicit parser: Parser): Either[String, RootSchema]
@@ -98,8 +101,15 @@ object SchemaValueDecoder extends SchemaParser {
     anyOf       <- ifObject(optionalProperty("anyOf")(seq(schema))).map(_.flatten).map(_.getOrElse(Seq()))
     oneOf       <- ifObject(optionalProperty("oneOf")(seq(schema))).map(_.flatten).map(_.getOrElse(Seq()))
     notOp       <- ifObject(optionalProperty("not")(schema)).map(_.flatten)
+    ifThenElse  <- ifObject(ifThenElse).map(_.flatten)
     s = typedSchema.orElse(refSchema).getOrElse(boolSchema)
-  } yield SchemaWithApplicators(s, allOf, anyOf, oneOf, notOp)
+  } yield SchemaWithApplicators(s, allOf, anyOf, oneOf, notOp, ifThenElse)
+
+  val ifThenElse: Decoder[Option[IfThenElseSchema]] = for {
+    ifSchema   <- optionalProperty("if")(schema)
+    thenSchema <- optionalProperty("then")(schema).map(_.getOrElse(TrueSchema))
+    elseSchema <- optionalProperty("else")(schema).map(_.getOrElse(TrueSchema))
+  } yield ifSchema.map(IfThenElseSchema(_, thenSchema, elseSchema))
 
 }
 
