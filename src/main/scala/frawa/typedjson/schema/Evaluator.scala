@@ -51,15 +51,15 @@ object Evaluator {
     case RootSchema(_, schema, defs) =>
       RootSchemaEvaluator[R](Evaluator[R](schema), defs.view.mapValues(Evaluator[R](_)).toMap)
     case RefSchema(ref) => RefEvaluator[R](ref)
-    case SchemaWithApplicators(schema, allOf, anyOf, oneOf, notOp, ifThenElse) =>
+    case SchemaWithApplicators(schema, applicators) =>
       AllOfEvaluator(
         Seq(
           Evaluator(schema),
-          Helper.mapNonEmpty(allOf)(Evaluator(_)).map(AllOfEvaluator(_)).getOrElse(AlwaysEvaluator(true)),
-          Helper.mapNonEmpty(anyOf)(Evaluator(_)).map(AnyOfEvaluator(_)).getOrElse(AlwaysEvaluator(true)),
-          Helper.mapNonEmpty(oneOf)(Evaluator(_)).map(OneOfEvaluator(_)).getOrElse(AlwaysEvaluator(true)),
-          notOp.map(schema => NotEvaluator(Evaluator(schema))).getOrElse(AlwaysEvaluator(true)),
-          ifThenElse
+          applicators.allOf.map(_.map(Evaluator(_))).map(AllOfEvaluator(_)).getOrElse(AlwaysEvaluator(true)),
+          applicators.anyOf.map(_.map(Evaluator(_))).map(AnyOfEvaluator(_)).getOrElse(AlwaysEvaluator(true)),
+          applicators.oneOf.map(_.map(Evaluator(_))).map(OneOfEvaluator(_)).getOrElse(AlwaysEvaluator(true)),
+          applicators.notOp.map(schema => NotEvaluator(Evaluator(schema))).getOrElse(AlwaysEvaluator(true)),
+          applicators.ifThenElse
             .map(ifThenElse =>
               IfThenElseEvaluator(
                 Evaluator(ifThenElse.ifSchema),

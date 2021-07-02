@@ -21,13 +21,16 @@ case class RootSchema(id: String, schema: Schema, defs: Map[String, Schema]) ext
 case class RefSchema(ref: String)                                            extends Schema
 case class SchemaWithApplicators(
     schema: Schema,
-    allOf: Seq[Schema],
-    anyOf: Seq[Schema],
-    oneOf: Seq[Schema],
-    notOp: Option[Schema],
-    ifThenElse: Option[IfThenElseSchema]
+    applicators: Applicators
 ) extends Schema
 
+case class Applicators(
+    allOf: Option[Seq[Schema]],
+    anyOf: Option[Seq[Schema]],
+    oneOf: Option[Seq[Schema]],
+    notOp: Option[Schema],
+    ifThenElse: Option[IfThenElseSchema]
+)
 case class IfThenElseSchema(ifSchema: Schema, thenSchema: Schema, elseSchema: Schema)
 
 trait SchemaParser {
@@ -97,19 +100,18 @@ object SchemaValueDecoder extends SchemaParser {
     typedSchema <- ifObject(optionalProperty("type")(string)).flatMap(t => option(t.flatten.map(t => typedSchema(t))))
     refSchema   <- ifObject(refSchema).map(_.flatten)
     boolSchema  <- booleanSchema
-    allOf       <- ifObject(optionalProperty("allOf")(seq(schema))).map(_.flatten).map(_.getOrElse(Seq()))
-    anyOf       <- ifObject(optionalProperty("anyOf")(seq(schema))).map(_.flatten).map(_.getOrElse(Seq()))
-    oneOf       <- ifObject(optionalProperty("oneOf")(seq(schema))).map(_.flatten).map(_.getOrElse(Seq()))
-    notOp       <- ifObject(optionalProperty("not")(schema)).map(_.flatten)
-    ifThenElse  <- ifObject(ifThenElse).map(_.flatten)
-    s           = typedSchema.orElse(refSchema).getOrElse(boolSchema)
-    sWith       = SchemaWithApplicators(s, allOf, anyOf, oneOf, notOp, ifThenElse)
-    withoutWith = Seq(allOf, anyOf, oneOf, notOp.toSeq, ifThenElse.toSeq).flatMap(identity).isEmpty
-  } yield
-    if (withoutWith)
-      s
-    else
-      sWith
+    applicators <- ifObject(applicators).map(_.flatten)
+    s = typedSchema.orElse(refSchema).getOrElse(boolSchema)
+  } yield applicators.map(SchemaWithApplicators(s, _)).getOrElse(s)
+
+  val applicators: Decoder[Option[Applicators]] = for {
+    allOf      <- optionalProperty("allOf")(seq(schema))
+    anyOf      <- optionalProperty("anyOf")(seq(schema))
+    oneOf      <- optionalProperty("oneOf")(seq(schema))
+    notOp      <- optionalProperty("not")(schema)
+    ifThenElse <- ifThenElse
+    noneDefined = Seq(allOf, anyOf, oneOf, notOp, ifThenElse).forall(_.isEmpty)
+  } yield if (noneDefined) None else Some(Applicators(allOf, anyOf, oneOf, notOp, ifThenElse))
 
   val ifThenElse: Decoder[Option[IfThenElseSchema]] = for {
     ifSchema   <- optionalProperty("if")(schema)
