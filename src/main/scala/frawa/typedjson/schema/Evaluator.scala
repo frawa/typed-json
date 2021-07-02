@@ -47,11 +47,7 @@ object Evaluator {
     case NumberSchema       => NumberEvaluator[R]()
     case ArraySchema(items) => ArrayEvaluator[R](Evaluator[R](items))
     case ObjectSchema(properties) =>
-      ObjectEvaluator[R](
-        properties.view
-          .mapValues(Evaluator[R](_))
-          .toMap
-      )
+      ObjectEvaluator[R](properties)
     case RootSchema(_, schema, defs) =>
       RootSchemaEvaluator[R](Evaluator[R](schema), defs.view.mapValues(Evaluator[R](_)).toMap)
     case RefSchema(ref) => RefEvaluator[R](ref)
@@ -130,20 +126,21 @@ case class ArrayEvaluator[R](itemsEvaluator: Evaluator[R])(implicit factory: Eva
   }
 }
 
-case class ObjectEvaluator[R](propertiesEvaluators: Map[String, Evaluator[R]])(implicit factory: EvalResultFactory[R])
+case class ObjectEvaluator[R](schemaByProperty: Map[String, Schema])(implicit factory: EvalResultFactory[R])
     extends Evaluator[R] {
   override def eval(value: Value)(implicit dereference: Dereferencer): R = {
     value match {
       case ObjectValue(properties) => {
         val validations = properties.map { case (key1, value1) =>
           lazy val prefix = Pointer.empty / key1
-          propertiesEvaluators
+          schemaByProperty
             .get(key1)
+            .map(Evaluator(_))
             .map(_.eval(value1))
             .map(factory.prefix(prefix, _))
             .getOrElse(factory.create(UnexpectedProperty(key1)))
         }.toSeq
-        val missingKeys = propertiesEvaluators.keySet
+        val missingKeys = schemaByProperty.keySet
           .diff(properties.keySet)
           .toSeq
         if (missingKeys.isEmpty) {
