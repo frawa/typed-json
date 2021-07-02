@@ -188,7 +188,8 @@ class SuggestTest extends FunSuite {
     }
   }
 // TODO
-// - suggest existing property
+// - suggest array (next item?)
 // - suggest contant property value
+// - suggest existing property
 
 }
