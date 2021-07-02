@@ -2,6 +2,9 @@ package frawa.typedjson.schema
 
 import frawa.typedjson.parser.Value
 import shapeless.the
+import frawa.typedjson.parser.ObjectValue
+import frawa.typedjson.parser.NullValue
+import frawa.typedjson.parser.ArrayValue
 
 trait Suggestion {
   type Dereferencer = String => Option[Quickfix]
@@ -9,25 +12,40 @@ trait Suggestion {
 }
 
 object Suggestion {
-  def suggestions(schema: Schema)(value: Value, at: Pointer): SuggestionResult = {
+  def suggestions(schema: Schema)(value: Value): SuggestionResult = {
     implicit val dereference: String => Option[Evaluator[SuggestionResult]] = ref => None
-    Evaluator(schema)(SuggestionResultFactory(at)).eval(value)
+    Evaluator(schema)(SuggestionResultFactory).eval(value)
   }
 }
 
-case class SuggestionResult(suggestions: Seq[String])
+case class SuggestionResult(suggestions: Seq[Value])
 
-case class SuggestionResultFactory(val at: Pointer) extends EvalResultFactory[SuggestionResult] {
+object SuggestionResultFactory extends EvalResultFactory[SuggestionResult] {
   def init(): SuggestionResult = SuggestionResult(Seq())
 
   override def create(observation: Observation): SuggestionResult = {
     observation match {
-      case MissingProperty(key) => SuggestionResult(Seq(key))
+      case MissingProperty(key) => SuggestionResult(Seq(ObjectValue(Map(key -> NullValue))))
       case _                    => init()
     }
   }
 
-  def prefix(prefix: Pointer, result: SuggestionResult): SuggestionResult = result
+  private def objectAt(segments: Seq[Token], value: Value): Value = {
+    segments match {
+      case FieldToken(key) :: as => ObjectValue(Map(key -> objectAt(as, value)))
+      case ArrayIndexToken(index) :: as =>
+        ArrayValue(
+          if (index > 0) Seq.fill(index - 1)(NullValue) :+ value
+          else Seq(value)
+        )
+      case Nil => value
+    }
+  }
+
+  def prefix(prefix: Pointer, result: SuggestionResult): SuggestionResult = {
+    val values = result.suggestions.map(objectAt(prefix.segments, _))
+    SuggestionResult(values)
+  }
 
   def allOf(results: Seq[SuggestionResult]): SuggestionResult = {
     val suggestions = results.flatMap(_.suggestions)

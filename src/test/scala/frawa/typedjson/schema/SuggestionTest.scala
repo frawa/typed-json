@@ -3,6 +3,7 @@ package frawa.typedjson.schema
 import munit.FunSuite
 import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.parser.Parser
+import frawa.typedjson.parser.{ObjectValue, NullValue}
 
 class SuggestTest extends FunSuite {
   implicit val zioParser    = new ZioParser();
@@ -19,10 +20,10 @@ class SuggestTest extends FunSuite {
       .swap
   }
 
-  private def assertSuggest(text: String, at: Pointer)(schema: Schema)(f: SuggestionResult => Unit) = {
+  private def assertSuggest(text: String)(schema: Schema)(f: SuggestionResult => Unit) = {
     val withParsed = for {
       value <- Parser(text)
-      result = Suggestion.suggestions(schema)(value, at)
+      result = Suggestion.suggestions(schema)(value)
     } yield {
       f(result)
     }
@@ -45,17 +46,16 @@ class SuggestTest extends FunSuite {
         """{
           |"toto": 13
           |}
-          |""".stripMargin,
-        Pointer.empty
+          |""".stripMargin
       )(
         schema
       ) { result =>
-        assertEquals(result, SuggestionResult(Seq("titi")))
+        assertEquals(result, SuggestionResult(Seq(ObjectValue(Map("titi" -> NullValue)))))
       }
     }
   }
 
-  test("suggest at deep pointer") {
+  test("suggest deep") {
     testSchema("""{
                  |"$id": "testme",
                  |"type": "object", 
@@ -73,17 +73,16 @@ class SuggestTest extends FunSuite {
         """{
           |"foo": {}
           |}
-          |""".stripMargin,
-        Pointer.empty / "foo"
+          |""".stripMargin
       )(
         schema
       ) { result =>
-        assertEquals(result, SuggestionResult(Seq("bar")))
+        assertEquals(result, SuggestionResult(Seq(ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NullValue)))))))
       }
     }
   }
 
-  test("suggest at another pointer".ignore) {
+  test("suggest more") {
     testSchema("""{
                  |"$id": "testme",
                  |"type": "object", 
@@ -107,24 +106,30 @@ class SuggestTest extends FunSuite {
         """{
           |"foo": {}
           |}
-          |""".stripMargin,
-        Pointer.empty / "foo"
+          |""".stripMargin
       )(
         schema
       ) { result =>
-        assertEquals(result, SuggestionResult(Seq("bar")))
+        assertEquals(
+          result,
+          SuggestionResult(
+            Seq(
+              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NullValue)))),
+              ObjectValue(Map("gnu" -> NullValue))
+            )
+          )
+        )
       }
       assertSuggest(
         """{
           |"foo": { "bar": 13 },
           |"gnu": {}
           |}
-          |""".stripMargin,
-        Pointer.empty / "gnu"
+          |""".stripMargin
       )(
         schema
       ) { result =>
-        assertEquals(result, SuggestionResult(Seq("toto")))
+        assertEquals(result, SuggestionResult(Seq(ObjectValue(Map("gnu" -> ObjectValue(Map("toto" -> NullValue)))))))
       }
     }
   }
