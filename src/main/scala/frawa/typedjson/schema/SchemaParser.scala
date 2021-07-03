@@ -15,6 +15,7 @@ case object FalseSchema                                                      ext
 case object BooleanSchema                                                    extends Schema
 case object StringSchema                                                     extends Schema
 case object NumberSchema                                                     extends Schema
+case object IntegerSchema                                                    extends Schema
 case class ArraySchema(items: Schema)                                        extends Schema
 case class ObjectSchema(properties: Map[String, Schema])                     extends Schema
 case class RootSchema(id: String, schema: Schema, defs: Map[String, Schema]) extends Schema
@@ -45,6 +46,10 @@ object SchemaParser {
     schemaParser.parseSchema(json)
 }
 
+// TODO
+// - type array | string
+// - enum
+// - const (as enum of 1?)
 object SchemaValueDecoder extends SchemaParser {
   import Decoding._
 
@@ -89,6 +94,7 @@ object SchemaValueDecoder extends SchemaParser {
     case "boolean" => success(BooleanSchema)
     case "string"  => success(StringSchema)
     case "number"  => success(NumberSchema)
+    case "integer" => success(IntegerSchema)
     case "array"   => property("items")(schema).map(ArraySchema(_))
     case "object"  => property("properties")(map(schema)).map(ObjectSchema(_))
     case t @ _     => failure(s"unknown type $t")
