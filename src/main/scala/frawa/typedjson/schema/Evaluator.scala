@@ -16,6 +16,7 @@ case class MissingProperties(properties: Map[String, Schema]) extends Observatio
 case class MissingRef(ref: String)                            extends Observation
 case class NotOneOf(valid: Int)                               extends Observation // ??? only in Validator?
 case class NotInvalid()                                       extends Observation // ??? only in Validator?
+case class NotInEnum(values: Seq[Value])                      extends Observation
 
 trait EvalResultFactory[R] {
   def init(): R
@@ -69,6 +70,13 @@ object Evaluator {
               )
             )
             .getOrElse(AlwaysEvaluator(true))
+        )
+      )
+    case SchemaWithValidators(schema, validators) =>
+      AllOfEvaluator(
+        Seq(
+          Evaluator(schema),
+          validators.`enum`.map(EnumEvaluator(_)).getOrElse(AlwaysEvaluator(true))
         )
       )
   }
@@ -219,6 +227,18 @@ case class IfThenElseEvaluator[R](ifE: Evaluator[R], thenE: Evaluator[R], elseE:
 ) extends Evaluator[R] {
   override def eval(value: Value)(implicit dereference: Dereferencer): R = {
     factory.ifThenElse(ifE.eval(value), thenE.eval(value), elseE.eval(value))
+  }
+}
+
+case class EnumEvaluator[R](values: Seq[Value])(implicit
+    factory: EvalResultFactory[R]
+) extends Evaluator[R] {
+  override def eval(value: Value)(implicit dereference: Dereferencer): R = {
+    if (values.contains(value)) {
+      factory.init()
+    } else {
+      factory.create(NotInEnum(values))
+    }
   }
 }
 

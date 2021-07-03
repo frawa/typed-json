@@ -3,6 +3,7 @@ package frawa.typedjson.schema
 import munit._
 import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.parser.Parser
+import frawa.typedjson.parser.{StringValue}
 import ValidationResult.{Error}
 
 // see https://json-schema.org/draft/2020-12/json-schema-core.html
@@ -431,6 +432,35 @@ class ValidatorTest extends FunSuite {
           Seq(
             WithPointer(TypeMismatch("null")),
             WithPointer(TypeMismatch("string"))
+          )
+        )
+      }
+    }
+  }
+
+  test("enum") {
+    testSchema("""{
+                 |"type": "string",
+                 |"enum": ["foo", "bar"]
+                 |}""".stripMargin) { schema =>
+      assertValidate(""""foo"""")(schema) { result =>
+        assertEquals(result.valid, true)
+      }
+      assertValidate(""""bar"""")(schema) { result =>
+        assertEquals(result.valid, true)
+      }
+      assertValidate(""""hello"""")(schema) { result =>
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(
+              NotInEnum(
+                Seq(
+                  StringValue("foo"),
+                  StringValue("bar")
+                )
+              )
+            )
           )
         )
       }

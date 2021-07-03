@@ -25,6 +25,10 @@ case class SchemaWithApplicators(
     schema: Schema,
     applicators: Applicators
 ) extends Schema
+case class SchemaWithValidators(
+    schema: Schema,
+    validators: Validators
+) extends Schema
 
 case class Applicators(
     allOf: Option[Seq[Schema]],
@@ -34,6 +38,10 @@ case class Applicators(
     ifThenElse: Option[IfThenElseSchema]
 )
 case class IfThenElseSchema(ifSchema: Schema, thenSchema: Schema, elseSchema: Schema)
+
+case class Validators(
+    `enum`: Option[Seq[Value]]
+)
 
 trait SchemaParser {
   def parseRoot(json: String)(implicit parser: Parser): Either[String, RootSchema]
@@ -48,9 +56,9 @@ object SchemaParser {
 }
 
 // TODO
-// - type array | string
 // - enum
 // - const (as enum of 1?)
+
 object SchemaValueDecoder extends SchemaParser {
   import Decoding._
 
@@ -116,12 +124,14 @@ object SchemaValueDecoder extends SchemaParser {
     )
 
   val schema: Decoder[Schema] = for {
+    boolSchema  <- booleanSchema
     typeSchema  <- ifObject(typeSchema).map(_.flatten)
     refSchema   <- ifObject(refSchema).map(_.flatten)
-    boolSchema  <- booleanSchema
     applicators <- ifObject(applicators).map(_.flatten)
-    s = typeSchema.orElse(refSchema).getOrElse(boolSchema)
-  } yield applicators.map(SchemaWithApplicators(s, _)).getOrElse(s)
+    validators  <- ifObject(validators).map(_.flatten)
+    schema     = typeSchema.orElse(refSchema).getOrElse(boolSchema)
+    schemaWith = validators.map(SchemaWithValidators(schema, _)).getOrElse(schema)
+  } yield applicators.map(SchemaWithApplicators(schemaWith, _)).getOrElse(schemaWith)
 
   val applicators: Decoder[Option[Applicators]] = for {
     allOf      <- optionalProperty("allOf")(seq(schema))
@@ -138,6 +148,11 @@ object SchemaValueDecoder extends SchemaParser {
     elseSchema <- optionalProperty("else")(schema).map(_.getOrElse(TrueSchema))
   } yield ifSchema.map(IfThenElseSchema(_, thenSchema, elseSchema))
 
+  val validators: Decoder[Option[Validators]] = for {
+    enum1 <- optionalProperty("enum")(seq(value))
+    noneDefined = Seq(enum1).forall(_.isEmpty)
+  } yield if (noneDefined) None else Some(Validators(enum1))
+
 }
 
 object Decoding {
@@ -149,6 +164,8 @@ object Decoding {
 
   def success[T](v: T): Decoder[T]      = value => Right(v)
   def failure[T](e: String): Decoder[T] = value => Left(e)
+
+  def value: Decoder[Value] = value => Right(value)
 
   def string: Decoder[String] = value =>
     value match {
