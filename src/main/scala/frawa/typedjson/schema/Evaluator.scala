@@ -39,13 +39,14 @@ trait Evaluator[R] {
 
 object Evaluator {
   def apply[R](schema: Schema)(implicit factory: EvalResultFactory[R]): Evaluator[R] = schema match {
-    case NullSchema         => NullEvaluator()
-    case TrueSchema         => AlwaysEvaluator[R](true)
-    case FalseSchema        => AlwaysEvaluator[R](false)
-    case BooleanSchema      => BooleanEvaluator[R]()
-    case StringSchema       => StringEvaluator[R]()
-    case NumberSchema       => NumberEvaluator[R]()
-    case ArraySchema(items) => ArrayEvaluator[R](Evaluator[R](items))
+    case NullSchema                        => NullEvaluator()
+    case TrueSchema                        => AlwaysEvaluator[R](true)
+    case FalseSchema                       => AlwaysEvaluator[R](false)
+    case BooleanSchema                     => BooleanEvaluator[R]()
+    case StringSchema                      => StringEvaluator[R]()
+    case NumberSchema                      => NumberEvaluator[R]()
+    case UnionSchema(schemas: Seq[Schema]) => OneOfEvaluator(schemas.map(Evaluator(_)))
+    case ArraySchema(items)                => ArrayEvaluator[R](Evaluator[R](items))
     case ObjectSchema(properties) =>
       ObjectEvaluator[R](properties)
     case RootSchema(_, schema, defs) =>

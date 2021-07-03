@@ -417,6 +417,23 @@ class ValidatorTest extends FunSuite {
     }
   }
 
-  // TODO
-  // - if/then/else
+  test("null or string") {
+    testSchema("""{"type": ["null","string"]}""") { schema =>
+      assertValidate("""null""")(schema) { result =>
+        assertEquals(result.valid, true)
+      }
+      assertValidate(""""hello"""")(schema) { result =>
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""13""")(schema) { result =>
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(TypeMismatch("null")),
+            WithPointer(TypeMismatch("string"))
+          )
+        )
+      }
+    }
+  }
 }

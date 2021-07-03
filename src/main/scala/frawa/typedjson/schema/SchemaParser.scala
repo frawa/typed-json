@@ -16,6 +16,7 @@ case object BooleanSchema                                                    ext
 case object StringSchema                                                     extends Schema
 case object NumberSchema                                                     extends Schema
 case object IntegerSchema                                                    extends Schema
+case class UnionSchema(schemas: Seq[Schema])                                 extends Schema
 case class ArraySchema(items: Schema)                                        extends Schema
 case class ObjectSchema(properties: Map[String, Schema])                     extends Schema
 case class RootSchema(id: String, schema: Schema, defs: Map[String, Schema]) extends Schema
@@ -102,12 +103,24 @@ object SchemaValueDecoder extends SchemaParser {
 
   val refSchema: Decoder[Option[Schema]] = optionalProperty("$ref")(string).map(s => s.map(RefSchema(_)))
 
+  val stringOrStrings: Decoder[Seq[String]] = orElse(string.map(Seq(_)))(seq(string))
+
+  val typeSchema: Decoder[Option[Schema]] = optionalProperty("type")(stringOrStrings)
+    .flatMap(ts =>
+      option(
+        ts.map { ts =>
+          sequence(ts.map(t => typedSchema(t)))
+            .map(schemas => if (schemas.length == 1) schemas(0) else UnionSchema(schemas))
+        }
+      )
+    )
+
   val schema: Decoder[Schema] = for {
-    typedSchema <- ifObject(optionalProperty("type")(string)).flatMap(t => option(t.flatten.map(t => typedSchema(t))))
+    typeSchema  <- ifObject(typeSchema).map(_.flatten)
     refSchema   <- ifObject(refSchema).map(_.flatten)
     boolSchema  <- booleanSchema
     applicators <- ifObject(applicators).map(_.flatten)
-    s = typedSchema.orElse(refSchema).getOrElse(boolSchema)
+    s = typeSchema.orElse(refSchema).getOrElse(boolSchema)
   } yield applicators.map(SchemaWithApplicators(s, _)).getOrElse(s)
 
   val applicators: Decoder[Option[Applicators]] = for {
@@ -208,6 +221,9 @@ object Decoding {
       .orElse(d2.decode(value))
   }
 
+  def sequence[T](ds: Seq[Decoder[T]]): Decoder[Seq[T]] = {
+    ds.foldLeft(success(Seq.empty[T]))((acc, v) => acc.flatMap(acc => v.map(acc :+ _)))
+  }
 }
 
 object Helper2 {
