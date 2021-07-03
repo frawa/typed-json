@@ -233,7 +233,7 @@ class SuggestTest extends FunSuite {
 
 // TODO
 // - suggest array (next item?)
-// - suggest contant property value
 // - suggest existing property
+// - suggest all enum values
 
 }
