@@ -41,8 +41,8 @@ object SuggestionResultFactory extends EvalResultFactory[SuggestionResult] {
           case "boolean" => SuggestionResult(Seq(DefaultValues(BooleanSchema)))
           case _         => init()
         }
-      // case NotInEnum(values) => SuggestionResult(values)
-      case _ => init()
+      case NotInEnum(values) => SuggestionResult(values)
+      case _                 => init()
     }
   }
 

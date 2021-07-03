@@ -208,6 +208,31 @@ class SuggestTest extends FunSuite {
     }
   }
 
+  test("enumr") {
+    testSchema("""{
+                 |"$id": "testme",
+                 |"type": "number",
+                 |"enum": [13, 14]                
+                 |}""".stripMargin) { schema =>
+      assertSuggest("""true""")(schema) { result =>
+        assertEquals(
+          result,
+          // TODO do not suggest default value
+          // SuggestionResult(Seq(NumberValue(0), NumberValue(13), NumberValue(14)))
+          SuggestionResult(Seq(NumberValue(0), NumberValue(13), NumberValue(14)))
+        )
+      }
+      assertSuggest("""13""")(schema) { result =>
+        assertEquals(
+          result,
+          // TODO suggest other enum values
+          // SuggestionResult(Seq(NumberValue(14)))
+          SuggestionResult(Seq())
+        )
+      }
+    }
+  }
+
 // TODO
 // - suggest array (next item?)
 // - suggest contant property value

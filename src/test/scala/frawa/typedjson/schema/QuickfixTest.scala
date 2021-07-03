@@ -133,4 +133,22 @@ class QuickfixTest extends FunSuite {
     }
   }
 
+  test("enum") {
+    testSchema("""{
+                 |"$id": "testme",
+                 |"type": "string",
+                 |"enum": ["foo", "bar"]
+                 |}""".stripMargin) { schema =>
+      assertQuickfix(""""foo"""")(schema) { result =>
+        assertEquals(result, QuickfixResultEmpty)
+      }
+      assertQuickfix(""""bar"""")(schema) { result =>
+        assertEquals(result, QuickfixResultEmpty)
+      }
+      assertQuickfix("""13""")(schema) { result =>
+        assertEquals(result, QuickfixResultEmpty)
+      }
+    }
+  }
+
 }
