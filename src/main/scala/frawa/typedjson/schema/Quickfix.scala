@@ -32,9 +32,9 @@ case object QuickfixResultEmpty                          extends QuickfixResult
 case class QuickfixResultFixes(fixes: Seq[QuickfixItem]) extends QuickfixResult
 
 object QuickfixResultFactory extends EvalResultFactory[QuickfixResult] {
-  def init(): QuickfixResult = QuickfixResultEmpty
+  def valid(schema: Schema): QuickfixResult = QuickfixResultEmpty
 
-  override def create(observation: Observation): QuickfixResult = {
+  override def invalid(observation: Observation): QuickfixResult = {
     observation match {
       case MissingProperties(properties) =>
         QuickfixResultFixes(Seq(AddProperties(Pointer.empty, properties.keySet.toSeq)))
@@ -83,7 +83,7 @@ object QuickfixResultFactory extends EvalResultFactory[QuickfixResult] {
   }
 
   def oneOf(results: Seq[QuickfixResult]): QuickfixResult = anyOf(results)
-  def not(result: QuickfixResult): QuickfixResult         = init()
+  def not(result: QuickfixResult): QuickfixResult         = QuickfixResultEmpty
   def ifThenElse(
       ifResult: QuickfixResult,
       thenResult: QuickfixResult,

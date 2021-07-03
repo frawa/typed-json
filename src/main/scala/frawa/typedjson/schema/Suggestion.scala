@@ -24,9 +24,9 @@ object Suggestion {
 case class SuggestionResult(suggestions: Seq[Value])
 
 object SuggestionResultFactory extends EvalResultFactory[SuggestionResult] {
-  def init(): SuggestionResult = SuggestionResult(Seq())
+  def valid(schema: Schema): SuggestionResult = SuggestionResult(Seq(DefaultValues(schema)))
 
-  override def create(observation: Observation): SuggestionResult = {
+  override def invalid(observation: Observation): SuggestionResult = {
     observation match {
       case MissingProperties(properties) =>
         SuggestionResult(Seq(ObjectValue(properties.map { case (key, schema) =>
@@ -39,10 +39,10 @@ object SuggestionResultFactory extends EvalResultFactory[SuggestionResult] {
           case "number"  => SuggestionResult(Seq(DefaultValues(NumberSchema)))
           case "string"  => SuggestionResult(Seq(DefaultValues(StringSchema)))
           case "boolean" => SuggestionResult(Seq(DefaultValues(BooleanSchema)))
-          case _         => init()
+          case _         => SuggestionResult(Seq())
         }
       case NotInEnum(values) => SuggestionResult(values)
-      case _                 => init()
+      case _                 => SuggestionResult(Seq())
     }
   }
 
@@ -80,7 +80,7 @@ object SuggestionResultFactory extends EvalResultFactory[SuggestionResult] {
 
   def anyOf(results: Seq[SuggestionResult]): SuggestionResult = allOf(results)
   def oneOf(results: Seq[SuggestionResult]): SuggestionResult = allOf(results)
-  def not(result: SuggestionResult): SuggestionResult         = init()
+  def not(result: SuggestionResult): SuggestionResult         = SuggestionResult(Seq())
   def ifThenElse(
       ifResult: SuggestionResult,
       thenResult: SuggestionResult,
@@ -92,16 +92,17 @@ object SuggestionResultFactory extends EvalResultFactory[SuggestionResult] {
 object DefaultValues {
   // TODO use evaluators instead
   def apply(schema: Schema): Value = schema match {
-    case NullSchema                       => NullValue
-    case TrueSchema                       => BoolValue(true)
-    case FalseSchema                      => BoolValue(false)
-    case BooleanSchema                    => BoolValue(true)
-    case StringSchema                     => StringValue("")
-    case NumberSchema                     => NumberValue(0)
-    case ArraySchema(items)               => ArrayValue(Seq())
-    case ObjectSchema(properties)         => ObjectValue(Map())
-    case RootSchema(_, schema, _)         => apply(schema)
-    case RefSchema(ref)                   => NullValue // TODO pass dereferenced schema
-    case SchemaWithApplicators(schema, _) => apply(schema)
+    case NullSchema                                      => NullValue
+    case TrueSchema                                      => BoolValue(true)
+    case FalseSchema                                     => BoolValue(false)
+    case BooleanSchema                                   => BoolValue(true)
+    case StringSchema                                    => StringValue("")
+    case NumberSchema                                    => NumberValue(0)
+    case ArraySchema(items)                              => ArrayValue(Seq())
+    case ObjectSchema(properties)                        => ObjectValue(Map())
+    case RootSchema(_, schema, _)                        => apply(schema)
+    case RefSchema(ref)                                  => NullValue // TODO pass dereferenced schema
+    case SchemaWithApplicators(schema, _)                => apply(schema)
+    case SchemaWithValidators(schema, Validators(enum1)) => enum1.flatMap(_.headOption).getOrElse(apply(schema))
   }
 }

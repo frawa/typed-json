@@ -50,7 +50,15 @@ class SuggestTest extends FunSuite {
       )(
         schema
       ) { result =>
-        assertEquals(result, SuggestionResult(Seq(ObjectValue(Map("titi" -> StringValue(""))))))
+        assertEquals(
+          result,
+          SuggestionResult(
+            Seq(
+              ObjectValue(Map("toto" -> NumberValue(0))),
+              ObjectValue(Map("titi" -> StringValue("")))
+            )
+          )
+        )
       }
     }
   }
@@ -134,7 +142,12 @@ class SuggestTest extends FunSuite {
       ) { result =>
         assertEquals(
           result,
-          SuggestionResult(Seq(ObjectValue(Map("gnu" -> ObjectValue(Map("toto" -> StringValue("")))))))
+          SuggestionResult(
+            Seq(
+              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0))))),
+              ObjectValue(Map("gnu" -> ObjectValue(Map("toto" -> StringValue("")))))
+            )
+          )
         )
       }
     }
@@ -182,7 +195,12 @@ class SuggestTest extends FunSuite {
       ) { result =>
         assertEquals(
           result,
-          SuggestionResult(Seq(ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> NumberValue(0)))))))
+          SuggestionResult(
+            Seq(
+              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0))))),
+              ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> NumberValue(0)))))
+            )
+          )
         )
       }
     }
@@ -196,7 +214,7 @@ class SuggestTest extends FunSuite {
       assertSuggest("""13""")(schema) { result =>
         assertEquals(
           result,
-          SuggestionResult(Seq(NullValue))
+          SuggestionResult(Seq(NullValue, NumberValue(0)))
         )
       }
       assertSuggest("""true""")(schema) { result =>
@@ -208,7 +226,7 @@ class SuggestTest extends FunSuite {
     }
   }
 
-  test("enumr") {
+  test("enum") {
     testSchema("""{
                  |"$id": "testme",
                  |"type": "number",
@@ -223,9 +241,7 @@ class SuggestTest extends FunSuite {
       assertSuggest("""13""")(schema) { result =>
         assertEquals(
           result,
-          // TODO suggest other enum values
-          // SuggestionResult(Seq(NumberValue(13), NumberValue(14)))
-          SuggestionResult(Seq())
+          SuggestionResult(Seq(NumberValue(13), NumberValue(14)))
         )
       }
     }
@@ -233,7 +249,5 @@ class SuggestTest extends FunSuite {
 
 // TODO
 // - suggest array (next item?)
-// - suggest existing property
-// - suggest all enum values
 
 }

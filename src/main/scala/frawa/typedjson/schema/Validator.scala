@@ -29,9 +29,9 @@ case class ValidationInvalid(errors: Seq[ValidationResult.Error]) extends Valida
 }
 
 object ValidationResultFactory extends EvalResultFactory[ValidationResult] {
-  override def init(): ValidationResult = ValidationValid
+  override def valid(schema: Schema): ValidationResult = ValidationValid
 
-  override def create(observation: Observation): ValidationResult = ValidationInvalid(
+  override def invalid(observation: Observation): ValidationResult = ValidationInvalid(
     Seq(WithPointer(observation))
   )
 
