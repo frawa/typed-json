@@ -118,4 +118,19 @@ class QuickfixTest extends FunSuite {
       }
     }
   }
+
+  test("null or bool") {
+    testSchema("""{
+                 |"$id": "testme",
+                 |"type": ["null","boolean"]
+                 |}""".stripMargin) { schema =>
+      assertQuickfix("""13""")(schema) { result =>
+        assertEquals(
+          result,
+          QuickfixResultEmpty
+        )
+      }
+    }
+  }
+
 }

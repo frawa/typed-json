@@ -187,6 +187,27 @@ class SuggestTest extends FunSuite {
       }
     }
   }
+
+  test("null or number") {
+    testSchema("""{
+                 |"$id": "testme",
+                 |"type": ["null","number"]
+                 |}""".stripMargin) { schema =>
+      assertSuggest("""13""")(schema) { result =>
+        assertEquals(
+          result,
+          SuggestionResult(Seq(NullValue))
+        )
+      }
+      assertSuggest("""true""")(schema) { result =>
+        assertEquals(
+          result,
+          SuggestionResult(Seq(NullValue, NumberValue(0)))
+        )
+      }
+    }
+  }
+
 // TODO
 // - suggest array (next item?)
 // - suggest contant property value
