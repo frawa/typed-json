@@ -75,8 +75,7 @@ object Evaluator {
     case SchemaWithValidators(schema, validators) =>
       AllOfEvaluator(
         Seq(
-          Evaluator(schema),
-          validators.`enum`.map(EnumEvaluator(_)).getOrElse(AlwaysEvaluator(true))
+          validators.`enum`.map(EnumEvaluator(Evaluator(schema), _)).getOrElse(AlwaysEvaluator(true))
         )
       )
   }
@@ -230,11 +229,11 @@ case class IfThenElseEvaluator[R](ifE: Evaluator[R], thenE: Evaluator[R], elseE:
   }
 }
 
-case class EnumEvaluator[R](values: Seq[Value])(implicit
+case class EnumEvaluator[R](evaluator: Evaluator[R], values: Seq[Value])(implicit
     factory: EvalResultFactory[R]
 ) extends Evaluator[R] {
   override def eval(value: Value)(implicit dereference: Dereferencer): R = {
-    if (values.contains(value)) {
+    if (evaluator.eval(value) == factory.init() && values.contains(value)) {
       factory.init()
     } else {
       factory.create(NotInEnum(values))

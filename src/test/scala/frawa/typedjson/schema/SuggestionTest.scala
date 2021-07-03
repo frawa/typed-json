@@ -217,16 +217,14 @@ class SuggestTest extends FunSuite {
       assertSuggest("""true""")(schema) { result =>
         assertEquals(
           result,
-          // TODO do not suggest default value
-          // SuggestionResult(Seq(NumberValue(0), NumberValue(13), NumberValue(14)))
-          SuggestionResult(Seq(NumberValue(0), NumberValue(13), NumberValue(14)))
+          SuggestionResult(Seq(NumberValue(13), NumberValue(14)))
         )
       }
       assertSuggest("""13""")(schema) { result =>
         assertEquals(
           result,
           // TODO suggest other enum values
-          // SuggestionResult(Seq(NumberValue(14)))
+          // SuggestionResult(Seq(NumberValue(13), NumberValue(14)))
           SuggestionResult(Seq())
         )
       }
