@@ -9,7 +9,7 @@ import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue
 
 trait Observation
-case class TypeMismatch(expected: String)                     extends Observation
+case class TypeMismatch(expected: Schema)                     extends Observation
 case class FalseSchemaReason()                                extends Observation
 case class UnexpectedProperty(key: String)                    extends Observation
 case class MissingProperties(properties: Map[String, Schema]) extends Observation
@@ -87,7 +87,7 @@ object Evaluator {
 case class NullEvaluator[R]()(implicit schema: Schema, factory: EvalResultFactory[R]) extends Evaluator[R] {
   override def eval(value: Value)(implicit dereference: Dereferencer): R = value match {
     case NullValue => factory.valid(schema)
-    case _         => factory.invalid(TypeMismatch("null"))
+    case _         => factory.invalid(TypeMismatch(schema))
   }
 }
 
@@ -103,21 +103,21 @@ case class AlwaysEvaluator[R](valid: Boolean)(implicit schema: Schema, factory: 
 case class BooleanEvaluator[R]()(implicit schema: Schema, factory: EvalResultFactory[R]) extends Evaluator[R] {
   override def eval(value: Value)(implicit dereference: Dereferencer): R = value match {
     case BoolValue(value) => if (value) factory.valid(schema) else factory.invalid(FalseSchemaReason())
-    case _                => factory.invalid(TypeMismatch("boolean"))
+    case _                => factory.invalid(TypeMismatch(schema))
   }
 }
 
 case class StringEvaluator[R]()(implicit schema: Schema, factory: EvalResultFactory[R]) extends Evaluator[R] {
   override def eval(value: Value)(implicit dereference: Dereferencer): R = value match {
     case StringValue(_) => factory.valid(schema)
-    case _              => factory.invalid(TypeMismatch("string"))
+    case _              => factory.invalid(TypeMismatch(schema))
   }
 }
 
 case class NumberEvaluator[R]()(implicit schema: Schema, factory: EvalResultFactory[R]) extends Evaluator[R] {
   override def eval(value: Value)(implicit dereference: Dereferencer): R = value match {
     case NumberValue(_) => factory.valid(schema)
-    case _              => factory.invalid(TypeMismatch("number"))
+    case _              => factory.invalid(TypeMismatch(schema))
   }
 }
 
@@ -133,7 +133,7 @@ case class ArrayEvaluator[R](itemsEvaluator: Evaluator[R])(implicit schema: Sche
               factory.prefix(prefix, itemsEvaluator.eval(item))
             }
         )
-      case _ => factory.invalid(TypeMismatch("array"))
+      case _ => factory.invalid(TypeMismatch(schema))
     }
   }
 }
@@ -163,7 +163,7 @@ case class ObjectEvaluator[R](schemaByProperty: Map[String, Schema])(implicit
           factory.allOf(validations :+ factory.invalid(MissingProperties(missing)))
         }
       }
-      case _ => factory.invalid(TypeMismatch("object"))
+      case _ => factory.invalid(TypeMismatch(schema))
     }
   }
 }

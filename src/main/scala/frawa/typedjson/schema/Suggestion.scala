@@ -32,17 +32,9 @@ object SuggestionResultFactory extends EvalResultFactory[SuggestionResult] {
         SuggestionResult(Seq(ObjectValue(properties.map { case (key, schema) =>
           key -> DefaultValues(schema)
         }.toMap)))
-      // TODO report errored type as case class?
-      case TypeMismatch(t) =>
-        t match {
-          case "null"    => SuggestionResult(Seq(DefaultValues(NullSchema)))
-          case "number"  => SuggestionResult(Seq(DefaultValues(NumberSchema)))
-          case "string"  => SuggestionResult(Seq(DefaultValues(StringSchema)))
-          case "boolean" => SuggestionResult(Seq(DefaultValues(BooleanSchema)))
-          case _         => SuggestionResult(Seq())
-        }
-      case NotInEnum(values) => SuggestionResult(values)
-      case _                 => SuggestionResult(Seq())
+      case TypeMismatch(schema) => SuggestionResult(Seq(DefaultValues(schema)))
+      case NotInEnum(values)    => SuggestionResult(values)
+      case _                    => SuggestionResult(Seq())
     }
   }
 
@@ -90,7 +82,6 @@ object SuggestionResultFactory extends EvalResultFactory[SuggestionResult] {
 }
 
 object DefaultValues {
-  // TODO use evaluators instead
   def apply(schema: Schema): Value = schema match {
     case NullSchema                                      => NullValue
     case TrueSchema                                      => BoolValue(true)

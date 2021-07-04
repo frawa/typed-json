@@ -52,7 +52,7 @@ class ValidatorTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate("""13""")(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("null"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch(NullSchema))))
       }
     }
   }
@@ -63,7 +63,7 @@ class ValidatorTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate("""13""")(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("boolean"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch(BooleanSchema))))
       }
     }
   }
@@ -82,7 +82,7 @@ class ValidatorTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate("""13""")(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("string"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch(StringSchema))))
       }
     }
   }
@@ -93,7 +93,7 @@ class ValidatorTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate("""null""")(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("number"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch(NumberSchema))))
       }
     }
   }
@@ -104,7 +104,7 @@ class ValidatorTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate("""null""")(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("array"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch(ArraySchema(NumberSchema)))))
       }
     }
   }
@@ -112,7 +112,7 @@ class ValidatorTest extends FunSuite {
   test("array item") {
     testSchema("""{"type": "array", "items": { "type": "number"} }""") { schema =>
       assertValidate("""[true]""")(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("number"), Pointer(0))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch(NumberSchema), Pointer(0))))
       }
     }
   }
@@ -134,7 +134,21 @@ class ValidatorTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate("""null""")(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("object"))))
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(
+              TypeMismatch(
+                ObjectSchema(
+                  Map(
+                    "toto" -> NumberSchema,
+                    "titi" -> StringSchema
+                  )
+                )
+              )
+            )
+          )
+        )
       }
     }
   }
@@ -153,7 +167,7 @@ class ValidatorTest extends FunSuite {
                        |"titi": true
                        |}
                        |""".stripMargin)(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / "titi")))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch(StringSchema), Pointer.empty / "titi")))
       }
     }
   }
@@ -280,7 +294,7 @@ class ValidatorTest extends FunSuite {
                  |""".stripMargin) { schema =>
       assertValidate("""1313""".stripMargin)(schema) { result =>
         assertEquals(result.valid, false)
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("string"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch(StringSchema))))
       }
     }
   }
@@ -312,8 +326,8 @@ class ValidatorTest extends FunSuite {
         assertEquals(
           result.errors,
           Seq(
-            WithPointer(TypeMismatch("number")),
-            WithPointer(TypeMismatch("string"))
+            WithPointer(TypeMismatch(NumberSchema)),
+            WithPointer(TypeMismatch(StringSchema))
           )
         )
       }
@@ -347,8 +361,8 @@ class ValidatorTest extends FunSuite {
         assertEquals(
           result.errors,
           Seq(
-            WithPointer(TypeMismatch("string")),
-            WithPointer(TypeMismatch("boolean"))
+            WithPointer(TypeMismatch(StringSchema)),
+            WithPointer(TypeMismatch(BooleanSchema))
           )
         )
       }
@@ -413,7 +427,7 @@ class ValidatorTest extends FunSuite {
       }
       assertValidate("""null""".stripMargin)(schema) { result =>
         assertEquals(result.valid, false)
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("string"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch(StringSchema))))
       }
     }
   }
@@ -430,8 +444,8 @@ class ValidatorTest extends FunSuite {
         assertEquals(
           result.errors,
           Seq(
-            WithPointer(TypeMismatch("null")),
-            WithPointer(TypeMismatch("string"))
+            WithPointer(TypeMismatch(NullSchema)),
+            WithPointer(TypeMismatch(StringSchema))
           )
         )
       }
