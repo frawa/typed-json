@@ -269,7 +269,7 @@ class SuggestTest extends FunSuite {
     }
   }
 
-  test("discriminator".ignore) {
+  test("discriminator") {
     testSchema("""{
                  |"$id": "testme",
                  |"oneOf": [{
@@ -303,13 +303,89 @@ class SuggestTest extends FunSuite {
       assertSuggest("""{}""".stripMargin)(schema) { result =>
         assertEquals(
           result,
-          SuggestionResult(Seq(NumberValue(13), NumberValue(14)))
+          SuggestionResult(
+            Seq(
+              ObjectValue(
+                properties = Map(
+                  "kind" -> StringValue(
+                    value = "first"
+                  )
+                )
+              ),
+              ObjectValue(
+                properties = Map(
+                  "gnu" -> NumberValue(
+                    value = 0
+                  )
+                )
+              ),
+              ObjectValue(
+                properties = Map(
+                  "kind" -> StringValue(
+                    value = "second"
+                  )
+                )
+              ),
+              ObjectValue(
+                properties = Map(
+                  "foo" -> BoolValue(
+                    value = true
+                  )
+                )
+              )
+            )
+          )
         )
       }
       assertSuggest("""{"kind":"first"}""")(schema) { result =>
         assertEquals(
           result,
-          SuggestionResult(Seq(NumberValue(13), NumberValue(14)))
+          SuggestionResult(
+            Seq(
+              ObjectValue(
+                properties = Map(
+                  "kind" -> StringValue(
+                    value = "first"
+                  )
+                )
+              ),
+              ObjectValue(
+                properties = Map(
+                  "kind" -> StringValue(
+                    value = "first"
+                  )
+                )
+              ),
+              ObjectValue(
+                properties = Map(
+                  "gnu" -> NumberValue(
+                    value = 0
+                  )
+                )
+              ),
+              ObjectValue(
+                properties = Map(
+                  "kind" -> StringValue(
+                    value = "second"
+                  )
+                )
+              ),
+              ObjectValue(
+                properties = Map(
+                  "kind" -> StringValue(
+                    value = "second"
+                  )
+                )
+              ),
+              ObjectValue(
+                properties = Map(
+                  "foo" -> BoolValue(
+                    value = true
+                  )
+                )
+              )
+            )
+          )
         )
       }
     }

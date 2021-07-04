@@ -24,15 +24,16 @@ object Suggestion {
 case class SuggestionResult(suggestions: Seq[Value])
 
 object SuggestionResultFactory extends EvalResultFactory[SuggestionResult] {
-  def valid(schema: Schema): SuggestionResult = SuggestionResult(Seq(DefaultValues(schema)))
+  def valid(schema: Schema): SuggestionResult =
+    SuggestionResult(DefaultValues(schema).toSeq)
 
   override def invalid(observation: Observation): SuggestionResult = {
     observation match {
       case MissingProperties(properties) =>
-        SuggestionResult(Seq(ObjectValue(properties.map { case (key, schema) =>
-          key -> DefaultValues(schema)
+        SuggestionResult(Seq(ObjectValue(properties.flatMap { case (key, schema) =>
+          DefaultValues(schema).map((key, _))
         }.toMap)))
-      case TypeMismatch(schema) => SuggestionResult(Seq(DefaultValues(schema)))
+      case TypeMismatch(schema) => SuggestionResult(DefaultValues(schema).toSeq)
       case NotInEnum(values)    => SuggestionResult(values)
       case _                    => SuggestionResult(Seq())
     }
@@ -60,16 +61,6 @@ object SuggestionResultFactory extends EvalResultFactory[SuggestionResult] {
     SuggestionResult(suggestions)
   }
 
-  // def allOf(results: Seq[SuggestionResult]): SuggestionResult = {
-  //   val properties = results.flatMap(_.suggestions).flatMap { case ObjectValue(properties) => properties }.toMap
-  //   println("FW", results, properties)
-  //   if (properties.isEmpty) {
-  //     init()
-  //   } else {
-  //     SuggestionResult(Seq(ObjectValue(properties)))
-  //   }
-  // }
-
   def anyOf(results: Seq[SuggestionResult]): SuggestionResult = allOf(results)
   def oneOf(results: Seq[SuggestionResult]): SuggestionResult = allOf(results)
   def not(result: SuggestionResult): SuggestionResult         = SuggestionResult(Seq())
@@ -82,22 +73,23 @@ object SuggestionResultFactory extends EvalResultFactory[SuggestionResult] {
 }
 
 object DefaultValues {
-  def apply(schema: Schema): Value = schema match {
-    case NullSchema                       => NullValue
-    case TrueSchema                       => BoolValue(true)
-    case FalseSchema                      => BoolValue(false)
-    case BooleanSchema                    => BoolValue(true)
-    case StringSchema                     => StringValue("")
-    case NumberSchema                     => NumberValue(0)
-    case ArraySchema(items)               => ArrayValue(Seq())
-    case ObjectSchema(properties)         => ObjectValue(Map())
-    case RootSchema(_, schema, _)         => apply(schema)
-    case RefSchema(ref)                   => NullValue // TODO pass dereferenced schema?
+  def apply(schema: Schema): Option[Value] = schema match {
+    case NullSchema => Some(NullValue)
+    // case TrueSchema                       => BoolValue(true)
+    // case FalseSchema                      => BoolValue(false)
+    case BooleanSchema            => Some(BoolValue(true))
+    case StringSchema             => Some(StringValue(""))
+    case NumberSchema             => Some(NumberValue(0))
+    case ArraySchema(items)       => Some(ArrayValue(Seq()))
+    case ObjectSchema(properties) => Some(ObjectValue(Map()))
+    case RootSchema(_, schema, _) => apply(schema)
+    // case RefSchema(ref)                   => NullValue // TODO pass dereferenced schema?
     case SchemaWithApplicators(schema, _) => apply(schema)
     case SchemaWithValidators(schema, Validators(enum1, const1)) =>
       enum1
         .flatMap(_.headOption)
         .orElse(const1)
-        .getOrElse(apply(schema))
+        .orElse(apply(schema))
+    case _ => None
   }
 }
