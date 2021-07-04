@@ -77,7 +77,8 @@ object Evaluator {
       case SchemaWithValidators(schema, validators) =>
         AllOfEvaluator(
           Seq(
-            validators.`enum`.map(EnumEvaluator(Evaluator(schema), _)).getOrElse(AlwaysEvaluator(true))
+            validators.`enum`.map(EnumEvaluator(Evaluator(schema), _)).getOrElse(AlwaysEvaluator(true)),
+            validators.`const`.map(c => EnumEvaluator(Evaluator(schema), Seq(c))).getOrElse(AlwaysEvaluator(true))
           )
         )
     }
@@ -250,20 +251,5 @@ case class EnumEvaluator[R](evaluator: Evaluator[R], values: Seq[Value])(implici
     } else {
       factory.invalid(NotInEnum(values))
     }
-  }
-}
-
-object Helper {
-
-  def mapNonEmpty[T, S](as: Seq[T])(f: T => S): Option[Seq[S]] =
-    if (as.isEmpty) {
-      None
-    } else {
-      Some(as.map(f))
-    }
-
-  def debugTraceValue[T](title: String): T => T = { v =>
-    println(title, v)
-    v
   }
 }

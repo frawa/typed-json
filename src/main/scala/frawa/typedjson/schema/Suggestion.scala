@@ -83,17 +83,21 @@ object SuggestionResultFactory extends EvalResultFactory[SuggestionResult] {
 
 object DefaultValues {
   def apply(schema: Schema): Value = schema match {
-    case NullSchema                                      => NullValue
-    case TrueSchema                                      => BoolValue(true)
-    case FalseSchema                                     => BoolValue(false)
-    case BooleanSchema                                   => BoolValue(true)
-    case StringSchema                                    => StringValue("")
-    case NumberSchema                                    => NumberValue(0)
-    case ArraySchema(items)                              => ArrayValue(Seq())
-    case ObjectSchema(properties)                        => ObjectValue(Map())
-    case RootSchema(_, schema, _)                        => apply(schema)
-    case RefSchema(ref)                                  => NullValue // TODO pass dereferenced schema
-    case SchemaWithApplicators(schema, _)                => apply(schema)
-    case SchemaWithValidators(schema, Validators(enum1)) => enum1.flatMap(_.headOption).getOrElse(apply(schema))
+    case NullSchema                       => NullValue
+    case TrueSchema                       => BoolValue(true)
+    case FalseSchema                      => BoolValue(false)
+    case BooleanSchema                    => BoolValue(true)
+    case StringSchema                     => StringValue("")
+    case NumberSchema                     => NumberValue(0)
+    case ArraySchema(items)               => ArrayValue(Seq())
+    case ObjectSchema(properties)         => ObjectValue(Map())
+    case RootSchema(_, schema, _)         => apply(schema)
+    case RefSchema(ref)                   => NullValue // TODO pass dereferenced schema?
+    case SchemaWithApplicators(schema, _) => apply(schema)
+    case SchemaWithValidators(schema, Validators(enum1, const1)) =>
+      enum1
+        .flatMap(_.headOption)
+        .orElse(const1)
+        .getOrElse(apply(schema))
   }
 }

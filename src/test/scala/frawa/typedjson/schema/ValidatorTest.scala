@@ -480,4 +480,59 @@ class ValidatorTest extends FunSuite {
       }
     }
   }
+
+  test("const") {
+    testSchema("""{
+                 |"$id": "testme",
+                 |"type": "object",
+                 |"properties": { 
+                 |  "kind": { "type": "string", "const": "first" }
+                 |}
+                 |}""".stripMargin) { schema =>
+      assertValidate("""{}""".stripMargin)(schema) { result =>
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(
+              result = MissingProperties(
+                properties = Map(
+                  "kind" -> SchemaWithValidators(
+                    schema = StringSchema,
+                    validators = Validators(
+                      enum = None,
+                      const = Some(
+                        value = StringValue(
+                          value = "first"
+                        )
+                      )
+                    )
+                  )
+                )
+              ),
+              pointer = Pointer(
+                segments = Nil
+              )
+            )
+          )
+        )
+      }
+      assertValidate("""{"kind":"second"}""")(schema) { result =>
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(
+              NotInEnum(Seq(StringValue("first"))),
+              Pointer(
+                segments = List(
+                  FieldToken(
+                    field = "kind"
+                  )
+                )
+              )
+            )
+          )
+        )
+      }
+    }
+  }
 }

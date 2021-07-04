@@ -40,7 +40,8 @@ case class Applicators(
 case class IfThenElseSchema(ifSchema: Schema, thenSchema: Schema, elseSchema: Schema)
 
 case class Validators(
-    `enum`: Option[Seq[Value]]
+    `enum`: Option[Seq[Value]],
+    `const`: Option[Value]
 )
 
 trait SchemaParser {
@@ -54,10 +55,6 @@ object SchemaParser {
   def schema(json: String)(implicit parser: Parser, schemaParser: SchemaParser): Either[String, Schema] =
     schemaParser.parseSchema(json)
 }
-
-// TODO
-// - enum
-// - const (as enum of 1?)
 
 object SchemaValueDecoder extends SchemaParser {
   import Decoding._
@@ -149,9 +146,10 @@ object SchemaValueDecoder extends SchemaParser {
   } yield ifSchema.map(IfThenElseSchema(_, thenSchema, elseSchema))
 
   val validators: Decoder[Option[Validators]] = for {
-    enum1 <- optionalProperty("enum")(seq(value))
-    noneDefined = Seq(enum1).forall(_.isEmpty)
-  } yield if (noneDefined) None else Some(Validators(enum1))
+    enum1  <- optionalProperty("enum")(seq(value))
+    const1 <- optionalProperty("const")(value)
+    noneDefined = Seq(enum1, const1).forall(_.isEmpty)
+  } yield if (noneDefined) None else Some(Validators(enum1, const1))
 
 }
 
@@ -175,7 +173,7 @@ object Decoding {
 
   def seq[T](d: Decoder[T]): Decoder[Seq[T]] = value =>
     value match {
-      case ArrayValue(items) => Helper2.sequence(items.map(d.decode))
+      case ArrayValue(items) => Util.sequence(items.map(d.decode))
       case _                 => Left("not an array")
     }
 
@@ -188,7 +186,7 @@ object Decoding {
   def map[K, V](d: Decoder[V]): Decoder[Map[String, V]] = value =>
     value match {
       case ObjectValue(properties) =>
-        Helper2
+        Util
           .sequence(properties.map { case (k, v) =>
             d.decode(v).map((k, _))
           }.toSeq)
@@ -240,26 +238,5 @@ object Decoding {
 
   def sequence[T](ds: Seq[Decoder[T]]): Decoder[Seq[T]] = {
     ds.foldLeft(success(Seq.empty[T]))((acc, v) => acc.flatMap(acc => v.map(acc :+ _)))
-  }
-}
-
-object Helper2 {
-  // def sequence[T](options: Seq[Option[T]]): Option[Seq[T]] = {
-  //   options.foldLeft(Option.empty[Seq[T]])((acc, v) =>
-  //     v.flatMap(v =>
-  //       acc
-  //         .map(_ :+ v)
-  //         .orElse(Option(Seq(v)))
-  //     ).orElse(acc)
-  //   )
-  // }
-  def sequence[E, T](eithers: Seq[Either[E, T]]): Either[E, Seq[T]] = {
-    // TODO continue over Left?
-    eithers.foldLeft[Either[E, Seq[T]]](Right[E, Seq[T]](Seq()))((acc, v) => acc.flatMap(acc => v.map(acc :+ _)))
-  }
-
-  def debugTraceValue[T](title: String): T => T = { v =>
-    println(title, v)
-    v
   }
 }

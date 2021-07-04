@@ -4,6 +4,7 @@ import munit.FunSuite
 import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.parser.Parser
 import frawa.typedjson.parser.{ObjectValue, NullValue, NumberValue, StringValue}
+import frawa.typedjson.parser.BoolValue
 
 class SuggestTest extends FunSuite {
   implicit val zioParser    = new ZioParser();
@@ -235,10 +236,77 @@ class SuggestTest extends FunSuite {
       assertSuggest("""true""")(schema) { result =>
         assertEquals(
           result,
-          SuggestionResult(Seq(NumberValue(13), NumberValue(14)))
+          SuggestionResult(Seq(NumberValue(13), NumberValue(14), NumberValue(13)))
         )
       }
       assertSuggest("""13""")(schema) { result =>
+        assertEquals(
+          result,
+          SuggestionResult(Seq(NumberValue(13), NumberValue(14), NumberValue(13)))
+        )
+      }
+    }
+  }
+
+  test("const") {
+    testSchema("""{
+                 |"$id": "testme",
+                 |"type": "boolean",
+                 |"const": true               
+                 |}""".stripMargin) { schema =>
+      assertSuggest("""true""")(schema) { result =>
+        assertEquals(
+          result,
+          SuggestionResult(Seq(BoolValue(true), BoolValue(true)))
+        )
+      }
+      assertSuggest("""13""")(schema) { result =>
+        assertEquals(
+          result,
+          SuggestionResult(Seq(BoolValue(true), BoolValue(true)))
+        )
+      }
+    }
+  }
+
+  test("discriminator".ignore) {
+    testSchema("""{
+                 |"$id": "testme",
+                 |"oneOf": [{
+                 |  "if": { 
+                 |    "type": "object",
+                 |    "properties": { 
+                 |      "kind": { "type": "string", "const": "first" }
+                 |    }
+                 |  },
+                 |  "then": {
+                 |    "type": "object",
+                 |    "properties": { 
+                 |      "gnu": { "type": "number" }
+                 |    }
+                 |  }
+                 |},{
+                 |  "if": { 
+                 |    "type": "object",
+                 |    "properties": { 
+                 |      "kind": { "type": "string", "const": "second" }
+                 |    }
+                 |  },
+                 |  "then": {
+                 |    "type": "object",
+                 |    "properties": { 
+                 |      "foo": { "type": "boolean" }
+                 |    }
+                 |  }
+                 |}]
+                 |}""".stripMargin) { schema =>
+      assertSuggest("""{}""".stripMargin)(schema) { result =>
+        assertEquals(
+          result,
+          SuggestionResult(Seq(NumberValue(13), NumberValue(14)))
+        )
+      }
+      assertSuggest("""{"kind":"first"}""")(schema) { result =>
         assertEquals(
           result,
           SuggestionResult(Seq(NumberValue(13), NumberValue(14)))
