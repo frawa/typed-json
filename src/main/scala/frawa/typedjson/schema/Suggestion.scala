@@ -23,16 +23,27 @@ object Suggestion {
 case class SuggestionResult(suggestions: Seq[Value])
 
 object SuggestionResultCalculator extends ResultCalculator[SuggestionResult] {
-  def valid(schema: Schema): SuggestionResult =
-    SuggestionResult(DefaultValues(schema).toSeq)
+  def valid(schema: Schema): SuggestionResult = SuggestionResult(DefaultValues(schema))
 
   override def invalid(observation: Observation): SuggestionResult = {
     observation match {
       case MissingProperties(properties) =>
-        SuggestionResult(Seq(ObjectValue(properties.flatMap { case (key, schema) =>
-          DefaultValues(schema).map((key, _))
-        }.toMap)))
-      case TypeMismatch(schema) => SuggestionResult(DefaultValues(schema).toSeq)
+        val fw1 = SuggestionResult(
+          properties
+            .map { case (key, schema) =>
+              DefaultValues(schema).map(key -> _)
+            }
+            .flatten
+            .map { case (key, value) =>
+              ObjectValue(Map(key -> value))
+            }
+            .toSeq
+        )
+        // val fw = SuggestionResult(Seq(ObjectValue(properties.flatMap { case (key, schema) =>
+        //   DefaultValues(schema).map((key, _))
+        // }.toMap)))
+        fw1
+      case TypeMismatch(schema) => SuggestionResult(DefaultValues(schema))
       case NotInEnum(values)    => SuggestionResult(values)
       case _                    => SuggestionResult(Seq())
     }
@@ -41,11 +52,12 @@ object SuggestionResultCalculator extends ResultCalculator[SuggestionResult] {
   private def objectAt(segments: Seq[Token], value: Value): Value = {
     segments match {
       case FieldToken(key) :: as => ObjectValue(Map(key -> objectAt(as, value)))
-      case ArrayIndexToken(index) :: as =>
-        ArrayValue(
-          if (index > 0) Seq.fill(index - 1)(NullValue) :+ value
-          else Seq(value)
-        )
+      // TODO
+      // case ArrayIndexToken(index) :: as =>
+      //   ArrayValue(
+      //     if (index > 0) Seq.fill(index - 1)(NullValue) :+ value
+      //     else Seq(value)
+      //   )
       case Nil => value
     }
   }
@@ -72,23 +84,24 @@ object SuggestionResultCalculator extends ResultCalculator[SuggestionResult] {
 }
 
 object DefaultValues {
-  def apply(schema: Schema): Option[Value] = schema match {
-    case NullSchema => Some(NullValue)
+  def apply(schema: Schema): Seq[Value] = schema match {
     // case TrueSchema                       => BoolValue(true)
     // case FalseSchema                      => BoolValue(false)
-    case BooleanSchema            => Some(BoolValue(true))
-    case StringSchema             => Some(StringValue(""))
-    case NumberSchema             => Some(NumberValue(0))
-    case ArraySchema(items)       => Some(ArrayValue(Seq()))
-    case ObjectSchema(properties) => Some(ObjectValue(Map()))
-    case RootSchema(_, schema, _) => apply(schema)
     // case RefSchema(ref)                   => NullValue // TODO pass dereferenced schema?
+    case NullSchema                       => Seq(NullValue)
+    case BooleanSchema                    => Seq(BoolValue(true))
+    case StringSchema                     => Seq(StringValue(""))
+    case NumberSchema                     => Seq(NumberValue(0))
+    case ArraySchema(_)                   => Seq(ArrayValue(Seq()))
+    case ObjectSchema(_)                  => Seq(ObjectValue(Map()))
+    case RootSchema(_, schema, _)         => apply(schema)
     case SchemaWithApplicators(schema, _) => apply(schema)
     case SchemaWithValidators(schema, Validators(enum1, const1)) =>
-      enum1
-        .flatMap(_.headOption)
-        .orElse(const1)
-        .orElse(apply(schema))
-    case _ => None
+      val valids = enum1.toSeq.flatten ++ const1.toSeq
+      if (valids.isEmpty)
+        apply(schema)
+      else
+        valids
+    case _ => Seq()
   }
 }

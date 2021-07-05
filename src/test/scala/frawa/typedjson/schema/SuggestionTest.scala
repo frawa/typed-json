@@ -181,7 +181,8 @@ class SuggestTest extends FunSuite {
           result,
           SuggestionResult(
             Seq(
-              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0), "gnu" -> NumberValue(0)))))
+              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0))))),
+              ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> NumberValue(0)))))
             )
           )
         )
@@ -370,6 +371,44 @@ class SuggestTest extends FunSuite {
                   )
                 )
               )
+            )
+          )
+        )
+      }
+    }
+  }
+
+  test("suggestions enum properties") {
+    testSchema("""{
+                 |"$id": "testme",
+                 |"type": "object", 
+                 |"properties": { 
+                 |  "foo": { 
+                 |    "type": "object", 
+                 |    "properties": { 
+                 |      "bar": { "type": "number", "enum": [13, 14] },
+                 |      "gnu": { "type": "string", "enum": ["toto", "titi"] }
+                 |    }
+                 |  }
+                 |} 
+                 |}
+                 |""".stripMargin) { schema =>
+      assertSuggest(
+        """{
+          |"foo": {}
+          |}
+          |""".stripMargin
+      )(
+        schema
+      ) { result =>
+        assertEquals(
+          result,
+          SuggestionResult(
+            Seq(
+              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(13))))),
+              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(14))))),
+              ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> StringValue("toto"))))),
+              ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> StringValue("titi")))))
             )
           )
         )
