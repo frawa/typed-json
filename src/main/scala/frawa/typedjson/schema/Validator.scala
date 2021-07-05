@@ -28,7 +28,7 @@ case class ValidationInvalid(errors: Seq[ValidationResult.Error]) extends Valida
   def prefix(prefix: Pointer): ValidationResult = ValidationInvalid(errors.map(_.prefix(prefix)))
 }
 
-object ValidationResultFactory extends EvalResultFactory[ValidationResult] {
+object ValidationResultCalculator extends ResultCalculator[ValidationResult] {
   override def valid(schema: Schema): ValidationResult = ValidationValid
 
   override def invalid(observation: Observation): ValidationResult = ValidationInvalid(
@@ -94,6 +94,6 @@ trait Validator {
 
 object Validator {
   def validate(schema: Schema)(value: Value): ValidationResult = {
-    Evaluator(schema)(value)(ValidationResultFactory)
+    Evaluator(schema)(value)(ValidationResultCalculator)
   }
 }

@@ -16,13 +16,13 @@ trait Suggestion {
 
 object Suggestion {
   def suggestions(schema: Schema)(value: Value): SuggestionResult = {
-    Evaluator(schema)(value)(SuggestionResultFactory)
+    Evaluator(schema)(value)(SuggestionResultCalculator)
   }
 }
 
 case class SuggestionResult(suggestions: Seq[Value])
 
-object SuggestionResultFactory extends EvalResultFactory[SuggestionResult] {
+object SuggestionResultCalculator extends ResultCalculator[SuggestionResult] {
   def valid(schema: Schema): SuggestionResult =
     SuggestionResult(DefaultValues(schema).toSeq)
 

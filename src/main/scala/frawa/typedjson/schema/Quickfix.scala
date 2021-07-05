@@ -9,7 +9,7 @@ trait Quickfix {
 
 object Quickfix {
   def fixes(schema: Schema)(value: Value): QuickfixResult = {
-    Evaluator(schema)(value)(QuickfixResultFactory)
+    Evaluator(schema)(value)(QuickfixResultCalculator)
   }
 }
 
@@ -30,7 +30,7 @@ trait QuickfixResult
 case object QuickfixResultEmpty                          extends QuickfixResult
 case class QuickfixResultFixes(fixes: Seq[QuickfixItem]) extends QuickfixResult
 
-object QuickfixResultFactory extends EvalResultFactory[QuickfixResult] {
+object QuickfixResultCalculator extends ResultCalculator[QuickfixResult] {
   def valid(schema: Schema): QuickfixResult = QuickfixResultEmpty
 
   override def invalid(observation: Observation): QuickfixResult = {

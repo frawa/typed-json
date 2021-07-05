@@ -18,7 +18,7 @@ case class NotOneOf(valid: Int)                               extends Observatio
 case class NotInvalid()                                       extends Observation // ??? only in Validator?
 case class NotInEnum(values: Seq[Value])                      extends Observation
 
-trait EvalResultFactory[R] {
+trait ResultCalculator[R] {
   def valid(schema: Schema): R
   def invalid(observation: Observation): R
   def prefix(prefix: Pointer, result: R): R
@@ -35,11 +35,11 @@ case class WithPointer[+R](result: R, pointer: Pointer = Pointer.empty) {
 }
 trait Evaluator {
   type Dereferencer = String => Option[Evaluator]
-  def eval[R](value: Value)(factory: EvalResultFactory[R])(implicit dereference: Dereferencer): R
+  def eval[R](value: Value)(calc: ResultCalculator[R])(implicit dereference: Dereferencer): R
 
-  def apply[R](value: Value)(factory: EvalResultFactory[R]) = {
+  def apply[R](value: Value)(calc: ResultCalculator[R]) = {
     implicit val dereference: String => Option[Evaluator] = ref => None
-    this.eval(value)(factory)
+    this.eval(value)(calc)
   }
 }
 
@@ -97,65 +97,63 @@ object Evaluator {
 }
 
 case class NullEvaluator(schema: Schema) extends Evaluator {
-  override def eval[R](value: Value)(factory: EvalResultFactory[R])(implicit dereference: Dereferencer): R =
+  override def eval[R](value: Value)(calc: ResultCalculator[R])(implicit dereference: Dereferencer): R =
     value match {
-      case NullValue => factory.valid(schema)
-      case _         => factory.invalid(TypeMismatch(schema))
+      case NullValue => calc.valid(schema)
+      case _         => calc.invalid(TypeMismatch(schema))
     }
 }
 
 case class AlwaysEvaluator(valid: Boolean) extends Evaluator {
-  override def eval[R](value: Value)(factory: EvalResultFactory[R])(implicit dereference: Dereferencer): R = if (
-    valid
-  ) {
-    factory.valid(TrueSchema)
+  override def eval[R](value: Value)(calc: ResultCalculator[R])(implicit dereference: Dereferencer): R = if (valid) {
+    calc.valid(TrueSchema)
   } else {
-    factory.invalid(FalseSchemaReason())
+    calc.invalid(FalseSchemaReason())
   }
 }
 
 case class BooleanEvaluator(schema: Schema) extends Evaluator {
-  override def eval[R](value: Value)(factory: EvalResultFactory[R])(implicit dereference: Dereferencer): R =
+  override def eval[R](value: Value)(calc: ResultCalculator[R])(implicit dereference: Dereferencer): R =
     value match {
-      case BoolValue(value) => if (value) factory.valid(schema) else factory.invalid(FalseSchemaReason())
-      case _                => factory.invalid(TypeMismatch(schema))
+      case BoolValue(value) => if (value) calc.valid(schema) else calc.invalid(FalseSchemaReason())
+      case _                => calc.invalid(TypeMismatch(schema))
     }
 }
 
 case class StringEvaluator(schema: Schema) extends Evaluator {
-  override def eval[R](value: Value)(factory: EvalResultFactory[R])(implicit dereference: Dereferencer): R =
+  override def eval[R](value: Value)(calc: ResultCalculator[R])(implicit dereference: Dereferencer): R =
     value match {
-      case StringValue(_) => factory.valid(schema)
-      case _              => factory.invalid(TypeMismatch(schema))
+      case StringValue(_) => calc.valid(schema)
+      case _              => calc.invalid(TypeMismatch(schema))
     }
 }
 
 case class NumberEvaluator(schema: Schema) extends Evaluator {
-  override def eval[R](value: Value)(factory: EvalResultFactory[R])(implicit dereference: Dereferencer): R =
+  override def eval[R](value: Value)(calc: ResultCalculator[R])(implicit dereference: Dereferencer): R =
     value match {
-      case NumberValue(_) => factory.valid(schema)
-      case _              => factory.invalid(TypeMismatch(schema))
+      case NumberValue(_) => calc.valid(schema)
+      case _              => calc.invalid(TypeMismatch(schema))
     }
 }
 
 case class ArrayEvaluator(schema: Schema)(itemsEvaluator: Evaluator) extends Evaluator {
-  override def eval[R](value: Value)(factory: EvalResultFactory[R])(implicit dereference: Dereferencer): R = {
+  override def eval[R](value: Value)(calc: ResultCalculator[R])(implicit dereference: Dereferencer): R = {
     value match {
       case ArrayValue(items) =>
-        factory.allOf(
+        calc.allOf(
           items.zipWithIndex
             .map { case (item, index) =>
               lazy val prefix = Pointer.empty / index
-              factory.prefix(prefix, itemsEvaluator.eval(item)(factory))
+              calc.prefix(prefix, itemsEvaluator.eval(item)(calc))
             }
         )
-      case _ => factory.invalid(TypeMismatch(schema))
+      case _ => calc.invalid(TypeMismatch(schema))
     }
   }
 }
 
 case class ObjectEvaluator(schema: Schema)(schemaByProperty: Map[String, Schema]) extends Evaluator {
-  override def eval[R](value: Value)(factory: EvalResultFactory[R])(implicit dereference: Dereferencer): R = {
+  override def eval[R](value: Value)(calc: ResultCalculator[R])(implicit dereference: Dereferencer): R = {
     value match {
       case ObjectValue(properties) => {
         val validations = properties.map { case (key1, value1) =>
@@ -163,27 +161,27 @@ case class ObjectEvaluator(schema: Schema)(schemaByProperty: Map[String, Schema]
           schemaByProperty
             .get(key1)
             .map(Evaluator(_))
-            .map(_.eval(value1)(factory))
-            .map(factory.prefix(prefix, _))
-            .getOrElse(factory.invalid(UnexpectedProperty(key1)))
+            .map(_.eval(value1)(calc))
+            .map(calc.prefix(prefix, _))
+            .getOrElse(calc.invalid(UnexpectedProperty(key1)))
         }.toSeq
         val missing = schemaByProperty.view
           .filterKeys(!properties.contains(_))
           .toMap
         if (missing.isEmpty) {
-          factory.allOf(validations)
+          calc.allOf(validations)
         } else {
-          factory.allOf(validations :+ factory.invalid(MissingProperties(missing)))
+          calc.allOf(validations :+ calc.invalid(MissingProperties(missing)))
         }
       }
-      case _ => factory.invalid(TypeMismatch(schema))
+      case _ => calc.invalid(TypeMismatch(schema))
     }
   }
 }
 
 case class RootSchemaEvaluator(evaluator: Evaluator, defs: Map[String, Evaluator]) extends Evaluator {
-  override def eval[R](value: Value)(factory: EvalResultFactory[R])(implicit dereference: Dereferencer): R =
-    evaluator.eval(value)(factory)(dereferenceDefs)
+  override def eval[R](value: Value)(calc: ResultCalculator[R])(implicit dereference: Dereferencer): R =
+    evaluator.eval(value)(calc)(dereferenceDefs)
 
   private def dereferenceDefs(ref: String): Option[Evaluator] =
     defs.get(relativeize(ref))
@@ -195,48 +193,48 @@ case class RootSchemaEvaluator(evaluator: Evaluator, defs: Map[String, Evaluator
 }
 
 case class RefEvaluator(ref: String) extends Evaluator {
-  override def eval[R](value: Value)(factory: EvalResultFactory[R])(implicit dereference: Dereferencer): R =
+  override def eval[R](value: Value)(calc: ResultCalculator[R])(implicit dereference: Dereferencer): R =
     dereference(ref)
-      .map(_.eval(value)(factory))
-      .getOrElse(factory.invalid(MissingRef(ref)))
+      .map(_.eval(value)(calc))
+      .getOrElse(calc.invalid(MissingRef(ref)))
 }
 
 case class AllOfEvaluator(es: Seq[Evaluator]) extends Evaluator {
-  override def eval[R](value: Value)(factory: EvalResultFactory[R])(implicit dereference: Dereferencer): R =
-    factory.allOf(es.map(_.eval(value)(factory)))
+  override def eval[R](value: Value)(calc: ResultCalculator[R])(implicit dereference: Dereferencer): R =
+    calc.allOf(es.map(_.eval(value)(calc)))
 }
 
 case class AnyOfEvaluator(es: Seq[Evaluator]) extends Evaluator {
-  override def eval[R](value: Value)(factory: EvalResultFactory[R])(implicit dereference: Dereferencer): R =
-    factory.anyOf(es.map(_.eval(value)(factory)))
+  override def eval[R](value: Value)(calc: ResultCalculator[R])(implicit dereference: Dereferencer): R =
+    calc.anyOf(es.map(_.eval(value)(calc)))
 }
 
 case class OneOfEvaluator(es: Seq[Evaluator]) extends Evaluator {
-  override def eval[R](value: Value)(factory: EvalResultFactory[R])(implicit dereference: Dereferencer): R = {
-    factory.oneOf(es.map(_.eval(value)(factory)))
+  override def eval[R](value: Value)(calc: ResultCalculator[R])(implicit dereference: Dereferencer): R = {
+    calc.oneOf(es.map(_.eval(value)(calc)))
   }
 }
 
 case class NotEvaluator(e: Evaluator) extends Evaluator {
-  override def eval[R](value: Value)(factory: EvalResultFactory[R])(implicit dereference: Dereferencer): R = {
-    factory.not(e.eval(value)(factory))
+  override def eval[R](value: Value)(calc: ResultCalculator[R])(implicit dereference: Dereferencer): R = {
+    calc.not(e.eval(value)(calc))
   }
 }
 
 case class IfThenElseEvaluator(ifE: Evaluator, thenE: Evaluator, elseE: Evaluator) extends Evaluator {
-  override def eval[R](value: Value)(factory: EvalResultFactory[R])(implicit dereference: Dereferencer): R = {
-    factory.ifThenElse(ifE.eval(value)(factory), thenE.eval(value)(factory), elseE.eval(value)(factory))
+  override def eval[R](value: Value)(calc: ResultCalculator[R])(implicit dereference: Dereferencer): R = {
+    calc.ifThenElse(ifE.eval(value)(calc), thenE.eval(value)(calc), elseE.eval(value)(calc))
   }
 }
 
 case class EnumEvaluator(schema: Schema)(evaluator: Evaluator, values: Seq[Value]) extends Evaluator {
-  override def eval[R](value: Value)(factory: EvalResultFactory[R])(implicit dereference: Dereferencer): R = {
-    val current     = evaluator.eval(value)(factory)
-    val validResult = factory.valid(schema)
+  override def eval[R](value: Value)(calc: ResultCalculator[R])(implicit dereference: Dereferencer): R = {
+    val current     = evaluator.eval(value)(calc)
+    val validResult = calc.valid(schema)
     if (current == validResult && values.contains(value)) {
-      factory.valid(schema)
+      calc.valid(schema)
     } else {
-      factory.invalid(NotInEnum(values))
+      calc.invalid(NotInEnum(values))
     }
   }
 }

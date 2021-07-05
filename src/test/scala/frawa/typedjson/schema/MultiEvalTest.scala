@@ -21,10 +21,10 @@ class MultiEvalTest extends FunSuite {
       .swap
   }
 
-  private def assertResult[R](text: String)(evaluator: Evaluator)(factory: EvalResultFactory[R])(f: R => Unit) = {
+  private def assertResult[R](text: String)(evaluator: Evaluator)(calc: ResultCalculator[R])(f: R => Unit) = {
     val withParsed = for {
       value <- Parser(text)
-      result = evaluator(value)(factory)
+      result = evaluator(value)(calc)
     } yield {
       f(result)
     }
@@ -34,15 +34,15 @@ class MultiEvalTest extends FunSuite {
   }
 
   private def assertValidate(text: String)(evaluator: Evaluator)(f: ValidationResult => Unit) = {
-    assertResult(text)(evaluator)(ValidationResultFactory)(f)
+    assertResult(text)(evaluator)(ValidationResultCalculator)(f)
   }
 
   private def assertQuickfix(text: String)(evaluator: Evaluator)(f: QuickfixResult => Unit) = {
-    assertResult(text)(evaluator)(QuickfixResultFactory)(f)
+    assertResult(text)(evaluator)(QuickfixResultCalculator)(f)
   }
 
   private def assertSuggestion(text: String)(evaluator: Evaluator)(f: SuggestionResult => Unit) = {
-    assertResult(text)(evaluator)(SuggestionResultFactory)(f)
+    assertResult(text)(evaluator)(SuggestionResultCalculator)(f)
   }
 
   withEvaluator("""{
