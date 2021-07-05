@@ -16,8 +16,7 @@ trait Suggestion {
 
 object Suggestion {
   def suggestions(schema: Schema)(value: Value): SuggestionResult = {
-    implicit val dereference: String => Option[Evaluator[SuggestionResult]] = ref => None
-    Evaluator(schema)(SuggestionResultFactory).eval(value)
+    Evaluator(schema)(value)(SuggestionResultFactory)
   }
 }
 

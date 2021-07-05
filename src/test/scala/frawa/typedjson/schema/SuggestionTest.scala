@@ -236,13 +236,13 @@ class SuggestTest extends FunSuite {
       assertSuggest("""true""")(schema) { result =>
         assertEquals(
           result,
-          SuggestionResult(Seq(NumberValue(13), NumberValue(14), NumberValue(13)))
+          SuggestionResult(Seq(NumberValue(13), NumberValue(14)))
         )
       }
       assertSuggest("""13""")(schema) { result =>
         assertEquals(
           result,
-          SuggestionResult(Seq(NumberValue(13), NumberValue(14), NumberValue(13)))
+          SuggestionResult(Seq(NumberValue(13), NumberValue(14)))
         )
       }
     }
@@ -257,13 +257,13 @@ class SuggestTest extends FunSuite {
       assertSuggest("""true""")(schema) { result =>
         assertEquals(
           result,
-          SuggestionResult(Seq(BoolValue(true), BoolValue(true)))
+          SuggestionResult(Seq(BoolValue(true)))
         )
       }
       assertSuggest("""13""")(schema) { result =>
         assertEquals(
           result,
-          SuggestionResult(Seq(BoolValue(true), BoolValue(true)))
+          SuggestionResult(Seq(BoolValue(true)))
         )
       }
     }
@@ -351,22 +351,8 @@ class SuggestTest extends FunSuite {
               ),
               ObjectValue(
                 properties = Map(
-                  "kind" -> StringValue(
-                    value = "first"
-                  )
-                )
-              ),
-              ObjectValue(
-                properties = Map(
                   "gnu" -> NumberValue(
                     value = 0
-                  )
-                )
-              ),
-              ObjectValue(
-                properties = Map(
-                  "kind" -> StringValue(
-                    value = "second"
                   )
                 )
               ),

@@ -94,7 +94,6 @@ trait Validator {
 
 object Validator {
   def validate(schema: Schema)(value: Value): ValidationResult = {
-    implicit val dereference: String => Option[Evaluator[ValidationResult]] = ref => None
-    Evaluator(schema)(ValidationResultFactory).eval(value)
+    Evaluator(schema)(value)(ValidationResultFactory)
   }
 }

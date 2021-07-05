@@ -9,8 +9,7 @@ trait Quickfix {
 
 object Quickfix {
   def fixes(schema: Schema)(value: Value): QuickfixResult = {
-    implicit val dereference: String => Option[Evaluator[QuickfixResult]] = ref => None
-    Evaluator(schema)(QuickfixResultFactory).eval(value)
+    Evaluator(schema)(value)(QuickfixResultFactory)
   }
 }
 
