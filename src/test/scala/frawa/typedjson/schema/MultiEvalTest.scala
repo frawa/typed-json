@@ -45,70 +45,74 @@ class MultiEvalTest extends FunSuite {
     assertResult(text)(evaluator)(SuggestionResultCalculator)(f)
   }
 
-  withEvaluator("""{
-                  |"$id": "testme",
-                  |"type": "object", 
-                  |"properties": { 
-                  |  "toto": { "type": "number" },
-                  |  "titi": { "type": "string" }
-                  |} 
-                  |}
-                  |""".stripMargin) { evaluator =>
-    assertValidate("""true""")(evaluator) { result =>
-      assertEquals(
-        result.errors,
-        Seq(
-          WithPointer(
-            result = TypeMismatch(
-              expected = ObjectSchema(
+  test("first") {
+    withEvaluator("""{
+                    |"$id": "testme",
+                    |"type": "object", 
+                    |"properties": { 
+                    |  "toto": { "type": "number" },
+                    |  "titi": { "type": "string" }
+                    |} 
+                    |}
+                    |""".stripMargin) { evaluator =>
+      assertValidate("""true""")(evaluator) { result =>
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(
+              result = TypeMismatch(
+                expected = ObjectSchema(
+                  properties = Map(
+                    "toto" -> NumberSchema,
+                    "titi" -> StringSchema
+                  )
+                )
+              ),
+              pointer = Pointer(
+                segments = Nil
+              )
+            )
+          )
+        )
+      }
+      assertQuickfix("""true""")(evaluator) { result =>
+        assertEquals(result, QuickfixResultEmpty)
+      }
+      assertSuggestion("""true""")(evaluator) { result =>
+        assertEquals(
+          result,
+          SuggestionResult(
+            Seq(
+              ObjectValue(
+                properties = Map()
+              )
+            )
+          )
+        )
+      }
+      assertSuggestion("""{}""")(evaluator) { result =>
+        assertEquals(
+          result,
+          SuggestionResult(
+            Seq(
+              ObjectValue(
                 properties = Map(
-                  "toto" -> NumberSchema,
-                  "titi" -> StringSchema
+                  "toto" -> NumberValue(
+                    value = 0
+                  )
                 )
-              )
-            ),
-            pointer = Pointer(
-              segments = Nil
-            )
-          )
-        )
-      )
-    }
-    assertQuickfix("""true""")(evaluator) { result =>
-      assertEquals(result, QuickfixResultEmpty)
-    }
-    assertSuggestion("""true""")(evaluator) { result =>
-      assertEquals(
-        result,
-        SuggestionResult(
-          Seq(
-            ObjectValue(
-              properties = Map()
-            )
-          )
-        )
-      )
-    }
-    assertSuggestion("""{}""")(evaluator) { result =>
-      assertEquals(
-        result,
-        SuggestionResult(
-          Seq(
-            ObjectValue(
-              properties = Map(
-                "toto" -> NumberValue(
-                  value = 0
-                ),
-                "titi" -> StringValue(
-                  value = ""
+              ),
+              ObjectValue(
+                Map(
+                  "titi" -> StringValue(
+                    value = ""
+                  )
                 )
               )
             )
           )
         )
-      )
-
+      }
     }
   }
-
 }
