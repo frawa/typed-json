@@ -10,7 +10,7 @@ class SuggestTest extends FunSuite {
   implicit val zioParser    = new ZioParser();
   implicit val schemaParser = SchemaValueDecoder;
 
-  private def testSchema(text: String)(f: Schema => Unit) {
+  private def withSchema(text: String)(f: Schema => Unit) {
     val withSchema = for {
       schema <- SchemaParser(text)
     } yield {
@@ -34,7 +34,7 @@ class SuggestTest extends FunSuite {
   }
 
   test("suggest missing property") {
-    testSchema("""{
+    withSchema("""{
                  |"$id": "testme",
                  |"type": "object", 
                  |"properties": { 
@@ -65,7 +65,7 @@ class SuggestTest extends FunSuite {
   }
 
   test("suggest deep") {
-    testSchema("""{
+    withSchema("""{
                  |"$id": "testme",
                  |"type": "object", 
                  |"properties": { 
@@ -95,7 +95,7 @@ class SuggestTest extends FunSuite {
   }
 
   test("suggest several values") {
-    testSchema("""{
+    withSchema("""{
                  |"$id": "testme",
                  |"type": "object", 
                  |"properties": { 
@@ -155,7 +155,7 @@ class SuggestTest extends FunSuite {
   }
 
   test("suggestions for several properties") {
-    testSchema("""{
+    withSchema("""{
                  |"$id": "testme",
                  |"type": "object", 
                  |"properties": { 
@@ -209,7 +209,7 @@ class SuggestTest extends FunSuite {
   }
 
   test("null or number") {
-    testSchema("""{
+    withSchema("""{
                  |"$id": "testme",
                  |"type": ["null","number"]
                  |}""".stripMargin) { schema =>
@@ -229,7 +229,7 @@ class SuggestTest extends FunSuite {
   }
 
   test("enum") {
-    testSchema("""{
+    withSchema("""{
                  |"$id": "testme",
                  |"type": "number",
                  |"enum": [13, 14]                
@@ -250,7 +250,7 @@ class SuggestTest extends FunSuite {
   }
 
   test("const") {
-    testSchema("""{
+    withSchema("""{
                  |"$id": "testme",
                  |"type": "boolean",
                  |"const": true               
@@ -271,7 +271,7 @@ class SuggestTest extends FunSuite {
   }
 
   test("discriminator") {
-    testSchema("""{
+    withSchema("""{
                  |"$id": "testme",
                  |"oneOf": [{
                  |  "if": { 
@@ -379,7 +379,7 @@ class SuggestTest extends FunSuite {
   }
 
   test("suggestions enum properties") {
-    testSchema("""{
+    withSchema("""{
                  |"$id": "testme",
                  |"type": "object", 
                  |"properties": { 

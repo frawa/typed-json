@@ -8,7 +8,7 @@ class QuickfixTest extends FunSuite {
   implicit val zioParser    = new ZioParser();
   implicit val schemaParser = SchemaValueDecoder;
 
-  private def testSchema(text: String)(f: Schema => Unit) {
+  private def withSchema(text: String)(f: Schema => Unit) {
     val withSchema = for {
       schema <- SchemaParser(text)
     } yield {
@@ -32,7 +32,7 @@ class QuickfixTest extends FunSuite {
   }
 
   test("object add missing property") {
-    testSchema("""{
+    withSchema("""{
                  |"$id": "testme",
                  |"type": "object", 
                  |"properties": { 
@@ -53,7 +53,7 @@ class QuickfixTest extends FunSuite {
   }
 
   test("object add deep missing property") {
-    testSchema("""{
+    withSchema("""{
                  |"$id": "testme",
                  |"type": "object", 
                  |"properties": { 
@@ -89,7 +89,7 @@ class QuickfixTest extends FunSuite {
   }
 
   test("anyOf raises two groups") {
-    testSchema("""{
+    withSchema("""{
                  |"$id": "testme",
                  |"anyOf": [{
                  |  "type": "object", 
@@ -120,7 +120,7 @@ class QuickfixTest extends FunSuite {
   }
 
   test("null or bool") {
-    testSchema("""{
+    withSchema("""{
                  |"$id": "testme",
                  |"type": ["null","boolean"]
                  |}""".stripMargin) { schema =>
@@ -134,7 +134,7 @@ class QuickfixTest extends FunSuite {
   }
 
   test("enum") {
-    testSchema("""{
+    withSchema("""{
                  |"$id": "testme",
                  |"type": "string",
                  |"enum": ["foo", "bar"]

@@ -24,7 +24,7 @@ class ValidatorTest extends FunSuite {
       .swap
   }
 
-  private def testSchema(text: String)(f: Schema => Unit) {
+  private def withSchema(text: String)(f: Schema => Unit) {
     testParsedSchema(text, SchemaParser.schema)(f)
   }
 
@@ -47,7 +47,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("null") {
-    testSchema("""{"type": "null"}""") { schema =>
+    withSchema("""{"type": "null"}""") { schema =>
       assertValidate("""null""")(schema) { result =>
         assertEquals(result.valid, true)
       }
@@ -58,7 +58,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("boolean") {
-    testSchema("""{"type": "boolean"}""") { schema =>
+    withSchema("""{"type": "boolean"}""") { schema =>
       assertValidate("""true""")(schema) { result =>
         assertEquals(result.valid, true)
       }
@@ -69,7 +69,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("boolean false") {
-    testSchema("""{"type": "boolean"}""") { schema =>
+    withSchema("""{"type": "boolean"}""") { schema =>
       assertValidate("""false""")(schema) { result =>
         assertEquals(result.errors, Seq(WithPointer(FalseSchemaReason())))
       }
@@ -77,7 +77,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("string") {
-    testSchema("""{"type": "string"}""") { schema =>
+    withSchema("""{"type": "string"}""") { schema =>
       assertValidate(""""hello"""")(schema) { result =>
         assertEquals(result.valid, true)
       }
@@ -88,7 +88,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("number") {
-    testSchema("""{"type": "number"}""") { schema =>
+    withSchema("""{"type": "number"}""") { schema =>
       assertValidate("""13""")(schema) { result =>
         assertEquals(result.valid, true)
       }
@@ -99,7 +99,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("array") {
-    testSchema("""{"type": "array", "items": { "type": "number"} }""") { schema =>
+    withSchema("""{"type": "array", "items": { "type": "number"} }""") { schema =>
       assertValidate("""[13]""")(schema) { result =>
         assertEquals(result.valid, true)
       }
@@ -110,7 +110,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("array item") {
-    testSchema("""{"type": "array", "items": { "type": "number"} }""") { schema =>
+    withSchema("""{"type": "array", "items": { "type": "number"} }""") { schema =>
       assertValidate("""[true]""")(schema) { result =>
         assertEquals(result.errors, Seq(WithPointer(TypeMismatch(NumberSchema), Pointer(0))))
       }
@@ -118,7 +118,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("object") {
-    testSchema("""{
+    withSchema("""{
                  |"type": "object", 
                  |"properties": { 
                  |  "toto": { "type": "number" },
@@ -154,7 +154,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("object property type") {
-    testSchema("""{
+    withSchema("""{
                  |"type": "object", 
                  |"properties": { 
                  |  "toto": { "type": "number" },
@@ -173,7 +173,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("object unknown property") {
-    testSchema("""{
+    withSchema("""{
                  |"type": "object", 
                  |"properties": { 
                  |  "toto": { "type": "number" },
@@ -193,7 +193,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("object missing property") {
-    testSchema("""{
+    withSchema("""{
                  |"type": "object", 
                  |"properties": { 
                  |  "toto": { "type": "number" },
@@ -211,7 +211,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("true schema") {
-    testSchema("""true""".stripMargin) { schema =>
+    withSchema("""true""".stripMargin) { schema =>
       assertValidate("""{
                        |"toto": 13
                        |}
@@ -222,7 +222,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("empty schema") {
-    testSchema("""{}""".stripMargin) { schema =>
+    withSchema("""{}""".stripMargin) { schema =>
       assertValidate("""{
                        |"toto": 13
                        |}
@@ -233,7 +233,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("false schema") {
-    testSchema("""false""".stripMargin) { schema =>
+    withSchema("""false""".stripMargin) { schema =>
       assertValidate("""{
                        |"toto": 13
                        |}
@@ -245,7 +245,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("$ref schema") {
-    testSchema("""{
+    withSchema("""{
                  |"$ref": "#/$defs/toto"
                  |}
                  |""".stripMargin) { schema =>
@@ -272,7 +272,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("allOf") {
-    testSchema("""{
+    withSchema("""{
                  |"allOf": [
                  |  { "type": "number" }
                  |]
@@ -285,7 +285,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("impossible allOf") {
-    testSchema("""{
+    withSchema("""{
                  |"allOf": [
                  |  { "type": "number" },
                  |  { "type": "string" }
@@ -300,7 +300,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("anyOf") {
-    testSchema("""{
+    withSchema("""{
                  |"anyOf": [
                  |  { "type": "number" },
                  |  { "type": "string" }
@@ -314,7 +314,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("failed anyOf") {
-    testSchema("""{
+    withSchema("""{
                  |"anyOf": [
                  |  { "type": "number" },
                  |  { "type": "string" }
@@ -335,7 +335,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("oneOf") {
-    testSchema("""{
+    withSchema("""{
                  |"anyOf": [
                  |  { "type": "number" },
                  |  { "type": "string" }
@@ -349,7 +349,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("failed oneOf: none") {
-    testSchema("""{
+    withSchema("""{
                  |"oneOf": [
                  |  { "type": "string" },
                  |  { "type": "boolean" }
@@ -370,7 +370,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("failed oneOf: two") {
-    testSchema("""{
+    withSchema("""{
                  |"oneOf": [
                  |  { "type": "number" },
                  |  { "type": "number" }
@@ -390,7 +390,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("not") {
-    testSchema("""{
+    withSchema("""{
                  |"not": { "type": "number" }
                  |}
                  |""".stripMargin) { schema =>
@@ -401,7 +401,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("failed not") {
-    testSchema("""{
+    withSchema("""{
                  |"not": { "type": "number" }
                  |}
                  |""".stripMargin) { schema =>
@@ -413,7 +413,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("if/then/else nop") {
-    testSchema("""{
+    withSchema("""{
                  |"if": { "type": "number" },
                  |"then": { "type": "number" },
                  |"else": { "type": "string" }
@@ -433,7 +433,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("null or string") {
-    testSchema("""{"type": ["null","string"]}""") { schema =>
+    withSchema("""{"type": ["null","string"]}""") { schema =>
       assertValidate("""null""")(schema) { result =>
         assertEquals(result.valid, true)
       }
@@ -453,7 +453,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("enum") {
-    testSchema("""{
+    withSchema("""{
                  |"type": "string",
                  |"enum": ["foo", "bar"]
                  |}""".stripMargin) { schema =>
@@ -482,7 +482,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("const") {
-    testSchema("""{
+    withSchema("""{
                  |"$id": "testme",
                  |"type": "object",
                  |"properties": { 
