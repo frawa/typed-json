@@ -28,7 +28,7 @@ class ValidatorTest extends FunSuite {
     testParsedSchema(text, SchemaParser.schema)(f)
   }
 
-  private def testRootSchema(text: String)(f: Schema => Unit) {
+  private def withRootSchema(text: String)(f: Schema => Unit) {
     testParsedSchema(text, SchemaParser.apply)(f)
   }
 
@@ -257,7 +257,7 @@ class ValidatorTest extends FunSuite {
   }
 
   test("dereference $ref schema") {
-    testRootSchema("""{
+    withRootSchema("""{
                      |"$id": "id13",
                      |"$ref": "#/$defs/toto",
                      |"$defs": {
