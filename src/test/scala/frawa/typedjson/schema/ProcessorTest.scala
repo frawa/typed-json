@@ -217,6 +217,29 @@ class ProcessorTest extends FunSuite {
     }
   }
 
+  test("string") {
+    withSchema("""{"type": "string"}""") { schema =>
+      assertValidate(""""hello"""")(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""13""")(schema) { result =>
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("string"))))
+      }
+    }
+  }
+
+  test("number") {
+    withSchema("""{"type": "number"}""") { schema =>
+      assertValidate("""13""")(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""null""")(schema) { result =>
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("number"))))
+      }
+    }
+  }
 }
 
 case class SchemaValue(value: Value)
@@ -310,9 +333,24 @@ case class NotHandler(schema: SchemaValue) extends Handler {
   }
 
 }
-case object StringHandler extends Handler {}
-case object NumberHandler extends Handler {}
-case object ArrayHandler  extends Handler {}
+case object StringHandler extends Handler {
+  override def handle[R](calc: Calculator[R])(value: Value): R = {
+    value match {
+      case StringValue(v) => calc.valid(SchemaValue(NullValue))
+      case _              => calc.invalid(new TypeMismatch2("string"))
+    }
+  }
+}
+case object NumberHandler extends Handler {
+  override def handle[R](calc: Calculator[R])(value: Value): R = {
+    value match {
+      case NumberValue(v) => calc.valid(SchemaValue(NullValue))
+      case _              => calc.invalid(new TypeMismatch2("number"))
+    }
+  }
+}
+
+case object ArrayHandler extends Handler {}
 case object ObjectHandler extends Handler {
   override def withKeyword(keyword: String, value: Value): Handler = (keyword, value) match {
     case ("properties", ObjectValue(properties)) => PropertiesHandler(properties)
