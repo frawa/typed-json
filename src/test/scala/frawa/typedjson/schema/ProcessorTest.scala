@@ -58,6 +58,165 @@ class ProcessorTest extends FunSuite {
       }
     }
   }
+
+  test("boolean") {
+    withSchema("""{"type": "boolean"}""") { schema =>
+      assertValidate("""true""")(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""13""")(schema) { result =>
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("boolean"))))
+        assertEquals(result.valid, false)
+      }
+    }
+  }
+
+  test("true schema") {
+    withSchema("""true""") { schema =>
+      assertValidate("""null""")(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""13""")(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""{}""")(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+    }
+  }
+
+  test("false schema") {
+    withSchema("""false""") { schema =>
+      assertValidate("""null""")(schema) { result =>
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(
+              result = FalseSchemaReason(),
+              pointer = Pointer(
+                segments = Nil
+              )
+            )
+          )
+        )
+        assertEquals(result.valid, false)
+      }
+      assertValidate("""13""")(schema) { result =>
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(
+              result = FalseSchemaReason(),
+              pointer = Pointer(
+                segments = Nil
+              )
+            )
+          )
+        )
+        assertEquals(result.valid, false)
+      }
+      assertValidate("""{}""")(schema) { result =>
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(
+              result = FalseSchemaReason(),
+              pointer = Pointer(
+                segments = Nil
+              )
+            )
+          )
+        )
+        assertEquals(result.valid, false)
+      }
+    }
+  }
+
+  test("not false") {
+    withSchema("""{"not": false}""") { schema =>
+      assertValidate("""null""")(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""13""")(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""{}""")(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+    }
+  }
+
+  test("empty schema") {
+    withSchema("""{}""") { schema =>
+      assertValidate("""null""")(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""13""")(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""{}""")(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+    }
+  }
+
+  test("not empty") {
+    withSchema("""{"not": {}}""") { schema =>
+      assertValidate("""null""")(schema) { result =>
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(
+              result = NotInvalid(),
+              pointer = Pointer(
+                segments = Nil
+              )
+            )
+          )
+        )
+        assertEquals(result.valid, false)
+      }
+      assertValidate("""13""")(schema) { result =>
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(
+              result = NotInvalid(),
+              pointer = Pointer(
+                segments = Nil
+              )
+            )
+          )
+        )
+        assertEquals(result.valid, false)
+      }
+      assertValidate("""{}""")(schema) { result =>
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(
+              result = NotInvalid(),
+              pointer = Pointer(
+                segments = Nil
+              )
+            )
+          )
+        )
+        assertEquals(result.valid, false)
+      }
+    }
+  }
+
 }
 
 case class SchemaValue(value: Value)
@@ -104,14 +263,19 @@ case object CoreHandler extends Handler {
       case ("type", StringValue("number"))  => NumberHandler
       case ("type", StringValue("array"))   => ArrayHandler
       case ("type", StringValue("object"))  => ObjectHandler
-      case _                                => ErroredHandler(s"unexpected keyword ${keyword} ${value}")
+      case ("not", value)                   => NotHandler(SchemaValue(value))
+      case _                                => ErroredHandler(s"""unexpected keyword "${keyword}": ${value}""")
     }
   }
   override def handle[R](calc: Calculator[R])(value: Value): R = calc.valid(SchemaValue(NullValue))
 }
 
-case class BoolHandler(value: Boolean) extends Handler {
-  override def withKeyword(keyword: String, value: Value): Handler = ???
+case class TrivialHandler(valid: Boolean) extends Handler {
+  override def handle[R](calc: Calculator[R])(value: Value): R =
+    if (valid)
+      calc.valid(SchemaValue(NullValue))
+    else
+      calc.invalid(FalseSchemaReason())
 }
 case class ErroredHandler(reason: String) extends Handler {
   override def withKeyword(keyword: String, value: Value): Handler = this
@@ -122,15 +286,33 @@ case object NullHandler extends Handler {
   override def handle[R](calc: Calculator[R])(value: Value): R = {
     value match {
       case NullValue => calc.valid(SchemaValue(NullValue))
-      case _         => calc.invalid(new TypeMismatch2("null"))
+      case _         => calc.invalid(TypeMismatch2("null"))
     }
   }
 }
 
-case object BooleanHandler extends Handler {}
-case object StringHandler  extends Handler {}
-case object NumberHandler  extends Handler {}
-case object ArrayHandler   extends Handler {}
+case object BooleanHandler extends Handler {
+  override def handle[R](calc: Calculator[R])(value: Value): R = {
+    value match {
+      case BoolValue(v) => calc.valid(SchemaValue(NullValue))
+      case _            => calc.invalid(new TypeMismatch2("boolean"))
+    }
+  }
+}
+
+case class NotHandler(schema: SchemaValue) extends Handler {
+  override def handle[R](calc: Calculator[R])(value: Value): R = {
+    val result = Processor.process(CoreHandler, calc)(schema, value)
+    if (result == calc.valid(schema))
+      calc.invalid(NotInvalid())
+    else
+      calc.valid(schema)
+  }
+
+}
+case object StringHandler extends Handler {}
+case object NumberHandler extends Handler {}
+case object ArrayHandler  extends Handler {}
 case object ObjectHandler extends Handler {
   override def withKeyword(keyword: String, value: Value): Handler = (keyword, value) match {
     case ("properties", ObjectValue(properties)) => PropertiesHandler(properties)
@@ -147,7 +329,7 @@ object Processor {
 
   def process[R](handler: Handler, calc: Calculator[R])(schema: SchemaValue, value: Value): R = {
     schema.value match {
-      case BoolValue(v) => BoolHandler(v).handle(calc)(value)
+      case BoolValue(v) => TrivialHandler(v).handle(calc)(value)
       case ObjectValue(properties) =>
         properties
           .foldLeft((handler, calc.valid(schema))) { case ((handler, result), (keyword, v)) =>
