@@ -275,6 +275,7 @@ case object RootHandler extends Handler {
   override def withKeyword(keyword: String, value: Value): Handler = keyword match {
     case _ => CoreHandler.withKeyword(keyword, value)
   }
+  override def handle[R](calc: Calculator[R])(value: Value): R = CoreHandler.handle(calc)(value)
 }
 
 case object CoreHandler extends Handler {
@@ -368,14 +369,12 @@ object Processor {
   def process[R](handler: Handler, calc: Calculator[R])(schema: SchemaValue, value: Value): R = {
     schema.value match {
       case BoolValue(v) => TrivialHandler(v).handle(calc)(value)
-      case ObjectValue(properties) =>
-        properties
-          .foldLeft((handler, calc.valid(schema))) { case ((handler, result), (keyword, v)) =>
-            val handler1 = handler.withKeyword(keyword, v)
-            val result1  = handler1.handle(calc)(value)
-            (handler1, result1)
+      case ObjectValue(keywords) =>
+        val handler1 = keywords
+          .foldLeft(handler) { case (handler, (keyword, v)) =>
+            handler.withKeyword(keyword, v)
           }
-          ._2
+        handler1.handle(calc)(value)
       case _ => calc.invalid(InvalidSchemaValue)
     }
 
