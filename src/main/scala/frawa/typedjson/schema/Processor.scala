@@ -157,10 +157,28 @@ case class ArrayItemsHandler(schema: SchemaValue) extends Handler {
   }
 }
 
-case class ObjectHandler(schema: SchemaValue) extends Handler {
+case class ObjectHandler(schema: SchemaValue, propertySchemas: Map[String, Value] = Map.empty) extends Handler {
   override def withKeyword(keyword: String, value: Value): Handler = (keyword, value) match {
-    case ("properties", ObjectValue(properties)) => PropertiesHandler(properties)
+    case ("properties", ObjectValue(properties)) => ObjectHandler(schema, properties)
     case _                                       => ErroredHandler(s"unexpected keyword ${keyword} ${value}")
+  }
+
+  override def handle[R](calc: Calculator[R])(value: Value): R = {
+    value match {
+      case ObjectValue(properties) =>
+        val results = properties.map { case (key1, value1) =>
+          lazy val prefix = Pointer.empty / key1
+          propertySchemas
+            .get(key1)
+            .map(SchemaValue(_))
+            .map(schema => Processor.getHandler(CoreHandler(schema))(schema))
+            .map(handler => handler.handle(calc)(value1))
+            .map(calc.prefix(prefix, _))
+            .getOrElse(calc.invalid(UnexpectedProperty(key1)))
+        }.toSeq
+        calc.allOf(results)
+      case _ => calc.invalid(new TypeMismatch2("object"))
+    }
   }
 }
 

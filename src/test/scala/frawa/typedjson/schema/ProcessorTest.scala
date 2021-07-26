@@ -268,4 +268,93 @@ class ProcessorTest extends FunSuite {
       }
     }
   }
+
+  test("object") {
+    withSchema("""{
+                 |"type": "object", 
+                 |"properties": { 
+                 |  "toto": { "type": "number" },
+                 |  "titi": { "type": "string" }
+                 |} 
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""{
+                       |"toto": 13,
+                       |"titi": "hello"
+                       |}
+                       |"""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""null""")(schema) { result =>
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(
+              TypeMismatch2("object")
+            )
+          )
+        )
+        assertEquals(result.valid, false)
+      }
+    }
+  }
+
+  test("object property type") {
+    withSchema("""{
+                 |"type": "object", 
+                 |"properties": { 
+                 |  "toto": { "type": "number" },
+                 |  "titi": { "type": "string" }
+                 |} 
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""{
+                       |"toto": 13,
+                       |"titi": true
+                       |}
+                       |""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("string"), Pointer.empty / "titi")))
+      }
+    }
+  }
+
+  test("object unknown property") {
+    withSchema("""{
+                 |"type": "object", 
+                 |"properties": { 
+                 |  "toto": { "type": "number" },
+                 |  "titi": { "type": "string" }
+                 |} 
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""{
+                       |"gnu": true,
+                       |"toto": 13,
+                       |"titi": "foo"
+                       |}
+                       |""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq(WithPointer(UnexpectedProperty("gnu"))))
+      }
+    }
+  }
+
+  test("object missing property".ignore) {
+    withSchema("""{
+                 |"type": "object", 
+                 |"properties": { 
+                 |  "toto": { "type": "number" },
+                 |  "titi": { "type": "string" }
+                 |} 
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""{
+                       |"toto": 13
+                       |}
+                       |""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq(WithPointer(MissingProperties(Map("titi" -> StringSchema)))))
+      }
+    }
+  }
+
 }
