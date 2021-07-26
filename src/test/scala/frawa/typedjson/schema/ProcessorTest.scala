@@ -426,6 +426,42 @@ class ProcessorTest extends FunSuite {
       }
     }
   }
+
+  test("anyOf") {
+    withSchema("""{
+                 |"anyOf": [
+                 |  { "type": "number" },
+                 |  { "type": "string" }
+                 |]
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+    }
+  }
+
+  test("failed anyOf") {
+    withSchema("""{
+                 |"anyOf": [
+                 |  { "type": "number" },
+                 |  { "type": "string" }
+                 |]
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""true""".stripMargin)(schema) { result =>
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(TypeMismatch2("number")),
+            WithPointer(TypeMismatch2("string"))
+          )
+        )
+        assertEquals(result.valid, false)
+      }
+    }
+  }
 }
 
 // TODO

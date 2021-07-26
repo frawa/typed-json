@@ -36,7 +36,7 @@ trait Calculator[R] {
   def invalid(observation: Observation): R
   def prefix(prefix: Pointer, result: R): R
   def allOf(results: Seq[R]): R
-//   def anyOf(results: Seq[R]): R
+  def anyOf(results: Seq[R]): R
 //   def oneOf(results: Seq[R]): R
 //   def not(result: R): R
 //   def ifThenElse(ifResult: R, thenResult: R, elseResult: R): R
@@ -64,6 +64,7 @@ case class CoreHandler(schema: SchemaValue) extends Handler {
       case ("type", StringValue("object"))  => ObjectHandler(schema)
       case ("not", value)                   => NotHandler(SchemaValue(value))
       case ("allOf", ArrayValue(schemas))   => AllOfHandler(schemas.map(SchemaValue(_)))
+      case ("anyOf", ArrayValue(schemas))   => AnyOfHandler(schemas.map(SchemaValue(_)))
       case _                                => ErroredHandler(s"""unexpected keyword "${keyword}": ${value}""")
     }
   }
@@ -211,6 +212,14 @@ case class AllOfHandler(schemas: Seq[SchemaValue]) extends Handler {
   }
 }
 
+case class AnyOfHandler(schemas: Seq[SchemaValue]) extends Handler {
+  override def handle[R](calc: Calculator[R])(value: Value): R = {
+    calc.anyOf(
+      schemas.map(schema => Processor.process(calc)(schema, value))
+    )
+  }
+}
+
 object Processor {
   def process[R](calc: Calculator[R])(schema: SchemaValue, value: Value): R = {
     process(RootHandler(schema), calc)(schema, value)
@@ -235,12 +244,23 @@ object Processor {
 
 class ValidationCalculator extends Calculator[ValidationResult] {
   override def valid(schema: SchemaValue): ValidationResult = ValidationValid
+
   override def invalid(observation: Observation): ValidationResult = ValidationInvalid(
     Seq(WithPointer(observation))
   )
+
   override def prefix(prefix: Pointer, result: ValidationResult): ValidationResult = result.prefix(prefix)
+
   override def allOf(results: Seq[ValidationResult]): ValidationResult = {
     if (results.isEmpty || results.forall(isValid(_))) {
+      ValidationValid
+    } else {
+      ValidationInvalid(results.flatMap(_.errors))
+    }
+  }
+
+  override def anyOf(results: Seq[ValidationResult]): ValidationResult = {
+    if (results.isEmpty || results.exists(isValid(_))) {
       ValidationValid
     } else {
       ValidationInvalid(results.flatMap(_.errors))
