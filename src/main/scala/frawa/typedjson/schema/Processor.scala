@@ -37,7 +37,7 @@ trait Calculator[R] {
   def prefix(prefix: Pointer, result: R): R
   def allOf(results: Seq[R]): R
   def anyOf(results: Seq[R]): R
-//   def oneOf(results: Seq[R]): R
+  def oneOf(results: Seq[R]): R
 //   def not(result: R): R
 //   def ifThenElse(ifResult: R, thenResult: R, elseResult: R): R
 }
@@ -65,6 +65,7 @@ case class CoreHandler(schema: SchemaValue) extends Handler {
       case ("not", value)                   => NotHandler(SchemaValue(value))
       case ("allOf", ArrayValue(schemas))   => AllOfHandler(schemas.map(SchemaValue(_)))
       case ("anyOf", ArrayValue(schemas))   => AnyOfHandler(schemas.map(SchemaValue(_)))
+      case ("oneOf", ArrayValue(schemas))   => OneOfHandler(schemas.map(SchemaValue(_)))
       case _                                => ErroredHandler(s"""unexpected keyword "${keyword}": ${value}""")
     }
   }
@@ -220,6 +221,14 @@ case class AnyOfHandler(schemas: Seq[SchemaValue]) extends Handler {
   }
 }
 
+case class OneOfHandler(schemas: Seq[SchemaValue]) extends Handler {
+  override def handle[R](calc: Calculator[R])(value: Value): R = {
+    calc.oneOf(
+      schemas.map(schema => Processor.process(calc)(schema, value))
+    )
+  }
+}
+
 object Processor {
   def process[R](calc: Calculator[R])(schema: SchemaValue, value: Value): R = {
     process(RootHandler(schema), calc)(schema, value)
@@ -264,6 +273,17 @@ class ValidationCalculator extends Calculator[ValidationResult] {
       ValidationValid
     } else {
       ValidationInvalid(results.flatMap(_.errors))
+    }
+  }
+
+  override def oneOf(results: Seq[ValidationResult]): ValidationResult = {
+    val count = results.count(isValid(_))
+    if (count == 1) {
+      ValidationValid
+    } else if (count == 0) {
+      ValidationInvalid(results.flatMap(_.errors))
+    } else {
+      ValidationInvalid(Seq(WithPointer(NotOneOf(count))))
     }
   }
 

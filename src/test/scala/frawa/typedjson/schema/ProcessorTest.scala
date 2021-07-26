@@ -462,6 +462,63 @@ class ProcessorTest extends FunSuite {
       }
     }
   }
+
+  test("oneOf") {
+    withSchema("""{
+                 |"anyOf": [
+                 |  { "type": "number" },
+                 |  { "type": "string" }
+                 |]
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+    }
+  }
+
+  test("failed oneOf: none") {
+    withSchema("""{
+                 |"oneOf": [
+                 |  { "type": "string" },
+                 |  { "type": "boolean" }
+                 |]
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(TypeMismatch2("string")),
+            WithPointer(TypeMismatch2("boolean"))
+          )
+        )
+        assertEquals(result.valid, false)
+      }
+    }
+  }
+
+  test("failed oneOf: two") {
+    withSchema("""{
+                 |"oneOf": [
+                 |  { "type": "number" },
+                 |  { "type": "number" }
+                 |]
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(NotOneOf(2))
+          )
+        )
+        assertEquals(result.valid, false)
+
+      }
+    }
+  }
 }
 
 // TODO
