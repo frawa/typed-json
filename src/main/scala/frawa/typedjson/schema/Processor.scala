@@ -25,10 +25,11 @@ trait Handler {
   def handle[R](calc: Calculator[R])(value: Value): R     = calc.invalid(NotHandled(this))
 }
 
-case class HandlerError(reason: String)    extends Observation
-case class NotHandled(handler: Handler)    extends Observation
-case object InvalidSchemaValue             extends Observation
-case class TypeMismatch2(expected: String) extends Observation
+case class HandlerError(reason: String)                             extends Observation
+case class NotHandled(handler: Handler)                             extends Observation
+case object InvalidSchemaValue                                      extends Observation
+case class TypeMismatch2(expected: String)                          extends Observation
+case class MissingProperties2(properties: Map[String, SchemaValue]) extends Observation
 
 trait Calculator[R] {
   def valid(schema: SchemaValue): R
@@ -157,12 +158,21 @@ case class ArrayItemsHandler(schema: SchemaValue) extends Handler {
   }
 }
 
-case class ObjectHandler(schema: SchemaValue, propertySchemas: Map[String, Value] = Map.empty) extends Handler {
+case class ObjectHandler(
+    schema: SchemaValue,
+    propertySchemas: Map[String, Value] = Map.empty,
+    required: Seq[String] = Seq.empty
+) extends Handler {
   override def withKeyword(keyword: String, value: Value): Handler = (keyword, value) match {
     case ("properties", ObjectValue(properties)) => ObjectHandler(schema, properties)
+    case ("required", ArrayValue(names))         => ObjectHandler(schema, propertySchemas, requiredNames(names))
     case _                                       => ErroredHandler(s"unexpected keyword ${keyword} ${value}")
   }
 
+  private def requiredNames(names: Seq[Value]): Seq[String] = names.flatMap {
+    case StringValue(name) => Some(name)
+    case _                 => None
+  }
   override def handle[R](calc: Calculator[R])(value: Value): R = {
     value match {
       case ObjectValue(properties) =>
@@ -176,13 +186,21 @@ case class ObjectHandler(schema: SchemaValue, propertySchemas: Map[String, Value
             .map(calc.prefix(prefix, _))
             .getOrElse(calc.invalid(UnexpectedProperty(key1)))
         }.toSeq
-        calc.allOf(results)
+        val missingNames = required
+          .filter(!properties.contains(_))
+        if (missingNames.isEmpty) {
+          calc.allOf(results)
+        } else {
+          val missing = propertySchemas.view
+            .filterKeys(missingNames.contains(_))
+            .mapValues(SchemaValue(_))
+            .toMap
+          calc.allOf(results :+ calc.invalid(MissingProperties2(missing)))
+        }
       case _ => calc.invalid(new TypeMismatch2("object"))
     }
   }
 }
-
-case class PropertiesHandler(properties: Map[String, Value]) extends Handler {}
 
 object Processor {
   def process[R](calc: Calculator[R])(schema: SchemaValue, value: Value): R = {

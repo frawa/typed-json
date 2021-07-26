@@ -315,6 +315,7 @@ class ProcessorTest extends FunSuite {
                        |}
                        |""".stripMargin)(schema) { result =>
         assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("string"), Pointer.empty / "titi")))
+        assertEquals(result.valid, false)
       }
     }
   }
@@ -335,11 +336,12 @@ class ProcessorTest extends FunSuite {
                        |}
                        |""".stripMargin)(schema) { result =>
         assertEquals(result.errors, Seq(WithPointer(UnexpectedProperty("gnu"))))
+        assertEquals(result.valid, false)
       }
     }
   }
 
-  test("object missing property".ignore) {
+  test("object missing property") {
     withSchema("""{
                  |"type": "object", 
                  |"properties": { 
@@ -352,9 +354,47 @@ class ProcessorTest extends FunSuite {
                        |"toto": 13
                        |}
                        |""".stripMargin)(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(MissingProperties(Map("titi" -> StringSchema)))))
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
       }
     }
   }
 
+  test("object missing required property") {
+    withSchema("""{
+                 |"type": "object", 
+                 |"properties": { 
+                 |  "toto": { "type": "number" },
+                 |  "titi": { "type": "string" }
+                 |},
+                 |"required": ["titi"]
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""{
+                       |"toto": 13
+                       |}
+                       |""".stripMargin)(schema) { result =>
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(
+              result = MissingProperties2(
+                Map(
+                  "titi" -> SchemaValue(
+                    value = ObjectValue(
+                      properties = Map(
+                        "type" -> StringValue(
+                          value = "string"
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      }
+    }
+  }
 }
