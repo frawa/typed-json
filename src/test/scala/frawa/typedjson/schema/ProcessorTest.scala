@@ -397,4 +397,36 @@ class ProcessorTest extends FunSuite {
       }
     }
   }
+
+  test("allOf") {
+    withSchema("""{
+                 |"allOf": [
+                 |  { "type": "number" }
+                 |]
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+    }
+  }
+
+  test("impossible allOf") {
+    withSchema("""{
+                 |"allOf": [
+                 |  { "type": "number" },
+                 |  { "type": "string" }
+                 |]
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("string"))))
+        assertEquals(result.valid, false)
+      }
+    }
+  }
 }
+
+// TODO
+// - $ref / $defs

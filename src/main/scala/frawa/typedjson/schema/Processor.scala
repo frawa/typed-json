@@ -63,6 +63,7 @@ case class CoreHandler(schema: SchemaValue) extends Handler {
       case ("type", StringValue("array"))   => ArrayHandler(schema)
       case ("type", StringValue("object"))  => ObjectHandler(schema)
       case ("not", value)                   => NotHandler(SchemaValue(value))
+      case ("allOf", ArrayValue(schemas))   => AllOfHandler(schemas.map(SchemaValue(_)))
       case _                                => ErroredHandler(s"""unexpected keyword "${keyword}": ${value}""")
     }
   }
@@ -199,6 +200,14 @@ case class ObjectHandler(
         }
       case _ => calc.invalid(new TypeMismatch2("object"))
     }
+  }
+}
+
+case class AllOfHandler(schemas: Seq[SchemaValue]) extends Handler {
+  override def handle[R](calc: Calculator[R])(value: Value): R = {
+    calc.allOf(
+      schemas.map(schema => Processor.process(calc)(schema, value))
+    )
   }
 }
 
