@@ -41,22 +41,26 @@ trait Calculator[R] {
 //   def ifThenElse(ifResult: R, thenResult: R, elseResult: R): R
 }
 
-case object RootHandler extends Handler {
+case class RootHandler(schema: SchemaValue) extends Handler {
+
+  private val core = new CoreHandler(schema)
+
   override def withKeyword(keyword: String, value: Value): Handler = keyword match {
-    case _ => CoreHandler.withKeyword(keyword, value)
+    case _ => core.withKeyword(keyword, value)
   }
-  override def handle[R](calc: Calculator[R])(value: Value): R = CoreHandler.handle(calc)(value)
+
+  override def handle[R](calc: Calculator[R])(value: Value): R = core.handle(calc)(value)
 }
 
-case object CoreHandler extends Handler {
+case class CoreHandler(schema: SchemaValue) extends Handler {
   override def withKeyword(keyword: String, value: Value): Handler = {
     (keyword, value) match {
-      case ("type", StringValue("null"))    => NullHandler
-      case ("type", StringValue("boolean")) => BooleanHandler
-      case ("type", StringValue("string"))  => StringHandler
-      case ("type", StringValue("number"))  => NumberHandler
-      case ("type", StringValue("array"))   => ArrayHandler
-      case ("type", StringValue("object"))  => ObjectHandler
+      case ("type", StringValue("null"))    => NullHandler(schema)
+      case ("type", StringValue("boolean")) => BooleanHandler(schema)
+      case ("type", StringValue("string"))  => StringHandler(schema)
+      case ("type", StringValue("number"))  => NumberHandler(schema)
+      case ("type", StringValue("array"))   => ArrayHandler(schema)
+      case ("type", StringValue("object"))  => ObjectHandler(schema)
       case ("not", value)                   => NotHandler(SchemaValue(value))
       case _                                => ErroredHandler(s"""unexpected keyword "${keyword}": ${value}""")
     }
@@ -71,24 +75,25 @@ case class TrivialHandler(valid: Boolean) extends Handler {
     else
       calc.invalid(FalseSchemaReason())
 }
+
 case class ErroredHandler(reason: String) extends Handler {
   override def withKeyword(keyword: String, value: Value): Handler = this
   override def handle[R](calc: Calculator[R])(value: Value): R     = calc.invalid(HandlerError(reason))
 }
 
-case object NullHandler extends Handler {
+case class NullHandler(schema: SchemaValue) extends Handler {
   override def handle[R](calc: Calculator[R])(value: Value): R = {
     value match {
-      case NullValue => calc.valid(SchemaValue(NullValue))
+      case NullValue => calc.valid(schema)
       case _         => calc.invalid(TypeMismatch2("null"))
     }
   }
 }
 
-case object BooleanHandler extends Handler {
+case class BooleanHandler(schema: SchemaValue) extends Handler {
   override def handle[R](calc: Calculator[R])(value: Value): R = {
     value match {
-      case BoolValue(v) => calc.valid(SchemaValue(NullValue))
+      case BoolValue(v) => calc.valid(schema)
       case _            => calc.invalid(new TypeMismatch2("boolean"))
     }
   }
@@ -96,31 +101,31 @@ case object BooleanHandler extends Handler {
 
 case class NotHandler(schema: SchemaValue) extends Handler {
   override def handle[R](calc: Calculator[R])(value: Value): R = {
-    val result = Processor.process(CoreHandler, calc)(schema, value)
+    val result = Processor.process(CoreHandler(schema), calc)(schema, value)
     if (result == calc.valid(schema))
       calc.invalid(NotInvalid())
     else
       calc.valid(schema)
   }
 }
-case object StringHandler extends Handler {
+case class StringHandler(schema: SchemaValue) extends Handler {
   override def handle[R](calc: Calculator[R])(value: Value): R = {
     value match {
-      case StringValue(v) => calc.valid(SchemaValue(NullValue))
+      case StringValue(v) => calc.valid(schema)
       case _              => calc.invalid(new TypeMismatch2("string"))
     }
   }
 }
-case object NumberHandler extends Handler {
+case class NumberHandler(schema: SchemaValue) extends Handler {
   override def handle[R](calc: Calculator[R])(value: Value): R = {
     value match {
-      case NumberValue(v) => calc.valid(SchemaValue(NullValue))
+      case NumberValue(v) => calc.valid(schema)
       case _              => calc.invalid(new TypeMismatch2("number"))
     }
   }
 }
 
-case object ArrayHandler extends Handler {
+case class ArrayHandler(schema: SchemaValue) extends Handler {
   override def withKeyword(keyword: String, value: Value): Handler = (keyword, value) match {
     case ("items", value) => ArrayItemsHandler(SchemaValue(value))
     case _                => ErroredHandler(s"""unexpected keyword "${keyword}": ${value}""")
@@ -128,7 +133,7 @@ case object ArrayHandler extends Handler {
 
   override def handle[R](calc: Calculator[R])(value: Value): R = {
     value match {
-      case ArrayValue(vs) => calc.valid(SchemaValue(NullValue))
+      case ArrayValue(vs) => calc.valid(schema)
       case _              => calc.invalid(new TypeMismatch2("array"))
     }
   }
@@ -138,7 +143,7 @@ case class ArrayItemsHandler(schema: SchemaValue) extends Handler {
   override def handle[R](calc: Calculator[R])(value: Value): R = {
     value match {
       case ArrayValue(items) =>
-        val handler = Processor.getHandler(CoreHandler)(schema)
+        val handler = Processor.getHandler(CoreHandler(schema))(schema)
         calc.allOf(
           items.zipWithIndex
             .map { case (item, index) =>
@@ -152,7 +157,7 @@ case class ArrayItemsHandler(schema: SchemaValue) extends Handler {
   }
 }
 
-case object ObjectHandler extends Handler {
+case class ObjectHandler(schema: SchemaValue) extends Handler {
   override def withKeyword(keyword: String, value: Value): Handler = (keyword, value) match {
     case ("properties", ObjectValue(properties)) => PropertiesHandler(properties)
     case _                                       => ErroredHandler(s"unexpected keyword ${keyword} ${value}")
@@ -163,7 +168,7 @@ case class PropertiesHandler(properties: Map[String, Value]) extends Handler {}
 
 object Processor {
   def process[R](calc: Calculator[R])(schema: SchemaValue, value: Value): R = {
-    process(RootHandler, calc)(schema, value)
+    process(RootHandler(schema), calc)(schema, value)
   }
 
   def process[R](handler: Handler, calc: Calculator[R])(schema: SchemaValue, value: Value): R = {
@@ -183,7 +188,6 @@ object Processor {
   }
 }
 
-// ResultCalculator[ValidationResult]
 class ValidationCalculator extends Calculator[ValidationResult] {
   override def valid(schema: SchemaValue): ValidationResult = ValidationValid
   override def invalid(observation: Observation): ValidationResult = ValidationInvalid(
