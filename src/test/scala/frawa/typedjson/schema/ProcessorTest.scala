@@ -647,6 +647,29 @@ class ProcessorTest extends FunSuite {
     }
   }
 
+  test("null or string") {
+    withSchema("""{"type": ["null","string"]}""") { schema =>
+      assertValidate("""null""")(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate(""""hello"""")(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""13""")(schema) { result =>
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(TypeMismatch2("null")),
+            WithPointer(TypeMismatch2("string"))
+          )
+        )
+        assertEquals(result.valid, false)
+      }
+    }
+  }
+
 }
 
 // TODO
