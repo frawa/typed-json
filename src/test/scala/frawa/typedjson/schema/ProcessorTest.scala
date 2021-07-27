@@ -670,6 +670,38 @@ class ProcessorTest extends FunSuite {
     }
   }
 
+  test("enum") {
+    withSchema("""{
+                 |"type": "string",
+                 |"enum": ["foo", "bar"]
+                 |}""".stripMargin) { schema =>
+      assertValidate(""""foo"""")(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate(""""bar"""")(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate(""""hello"""")(schema) { result =>
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(
+              NotInEnum(
+                Seq(
+                  StringValue("foo"),
+                  StringValue("bar")
+                )
+              )
+            )
+          )
+        )
+        assertEquals(result.valid, false)
+      }
+    }
+  }
+
 }
 
 // TODO

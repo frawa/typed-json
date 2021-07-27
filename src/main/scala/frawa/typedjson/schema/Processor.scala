@@ -21,7 +21,7 @@ object SchemaValue {
 }
 
 trait Handler {
-  def withKeyword(keyword: String, value: Value): Option[Handler] = Some(this)
+  def withKeyword(keyword: String, value: Value): Option[Handler] = None
   def handle[R](calc: Calculator[R])(value: Value): R             = calc.invalid(NotHandled(this))
 }
 
@@ -73,6 +73,7 @@ case class CoreHandler(schema: SchemaValue, handlers: Seq[Handler] = Seq.empty) 
       case ("else", value) =>
         firstHandler(keyword, value)
           .orElse(add(IfThenElseHandler(None, None, Some(SchemaValue(value)))))
+      case ("enum", ArrayValue(values)) => add(EnumHandler(this, values))
       case _ =>
         firstHandler(keyword, value)
           .orElse(Some(ErroredHandler(s"""unhandled keyword "${keyword}": ${value}""")))
@@ -300,6 +301,17 @@ case class UnionHandler(handlers: Seq[Handler]) extends Handler {
   }
 }
 
+case class EnumHandler(handler: Handler, values: Seq[Value]) extends Handler {
+  override def handle[R](calc: Calculator[R])(value: Value): R = {
+    val result = handler.handle(calc)(value)
+    if (calc.isValid(result) && values.contains(value)) {
+      result
+    } else {
+      calc.invalid(NotInEnum(values))
+    }
+  }
+}
+
 object Processor {
   def process[R](calc: Calculator[R])(schema: SchemaValue, value: Value): R = {
     process(RootHandler(schema), calc)(schema, value)
@@ -324,10 +336,12 @@ object Processor {
   }
 
   def firstHandler(handlers: Seq[Handler])(keyword: String, value: Value): Option[Handler] = {
-    handlers
+    val fw = handlers
       .to(LazyList)
       .flatMap(_.withKeyword(keyword, value))
       .headOption
+    println("FW", keyword, fw)
+    fw
   }
 }
 
