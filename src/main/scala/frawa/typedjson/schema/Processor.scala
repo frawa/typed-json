@@ -135,7 +135,7 @@ case class BooleanHandler(schema: SchemaValue) extends Handler {
 case class NotHandler(schema: SchemaValue) extends Handler {
   override def handle[R](calc: Calculator[R])(value: Value): R = {
     val result = Processor.process(CoreHandler(schema), calc)(schema, value)
-    if (result == calc.valid(schema))
+    if (calc.isValid(result))
       calc.invalid(NotInvalid())
     else
       calc.valid(schema)
