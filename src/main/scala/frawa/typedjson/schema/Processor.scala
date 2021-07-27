@@ -74,6 +74,7 @@ case class CoreHandler(schema: SchemaValue, handlers: Seq[Handler] = Seq.empty) 
         firstHandler(keyword, value)
           .orElse(add(IfThenElseHandler(None, None, Some(SchemaValue(value)))))
       case ("enum", ArrayValue(values)) => add(EnumHandler(this, values))
+      case ("const", values)            => add(EnumHandler(this, Seq(value)))
       case _ =>
         firstHandler(keyword, value)
           .orElse(Some(ErroredHandler(s"""unhandled keyword "${keyword}": ${value}""")))
@@ -336,12 +337,10 @@ object Processor {
   }
 
   def firstHandler(handlers: Seq[Handler])(keyword: String, value: Value): Option[Handler] = {
-    val fw = handlers
+    handlers
       .to(LazyList)
       .flatMap(_.withKeyword(keyword, value))
       .headOption
-    println("FW", keyword, fw)
-    fw
   }
 }
 

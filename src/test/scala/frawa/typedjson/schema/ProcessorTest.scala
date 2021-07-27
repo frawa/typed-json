@@ -702,6 +702,64 @@ class ProcessorTest extends FunSuite {
     }
   }
 
+  test("const") {
+    withSchema("""{
+                 |"type": "string",
+                 |"const": "first" 
+                 |}""".stripMargin) { schema =>
+      assertValidate(""""first"""")(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""{}""".stripMargin)(schema) { result =>
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(
+              result = TypeMismatch2(
+                expected = "string"
+              ),
+              pointer = Pointer(
+                segments = Nil
+              )
+            ),
+            WithPointer(
+              result = NotInEnum(
+                values = List(
+                  StringValue(
+                    value = "first"
+                  )
+                )
+              ),
+              pointer = Pointer(
+                segments = Nil
+              )
+            )
+          )
+        )
+      }
+      assertValidate(""""second"""")(schema) { result =>
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(
+              result = NotInEnum(
+                values = List(
+                  StringValue(
+                    value = "first"
+                  )
+                )
+              ),
+              pointer = Pointer(
+                segments = Nil
+              )
+            )
+          )
+        )
+      }
+    }
+  }
+
 }
 
 // TODO
