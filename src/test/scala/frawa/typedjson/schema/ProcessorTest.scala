@@ -543,6 +543,110 @@ class ProcessorTest extends FunSuite {
       }
     }
   }
+
+  test("if/then/else") {
+    withSchema("""{
+                 |"if": { "type": "number" },
+                 |"then": { "type": "number" },
+                 |"else": { "type": "string" }
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate(""""string"""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""null""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("string"))))
+        assertEquals(result.valid, false)
+      }
+    }
+  }
+
+  test("then/if/else") {
+    withSchema("""{
+                 |"then": { "type": "number" },
+                 |"if": { "type": "number" },
+                 |"else": { "type": "string" }
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate(""""string"""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""null""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("string"))))
+        assertEquals(result.valid, false)
+      }
+    }
+  }
+
+  test("if/else") {
+    withSchema("""{
+                 |"if": { "type": "number" },
+                 |"else": { "type": "string" }
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate(""""string"""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""null""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("string"))))
+        assertEquals(result.valid, false)
+      }
+    }
+  }
+
+  test("if/then") {
+    withSchema("""{
+                 |"if": { "type": "number" },
+                 |"then": { "type": "number" }
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate(""""string"""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+    }
+  }
+
+  test("then/else") {
+    withSchema("""{
+                 |"then": { "type": "number" },
+                 |"else": { "type": "string" }
+                 |}
+                 |""".stripMargin) { schema =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate(""""string"""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate("""null""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+    }
+  }
+
 }
 
 // TODO
