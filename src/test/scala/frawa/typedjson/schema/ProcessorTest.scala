@@ -11,26 +11,11 @@ import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue
 import scala.reflect.internal.Reporter
+import munit.Assertions._
+import TestUtil._
 
 class ProcessorTest extends FunSuite {
   implicit val zioParser = new ZioParser();
-
-  private def withParsedSchemaValue(text: String, parse: String => Either[String, SchemaValue])(
-      f: SchemaValue => Unit
-  ) {
-    val withSchema = for {
-      value <- parse(text)
-    } yield {
-      f(value)
-    }
-    withSchema.swap
-      .map(message => fail("no schema", clues(clue(message))))
-      .swap
-  }
-
-  private def withSchema(text: String)(f: SchemaValue => Unit) {
-    withParsedSchemaValue(text, SchemaValue.apply)(f)
-  }
 
   private def assertValidate(text: String)(schema: SchemaValue)(
       f: ValidationResult => Unit
@@ -760,7 +745,61 @@ class ProcessorTest extends FunSuite {
     }
   }
 
+  test("$id/$ref/$def".ignore) {
+    withSchema("""{
+                 |"$id": "https://example.net/root.json",
+                 |"type": "array",
+                 |"items": {
+                 |    "$ref": "#item"
+                 |},
+                 |"$defs": {
+                 |    "single": {
+                 |        "$anchor": "item",
+                 |        "type": "number"
+                 |    }
+                 |}
+                 |}""".stripMargin) { schema =>
+      assertValidate("""[1313]""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+      assertValidate(""""string"""".stripMargin)(schema) { result =>
+        assertEquals(result.errors, Seq())
+        assertEquals(result.valid, true)
+      }
+    }
+  }
 }
 
 // TODO
 // - $ref / $defs
+
+/*
+{
+    "$id": "https://example.net/root.json",
+    "items": {
+        "type": "array",
+        "items": { "$ref": "#item" }
+    },
+    "$defs": {
+        "single": {
+            "$anchor": "item",
+            "type": "object",
+            "additionalProperties": { "$ref": "other.json" }
+        }
+    }
+}
+{
+    "$id": "https://example.net/root.json",
+    "type": "array",
+    "items": {
+        "$ref": "#item"
+    },
+    "$defs": {
+        "single": {
+            "$anchor": "item",
+            "type": "number"
+        }
+    }
+}
+ */

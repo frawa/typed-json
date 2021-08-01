@@ -10,6 +10,7 @@ import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue
 import scala.reflect.internal.Reporter
+import java.net.URI
 
 case class SchemaValue(value: Value)
 
@@ -18,6 +19,25 @@ object SchemaValue {
     for {
       value <- parser.parse(json)
     } yield SchemaValue(value)
+}
+
+trait SchemaResolver {
+  def resolve(ref: String): Option[SchemaValue] = None
+}
+
+case object RootSchemaResolver extends SchemaResolver {
+  override def resolve(ref: String): Option[SchemaValue] = None
+}
+
+case class RelativeSchemaResolver(id: String, resolver: SchemaResolver) extends SchemaResolver {
+
+  val base = URI.create(id).normalize()
+  println("FW0", base)
+  override def resolve(ref: String): Option[SchemaValue] = {
+    val id = base.resolve(URI.create(ref))
+    println("FW", base, ref, id)
+    None
+  }
 }
 
 trait Handler {
@@ -43,9 +63,9 @@ trait Calculator[R] {
   def ifThenElse(ifResult: R, thenResult: Option[R], elseResult: Option[R]): R
 }
 
-case class RootHandler(schema: SchemaValue) extends Handler {
+case class RootHandler(schema: SchemaValue, resolver: SchemaResolver) extends Handler {
 
-  private val core = new CoreHandler(schema)
+  private val core = new CoreHandler(schema, resolver)
 
   override def withKeyword(keyword: String, value: Value): Option[Handler] = keyword match {
     case _ => core.withKeyword(keyword, value)
@@ -54,29 +74,46 @@ case class RootHandler(schema: SchemaValue) extends Handler {
   override def handle[R](calc: Calculator[R])(value: Value): R = core.handle(calc)(value)
 }
 
-case class CoreHandler(schema: SchemaValue, handlers: Seq[Handler] = Seq.empty) extends Handler {
+case class CoreHandler(schema: SchemaValue, resolver: SchemaResolver, handlers: Seq[Handler] = Seq.empty)
+    extends Handler {
   override def withKeyword(keyword: String, value: Value): Option[Handler] = {
     (keyword, value) match {
       case ("type", StringValue(typeName)) => getTypeHandler(typeName, schema).flatMap(add(_))
       case ("type", ArrayValue(typeNames)) =>
         add(UnionHandler(Utils.toStrings(typeNames).flatMap(getTypeHandler(_, schema))))
-      case ("not", value)                 => add(NotHandler(SchemaValue(value)))
+      case ("not", value)                 => add(NotHandler(SchemaValue(value), resolver))
       case ("allOf", ArrayValue(schemas)) => add(AllOfHandler(schemas.map(SchemaValue(_))))
       case ("anyOf", ArrayValue(schemas)) => add(AnyOfHandler(schemas.map(SchemaValue(_))))
       case ("oneOf", ArrayValue(schemas)) => add(OneOfHandler(schemas.map(SchemaValue(_))))
       case ("if", value) =>
-        firstHandler(keyword, value)
+        val (first, handlers) = firstHandler(keyword, value)
+        first
+          .map(_ => CoreHandler(schema, resolver, handlers))
           .orElse(add(IfThenElseHandler(Some(SchemaValue(value)))))
       case ("then", value) =>
-        firstHandler(keyword, value)
+        val (first, handlers) = firstHandler(keyword, value)
+        first
+          .map(_ => CoreHandler(schema, resolver, handlers))
           .orElse(add(IfThenElseHandler(None, Some(SchemaValue(value)))))
       case ("else", value) =>
-        firstHandler(keyword, value)
+        val (first, handlers) = firstHandler(keyword, value)
+        first
+          .map(_ => CoreHandler(schema, resolver, handlers))
           .orElse(add(IfThenElseHandler(None, None, Some(SchemaValue(value)))))
       case ("enum", ArrayValue(values)) => add(EnumHandler(this, values))
       case ("const", values)            => add(EnumHandler(this, Seq(value)))
+      case ("$id", StringValue(id))     => Some(CoreHandler(schema, RelativeSchemaResolver(id, resolver), handlers))
+      case ("$ref", StringValue(ref)) =>
+        resolver
+          .resolve(ref)
+          .map(schema => Processor.getHandler(CoreHandler(schema, resolver))(schema))
+          .orElse(Some(ErroredHandler(s"""missing reference "${ref}"""")))
+      case ("$defs", _)   => Some(this)
+      case ("$anchor", _) => Some(this)
       case _ =>
-        firstHandler(keyword, value)
+        val (first, handlers) = firstHandler(keyword, value)
+        first
+          .map(_ => CoreHandler(schema, resolver, handlers))
           .orElse(Some(ErroredHandler(s"""unhandled keyword "${keyword}": ${value}""")))
     }
   }
@@ -86,18 +123,18 @@ case class CoreHandler(schema: SchemaValue, handlers: Seq[Handler] = Seq.empty) 
       case "null"    => Some(NullHandler(schema))
       case "boolean" => Some(BooleanHandler(schema))
       case "string"  => Some(StringHandler(schema))
-      case "array"   => Some(ArrayHandler(schema))
+      case "array"   => Some(ArrayHandler(schema, resolver))
       case "number"  => Some(NumberHandler(schema))
-      case "object"  => Some(ObjectHandler(schema))
+      case "object"  => Some(ObjectHandler(schema, resolver))
       case _         => None
     }
   }
 
   private def add(handler: Handler): Option[Handler] = {
-    Some(CoreHandler(schema, handlers :+ handler))
+    Some(CoreHandler(schema, resolver, handlers :+ handler))
   }
 
-  private def firstHandler(keyword: String, value: Value): Option[Handler] = {
+  private def firstHandler(keyword: String, value: Value): (Option[Handler], Seq[Handler]) = {
     Processor.firstHandler(handlers)(keyword, value)
   }
 
@@ -140,9 +177,9 @@ case class BooleanHandler(schema: SchemaValue) extends Handler {
   }
 }
 
-case class NotHandler(schema: SchemaValue) extends Handler {
+case class NotHandler(schema: SchemaValue, resolver: SchemaResolver) extends Handler {
   override def handle[R](calc: Calculator[R])(value: Value): R = {
-    val result = Processor.process(CoreHandler(schema), calc)(schema, value)
+    val result = Processor.process(CoreHandler(schema, resolver), calc)(schema, value)
     if (calc.isValid(result))
       calc.invalid(NotInvalid())
     else
@@ -166,9 +203,9 @@ case class NumberHandler(schema: SchemaValue) extends Handler {
   }
 }
 
-case class ArrayHandler(schema: SchemaValue) extends Handler {
+case class ArrayHandler(schema: SchemaValue, resolver: SchemaResolver) extends Handler {
   override def withKeyword(keyword: String, value: Value): Option[Handler] = (keyword, value) match {
-    case ("items", value) => Some(ArrayItemsHandler(SchemaValue(value)))
+    case ("items", value) => Some(ArrayItemsHandler(SchemaValue(value), resolver))
     case _                => None
   }
 
@@ -180,11 +217,11 @@ case class ArrayHandler(schema: SchemaValue) extends Handler {
   }
 }
 
-case class ArrayItemsHandler(schema: SchemaValue) extends Handler {
+case class ArrayItemsHandler(schema: SchemaValue, resolver: SchemaResolver) extends Handler {
   override def handle[R](calc: Calculator[R])(value: Value): R = {
     value match {
       case ArrayValue(items) =>
-        val handler = Processor.getHandler(CoreHandler(schema))(schema)
+        val handler = Processor.getHandler(CoreHandler(schema, resolver))(schema)
         calc.allOf(
           items.zipWithIndex
             .map { case (item, index) =>
@@ -200,12 +237,13 @@ case class ArrayItemsHandler(schema: SchemaValue) extends Handler {
 
 case class ObjectHandler(
     schema: SchemaValue,
+    resolver: SchemaResolver,
     propertySchemas: Map[String, Value] = Map.empty,
     required: Seq[String] = Seq.empty
 ) extends Handler {
   override def withKeyword(keyword: String, value: Value): Option[Handler] = (keyword, value) match {
-    case ("properties", ObjectValue(properties)) => Some(ObjectHandler(schema, properties))
-    case ("required", ArrayValue(names))         => Some(ObjectHandler(schema, propertySchemas, requiredNames(names)))
+    case ("properties", ObjectValue(properties)) => Some(ObjectHandler(schema, resolver, properties))
+    case ("required", ArrayValue(names))         => Some(ObjectHandler(schema, resolver, propertySchemas, requiredNames(names)))
     case _                                       => None
   }
 
@@ -219,7 +257,7 @@ case class ObjectHandler(
           propertySchemas
             .get(key1)
             .map(SchemaValue(_))
-            .map(schema => Processor.getHandler(CoreHandler(schema))(schema))
+            .map(schema => Processor.getHandler(CoreHandler(schema, resolver))(schema))
             .map(handler => handler.handle(calc)(value1))
             .map(calc.prefix(prefix, _))
             .getOrElse(calc.invalid(UnexpectedProperty(key1)))
@@ -294,7 +332,7 @@ case class IfThenElseHandler(
 
 case class UnionHandler(handlers: Seq[Handler]) extends Handler {
   override def withKeyword(keyword: String, value: Value): Option[Handler] =
-    Processor.firstHandler(handlers)(keyword, value)
+    Processor.firstHandler(handlers)(keyword, value)._1
   override def handle[R](calc: Calculator[R])(value: Value): R = {
     calc.oneOf(
       handlers.map(_.handle(calc)(value))
@@ -315,10 +353,13 @@ case class EnumHandler(handler: Handler, values: Seq[Value]) extends Handler {
 
 object Processor {
   def process[R](calc: Calculator[R])(schema: SchemaValue, value: Value): R = {
-    process(RootHandler(schema), calc)(schema, value)
+    process(RootHandler(schema, RootSchemaResolver), calc)(schema, value)
   }
 
-  def process[R](handler: Handler, calc: Calculator[R])(schema: SchemaValue, value: Value): R = {
+  def process[R](handler: Handler, calc: Calculator[R])(
+      schema: SchemaValue,
+      value: Value
+  ): R = {
     getHandler(handler)(schema).handle(calc)(value)
   }
 
@@ -330,17 +371,27 @@ object Processor {
           .foldLeft(handler) { case (handler, (keyword, v)) =>
             handler
               .withKeyword(keyword, v)
-              .getOrElse(ErroredHandler(s"""invalid schema ${schema} with keyword "${keyword}"": ${v}"""))
+              .getOrElse(ErroredHandler(s"""unhandled schema with keyword "${keyword}": ${v}, handler ${handler}"""))
           }
       case _ => ErroredHandler(s"invalid schema ${schema}")
     }
   }
 
-  def firstHandler(handlers: Seq[Handler])(keyword: String, value: Value): Option[Handler] = {
-    handlers
-      .to(LazyList)
-      .flatMap(_.withKeyword(keyword, value))
-      .headOption
+  def firstHandler(handlers: Seq[Handler])(keyword: String, value: Value): (Option[Handler], Seq[Handler]) = {
+    // handlers
+    //   .to(LazyList)
+    //   .flatMap(_.withKeyword(keyword, value))
+    //   .headOption
+    handlers.foldLeft((Option.empty[Handler], Seq.empty[Handler])) { case ((first, handlers), current) =>
+      if (first.isDefined) {
+        (first, handlers :+ current)
+      } else {
+        current
+          .withKeyword(keyword, value)
+          .map(h => (Some(h), handlers :+ h))
+          .getOrElse((Option.empty[Handler], handlers :+ current))
+      }
+    }
   }
 }
 
