@@ -22,20 +22,33 @@ object SchemaValue {
 }
 
 trait SchemaResolver {
-  def resolve(ref: String): Option[SchemaValue] = None
+  val base: Option[URI]                      = None
+  def resolve(uri: URI): Option[SchemaValue] = None
+  def resolveRef(ref: String): Option[SchemaValue] = {
+    def uri = URI.create(ref)
+    if (uri.isAbsolute()) {
+      resolve(uri)
+    } else {
+      base
+        .map(_.resolve(uri))
+        .flatMap(resolve(_))
+    }
+  }
 }
 
 case object RootSchemaResolver extends SchemaResolver {
-  override def resolve(ref: String): Option[SchemaValue] = None
+
+  override def resolve(uri: URI): Option[SchemaValue] = None
 }
 
 case class RelativeSchemaResolver(id: String, resolver: SchemaResolver) extends SchemaResolver {
 
-  val base = URI.create(id).normalize()
+  override val base = Some(URI.create(id).normalize())
+
   println("FW0", base)
-  override def resolve(ref: String): Option[SchemaValue] = {
-    val id = base.resolve(URI.create(ref))
-    println("FW", base, ref, id)
+  override def resolve(uri: URI): Option[SchemaValue] = {
+    // val id = base.resolve(URI.create(ref))
+    // println("FW", base, ref, id)
     None
   }
 }
@@ -105,7 +118,7 @@ case class CoreHandler(schema: SchemaValue, resolver: SchemaResolver, handlers: 
       case ("$id", StringValue(id))     => Some(CoreHandler(schema, RelativeSchemaResolver(id, resolver), handlers))
       case ("$ref", StringValue(ref)) =>
         resolver
-          .resolve(ref)
+          .resolveRef(ref)
           .map(schema => Processor.getHandler(CoreHandler(schema, resolver))(schema))
           .orElse(Some(ErroredHandler(s"""missing reference "${ref}"""")))
       case ("$defs", _)   => Some(this)

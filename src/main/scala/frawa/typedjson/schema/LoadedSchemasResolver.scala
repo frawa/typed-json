@@ -37,7 +37,8 @@ case object LoadedSchemasResolver {
 
 }
 
-case class LoadedSchemasResolver(base: Option[URI], schemas: Map[URI, SchemaValue] = Map.empty) extends SchemaResolver {
+case class LoadedSchemasResolver(override val base: Option[URI], schemas: Map[URI, SchemaValue] = Map.empty)
+    extends SchemaResolver {
   def add(uri: URI, schema: SchemaValue): LoadedSchemasResolver = {
     LoadedSchemasResolver(Some(uri), schemas + ((uri, schema)))
   }
@@ -45,5 +46,5 @@ case class LoadedSchemasResolver(base: Option[URI], schemas: Map[URI, SchemaValu
     base,
     schemas.concat(other.schemas.toIterable)
   )
-  override def resolve(ref: String): Option[SchemaValue] = schemas.get(URI.create(ref))
+  override def resolve(uri: URI): Option[SchemaValue] = schemas.get(uri)
 }

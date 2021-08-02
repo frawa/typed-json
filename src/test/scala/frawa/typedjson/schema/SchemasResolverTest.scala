@@ -24,8 +24,9 @@ class LoadedSchemasResolverTest extends FunSuite {
                  |"type": "null"
                  |}""".stripMargin) { schema =>
       val resolver = LoadedSchemasResolver(schema)
-      assertEquals(resolver.base, Some(URI.create("https://example.net/root.json")))
-      assertEquals(resolver.resolve("https://example.net/root.json"), Some(schema))
+      val uri      = URI.create("https://example.net/root.json")
+      assertEquals(resolver.base, Some(uri))
+      assertEquals(resolver.resolve(uri), Some(schema))
     }
   }
 
@@ -41,10 +42,11 @@ class LoadedSchemasResolverTest extends FunSuite {
                  |}
                  |}""".stripMargin) { schema =>
       val resolver = LoadedSchemasResolver(schema)
-      assertEquals(resolver.base, Some(URI.create("https://example.net/root.json")))
-      assertEquals(resolver.resolve("https://example.net/root.json"), Some(schema))
+      val uri      = URI.create("https://example.net/root.json")
+      assertEquals(resolver.base, Some(uri))
+      assertEquals(resolver.resolve(uri), Some(schema))
       assertEquals(
-        resolver.resolve("https://example.net/foo.json"),
+        resolver.resolve(URI.create("https://example.net/foo.json")),
         Some(
           value = SchemaValue(
             value = ObjectValue(
@@ -75,8 +77,9 @@ class LoadedSchemasResolverTest extends FunSuite {
                  |}
                  |}""".stripMargin) { schema =>
       val resolver = LoadedSchemasResolver(schema)
-      assertEquals(resolver.base, Some(URI.create("https://example.net/root.json")))
-      assertEquals(resolver.resolve("https://example.net/root.json"), Some(schema))
+      val uri      = URI.create("https://example.net/root.json")
+      assertEquals(resolver.base, Some(uri))
+      assertEquals(resolver.resolve(uri), Some(schema))
       val expected = SchemaValue(
         value = ObjectValue(
           properties = Map(
@@ -91,9 +94,62 @@ class LoadedSchemasResolverTest extends FunSuite {
       )
 
       assertEquals(
-        resolver.resolve("https://example.net/root.json#foo"),
+        resolver.resolve(URI.create("https://example.net/root.json#foo")),
         Some(expected)
       )
     }
+  }
+}
+
+class SchemaResolverTest extends FunSuite {
+  val fooId  = "https://example.net/foo.json"
+  val fooUri = URI.create(fooId)
+  val fooSchema =
+    SchemaValue(
+      value = ObjectValue(
+        properties = Map(
+          "$id" -> StringValue(
+            value = fooId
+          ),
+          "type" -> StringValue(
+            value = "number"
+          )
+        )
+      )
+    )
+
+  val gnuUri = URI.create("https://example.net/foo.json#gnu")
+  val gnuSchema =
+    SchemaValue(
+      value = ObjectValue(
+        properties = Map(
+          "$anchor" -> StringValue(
+            value = "gnu"
+          ),
+          "type" -> StringValue(
+            value = "string"
+          )
+        )
+      )
+    )
+
+  case object NySchemaResolver extends SchemaResolver {
+
+    override val base: Option[URI] = Some(fooUri)
+    override def resolve(uri: URI): Option[SchemaValue] = uri match {
+      case `fooUri` => Some(fooSchema)
+      case `gnuUri` => Some(gnuSchema)
+      case _        => None
+    }
+  }
+
+  test("absolute ref") {
+    val resolved = NySchemaResolver.resolveRef(fooId)
+    assertEquals(resolved, Some(fooSchema))
+  }
+
+  test("anchor ref") {
+    val resolved = NySchemaResolver.resolveRef("#gnu")
+    assertEquals(resolved, Some(gnuSchema))
   }
 }
