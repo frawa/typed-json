@@ -104,19 +104,6 @@ class LoadedSchemasResolverTest extends FunSuite {
 class SchemaResolverTest extends FunSuite {
   val fooId  = "https://example.net/foo.json"
   val fooUri = URI.create(fooId)
-  val fooSchema =
-    SchemaValue(
-      value = ObjectValue(
-        properties = Map(
-          "$id" -> StringValue(
-            value = fooId
-          ),
-          "type" -> StringValue(
-            value = "number"
-          )
-        )
-      )
-    )
 
   val gnuUri = URI.create("https://example.net/foo.json#gnu")
   val gnuSchema =
@@ -128,6 +115,25 @@ class SchemaResolverTest extends FunSuite {
           ),
           "type" -> StringValue(
             value = "string"
+          )
+        )
+      )
+    )
+
+  val fooSchema =
+    SchemaValue(
+      value = ObjectValue(
+        properties = Map(
+          "$id" -> StringValue(
+            value = fooId
+          ),
+          "type" -> StringValue(
+            value = "number"
+          ),
+          "$defs" -> ObjectValue(
+            properties = Map(
+              "gnu" -> gnuSchema.value
+            )
           )
         )
       )
@@ -150,6 +156,11 @@ class SchemaResolverTest extends FunSuite {
 
   test("anchor ref") {
     val resolved = NySchemaResolver.resolveRef("#gnu")
+    assertEquals(resolved, Some(gnuSchema))
+  }
+
+  test("path ref") {
+    val resolved = NySchemaResolver.resolveRef("#/$defs/gnu")
     assertEquals(resolved, Some(gnuSchema))
   }
 }

@@ -24,16 +24,25 @@ object SchemaValue {
 trait SchemaResolver {
   val base: Option[URI]                      = None
   def resolve(uri: URI): Option[SchemaValue] = None
+
   def resolveRef(ref: String): Option[SchemaValue] = {
     def uri = URI.create(ref)
     if (uri.isAbsolute()) {
       resolve(uri)
+    } else if (uri.getFragment.startsWith("/")) {
+      val pointer = Pointer.parse(uri.getFragment())
+      base
+        .flatMap(resolve(_))
+        .flatMap(resolvePointer(_, pointer))
     } else {
       base
         .map(_.resolve(uri))
         .flatMap(resolve(_))
     }
   }
+
+  private def resolvePointer(schema: SchemaValue, pointer: Pointer): Option[SchemaValue] =
+    pointer(schema.value).map(SchemaValue(_))
 }
 
 case object RootSchemaResolver extends SchemaResolver {

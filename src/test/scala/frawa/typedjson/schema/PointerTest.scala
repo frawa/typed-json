@@ -23,6 +23,10 @@ class PointerTest extends FunSuite {
     assertEquals((Pointer.empty / "toto").toString, "/toto")
   }
 
+  test("deep field") {
+    assertEquals((Pointer.empty / "$defs" / "gnu").toString, "/$defs/gnu")
+  }
+
   test("field with /") {
     assertEquals((Pointer.empty / "toto/titi").toString, "/toto~1titi")
   }
@@ -39,6 +43,7 @@ class PointerTest extends FunSuite {
 
   test("parse") {
     assertEquals(Pointer.parse("/toto/titi"), Pointer.empty / "toto" / "titi")
+    assertEquals(Pointer.parse("/$defs/gnu"), Pointer.empty / "$defs" / "gnu")
     assertEquals(Pointer.parse("/toto~1titi"), Pointer.empty / "toto/titi")
     assertEquals(Pointer.parse("/toto~0titi"), Pointer.empty / "toto~titi")
   }
