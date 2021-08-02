@@ -1,9 +1,14 @@
 package frawa.typedjson.schema
 
+import frawa.typedjson.parser.Value
+import frawa.typedjson.parser.ArrayValue
+import frawa.typedjson.parser.ObjectValue
+
 object Pointer {
   def empty                         = new Pointer(Nil)
   def apply(index: Int): Pointer    = Pointer.empty / index
   def apply(field: String): Pointer = Pointer.empty / field
+
   def parse(spec: String): Pointer = Pointer( // TODO ArrayIndexToken?
     spec
       .split("/")
@@ -35,16 +40,36 @@ case class Pointer(segments: Seq[Token]) {
   def /(pointer: Pointer): Pointer = {
     new Pointer(segments ++ pointer.segments)
   }
+
+  def apply(value: Value): Option[Value] = segments.foldLeft(Option(value)) { case (v, segment) =>
+    v.flatMap(v => segment(v))
+  }
 }
 
-trait Token
+trait Token {
+  def apply(value: Value): Option[Value]
+}
+
 case class ArrayIndexToken(index: Int) extends Token {
   override def toString(): String = { index.toString }
+  override def apply(value: Value): Option[Value] = value match {
+    case ArrayValue(values) =>
+      if (values.isDefinedAt(index)) {
+        Some(values.apply(index))
+      } else {
+        None
+      }
+    case _ => None
+  }
 }
 case class FieldToken(field: String) extends Token {
   override def toString(): String = {
     field
       .replace("~", "~0")
       .replace("/", "~1")
+  }
+  override def apply(value: Value): Option[Value] = value match {
+    case ObjectValue(properties) => properties.get(field)
+    case _                       => None
   }
 }
