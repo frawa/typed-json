@@ -4,6 +4,17 @@ object Pointer {
   def empty                         = new Pointer(Nil)
   def apply(index: Int): Pointer    = Pointer.empty / index
   def apply(field: String): Pointer = Pointer.empty / field
+  def parse(spec: String): Pointer = Pointer( // TODO ArrayIndexToken?
+    spec
+      .split("/")
+      .map(field =>
+        field
+          .replace("~1", "/")
+          .replace("~0", "~")
+      )
+      .filter(_.length() > 0)
+      .map(FieldToken(_))
+  )
 }
 
 case class Pointer(segments: Seq[Token]) {

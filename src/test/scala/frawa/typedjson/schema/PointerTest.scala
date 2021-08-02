@@ -32,4 +32,10 @@ class PointerTest extends FunSuite {
     val pointer2 = Pointer.empty / 13
     assertEquals((pointer1 / pointer2).toString, "/toto/13")
   }
+
+  test("parse") {
+    assertEquals(Pointer.parse("/toto/titi"), Pointer.empty / "toto" / "titi")
+    assertEquals(Pointer.parse("/toto~1titi"), Pointer.empty / "toto/titi")
+    assertEquals(Pointer.parse("/toto~0titi"), Pointer.empty / "toto~titi")
+  }
 }
