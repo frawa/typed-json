@@ -42,15 +42,8 @@ case object RootSchemaResolver extends SchemaResolver {
 }
 
 case class RelativeSchemaResolver(id: String, resolver: SchemaResolver) extends SchemaResolver {
-
-  override val base = Some(URI.create(id).normalize())
-
-  println("FW0", base)
-  override def resolve(uri: URI): Option[SchemaValue] = {
-    // val id = base.resolve(URI.create(ref))
-    // println("FW", base, ref, id)
-    None
-  }
+  override val base                                   = Some(URI.create(id).normalize())
+  override def resolve(uri: URI): Option[SchemaValue] = resolver.resolve(uri)
 }
 
 trait Handler {
@@ -366,7 +359,7 @@ case class EnumHandler(handler: Handler, values: Seq[Value]) extends Handler {
 
 object Processor {
   def process[R](calc: Calculator[R])(schema: SchemaValue, value: Value): R = {
-    process(RootHandler(schema, RootSchemaResolver), calc)(schema, value)
+    process(RootHandler(schema, LoadedSchemasResolver(schema)), calc)(schema, value)
   }
 
   def process[R](handler: Handler, calc: Calculator[R])(

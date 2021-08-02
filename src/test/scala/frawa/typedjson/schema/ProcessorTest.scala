@@ -745,7 +745,7 @@ class ProcessorTest extends FunSuite {
     }
   }
 
-  test("$id/$ref/$def".ignore) {
+  test("$id/$ref/$def") {
     withSchema("""{
                  |"$id": "https://example.net/root.json",
                  |"type": "array",
@@ -764,8 +764,20 @@ class ProcessorTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate(""""string"""".stripMargin)(schema) { result =>
-        assertEquals(result.errors, Seq())
-        assertEquals(result.valid, true)
+        assertEquals(
+          result.errors,
+          Seq(
+            WithPointer(
+              result = TypeMismatch2(
+                expected = "array"
+              ),
+              pointer = Pointer(
+                segments = Nil
+              )
+            )
+          )
+        )
+        assertEquals(result.valid, false)
       }
     }
   }
