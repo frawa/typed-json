@@ -46,7 +46,6 @@ trait SchemaResolver {
 }
 
 case object RootSchemaResolver extends SchemaResolver {
-
   override def resolve(uri: URI): Option[SchemaValue] = None
 }
 
@@ -54,18 +53,6 @@ case class RelativeSchemaResolver(id: String, resolver: SchemaResolver) extends 
   override val base                                   = Some(URI.create(id).normalize())
   override def resolve(uri: URI): Option[SchemaValue] = resolver.resolve(uri)
 }
-
-trait Handler {
-  def withKeyword(keyword: String, value: Value): Option[Handler] = None
-  def handle[R](calc: Calculator[R])(value: Value): R             = calc.invalid(NotHandled(this))
-}
-
-case class HandlerError(reason: String)                             extends Observation
-case class NotHandled(handler: Handler)                             extends Observation
-case object InvalidSchemaValue                                      extends Observation
-case class TypeMismatch2(expected: String)                          extends Observation
-case class MissingProperties2(properties: Map[String, SchemaValue]) extends Observation
-
 trait Calculator[R] {
   def valid(schema: SchemaValue): R
   def isValid(result: R): Boolean
@@ -78,344 +65,141 @@ trait Calculator[R] {
   def ifThenElse(ifResult: R, thenResult: Option[R], elseResult: Option[R]): R
 }
 
-case class RootHandler(schema: SchemaValue, resolver: SchemaResolver) extends Handler {
+trait Check
+case class TrivialCheck(v: Boolean)     extends Check
+case class NullCheck()                  extends Check
+case class BooleanCheck()               extends Check
+case class StringCheck()                extends Check
+case class NumberCheck()                extends Check
+case class ArrayCheck()                 extends Check
+case class ObjectCheck()                extends Check
+case class NotCheck(checks: Seq[Check]) extends Check
 
-  private val core = new CoreHandler(schema, resolver)
-
-  override def withKeyword(keyword: String, value: Value): Option[Handler] = keyword match {
-    case _ => core.withKeyword(keyword, value)
-  }
-
-  override def handle[R](calc: Calculator[R])(value: Value): R = core.handle(calc)(value)
+trait Checker[R] {
+  def init: R
+  def check(check: Check): Value => R
 }
 
-case class CoreHandler(schema: SchemaValue, resolver: SchemaResolver, handlers: Seq[Handler] = Seq.empty)
-    extends Handler {
-  override def withKeyword(keyword: String, value: Value): Option[Handler] = {
-    (keyword, value) match {
-      case ("type", StringValue(typeName)) => getTypeHandler(typeName, schema).flatMap(add(_))
-      case ("type", ArrayValue(typeNames)) =>
-        add(UnionHandler(Utils.toStrings(typeNames).flatMap(getTypeHandler(_, schema))))
-      case ("not", value)                 => add(NotHandler(SchemaValue(value), resolver))
-      case ("allOf", ArrayValue(schemas)) => add(AllOfHandler(schemas.map(SchemaValue(_))))
-      case ("anyOf", ArrayValue(schemas)) => add(AnyOfHandler(schemas.map(SchemaValue(_))))
-      case ("oneOf", ArrayValue(schemas)) => add(OneOfHandler(schemas.map(SchemaValue(_))))
-      case ("if", value) =>
-        val (first, handlers) = firstHandler(keyword, value)
-        first
-          .map(_ => CoreHandler(schema, resolver, handlers))
-          .orElse(add(IfThenElseHandler(Some(SchemaValue(value)))))
-      case ("then", value) =>
-        val (first, handlers) = firstHandler(keyword, value)
-        first
-          .map(_ => CoreHandler(schema, resolver, handlers))
-          .orElse(add(IfThenElseHandler(None, Some(SchemaValue(value)))))
-      case ("else", value) =>
-        val (first, handlers) = firstHandler(keyword, value)
-        first
-          .map(_ => CoreHandler(schema, resolver, handlers))
-          .orElse(add(IfThenElseHandler(None, None, Some(SchemaValue(value)))))
-      case ("enum", ArrayValue(values)) => add(EnumHandler(this, values))
-      case ("const", values)            => add(EnumHandler(this, Seq(value)))
-      case ("$id", StringValue(id))     => Some(CoreHandler(schema, RelativeSchemaResolver(id, resolver), handlers))
-      case ("$ref", StringValue(ref)) =>
-        resolver
-          .resolveRef(ref)
-          .map(schema => Processor.getHandler(CoreHandler(schema, resolver))(schema))
-          .orElse(Some(ErroredHandler(s"""missing reference "${ref}"""")))
-      case ("$defs", _)   => Some(this)
-      case ("$anchor", _) => Some(this)
-      case _ =>
-        val (first, handlers) = firstHandler(keyword, value)
-        first
-          .map(_ => CoreHandler(schema, resolver, handlers))
-          .orElse(Some(ErroredHandler(s"""unhandled keyword "${keyword}": ${value}""")))
-    }
+case class Checks(
+    schama: SchemaValue,
+    checks: Seq[Check] = Seq.empty[Check],
+    ignoredKeywords: Map[String, Value] = Map.empty
+) {
+  //update[C :< Check ]()
+  def withCheck(check: Check): Checks = this.copy(checks = checks :+ check)
+
+  type SchemaErrors = Checks.SchemaErrors
+
+  def withKeyword(keyword: String, value: Value): Either[SchemaErrors, Checks] = (keyword, value) match {
+    case ("type", StringValue(typeName)) =>
+      Right(
+        getTypeCheck(typeName)
+          .map(withCheck(_))
+          .getOrElse(withIgnored(keyword, value))
+      )
+    case ("not", value) =>
+      for {
+        checks <- Checks.parseKeywords(SchemaValue(value))
+      } yield {
+        withCheck(NotCheck(checks.checks)).withIgnored(checks.ignoredKeywords)
+      }
+
+    case _ => Right(withIgnored(keyword, value))
   }
 
-  private def getTypeHandler(typeName: String, schema: SchemaValue): Option[Handler] = {
+  private def withIgnored(keyword: String, value: Value): Checks =
+    this.copy(ignoredKeywords = ignoredKeywords + ((keyword, value)))
+
+  private def withIgnored(ignored: Map[String, Value]): Checks =
+    this.copy(ignoredKeywords = ignoredKeywords.concat(ignored))
+
+  private def getTypeCheck(typeName: String): Option[Check] =
     typeName match {
-      case "null"    => Some(NullHandler(schema))
-      case "boolean" => Some(BooleanHandler(schema))
-      case "string"  => Some(StringHandler(schema))
-      case "array"   => Some(ArrayHandler(schema, resolver))
-      case "number"  => Some(NumberHandler(schema))
-      case "object"  => Some(ObjectHandler(schema, resolver))
+      case "null"    => Some(NullCheck())
+      case "boolean" => Some(BooleanCheck())
+      case "string"  => Some(StringCheck())
+      case "number"  => Some(NumberCheck())
+      case "array"   => Some(ArrayCheck())
+      case "object"  => Some(ObjectCheck())
       case _         => None
     }
-  }
 
-  private def add(handler: Handler): Option[Handler] = {
-    Some(CoreHandler(schema, resolver, handlers :+ handler))
-  }
-
-  private def firstHandler(keyword: String, value: Value): (Option[Handler], Seq[Handler]) = {
-    Processor.firstHandler(handlers)(keyword, value)
-  }
-
-  override def handle[R](calc: Calculator[R])(value: Value): R =
-    if (handlers.isEmpty) {
-      calc.valid(SchemaValue(NullValue))
-    } else {
-      calc.allOf(handlers.map(_.handle(calc)(value)))
+  def processor[R](checker: Checker[R]): Processor[R] = Processor(value =>
+    checks.foldLeft(checker.init) { case (result, check) =>
+      checker.check(check)(value)
     }
+  )
 }
 
-case class TrivialHandler(valid: Boolean) extends Handler {
-  override def handle[R](calc: Calculator[R])(value: Value): R =
-    if (valid)
-      calc.valid(SchemaValue(NullValue))
-    else
-      calc.invalid(FalseSchemaReason())
+case class SchemaError(message: String, pointer: Pointer = Pointer.empty) {
+  def prefix(prefix: Pointer): SchemaError = SchemaError(message, prefix / pointer)
 }
 
-case class ErroredHandler(reason: String) extends Handler {
-  override def withKeyword(keyword: String, value: Value): Option[Handler] = Some(this)
-  override def handle[R](calc: Calculator[R])(value: Value): R             = calc.invalid(HandlerError(reason))
-}
+object Checks {
+  type SchemaErrors = Seq[SchemaError]
 
-case class NullHandler(schema: SchemaValue) extends Handler {
-  override def handle[R](calc: Calculator[R])(value: Value): R = {
-    value match {
-      case NullValue => calc.valid(schema)
-      case _         => calc.invalid(TypeMismatch2("null"))
-    }
-  }
-}
-
-case class BooleanHandler(schema: SchemaValue) extends Handler {
-  override def handle[R](calc: Calculator[R])(value: Value): R = {
-    value match {
-      case BoolValue(v) => calc.valid(schema)
-      case _            => calc.invalid(new TypeMismatch2("boolean"))
-    }
-  }
-}
-
-case class NotHandler(schema: SchemaValue, resolver: SchemaResolver) extends Handler {
-  override def handle[R](calc: Calculator[R])(value: Value): R = {
-    val result = Processor.process(CoreHandler(schema, resolver), calc)(schema, value)
-    if (calc.isValid(result))
-      calc.invalid(NotInvalid())
-    else
-      calc.valid(schema)
-  }
-}
-case class StringHandler(schema: SchemaValue) extends Handler {
-  override def handle[R](calc: Calculator[R])(value: Value): R = {
-    value match {
-      case StringValue(v) => calc.valid(schema)
-      case _              => calc.invalid(new TypeMismatch2("string"))
-    }
-  }
-}
-case class NumberHandler(schema: SchemaValue) extends Handler {
-  override def handle[R](calc: Calculator[R])(value: Value): R = {
-    value match {
-      case NumberValue(v) => calc.valid(schema)
-      case _              => calc.invalid(new TypeMismatch2("number"))
-    }
-  }
-}
-
-case class ArrayHandler(schema: SchemaValue, resolver: SchemaResolver) extends Handler {
-  override def withKeyword(keyword: String, value: Value): Option[Handler] = (keyword, value) match {
-    case ("items", value) => Some(ArrayItemsHandler(schema, SchemaValue(value), resolver))
-    case _                => None
-  }
-
-  override def handle[R](calc: Calculator[R])(value: Value): R = {
-    value match {
-      case ArrayValue(vs) => calc.valid(schema)
-      case _              => calc.invalid(new TypeMismatch2("array"))
-    }
-  }
-}
-
-case class ArrayItemsHandler(schema: SchemaValue, itemsSchema: SchemaValue, resolver: SchemaResolver) extends Handler {
-  override def handle[R](calc: Calculator[R])(value: Value): R = {
-    value match {
-      case ArrayValue(items) =>
-        if (items.isEmpty) {
-          calc.valid(schema)
-        } else {
-          val handler = Processor.getHandler(CoreHandler(itemsSchema, resolver))(itemsSchema)
-          calc.allOf(
-            items.zipWithIndex
-              .map { case (item, index) =>
-                lazy val prefix = Pointer.empty / index
-                lazy val result = handler.handle(calc)(item)
-                calc.prefix(prefix, result)
-              }
-          )
+  def parseKeywords(schema: SchemaValue): Either[SchemaErrors, Checks] = schema.value match {
+    case BoolValue(v) => Right(Checks(schema).withCheck(TrivialCheck(v)))
+    case ObjectValue(keywords) =>
+      keywords
+        .foldLeft[Either[SchemaErrors, Checks]](Right(Checks(schema))) { case (checks, (keyword, value)) =>
+          val prefix = Pointer.empty / keyword
+          checks
+            .flatMap(_.withKeyword(keyword, value))
+            .swap
+            .map(_.map(_.prefix(prefix)))
+            .swap
         }
-      case _ => calc.invalid(new TypeMismatch2("array"))
-    }
+    case _ => Left(Seq(SchemaError(s"invalid schema ${schema}")))
   }
 }
 
-case class ObjectHandler(
-    schema: SchemaValue,
-    resolver: SchemaResolver,
-    propertySchemas: Map[String, Value] = Map.empty,
-    required: Seq[String] = Seq.empty
-) extends Handler {
-  override def withKeyword(keyword: String, value: Value): Option[Handler] = (keyword, value) match {
-    case ("properties", ObjectValue(properties)) => Some(ObjectHandler(schema, resolver, properties))
-    case ("required", ArrayValue(names))         => Some(ObjectHandler(schema, resolver, propertySchemas, requiredNames(names)))
-    case _                                       => None
-  }
-
-  private def requiredNames(names: Seq[Value]): Seq[String] = Utils.toStrings(names)
-
-  override def handle[R](calc: Calculator[R])(value: Value): R = {
-    value match {
-      case ObjectValue(properties) =>
-        val results = properties.map { case (key1, value1) =>
-          lazy val prefix = Pointer.empty / key1
-          propertySchemas
-            .get(key1)
-            .map(SchemaValue(_))
-            .map(schema => Processor.getHandler(CoreHandler(schema, resolver))(schema))
-            .map(handler => handler.handle(calc)(value1))
-            .map(calc.prefix(prefix, _))
-            .getOrElse(calc.invalid(UnexpectedProperty(key1)))
-        }.toSeq
-        val missingNames = required
-          .filter(!properties.contains(_))
-        if (missingNames.isEmpty) {
-          if (properties.isEmpty) {
-            calc.valid(schema)
-          } else {
-            calc.allOf(results)
-          }
-        } else {
-          val missing = propertySchemas.view
-            .filterKeys(missingNames.contains(_))
-            .mapValues(SchemaValue(_))
-            .toMap
-          calc.allOf(results :+ calc.invalid(MissingProperties2(missing)))
-        }
-      case _ => calc.invalid(new TypeMismatch2("object"))
-    }
-  }
-}
-
-case class AllOfHandler(schemas: Seq[SchemaValue]) extends Handler {
-  override def handle[R](calc: Calculator[R])(value: Value): R = {
-    calc.allOf(
-      schemas.map(schema => Processor.process(calc)(schema, value))
-    )
-  }
-}
-
-case class AnyOfHandler(schemas: Seq[SchemaValue]) extends Handler {
-  override def handle[R](calc: Calculator[R])(value: Value): R = {
-    calc.anyOf(
-      schemas.map(schema => Processor.process(calc)(schema, value))
-    )
-  }
-}
-
-case class OneOfHandler(schemas: Seq[SchemaValue]) extends Handler {
-  override def handle[R](calc: Calculator[R])(value: Value): R = {
-    calc.oneOf(
-      schemas.map(schema => Processor.process(calc)(schema, value))
-    )
-  }
-}
-
-case class IfThenElseHandler(
-    ifSchema: Option[SchemaValue],
-    thenSchema: Option[SchemaValue] = None,
-    elseSchema: Option[SchemaValue] = None
-) extends Handler {
-  override def withKeyword(keyword: String, value: Value): Option[Handler] = (keyword, value) match {
-    case ("if", value)   => Some(IfThenElseHandler(Some(SchemaValue(value)), thenSchema, elseSchema))
-    case ("then", value) => Some(IfThenElseHandler(ifSchema, Some(SchemaValue(value))))
-    case ("else", value) => Some(IfThenElseHandler(ifSchema, thenSchema, Some(SchemaValue(value))))
-    case _               => None
-  }
-
-  override def handle[R](calc: Calculator[R])(value: Value): R = {
-    ifSchema
-      .map(Processor.process(calc)(_, value))
-      .map { result =>
-        if (calc.isValid(result)) {
-          val thenResult = thenSchema.map(Processor.process(calc)(_, value))
-          calc.ifThenElse(result, thenResult, None)
-        } else {
-          val elseResult = elseSchema.map(Processor.process(calc)(_, value))
-          calc.ifThenElse(result, None, elseResult)
-        }
-      }
-      .getOrElse(calc.valid(ifSchema.getOrElse(SchemaValue(NullValue))))
-  }
-}
-
-case class UnionHandler(handlers: Seq[Handler]) extends Handler {
-  override def withKeyword(keyword: String, value: Value): Option[Handler] =
-    Processor.firstHandler(handlers)(keyword, value)._1
-  override def handle[R](calc: Calculator[R])(value: Value): R = {
-    calc.oneOf(
-      handlers.map(_.handle(calc)(value))
-    )
-  }
-}
-
-case class EnumHandler(handler: Handler, values: Seq[Value]) extends Handler {
-  override def handle[R](calc: Calculator[R])(value: Value): R = {
-    val result = handler.handle(calc)(value)
-    if (calc.isValid(result) && values.contains(value)) {
-      result
-    } else {
-      calc.invalid(NotInEnum(values))
-    }
-  }
-}
+case class Processor[R] private[schema] (process: Value => R)
 
 object Processor {
-  def process[R](calc: Calculator[R])(schema: SchemaValue, value: Value): R = {
-    process(RootHandler(schema, LoadedSchemasResolver(schema)), calc)(schema, value)
-  }
+  type SchemaErrors = Checks.SchemaErrors
 
-  def process[R](handler: Handler, calc: Calculator[R])(
-      schema: SchemaValue,
-      value: Value
-  ): R = {
-    getHandler(handler)(schema).handle(calc)(value)
-  }
+  def apply[R](schema: SchemaValue)(checker: Checker[R]): Either[SchemaErrors, Processor[R]] = for {
+    checks <- Checks.parseKeywords(schema)
+  } yield (checks.processor(checker))
 
-  def getHandler[R](handler: Handler)(schema: SchemaValue): Handler = {
-    schema.value match {
-      case BoolValue(v) => TrivialHandler(v)
-      case ObjectValue(keywords) =>
-        keywords
-          .foldLeft(handler) { case (handler, (keyword, v)) =>
-            handler
-              .withKeyword(keyword, v)
-              .getOrElse(ErroredHandler(s"""unhandled schema with keyword "${keyword}": ${v}, handler ${handler}"""))
-          }
-      case _ => ErroredHandler(s"invalid schema ${schema}")
-    }
-  }
+  // def process[R](handler: Handler, calc: Calculator[R])(
+  //     schema: SchemaValue,
+  //     value: Value
+  // ): R = {
+  //   getHandler(handler)(schema).handle(calc)(value)
+  // }
 
-  def firstHandler(handlers: Seq[Handler])(keyword: String, value: Value): (Option[Handler], Seq[Handler]) = {
-    // handlers
-    //   .to(LazyList)
-    //   .flatMap(_.withKeyword(keyword, value))
-    //   .headOption
-    handlers.foldLeft((Option.empty[Handler], Seq.empty[Handler])) { case ((first, handlers), current) =>
-      if (first.isDefined) {
-        (first, handlers :+ current)
-      } else {
-        current
-          .withKeyword(keyword, value)
-          .map(h => (Some(h), handlers :+ h))
-          .getOrElse((Option.empty[Handler], handlers :+ current))
-      }
-    }
-  }
+  // def getHandler[R](handler: Handler)(schema: SchemaValue): Handler = {
+  //   schema.value match {
+  //     case BoolValue(v) => TrivialHandler(v)
+  //     case ObjectValue(keywords) =>
+  //       keywords
+  //         .foldLeft(handler) { case (handler, (keyword, v)) =>
+  //           handler
+  //             .withKeyword(keyword, v)
+  //             .getOrElse(ErroredHandler(s"""unhandled schema with keyword "${keyword}": ${v}, handler ${handler}"""))
+  //         }
+  //     case _ => ErroredHandler(s"invalid schema ${schema}")
+  //   }
+  // }
+
+  // def firstHandler(handlers: Seq[Handler])(keyword: String, value: Value): (Option[Handler], Seq[Handler]) = {
+  //   // handlers
+  //   //   .to(LazyList)
+  //   //   .flatMap(_.withKeyword(keyword, value))
+  //   //   .headOption
+  //   handlers.foldLeft((Option.empty[Handler], Seq.empty[Handler])) { case ((first, handlers), current) =>
+  //     if (first.isDefined) {
+  //       (first, handlers :+ current)
+  //     } else {
+  //       current
+  //         .withKeyword(keyword, value)
+  //         .map(h => (Some(h), handlers :+ h))
+  //         .getOrElse((Option.empty[Handler], handlers :+ current))
+  //     }
+  //   }
+  // }
 }
 
 object Utils {
@@ -424,6 +208,12 @@ object Utils {
     case _              => None
   }
 }
+
+case class HandlerError(reason: String) extends Observation
+// case class NotHandled(handler: Handler)                             extends Observation
+case object InvalidSchemaValue                                      extends Observation
+case class TypeMismatch2(expected: String)                          extends Observation
+case class MissingProperties2(properties: Map[String, SchemaValue]) extends Observation
 
 class ValidationCalculator extends Calculator[ValidationResult] {
   override def valid(schema: SchemaValue): ValidationResult = ValidationValid

@@ -2,7 +2,8 @@ package frawa.typedjson.schema
 
 import munit.FunSuite
 
-// class ValidationResultTest extends FunSuite {
+class ValidationResultTest extends FunSuite {
+  test("noop") {}
 //   test("valid") {
 //     val result = ValidationResult.valid()
 //     assertEquals(result.valid, true)
@@ -40,4 +41,4 @@ import munit.FunSuite
 //     assertEquals(result.valid, false)
 //     assertEquals(result.errors, Seq(ValidationError(TypeMismatch("bla")), ValidationError(TypeMismatch("foo"))))
 //   }
-// }
+}
