@@ -157,7 +157,7 @@ case class CoreHandler(schema: SchemaValue, resolver: SchemaResolver, handlers: 
     if (handlers.isEmpty) {
       calc.valid(SchemaValue(NullValue))
     } else {
-      calc.allOf(handlers.map(handler => handler.handle(calc)(value)))
+      calc.allOf(handlers.map(_.handle(calc)(value)))
     }
 }
 
@@ -220,7 +220,7 @@ case class NumberHandler(schema: SchemaValue) extends Handler {
 
 case class ArrayHandler(schema: SchemaValue, resolver: SchemaResolver) extends Handler {
   override def withKeyword(keyword: String, value: Value): Option[Handler] = (keyword, value) match {
-    case ("items", value) => Some(ArrayItemsHandler(SchemaValue(value), resolver))
+    case ("items", value) => Some(ArrayItemsHandler(schema, SchemaValue(value), resolver))
     case _                => None
   }
 
@@ -232,19 +232,23 @@ case class ArrayHandler(schema: SchemaValue, resolver: SchemaResolver) extends H
   }
 }
 
-case class ArrayItemsHandler(schema: SchemaValue, resolver: SchemaResolver) extends Handler {
+case class ArrayItemsHandler(schema: SchemaValue, itemsSchema: SchemaValue, resolver: SchemaResolver) extends Handler {
   override def handle[R](calc: Calculator[R])(value: Value): R = {
     value match {
       case ArrayValue(items) =>
-        val handler = Processor.getHandler(CoreHandler(schema, resolver))(schema)
-        calc.allOf(
-          items.zipWithIndex
-            .map { case (item, index) =>
-              lazy val prefix = Pointer.empty / index
-              lazy val result = handler.handle(calc)(item)
-              calc.prefix(prefix, result)
-            }
-        )
+        if (items.isEmpty) {
+          calc.valid(schema)
+        } else {
+          val handler = Processor.getHandler(CoreHandler(itemsSchema, resolver))(itemsSchema)
+          calc.allOf(
+            items.zipWithIndex
+              .map { case (item, index) =>
+                lazy val prefix = Pointer.empty / index
+                lazy val result = handler.handle(calc)(item)
+                calc.prefix(prefix, result)
+              }
+          )
+        }
       case _ => calc.invalid(new TypeMismatch2("array"))
     }
   }
@@ -280,7 +284,11 @@ case class ObjectHandler(
         val missingNames = required
           .filter(!properties.contains(_))
         if (missingNames.isEmpty) {
-          calc.allOf(results)
+          if (properties.isEmpty) {
+            calc.valid(schema)
+          } else {
+            calc.allOf(results)
+          }
         } else {
           val missing = propertySchemas.view
             .filterKeys(missingNames.contains(_))
