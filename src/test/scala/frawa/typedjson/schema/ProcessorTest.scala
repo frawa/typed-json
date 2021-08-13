@@ -282,6 +282,42 @@ class ProcessorTest extends FunSuite {
     }
   }
 
+  test("allOf") {
+    withSchema("""{
+                 |"allOf": [
+                 |  { "type": "number" }
+                 |]
+                 |}
+                 |""".stripMargin) { schema =>
+      assertChecks(schema) { checks =>
+        assertEquals(
+          checks.checks,
+          Seq(
+            AllOfCheck(
+              Seq(
+                Checks(
+                  schema = SchemaValue(
+                    value = ObjectValue(
+                      properties = Map(
+                        "type" -> StringValue(
+                          value = "number"
+                        )
+                      )
+                    )
+                  ),
+                  checks = List(
+                    NumberTypeCheck
+                  ),
+                  ignoredKeywords = Set()
+                )
+              )
+            )
+          )
+        )
+      }
+    }
+  }
+
 }
 
 // class ProcessorTest2 extends FunSuite {
