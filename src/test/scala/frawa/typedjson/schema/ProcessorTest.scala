@@ -13,6 +13,7 @@ import frawa.typedjson.parser.ObjectValue
 import scala.reflect.internal.Reporter
 import munit.Assertions._
 import TestUtil._
+import TestSchemas._
 
 class ProcessorTest extends FunSuite {
   implicit val zioParser = new ZioParser();
@@ -48,7 +49,7 @@ class ProcessorTest extends FunSuite {
   }
 
   test("null") {
-    withSchema("""{"type": "null"}""") { schema =>
+    withSchema(nullSchema) { schema =>
       assertChecks(schema) { checks =>
         assertEquals(checks.checks, Seq(NullTypeCheck))
       }
@@ -56,7 +57,7 @@ class ProcessorTest extends FunSuite {
   }
 
   test("boolean") {
-    withSchema("""{"type": "boolean"}""") { schema =>
+    withSchema(boolSchema) { schema =>
       assertChecks(schema) { checks =>
         assertEquals(checks.checks, Seq(BooleanTypeCheck))
       }
@@ -64,7 +65,7 @@ class ProcessorTest extends FunSuite {
   }
 
   test("true schema") {
-    withSchema("""true""") { schema =>
+    withSchema(trueSchema) { schema =>
       assertChecks(schema) { checks =>
         assertEquals(checks.checks, Seq(TrivialCheck(true)))
       }
@@ -72,7 +73,7 @@ class ProcessorTest extends FunSuite {
   }
 
   test("false schema") {
-    withSchema("""false""") { schema =>
+    withSchema(falseSchema) { schema =>
       assertChecks(schema) { checks =>
         assertEquals(checks.checks, Seq(TrivialCheck(false)))
       }
@@ -88,7 +89,7 @@ class ProcessorTest extends FunSuite {
   }
 
   test("not false") {
-    withSchema("""{"not": false}""") { schema =>
+    withSchema(notFalseSchema) { schema =>
       assertChecks(schema) { checks =>
         assertEquals(
           checks.checks,
@@ -126,7 +127,7 @@ class ProcessorTest extends FunSuite {
   }
 
   test("empty schema") {
-    withSchema("""{}""") { schema =>
+    withSchema(emtpySchema) { schema =>
       assertChecks(schema) { checks =>
         assertEquals(checks.checks, Seq(TrivialCheck(true)))
       }
@@ -134,7 +135,7 @@ class ProcessorTest extends FunSuite {
   }
 
   test("string") {
-    withSchema("""{"type": "string"}""") { schema =>
+    withSchema(stringSchema) { schema =>
       assertChecks(schema) { checks =>
         assertEquals(checks.checks, Seq(StringTypeCheck))
       }
@@ -142,7 +143,7 @@ class ProcessorTest extends FunSuite {
   }
 
   test("number") {
-    withSchema("""{"type": "number"}""") { schema =>
+    withSchema(numberSchema) { schema =>
       assertChecks(schema) { checks =>
         assertEquals(checks.checks, Seq(NumberTypeCheck))
       }
@@ -150,7 +151,7 @@ class ProcessorTest extends FunSuite {
   }
 
   test("array") {
-    withSchema("""{"type": "array"}""") { schema =>
+    withSchema(arraySchema) { schema =>
       assertChecks(schema) { checks =>
         assertEquals(checks.checks, Seq(ArrayTypeCheck))
       }
@@ -158,7 +159,7 @@ class ProcessorTest extends FunSuite {
   }
 
   test("array with items") {
-    withSchema("""{"type": "array", "items": { "type": "number"}}""") { schema =>
+    withSchema(numberArraySchema) { schema =>
       assertChecks(schema) { checks =>
         assertEquals(
           checks.checks,
@@ -213,14 +214,7 @@ class ProcessorTest extends FunSuite {
   }
 
   test("object") {
-    withSchema("""{
-                 |"type": "object",
-                 |"properties": {
-                 |  "toto": { "type": "number" },
-                 |  "titi": { "type": "string" }
-                 |}
-                 |}
-                 |""".stripMargin) { schema =>
+    withSchema(totoObjectSchema) { schema =>
       assertChecks(schema) { checks =>
         assertEquals(
           checks.checks,
