@@ -318,6 +318,109 @@ class ProcessorTest extends FunSuite {
     }
   }
 
+  test("anyOf") {
+    withSchema("""{
+                 |"anyOf": [
+                 |  { "type": "number" },
+                 |  { "type": "string" }
+                 |]
+                 |}
+                 |""".stripMargin) { schema =>
+      assertChecks(schema) { checks =>
+        assertEquals(
+          checks.checks,
+          Seq(
+            AnyOfCheck(
+              Seq(
+                Checks(
+                  schema = SchemaValue(
+                    value = ObjectValue(
+                      properties = Map(
+                        "type" -> StringValue(
+                          value = "number"
+                        )
+                      )
+                    )
+                  ),
+                  checks = List(
+                    NumberTypeCheck
+                  ),
+                  ignoredKeywords = Set()
+                ),
+                Checks(
+                  schema = SchemaValue(
+                    value = ObjectValue(
+                      properties = Map(
+                        "type" -> StringValue(
+                          value = "string"
+                        )
+                      )
+                    )
+                  ),
+                  checks = List(
+                    StringTypeCheck
+                  ),
+                  ignoredKeywords = Set()
+                )
+              )
+            )
+          )
+        )
+      }
+    }
+  }
+
+  test("oneOf") {
+    withSchema("""{
+                 |"oneOf": [
+                 |  { "type": "number" },
+                 |  { "type": "string" }
+                 |]
+                 |}
+                 |""".stripMargin) { schema =>
+      assertChecks(schema) { checks =>
+        assertEquals(
+          checks.checks,
+          Seq(
+            OneOfCheck(
+              Seq(
+                Checks(
+                  schema = SchemaValue(
+                    value = ObjectValue(
+                      properties = Map(
+                        "type" -> StringValue(
+                          value = "number"
+                        )
+                      )
+                    )
+                  ),
+                  checks = List(
+                    NumberTypeCheck
+                  ),
+                  ignoredKeywords = Set()
+                ),
+                Checks(
+                  schema = SchemaValue(
+                    value = ObjectValue(
+                      properties = Map(
+                        "type" -> StringValue(
+                          value = "string"
+                        )
+                      )
+                    )
+                  ),
+                  checks = List(
+                    StringTypeCheck
+                  ),
+                  ignoredKeywords = Set()
+                )
+              )
+            )
+          )
+        )
+      }
+    }
+  }
 }
 
 // class ProcessorTest2 extends FunSuite {
