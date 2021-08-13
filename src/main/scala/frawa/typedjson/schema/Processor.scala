@@ -93,7 +93,22 @@ case class Checks(
     ignoredKeywords: Set[String] = Set.empty
 ) {
   //update[C :< Check ]()
-  def withCheck(check: Check): Checks = this.copy(checks = checks :+ check)
+  private def withCheck(check: Check): Checks                         = this.copy(checks = checks :+ check)
+  private def withChecks(checks: Checks)(f: Checks => Checks): Checks = f(checks).withIgnored(checks.ignoredKeywords)
+  private def withChecks(checks: Map[String, Checks])(f: Map[String, Checks] => Check): Checks =
+    withCheck(f(checks)).withIgnored(checks.values.flatMap(_.ignoredKeywords).toSet)
+  private def withChecks(checks: Seq[Checks])(f: Seq[Checks] => Check): Checks =
+    withCheck(f(checks)).withIgnored(checks.flatMap(_.ignoredKeywords).toSet)
+  private def withChecks(values: Seq[Value])(f: Seq[Checks] => Check): Either[SchemaErrors, Checks] = {
+    val checks0 = values
+      .map(v => Checks.parseKeywords(SchemaValue(v)))
+      .toSeq
+    for {
+      checks <- sequence(checks0)
+    } yield {
+      withChecks(checks)(f)
+    }
+  }
 
   type SchemaErrors = Checks.SchemaErrors
 
@@ -108,15 +123,16 @@ case class Checks(
       for {
         checks <- Checks.parseKeywords(SchemaValue(value))
       } yield {
-        withCheck(NotCheck(checks)).withIgnored(checks.ignoredKeywords)
+        withChecks(checks)(c => withCheck(NotCheck(c)))
       }
 
     case ("items", value) =>
       for {
         checks <- Checks.parseKeywords(SchemaValue(value))
       } yield {
-        updateCheck(ArrayItemsCheck())(check => check.copy(items = Some(checks)))
-          .withIgnored(checks.ignoredKeywords)
+        withChecks(checks) { checks =>
+          updateCheck(ArrayItemsCheck())(check => check.copy(items = Some(checks)))
+        }
       }
 
     case ("properties", ObjectValue(properties)) =>
@@ -131,8 +147,7 @@ case class Checks(
         propChecks1 <- sequence(propChecks)
         checks = Map.from(propChecks1)
       } yield {
-        withCheck(ObjectPropertiesCheck(checks))
-          .withIgnored(checks.values.flatMap(_.ignoredKeywords).toSet)
+        withChecks(checks)(ObjectPropertiesCheck)
       }
 
     case ("required", ArrayValue(values)) => {
@@ -141,40 +156,17 @@ case class Checks(
     }
 
     case ("allOf", ArrayValue(values)) => {
-      val checks0 = values
-        .map(v => Checks.parseKeywords(SchemaValue(v)))
-        .toSeq
-      for {
-        checks <- sequence(checks0)
-      } yield {
-        withCheck(AllOfCheck(checks))
-          .withIgnored(checks.flatMap(_.ignoredKeywords).toSet)
-      }
+      withChecks(values)(AllOfCheck)
     }
 
     case ("anyOf", ArrayValue(values)) => {
-      val checks0 = values
-        .map(v => Checks.parseKeywords(SchemaValue(v)))
-        .toSeq
-      for {
-        checks <- sequence(checks0)
-      } yield {
-        withCheck(AnyOfCheck(checks))
-          .withIgnored(checks.flatMap(_.ignoredKeywords).toSet)
-      }
+      withChecks(values)(AnyOfCheck)
     }
 
     case ("oneOf", ArrayValue(values)) => {
-      val checks0 = values
-        .map(v => Checks.parseKeywords(SchemaValue(v)))
-        .toSeq
-      for {
-        checks <- sequence(checks0)
-      } yield {
-        withCheck(OneOfCheck(checks))
-          .withIgnored(checks.flatMap(_.ignoredKeywords).toSet)
-      }
+      withChecks(values)(OneOfCheck)
     }
+
     case _ => Right(withIgnored(keyword))
   }
 
