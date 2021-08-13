@@ -11,6 +11,7 @@ import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue
 import scala.reflect.internal.Reporter
 import java.net.URI
+import scala.reflect.ClassTag
 
 case class SchemaValue(value: Value)
 
@@ -65,15 +66,17 @@ trait Calculator[R] {
   def ifThenElse(ifResult: R, thenResult: Option[R], elseResult: Option[R]): R
 }
 
-trait Check
-case class TrivialCheck(v: Boolean)     extends Check
-case class NullCheck()                  extends Check
-case class BooleanCheck()               extends Check
-case class StringCheck()                extends Check
-case class NumberCheck()                extends Check
-case class ArrayCheck()                 extends Check
-case class ObjectCheck()                extends Check
-case class NotCheck(checks: Seq[Check]) extends Check
+sealed trait Check
+case class TrivialCheck(v: Boolean)                               extends Check
+case object NullTypeCheck                                         extends Check
+case object BooleanTypeCheck                                      extends Check
+case object StringTypeCheck                                       extends Check
+case object NumberTypeCheck                                       extends Check
+case object ArrayTypeCheck                                        extends Check
+case class ArrayItemsCheck(items: Option[Checks] = None)          extends Check
+case object ObjectTypeCheck                                       extends Check
+case class ObjectPropertiesCheck(properties: Map[String, Checks]) extends Check
+case class NotCheck(checks: Checks)                               extends Check
 
 trait Checker[R] {
   def init: R
@@ -81,9 +84,9 @@ trait Checker[R] {
 }
 
 case class Checks(
-    schama: SchemaValue,
+    schema: SchemaValue,
     checks: Seq[Check] = Seq.empty[Check],
-    ignoredKeywords: Map[String, Value] = Map.empty
+    ignoredKeywords: Set[String] = Set.empty
 ) {
   //update[C :< Check ]()
   def withCheck(check: Check): Checks = this.copy(checks = checks :+ check)
@@ -95,32 +98,84 @@ case class Checks(
       Right(
         getTypeCheck(typeName)
           .map(withCheck(_))
-          .getOrElse(withIgnored(keyword, value))
+          .getOrElse(withIgnored(keyword))
       )
     case ("not", value) =>
       for {
         checks <- Checks.parseKeywords(SchemaValue(value))
       } yield {
-        withCheck(NotCheck(checks.checks)).withIgnored(checks.ignoredKeywords)
+        withCheck(NotCheck(checks)).withIgnored(checks.ignoredKeywords)
       }
 
-    case _ => Right(withIgnored(keyword, value))
+    case ("items", value) =>
+      for {
+        checks <- Checks.parseKeywords(SchemaValue(value))
+      } yield {
+        updateCheck(ArrayItemsCheck())(check => check.copy(items = Some(checks)))
+          .withIgnored(checks.ignoredKeywords)
+      }
+
+    case ("properties", ObjectValue(properties)) =>
+      val propChecks = properties.view
+        .mapValues(v => Checks.parseKeywords(SchemaValue(v)))
+        .map {
+          case (prop, Right(checks)) => Right((prop, checks))
+          case (prop, Left(errors))  => Left(errors.map(_.prefix(Pointer.empty / prop)))
+        }
+        .toSeq
+      for {
+        propChecks1 <- sequence(propChecks)
+        checks = Map.from(propChecks1)
+      } yield {
+        withCheck(ObjectPropertiesCheck(checks))
+          .withIgnored(checks.values.flatMap(_.ignoredKeywords).toSet)
+      }
+
+    case _ => Right(withIgnored(keyword))
   }
 
-  private def withIgnored(keyword: String, value: Value): Checks =
-    this.copy(ignoredKeywords = ignoredKeywords + ((keyword, value)))
+  // TODO to utils
+  private def sequence[V](as: Seq[Either[SchemaErrors, V]]): Either[SchemaErrors, Seq[V]] = {
+    as.foldLeft[Either[SchemaErrors, Seq[V]]](Right(Seq.empty[V])) {
+      case (Right(acc), Right(v))    => Right(acc :+ v)
+      case (Right(_), Left(errors))  => Left(errors)
+      case (Left(acc), Left(errors)) => Left(acc :++ errors)
+      case (Left(acc), _)            => Left(acc)
+    }
+  }
 
-  private def withIgnored(ignored: Map[String, Value]): Checks =
+  private def updateCheck[C <: Check: ClassTag](newCheck: => C)(f: C => C): Checks = {
+    val checks1: Seq[Check] =
+      if (
+        checks.exists {
+          case check: C => true
+          case other    => false
+        }
+      ) {
+        checks
+      } else {
+        checks :+ newCheck
+      }
+    this.copy(checks = checks1.map {
+      case check: C => f(check)
+      case other    => other
+    })
+  }
+
+  private def withIgnored(keyword: String): Checks =
+    this.copy(ignoredKeywords = ignoredKeywords + keyword)
+
+  private def withIgnored(ignored: Set[String]): Checks =
     this.copy(ignoredKeywords = ignoredKeywords.concat(ignored))
 
   private def getTypeCheck(typeName: String): Option[Check] =
     typeName match {
-      case "null"    => Some(NullCheck())
-      case "boolean" => Some(BooleanCheck())
-      case "string"  => Some(StringCheck())
-      case "number"  => Some(NumberCheck())
-      case "array"   => Some(ArrayCheck())
-      case "object"  => Some(ObjectCheck())
+      case "null"    => Some(NullTypeCheck)
+      case "boolean" => Some(BooleanTypeCheck)
+      case "string"  => Some(StringTypeCheck)
+      case "number"  => Some(NumberTypeCheck)
+      case "array"   => Some(ArrayTypeCheck)
+      case "object"  => Some(ObjectTypeCheck)
       case _         => None
     }
 
@@ -141,15 +196,19 @@ object Checks {
   def parseKeywords(schema: SchemaValue): Either[SchemaErrors, Checks] = schema.value match {
     case BoolValue(v) => Right(Checks(schema).withCheck(TrivialCheck(v)))
     case ObjectValue(keywords) =>
-      keywords
-        .foldLeft[Either[SchemaErrors, Checks]](Right(Checks(schema))) { case (checks, (keyword, value)) =>
-          val prefix = Pointer.empty / keyword
-          checks
-            .flatMap(_.withKeyword(keyword, value))
-            .swap
-            .map(_.map(_.prefix(prefix)))
-            .swap
-        }
+      if (keywords.isEmpty) {
+        Right(Checks(schema).withCheck(TrivialCheck(true)))
+      } else {
+        keywords
+          .foldLeft[Either[SchemaErrors, Checks]](Right(Checks(schema))) { case (checks, (keyword, value)) =>
+            val prefix = Pointer.empty / keyword
+            checks
+              .flatMap(_.withKeyword(keyword, value))
+              .swap
+              .map(_.map(_.prefix(prefix)))
+              .swap
+          }
+      }
     case _ => Left(Seq(SchemaError(s"invalid schema ${schema}")))
   }
 }

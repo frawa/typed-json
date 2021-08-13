@@ -17,18 +17,26 @@ import TestUtil._
 class ProcessorTest extends FunSuite {
   implicit val zioParser = new ZioParser();
 
-  private def assertChecks(schema: SchemaValue)(
+  private def assertChecks(schema: SchemaValue, allowIgnored: Boolean = false)(
       f: Checks => Unit
   ) = {
     val withParsed = for {
       checks <- Checks.parseKeywords(schema)
     } yield {
+      if (!allowIgnored) {
+        assert(
+          checks.ignoredKeywords.isEmpty,
+          clue(s"""unexpected ignored keywords: ${checks.ignoredKeywords.mkString("")}""")
+        )
+      }
       f(checks)
     }
     withParsed.swap
       .map(messages => fail("parsing keywords failed", clues(clue(messages))))
       .swap
   }
+
+  private def assertChecksWithIgnored(schema: SchemaValue) = assertChecks(schema, true) _
 
   private def assertSchemaErrors(schema: SchemaValue)(
       f: Checks.SchemaErrors => Unit
@@ -42,7 +50,7 @@ class ProcessorTest extends FunSuite {
   test("null") {
     withSchema("""{"type": "null"}""") { schema =>
       assertChecks(schema) { checks =>
-        assertEquals(checks.checks, Seq(NullCheck()))
+        assertEquals(checks.checks, Seq(NullTypeCheck))
       }
     }
   }
@@ -50,7 +58,7 @@ class ProcessorTest extends FunSuite {
   test("boolean") {
     withSchema("""{"type": "boolean"}""") { schema =>
       assertChecks(schema) { checks =>
-        assertEquals(checks.checks, Seq(BooleanCheck()))
+        assertEquals(checks.checks, Seq(BooleanTypeCheck))
       }
     }
   }
@@ -73,8 +81,8 @@ class ProcessorTest extends FunSuite {
 
   test("ignored keyword") {
     withSchema("""{"ignored": false}""") { schema =>
-      assertChecks(schema) { checks =>
-        assertEquals(checks.ignoredKeywords.keySet, Set("ignored"))
+      assertChecksWithIgnored(schema) { checks =>
+        assertEquals(checks.ignoredKeywords, Set("ignored"))
       }
     }
   }
@@ -82,7 +90,21 @@ class ProcessorTest extends FunSuite {
   test("not false") {
     withSchema("""{"not": false}""") { schema =>
       assertChecks(schema) { checks =>
-        assertEquals(checks.checks, Seq(NotCheck(Seq(TrivialCheck(false)))))
+        assertEquals(
+          checks.checks,
+          Seq(
+            NotCheck(
+              Checks(
+                SchemaValue(
+                  value = BoolValue(
+                    value = false
+                  )
+                ),
+                Seq(TrivialCheck(false))
+              )
+            )
+          )
+        )
       }
     }
   }
@@ -102,6 +124,148 @@ class ProcessorTest extends FunSuite {
       }
     }
   }
+
+  test("empty schema") {
+    withSchema("""{}""") { schema =>
+      assertChecks(schema) { checks =>
+        assertEquals(checks.checks, Seq(TrivialCheck(true)))
+      }
+    }
+  }
+
+  test("string") {
+    withSchema("""{"type": "string"}""") { schema =>
+      assertChecks(schema) { checks =>
+        assertEquals(checks.checks, Seq(StringTypeCheck))
+      }
+    }
+  }
+
+  test("number") {
+    withSchema("""{"type": "number"}""") { schema =>
+      assertChecks(schema) { checks =>
+        assertEquals(checks.checks, Seq(NumberTypeCheck))
+      }
+    }
+  }
+
+  test("array") {
+    withSchema("""{"type": "array"}""") { schema =>
+      assertChecks(schema) { checks =>
+        assertEquals(checks.checks, Seq(ArrayTypeCheck))
+      }
+    }
+  }
+
+  test("array with items") {
+    withSchema("""{"type": "array", "items": { "type": "number"}}""") { schema =>
+      assertChecks(schema) { checks =>
+        assertEquals(
+          checks.checks,
+          Seq(
+            ArrayTypeCheck,
+            ArrayItemsCheck(
+              Some(
+                Checks(
+                  SchemaValue(
+                    value = ObjectValue(
+                      properties = Map(
+                        "type" -> StringValue(
+                          value = "number"
+                        )
+                      )
+                    )
+                  ),
+                  Seq(NumberTypeCheck)
+                )
+              )
+            )
+          )
+        )
+      }
+    }
+    withSchema("""{"items": { "type": "number"}, "type": "array"}""") { schema =>
+      assertChecks(schema) { checks =>
+        assertEquals(
+          checks.checks,
+          Seq(
+            ArrayItemsCheck(
+              Some(
+                Checks(
+                  SchemaValue(
+                    value = ObjectValue(
+                      properties = Map(
+                        "type" -> StringValue(
+                          value = "number"
+                        )
+                      )
+                    )
+                  ),
+                  Seq(NumberTypeCheck)
+                )
+              )
+            ),
+            ArrayTypeCheck
+          )
+        )
+      }
+    }
+  }
+
+  test("object") {
+    withSchema("""{
+                 |"type": "object",
+                 |"properties": {
+                 |  "toto": { "type": "number" },
+                 |  "titi": { "type": "string" }
+                 |}
+                 |}
+                 |""".stripMargin) { schema =>
+      assertChecks(schema) { checks =>
+        assertEquals(
+          checks.checks,
+          Seq(
+            ObjectTypeCheck,
+            ObjectPropertiesCheck(
+              Map(
+                "toto" -> Checks(
+                  schema = SchemaValue(
+                    value = ObjectValue(
+                      properties = Map(
+                        "type" -> StringValue(
+                          value = "number"
+                        )
+                      )
+                    )
+                  ),
+                  checks = List(
+                    NumberTypeCheck
+                  ),
+                  ignoredKeywords = Set()
+                ),
+                "titi" -> Checks(
+                  schema = SchemaValue(
+                    value = ObjectValue(
+                      properties = Map(
+                        "type" -> StringValue(
+                          value = "string"
+                        )
+                      )
+                    )
+                  ),
+                  checks = List(
+                    StringTypeCheck
+                  ),
+                  ignoredKeywords = Set()
+                )
+              )
+            )
+          )
+        )
+      }
+    }
+  }
+
 }
 
 // class ProcessorTest2 extends FunSuite {
