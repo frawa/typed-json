@@ -81,6 +81,11 @@ case class NotCheck(checks: Checks)                               extends Check
 case class AllOfCheck(checks: Seq[Checks])                        extends Check
 case class AnyOfCheck(checks: Seq[Checks])                        extends Check
 case class OneOfCheck(checks: Seq[Checks])                        extends Check
+case class IfThenElseCheck(
+    ifChecks: Option[Checks] = None,
+    thenChecks: Option[Checks] = None,
+    elseChecks: Option[Checks] = None
+) extends Check
 
 trait Checker[R] {
   def init: R
@@ -166,6 +171,33 @@ case class Checks(
     case ("oneOf", ArrayValue(values)) => {
       withChecks(values)(OneOfCheck)
     }
+
+    case ("if", value) =>
+      for {
+        checks <- Checks.parseKeywords(SchemaValue(value))
+      } yield {
+        withChecks(checks) { checks =>
+          updateCheck(IfThenElseCheck())(check => check.copy(ifChecks = Some(checks)))
+        }
+      }
+
+    case ("then", value) =>
+      for {
+        checks <- Checks.parseKeywords(SchemaValue(value))
+      } yield {
+        withChecks(checks) { checks =>
+          updateCheck(IfThenElseCheck())(check => check.copy(thenChecks = Some(checks)))
+        }
+      }
+
+    case ("else", value) =>
+      for {
+        checks <- Checks.parseKeywords(SchemaValue(value))
+      } yield {
+        withChecks(checks) { checks =>
+          updateCheck(IfThenElseCheck())(check => check.copy(elseChecks = Some(checks)))
+        }
+      }
 
     case _ => Right(withIgnored(keyword))
   }

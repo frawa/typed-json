@@ -168,15 +168,7 @@ class ProcessorTest extends FunSuite {
             ArrayItemsCheck(
               Some(
                 Checks(
-                  SchemaValue(
-                    value = ObjectValue(
-                      properties = Map(
-                        "type" -> StringValue(
-                          value = "number"
-                        )
-                      )
-                    )
-                  ),
+                  numberSchemaValue,
                   Seq(NumberTypeCheck)
                 )
               )
@@ -193,15 +185,7 @@ class ProcessorTest extends FunSuite {
             ArrayItemsCheck(
               Some(
                 Checks(
-                  SchemaValue(
-                    value = ObjectValue(
-                      properties = Map(
-                        "type" -> StringValue(
-                          value = "number"
-                        )
-                      )
-                    )
-                  ),
+                  numberSchemaValue,
                   Seq(NumberTypeCheck)
                 )
               )
@@ -223,30 +207,14 @@ class ProcessorTest extends FunSuite {
             ObjectPropertiesCheck(
               Map(
                 "toto" -> Checks(
-                  schema = SchemaValue(
-                    value = ObjectValue(
-                      properties = Map(
-                        "type" -> StringValue(
-                          value = "number"
-                        )
-                      )
-                    )
-                  ),
+                  numberSchemaValue,
                   checks = List(
                     NumberTypeCheck
                   ),
                   ignoredKeywords = Set()
                 ),
                 "titi" -> Checks(
-                  schema = SchemaValue(
-                    value = ObjectValue(
-                      properties = Map(
-                        "type" -> StringValue(
-                          value = "string"
-                        )
-                      )
-                    )
-                  ),
+                  stringSchemaValue,
                   checks = List(
                     StringTypeCheck
                   ),
@@ -296,15 +264,7 @@ class ProcessorTest extends FunSuite {
             AllOfCheck(
               Seq(
                 Checks(
-                  schema = SchemaValue(
-                    value = ObjectValue(
-                      properties = Map(
-                        "type" -> StringValue(
-                          value = "number"
-                        )
-                      )
-                    )
-                  ),
+                  numberSchemaValue,
                   checks = List(
                     NumberTypeCheck
                   ),
@@ -385,36 +345,42 @@ class ProcessorTest extends FunSuite {
             OneOfCheck(
               Seq(
                 Checks(
-                  schema = SchemaValue(
-                    value = ObjectValue(
-                      properties = Map(
-                        "type" -> StringValue(
-                          value = "number"
-                        )
-                      )
-                    )
-                  ),
+                  numberSchemaValue,
                   checks = List(
                     NumberTypeCheck
                   ),
                   ignoredKeywords = Set()
                 ),
                 Checks(
-                  schema = SchemaValue(
-                    value = ObjectValue(
-                      properties = Map(
-                        "type" -> StringValue(
-                          value = "string"
-                        )
-                      )
-                    )
-                  ),
+                  stringSchemaValue,
                   checks = List(
                     StringTypeCheck
                   ),
                   ignoredKeywords = Set()
                 )
               )
+            )
+          )
+        )
+      }
+    }
+  }
+
+  test("if/then/else") {
+    withSchema("""{
+                 |"if": { "type": "number" },
+                 |"then": { "type": "number" },
+                 |"else": { "type": "string" }
+                 |}
+                 |""".stripMargin) { schema =>
+      assertChecks(schema) { checks =>
+        assertEquals(
+          checks.checks,
+          Seq(
+            IfThenElseCheck(
+              Some(Checks(numberSchemaValue, Seq(NumberTypeCheck), Set())),
+              Some(Checks(numberSchemaValue, Seq(NumberTypeCheck), Set())),
+              Some(Checks(stringSchemaValue, Seq(StringTypeCheck), Set()))
             )
           )
         )

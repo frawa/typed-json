@@ -1,5 +1,8 @@
 package frawa.typedjson.schema
 
+import frawa.typedjson.parser.ObjectValue
+import frawa.typedjson.parser.StringValue
+
 object TestSchemas {
   val nullSchema        = """{"type": "null"}"""
   val boolSchema        = """{"type": "boolean"}"""
@@ -19,4 +22,23 @@ object TestSchemas {
                            |}
                            |}
                            |""".stripMargin
+
+  val numberSchemaValue = SchemaValue(
+    value = ObjectValue(
+      properties = Map(
+        "type" -> StringValue(
+          value = "number"
+        )
+      )
+    )
+  )
+  val stringSchemaValue = SchemaValue(
+    value = ObjectValue(
+      properties = Map(
+        "type" -> StringValue(
+          value = "string"
+        )
+      )
+    )
+  )
 }
