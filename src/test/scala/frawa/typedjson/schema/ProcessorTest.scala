@@ -387,6 +387,25 @@ class ProcessorTest extends FunSuite {
       }
     }
   }
+
+  test("null or string") {
+    withSchema("""{"type": ["null","string"]}""") { schema =>
+      assertChecks(schema) { checks =>
+        assertEquals(
+          checks.checks,
+          Seq(
+            UnionTypeCheck(
+              Seq(
+                NullTypeCheck,
+                StringTypeCheck
+              )
+            )
+          )
+        )
+      }
+    }
+  }
+
 }
 
 // class ProcessorTest2 extends FunSuite {

@@ -85,7 +85,8 @@ case class IfThenElseCheck(
     ifChecks: Option[Checks] = None,
     thenChecks: Option[Checks] = None,
     elseChecks: Option[Checks] = None
-) extends Check
+)                                                 extends Check
+case class UnionTypeCheck(typeChecks: Seq[Check]) extends Check
 
 trait Checker[R] {
   def init: R
@@ -97,7 +98,8 @@ case class Checks(
     checks: Seq[Check] = Seq.empty[Check],
     ignoredKeywords: Set[String] = Set.empty
 ) {
-  //update[C :< Check ]()
+  import Utils._
+
   private def withCheck(check: Check): Checks                         = this.copy(checks = checks :+ check)
   private def withChecks(checks: Checks)(f: Checks => Checks): Checks = f(checks).withIgnored(checks.ignoredKeywords)
   private def withChecks(checks: Map[String, Checks])(f: Map[String, Checks] => Check): Checks =
@@ -124,6 +126,12 @@ case class Checks(
           .map(withCheck(_))
           .getOrElse(withIgnored(keyword))
       )
+
+    case ("type", ArrayValue(values)) => {
+      def typeNames = toStrings(values)
+      Right(withCheck(UnionTypeCheck(typeNames.flatMap(getTypeCheck(_)))))
+    }
+
     case ("not", value) =>
       for {
         checks <- Checks.parseKeywords(SchemaValue(value))
@@ -156,7 +164,7 @@ case class Checks(
       }
 
     case ("required", ArrayValue(values)) => {
-      def names = values.flatMap(v => Value.asString(v))
+      def names = toStrings(values)
       Right(withCheck(ObjectRequiredCheck(names)))
     }
 
@@ -200,16 +208,6 @@ case class Checks(
       }
 
     case _ => Right(withIgnored(keyword))
-  }
-
-  // TODO to utils
-  private def sequence[V](as: Seq[Either[SchemaErrors, V]]): Either[SchemaErrors, Seq[V]] = {
-    as.foldLeft[Either[SchemaErrors, Seq[V]]](Right(Seq.empty[V])) {
-      case (Right(acc), Right(v))    => Right(acc :+ v)
-      case (Right(_), Left(errors))  => Left(errors)
-      case (Left(acc), Left(errors)) => Left(acc :++ errors)
-      case (Left(acc), _)            => Left(acc)
-    }
   }
 
   private def updateCheck[C <: Check: ClassTag](newCheck: => C)(f: C => C): Checks = {
@@ -330,6 +328,15 @@ object Processor {
 }
 
 object Utils {
+  def sequence[E, V](as: Seq[Either[Seq[E], V]]): Either[Seq[E], Seq[V]] = {
+    as.foldLeft[Either[Seq[E], Seq[V]]](Right(Seq.empty[V])) {
+      case (Right(acc), Right(v))    => Right(acc :+ v)
+      case (Right(_), Left(errors))  => Left(errors)
+      case (Left(acc), Left(errors)) => Left(acc :++ errors)
+      case (Left(acc), _)            => Left(acc)
+    }
+  }
+
   def toStrings(values: Seq[Value]): Seq[String] = values.flatMap {
     case StringValue(v) => Some(v)
     case _              => None
