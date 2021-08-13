@@ -76,6 +76,7 @@ case object ArrayTypeCheck                                        extends Check
 case class ArrayItemsCheck(items: Option[Checks] = None)          extends Check
 case object ObjectTypeCheck                                       extends Check
 case class ObjectPropertiesCheck(properties: Map[String, Checks]) extends Check
+case class ObjectRequiredCheck(names: Seq[String])                extends Check
 case class NotCheck(checks: Checks)                               extends Check
 
 trait Checker[R] {
@@ -130,6 +131,11 @@ case class Checks(
         withCheck(ObjectPropertiesCheck(checks))
           .withIgnored(checks.values.flatMap(_.ignoredKeywords).toSet)
       }
+
+    case ("required", ArrayValue(values)) => {
+      def names = values.flatMap(v => Value.asString(v))
+      Right(withCheck(ObjectRequiredCheck(names)))
+    }
 
     case _ => Right(withIgnored(keyword))
   }

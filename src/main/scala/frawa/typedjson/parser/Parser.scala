@@ -17,3 +17,10 @@ object Parser {
     parser.parse(json)
   }
 }
+
+object Value {
+  def asString(value: Value): Option[String] = value match {
+    case StringValue(v) => Some(v)
+    case _              => None
+  }
+}

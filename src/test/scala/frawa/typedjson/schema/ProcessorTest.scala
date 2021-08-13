@@ -266,6 +266,28 @@ class ProcessorTest extends FunSuite {
     }
   }
 
+  test("required") {
+    withSchema("""{
+                 |"type": "object",
+                 |"required": ["titi"]
+                 |}
+                 |""".stripMargin) { schema =>
+      assertChecks(schema) { checks =>
+        assertEquals(
+          checks.checks,
+          Seq(
+            ObjectTypeCheck,
+            ObjectRequiredCheck(
+              names = IndexedSeq(
+                "titi"
+              )
+            )
+          )
+        )
+      }
+    }
+  }
+
 }
 
 // class ProcessorTest2 extends FunSuite {
