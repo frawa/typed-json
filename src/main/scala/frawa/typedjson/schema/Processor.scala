@@ -121,6 +121,7 @@ case class Checks(
   type SchemaErrors = Checks.SchemaErrors
 
   def withKeyword(keyword: String, value: Value): Either[SchemaErrors, Checks] = (keyword, value) match {
+    // TODO validation vocabulary
     case ("type", StringValue(typeName)) =>
       Right(
         getTypeCheck(typeName)
@@ -128,6 +129,7 @@ case class Checks(
           .getOrElse(withIgnored(keyword))
       )
 
+    // TODO validation vocabulary
     case ("type", ArrayValue(values)) => {
       def typeNames = toStrings(values)
       Right(withCheck(UnionTypeCheck(typeNames.flatMap(getTypeCheck(_)))))
@@ -196,6 +198,7 @@ case class Checks(
         check.copy(elseChecks = Some(checks))
       }
 
+    // TODO validation vocabulary
     case ("enum", ArrayValue(values)) => {
       Right(withCheck(EnumCheck(values)))
     }
