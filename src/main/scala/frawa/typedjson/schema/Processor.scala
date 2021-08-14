@@ -182,30 +182,18 @@ case class Checks(
     }
 
     case ("if", value) =>
-      for {
-        checks <- Checks.parseKeywords(SchemaValue(value))
-      } yield {
-        withChecks(checks) { checks =>
-          updateCheck(IfThenElseCheck())(check => check.copy(ifChecks = Some(checks)))
-        }
+      updateChecks(SchemaValue(value))(IfThenElseCheck()) { (checks, check) =>
+        check.copy(ifChecks = Some(checks))
       }
 
     case ("then", value) =>
-      for {
-        checks <- Checks.parseKeywords(SchemaValue(value))
-      } yield {
-        withChecks(checks) { checks =>
-          updateCheck(IfThenElseCheck())(check => check.copy(thenChecks = Some(checks)))
-        }
+      updateChecks(SchemaValue(value))(IfThenElseCheck()) { (checks, check) =>
+        check.copy(thenChecks = Some(checks))
       }
 
     case ("else", value) =>
-      for {
-        checks <- Checks.parseKeywords(SchemaValue(value))
-      } yield {
-        withChecks(checks) { checks =>
-          updateCheck(IfThenElseCheck())(check => check.copy(elseChecks = Some(checks)))
-        }
+      updateChecks(SchemaValue(value))(IfThenElseCheck()) { (checks, check) =>
+        check.copy(elseChecks = Some(checks))
       }
 
     case ("enum", ArrayValue(values)) => {
@@ -231,6 +219,18 @@ case class Checks(
       case check: C => f(check)
       case other    => other
     })
+  }
+
+  private def updateChecks[C <: Check: ClassTag](
+      schema: SchemaValue
+  )(newCheck: => C)(f: (Checks, C) => C): Either[SchemaErrors, Checks] = {
+    for {
+      checks <- Checks.parseKeywords(schema)
+    } yield {
+      withChecks(checks) { checks =>
+        updateCheck(newCheck)(f(checks, _))
+      }
+    }
   }
 
   private def withIgnored(keyword: String): Checks =
