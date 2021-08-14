@@ -203,6 +203,11 @@ case class Checks(
       Right(withCheck(EnumCheck(values)))
     }
 
+    // TODO validation vocabulary
+    case ("const", value) => {
+      Right(withCheck(EnumCheck(Seq(value))))
+    }
+
     case _ => Right(withIgnored(keyword))
   }
 

@@ -432,6 +432,29 @@ class ProcessorTest extends FunSuite {
     }
   }
 
+  test("const") {
+    withSchema("""{
+                 |"type": "string",
+                 |"const": "first"
+                 |}""".stripMargin) { schema =>
+      assertChecks(schema) { checks =>
+        assertEquals(
+          checks.checks,
+          Seq(
+            StringTypeCheck,
+            EnumCheck(
+              values = Seq(
+                StringValue(
+                  value = "first"
+                )
+              )
+            )
+          )
+        )
+      }
+    }
+  }
+
 }
 
 // class ProcessorTest2 extends FunSuite {
