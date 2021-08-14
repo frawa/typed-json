@@ -397,6 +397,7 @@ case class HandlerError(reason: String) extends Observation
 case object InvalidSchemaValue                                      extends Observation
 case class TypeMismatch2(expected: String)                          extends Observation
 case class MissingProperties2(properties: Map[String, SchemaValue]) extends Observation
+case class UnsupportedCheck(check: Check)                           extends Observation
 
 class ValidationCalculator extends Calculator[ValidationResult] {
   override def valid(schema: SchemaValue): ValidationResult = ValidationValid
