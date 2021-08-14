@@ -87,6 +87,7 @@ case class IfThenElseCheck(
     elseChecks: Option[Checks] = None
 )                                                 extends Check
 case class UnionTypeCheck(typeChecks: Seq[Check]) extends Check
+case class EnumCheck(values: Seq[Value])          extends Check
 
 trait Checker[R] {
   def init: R
@@ -206,6 +207,10 @@ case class Checks(
           updateCheck(IfThenElseCheck())(check => check.copy(elseChecks = Some(checks)))
         }
       }
+
+    case ("enum", ArrayValue(values)) => {
+      Right(withCheck(EnumCheck(values)))
+    }
 
     case _ => Right(withIgnored(keyword))
   }

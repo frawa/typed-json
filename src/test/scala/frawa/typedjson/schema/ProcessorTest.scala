@@ -406,6 +406,32 @@ class ProcessorTest extends FunSuite {
     }
   }
 
+  test("enum") {
+    withSchema("""{
+                 |"type": "string",
+                 |"enum": ["foo", "bar"]
+                 |}""".stripMargin) { schema =>
+      assertChecks(schema) { checks =>
+        assertEquals(
+          checks.checks,
+          Seq(
+            StringTypeCheck,
+            EnumCheck(
+              values = Seq(
+                StringValue(
+                  value = "foo"
+                ),
+                StringValue(
+                  value = "bar"
+                )
+              )
+            )
+          )
+        )
+      }
+    }
+  }
+
 }
 
 // class ProcessorTest2 extends FunSuite {
