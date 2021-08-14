@@ -92,6 +92,7 @@ case class EnumCheck(values: Seq[Value])          extends Check
 trait Checker[R] {
   def init: R
   def check(check: Check): Value => R
+  def aggregate(results: Seq[R]): R
 }
 
 case class Checks(
@@ -288,11 +289,13 @@ case class Checks(
       case _         => None
     }
 
-  def processor[R](checker: Checker[R]): Processor[R] = Processor(value =>
-    checks.foldLeft(checker.init) { case (result, check) =>
-      checker.check(check)(value)
-    }
-  )
+  def processor[R](checker: Checker[R]): Processor[R] =
+    Processor(value => checker.aggregate(checks.map(checker.check(_)(value)))
+    // checks.foldLeft(checker.init) { case (result, check) =>
+    //   val r = checker.check(check)(value)
+    //   checker.aggregate(result, r)
+    //
+    )
 }
 
 case class SchemaError(message: String, pointer: Pointer = Pointer.empty) {

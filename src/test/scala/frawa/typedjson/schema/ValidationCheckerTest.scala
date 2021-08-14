@@ -13,7 +13,7 @@ class ValidationCheckerTest extends FunSuite {
   ) = {
     val withParsed = for {
       value     <- Parser(text)
-      processor <- Processor(schema)(ValidationChecker())
+      processor <- Processor(schema)(new ValidationChecker())
       result = processor.process(value)
     } yield {
       f(result)
@@ -36,7 +36,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("boolean") {
+  test("boolean".only) {
     withSchema("""{"type": "boolean"}""") { schema =>
       assertValidate("""true""")(schema) { result =>
         assertEquals(result.errors, Seq())
@@ -49,7 +49,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("true schema") {
+  test("true schema".only) {
     withSchema("""true""") { schema =>
       assertValidate("""null""")(schema) { result =>
         assertEquals(result.errors, Seq())
@@ -66,7 +66,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("false schema") {
+  test("false schema".only) {
     withSchema("""false""") { schema =>
       assertValidate("""null""")(schema) { result =>
         assertEquals(
@@ -113,7 +113,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("not false") {
+  test("not false".only) {
     withSchema("""{"not": false}""") { schema =>
       assertValidate("""null""")(schema) { result =>
         assertEquals(result.errors, Seq())
@@ -130,7 +130,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("empty schema") {
+  test("empty schema".only) {
     withSchema("""{}""") { schema =>
       assertValidate("""null""")(schema) { result =>
         assertEquals(result.errors, Seq())
@@ -147,7 +147,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("not empty") {
+  test("not empty".only) {
     withSchema("""{"not": {}}""") { schema =>
       assertValidate("""null""")(schema) { result =>
         assertEquals(
@@ -194,7 +194,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("string") {
+  test("string".only) {
     withSchema("""{"type": "string"}""") { schema =>
       assertValidate(""""hello"""")(schema) { result =>
         assertEquals(result.errors, Seq())
@@ -207,7 +207,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("number") {
+  test("number".only) {
     withSchema("""{"type": "number"}""") { schema =>
       assertValidate("""13""")(schema) { result =>
         assertEquals(result.errors, Seq())
@@ -220,7 +220,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("array") {
+  test("array".only) {
     withSchema("""{"type": "array", "items": { "type": "number"} }""") { schema =>
       assertValidate("""[13]""")(schema) { result =>
         assertEquals(result.errors, Seq())
@@ -233,7 +233,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("array item") {
+  test("array item".only) {
     withSchema("""{"type": "array", "items": { "type": "number"} }""") { schema =>
       assertValidate("""[true]""")(schema) { result =>
         assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("number"), Pointer(0))))
