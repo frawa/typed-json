@@ -21,13 +21,14 @@ class ProcessorTest extends FunSuite {
   private def assertChecks(schema: SchemaValue, allowIgnored: Boolean = false)(
       f: Checks => Unit
   ) = {
+    implicit val resolver = LoadedSchemasResolver(schema)
     val withParsed = for {
       checks <- Checks.parseKeywords(schema)
     } yield {
       if (!allowIgnored) {
         assert(
           checks.ignoredKeywords.isEmpty,
-          clue(s"""unexpected ignored keywords: ${checks.ignoredKeywords.mkString("")}""")
+          clue(s"""unexpected ignored keywords: ${checks.ignoredKeywords.mkString(",")}""")
         )
       }
       f(checks)
@@ -42,6 +43,7 @@ class ProcessorTest extends FunSuite {
   private def assertSchemaErrors(schema: SchemaValue)(
       f: Checks.SchemaErrors => Unit
   ) = {
+    implicit val resolver = LoadedSchemasResolver(schema)
     Checks.parseKeywords(schema) match {
       case Right(_)     => fail("parsing keywords expected to fail")
       case Left(errors) => f(errors)
@@ -446,6 +448,53 @@ class ProcessorTest extends FunSuite {
               values = Seq(
                 StringValue(
                   value = "first"
+                )
+              )
+            )
+          )
+        )
+      }
+    }
+  }
+
+  test("$id/$ref/$def") {
+    withSchema("""{
+                 |"$id": "https://example.net/root.json",
+                 |"type": "array",
+                 |"items": {
+                 |    "$ref": "#item"
+                 |},
+                 |"$defs": {
+                 |    "single": {
+                 |        "$anchor": "item",
+                 |        "type": "number"
+                 |    }
+                 |}
+                 |}""".stripMargin) { schema =>
+      assertChecks(schema) { checks =>
+        assertEquals(
+          checks.checks,
+          Seq(
+            ArrayTypeCheck,
+            ArrayItemsCheck(
+              items = Some(
+                value = Checks(
+                  schema = SchemaValue(
+                    value = ObjectValue(
+                      properties = Map(
+                        "$anchor" -> StringValue(
+                          value = "item"
+                        ),
+                        "type" -> StringValue(
+                          value = "number"
+                        )
+                      )
+                    )
+                  ),
+                  checks = List(
+                    NumberTypeCheck
+                  ),
+                  ignoredKeywords = Set()
                 )
               )
             )
@@ -1225,9 +1274,6 @@ class ProcessorTest extends FunSuite {
 //     }
 //   }
 // }
-
-// TODO
-// - $ref / $defs
 
 /*
 {

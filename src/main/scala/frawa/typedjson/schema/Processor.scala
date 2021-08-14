@@ -107,7 +107,9 @@ case class Checks(
     withCheck(f(checks)).withIgnored(checks.values.flatMap(_.ignoredKeywords).toSet)
   private def withChecks(checks: Seq[Checks])(f: Seq[Checks] => Check): Checks =
     withCheck(f(checks)).withIgnored(checks.flatMap(_.ignoredKeywords).toSet)
-  private def withChecks(values: Seq[Value])(f: Seq[Checks] => Check): Either[SchemaErrors, Checks] = {
+  private def withChecks(
+      values: Seq[Value]
+  )(f: Seq[Checks] => Check)(implicit resolver: SchemaResolver): Either[SchemaErrors, Checks] = {
     val checks0 = values
       .map(v => Checks.parseKeywords(SchemaValue(v)))
       .toSeq
@@ -120,96 +122,124 @@ case class Checks(
 
   type SchemaErrors = Checks.SchemaErrors
 
-  def withKeyword(keyword: String, value: Value): Either[SchemaErrors, Checks] = (keyword, value) match {
-    // TODO validation vocabulary
-    case ("type", StringValue(typeName)) =>
-      Right(
-        getTypeCheck(typeName)
-          .map(withCheck(_))
-          .getOrElse(withIgnored(keyword))
-      )
+  def withKeyword(keyword: String, value: Value)(implicit resolver: SchemaResolver): Either[SchemaErrors, Checks] =
+    (keyword, value) match {
+      // TODO validation vocabulary
+      case ("type", StringValue(typeName)) =>
+        Right(
+          getTypeCheck(typeName)
+            .map(withCheck(_))
+            .getOrElse(withIgnored(keyword))
+        )
 
-    // TODO validation vocabulary
-    case ("type", ArrayValue(values)) => {
-      def typeNames = toStrings(values)
-      Right(withCheck(UnionTypeCheck(typeNames.flatMap(getTypeCheck(_)))))
-    }
-
-    case ("not", value) =>
-      for {
-        checks <- Checks.parseKeywords(SchemaValue(value))
-      } yield {
-        withChecks(checks)(c => withCheck(NotCheck(c)))
+      // TODO validation vocabulary
+      case ("type", ArrayValue(values)) => {
+        def typeNames = toStrings(values)
+        Right(withCheck(UnionTypeCheck(typeNames.flatMap(getTypeCheck(_)))))
       }
 
-    case ("items", value) =>
-      for {
-        checks <- Checks.parseKeywords(SchemaValue(value))
-      } yield {
-        withChecks(checks) { checks =>
-          updateCheck(ArrayItemsCheck())(check => check.copy(items = Some(checks)))
+      case ("not", value) =>
+        for {
+          checks <- Checks.parseKeywords(SchemaValue(value))
+        } yield {
+          withChecks(checks)(c => withCheck(NotCheck(c)))
+        }
+
+      case ("items", value) =>
+        for {
+          checks <- Checks.parseKeywords(SchemaValue(value))
+        } yield {
+          withChecks(checks) { checks =>
+            updateCheck(ArrayItemsCheck())(check => check.copy(items = Some(checks)))
+          }
+        }
+
+      case ("properties", ObjectValue(properties)) =>
+        val propChecks = properties.view
+          .mapValues(v => Checks.parseKeywords(SchemaValue(v)))
+          .map {
+            case (prop, Right(checks)) => Right((prop, checks))
+            case (prop, Left(errors))  => Left(errors.map(_.prefix(Pointer.empty / prop)))
+          }
+          .toSeq
+        for {
+          propChecks1 <- sequence(propChecks)
+          checks = Map.from(propChecks1)
+        } yield {
+          withChecks(checks)(ObjectPropertiesCheck)
+        }
+
+      case ("required", ArrayValue(values)) => {
+        def names = toStrings(values)
+        Right(withCheck(ObjectRequiredCheck(names)))
+      }
+
+      case ("allOf", ArrayValue(values)) => {
+        withChecks(values)(AllOfCheck)
+      }
+
+      case ("anyOf", ArrayValue(values)) => {
+        withChecks(values)(AnyOfCheck)
+      }
+
+      case ("oneOf", ArrayValue(values)) => {
+        withChecks(values)(OneOfCheck)
+      }
+
+      case ("if", value) =>
+        updateChecks(SchemaValue(value))(IfThenElseCheck()) { (checks, check) =>
+          check.copy(ifChecks = Some(checks))
+        }
+
+      case ("then", value) =>
+        updateChecks(SchemaValue(value))(IfThenElseCheck()) { (checks, check) =>
+          check.copy(thenChecks = Some(checks))
+        }
+
+      case ("else", value) =>
+        updateChecks(SchemaValue(value))(IfThenElseCheck()) { (checks, check) =>
+          check.copy(elseChecks = Some(checks))
+        }
+
+      // TODO validation vocabulary
+      case ("enum", ArrayValue(values)) => {
+        Right(withCheck(EnumCheck(values)))
+      }
+
+      // TODO validation vocabulary
+      case ("const", value) => {
+        Right(withCheck(EnumCheck(Seq(value))))
+      }
+
+      case ("$id", StringValue(_)) => {
+        // handled during load
+        Right(this)
+      }
+
+      case ("$anchor", StringValue(_)) => {
+        // handled during load
+        Right(this)
+      }
+
+      case ("$defs", ObjectValue(_)) => {
+        // handled during load
+        Right(this)
+      }
+
+      case ("$ref", StringValue(ref)) => {
+        for {
+          schema <- resolver
+            .resolveRef(ref)
+            .map(Right(_))
+            .getOrElse(Left(Seq(SchemaError(s"""missing reference "${ref}""""))))
+          checks <- Checks.parseKeywords(schema)
+        } yield {
+          withChecks(checks)(identity)
         }
       }
 
-    case ("properties", ObjectValue(properties)) =>
-      val propChecks = properties.view
-        .mapValues(v => Checks.parseKeywords(SchemaValue(v)))
-        .map {
-          case (prop, Right(checks)) => Right((prop, checks))
-          case (prop, Left(errors))  => Left(errors.map(_.prefix(Pointer.empty / prop)))
-        }
-        .toSeq
-      for {
-        propChecks1 <- sequence(propChecks)
-        checks = Map.from(propChecks1)
-      } yield {
-        withChecks(checks)(ObjectPropertiesCheck)
-      }
-
-    case ("required", ArrayValue(values)) => {
-      def names = toStrings(values)
-      Right(withCheck(ObjectRequiredCheck(names)))
+      case _ => Right(withIgnored(keyword))
     }
-
-    case ("allOf", ArrayValue(values)) => {
-      withChecks(values)(AllOfCheck)
-    }
-
-    case ("anyOf", ArrayValue(values)) => {
-      withChecks(values)(AnyOfCheck)
-    }
-
-    case ("oneOf", ArrayValue(values)) => {
-      withChecks(values)(OneOfCheck)
-    }
-
-    case ("if", value) =>
-      updateChecks(SchemaValue(value))(IfThenElseCheck()) { (checks, check) =>
-        check.copy(ifChecks = Some(checks))
-      }
-
-    case ("then", value) =>
-      updateChecks(SchemaValue(value))(IfThenElseCheck()) { (checks, check) =>
-        check.copy(thenChecks = Some(checks))
-      }
-
-    case ("else", value) =>
-      updateChecks(SchemaValue(value))(IfThenElseCheck()) { (checks, check) =>
-        check.copy(elseChecks = Some(checks))
-      }
-
-    // TODO validation vocabulary
-    case ("enum", ArrayValue(values)) => {
-      Right(withCheck(EnumCheck(values)))
-    }
-
-    // TODO validation vocabulary
-    case ("const", value) => {
-      Right(withCheck(EnumCheck(Seq(value))))
-    }
-
-    case _ => Right(withIgnored(keyword))
-  }
 
   private def updateCheck[C <: Check: ClassTag](newCheck: => C)(f: C => C): Checks = {
     val checks1: Seq[Check] =
@@ -231,7 +261,7 @@ case class Checks(
 
   private def updateChecks[C <: Check: ClassTag](
       schema: SchemaValue
-  )(newCheck: => C)(f: (Checks, C) => C): Either[SchemaErrors, Checks] = {
+  )(newCheck: => C)(f: (Checks, C) => C)(implicit resolver: SchemaResolver): Either[SchemaErrors, Checks] = {
     for {
       checks <- Checks.parseKeywords(schema)
     } yield {
@@ -272,24 +302,25 @@ case class SchemaError(message: String, pointer: Pointer = Pointer.empty) {
 object Checks {
   type SchemaErrors = Seq[SchemaError]
 
-  def parseKeywords(schema: SchemaValue): Either[SchemaErrors, Checks] = schema.value match {
-    case BoolValue(v) => Right(Checks(schema).withCheck(TrivialCheck(v)))
-    case ObjectValue(keywords) =>
-      if (keywords.isEmpty) {
-        Right(Checks(schema).withCheck(TrivialCheck(true)))
-      } else {
-        keywords
-          .foldLeft[Either[SchemaErrors, Checks]](Right(Checks(schema))) { case (checks, (keyword, value)) =>
-            val prefix = Pointer.empty / keyword
-            checks
-              .flatMap(_.withKeyword(keyword, value))
-              .swap
-              .map(_.map(_.prefix(prefix)))
-              .swap
-          }
-      }
-    case _ => Left(Seq(SchemaError(s"invalid schema ${schema}")))
-  }
+  def parseKeywords(schema: SchemaValue)(implicit resolver: SchemaResolver): Either[SchemaErrors, Checks] =
+    schema.value match {
+      case BoolValue(v) => Right(Checks(schema).withCheck(TrivialCheck(v)))
+      case ObjectValue(keywords) =>
+        if (keywords.isEmpty) {
+          Right(Checks(schema).withCheck(TrivialCheck(true)))
+        } else {
+          keywords
+            .foldLeft[Either[SchemaErrors, Checks]](Right(Checks(schema))) { case (checks, (keyword, value)) =>
+              val prefix = Pointer.empty / keyword
+              checks
+                .flatMap(_.withKeyword(keyword, value))
+                .swap
+                .map(_.map(_.prefix(prefix)))
+                .swap
+            }
+        }
+      case _ => Left(Seq(SchemaError(s"invalid schema ${schema}")))
+    }
 }
 
 case class Processor[R] private[schema] (process: Value => R)
@@ -297,9 +328,14 @@ case class Processor[R] private[schema] (process: Value => R)
 object Processor {
   type SchemaErrors = Checks.SchemaErrors
 
-  def apply[R](schema: SchemaValue)(checker: Checker[R]): Either[SchemaErrors, Processor[R]] = for {
-    checks <- Checks.parseKeywords(schema)
-  } yield (checks.processor(checker))
+  def apply[R](
+      schema: SchemaValue
+  )(checker: Checker[R]): Either[SchemaErrors, Processor[R]] = {
+    implicit val resolver = LoadedSchemasResolver(schema)
+    for {
+      checks <- Checks.parseKeywords(schema)
+    } yield (checks.processor(checker))
+  }
 
   // def process[R](handler: Handler, calc: Calculator[R])(
   //     schema: SchemaValue,
