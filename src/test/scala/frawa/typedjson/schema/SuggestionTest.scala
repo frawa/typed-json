@@ -5,26 +5,19 @@ import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.parser.Parser
 import frawa.typedjson.parser.{ObjectValue, NullValue, NumberValue, StringValue}
 import frawa.typedjson.parser.BoolValue
+import TestUtil._
+import TestSchemas._
 
 class SuggestTest extends FunSuite {
-  implicit val zioParser    = new ZioParser();
-  implicit val schemaParser = SchemaValueDecoder;
+  implicit val zioParser = new ZioParser();
 
-  private def withSchema(text: String)(f: Schema => Unit) {
-    val withSchema = for {
-      schema <- SchemaParser(text)
-    } yield {
-      f(schema)
-    }
-    withSchema.swap
-      .map(message => fail("no schema", clues(clue(message))))
-      .swap
-  }
-
-  private def assertSuggest(text: String)(schema: Schema)(f: SuggestionResult => Unit) = {
+  private def assertSuggest(text: String)(schema: SchemaValue)(
+      f: SuggestionResult => Unit
+  ) = {
     val withParsed = for {
-      value <- Parser(text)
-      result = Suggestion.suggestions(schema)(value)
+      value     <- Parser(text)
+      processor <- Processor(schema)(new SuggestionChecker())
+      result = processor.process(value)
     } yield {
       f(result)
     }
@@ -33,7 +26,7 @@ class SuggestTest extends FunSuite {
       .swap
   }
 
-  test("suggest missing property") {
+  test("suggest missing property".only) {
     withSchema("""{
                  |"$id": "testme",
                  |"type": "object", 
