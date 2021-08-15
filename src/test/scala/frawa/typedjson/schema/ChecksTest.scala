@@ -253,12 +253,7 @@ class ChecksTest extends FunSuite {
   }
 
   test("allOf") {
-    withSchema("""{
-                 |"allOf": [
-                 |  { "type": "number" }
-                 |]
-                 |}
-                 |""".stripMargin) { schema =>
+    withSchema(allOfSchema) { schema =>
       assertChecks(schema) { checks =>
         assertEquals(
           checks.checks,
@@ -281,13 +276,7 @@ class ChecksTest extends FunSuite {
   }
 
   test("anyOf") {
-    withSchema("""{
-                 |"anyOf": [
-                 |  { "type": "number" },
-                 |  { "type": "string" }
-                 |]
-                 |}
-                 |""".stripMargin) { schema =>
+    withSchema(anyOfSchema) { schema =>
       assertChecks(schema) { checks =>
         assertEquals(
           checks.checks,
@@ -333,13 +322,7 @@ class ChecksTest extends FunSuite {
   }
 
   test("oneOf") {
-    withSchema("""{
-                 |"oneOf": [
-                 |  { "type": "number" },
-                 |  { "type": "string" }
-                 |]
-                 |}
-                 |""".stripMargin) { schema =>
+    withSchema(oneOfSchema) { schema =>
       assertChecks(schema) { checks =>
         assertEquals(
           checks.checks,
@@ -369,12 +352,7 @@ class ChecksTest extends FunSuite {
   }
 
   test("if/then/else") {
-    withSchema("""{
-                 |"if": { "type": "number" },
-                 |"then": { "type": "number" },
-                 |"else": { "type": "string" }
-                 |}
-                 |""".stripMargin) { schema =>
+    withSchema(ifThenElseSchema) { schema =>
       assertChecks(schema) { checks =>
         assertEquals(
           checks.checks,
@@ -391,7 +369,7 @@ class ChecksTest extends FunSuite {
   }
 
   test("null or string") {
-    withSchema("""{"type": ["null","string"]}""") { schema =>
+    withSchema(nullOrStringSchema) { schema =>
       assertChecks(schema) { checks =>
         assertEquals(
           checks.checks,
@@ -409,10 +387,7 @@ class ChecksTest extends FunSuite {
   }
 
   test("enum") {
-    withSchema("""{
-                 |"type": "string",
-                 |"enum": ["foo", "bar"]
-                 |}""".stripMargin) { schema =>
+    withSchema(enumSchema) { schema =>
       assertChecks(schema) { checks =>
         assertEquals(
           checks.checks,
@@ -435,10 +410,7 @@ class ChecksTest extends FunSuite {
   }
 
   test("const") {
-    withSchema("""{
-                 |"type": "string",
-                 |"const": "first"
-                 |}""".stripMargin) { schema =>
+    withSchema(constSchema) { schema =>
       assertChecks(schema) { checks =>
         assertEquals(
           checks.checks,
@@ -458,19 +430,7 @@ class ChecksTest extends FunSuite {
   }
 
   test("$id/$ref/$def") {
-    withSchema("""{
-                 |"$id": "https://example.net/root.json",
-                 |"type": "array",
-                 |"items": {
-                 |    "$ref": "#item"
-                 |},
-                 |"$defs": {
-                 |    "single": {
-                 |        "$anchor": "item",
-                 |        "type": "number"
-                 |    }
-                 |}
-                 |}""".stripMargin) { schema =>
+    withSchema(idRefDefsSchema) { schema =>
       assertChecks(schema) { checks =>
         assertEquals(
           checks.checks,
