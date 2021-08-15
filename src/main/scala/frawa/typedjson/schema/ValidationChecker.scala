@@ -15,9 +15,12 @@ import scala.reflect.ClassTag
 
 class ValidationChecker() extends Checker[ValidationResult] {
   private val calc: Calculator[ValidationResult] = new ValidationCalculator()
-  override def init: ValidationResult            = ValidationValid
 
-  override def check(check: Check): Value => ValidationResult = { value: Value =>
+  override def check(checks: Checks)(value: Value): ValidationResult = {
+    val results = checks.checks.map(checkOne(_)(value))
+    calc.allOf(results)
+  }
+  private def checkOne(check: Check)(value: Value): ValidationResult =
     check match {
       case NullTypeCheck          => checkNull(value)
       case BooleanTypeCheck       => checkBoolean(value)
@@ -29,9 +32,6 @@ class ValidationChecker() extends Checker[ValidationResult] {
       case NotCheck(checks)       => checkNot(checks, value)
       case _                      => ValidationInvalid(Seq(WithPointer(UnsupportedCheck(check))))
     }
-  }
-
-  override def aggregate(results: Seq[ValidationResult]): ValidationResult = calc.allOf(results)
 
   private def checkNull(value: Value): ValidationResult = value match {
     case NullValue => calc.valid(SchemaValue(NullValue))

@@ -90,9 +90,7 @@ case class UnionTypeCheck(typeChecks: Seq[Check]) extends Check
 case class EnumCheck(values: Seq[Value])          extends Check
 
 trait Checker[R] {
-  def init: R
-  def check(check: Check): Value => R
-  def aggregate(results: Seq[R]): R
+  def check(checks: Checks)(value: Value): R
 }
 
 case class Checks(
@@ -290,12 +288,8 @@ case class Checks(
     }
 
   def processor[R](checker: Checker[R]): Processor[R] =
-    Processor(value => checker.aggregate(checks.map(checker.check(_)(value)))
-    // checks.foldLeft(checker.init) { case (result, check) =>
-    //   val r = checker.check(check)(value)
-    //   checker.aggregate(result, r)
-    //
-    )
+    Processor(value => checker.check(this)(value))
+
 }
 
 case class SchemaError(message: String, pointer: Pointer = Pointer.empty) {
