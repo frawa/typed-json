@@ -731,7 +731,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("$id/$ref/$def".ignore) {
+  test("$id/$ref/$def") {
     withSchema("""{
                  |"$id": "https://example.net/root.json",
                  |"type": "array",
@@ -768,33 +768,3 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 }
-
-/*
-{
-    "$id": "https://example.net/root.json",
-    "items": {
-        "type": "array",
-        "items": { "$ref": "#item" }
-    },
-    "$defs": {
-        "single": {
-            "$anchor": "item",
-            "type": "object",
-            "additionalProperties": { "$ref": "other.json" }
-        }
-    }
-}
-{
-    "$id": "https://example.net/root.json",
-    "type": "array",
-    "items": {
-        "$ref": "#item"
-    },
-    "$defs": {
-        "single": {
-            "$anchor": "item",
-            "type": "number"
-        }
-    }
-}
- */
