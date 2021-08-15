@@ -23,7 +23,7 @@ class ValidationCheckerTest extends FunSuite {
       .swap
   }
 
-  test("null".only) {
+  test("null") {
     withSchema("""{"type": "null"}""") { schema =>
       assertValidate("""null""")(schema) { result =>
         assertEquals(result.errors, Seq())
@@ -36,7 +36,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("boolean".only) {
+  test("boolean") {
     withSchema("""{"type": "boolean"}""") { schema =>
       assertValidate("""true""")(schema) { result =>
         assertEquals(result.errors, Seq())
@@ -49,7 +49,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("true schema".only) {
+  test("true schema") {
     withSchema("""true""") { schema =>
       assertValidate("""null""")(schema) { result =>
         assertEquals(result.errors, Seq())
@@ -66,7 +66,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("false schema".only) {
+  test("false schema") {
     withSchema("""false""") { schema =>
       assertValidate("""null""")(schema) { result =>
         assertEquals(
@@ -113,7 +113,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("not false".only) {
+  test("not false") {
     withSchema("""{"not": false}""") { schema =>
       assertValidate("""null""")(schema) { result =>
         assertEquals(result.errors, Seq())
@@ -130,7 +130,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("empty schema".only) {
+  test("empty schema") {
     withSchema("""{}""") { schema =>
       assertValidate("""null""")(schema) { result =>
         assertEquals(result.errors, Seq())
@@ -147,7 +147,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("not empty".only) {
+  test("not empty") {
     withSchema("""{"not": {}}""") { schema =>
       assertValidate("""null""")(schema) { result =>
         assertEquals(
@@ -194,7 +194,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("string".only) {
+  test("string") {
     withSchema("""{"type": "string"}""") { schema =>
       assertValidate(""""hello"""")(schema) { result =>
         assertEquals(result.errors, Seq())
@@ -207,7 +207,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("number".only) {
+  test("number") {
     withSchema("""{"type": "number"}""") { schema =>
       assertValidate("""13""")(schema) { result =>
         assertEquals(result.errors, Seq())
@@ -220,7 +220,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("array".only) {
+  test("array") {
     withSchema("""{"type": "array", "items": { "type": "number"} }""") { schema =>
       assertValidate("""[13]""")(schema) { result =>
         assertEquals(result.errors, Seq())
@@ -233,7 +233,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("array item".only) {
+  test("array item") {
     withSchema("""{"type": "array", "items": { "type": "number"} }""") { schema =>
       assertValidate("""[true]""")(schema) { result =>
         assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("number"), Pointer(0))))
@@ -246,7 +246,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("object".only) {
+  test("object") {
     withSchema("""{
                  |"type": "object",
                  |"properties": {
@@ -277,7 +277,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("object property type".only) {
+  test("object property type") {
     withSchema("""{
                  |"type": "object",
                  |"properties": {
@@ -297,7 +297,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("object unknown property".only) {
+  test("object unknown property") {
     withSchema("""{
                  |"type": "object",
                  |"properties": {
@@ -318,7 +318,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("object missing property".only) {
+  test("object missing property") {
     withSchema("""{
                  |"type": "object",
                  |"properties": {
@@ -337,7 +337,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("object missing required property".only) {
+  test("object missing required property") {
     withSchema("""{
                  |"type": "object",
                  |"properties": {
@@ -369,7 +369,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("allOf".only) {
+  test("allOf") {
     withSchema("""{
                  |"allOf": [
                  |  { "type": "number" }
@@ -383,7 +383,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("impossible allOf".only) {
+  test("impossible allOf") {
     withSchema("""{
                  |"allOf": [
                  |  { "type": "number" },
@@ -398,7 +398,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("anyOf".only) {
+  test("anyOf") {
     withSchema("""{
                  |"anyOf": [
                  |  { "type": "number" },
@@ -413,7 +413,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("failed anyOf".only) {
+  test("failed anyOf") {
     withSchema("""{
                  |"anyOf": [
                  |  { "type": "number" },
@@ -434,7 +434,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("oneOf".only) {
+  test("oneOf") {
     withSchema("""{
                  |"oneOf": [
                  |  { "type": "number" },
@@ -449,7 +449,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("failed oneOf: none".only) {
+  test("failed oneOf: none") {
     withSchema("""{
                  |"oneOf": [
                  |  { "type": "string" },
@@ -470,7 +470,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("failed oneOf: two".only) {
+  test("failed oneOf: two") {
     withSchema("""{
                  |"oneOf": [
                  |  { "type": "number" },
@@ -491,7 +491,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("not".only) {
+  test("not") {
     withSchema("""{
                  |"not": { "type": "number" }
                  |}
@@ -503,7 +503,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("failed not".only) {
+  test("failed not") {
     withSchema("""{
                  |"not": { "type": "number" }
                  |}
@@ -515,7 +515,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("if/then/else".only) {
+  test("if/then/else") {
     withSchema("""{
                  |"if": { "type": "number" },
                  |"then": { "type": "number" },
@@ -537,7 +537,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("then/if/else".only) {
+  test("then/if/else") {
     withSchema("""{
                  |"then": { "type": "number" },
                  |"if": { "type": "number" },
@@ -559,7 +559,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("if/else".only) {
+  test("if/else") {
     withSchema("""{
                  |"if": { "type": "number" },
                  |"else": { "type": "string" }
@@ -580,7 +580,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("if/then".only) {
+  test("if/then") {
     withSchema("""{
                  |"if": { "type": "number" },
                  |"then": { "type": "number" }
@@ -597,7 +597,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("then/else".only) {
+  test("then/else") {
     withSchema("""{
                  |"then": { "type": "number" },
                  |"else": { "type": "string" }
@@ -618,7 +618,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("null or string".only) {
+  test("null or string") {
     withSchema("""{"type": ["null","string"]}""") { schema =>
       assertValidate("""null""")(schema) { result =>
         assertEquals(result.errors, Seq())
@@ -641,7 +641,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("enum".only) {
+  test("enum") {
     withSchema("""{
                  |"type": "string",
                  |"enum": ["foo", "bar"]
@@ -673,7 +673,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("const".only) {
+  test("const") {
     withSchema("""{
                  |"type": "string",
                  |"const": "first"
