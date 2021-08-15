@@ -618,7 +618,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("null or string") {
+  test("null or string".only) {
     withSchema("""{"type": ["null","string"]}""") { schema =>
       assertValidate("""null""")(schema) { result =>
         assertEquals(result.errors, Seq())
@@ -641,7 +641,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("enum") {
+  test("enum".only) {
     withSchema("""{
                  |"type": "string",
                  |"enum": ["foo", "bar"]
@@ -673,7 +673,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("const") {
+  test("const".only) {
     withSchema("""{
                  |"type": "string",
                  |"const": "first"

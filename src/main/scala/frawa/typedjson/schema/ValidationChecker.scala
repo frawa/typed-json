@@ -37,6 +37,8 @@ class ValidationChecker() extends Checker[ValidationResult] {
       case AnyOfCheck(checks)                                => checkAnyOf(checks, value)
       case OneOfCheck(checks)                                => checkOneOf(checks, value)
       case IfThenElseCheck(ifChecks, thenChecks, elseChecks) => checkIfThenElse(ifChecks, thenChecks, elseChecks, value)
+      case UnionTypeCheck(checks)                            => checkUnionType(checks, value)
+      case EnumCheck(values)                                 => checkEnum(values, value)
       case _                                                 => ValidationInvalid(Seq(WithPointer(UnsupportedCheck(check))))
     }
 
@@ -170,4 +172,17 @@ class ValidationChecker() extends Checker[ValidationResult] {
       }
       .getOrElse(calc.valid(SchemaValue(NullValue)))
   }
+
+  private def checkUnionType(checks: Seq[Check], value: Value): ValidationResult = {
+    calc.oneOf(checks.map(checkOne(_)(value)))
+  }
+
+  private def checkEnum(values: Seq[Value], value: Value): ValidationResult = {
+    if (values.contains(value)) {
+      calc.valid(SchemaValue(NullValue))
+    } else {
+      calc.invalid(NotInEnum(values))
+    }
+  }
+
 }
