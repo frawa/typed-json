@@ -22,21 +22,22 @@ class ValidationChecker() extends Checker[ValidationResult] {
   }
   private def checkOne(check: Check)(value: Value): ValidationResult =
     check match {
-      case NullTypeCheck                     => checkNullType(value)
-      case BooleanTypeCheck                  => checkBooleanType(value)
-      case StringTypeCheck                   => checkStringType(value)
-      case NumberTypeCheck                   => checkNumberType(value)
-      case ArrayTypeCheck                    => checkArrayType(value)
-      case ObjectTypeCheck                   => checkObjectType(value)
-      case ArrayItemsCheck(items)            => checkArrayItems(items, value)
-      case ObjectPropertiesCheck(properties) => checkObjectProperties(properties, value)
-      case ObjectRequiredCheck(required)     => checkObjectRequired(required, value)
-      case TrivialCheck(valid)               => checkTrivial(valid)
-      case NotCheck(checks)                  => checkNot(checks, value)
-      case AllOfCheck(checks)                => checkAllOf(checks, value)
-      case AnyOfCheck(checks)                => checkAnyOf(checks, value)
-      case OneOfCheck(checks)                => checkOneOf(checks, value)
-      case _                                 => ValidationInvalid(Seq(WithPointer(UnsupportedCheck(check))))
+      case NullTypeCheck                                     => checkNullType(value)
+      case BooleanTypeCheck                                  => checkBooleanType(value)
+      case StringTypeCheck                                   => checkStringType(value)
+      case NumberTypeCheck                                   => checkNumberType(value)
+      case ArrayTypeCheck                                    => checkArrayType(value)
+      case ObjectTypeCheck                                   => checkObjectType(value)
+      case ArrayItemsCheck(items)                            => checkArrayItems(items, value)
+      case ObjectPropertiesCheck(properties)                 => checkObjectProperties(properties, value)
+      case ObjectRequiredCheck(required)                     => checkObjectRequired(required, value)
+      case TrivialCheck(valid)                               => checkTrivial(valid)
+      case NotCheck(checks)                                  => checkNot(checks, value)
+      case AllOfCheck(checks)                                => checkAllOf(checks, value)
+      case AnyOfCheck(checks)                                => checkAnyOf(checks, value)
+      case OneOfCheck(checks)                                => checkOneOf(checks, value)
+      case IfThenElseCheck(ifChecks, thenChecks, elseChecks) => checkIfThenElse(ifChecks, thenChecks, elseChecks, value)
+      case _                                                 => ValidationInvalid(Seq(WithPointer(UnsupportedCheck(check))))
     }
 
   private def checkNullType(value: Value): ValidationResult = value match {
@@ -148,5 +149,25 @@ class ValidationChecker() extends Checker[ValidationResult] {
 
   private def checkOneOf(checks: Seq[Checks], value: Value): ValidationResult = {
     calc.oneOf(checks.map(_.processor(this).process(value)))
+  }
+
+  private def checkIfThenElse(
+      ifChecks: Option[Checks],
+      thenChecks: Option[Checks],
+      elseChecks: Option[Checks],
+      value: Value
+  ): ValidationResult = {
+    ifChecks
+      .map(_.processor(this).process(value))
+      .map { result =>
+        if (calc.isValid(result)) {
+          val thenResult = thenChecks.map(_.processor(this).process(value))
+          calc.ifThenElse(result, thenResult, None)
+        } else {
+          val elseResult = elseChecks.map(_.processor(this).process(value))
+          calc.ifThenElse(result, None, elseResult)
+        }
+      }
+      .getOrElse(calc.valid(SchemaValue(NullValue)))
   }
 }

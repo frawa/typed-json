@@ -515,7 +515,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("if/then/else") {
+  test("if/then/else".only) {
     withSchema("""{
                  |"if": { "type": "number" },
                  |"then": { "type": "number" },
@@ -537,7 +537,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("then/if/else") {
+  test("then/if/else".only) {
     withSchema("""{
                  |"then": { "type": "number" },
                  |"if": { "type": "number" },
@@ -559,7 +559,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("if/else") {
+  test("if/else".only) {
     withSchema("""{
                  |"if": { "type": "number" },
                  |"else": { "type": "string" }
@@ -580,7 +580,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("if/then") {
+  test("if/then".only) {
     withSchema("""{
                  |"if": { "type": "number" },
                  |"then": { "type": "number" }
@@ -597,7 +597,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("then/else") {
+  test("then/else".only) {
     withSchema("""{
                  |"then": { "type": "number" },
                  |"else": { "type": "string" }
