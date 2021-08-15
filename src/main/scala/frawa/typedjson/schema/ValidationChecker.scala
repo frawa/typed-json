@@ -22,40 +22,48 @@ class ValidationChecker() extends Checker[ValidationResult] {
   }
   private def checkOne(check: Check)(value: Value): ValidationResult =
     check match {
-      case NullTypeCheck          => checkNull(value)
-      case BooleanTypeCheck       => checkBoolean(value)
-      case StringTypeCheck        => checkString(value)
-      case NumberTypeCheck        => checkNumber(value)
-      case ArrayTypeCheck         => checkArray(value)
-      case ArrayItemsCheck(items) => checkArrayItems(items, value)
-      case TrivialCheck(valid)    => checkTrivial(valid)
-      case NotCheck(checks)       => checkNot(checks, value)
-      case _                      => ValidationInvalid(Seq(WithPointer(UnsupportedCheck(check))))
+      case NullTypeCheck                     => checkNullType(value)
+      case BooleanTypeCheck                  => checkBooleanType(value)
+      case StringTypeCheck                   => checkStringType(value)
+      case NumberTypeCheck                   => checkNumberType(value)
+      case ArrayTypeCheck                    => checkArrayType(value)
+      case ObjectTypeCheck                   => checkObjectType(value)
+      case ArrayItemsCheck(items)            => checkArrayItems(items, value)
+      case ObjectPropertiesCheck(properties) => checkObjectProperties(properties, value)
+      case ObjectRequiredCheck(required)     => checkObjectRequired(required, value)
+      case TrivialCheck(valid)               => checkTrivial(valid)
+      case NotCheck(checks)                  => checkNot(checks, value)
+      case _                                 => ValidationInvalid(Seq(WithPointer(UnsupportedCheck(check))))
     }
 
-  private def checkNull(value: Value): ValidationResult = value match {
+  private def checkNullType(value: Value): ValidationResult = value match {
     case NullValue => calc.valid(SchemaValue(NullValue))
     case _         => calc.invalid(TypeMismatch2("null"))
   }
 
-  private def checkBoolean(value: Value): ValidationResult = value match {
+  private def checkBooleanType(value: Value): ValidationResult = value match {
     case BoolValue(_) => calc.valid(SchemaValue(NullValue))
     case _            => calc.invalid(TypeMismatch2("boolean"))
   }
 
-  private def checkString(value: Value): ValidationResult = value match {
+  private def checkStringType(value: Value): ValidationResult = value match {
     case StringValue(_) => calc.valid(SchemaValue(NullValue))
     case _              => calc.invalid(TypeMismatch2("string"))
   }
 
-  private def checkNumber(value: Value): ValidationResult = value match {
+  private def checkNumberType(value: Value): ValidationResult = value match {
     case NumberValue(_) => calc.valid(SchemaValue(NullValue))
     case _              => calc.invalid(TypeMismatch2("number"))
   }
 
-  private def checkArray(value: Value): ValidationResult = value match {
+  private def checkArrayType(value: Value): ValidationResult = value match {
     case ArrayValue(_) => calc.valid(SchemaValue(NullValue))
     case _             => calc.invalid(TypeMismatch2("array"))
+  }
+
+  private def checkObjectType(value: Value): ValidationResult = value match {
+    case ObjectValue(_) => calc.valid(SchemaValue(NullValue))
+    case _              => calc.invalid(TypeMismatch2("object"))
   }
 
   private def checkTrivial(valid: Boolean): ValidationResult = {
@@ -87,6 +95,41 @@ class ValidationChecker() extends Checker[ValidationResult] {
         )
       } else {
         calc.valid(SchemaValue(NullValue))
+      }
+    }
+    case _ => calc.valid(SchemaValue(NullValue))
+  }
+
+  private def checkObjectProperties(properties: Map[String, Checks], value: Value): ValidationResult = value match {
+    case ObjectValue(propertiesValues) => {
+      val results = propertiesValues.map { case (key1, value1) =>
+        lazy val prefix = Pointer.empty / key1
+        properties
+          .get(key1)
+          .map(_.processor(this))
+          .map(_.process(value1))
+          .map(calc.prefix(prefix, _))
+          .getOrElse(calc.invalid(UnexpectedProperty(key1)))
+      }.toSeq
+      if (properties.isEmpty) {
+        calc.valid(SchemaValue(NullValue))
+      } else {
+        calc.allOf(results)
+      }
+    }
+    case _ => calc.valid(SchemaValue(NullValue))
+  }
+
+  private def checkObjectRequired(required: Seq[String], value: Value): ValidationResult = value match {
+    case ObjectValue(propertiesValues) => {
+      val missingNames = required.filter(!propertiesValues.contains(_))
+      if (missingNames.isEmpty) {
+        calc.valid(SchemaValue(NullValue))
+      } else {
+        val missing = missingNames
+          .map(name => (name, SchemaValue(NullValue)))
+          .toMap
+        calc.invalid(MissingProperties2(missing))
       }
     }
     case _ => calc.valid(SchemaValue(NullValue))

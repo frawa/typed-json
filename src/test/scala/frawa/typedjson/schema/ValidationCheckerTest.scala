@@ -246,7 +246,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("object") {
+  test("object".only) {
     withSchema("""{
                  |"type": "object",
                  |"properties": {
@@ -277,7 +277,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("object property type") {
+  test("object property type".only) {
     withSchema("""{
                  |"type": "object",
                  |"properties": {
@@ -297,7 +297,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("object unknown property") {
+  test("object unknown property".only) {
     withSchema("""{
                  |"type": "object",
                  |"properties": {
@@ -318,7 +318,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("object missing property") {
+  test("object missing property".only) {
     withSchema("""{
                  |"type": "object",
                  |"properties": {
@@ -337,7 +337,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("object missing required property") {
+  test("object missing required property".only) {
     withSchema("""{
                  |"type": "object",
                  |"properties": {
@@ -358,13 +358,7 @@ class ValidationCheckerTest extends FunSuite {
               result = MissingProperties2(
                 Map(
                   "titi" -> SchemaValue(
-                    value = ObjectValue(
-                      properties = Map(
-                        "type" -> StringValue(
-                          value = "string"
-                        )
-                      )
-                    )
+                    value = NullValue
                   )
                 )
               )
