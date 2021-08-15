@@ -20,6 +20,7 @@ class ValidationChecker() extends Checker[ValidationResult] {
     val results = checks.checks.map(checkOne(_)(value))
     calc.allOf(results)
   }
+
   private def checkOne(check: Check)(value: Value): ValidationResult =
     check match {
       case NullTypeCheck                                     => checkNullType(value)
