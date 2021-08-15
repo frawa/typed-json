@@ -369,7 +369,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("allOf") {
+  test("allOf".only) {
     withSchema("""{
                  |"allOf": [
                  |  { "type": "number" }
@@ -383,7 +383,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("impossible allOf") {
+  test("impossible allOf".only) {
     withSchema("""{
                  |"allOf": [
                  |  { "type": "number" },
@@ -398,7 +398,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("anyOf") {
+  test("anyOf".only) {
     withSchema("""{
                  |"anyOf": [
                  |  { "type": "number" },
@@ -413,7 +413,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("failed anyOf") {
+  test("failed anyOf".only) {
     withSchema("""{
                  |"anyOf": [
                  |  { "type": "number" },
@@ -434,9 +434,9 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("oneOf") {
+  test("oneOf".only) {
     withSchema("""{
-                 |"anyOf": [
+                 |"oneOf": [
                  |  { "type": "number" },
                  |  { "type": "string" }
                  |]
@@ -449,7 +449,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("failed oneOf: none") {
+  test("failed oneOf: none".only) {
     withSchema("""{
                  |"oneOf": [
                  |  { "type": "string" },
@@ -470,7 +470,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("failed oneOf: two") {
+  test("failed oneOf: two".only) {
     withSchema("""{
                  |"oneOf": [
                  |  { "type": "number" },
@@ -491,7 +491,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("not") {
+  test("not".only) {
     withSchema("""{
                  |"not": { "type": "number" }
                  |}
@@ -503,7 +503,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("failed not") {
+  test("failed not".only) {
     withSchema("""{
                  |"not": { "type": "number" }
                  |}

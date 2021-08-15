@@ -33,6 +33,9 @@ class ValidationChecker() extends Checker[ValidationResult] {
       case ObjectRequiredCheck(required)     => checkObjectRequired(required, value)
       case TrivialCheck(valid)               => checkTrivial(valid)
       case NotCheck(checks)                  => checkNot(checks, value)
+      case AllOfCheck(checks)                => checkAllOf(checks, value)
+      case AnyOfCheck(checks)                => checkAnyOf(checks, value)
+      case OneOfCheck(checks)                => checkOneOf(checks, value)
       case _                                 => ValidationInvalid(Seq(WithPointer(UnsupportedCheck(check))))
     }
 
@@ -71,14 +74,6 @@ class ValidationChecker() extends Checker[ValidationResult] {
       calc.valid(SchemaValue(NullValue))
     else
       calc.invalid(FalseSchemaReason())
-  }
-
-  private def checkNot(checks: Checks, value: Value): ValidationResult = {
-    val result = checks.processor(this).process(value)
-    if (calc.isValid(result))
-      calc.invalid(NotInvalid())
-    else
-      calc.valid(SchemaValue(NullValue))
   }
 
   private def checkArrayItems(items: Option[Checks], value: Value): ValidationResult = value match {
@@ -135,4 +130,23 @@ class ValidationChecker() extends Checker[ValidationResult] {
     case _ => calc.valid(SchemaValue(NullValue))
   }
 
+  private def checkNot(checks: Checks, value: Value): ValidationResult = {
+    val result = checks.processor(this).process(value)
+    if (calc.isValid(result))
+      calc.invalid(NotInvalid())
+    else
+      calc.valid(SchemaValue(NullValue))
+  }
+
+  private def checkAllOf(checks: Seq[Checks], value: Value): ValidationResult = {
+    calc.allOf(checks.map(_.processor(this).process(value)))
+  }
+
+  private def checkAnyOf(checks: Seq[Checks], value: Value): ValidationResult = {
+    calc.anyOf(checks.map(_.processor(this).process(value)))
+  }
+
+  private def checkOneOf(checks: Seq[Checks], value: Value): ValidationResult = {
+    calc.oneOf(checks.map(_.processor(this).process(value)))
+  }
 }
