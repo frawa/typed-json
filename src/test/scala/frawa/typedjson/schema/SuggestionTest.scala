@@ -26,7 +26,7 @@ class SuggestTest extends FunSuite {
       .swap
   }
 
-  test("suggest missing property".only) {
+  test("suggest missing property") {
     withSchema(totoObjectSchema) { schema =>
       assertSuggest(
         """{
@@ -50,7 +50,7 @@ class SuggestTest extends FunSuite {
     }
   }
 
-  test("suggest deep".only) {
+  test("suggest deep") {
     withSchema("""{
                  |"$id": "testme",
                  |"type": "object", 
@@ -92,7 +92,7 @@ class SuggestTest extends FunSuite {
     }
   }
 
-  test("suggest several values".only) {
+  test("suggest several values") {
     withSchema("""{
                  |"$id": "testme",
                  |"type": "object", 
@@ -166,7 +166,7 @@ class SuggestTest extends FunSuite {
     }
   }
 
-  test("suggestions for several properties".only) {
+  test("suggestions for several properties") {
     withSchema("""{
                  |"$id": "testme",
                  |"type": "object", 
@@ -230,7 +230,7 @@ class SuggestTest extends FunSuite {
     }
   }
 
-  test("null or number".only) {
+  test("null or number") {
     withSchema("""{
                  |"$id": "testme",
                  |"type": ["null","number"]
@@ -250,7 +250,7 @@ class SuggestTest extends FunSuite {
     }
   }
 
-  test("enum".only) {
+  test("enum") {
     withSchema("""{
                  |"$id": "testme",
                  |"type": "number",
@@ -271,7 +271,7 @@ class SuggestTest extends FunSuite {
     }
   }
 
-  test("const".only) {
+  test("const") {
     withSchema("""{
                  |"$id": "testme",
                  |"type": "boolean",
@@ -329,6 +329,16 @@ class SuggestTest extends FunSuite {
           SuggestionResult(
             Seq(
               ObjectValue(
+                properties = Map()
+              ),
+              ObjectValue(
+                properties = Map(
+                  "kind" -> StringValue(
+                    value = ""
+                  )
+                )
+              ),
+              ObjectValue(
                 properties = Map(
                   "kind" -> StringValue(
                     value = "first"
@@ -365,6 +375,16 @@ class SuggestTest extends FunSuite {
           result,
           SuggestionResult(
             Seq(
+              ObjectValue(
+                properties = Map()
+              ),
+              ObjectValue(
+                properties = Map(
+                  "kind" -> StringValue(
+                    value = ""
+                  )
+                )
+              ),
               ObjectValue(
                 properties = Map(
                   "kind" -> StringValue(
@@ -427,8 +447,14 @@ class SuggestTest extends FunSuite {
           result,
           SuggestionResult(
             Seq(
+              ObjectValue(
+                properties = Map()
+              ),
+              ObjectValue(Map("foo" -> ObjectValue(Map()))),
+              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0))))),
               ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(13))))),
               ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(14))))),
+              ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> StringValue(""))))),
               ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> StringValue("toto"))))),
               ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> StringValue("titi")))))
             )
