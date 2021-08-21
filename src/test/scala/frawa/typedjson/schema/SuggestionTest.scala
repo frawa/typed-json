@@ -142,7 +142,12 @@ class SuggestTest extends FunSuite {
                   )
                 )
               ),
-              ObjectValue(Map("gnu" -> ObjectValue(Map()))),
+              ObjectValue(
+                Map(
+                  "gnu" ->
+                    ObjectValue(Map())
+                )
+              ),
               ObjectValue(
                 properties = Map(
                   "gnu" -> ObjectValue(
@@ -225,7 +230,7 @@ class SuggestTest extends FunSuite {
     }
   }
 
-  test("null or number") {
+  test("null or number".only) {
     withSchema("""{
                  |"$id": "testme",
                  |"type": ["null","number"]
@@ -245,7 +250,7 @@ class SuggestTest extends FunSuite {
     }
   }
 
-  test("enum") {
+  test("enum".only) {
     withSchema("""{
                  |"$id": "testme",
                  |"type": "number",
@@ -254,19 +259,19 @@ class SuggestTest extends FunSuite {
       assertSuggest("""true""")(schema) { result =>
         assertEquals(
           result,
-          SuggestionResult(Seq(NumberValue(13), NumberValue(14)))
+          SuggestionResult(Seq(NumberValue(0), NumberValue(13), NumberValue(14)))
         )
       }
       assertSuggest("""13""")(schema) { result =>
         assertEquals(
           result,
-          SuggestionResult(Seq(NumberValue(13), NumberValue(14)))
+          SuggestionResult(Seq(NumberValue(0), NumberValue(13), NumberValue(14)))
         )
       }
     }
   }
 
-  test("const") {
+  test("const".only) {
     withSchema("""{
                  |"$id": "testme",
                  |"type": "boolean",
