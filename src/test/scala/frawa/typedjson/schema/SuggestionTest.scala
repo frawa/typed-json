@@ -464,6 +464,37 @@ class SuggestTest extends FunSuite {
     }
   }
 
+  test("suggest required property") {
+    withSchema(totoRequiredObjectSchema) { schema =>
+      assertSuggest(
+        """{
+          |"toto": 13
+          |}
+          |""".stripMargin
+      )(
+        schema
+      ) { result =>
+        assertEquals(
+          result,
+          SuggestionResult(
+            Seq(
+              ObjectValue(Map()),
+              ObjectValue(
+                properties = Map(
+                  "toto" -> NullValue,
+                  "gnu"  -> NullValue
+                )
+              ),
+              ObjectValue(Map("toto" -> NumberValue(0))),
+              ObjectValue(Map("gnu" -> BoolValue(true))),
+              ObjectValue(Map("titi" -> StringValue("")))
+            )
+          )
+        )
+      }
+    }
+  }
+
 // TODO
 // - suggest array (next item?)
 

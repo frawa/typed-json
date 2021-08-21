@@ -34,12 +34,12 @@ class SuggestionChecker extends Checker[SuggestionResult] {
             .map(v => ObjectValue(Map(prop -> v)))
           fw
         }.toSeq
-      // case ObjectRequiredCheck(required)                     => checkObjectRequired(required, value)
-      case TrivialCheck(valid) => Seq()
-      case NotCheck(checks)    => Seq()
-      case AllOfCheck(checks)  => checks.flatMap(_.checks).flatMap(suggestFor(_)(value))
-      case AnyOfCheck(checks)  => checks.flatMap(_.checks).flatMap(suggestFor(_)(value))
-      case OneOfCheck(checks)  => checks.flatMap(_.checks).flatMap(suggestFor(_)(value))
+      case ObjectRequiredCheck(required) => Seq(ObjectValue(Map.from(required.map((_, NullValue)))))
+      case TrivialCheck(valid)           => Seq()
+      case NotCheck(checks)              => Seq()
+      case AllOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_)(value))
+      case AnyOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_)(value))
+      case OneOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_)(value))
       case IfThenElseCheck(ifChecks, thenChecks, elseChecks) =>
         Seq(ifChecks, thenChecks, elseChecks)
           .flatMap(identity)
