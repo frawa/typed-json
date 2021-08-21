@@ -3,8 +3,7 @@ package frawa.typedjson.schema
 import munit.FunSuite
 import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.parser.Parser
-import frawa.typedjson.parser.{ObjectValue, NullValue, NumberValue, StringValue}
-import frawa.typedjson.parser.BoolValue
+import frawa.typedjson.parser.{ObjectValue, NullValue, NumberValue, StringValue, ArrayValue, BoolValue}
 import TestUtil._
 import TestSchemas._
 
@@ -495,7 +494,24 @@ class SuggestTest extends FunSuite {
     }
   }
 
-// TODO
-// - suggest array (next item?)
+  test("suggest array item") {
+    withSchema(numberArraySchema) { schema =>
+      assertSuggest(
+        """[]""".stripMargin
+      )(
+        schema
+      ) { result =>
+        assertEquals(
+          result,
+          SuggestionResult(
+            Seq(
+              ArrayValue(Seq()),
+              ArrayValue(Seq(NumberValue(0)))
+            )
+          )
+        )
+      }
+    }
+  }
 
 }

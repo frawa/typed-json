@@ -26,13 +26,19 @@ class SuggestionChecker extends Checker[SuggestionResult] {
       case NumberTypeCheck  => Seq(NumberValue(0))
       case ArrayTypeCheck   => Seq(ArrayValue(Seq()))
       case ObjectTypeCheck  => Seq(ObjectValue(Map()))
-      // case ArrayItemsCheck(items)                            => checkArrayItems(items, value)
+      case ArrayItemsCheck(items) =>
+        items
+          .map { checks =>
+            checks.checks
+              .flatMap(suggestFor(_)(value))
+              .map(v => ArrayValue(Seq(v)))
+          }
+          .getOrElse(Seq(ArrayValue(Seq())))
       case ObjectPropertiesCheck(properties) =>
         properties.flatMap { case (prop, checks) =>
-          val fw = checks.checks
+          checks.checks
             .flatMap(suggestFor(_)(value))
             .map(v => ObjectValue(Map(prop -> v)))
-          fw
         }.toSeq
       case ObjectRequiredCheck(required) => Seq(ObjectValue(Map.from(required.map((_, NullValue)))))
       case TrivialCheck(valid)           => Seq()
