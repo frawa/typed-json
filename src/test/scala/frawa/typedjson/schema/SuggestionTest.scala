@@ -27,15 +27,7 @@ class SuggestTest extends FunSuite {
   }
 
   test("suggest missing property".only) {
-    withSchema("""{
-                 |"$id": "testme",
-                 |"type": "object", 
-                 |"properties": { 
-                 |  "toto": { "type": "number" },
-                 |  "titi": { "type": "string" }
-                 |} 
-                 |}
-                 |""".stripMargin) { schema =>
+    withSchema(totoObjectSchema) { schema =>
       assertSuggest(
         """{
           |"toto": 13
@@ -48,6 +40,7 @@ class SuggestTest extends FunSuite {
           result,
           SuggestionResult(
             Seq(
+              ObjectValue(Map()),
               ObjectValue(Map("toto" -> NumberValue(0))),
               ObjectValue(Map("titi" -> StringValue("")))
             )
@@ -57,7 +50,7 @@ class SuggestTest extends FunSuite {
     }
   }
 
-  test("suggest deep") {
+  test("suggest deep".only) {
     withSchema("""{
                  |"$id": "testme",
                  |"type": "object", 
@@ -81,13 +74,25 @@ class SuggestTest extends FunSuite {
       ) { result =>
         assertEquals(
           result,
-          SuggestionResult(Seq(ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0)))))))
+          SuggestionResult(
+            Seq(
+              ObjectValue(Map()),
+              ObjectValue(
+                properties = Map(
+                  "foo" -> ObjectValue(
+                    properties = Map()
+                  )
+                )
+              ),
+              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0)))))
+            )
+          )
         )
       }
     }
   }
 
-  test("suggest several values") {
+  test("suggest several values".only) {
     withSchema("""{
                  |"$id": "testme",
                  |"type": "object", 
@@ -119,27 +124,36 @@ class SuggestTest extends FunSuite {
           result,
           SuggestionResult(
             Seq(
-              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0))))),
-              ObjectValue(Map("gnu" -> ObjectValue(Map())))
-            )
-          )
-        )
-      }
-      assertSuggest(
-        """{
-          |"foo": { "bar": 13 },
-          |"gnu": {}
-          |}
-          |""".stripMargin
-      )(
-        schema
-      ) { result =>
-        assertEquals(
-          result,
-          SuggestionResult(
-            Seq(
-              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0))))),
-              ObjectValue(Map("gnu" -> ObjectValue(Map("toto" -> StringValue("")))))
+              ObjectValue(Map()),
+              ObjectValue(
+                properties = Map(
+                  "foo" -> ObjectValue(
+                    properties = Map()
+                  )
+                )
+              ),
+              ObjectValue(
+                Map(
+                  "foo" -> ObjectValue(
+                    Map(
+                      "bar" ->
+                        NumberValue(0)
+                    )
+                  )
+                )
+              ),
+              ObjectValue(Map("gnu" -> ObjectValue(Map()))),
+              ObjectValue(
+                properties = Map(
+                  "gnu" -> ObjectValue(
+                    properties = Map(
+                      "toto" -> StringValue(
+                        value = ""
+                      )
+                    )
+                  )
+                )
+              )
             )
           )
         )
@@ -147,7 +161,7 @@ class SuggestTest extends FunSuite {
     }
   }
 
-  test("suggestions for several properties") {
+  test("suggestions for several properties".only) {
     withSchema("""{
                  |"$id": "testme",
                  |"type": "object", 
@@ -174,26 +188,36 @@ class SuggestTest extends FunSuite {
           result,
           SuggestionResult(
             Seq(
-              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0))))),
-              ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> NumberValue(0)))))
-            )
-          )
-        )
-      }
-      assertSuggest(
-        """{
-          |"foo": { "bar": 13 }
-          |}
-          |""".stripMargin
-      )(
-        schema
-      ) { result =>
-        assertEquals(
-          result,
-          SuggestionResult(
-            Seq(
-              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0))))),
-              ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> NumberValue(0)))))
+              ObjectValue(
+                properties = Map()
+              ),
+              ObjectValue(
+                properties = Map(
+                  "foo" -> ObjectValue(
+                    properties = Map()
+                  )
+                )
+              ),
+              ObjectValue(
+                Map(
+                  "foo" -> ObjectValue(
+                    Map(
+                      "bar" ->
+                        NumberValue(0)
+                    )
+                  )
+                )
+              ),
+              ObjectValue(
+                Map(
+                  "foo" -> ObjectValue(
+                    Map(
+                      "gnu" ->
+                        NumberValue(0)
+                    )
+                  )
+                )
+              )
             )
           )
         )

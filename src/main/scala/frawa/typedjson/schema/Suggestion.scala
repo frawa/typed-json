@@ -18,7 +18,7 @@ class SuggestionChecker extends Checker[SuggestionResult] {
     SuggestionResult(suggestions)
   }
 
-  private def suggestFor(check: Check)(value: Value): Seq[Value] =
+  private def suggestFor(check: Check)(value: Value): Seq[Value] = {
     check match {
       case NullTypeCheck    => Seq(NullValue)
       case BooleanTypeCheck => Seq(BoolValue(true))
@@ -27,7 +27,13 @@ class SuggestionChecker extends Checker[SuggestionResult] {
       case ArrayTypeCheck   => Seq(ArrayValue(Seq()))
       case ObjectTypeCheck  => Seq(ObjectValue(Map()))
       // case ArrayItemsCheck(items)                            => checkArrayItems(items, value)
-      // case ObjectPropertiesCheck(properties)                 => checkObjectProperties(properties, value)
+      case ObjectPropertiesCheck(properties) =>
+        properties.flatMap { case (prop, checks) =>
+          val fw = checks.checks
+            .flatMap(suggestFor(_)(value))
+            .map(v => ObjectValue(Map(prop -> v)))
+          fw
+        }.toSeq
       // case ObjectRequiredCheck(required)                     => checkObjectRequired(required, value)
       case TrivialCheck(valid) => Seq()
       case NotCheck(checks)    => Seq()
@@ -43,5 +49,5 @@ class SuggestionChecker extends Checker[SuggestionResult] {
       case EnumCheck(values)      => values
       case _                      => Seq()
     }
-
+  }
 }
