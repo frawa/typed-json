@@ -22,38 +22,15 @@ object SchemaValue {
     } yield SchemaValue(value)
 }
 
-trait SchemaResolver {
-  val base: Option[URI]                      = None
-  def resolve(uri: URI): Option[SchemaValue] = None
+// case object RootSchemaResolver extends SchemaResolver {
+//   override def resolve(uri: URI): Option[SchemaValue] = None
+// }
 
-  def resolveRef(ref: String): Option[SchemaValue] = {
-    def uri = URI.create(ref)
-    if (uri.isAbsolute()) {
-      resolve(uri)
-    } else if (uri.getFragment.startsWith("/")) {
-      val pointer = Pointer.parse(uri.getFragment())
-      base
-        .flatMap(resolve(_))
-        .flatMap(resolvePointer(_, pointer))
-    } else {
-      base
-        .map(_.resolve(uri))
-        .flatMap(resolve(_))
-    }
-  }
+// case class RelativeSchemaResolver(id: String, resolver: SchemaResolver) extends SchemaResolver {
+//   override val base                                   = Some(URI.create(id).normalize())
+//   override def resolve(uri: URI): Option[SchemaValue] = resolver.resolve(uri)
+// }
 
-  private def resolvePointer(schema: SchemaValue, pointer: Pointer): Option[SchemaValue] =
-    pointer(schema.value).map(SchemaValue(_))
-}
-
-case object RootSchemaResolver extends SchemaResolver {
-  override def resolve(uri: URI): Option[SchemaValue] = None
-}
-
-case class RelativeSchemaResolver(id: String, resolver: SchemaResolver) extends SchemaResolver {
-  override val base                                   = Some(URI.create(id).normalize())
-  override def resolve(uri: URI): Option[SchemaValue] = resolver.resolve(uri)
-}
 trait Calculator[R] {
   def valid(schema: SchemaValue): R
   def isValid(result: R): Boolean
