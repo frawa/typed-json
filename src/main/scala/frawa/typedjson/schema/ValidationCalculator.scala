@@ -15,7 +15,7 @@ import scala.reflect.ClassTag
 
 sealed trait Observation
 case class FalseSchemaReason()                        extends Observation
-case class TypeMismatch(expected: String)             extends Observation
+case class TypeMismatch[T <: Value](expected: String) extends Observation
 case class UnexpectedProperty(key: String)            extends Observation
 case class NotOneOf(valid: Int)                       extends Observation
 case class NotInvalid()                               extends Observation

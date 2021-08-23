@@ -32,14 +32,21 @@ class ValidationChecker() extends Checker[ValidationResult] {
     calc.allOf(results)
   }
 
+  private val nullTypeMismatch    = TypeMismatch[NullValue.type]("null")
+  private val booleanTypeMismatch = TypeMismatch[BoolValue]("boolean")
+  private val stringTypeMismatch  = TypeMismatch[StringValue]("string")
+  private val numberTypeMismatch  = TypeMismatch[NumberValue]("number")
+  private val arrayTypeMismatch   = TypeMismatch[ArrayValue]("array")
+  private val objectTypeMismatch  = TypeMismatch[ObjectValue]("object")
+
   private def checkOne(check: Check)(value: Value): ValidationResult =
     check match {
-      case NullTypeCheck                                     => checkNullType(value)
-      case BooleanTypeCheck                                  => checkBooleanType(value)
-      case StringTypeCheck                                   => checkStringType(value)
-      case NumberTypeCheck                                   => checkNumberType(value)
-      case ArrayTypeCheck                                    => checkArrayType(value)
-      case ObjectTypeCheck                                   => checkObjectType(value)
+      case NullTypeCheck                                     => checkType(nullTypeMismatch)(value)
+      case BooleanTypeCheck                                  => checkType(booleanTypeMismatch)(value)
+      case StringTypeCheck                                   => checkType(stringTypeMismatch)(value)
+      case NumberTypeCheck                                   => checkType(numberTypeMismatch)(value)
+      case ArrayTypeCheck                                    => checkType(arrayTypeMismatch)(value)
+      case ObjectTypeCheck                                   => checkType(objectTypeMismatch)(value)
       case ArrayItemsCheck(items)                            => checkArrayItems(items, value)
       case ObjectPropertiesCheck(properties)                 => checkObjectProperties(properties, value)
       case ObjectRequiredCheck(required)                     => checkObjectRequired(required, value)
@@ -54,35 +61,11 @@ class ValidationChecker() extends Checker[ValidationResult] {
       case _                                                 => ValidationInvalid(Seq(WithPointer(UnsupportedCheck(check))))
     }
 
-  private def checkNullType(value: Value): ValidationResult = value match {
-    case NullValue => calc.valid()
-    case _         => calc.invalid(TypeMismatch("null"))
-  }
-
-  private def checkBooleanType(value: Value): ValidationResult = value match {
-    case BoolValue(_) => calc.valid()
-    case _            => calc.invalid(TypeMismatch("boolean"))
-  }
-
-  private def checkStringType(value: Value): ValidationResult = value match {
-    case StringValue(_) => calc.valid()
-    case _              => calc.invalid(TypeMismatch("string"))
-  }
-
-  private def checkNumberType(value: Value): ValidationResult = value match {
-    case NumberValue(_) => calc.valid()
-    case _              => calc.invalid(TypeMismatch("number"))
-  }
-
-  private def checkArrayType(value: Value): ValidationResult = value match {
-    case ArrayValue(_) => calc.valid()
-    case _             => calc.invalid(TypeMismatch("array"))
-  }
-
-  private def checkObjectType(value: Value): ValidationResult = value match {
-    case ObjectValue(_) => calc.valid()
-    case _              => calc.invalid(TypeMismatch("object"))
-  }
+  private def checkType[T <: Value: ClassTag](observation: TypeMismatch[T])(value: Value): ValidationResult =
+    value match {
+      case v: T => calc.valid()
+      case _    => calc.invalid(observation)
+    }
 
   private def checkTrivial(valid: Boolean): ValidationResult = {
     if (valid)
@@ -186,5 +169,4 @@ class ValidationChecker() extends Checker[ValidationResult] {
       calc.invalid(NotInEnum(values))
     }
   }
-
 }
