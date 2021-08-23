@@ -30,7 +30,7 @@ class ValidationCheckerTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate("""13""")(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("null"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("null"))))
         assertEquals(result.valid, false)
       }
     }
@@ -43,7 +43,7 @@ class ValidationCheckerTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate("""13""")(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("boolean"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("boolean"))))
         assertEquals(result.valid, false)
       }
     }
@@ -201,7 +201,7 @@ class ValidationCheckerTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate("""13""")(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("string"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("string"))))
         assertEquals(result.valid, false)
       }
     }
@@ -214,7 +214,7 @@ class ValidationCheckerTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate("""null""")(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("number"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("number"))))
         assertEquals(result.valid, false)
       }
     }
@@ -227,7 +227,7 @@ class ValidationCheckerTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate("""null""")(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("array"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("array"))))
         assertEquals(result.valid, false)
       }
     }
@@ -236,7 +236,7 @@ class ValidationCheckerTest extends FunSuite {
   test("array item") {
     withSchema(numberArraySchema) { schema =>
       assertValidate("""[true]""")(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("number"), Pointer(0))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("number"), Pointer(0))))
         assertEquals(result.valid, false)
       }
       assertValidate("""[13]""")(schema) { result =>
@@ -261,7 +261,7 @@ class ValidationCheckerTest extends FunSuite {
           result.errors,
           Seq(
             WithPointer(
-              TypeMismatch2("object")
+              TypeMismatch("object")
             )
           )
         )
@@ -277,7 +277,7 @@ class ValidationCheckerTest extends FunSuite {
                        |"titi": true
                        |}
                        |""".stripMargin)(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("string"), Pointer.empty / "titi")))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / "titi")))
         assertEquals(result.valid, false)
       }
     }
@@ -327,13 +327,7 @@ class ValidationCheckerTest extends FunSuite {
           result.errors,
           Seq(
             WithPointer(
-              result = MissingProperties2(
-                Map(
-                  "titi" -> SchemaValue(
-                    value = NullValue
-                  )
-                )
-              )
+              result = MissingProperties(Seq("titi"))
             )
           )
         )
@@ -359,7 +353,7 @@ class ValidationCheckerTest extends FunSuite {
                  |}
                  |""".stripMargin) { schema =>
       assertValidate("""1313""".stripMargin)(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("string"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("string"))))
         assertEquals(result.valid, false)
       }
     }
@@ -380,8 +374,8 @@ class ValidationCheckerTest extends FunSuite {
         assertEquals(
           result.errors,
           Seq(
-            WithPointer(TypeMismatch2("number")),
-            WithPointer(TypeMismatch2("string"))
+            WithPointer(TypeMismatch("number")),
+            WithPointer(TypeMismatch("string"))
           )
         )
         assertEquals(result.valid, false)
@@ -410,8 +404,8 @@ class ValidationCheckerTest extends FunSuite {
         assertEquals(
           result.errors,
           Seq(
-            WithPointer(TypeMismatch2("string")),
-            WithPointer(TypeMismatch2("boolean"))
+            WithPointer(TypeMismatch("string")),
+            WithPointer(TypeMismatch("boolean"))
           )
         )
         assertEquals(result.valid, false)
@@ -475,7 +469,7 @@ class ValidationCheckerTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate("""null""".stripMargin)(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("string"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("string"))))
         assertEquals(result.valid, false)
       }
     }
@@ -497,7 +491,7 @@ class ValidationCheckerTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate("""null""".stripMargin)(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("string"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("string"))))
         assertEquals(result.valid, false)
       }
     }
@@ -518,7 +512,7 @@ class ValidationCheckerTest extends FunSuite {
         assertEquals(result.valid, true)
       }
       assertValidate("""null""".stripMargin)(schema) { result =>
-        assertEquals(result.errors, Seq(WithPointer(TypeMismatch2("string"))))
+        assertEquals(result.errors, Seq(WithPointer(TypeMismatch("string"))))
         assertEquals(result.valid, false)
       }
     }
@@ -576,8 +570,8 @@ class ValidationCheckerTest extends FunSuite {
         assertEquals(
           result.errors,
           Seq(
-            WithPointer(TypeMismatch2("null")),
-            WithPointer(TypeMismatch2("string"))
+            WithPointer(TypeMismatch("null")),
+            WithPointer(TypeMismatch("string"))
           )
         )
         assertEquals(result.valid, false)
@@ -625,7 +619,7 @@ class ValidationCheckerTest extends FunSuite {
           result.errors,
           Seq(
             WithPointer(
-              result = TypeMismatch2(
+              result = TypeMismatch(
                 expected = "string"
               ),
               pointer = Pointer(
@@ -680,7 +674,7 @@ class ValidationCheckerTest extends FunSuite {
           result.errors,
           Seq(
             WithPointer(
-              result = TypeMismatch2(
+              result = TypeMismatch(
                 expected = "array"
               ),
               pointer = Pointer(

@@ -56,32 +56,32 @@ class ValidationChecker() extends Checker[ValidationResult] {
 
   private def checkNullType(value: Value): ValidationResult = value match {
     case NullValue => calc.valid()
-    case _         => calc.invalid(TypeMismatch2("null"))
+    case _         => calc.invalid(TypeMismatch("null"))
   }
 
   private def checkBooleanType(value: Value): ValidationResult = value match {
     case BoolValue(_) => calc.valid()
-    case _            => calc.invalid(TypeMismatch2("boolean"))
+    case _            => calc.invalid(TypeMismatch("boolean"))
   }
 
   private def checkStringType(value: Value): ValidationResult = value match {
     case StringValue(_) => calc.valid()
-    case _              => calc.invalid(TypeMismatch2("string"))
+    case _              => calc.invalid(TypeMismatch("string"))
   }
 
   private def checkNumberType(value: Value): ValidationResult = value match {
     case NumberValue(_) => calc.valid()
-    case _              => calc.invalid(TypeMismatch2("number"))
+    case _              => calc.invalid(TypeMismatch("number"))
   }
 
   private def checkArrayType(value: Value): ValidationResult = value match {
     case ArrayValue(_) => calc.valid()
-    case _             => calc.invalid(TypeMismatch2("array"))
+    case _             => calc.invalid(TypeMismatch("array"))
   }
 
   private def checkObjectType(value: Value): ValidationResult = value match {
     case ObjectValue(_) => calc.valid()
-    case _              => calc.invalid(TypeMismatch2("object"))
+    case _              => calc.invalid(TypeMismatch("object"))
   }
 
   private def checkTrivial(valid: Boolean): ValidationResult = {
@@ -136,10 +136,7 @@ class ValidationChecker() extends Checker[ValidationResult] {
       if (missingNames.isEmpty) {
         calc.valid()
       } else {
-        val missing = missingNames
-          .map(name => (name, SchemaValue(NullValue)))
-          .toMap
-        calc.invalid(MissingProperties2(missing))
+        calc.invalid(MissingProperties(missingNames))
       }
     }
     case _ => calc.valid()

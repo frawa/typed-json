@@ -14,20 +14,14 @@ import java.net.URI
 import scala.reflect.ClassTag
 
 sealed trait Observation
-// case class TypeMismatch(expected: Schema)                     extends Observation
-case class FalseSchemaReason()             extends Observation
-case class UnexpectedProperty(key: String) extends Observation
-// case class MissingProperties(properties: Map[String, Schema]) extends Observation
-case class MissingRef(ref: String)       extends Observation
-case class NotOneOf(valid: Int)          extends Observation // ??? only in Validator?
-case class NotInvalid()                  extends Observation // ??? only in Validator?
-case class NotInEnum(values: Seq[Value]) extends Observation
-case class HandlerError(reason: String)  extends Observation
-// case class NotHandled(handler: Handler)                             extends Observation
-case object InvalidSchemaValue                                      extends Observation
-case class TypeMismatch2(expected: String)                          extends Observation
-case class MissingProperties2(properties: Map[String, SchemaValue]) extends Observation
-case class UnsupportedCheck(check: Check)                           extends Observation
+case class FalseSchemaReason()                        extends Observation
+case class TypeMismatch(expected: String)             extends Observation
+case class UnexpectedProperty(key: String)            extends Observation
+case class NotOneOf(valid: Int)                       extends Observation
+case class NotInvalid()                               extends Observation
+case class NotInEnum(values: Seq[Value])              extends Observation
+case class MissingProperties(properties: Seq[String]) extends Observation
+case class UnsupportedCheck(check: Check)             extends Observation
 
 case class WithPointer[+R](result: R, pointer: Pointer = Pointer.empty) {
   def prefix(prefix: Pointer): WithPointer[R] = WithPointer(result, prefix / pointer)
