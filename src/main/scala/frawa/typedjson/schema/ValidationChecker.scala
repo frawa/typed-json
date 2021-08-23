@@ -45,9 +45,9 @@ class ValidationChecker() extends Checker[ValidationResult] {
       case ObjectRequiredCheck(required)                     => checkObjectRequired(required, value)
       case TrivialCheck(valid)                               => checkTrivial(valid)
       case NotCheck(checks)                                  => checkNot(checks, value)
-      case AllOfCheck(checks)                                => checkAllOf(checks, value)
-      case AnyOfCheck(checks)                                => checkAnyOf(checks, value)
-      case OneOfCheck(checks)                                => checkOneOf(checks, value)
+      case AllOfCheck(checks)                                => checkApplicator(calc.allOf)(checks, value)
+      case AnyOfCheck(checks)                                => checkApplicator(calc.anyOf)(checks, value)
+      case OneOfCheck(checks)                                => checkApplicator(calc.oneOf)(checks, value)
       case IfThenElseCheck(ifChecks, thenChecks, elseChecks) => checkIfThenElse(ifChecks, thenChecks, elseChecks, value)
       case UnionTypeCheck(checks)                            => checkUnionType(checks, value)
       case EnumCheck(values)                                 => checkEnum(values, value)
@@ -150,17 +150,10 @@ class ValidationChecker() extends Checker[ValidationResult] {
       calc.valid()
   }
 
-  private def checkAllOf(checks: Seq[Checks], value: Value): ValidationResult = {
-    calc.allOf(checks.map(_.processor(this).process(value)))
-  }
-
-  private def checkAnyOf(checks: Seq[Checks], value: Value): ValidationResult = {
-    calc.anyOf(checks.map(_.processor(this).process(value)))
-  }
-
-  private def checkOneOf(checks: Seq[Checks], value: Value): ValidationResult = {
-    calc.oneOf(checks.map(_.processor(this).process(value)))
-  }
+  private def checkApplicator(
+      f: Seq[ValidationResult] => ValidationResult
+  )(checks: Seq[Checks], value: Value): ValidationResult =
+    f(checks.map(_.processor(this).process(value)))
 
   private def checkIfThenElse(
       ifChecks: Option[Checks],
