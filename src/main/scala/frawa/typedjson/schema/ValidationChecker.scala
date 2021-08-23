@@ -13,6 +13,17 @@ import scala.reflect.internal.Reporter
 import java.net.URI
 import scala.reflect.ClassTag
 
+trait Calculator[R] {
+  def valid(schema: SchemaValue): R
+  def isValid(result: R): Boolean
+  def invalid(observation: Observation): R
+  def prefix(prefix: Pointer, result: R): R
+  def allOf(results: Seq[R]): R
+  def anyOf(results: Seq[R]): R
+  def oneOf(results: Seq[R]): R
+//   def not(result: R): R
+  def ifThenElse(ifResult: R, thenResult: Option[R], elseResult: Option[R]): R
+}
 class ValidationChecker() extends Checker[ValidationResult] {
   private val calc: Calculator[ValidationResult] = new ValidationCalculator()
 
