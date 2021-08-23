@@ -35,7 +35,7 @@ case class WithPointer[+R](result: R, pointer: Pointer = Pointer.empty) {
 }
 
 class ValidationCalculator extends Calculator[ValidationResult] {
-  override def valid(schema: SchemaValue): ValidationResult = ValidationValid
+  override def valid(): ValidationResult = ValidationValid
 
   override def invalid(observation: Observation): ValidationResult = ValidationInvalid(
     Seq(WithPointer(observation))
@@ -78,9 +78,9 @@ class ValidationCalculator extends Calculator[ValidationResult] {
       elseResult: Option[ValidationResult]
   ): ValidationResult = {
     if (isValid(ifResult)) {
-      thenResult.getOrElse(valid(SchemaValue(NullValue)))
+      thenResult.getOrElse(valid())
     } else {
-      elseResult.getOrElse(valid(SchemaValue(NullValue)))
+      elseResult.getOrElse(valid())
     }
   }
 }

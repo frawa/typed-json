@@ -14,7 +14,7 @@ import java.net.URI
 import scala.reflect.ClassTag
 
 trait Calculator[R] {
-  def valid(schema: SchemaValue): R
+  def valid(): R
   def isValid(result: R): Boolean
   def invalid(observation: Observation): R
   def prefix(prefix: Pointer, result: R): R
@@ -55,38 +55,38 @@ class ValidationChecker() extends Checker[ValidationResult] {
     }
 
   private def checkNullType(value: Value): ValidationResult = value match {
-    case NullValue => calc.valid(SchemaValue(NullValue))
+    case NullValue => calc.valid()
     case _         => calc.invalid(TypeMismatch2("null"))
   }
 
   private def checkBooleanType(value: Value): ValidationResult = value match {
-    case BoolValue(_) => calc.valid(SchemaValue(NullValue))
+    case BoolValue(_) => calc.valid()
     case _            => calc.invalid(TypeMismatch2("boolean"))
   }
 
   private def checkStringType(value: Value): ValidationResult = value match {
-    case StringValue(_) => calc.valid(SchemaValue(NullValue))
+    case StringValue(_) => calc.valid()
     case _              => calc.invalid(TypeMismatch2("string"))
   }
 
   private def checkNumberType(value: Value): ValidationResult = value match {
-    case NumberValue(_) => calc.valid(SchemaValue(NullValue))
+    case NumberValue(_) => calc.valid()
     case _              => calc.invalid(TypeMismatch2("number"))
   }
 
   private def checkArrayType(value: Value): ValidationResult = value match {
-    case ArrayValue(_) => calc.valid(SchemaValue(NullValue))
+    case ArrayValue(_) => calc.valid()
     case _             => calc.invalid(TypeMismatch2("array"))
   }
 
   private def checkObjectType(value: Value): ValidationResult = value match {
-    case ObjectValue(_) => calc.valid(SchemaValue(NullValue))
+    case ObjectValue(_) => calc.valid()
     case _              => calc.invalid(TypeMismatch2("object"))
   }
 
   private def checkTrivial(valid: Boolean): ValidationResult = {
     if (valid)
-      calc.valid(SchemaValue(NullValue))
+      calc.valid()
     else
       calc.invalid(FalseSchemaReason())
   }
@@ -104,10 +104,10 @@ class ValidationChecker() extends Checker[ValidationResult] {
             }
         )
       } else {
-        calc.valid(SchemaValue(NullValue))
+        calc.valid()
       }
     }
-    case _ => calc.valid(SchemaValue(NullValue))
+    case _ => calc.valid()
   }
 
   private def checkObjectProperties(properties: Map[String, Checks], value: Value): ValidationResult = value match {
@@ -122,19 +122,19 @@ class ValidationChecker() extends Checker[ValidationResult] {
           .getOrElse(calc.invalid(UnexpectedProperty(key1)))
       }.toSeq
       if (properties.isEmpty) {
-        calc.valid(SchemaValue(NullValue))
+        calc.valid()
       } else {
         calc.allOf(results)
       }
     }
-    case _ => calc.valid(SchemaValue(NullValue))
+    case _ => calc.valid()
   }
 
   private def checkObjectRequired(required: Seq[String], value: Value): ValidationResult = value match {
     case ObjectValue(propertiesValues) => {
       val missingNames = required.filter(!propertiesValues.contains(_))
       if (missingNames.isEmpty) {
-        calc.valid(SchemaValue(NullValue))
+        calc.valid()
       } else {
         val missing = missingNames
           .map(name => (name, SchemaValue(NullValue)))
@@ -142,7 +142,7 @@ class ValidationChecker() extends Checker[ValidationResult] {
         calc.invalid(MissingProperties2(missing))
       }
     }
-    case _ => calc.valid(SchemaValue(NullValue))
+    case _ => calc.valid()
   }
 
   private def checkNot(checks: Checks, value: Value): ValidationResult = {
@@ -150,7 +150,7 @@ class ValidationChecker() extends Checker[ValidationResult] {
     if (calc.isValid(result))
       calc.invalid(NotInvalid())
     else
-      calc.valid(SchemaValue(NullValue))
+      calc.valid()
   }
 
   private def checkAllOf(checks: Seq[Checks], value: Value): ValidationResult = {
@@ -182,7 +182,7 @@ class ValidationChecker() extends Checker[ValidationResult] {
           calc.ifThenElse(result, None, elseResult)
         }
       }
-      .getOrElse(calc.valid(SchemaValue(NullValue)))
+      .getOrElse(calc.valid())
   }
 
   private def checkUnionType(checks: Seq[Check], value: Value): ValidationResult = {
@@ -191,7 +191,7 @@ class ValidationChecker() extends Checker[ValidationResult] {
 
   private def checkEnum(values: Seq[Value], value: Value): ValidationResult = {
     if (values.contains(value)) {
-      calc.valid(SchemaValue(NullValue))
+      calc.valid()
     } else {
       calc.invalid(NotInEnum(values))
     }
