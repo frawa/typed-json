@@ -13,6 +13,16 @@ import scala.reflect.internal.Reporter
 import java.net.URI
 import scala.reflect.ClassTag
 
+sealed trait Observation
+case class FalseSchemaReason()                        extends Observation
+case class TypeMismatch[T <: Value](expected: String) extends Observation
+case class UnexpectedProperty(key: String)            extends Observation
+case class NotOneOf(valid: Int)                       extends Observation
+case class NotInvalid()                               extends Observation
+case class NotInEnum(values: Seq[Value])              extends Observation
+case class MissingProperties(properties: Seq[String]) extends Observation
+case class UnsupportedCheck(check: Check)             extends Observation
+
 trait Calculator[R] {
   def valid(): R
   def isValid(result: R): Boolean
