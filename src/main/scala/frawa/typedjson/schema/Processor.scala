@@ -98,7 +98,7 @@ case class Checks(
     checks: Seq[Check] = Seq.empty[Check],
     ignoredKeywords: Set[String] = Set.empty
 ) {
-  import Utils._
+  import Util._
 
   private def withCheck(check: Check): Checks                         = this.copy(checks = checks :+ check)
   private def withChecks(checks: Checks)(f: Checks => Checks): Checks = f(checks).withIgnored(checks.ignoredKeywords)
@@ -113,7 +113,7 @@ case class Checks(
       .map(v => Checks.parseKeywords(SchemaValue(v)))
       .toSeq
     for {
-      checks <- sequence(checks0)
+      checks <- sequenceAllLefts(checks0)
     } yield {
       withChecks(checks)(f)
     }
@@ -162,7 +162,7 @@ case class Checks(
           }
           .toSeq
         for {
-          propChecks1 <- sequence(propChecks)
+          propChecks1 <- sequenceFirstLeft(propChecks)
           checks = Map.from(propChecks1)
         } yield {
           withChecks(checks)(ObjectPropertiesCheck)
@@ -332,60 +332,6 @@ object Processor {
     for {
       checks <- Checks.parseKeywords(schema)
     } yield (checks.processor(checker))
-  }
-
-  // def process[R](handler: Handler, calc: Calculator[R])(
-  //     schema: SchemaValue,
-  //     value: Value
-  // ): R = {
-  //   getHandler(handler)(schema).handle(calc)(value)
-  // }
-
-  // def getHandler[R](handler: Handler)(schema: SchemaValue): Handler = {
-  //   schema.value match {
-  //     case BoolValue(v) => TrivialHandler(v)
-  //     case ObjectValue(keywords) =>
-  //       keywords
-  //         .foldLeft(handler) { case (handler, (keyword, v)) =>
-  //           handler
-  //             .withKeyword(keyword, v)
-  //             .getOrElse(ErroredHandler(s"""unhandled schema with keyword "${keyword}": ${v}, handler ${handler}"""))
-  //         }
-  //     case _ => ErroredHandler(s"invalid schema ${schema}")
-  //   }
-  // }
-
-  // def firstHandler(handlers: Seq[Handler])(keyword: String, value: Value): (Option[Handler], Seq[Handler]) = {
-  //   // handlers
-  //   //   .to(LazyList)
-  //   //   .flatMap(_.withKeyword(keyword, value))
-  //   //   .headOption
-  //   handlers.foldLeft((Option.empty[Handler], Seq.empty[Handler])) { case ((first, handlers), current) =>
-  //     if (first.isDefined) {
-  //       (first, handlers :+ current)
-  //     } else {
-  //       current
-  //         .withKeyword(keyword, value)
-  //         .map(h => (Some(h), handlers :+ h))
-  //         .getOrElse((Option.empty[Handler], handlers :+ current))
-  //     }
-  //   }
-  // }
-}
-
-object Utils {
-  def sequence[E, V](as: Seq[Either[Seq[E], V]]): Either[Seq[E], Seq[V]] = {
-    as.foldLeft[Either[Seq[E], Seq[V]]](Right(Seq.empty[V])) {
-      case (Right(acc), Right(v))    => Right(acc :+ v)
-      case (Right(_), Left(errors))  => Left(errors)
-      case (Left(acc), Left(errors)) => Left(acc :++ errors)
-      case (Left(acc), _)            => Left(acc)
-    }
-  }
-
-  def toStrings(values: Seq[Value]): Seq[String] = values.flatMap {
-    case StringValue(v) => Some(v)
-    case _              => None
   }
 }
 
