@@ -11,19 +11,18 @@ import frawa.typedjson.parser.ObjectValue
 trait ValidationResult {
   val valid: Boolean
   val errors: Seq[ValidationResult.Error]
-  def prefix(prefix: Pointer): ValidationResult
 }
 
 object ValidationResult {
   type Error = WithPointer[Observation]
 }
 
+case class WithPointer[+R](result: R, pointer: Pointer = Pointer.empty)
+
 case object ValidationValid extends ValidationResult {
-  val valid                                     = true
-  val errors                                    = Seq()
-  def prefix(prefix: Pointer): ValidationResult = this
+  val valid  = true
+  val errors = Seq()
 }
 case class ValidationInvalid(errors: Seq[ValidationResult.Error]) extends ValidationResult {
-  val valid                                     = false
-  def prefix(prefix: Pointer): ValidationResult = ValidationInvalid(errors.map(_.prefix(prefix)))
+  val valid = false
 }

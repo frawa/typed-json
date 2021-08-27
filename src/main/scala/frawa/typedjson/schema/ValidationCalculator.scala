@@ -13,19 +13,12 @@ import scala.reflect.internal.Reporter
 import java.net.URI
 import scala.reflect.ClassTag
 
-case class WithPointer[+R](result: R, pointer: Pointer = Pointer.empty) {
-  def prefix(prefix: Pointer): WithPointer[R] = WithPointer(result, prefix / pointer)
-  def map[S](f: R => S)                       = WithPointer(f(result), pointer)
-}
-
 class ValidationCalculator extends Calculator[ValidationResult] {
   override def valid(): ValidationResult = ValidationValid
 
-  override def invalid(observation: Observation): ValidationResult = ValidationInvalid(
-    Seq(WithPointer(observation))
+  override def invalid(observation: Observation, pointer: Pointer): ValidationResult = ValidationInvalid(
+    Seq(WithPointer(observation, pointer))
   )
-
-  override def prefix(prefix: Pointer, result: ValidationResult): ValidationResult = result.prefix(prefix)
 
   override def allOf(results: Seq[ValidationResult]): ValidationResult = {
     if (results.isEmpty || results.forall(isValid(_))) {

@@ -13,7 +13,7 @@ case class SuggestionResult(suggestions: Seq[Value])
 
 class SuggestionChecker extends Checker[SuggestionResult] {
 
-  override def check(checks: Checks)(value: Value): SuggestionResult = {
+  override def check(checks: Checks)(value: InnerValue): SuggestionResult = {
     val suggestions = checks.checks.flatMap(suggestFor(_)).distinct
     SuggestionResult(suggestions)
   }

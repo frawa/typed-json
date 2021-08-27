@@ -31,7 +31,7 @@ object SchemaValue {
 //   override def resolve(uri: URI): Option[SchemaValue] = resolver.resolve(uri)
 // }
 
-case class Processor[R] private[schema] (process: Value => R)
+case class Processor[R] private[schema] (process: InnerValue => R)
 
 object Processor {
   type SchemaErrors = Checks.SchemaErrors
@@ -48,24 +48,26 @@ object Processor {
   def processor[R](checker: Checker[R])(checks: Checks): Processor[R] =
     Processor(value => checker.check(checks)(value))
 
-  def processIndexed[R](checker: Checker[R])(checks: Checks)(values: Seq[Value])(f: (R, Int) => R): Seq[R] = {
+  def processIndexed[R](
+      checker: Checker[R]
+  )(checks: Checks)(values: Seq[Value], pointer: Pointer): Seq[R] = {
     val processor = Processor.processor(checker)(checks)
     values.zipWithIndex
-      .map { case (item, index) =>
-        f(processor.process(item), index)
+      .map { case (value, index) =>
+        processor.process(InnerValue(value, pointer / index))
       }
   }
 
   def processMap[R](
       checker: Checker[R]
-  )(checks: Map[String, Checks])(values: Map[String, Value])(f: (Option[R], String) => R): Seq[R] = {
-    values.map { case (key1, value1) =>
+  )(checks: Map[String, Checks])(values: Map[String, Value], pointer: Pointer)(f: (Option[R], String) => R): Seq[R] = {
+    values.map { case (key, value) =>
       f(
         checks
-          .get(key1)
+          .get(key)
           .map(Processor.processor(checker)(_))
-          .map(_.process(value1)),
-        key1
+          .map(_.process(InnerValue(value, pointer / key))),
+        key
       )
     }.toSeq
   }

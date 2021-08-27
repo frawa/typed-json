@@ -16,7 +16,7 @@ class SuggestTest extends FunSuite {
     val withParsed = for {
       value     <- Parser(text)
       processor <- Processor(schema)(new SuggestionChecker())
-      result = processor.process(value)
+      result = processor.process(InnerValue(value, Pointer.empty))
     } yield {
       f(result)
     }

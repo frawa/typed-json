@@ -26,8 +26,7 @@ case class UnsupportedCheck(check: Check)             extends Observation
 trait Calculator[R] {
   def valid(): R
   def isValid(result: R): Boolean
-  def invalid(observation: Observation): R
-  def prefix(prefix: Pointer, result: R): R
+  def invalid(observation: Observation, pointer: Pointer): R
   def allOf(results: Seq[R]): R
   def anyOf(results: Seq[R]): R
   def oneOf(results: Seq[R]): R
@@ -37,7 +36,7 @@ trait Calculator[R] {
 class ValidationChecker() extends Checker[ValidationResult] {
   private val calc: Calculator[ValidationResult] = new ValidationCalculator()
 
-  override def check(checks: Checks)(value: Value): ValidationResult = {
+  override def check(checks: Checks)(value: InnerValue): ValidationResult = {
     val results = checks.checks.map(checkOne(_)(value))
     calc.allOf(results)
   }
@@ -49,7 +48,7 @@ class ValidationChecker() extends Checker[ValidationResult] {
   private val arrayTypeMismatch   = TypeMismatch[ArrayValue]("array")
   private val objectTypeMismatch  = TypeMismatch[ObjectValue]("object")
 
-  private def checkOne(check: Check)(value: Value): ValidationResult =
+  private def checkOne(check: Check)(value: InnerValue): ValidationResult =
     check match {
       case NullTypeCheck                                     => checkType(nullTypeMismatch)(value)
       case BooleanTypeCheck                                  => checkType(booleanTypeMismatch)(value)
@@ -60,7 +59,7 @@ class ValidationChecker() extends Checker[ValidationResult] {
       case ArrayItemsCheck(items)                            => checkArrayItems(items, value)
       case ObjectPropertiesCheck(properties)                 => checkObjectProperties(properties, value)
       case ObjectRequiredCheck(required)                     => checkObjectRequired(required, value)
-      case TrivialCheck(valid)                               => checkTrivial(valid)
+      case TrivialCheck(valid)                               => checkTrivial(valid, value)
       case NotCheck(checks)                                  => checkNot(checks, value)
       case AllOfCheck(checks)                                => checkApplicator(calc.allOf)(checks, value)
       case AnyOfCheck(checks)                                => checkApplicator(calc.anyOf)(checks, value)
@@ -71,26 +70,24 @@ class ValidationChecker() extends Checker[ValidationResult] {
       case _                                                 => ValidationInvalid(Seq(WithPointer(UnsupportedCheck(check))))
     }
 
-  private def checkType[T <: Value: ClassTag](observation: TypeMismatch[T])(value: Value): ValidationResult =
-    value match {
+  private def checkType[T <: Value: ClassTag](observation: TypeMismatch[T])(value: InnerValue): ValidationResult =
+    value.value match {
       case v: T => calc.valid()
-      case _    => calc.invalid(observation)
+      case _    => calc.invalid(observation, value.pointer)
     }
 
-  private def checkTrivial(valid: Boolean): ValidationResult = {
+  private def checkTrivial(valid: Boolean, value: InnerValue): ValidationResult = {
     if (valid)
       calc.valid()
     else
-      calc.invalid(FalseSchemaReason())
+      calc.invalid(FalseSchemaReason(), value.pointer)
   }
 
-  private def checkArrayItems(items: Option[Checks], value: Value): ValidationResult = value match {
+  private def checkArrayItems(items: Option[Checks], value: InnerValue): ValidationResult = value.value match {
     case ArrayValue(itemValues) => {
       if (items.isDefined && itemValues.nonEmpty) {
         calc.allOf(
-          Processor.processIndexed(this)(items.get)(itemValues) { case (result, index) =>
-            calc.prefix(Pointer.empty / index, result)
-          }
+          Processor.processIndexed(this)(items.get)(itemValues, value.pointer)
         )
       } else {
         calc.valid()
@@ -99,53 +96,52 @@ class ValidationChecker() extends Checker[ValidationResult] {
     case _ => calc.valid()
   }
 
-  private def checkObjectProperties(properties: Map[String, Checks], value: Value): ValidationResult = value match {
-    case ObjectValue(propertiesValues) => {
-      val results = Processor.processMap(this)(properties)(propertiesValues) { case (result, key) =>
-        lazy val prefix = Pointer.empty / key
-        result
-          .map(calc.prefix(prefix, _))
-          .getOrElse(calc.invalid(UnexpectedProperty(key)))
+  private def checkObjectProperties(properties: Map[String, Checks], value: InnerValue): ValidationResult =
+    value.value match {
+      case ObjectValue(propertiesValues) => {
+        val results = Processor.processMap(this)(properties)(propertiesValues, value.pointer) { case (result, key) =>
+          result
+            .getOrElse(calc.invalid(UnexpectedProperty(key), value.pointer))
+        }
+        if (properties.isEmpty) {
+          calc.valid()
+        } else {
+          calc.allOf(results)
+        }
       }
-      if (properties.isEmpty) {
-        calc.valid()
-      } else {
-        calc.allOf(results)
-      }
+      case _ => calc.valid()
     }
-    case _ => calc.valid()
-  }
 
-  private def checkObjectRequired(required: Seq[String], value: Value): ValidationResult = value match {
+  private def checkObjectRequired(required: Seq[String], value: InnerValue): ValidationResult = value.value match {
     case ObjectValue(propertiesValues) => {
       val missingNames = required.filter(!propertiesValues.contains(_))
       if (missingNames.isEmpty) {
         calc.valid()
       } else {
-        calc.invalid(MissingProperties(missingNames))
+        calc.invalid(MissingProperties(missingNames), value.pointer)
       }
     }
     case _ => calc.valid()
   }
 
-  private def checkNot(checks: Checks, value: Value): ValidationResult = {
+  private def checkNot(checks: Checks, value: InnerValue): ValidationResult = {
     val result = Processor.processor(this)(checks).process(value)
     if (calc.isValid(result))
-      calc.invalid(NotInvalid())
+      calc.invalid(NotInvalid(), value.pointer)
     else
       calc.valid()
   }
 
   private def checkApplicator(
       f: Seq[ValidationResult] => ValidationResult
-  )(checks: Seq[Checks], value: Value): ValidationResult =
+  )(checks: Seq[Checks], value: InnerValue): ValidationResult =
     f(checks.map(Processor.processor(this)(_).process(value)))
 
   private def checkIfThenElse(
       ifChecks: Option[Checks],
       thenChecks: Option[Checks],
       elseChecks: Option[Checks],
-      value: Value
+      value: InnerValue
   ): ValidationResult = {
     ifChecks
       .map(Processor.processor(this)(_).process(value))
@@ -161,15 +157,15 @@ class ValidationChecker() extends Checker[ValidationResult] {
       .getOrElse(calc.valid())
   }
 
-  private def checkUnionType(checks: Seq[Check], value: Value): ValidationResult = {
+  private def checkUnionType(checks: Seq[Check], value: InnerValue): ValidationResult = {
     calc.oneOf(checks.map(checkOne(_)(value)))
   }
 
-  private def checkEnum(values: Seq[Value], value: Value): ValidationResult = {
-    if (values.contains(value)) {
+  private def checkEnum(values: Seq[Value], value: InnerValue): ValidationResult = {
+    if (values.contains(value.value)) {
       calc.valid()
     } else {
-      calc.invalid(NotInEnum(values))
+      calc.invalid(NotInEnum(values), value.pointer)
     }
   }
 }

@@ -13,8 +13,10 @@ import scala.reflect.internal.Reporter
 import java.net.URI
 import scala.reflect.ClassTag
 
+case class InnerValue(value: Value, pointer: Pointer = Pointer.empty)
+
 trait Checker[R] {
-  def check(checks: Checks)(value: Value): R
+  def check(checks: Checks)(value: InnerValue): R
 }
 
 case class SchemaError(message: String, pointer: Pointer = Pointer.empty) {
