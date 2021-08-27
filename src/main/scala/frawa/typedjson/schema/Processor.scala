@@ -48,4 +48,26 @@ object Processor {
   def processor[R](checker: Checker[R])(checks: Checks): Processor[R] =
     Processor(value => checker.check(checks)(value))
 
+  def processIndexed[R](checker: Checker[R])(checks: Checks)(values: Seq[Value])(f: (R, Int) => R): Seq[R] = {
+    val processor = Processor.processor(checker)(checks)
+    values.zipWithIndex
+      .map { case (item, index) =>
+        f(processor.process(item), index)
+      }
+  }
+
+  def processMap[R](
+      checker: Checker[R]
+  )(checks: Map[String, Checks])(values: Map[String, Value])(f: (Option[R], String) => R): Seq[R] = {
+    values.map { case (key1, value1) =>
+      f(
+        checks
+          .get(key1)
+          .map(Processor.processor(checker)(_))
+          .map(_.process(value1)),
+        key1
+      )
+    }.toSeq
+  }
+
 }

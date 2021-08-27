@@ -87,14 +87,10 @@ class ValidationChecker() extends Checker[ValidationResult] {
   private def checkArrayItems(items: Option[Checks], value: Value): ValidationResult = value match {
     case ArrayValue(itemValues) => {
       if (items.isDefined && itemValues.nonEmpty) {
-        val processor = Processor.processor(this)(items.get)
         calc.allOf(
-          itemValues.zipWithIndex
-            .map { case (item, index) =>
-              lazy val prefix = Pointer.empty / index
-              lazy val result = processor.process(item)
-              calc.prefix(prefix, result)
-            }
+          Processor.processIndexed(this)(items.get)(itemValues) { case (result, index) =>
+            calc.prefix(Pointer.empty / index, result)
+          }
         )
       } else {
         calc.valid()
@@ -105,15 +101,12 @@ class ValidationChecker() extends Checker[ValidationResult] {
 
   private def checkObjectProperties(properties: Map[String, Checks], value: Value): ValidationResult = value match {
     case ObjectValue(propertiesValues) => {
-      val results = propertiesValues.map { case (key1, value1) =>
-        lazy val prefix = Pointer.empty / key1
-        properties
-          .get(key1)
-          .map(Processor.processor(this))
-          .map(_.process(value1))
+      val results = Processor.processMap(this)(properties)(propertiesValues) { case (result, key) =>
+        lazy val prefix = Pointer.empty / key
+        result
           .map(calc.prefix(prefix, _))
-          .getOrElse(calc.invalid(UnexpectedProperty(key1)))
-      }.toSeq
+          .getOrElse(calc.invalid(UnexpectedProperty(key)))
+      }
       if (properties.isEmpty) {
         calc.valid()
       } else {
