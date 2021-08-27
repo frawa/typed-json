@@ -42,6 +42,10 @@ object Processor {
     implicit val resolver = LoadedSchemasResolver(schema)
     for {
       checks <- Checks.parseKeywords(schema)
-    } yield (checks.processor(checker))
+    } yield (processor(checker)(checks))
   }
+
+  def processor[R](checker: Checker[R])(checks: Checks): Processor[R] =
+    Processor(value => checker.check(checks)(value))
+
 }

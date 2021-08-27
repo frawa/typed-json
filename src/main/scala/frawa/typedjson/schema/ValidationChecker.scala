@@ -87,7 +87,7 @@ class ValidationChecker() extends Checker[ValidationResult] {
   private def checkArrayItems(items: Option[Checks], value: Value): ValidationResult = value match {
     case ArrayValue(itemValues) => {
       if (items.isDefined && itemValues.nonEmpty) {
-        val processor = items.get.processor(this)
+        val processor = Processor.processor(this)(items.get)
         calc.allOf(
           itemValues.zipWithIndex
             .map { case (item, index) =>
@@ -109,7 +109,7 @@ class ValidationChecker() extends Checker[ValidationResult] {
         lazy val prefix = Pointer.empty / key1
         properties
           .get(key1)
-          .map(_.processor(this))
+          .map(Processor.processor(this))
           .map(_.process(value1))
           .map(calc.prefix(prefix, _))
           .getOrElse(calc.invalid(UnexpectedProperty(key1)))
@@ -136,7 +136,7 @@ class ValidationChecker() extends Checker[ValidationResult] {
   }
 
   private def checkNot(checks: Checks, value: Value): ValidationResult = {
-    val result = checks.processor(this).process(value)
+    val result = Processor.processor(this)(checks).process(value)
     if (calc.isValid(result))
       calc.invalid(NotInvalid())
     else
@@ -146,7 +146,7 @@ class ValidationChecker() extends Checker[ValidationResult] {
   private def checkApplicator(
       f: Seq[ValidationResult] => ValidationResult
   )(checks: Seq[Checks], value: Value): ValidationResult =
-    f(checks.map(_.processor(this).process(value)))
+    f(checks.map(Processor.processor(this)(_).process(value)))
 
   private def checkIfThenElse(
       ifChecks: Option[Checks],
@@ -155,13 +155,13 @@ class ValidationChecker() extends Checker[ValidationResult] {
       value: Value
   ): ValidationResult = {
     ifChecks
-      .map(_.processor(this).process(value))
+      .map(Processor.processor(this)(_).process(value))
       .map { result =>
         if (calc.isValid(result)) {
-          val thenResult = thenChecks.map(_.processor(this).process(value))
+          val thenResult = thenChecks.map(Processor.processor(this)(_).process(value))
           calc.ifThenElse(result, thenResult, None)
         } else {
-          val elseResult = elseChecks.map(_.processor(this).process(value))
+          val elseResult = elseChecks.map(Processor.processor(this)(_).process(value))
           calc.ifThenElse(result, None, elseResult)
         }
       }

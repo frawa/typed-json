@@ -237,10 +237,6 @@ case class Checks(
       case "object"  => Some(ObjectTypeCheck)
       case _         => None
     }
-
-  def processor[R](checker: Checker[R]): Processor[R] =
-    Processor(value => checker.check(this)(value))
-
 }
 
 object Checks {
