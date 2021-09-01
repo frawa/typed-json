@@ -15,36 +15,42 @@ import scala.reflect.ClassTag
 
 case class InnerValue(value: Value, pointer: Pointer = Pointer.empty)
 
-trait Checker[R] {
-  def check(checks: Checks)(value: InnerValue): R
-}
+// trait Checker[R] {
+//   def check(checks: Checks)(value: InnerValue): R
+// }
 
 case class SchemaError(message: String, pointer: Pointer = Pointer.empty) {
   def prefix(prefix: Pointer): SchemaError = SchemaError(message, prefix / pointer)
 }
 
 sealed trait Check
-case class TrivialCheck(v: Boolean)                               extends Check
-case object NullTypeCheck                                         extends Check
-case object BooleanTypeCheck                                      extends Check
-case object StringTypeCheck                                       extends Check
-case object NumberTypeCheck                                       extends Check
-case object ArrayTypeCheck                                        extends Check
-case class ArrayItemsCheck(items: Option[Checks] = None)          extends Check
-case object ObjectTypeCheck                                       extends Check
-case class ObjectPropertiesCheck(properties: Map[String, Checks]) extends Check
-case class ObjectRequiredCheck(names: Seq[String])                extends Check
-case class NotCheck(checks: Checks)                               extends Check
-case class AllOfCheck(checks: Seq[Checks])                        extends Check
-case class AnyOfCheck(checks: Seq[Checks])                        extends Check
-case class OneOfCheck(checks: Seq[Checks])                        extends Check
+sealed trait SimpleCheck  extends Check
+sealed trait TypeCheck    extends SimpleCheck
+sealed trait NestingCheck extends Check
+
+case class TrivialCheck(v: Boolean)                               extends SimpleCheck
+case object NullTypeCheck                                         extends TypeCheck
+case object BooleanTypeCheck                                      extends TypeCheck
+case object StringTypeCheck                                       extends TypeCheck
+case object NumberTypeCheck                                       extends TypeCheck
+case object ArrayTypeCheck                                        extends TypeCheck
+case object ObjectTypeCheck                                       extends TypeCheck
+case class ObjectRequiredCheck(names: Seq[String])                extends SimpleCheck
+case class NotCheck(checks: Checks)                               extends NestingCheck
+case class AllOfCheck(checks: Seq[Checks])                        extends NestingCheck
+case class AnyOfCheck(checks: Seq[Checks])                        extends NestingCheck
+case class OneOfCheck(checks: Seq[Checks])                        extends NestingCheck
+case class UnionTypeCheck(typeChecks: Seq[TypeCheck])             extends SimpleCheck
+case class EnumCheck(values: Seq[Value])                          extends SimpleCheck
+case class ArrayItemsCheck(items: Option[Checks] = None)          extends NestingCheck
+case class ObjectPropertiesCheck(properties: Map[String, Checks]) extends NestingCheck
 case class IfThenElseCheck(
     ifChecks: Option[Checks] = None,
     thenChecks: Option[Checks] = None,
     elseChecks: Option[Checks] = None
-)                                                 extends Check
-case class UnionTypeCheck(typeChecks: Seq[Check]) extends Check
-case class EnumCheck(values: Seq[Value])          extends Check
+) extends NestingCheck
+
+case class Checked[R](valid: Boolean, results: Seq[R])
 
 case class Checks(
     schema: SchemaValue,
@@ -229,7 +235,7 @@ case class Checks(
   private def withIgnored(ignored: Set[String]): Checks =
     this.copy(ignoredKeywords = ignoredKeywords.concat(ignored))
 
-  private def getTypeCheck(typeName: String): Option[Check] =
+  private def getTypeCheck(typeName: String): Option[TypeCheck] =
     typeName match {
       case "null"    => Some(NullTypeCheck)
       case "boolean" => Some(BooleanTypeCheck)
@@ -240,6 +246,17 @@ case class Checks(
       case _         => None
     }
 }
+
+sealed trait ApplicatorKind
+case object AllOfKind extends ApplicatorKind
+case object AnyOfKind extends ApplicatorKind
+case object OneOfKind extends ApplicatorKind
+case object NotKind   extends ApplicatorKind
+
+case class Checker[R](
+    check: SimpleCheck => InnerValue => Checked[R],
+    applicate: ApplicatorKind => Seq[Checked[R]] => InnerValue => Checked[R]
+)
 
 object Checks {
   type SchemaErrors = Seq[SchemaError]

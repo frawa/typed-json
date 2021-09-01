@@ -20,6 +20,15 @@ object Pointer {
       .filter(_.length() > 0)
       .map(FieldToken(_))
   )
+
+  def dropPrefix(p1: Pointer, p2: Pointer): Option[Pointer] = {
+    if (p2.segments.startsWith(p1.segments)) {
+      val tail = p2.segments.slice(p1.segments.length, p2.segments.length)
+      Some(Pointer(tail))
+    } else {
+      None
+    }
+  }
 }
 
 case class Pointer(segments: Seq[Token]) {

@@ -20,44 +20,52 @@ class ValidationCalculator extends Calculator[ValidationResult] {
     Seq(WithPointer(observation, pointer))
   )
 
-  override def allOf(results: Seq[ValidationResult]): ValidationResult = {
-    if (results.isEmpty || results.forall(isValid(_))) {
-      ValidationValid
+  override def allOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
+    if (checked.isEmpty || checked.forall(_.valid)) {
+      Checked(true, Seq())
     } else {
-      ValidationInvalid(results.flatMap(_.errors))
+      Checked(false, Seq(ValidationInvalid(checked.flatMap(_.results.flatMap(_.errors)))))
     }
   }
 
-  override def anyOf(results: Seq[ValidationResult]): ValidationResult = {
-    if (results.isEmpty || results.exists(isValid(_))) {
-      ValidationValid
+  override def anyOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
+    if (checked.isEmpty || checked.exists(_.valid)) {
+      Checked(true, Seq())
     } else {
-      ValidationInvalid(results.flatMap(_.errors))
+      Checked(false, Seq(ValidationInvalid(checked.flatMap(_.results.flatMap(_.errors)))))
     }
   }
 
-  override def oneOf(results: Seq[ValidationResult]): ValidationResult = {
-    val count = results.count(isValid(_))
+  override def oneOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
+    val count = checked.count(_.valid)
     if (count == 1) {
-      ValidationValid
+      Checked(true, Seq())
     } else if (count == 0) {
-      ValidationInvalid(results.flatMap(_.errors))
+      Checked(false, Seq(ValidationInvalid(checked.flatMap(_.results.flatMap(_.errors)))))
     } else {
-      ValidationInvalid(Seq(WithPointer(NotOneOf(count))))
+      Checked(false, Seq(ValidationInvalid(Seq(WithPointer(NotOneOf(count), pointer)))))
+    }
+  }
+
+  override def not(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
+    if (checked.length == 1 && !checked(0).valid) {
+      Checked(true, Seq())
+    } else {
+      Checked(false, Seq(ValidationInvalid(Seq(WithPointer(NotInvalid(), pointer)))))
     }
   }
 
   override def isValid(result: ValidationResult): Boolean = result == ValidationValid
 
-  override def ifThenElse(
-      ifResult: ValidationResult,
-      thenResult: Option[ValidationResult],
-      elseResult: Option[ValidationResult]
-  ): ValidationResult = {
-    if (isValid(ifResult)) {
-      thenResult.getOrElse(valid())
-    } else {
-      elseResult.getOrElse(valid())
-    }
-  }
+  // override def ifThenElse(
+  //     ifResult: ValidationResult,
+  //     thenResult: Option[ValidationResult],
+  //     elseResult: Option[ValidationResult]
+  // ): ValidationResult = {
+  //   if (isValid(ifResult)) {
+  //     thenResult.getOrElse(valid())
+  //   } else {
+  //     elseResult.getOrElse(valid())
+  //   }
+  // }
 }
