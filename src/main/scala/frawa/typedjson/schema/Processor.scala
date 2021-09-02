@@ -61,22 +61,6 @@ object Processor {
     Checked(valid, results)
   }
 
-  // private def anyOf[R](checked: Seq[Checked[R]]): Checked[R] = {
-  //   val valid           = checked.exists(_.valid)
-  //   val results: Seq[R] = checked.flatMap(_.results)
-  //   Checked(valid, results)
-  // }
-
-  // private def oneOf[R](checked: Seq[Checked[R]]): Checked[R] = {
-  //   val valid           = checked.count(_.valid) == 1
-  //   val results: Seq[R] = checked.flatMap(_.results)
-  //   Checked(valid, results)
-  // }
-
-  // private def not[R](checked: Checked[R]): Checked[R] = {
-  //   Checked(!checked.valid, Seq())
-  // }
-
   private def processOne[R](
       checker: Checker[R]
   )(check: Check)(value: InnerValue): Checked[R] =

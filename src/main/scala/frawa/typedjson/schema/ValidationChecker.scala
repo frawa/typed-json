@@ -101,38 +101,6 @@ object ValidationChecker {
     case _ => calc.valid()
   }
 
-  // private def checkedNot(checked: Checked[ValidationResult], value: InnerValue): ValidationResult = {
-  //   if (checked.valid)
-  //     calc.invalid(NotInvalid(), value.pointer)
-  //   else
-  //     calc.valid()
-  // }
-
-  // private def checkedApplicator(
-  //     f: Seq[Checked[ValidationResult]] => ValidationResult
-  // )(checked: Seq[Checked[ValidationResult]], value: InnerValue): ValidationResult =
-  //   f(checked)
-
-  // private def checkIfThenElse(
-  //     ifChecks: Option[Checks],
-  //     thenChecks: Option[Checks],
-  //     elseChecks: Option[Checks],
-  //     value: InnerValue
-  // ): ValidationResult = {
-  //   ifChecks
-  //     .map(Processor.processor(this)(_).process(value))
-  //     .map { result =>
-  //       if (calc.isValid(result)) {
-  //         val thenResult = thenChecks.map(Processor.processor(this)(_).process(value))
-  //         calc.ifThenElse(result, thenResult, None)
-  //       } else {
-  //         val elseResult = elseChecks.map(Processor.processor(this)(_).process(value))
-  //         calc.ifThenElse(result, None, elseResult)
-  //       }
-  //     }
-  //     .getOrElse(calc.valid())
-  // }
-
   private def checkUnionType(checks: Seq[TypeCheck], value: InnerValue): Checked[ValidationResult] = {
     calc.oneOf(checks.map(check(_)(value)), value.pointer)
   }

@@ -65,7 +65,6 @@ object SuggestionChecker {
         }.toSeq
       case ObjectRequiredCheck(required) => Seq(ObjectValue(Map.from(required.map((_, NullValue)))))
       case TrivialCheck(valid)           => Seq()
-      // case NotCheck(checks)              => Seq()
       // case AllOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_))
       // case AnyOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_))
       // case OneOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_))
