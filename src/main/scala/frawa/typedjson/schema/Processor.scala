@@ -89,12 +89,12 @@ object Processor {
       checker: Checker[R]
   )(check: NestingCheck)(value: InnerValue): Checked[R] =
     check match {
-      case ArrayItemsCheck(items)            => checkArrayItems(checker)(items, value)
-      case ObjectPropertiesCheck(properties) => checkObjectProperties(checker)(properties, value)
-      case NotCheck(checks)                  => checkNot(checker)(checks, value)
-      case AllOfCheck(checks)                => checkApplicator(checker)(checker.applicate(AllOfKind))(checks, value)
-      case AnyOfCheck(checks)                => checkApplicator(checker)(checker.applicate(AnyOfKind))(checks, value)
-      case OneOfCheck(checks)                => checkApplicator(checker)(checker.applicate(OneOfKind))(checks, value)
+      case ArrayItemsCheck(items)                => checkArrayItems(checker)(items, value)
+      case c @ ObjectPropertiesCheck(properties) => checkObjectProperties(checker)(c)(properties, value)
+      case c @ NotCheck(checks)                  => checkNot(checker)(c)(checks, value)
+      case AllOfCheck(checks)                    => checkApplicator(checker)(checker.nested(check))(checks, value)
+      case AnyOfCheck(checks)                    => checkApplicator(checker)(checker.nested(check))(checks, value)
+      case OneOfCheck(checks)                    => checkApplicator(checker)(checker.nested(check))(checks, value)
       case IfThenElseCheck(ifChecks, thenChecks, elseChecks) =>
         checkIfThenElse(checker)(ifChecks, thenChecks, elseChecks, value)
     }
@@ -117,14 +117,14 @@ object Processor {
 
   def checkObjectProperties[R](
       checker: Checker[R]
-  )(properties: Map[String, Checks], value: InnerValue): Checked[R] =
+  )(check: ObjectPropertiesCheck)(properties: Map[String, Checks], value: InnerValue): Checked[R] =
     value.value match {
       case ObjectValue(propertiesValues) => {
         val results = processMap(checker)(properties)(propertiesValues, value.pointer)
         if (results.isEmpty) {
           Checked(true, Seq())
         } else {
-          merge(results)
+          checker.nested(check)(results)(value)
         }
       }
       case _ => Checked(true, Seq())
@@ -132,9 +132,9 @@ object Processor {
 
   private def checkNot[R](
       checker: Checker[R]
-  )(checks: Checks, value: InnerValue): Checked[R] = {
+  )(check: NotCheck)(checks: Checks, value: InnerValue): Checked[R] = {
     val checked = processor(checker)(checks).process(value)
-    checker.applicate(NotKind)(Seq(checked))(value)
+    checker.nested(check)(Seq(checked))(value)
   }
 
   private def checkApplicator[R](

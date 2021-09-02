@@ -10,22 +10,23 @@ import TestSchemas._
 class SuggestTest extends FunSuite {
   implicit val zioParser = new ZioParser();
 
-  private def assertSuggest(text: String)(schema: SchemaValue)(
+  private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
       f: SuggestionResult => Unit
   ) = {
     val withParsed = for {
       value     <- Parser(text)
-      processor <- Processor(schema)(new SuggestionChecker())
+      processor <- Processor(schema)(SuggestionChecker(at))
       result = processor.process(InnerValue(value, Pointer.empty))
     } yield {
-      f(result)
+      // TODO avoid the flattening
+      f(SuggestionResult(result.results.flatMap(_.suggestions)))
     }
     withParsed.swap
       .map(message => fail("parsing failed", clues(clue(message))))
       .swap
   }
 
-  test("suggest missing property") {
+  test("suggest property".only) {
     withSchema(totoObjectSchema) { schema =>
       assertSuggest(
         """{
@@ -507,6 +508,29 @@ class SuggestTest extends FunSuite {
             Seq(
               ArrayValue(Seq()),
               ArrayValue(Seq(NumberValue(0)))
+            )
+          )
+        )
+      }
+    }
+  }
+
+  test("suggest at deeper property") {
+    withSchema(totoObjectSchema) { schema =>
+      assertSuggest(
+        """{
+          |"toto": 13
+          |}
+          |""".stripMargin,
+        Pointer.empty / "toto"
+      )(
+        schema
+      ) { result =>
+        assertEquals(
+          result,
+          SuggestionResult(
+            Seq(
+              NumberValue(0)
             )
           )
         )

@@ -15,10 +15,6 @@ import scala.reflect.ClassTag
 
 case class InnerValue(value: Value, pointer: Pointer = Pointer.empty)
 
-// trait Checker[R] {
-//   def check(checks: Checks)(value: InnerValue): R
-// }
-
 case class SchemaError(message: String, pointer: Pointer = Pointer.empty) {
   def prefix(prefix: Pointer): SchemaError = SchemaError(message, prefix / pointer)
 }
@@ -247,15 +243,9 @@ case class Checks(
     }
 }
 
-sealed trait ApplicatorKind
-case object AllOfKind extends ApplicatorKind
-case object AnyOfKind extends ApplicatorKind
-case object OneOfKind extends ApplicatorKind
-case object NotKind   extends ApplicatorKind
-
 case class Checker[R](
     check: SimpleCheck => InnerValue => Checked[R],
-    applicate: ApplicatorKind => Seq[Checked[R]] => InnerValue => Checked[R]
+    nested: NestingCheck => Seq[Checked[R]] => InnerValue => Checked[R]
 )
 
 object Checks {

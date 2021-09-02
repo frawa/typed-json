@@ -11,11 +11,34 @@ import frawa.typedjson.parser.NumberValue
 
 case class SuggestionResult(suggestions: Seq[Value])
 
-class SuggestionChecker extends Checker[SuggestionResult] {
+object SuggestionChecker {
 
-  override def check(checks: Checks)(value: InnerValue): SuggestionResult = {
-    val suggestions = checks.checks.flatMap(suggestFor(_)).distinct
-    SuggestionResult(suggestions)
+  def apply(at: Pointer): Checker[SuggestionResult] = Checker(check(at), nested(at))
+
+  private def check(at: Pointer)(check: SimpleCheck)(value: InnerValue): Checked[SuggestionResult] = {
+    val inside = Pointer.dropPrefix(at, value.pointer)
+    inside
+      .map(inside => {
+        val suggestions = suggestFor(check)
+        Checked(true, Seq(SuggestionResult(suggestions)))
+      })
+      .getOrElse {
+        val checked = ValidationChecker().check(check)(value)
+        Checked(checked.valid, Seq())
+      }
+  }
+
+  private def nested(
+      at: Pointer
+  )(check: NestingCheck)(checked: Seq[Checked[SuggestionResult]])(value: InnerValue): Checked[SuggestionResult] = {
+    if (at == value.pointer) {
+      val suggestions = suggestFor(check)
+      Checked(true, Seq(SuggestionResult(suggestions)))
+    } else {
+      // val checked = ValidationChecker().nested(check)(checked)
+      // Checked(checked.valid, Seq())
+      Checked(true, Seq())
+    }
   }
 
   private def suggestFor(check: Check): Seq[Value] = {
@@ -26,14 +49,14 @@ class SuggestionChecker extends Checker[SuggestionResult] {
       case NumberTypeCheck  => Seq(NumberValue(0))
       case ArrayTypeCheck   => Seq(ArrayValue(Seq()))
       case ObjectTypeCheck  => Seq(ObjectValue(Map()))
-      case ArrayItemsCheck(items) =>
-        items
-          .map { checks =>
-            checks.checks
-              .flatMap(suggestFor(_))
-              .map(v => ArrayValue(Seq(v)))
-          }
-          .getOrElse(Seq(ArrayValue(Seq())))
+      // case ArrayItemsCheck(items) =>
+      //   items
+      //     .map { checks =>
+      //       checks.checks
+      //         .flatMap(suggestFor(_))
+      //         .map(v => ArrayValue(Seq(v)))
+      //     }
+      //     .getOrElse(Seq(ArrayValue(Seq())))
       case ObjectPropertiesCheck(properties) =>
         properties.flatMap { case (prop, checks) =>
           checks.checks
@@ -42,15 +65,15 @@ class SuggestionChecker extends Checker[SuggestionResult] {
         }.toSeq
       case ObjectRequiredCheck(required) => Seq(ObjectValue(Map.from(required.map((_, NullValue)))))
       case TrivialCheck(valid)           => Seq()
-      case NotCheck(checks)              => Seq()
-      case AllOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_))
-      case AnyOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_))
-      case OneOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_))
-      case IfThenElseCheck(ifChecks, thenChecks, elseChecks) =>
-        Seq(ifChecks, thenChecks, elseChecks)
-          .flatMap(identity)
-          .flatMap(_.checks)
-          .flatMap(suggestFor(_))
+      // case NotCheck(checks)              => Seq()
+      // case AllOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_))
+      // case AnyOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_))
+      // case OneOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_))
+      // case IfThenElseCheck(ifChecks, thenChecks, elseChecks) =>
+      //   Seq(ifChecks, thenChecks, elseChecks)
+      //     .flatMap(identity)
+      //     .flatMap(_.checks)
+      //     .flatMap(suggestFor(_))
       case UnionTypeCheck(checks) => checks.flatMap(suggestFor(_))
       case EnumCheck(values)      => values
       case _                      => Seq()

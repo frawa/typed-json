@@ -34,7 +34,7 @@ trait Calculator[R] {
 }
 object ValidationChecker {
 
-  def apply(): Checker[ValidationResult] = Checker(check, applicate)
+  def apply(): Checker[ValidationResult] = Checker(check, nested)
 
   private val calc: Calculator[ValidationResult] = new ValidationCalculator()
 
@@ -61,14 +61,15 @@ object ValidationChecker {
     }
   }
 
-  private def applicate(
-      kind: ApplicatorKind
+  private def nested(
+      check: NestingCheck
   )(checked: Seq[Checked[ValidationResult]])(value: InnerValue): Checked[ValidationResult] = {
-    kind match {
-      case AllOfKind => calc.allOf(checked, value.pointer)
-      case AnyOfKind => calc.anyOf(checked, value.pointer)
-      case OneOfKind => calc.oneOf(checked, value.pointer)
-      case NotKind   => calc.not(checked, value.pointer)
+    check match {
+      case AllOfCheck(_) => calc.allOf(checked, value.pointer)
+      case AnyOfCheck(_) => calc.anyOf(checked, value.pointer)
+      case OneOfCheck(_) => calc.oneOf(checked, value.pointer)
+      case NotCheck(_)   => calc.not(checked, value.pointer)
+      case _             => calc.allOf(checked, value.pointer)
     }
   }
 
