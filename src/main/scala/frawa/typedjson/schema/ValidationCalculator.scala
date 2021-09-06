@@ -55,17 +55,13 @@ class ValidationCalculator extends Calculator[ValidationResult] {
     }
   }
 
+  override def ifThenElse(
+      checked: Seq[Checked[ValidationResult]],
+      pointer: Pointer
+  ): Checked[ValidationResult] = {
+    allOf(checked, pointer)
+  }
+
   override def isValid(result: ValidationResult): Boolean = result == ValidationValid
 
-  // override def ifThenElse(
-  //     ifResult: ValidationResult,
-  //     thenResult: Option[ValidationResult],
-  //     elseResult: Option[ValidationResult]
-  // ): ValidationResult = {
-  //   if (isValid(ifResult)) {
-  //     thenResult.getOrElse(valid())
-  //   } else {
-  //     elseResult.getOrElse(valid())
-  //   }
-  // }
 }

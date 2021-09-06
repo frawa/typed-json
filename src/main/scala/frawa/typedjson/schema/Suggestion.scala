@@ -35,9 +35,8 @@ object SuggestionChecker {
       val suggestions = suggestFor(check)
       Checked(true, Seq(SuggestionResult(suggestions)))
     } else {
-      // val checked = ValidationChecker().nested(check)(checked)
-      // Checked(checked.valid, Seq())
-      Checked(true, Seq())
+      val results = checked.flatMap(_.results)
+      Checked(true, results)
     }
   }
 

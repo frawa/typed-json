@@ -495,7 +495,7 @@ class SuggestTest extends FunSuite {
     }
   }
 
-  test("suggest array item".ignore) {
+  test("suggest array") {
     withSchema(numberArraySchema) { schema =>
       assertSuggest(
         """[]""".stripMargin
@@ -506,8 +506,7 @@ class SuggestTest extends FunSuite {
           result,
           SuggestionResult(
             Seq(
-              ArrayValue(Seq()),
-              ArrayValue(Seq(NumberValue(0)))
+              ArrayValue(Seq())
             )
           )
         )
