@@ -81,8 +81,7 @@ object Processor {
       case c: AllOfCheck            => checkApplicator(checker)(checker.nested(check))(c.checks)
       case c: AnyOfCheck            => checkApplicator(checker)(checker.nested(check))(c.checks)
       case c: OneOfCheck            => checkApplicator(checker)(checker.nested(check))(c.checks)
-      case c @ IfThenElseCheck(ifChecks, thenChecks, elseChecks) =>
-        checkIfThenElse(checker)(c)(ifChecks, thenChecks, elseChecks)
+      case c: IfThenElseCheck       => checkIfThenElse(checker)(c)
     }
 
   private def checkArrayItems[R](checker: Checker[R])(check: ArrayItemsCheck): ProcessFun[R] = value =>
@@ -132,15 +131,11 @@ object Processor {
       }
   }
 
-  private def checkIfThenElse[R](
-      checker: Checker[R]
-  )(
-      check: IfThenElseCheck
-  )(ifChecks: Option[Checks], thenChecks: Option[Checks], elseChecks: Option[Checks]): ProcessFun[R] = { value =>
-    ifChecks
+  private def checkIfThenElse[R](checker: Checker[R])(check: IfThenElseCheck): ProcessFun[R] = { value =>
+    check.ifChecks
       .map(processor(checker)(_).process(value))
       .flatMap { checked =>
-        val branchChecks  = if (checked.valid) thenChecks else elseChecks
+        val branchChecks  = if (checked.valid) check.thenChecks else check.elseChecks
         val branchChecked = branchChecks.map(processor(checker)(_).process(value))
         branchChecked.map(checked => checker.nested(check)(Seq(checked))(value))
       }
