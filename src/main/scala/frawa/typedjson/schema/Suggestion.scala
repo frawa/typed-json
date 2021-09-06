@@ -9,38 +9,47 @@ import frawa.typedjson.parser.BoolValue
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.NumberValue
 
-case class SuggestionResult(suggestions: Seq[Value])
+case class SuggestionResult(suggestions: Seq[Value], validated: Checked[ValidationResult])
 
 object SuggestionChecker {
 
   def apply(at: Pointer): Checker[SuggestionResult] = Checker(check(at), nested(at))
 
   private def check(at: Pointer)(check: SimpleCheck)(value: InnerValue): Checked[SuggestionResult] = {
-    val inside = Pointer.dropPrefix(at, value.pointer)
-    inside
-      .map(inside => {
-        val suggestions = suggestFor(check)
-        Checked(true, Seq(SuggestionResult(suggestions)))
-      })
-      .getOrElse {
-        val checked = ValidationChecker().check(check)(value)
-        Checked(checked.valid, Seq())
-      }
+    // val inside = Pointer.dropPrefix(at, value.pointer)
+    // inside
+    //   .map(inside => {
+    //     val suggestions = suggestFor(check)(Seq(Checked(true, Seq())))
+    //     Checked(true, Seq(SuggestionResult(suggestions, Checked(true, Seq(ValidationValid)))))
+    //   })
+    //   .getOrElse {
+    //     val checked = ValidationChecker().check(check)(value)
+    //     Checked(checked.valid, Seq(SuggestionResult(Seq(), checked)))
+    //   }
+    if (at == value.pointer) {
+      val suggestions = suggestFor(check)(Seq(Checked(true, Seq())))
+      Checked(true, Seq(SuggestionResult(suggestions, Checked(true, Seq(ValidationValid)))))
+    } else {
+      val checked = ValidationChecker().check(check)(value)
+      Checked(checked.valid, Seq(SuggestionResult(Seq(), checked)))
+    }
   }
 
   private def nested(
       at: Pointer
   )(check: NestingCheck)(checked: Seq[Checked[SuggestionResult]])(value: InnerValue): Checked[SuggestionResult] = {
     if (at == value.pointer) {
-      val suggestions = suggestFor(check)
-      Checked(true, Seq(SuggestionResult(suggestions)))
+      val suggestions = suggestFor(check)(checked)
+      Checked(true, Seq(SuggestionResult(suggestions, Checked(true, Seq(ValidationValid)))))
     } else {
-      val results = checked.flatMap(_.results)
-      Checked(true, results)
+      val suggestions = checked.flatMap(_.results).flatMap(_.suggestions)
+      val validated   = checked.flatMap(_.results).map(_.validated)
+      val nested      = ValidationChecker().nested(check)(validated)(value)
+      Checked(true, Seq(SuggestionResult(suggestions, nested)))
     }
   }
 
-  private def suggestFor(check: Check): Seq[Value] = {
+  private def suggestFor(check: Check)(checked: Seq[Checked[SuggestionResult]]): Seq[Value] = {
     check match {
       case NullTypeCheck    => Seq(NullValue)
       case BooleanTypeCheck => Seq(BoolValue(true))
@@ -59,7 +68,7 @@ object SuggestionChecker {
       case ObjectPropertiesCheck(properties) =>
         properties.flatMap { case (prop, checks) =>
           checks.checks
-            .flatMap(suggestFor(_))
+            .flatMap(suggestFor(_)(checked))
             .map(v => ObjectValue(Map(prop -> v)))
         }.toSeq
       case ObjectRequiredCheck(required) => Seq(ObjectValue(Map.from(required.map((_, NullValue)))))
@@ -67,14 +76,14 @@ object SuggestionChecker {
       // case AllOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_))
       // case AnyOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_))
       // case OneOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_))
-      // case IfThenElseCheck(ifChecks, thenChecks, elseChecks) =>
-      //   Seq(ifChecks, thenChecks, elseChecks)
-      //     .flatMap(identity)
-      //     .flatMap(_.checks)
-      //     .flatMap(suggestFor(_))
-      case UnionTypeCheck(checks) => checks.flatMap(suggestFor(_))
+      case IfThenElseCheck(ifChecks, thenChecks, elseChecks) =>
+        Seq(ifChecks, thenChecks, elseChecks)
+          .flatMap(identity)
+          .flatMap(_.checks)
+          .flatMap(suggestFor(_)(checked))
+      case UnionTypeCheck(checks) => checks.flatMap(suggestFor(_)(checked))
       case EnumCheck(values)      => values
-      case _                      => Seq()
+      case _                      => checked.flatMap(_.results).flatMap(_.suggestions)
     }
   }
 }

@@ -154,7 +154,7 @@ object Processor {
       .flatMap { checked =>
         if (checked.valid) {
           val thenChecked = thenChecks.map(processor(checker)(_).process(value))
-          thenChecked.map(thenChecked => checker.nested(check)(Seq(checked, thenChecked))(value))
+          thenChecked.map(thenChecked => checker.nested(check)(Seq(thenChecked))(value))
         } else {
           val elseChecked = elseChecks.map(processor(checker)(_).process(value))
           elseChecked.map(elseChecked => checker.nested(check)(Seq(checked, elseChecked))(value))
