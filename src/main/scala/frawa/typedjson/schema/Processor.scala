@@ -36,6 +36,8 @@ case class Processor[R] private[schema] (process: InnerValue => Checked[R])
 object Processor {
   type SchemaErrors = Checks.SchemaErrors
 
+  type ProcessFun[R] = InnerValue => Checked[R]
+
   def apply[R](
       schema: SchemaValue
   )(checker: Checker[R]): Either[SchemaErrors, Processor[R]] = {
@@ -50,7 +52,7 @@ object Processor {
 
   private def process[R](
       checker: Checker[R]
-  )(checks: Checks)(value: InnerValue): Checked[R] = {
+  )(checks: Checks): ProcessFun[R] = { value =>
     val checked = checks.checks.map(processOne(checker)(_)(value))
     merge(checked)
   }
@@ -63,7 +65,7 @@ object Processor {
 
   private def processOne[R](
       checker: Checker[R]
-  )(check: Check)(value: InnerValue): Checked[R] =
+  )(check: Check): ProcessFun[R] = value =>
     check match {
       case simple: SimpleCheck   => checker.check(simple)(value)
       case nesting: NestingCheck => processNesting(checker)(nesting)(value)
@@ -71,25 +73,23 @@ object Processor {
 
   private def processNesting[R](
       checker: Checker[R]
-  )(check: NestingCheck)(value: InnerValue): Checked[R] =
+  )(check: NestingCheck): ProcessFun[R] =
     check match {
-      case c @ ArrayItemsCheck(items)            => checkArrayItems(checker)(c)(items, value)
-      case c @ ObjectPropertiesCheck(properties) => checkObjectProperties(checker)(c)(properties, value)
-      case c @ NotCheck(checks)                  => checkNot(checker)(c)(checks, value)
-      case AllOfCheck(checks)                    => checkApplicator(checker)(checker.nested(check))(checks, value)
-      case AnyOfCheck(checks)                    => checkApplicator(checker)(checker.nested(check))(checks, value)
-      case OneOfCheck(checks)                    => checkApplicator(checker)(checker.nested(check))(checks, value)
+      case c: ArrayItemsCheck       => checkArrayItems(checker)(c)
+      case c: ObjectPropertiesCheck => checkObjectProperties(checker)(c)
+      case c: NotCheck              => checkNot(checker)(c)
+      case c: AllOfCheck            => checkApplicator(checker)(checker.nested(check))(c.checks)
+      case c: AnyOfCheck            => checkApplicator(checker)(checker.nested(check))(c.checks)
+      case c: OneOfCheck            => checkApplicator(checker)(checker.nested(check))(c.checks)
       case c @ IfThenElseCheck(ifChecks, thenChecks, elseChecks) =>
-        checkIfThenElse(checker)(c)(ifChecks, thenChecks, elseChecks, value)
+        checkIfThenElse(checker)(c)(ifChecks, thenChecks, elseChecks)
     }
 
-  private def checkArrayItems[R](
-      checker: Checker[R]
-  )(check: ArrayItemsCheck)(items: Option[Checks], value: InnerValue): Checked[R] =
+  private def checkArrayItems[R](checker: Checker[R])(check: ArrayItemsCheck): ProcessFun[R] = value =>
     value.value match {
       case ArrayValue(itemValues) => {
-        if (items.isDefined && itemValues.nonEmpty) {
-          val results = processIndexed(checker)(items.get)(itemValues, value.pointer)
+        if (check.items.isDefined && itemValues.nonEmpty) {
+          val results = processIndexed(process(checker)(check.items.get))(itemValues, value.pointer)
           checker.nested(check)(results)(value)
         } else {
           Checked.valid
@@ -98,12 +98,10 @@ object Processor {
       case _ => Checked.valid
     }
 
-  private def checkObjectProperties[R](
-      checker: Checker[R]
-  )(check: ObjectPropertiesCheck)(properties: Map[String, Checks], value: InnerValue): Checked[R] =
+  private def checkObjectProperties[R](checker: Checker[R])(check: ObjectPropertiesCheck): ProcessFun[R] = value =>
     value.value match {
       case ObjectValue(propertiesValues) => {
-        val results = processMap(checker)(properties)(propertiesValues, value.pointer)
+        val results = processMap(process(checker))(check.properties)(propertiesValues, value.pointer)
         if (propertiesValues.isEmpty) {
           Checked.valid
         } else {
@@ -113,29 +111,24 @@ object Processor {
       case _ => Checked.valid
     }
 
-  private def checkNot[R](
-      checker: Checker[R]
-  )(check: NotCheck)(checks: Checks, value: InnerValue): Checked[R] = {
-    val checked = processor(checker)(checks).process(value)
+  private def checkNot[R](checker: Checker[R])(check: NotCheck): ProcessFun[R] = { value =>
+    val checked = processor(checker)(check.checks).process(value)
     checker.nested(check)(Seq(checked))(value)
   }
 
   private def checkApplicator[R](
       checker: Checker[R]
   )(
-      f: Seq[Checked[R]] => InnerValue => Checked[R]
-  )(checks: Seq[Checks], value: InnerValue): Checked[R] = {
+      f: Seq[Checked[R]] => ProcessFun[R]
+  )(checks: Seq[Checks]): ProcessFun[R] = { value =>
     val checked = checks.map(processor(checker)(_).process(value))
     f(checked)(value)
   }
 
-  private def processIndexed[R](
-      checker: Checker[R]
-  )(checks: Checks)(values: Seq[Value], pointer: Pointer): Seq[Checked[R]] = {
-    val processor1 = processor(checker)(checks)
+  private def processIndexed[R](process: ProcessFun[R])(values: Seq[Value], pointer: Pointer): Seq[Checked[R]] = {
     values.zipWithIndex
       .map { case (value, index) =>
-        processor1.process(InnerValue(value, pointer / index))
+        process(InnerValue(value, pointer / index))
       }
   }
 
@@ -143,12 +136,7 @@ object Processor {
       checker: Checker[R]
   )(
       check: IfThenElseCheck
-  )(
-      ifChecks: Option[Checks],
-      thenChecks: Option[Checks],
-      elseChecks: Option[Checks],
-      value: InnerValue
-  ): Checked[R] = {
+  )(ifChecks: Option[Checks], thenChecks: Option[Checks], elseChecks: Option[Checks]): ProcessFun[R] = { value =>
     ifChecks
       .map(processor(checker)(_).process(value))
       .flatMap { checked =>
@@ -160,14 +148,12 @@ object Processor {
   }
 
   private def processMap[R](
-      checker: Checker[R]
-  )(
-      checks: Map[String, Checks]
-  )(values: Map[String, Value], pointer: Pointer): Seq[Checked[R]] = {
+      process: Checks => ProcessFun[R]
+  )(checks: Map[String, Checks])(values: Map[String, Value], pointer: Pointer): Seq[Checked[R]] = {
     values.map { case (key, value) =>
       checks
         .get(key)
-        .map(processor(checker)(_).process(InnerValue(value, pointer / key)))
+        .map(process(_)(InnerValue(value, pointer / key)))
         .getOrElse(Checked(true, Seq()))
     }.toSeq
   }
