@@ -514,7 +514,7 @@ class SuggestTest extends FunSuite {
     }
   }
 
-  test("suggest at deeper property".ignore) {
+  test("suggest at inside object") {
     withSchema(totoObjectSchema) { schema =>
       assertSuggest(
         """{
