@@ -157,7 +157,7 @@ object Processor {
           thenChecked.map(thenChecked => checker.nested(check)(Seq(thenChecked))(value))
         } else {
           val elseChecked = elseChecks.map(processor(checker)(_).process(value))
-          elseChecked.map(elseChecked => checker.nested(check)(Seq(checked, elseChecked))(value))
+          elseChecked.map(elseChecked => checker.nested(check)(Seq(elseChecked))(value))
         }
       }
       .getOrElse(Checked(true, Seq()))
