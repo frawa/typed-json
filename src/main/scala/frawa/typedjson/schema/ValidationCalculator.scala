@@ -22,36 +22,36 @@ class ValidationCalculator extends Calculator[ValidationResult] {
 
   override def allOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
     if (checked.isEmpty || checked.forall(_.valid)) {
-      Checked(true, Seq())
+      Checked.valid
     } else {
-      Checked(false, Seq(ValidationInvalid(checked.flatMap(_.results.flatMap(_.errors)))))
+      Checked.invalid(ValidationInvalid(checked.flatMap(_.results.flatMap(_.errors))))
     }
   }
 
   override def anyOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
     if (checked.isEmpty || checked.exists(_.valid)) {
-      Checked(true, Seq())
+      Checked.valid
     } else {
-      Checked(false, Seq(ValidationInvalid(checked.flatMap(_.results.flatMap(_.errors)))))
+      Checked.invalid(ValidationInvalid(checked.flatMap(_.results.flatMap(_.errors))))
     }
   }
 
   override def oneOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
     val count = checked.count(_.valid)
     if (count == 1) {
-      Checked(true, Seq())
+      Checked.valid
     } else if (count == 0) {
-      Checked(false, Seq(ValidationInvalid(checked.flatMap(_.results.flatMap(_.errors)))))
+      Checked.invalid(ValidationInvalid(checked.flatMap(_.results.flatMap(_.errors))))
     } else {
-      Checked(false, Seq(ValidationInvalid(Seq(WithPointer(NotOneOf(count), pointer)))))
+      Checked.invalid(ValidationInvalid(Seq(WithPointer(NotOneOf(count), pointer))))
     }
   }
 
   override def not(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
     if (checked.length == 1 && !checked(0).valid) {
-      Checked(true, Seq())
+      Checked.valid
     } else {
-      Checked(false, Seq(ValidationInvalid(Seq(WithPointer(NotInvalid(), pointer)))))
+      Checked.invalid(ValidationInvalid(Seq(WithPointer(NotInvalid(), pointer))))
     }
   }
 

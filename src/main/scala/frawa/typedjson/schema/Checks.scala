@@ -48,6 +48,11 @@ case class IfThenElseCheck(
 
 case class Checked[R](valid: Boolean, results: Seq[R])
 
+object Checked {
+  def valid[R]              = Checked[R](true, Seq())
+  def invalid[R](result: R) = Checked[R](false, Seq(result))
+}
+
 case class Checks(
     schema: SchemaValue,
     checks: Seq[Check] = Seq.empty[Check],

@@ -31,24 +31,24 @@ object SchemaValue {
 //   override def resolve(uri: URI): Option[SchemaValue] = resolver.resolve(uri)
 // }
 
-case class Processor[R] private[schema] (process: InnerValue => R)
+case class Processor[R] private[schema] (process: InnerValue => Checked[R])
 
 object Processor {
   type SchemaErrors = Checks.SchemaErrors
 
   def apply[R](
       schema: SchemaValue
-  )(checker: Checker[R]): Either[SchemaErrors, Processor[Checked[R]]] = {
+  )(checker: Checker[R]): Either[SchemaErrors, Processor[R]] = {
     implicit val resolver = LoadedSchemasResolver(schema)
     for {
       checks <- Checks.parseKeywords(schema)
     } yield (processor(checker)(checks))
   }
 
-  def processor[R](checker: Checker[R])(checks: Checks): Processor[Checked[R]] =
+  private def processor[R](checker: Checker[R])(checks: Checks): Processor[R] =
     Processor(value => process(checker)(checks)(value))
 
-  def process[R](
+  private def process[R](
       checker: Checker[R]
   )(checks: Checks)(value: InnerValue): Checked[R] = {
     val checked = checks.checks.map(processOne(checker)(_)(value))
@@ -92,25 +92,25 @@ object Processor {
           val results = processIndexed(checker)(items.get)(itemValues, value.pointer)
           checker.nested(check)(results)(value)
         } else {
-          Checked(true, Seq())
+          Checked.valid
         }
       }
-      case _ => Checked(true, Seq())
+      case _ => Checked.valid
     }
 
-  def checkObjectProperties[R](
+  private def checkObjectProperties[R](
       checker: Checker[R]
   )(check: ObjectPropertiesCheck)(properties: Map[String, Checks], value: InnerValue): Checked[R] =
     value.value match {
       case ObjectValue(propertiesValues) => {
         val results = processMap(checker)(properties)(propertiesValues, value.pointer)
         if (propertiesValues.isEmpty) {
-          Checked(true, Seq())
+          Checked.valid
         } else {
           checker.nested(check)(results)(value)
         }
       }
-      case _ => Checked(true, Seq())
+      case _ => Checked.valid
     }
 
   private def checkNot[R](
@@ -156,7 +156,7 @@ object Processor {
         val branchChecked = branchChecks.map(processor(checker)(_).process(value))
         branchChecked.map(checked => checker.nested(check)(Seq(checked))(value))
       }
-      .getOrElse(Checked(true, Seq()))
+      .getOrElse(Checked.valid)
   }
 
   private def processMap[R](
