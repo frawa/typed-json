@@ -27,8 +27,8 @@ object SuggestionChecker {
     //     Checked(checked.valid, Seq(SuggestionResult(Seq(), checked)))
     //   }
     if (at == value.pointer) {
-      val suggestions = suggestFor(check)(Seq(Checked(true, Seq())))
-      Checked(true, Seq(SuggestionResult(suggestions, Checked(true, Seq(ValidationValid)))))
+      val suggestions = suggestFor(check)(Seq(Checked.valid))
+      Checked.valid(SuggestionResult(suggestions, Checked.valid))
     } else {
       val checked = ValidationChecker().check(check)(value)
       Checked(checked.valid, Seq(SuggestionResult(Seq(), checked)))
@@ -40,7 +40,7 @@ object SuggestionChecker {
   )(check: NestingCheck)(checked: Seq[Checked[SuggestionResult]])(value: InnerValue): Checked[SuggestionResult] = {
     if (at == value.pointer) {
       val suggestions = suggestFor(check)(checked)
-      Checked(true, Seq(SuggestionResult(suggestions, Checked(true, Seq(ValidationValid)))))
+      Checked.valid(SuggestionResult(suggestions, Checked.valid))
     } else {
       val suggestions = checked.flatMap(_.results).flatMap(_.suggestions)
       val validated   = checked.flatMap(_.results).map(_.validated)

@@ -23,9 +23,7 @@ case class MissingProperties(properties: Seq[String]) extends Observation
 case class UnsupportedCheck(check: Check)             extends Observation
 
 trait Calculator[R] {
-  def valid(): R
-  def isValid(result: R): Boolean
-  def invalid(observation: Observation, pointer: Pointer): R
+  def invalid(observation: Observation, pointer: Pointer): Checked[R]
   def allOf(checked: Seq[Checked[R]], pointer: Pointer): Checked[R]
   def anyOf(checked: Seq[Checked[R]], pointer: Pointer): Checked[R]
   def oneOf(checked: Seq[Checked[R]], pointer: Pointer): Checked[R]
@@ -45,25 +43,25 @@ object ValidationChecker {
   private val arrayTypeMismatch   = TypeMismatch[ArrayValue]("array")
   private val objectTypeMismatch  = TypeMismatch[ObjectValue]("object")
 
-  private def check(check: SimpleCheck)(value: InnerValue): Checked[ValidationResult] = {
+  private type ProcessFun = Processor.ProcessFun[ValidationResult]
+
+  private def check(check: SimpleCheck): ProcessFun = {
     check match {
-      case NullTypeCheck                 => toChecked(checkType(nullTypeMismatch)(value))
-      case BooleanTypeCheck              => toChecked(checkType(booleanTypeMismatch)(value))
-      case StringTypeCheck               => toChecked(checkType(stringTypeMismatch)(value))
-      case NumberTypeCheck               => toChecked(checkType(numberTypeMismatch)(value))
-      case ArrayTypeCheck                => toChecked(checkType(arrayTypeMismatch)(value))
-      case ObjectTypeCheck               => toChecked(checkType(objectTypeMismatch)(value))
-      case ObjectRequiredCheck(required) => toChecked(checkObjectRequired(required, value))
-      case TrivialCheck(valid)           => toChecked(checkTrivial(valid, value))
-      case UnionTypeCheck(checks)        => checkUnionType(checks, value)
-      case EnumCheck(values)             => toChecked(checkEnum(values, value))
-      case _                             => toChecked(ValidationInvalid(Seq(WithPointer(UnsupportedCheck(check)))))
+      case NullTypeCheck                 => checkType(nullTypeMismatch)
+      case BooleanTypeCheck              => checkType(booleanTypeMismatch)
+      case StringTypeCheck               => checkType(stringTypeMismatch)
+      case NumberTypeCheck               => checkType(numberTypeMismatch)
+      case ArrayTypeCheck                => checkType(arrayTypeMismatch)
+      case ObjectTypeCheck               => checkType(objectTypeMismatch)
+      case ObjectRequiredCheck(required) => checkObjectRequired(required)
+      case TrivialCheck(valid)           => checkTrivial(valid)
+      case UnionTypeCheck(checks)        => checkUnionType(checks)
+      case EnumCheck(values)             => checkEnum(values)
+      case _                             => _ => Checked.invalid(ValidationResult.invalid(UnsupportedCheck(check)))
     }
   }
 
-  private def nested(
-      check: NestingCheck
-  )(checked: Seq[Checked[ValidationResult]])(value: InnerValue): Checked[ValidationResult] = {
+  private def nested(check: NestingCheck)(checked: Seq[Checked[ValidationResult]]): ProcessFun = { value =>
     check match {
       case AllOfCheck(_)            => calc.allOf(checked, value.pointer)
       case AnyOfCheck(_)            => calc.anyOf(checked, value.pointer)
@@ -75,41 +73,40 @@ object ValidationChecker {
     }
   }
 
-  private def toChecked(result: ValidationResult): Checked[ValidationResult] =
-    Checked(calc.isValid(result), Seq(result))
-
-  private def checkType[T <: Value: ClassTag](observation: TypeMismatch[T])(value: InnerValue): ValidationResult =
+  private def checkType[T <: Value: ClassTag](observation: TypeMismatch[T]): ProcessFun = value =>
     value.value match {
-      case v: T => calc.valid()
+      case v: T => Checked.valid
       case _    => calc.invalid(observation, value.pointer)
     }
 
-  private def checkTrivial(valid: Boolean, value: InnerValue): ValidationResult = {
+  private def checkTrivial(valid: Boolean): ProcessFun = { value =>
     if (valid)
-      calc.valid()
+      Checked.valid
     else
       calc.invalid(FalseSchemaReason(), value.pointer)
   }
 
-  private def checkObjectRequired(required: Seq[String], value: InnerValue): ValidationResult = value.value match {
-    case ObjectValue(propertiesValues) => {
-      val missingNames = required.filter(!propertiesValues.contains(_))
-      if (missingNames.isEmpty) {
-        calc.valid()
-      } else {
-        calc.invalid(MissingProperties(missingNames), value.pointer)
+  private def checkObjectRequired(required: Seq[String]): ProcessFun = { value =>
+    value.value match {
+      case ObjectValue(propertiesValues) => {
+        val missingNames = required.filter(!propertiesValues.contains(_))
+        if (missingNames.isEmpty) {
+          Checked.valid
+        } else {
+          calc.invalid(MissingProperties(missingNames), value.pointer)
+        }
       }
+      case _ => Checked.valid
     }
-    case _ => calc.valid()
   }
 
-  private def checkUnionType(checks: Seq[TypeCheck], value: InnerValue): Checked[ValidationResult] = {
+  private def checkUnionType(checks: Seq[TypeCheck]): ProcessFun = { value =>
     calc.oneOf(checks.map(check(_)(value)), value.pointer)
   }
 
-  private def checkEnum(values: Seq[Value], value: InnerValue): ValidationResult = {
+  private def checkEnum(values: Seq[Value]): ProcessFun = { value =>
     if (values.contains(value.value)) {
-      calc.valid()
+      Checked.valid
     } else {
       calc.invalid(NotInEnum(values), value.pointer)
     }

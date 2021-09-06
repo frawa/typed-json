@@ -14,25 +14,26 @@ import java.net.URI
 import scala.reflect.ClassTag
 
 class ValidationCalculator extends Calculator[ValidationResult] {
-  override def valid(): ValidationResult = ValidationValid
-
-  override def invalid(observation: Observation, pointer: Pointer): ValidationResult = ValidationInvalid(
-    Seq(WithPointer(observation, pointer))
-  )
-
   override def allOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
     if (checked.isEmpty || checked.forall(_.valid)) {
       Checked.valid
     } else {
-      Checked.invalid(ValidationInvalid(checked.flatMap(_.results.flatMap(_.errors))))
+      invalid(checked)
     }
   }
+
+  private def invalid(checked: Seq[Checked[ValidationResult]]): Checked[ValidationResult] =
+    Checked.invalid(ValidationResult.invalid(checked.flatMap(_.results.flatMap(_.errors))))
+
+  override def invalid(observation: Observation, pointer: Pointer): Checked[ValidationResult] = Checked.invalid(
+    ValidationResult.invalid(observation, pointer)
+  )
 
   override def anyOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
     if (checked.isEmpty || checked.exists(_.valid)) {
       Checked.valid
     } else {
-      Checked.invalid(ValidationInvalid(checked.flatMap(_.results.flatMap(_.errors))))
+      invalid(checked)
     }
   }
 
@@ -41,9 +42,9 @@ class ValidationCalculator extends Calculator[ValidationResult] {
     if (count == 1) {
       Checked.valid
     } else if (count == 0) {
-      Checked.invalid(ValidationInvalid(checked.flatMap(_.results.flatMap(_.errors))))
+      invalid(checked)
     } else {
-      Checked.invalid(ValidationInvalid(Seq(WithPointer(NotOneOf(count), pointer))))
+      invalid(NotOneOf(count), pointer)
     }
   }
 
@@ -51,7 +52,7 @@ class ValidationCalculator extends Calculator[ValidationResult] {
     if (checked.length == 1 && !checked(0).valid) {
       Checked.valid
     } else {
-      Checked.invalid(ValidationInvalid(Seq(WithPointer(NotInvalid(), pointer))))
+      invalid(NotInvalid(), pointer)
     }
   }
 
@@ -61,7 +62,5 @@ class ValidationCalculator extends Calculator[ValidationResult] {
   ): Checked[ValidationResult] = {
     allOf(checked, pointer)
   }
-
-  override def isValid(result: ValidationResult): Boolean = result == ValidationValid
 
 }

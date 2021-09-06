@@ -50,6 +50,7 @@ case class Checked[R](valid: Boolean, results: Seq[R])
 
 object Checked {
   def valid[R]              = Checked[R](true, Seq())
+  def valid[R](result: R)   = Checked[R](true, Seq(result))
   def invalid[R](result: R) = Checked[R](false, Seq(result))
 }
 
