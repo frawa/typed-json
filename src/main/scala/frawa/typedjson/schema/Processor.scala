@@ -152,13 +152,9 @@ object Processor {
     ifChecks
       .map(processor(checker)(_).process(value))
       .flatMap { checked =>
-        if (checked.valid) {
-          val thenChecked = thenChecks.map(processor(checker)(_).process(value))
-          thenChecked.map(thenChecked => checker.nested(check)(Seq(thenChecked))(value))
-        } else {
-          val elseChecked = elseChecks.map(processor(checker)(_).process(value))
-          elseChecked.map(elseChecked => checker.nested(check)(Seq(elseChecked))(value))
-        }
+        val branchChecks  = if (checked.valid) thenChecks else elseChecks
+        val branchChecked = branchChecks.map(processor(checker)(_).process(value))
+        branchChecked.map(checked => checker.nested(check)(Seq(checked))(value))
       }
       .getOrElse(Checked(true, Seq()))
   }
@@ -171,8 +167,7 @@ object Processor {
     values.map { case (key, value) =>
       checks
         .get(key)
-        .map(Processor.processor(checker)(_))
-        .map(_.process(InnerValue(value, pointer / key)))
+        .map(processor(checker)(_).process(InnerValue(value, pointer / key)))
         .getOrElse(Checked(true, Seq()))
     }.toSeq
   }
