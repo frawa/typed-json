@@ -31,7 +31,7 @@ object SchemaValue {
 //   override def resolve(uri: URI): Option[SchemaValue] = resolver.resolve(uri)
 // }
 
-case class Processor[R] private[schema] (process: InnerValue => Checked[R])
+case class Processor[R] private[schema] (process: Processor.ProcessFun[R])
 
 object Processor {
   type SchemaErrors = Checks.SchemaErrors
@@ -44,11 +44,9 @@ object Processor {
     implicit val resolver = LoadedSchemasResolver(schema)
     for {
       checks <- Checks.parseKeywords(schema)
-    } yield (processor(checker)(checks))
+      processor = Processor(process(checker)(checks))
+    } yield (processor)
   }
-
-  private def processor[R](checker: Checker[R])(checks: Checks): Processor[R] =
-    Processor(value => process(checker)(checks)(value))
 
   private def process[R](
       checker: Checker[R]
@@ -57,89 +55,48 @@ object Processor {
     merge(checked)
   }
 
-  private def merge[R](checked: Seq[Checked[R]]): Checked[R] = {
-    val valid           = checked.forall(_.valid)
-    val results: Seq[R] = checked.flatMap(_.results)
-    Checked(valid, results)
+  private def process2[R](checker: Checker[R], checks: Checks): ProcessFun[R] = { value =>
+    val checked = checks.checks.map(processOne(checker)(_)(value))
+    merge(checked)
+  }
+  private def noop[R]: ProcessFun[R]                                                 = value => Checked.valid[R]
+  private def simpleCheck[R](checker: Checker[R], check: SimpleCheck): ProcessFun[R] = checker.check(check)
+  private def seq[R](ps: Seq[ProcessFun[R]]): ProcessFun[R]                          = value => merge(ps.map(_.apply(value)))
+
+  private def applyToArray[R](p: ProcessFun[R])(merge: Seq[Checked[R]] => ProcessFun[R]): ProcessFun[R] = {
+    value: InnerValue =>
+      value.value match {
+        case ArrayValue(vs) => {
+          val indexed = vs.zipWithIndex
+            .map { case (v, index) =>
+              InnerValue(v, value.pointer / index)
+            }
+          val checked = indexed.map(p)
+          merge(checked)(value)
+        }
+        case _ => Checked.valid
+      }
   }
 
-  private def processOne[R](
-      checker: Checker[R]
-  )(check: Check): ProcessFun[R] = value =>
-    check match {
-      case simple: SimpleCheck   => checker.check(simple)(value)
-      case nesting: NestingCheck => processNesting(checker)(nesting)(value)
-    }
-
-  private def processNesting[R](
-      checker: Checker[R]
-  )(check: NestingCheck): ProcessFun[R] =
-    check match {
-      case c: ArrayItemsCheck       => checkArrayItems(checker)(c)
-      case c: ObjectPropertiesCheck => checkObjectProperties(checker)(c)
-      case c: NotCheck              => checkNot(checker)(c)
-      case c: AllOfCheck            => checkApplicator(checker)(checker.nested(check))(c.checks)
-      case c: AnyOfCheck            => checkApplicator(checker)(checker.nested(check))(c.checks)
-      case c: OneOfCheck            => checkApplicator(checker)(checker.nested(check))(c.checks)
-      case c: IfThenElseCheck       => checkIfThenElse(checker)(c)
-    }
-
-  private def checkArrayItems[R](checker: Checker[R])(check: ArrayItemsCheck): ProcessFun[R] = value =>
+  private def applyToObject[R](
+      p: Map[String, ProcessFun[R]]
+  )(merge: Seq[Checked[R]] => ProcessFun[R]): ProcessFun[R] = { value =>
     value.value match {
-      case ArrayValue(itemValues) => {
-        if (check.items.isDefined && itemValues.nonEmpty) {
-          val results = processIndexed(process(checker)(check.items.get))(itemValues, value.pointer)
-          checker.nested(check)(results)(value)
-        } else {
-          Checked.valid
-        }
+      case ObjectValue(vs) => {
+        val inners = vs.view.map { case (key, v) =>
+          (key, InnerValue(v, value.pointer / key))
+        }.toMap
+        val checked = inners.view.flatMap { case (key, v) => p.get(key).map(_.apply(v)) }.toSeq
+        merge(checked)(value)
       }
       case _ => Checked.valid
     }
-
-  private def checkObjectProperties[R](checker: Checker[R])(check: ObjectPropertiesCheck): ProcessFun[R] = value =>
-    value.value match {
-      case ObjectValue(propertiesValues) => {
-        val results = processMap(process(checker))(check.properties)(propertiesValues, value.pointer)
-        if (propertiesValues.isEmpty) {
-          Checked.valid
-        } else {
-          checker.nested(check)(results)(value)
-        }
-      }
-      case _ => Checked.valid
-    }
-
-  private def checkNot[R](checker: Checker[R])(check: NotCheck): ProcessFun[R] = { value =>
-    val checked = processor(checker)(check.checks).process(value)
-    checker.nested(check)(Seq(checked))(value)
   }
 
-  private def checkApplicator[R](
-      checker: Checker[R]
-  )(
-      f: Seq[Checked[R]] => ProcessFun[R]
-  )(checks: Seq[Checks]): ProcessFun[R] = { value =>
-    val checked = checks.map(processor(checker)(_).process(value))
-    f(checked)(value)
-  }
-
-  private def processIndexed[R](process: ProcessFun[R])(values: Seq[Value], pointer: Pointer): Seq[Checked[R]] = {
-    values.zipWithIndex
-      .map { case (value, index) =>
-        process(InnerValue(value, pointer / index))
-      }
-  }
-
-  private def checkIfThenElse[R](checker: Checker[R])(check: IfThenElseCheck): ProcessFun[R] = { value =>
-    check.ifChecks
-      .map(processor(checker)(_).process(value))
-      .flatMap { checked =>
-        val branchChecks  = if (checked.valid) check.thenChecks else check.elseChecks
-        val branchChecked = branchChecks.map(processor(checker)(_).process(value))
-        branchChecked.map(checked => checker.nested(check)(Seq(checked))(value))
-      }
-      .getOrElse(Checked.valid)
+  private def applyToValue[R](ps: Seq[ProcessFun[R]])(merge: Seq[Checked[R]] => ProcessFun[R]): ProcessFun[R] = {
+    value =>
+      val checked = ps.map(_.apply(value))
+      merge(checked)(value)
   }
 
   private def processMap[R](
@@ -152,4 +109,81 @@ object Processor {
         .getOrElse(Checked(true, Seq()))
     }.toSeq
   }
+
+  // private def checks[R](checker: Checker[R], checks: Checks): ProcessFun[R] = seq(
+  //   checks.checks.map(check => simpleCheck(checker, check))
+  // )
+
+  // private def nestingCheck[R](checker: Checker[R], check: NestingCheck): ProcessFun[R] = checker.check(check)
+  // private def fw[R](process: ProcessFun[R])(f)
+
+  private def merge[R](checked: Seq[Checked[R]]): Checked[R] = {
+    val valid           = checked.forall(_.valid)
+    val results: Seq[R] = checked.flatMap(_.results)
+    Checked(valid, results)
+  }
+
+  private def processOne[R](
+      checker: Checker[R]
+  )(check: Check): ProcessFun[R] =
+    check match {
+      case simple: SimpleCheck   => processSimple(checker)(simple)
+      case nesting: NestingCheck => processNesting(checker)(nesting)
+    }
+
+  private def processSimple[R](checker: Checker[R])(check: SimpleCheck): ProcessFun[R] = checker.check(check)
+
+  private def processNesting[R](
+      checker: Checker[R]
+  )(check: NestingCheck): ProcessFun[R] =
+    check match {
+      case c: ArrayItemsCheck       => checkArrayItems(checker, c)
+      case c: ObjectPropertiesCheck => checkObjectProperties(checker, c)
+      case c: NotCheck              => checkApplicator(checker, Seq(c.checks))(checker.nested(check))
+      case c: AllOfCheck            => checkApplicator(checker, c.checks)(checker.nested(check))
+      case c: AnyOfCheck            => checkApplicator(checker, c.checks)(checker.nested(check))
+      case c: OneOfCheck            => checkApplicator(checker, c.checks)(checker.nested(check))
+      case c: IfThenElseCheck       => checkIfThenElse(checker)(c)
+    }
+
+  private def checkArrayItems[R](checker: Checker[R], check: ArrayItemsCheck): ProcessFun[R] = {
+    if (check.items.isDefined) {
+      val p     = process(checker)(check.items.get)
+      val merge = checker.nested(check)
+      applyToArray(p)(merge)
+    } else {
+      noop
+    }
+  }
+
+  private def checkObjectProperties[R](checker: Checker[R], check: ObjectPropertiesCheck): ProcessFun[R] = {
+    if (check.properties.nonEmpty) {
+      val p = check.properties.view
+        .mapValues(process(checker)(_))
+        .toMap
+      val merge = checker.nested(check)
+      applyToObject(p)(merge)
+    } else {
+      noop
+    }
+  }
+
+  private def checkApplicator[R](checker: Checker[R], checks: Seq[Checks])(
+      merge: Seq[Checked[R]] => ProcessFun[R]
+  ): ProcessFun[R] = {
+    val p = checks.map(process(checker)(_))
+    applyToValue(p)(merge)
+  }
+
+  private def checkIfThenElse[R](checker: Checker[R])(check: IfThenElseCheck): ProcessFun[R] = { value =>
+    check.ifChecks
+      .map(process(checker)(_)(value))
+      .flatMap { checked =>
+        val branchChecks  = if (checked.valid) check.thenChecks else check.elseChecks
+        val branchChecked = branchChecks.map(process(checker)(_)(value))
+        branchChecked.map(checked => checker.nested(check)(Seq(checked))(value))
+      }
+      .getOrElse(Checked.valid)
+  }
+
 }
