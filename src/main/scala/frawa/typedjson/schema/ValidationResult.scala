@@ -9,6 +9,7 @@ import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue
 
 case class ValidationResult(errors: Seq[ValidationResult.Error])
+
 object ValidationResult {
   type Error = WithPointer[Observation]
 
