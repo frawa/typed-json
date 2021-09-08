@@ -8,7 +8,7 @@ import TestUtil._
 import TestSchemas._
 import frawa.typedjson.parser.Value
 
-class SuggestTest extends FunSuite {
+class SuggestCheckerTest extends FunSuite {
   implicit val zioParser = new ZioParser();
 
   private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
