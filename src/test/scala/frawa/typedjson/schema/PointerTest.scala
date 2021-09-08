@@ -73,10 +73,4 @@ class PointerTest extends FunSuite {
     assertEquals((Pointer.empty / "bar")(value), None)
   }
 
-  test("drop prefix") {
-    assertEquals(Pointer.dropPrefix(Pointer.empty, Pointer.empty), Some(Pointer.empty))
-    assertEquals(Pointer.dropPrefix(Pointer.empty / "foo", Pointer.empty / "bar"), None)
-    assertEquals(Pointer.dropPrefix(Pointer.empty, Pointer.empty / "bar"), Some(Pointer.empty / "bar"))
-    assertEquals(Pointer.dropPrefix(Pointer.empty / "foo", Pointer.empty / "foo" / "bar"), Some(Pointer.empty / "bar"))
-  }
 }

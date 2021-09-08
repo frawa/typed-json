@@ -16,16 +16,6 @@ object SuggestionChecker {
   def apply(at: Pointer): Checker[SuggestionResult] = Checker(check(at), nested(at))
 
   private def check(at: Pointer)(check: SimpleCheck)(value: InnerValue): Checked[SuggestionResult] = {
-    // val inside = Pointer.dropPrefix(at, value.pointer)
-    // inside
-    //   .map(inside => {
-    //     val suggestions = suggestFor(check)(Seq(Checked(true, Seq())))
-    //     Checked(true, Seq(SuggestionResult(suggestions, Checked(true, Seq(ValidationValid)))))
-    //   })
-    //   .getOrElse {
-    //     val checked = ValidationChecker().check(check)(value)
-    //     Checked(checked.valid, Seq(SuggestionResult(Seq(), checked)))
-    //   }
     if (at == value.pointer) {
       val suggestions = suggestFor(check)(Seq(Checked.valid))
       Checked.valid(SuggestionResult(suggestions, Checked.valid))
