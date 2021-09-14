@@ -57,6 +57,7 @@ object ValidationChecker {
       case BooleanTypeCheck              => checkType(booleanTypeMismatch)
       case StringTypeCheck               => checkType(stringTypeMismatch)
       case NumberTypeCheck               => checkType(numberTypeMismatch)
+      case IntegerTypeCheck              => checkInteger()
       case ArrayTypeCheck                => checkType(arrayTypeMismatch)
       case ObjectTypeCheck               => checkType(objectTypeMismatch)
       case ObjectRequiredCheck(required) => checkObjectRequired(required)
@@ -85,6 +86,16 @@ object ValidationChecker {
     value.value match {
       case v: T => Checked.valid
       case _    => calc.invalid(observation, value.pointer)
+    }
+
+  private def checkInteger(): ProcessFun = value =>
+    value.value match {
+      case NumberValue(v) =>
+        if (v.isValidLong)
+          Checked.valid
+        else
+          calc.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
+      case _ => calc.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
     }
 
   private def checkTrivial(valid: Boolean): ProcessFun = { value =>

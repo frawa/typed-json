@@ -70,7 +70,6 @@ class SchemaSpecTest extends FunSuite {
           "$vocabulary",
           "minItems",
           "minimum",
-          "type",
           "$schema",
           "uniqueItems"
         )
@@ -127,7 +126,6 @@ class SchemaSpecTest extends FunSuite {
           "$vocabulary",
           "minItems",
           "minimum",
-          "type",
           "$schema",
           "uniqueItems"
         )

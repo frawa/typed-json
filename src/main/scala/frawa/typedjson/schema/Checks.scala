@@ -30,6 +30,7 @@ case object NullTypeCheck                                         extends TypeCh
 case object BooleanTypeCheck                                      extends TypeCheck
 case object StringTypeCheck                                       extends TypeCheck
 case object NumberTypeCheck                                       extends TypeCheck
+case object IntegerTypeCheck                                      extends TypeCheck
 case object ArrayTypeCheck                                        extends TypeCheck
 case object ObjectTypeCheck                                       extends TypeCheck
 case class ObjectRequiredCheck(names: Seq[String])                extends SimpleCheck
@@ -101,7 +102,7 @@ case class Checks(
         Right(
           getTypeCheck(typeName)
             .map(withCheck(_))
-            .getOrElse(withIgnored(keyword))
+            .getOrElse(withIgnored(s"${keyword}-${typeName}"))
         )
 
       // TODO validation vocabulary
@@ -285,6 +286,7 @@ case class Checks(
       case "boolean" => Some(BooleanTypeCheck)
       case "string"  => Some(StringTypeCheck)
       case "number"  => Some(NumberTypeCheck)
+      case "integer" => Some(IntegerTypeCheck)
       case "array"   => Some(ArrayTypeCheck)
       case "object"  => Some(ObjectTypeCheck)
       case _         => None
