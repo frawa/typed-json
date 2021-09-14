@@ -21,7 +21,7 @@ object SuggestionChecker {
       Checked.valid(SuggestionResult(suggestions, Checked.valid))
     } else {
       val checked = ValidationChecker().check(check)(value)
-      Checked(checked.valid, Seq(SuggestionResult(Seq(), checked)))
+      Checked(checked.valid, SuggestionResult(Seq(), checked))
     }
   }
 
@@ -35,7 +35,7 @@ object SuggestionChecker {
       val suggestions = checked.flatMap(_.results).flatMap(_.suggestions)
       val validated   = checked.flatMap(_.results).map(_.validated)
       val nested      = ValidationChecker().nested(check)(validated)(value)
-      Checked(true, Seq(SuggestionResult(suggestions, nested)))
+      Checked.valid(SuggestionResult(suggestions, nested))
     }
   }
 

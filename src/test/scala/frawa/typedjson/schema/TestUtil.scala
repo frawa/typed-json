@@ -14,21 +14,19 @@ import scala.reflect.internal.Reporter
 import munit.Assertions._
 
 object TestUtil {
-  private def withParsedSchemaValue(text: String, parse: String => Either[String, SchemaValue])(
-      f: SchemaValue => Unit
-  ) {
-    val withSchema = for {
-      value <- parse(text)
-    } yield {
-      f(value)
-    }
-    withSchema.swap
-      .map(message => fail("no schema", clues(clue(message))))
+
+  def parseValue(text: String)(implicit parser: Parser): Value = {
+    parser
+      .parse(text)
       .swap
+      .map(message => fail("no schema value", clues(clue(message))))
+      .swap
+      .toOption
+      .get
   }
 
-  def withSchema(text: String)(f: SchemaValue => Unit)(implicit parser: Parser) {
-    withParsedSchemaValue(text, SchemaValue.apply)(f)
+  def withSchema(text: String)(f: SchemaValue => Unit)(implicit parser: Parser) = {
+    f(SchemaValue(parseValue(text)))
   }
 
 }

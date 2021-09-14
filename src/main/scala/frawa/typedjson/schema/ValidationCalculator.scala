@@ -16,14 +16,14 @@ import scala.reflect.ClassTag
 class ValidationCalculator extends Calculator[ValidationResult] {
   override def allOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
     if (checked.isEmpty || checked.forall(_.valid)) {
-      Checked.valid
+      Checked.valid.add(checked)
     } else {
       invalid(checked)
     }
   }
 
   private def invalid(checked: Seq[Checked[ValidationResult]]): Checked[ValidationResult] =
-    Checked.invalid(ValidationResult.invalid(checked.flatMap(_.results.flatMap(_.errors))))
+    Checked.invalid(ValidationResult.invalid(checked.flatMap(_.results.flatMap(_.errors)))).add(checked)
 
   override def invalid(observation: Observation, pointer: Pointer): Checked[ValidationResult] = Checked.invalid(
     ValidationResult.invalid(observation, pointer)
@@ -31,7 +31,7 @@ class ValidationCalculator extends Calculator[ValidationResult] {
 
   override def anyOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
     if (checked.isEmpty || checked.exists(_.valid)) {
-      Checked.valid
+      Checked.valid.add(checked)
     } else {
       invalid(checked)
     }
@@ -40,7 +40,7 @@ class ValidationCalculator extends Calculator[ValidationResult] {
   override def oneOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
     val count = checked.count(_.valid)
     if (count == 1) {
-      Checked.valid
+      Checked.valid.add(checked)
     } else if (count == 0) {
       invalid(checked)
     } else {
@@ -50,7 +50,7 @@ class ValidationCalculator extends Calculator[ValidationResult] {
 
   override def not(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
     if (checked.length == 1 && !checked(0).valid) {
-      Checked.valid
+      Checked.valid.add(checked)
     } else {
       invalid(NotInvalid(), pointer)
     }

@@ -1,17 +1,18 @@
 package frawa.typedjson.schema
 
-import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.parser.Parser
-import frawa.typedjson.parser.NumberValue
+import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.BoolValue
 import frawa.typedjson.parser.NullValue
-import frawa.typedjson.parser.StringValue
-import frawa.typedjson.parser.ArrayValue
+import frawa.typedjson.parser.NumberValue
 import frawa.typedjson.parser.ObjectValue
-import scala.reflect.internal.Reporter
+import frawa.typedjson.parser.Parser
+import frawa.typedjson.parser.StringValue
+import frawa.typedjson.parser.Value
+import frawa.typedjson.parser.ZioParser
+
 import java.net.URI
 import scala.reflect.ClassTag
+import scala.reflect.internal.Reporter
 
 case class InnerValue(value: Value, pointer: Pointer = Pointer.empty)
 
@@ -46,12 +47,21 @@ case class IfThenElseCheck(
     elseChecks: Option[Checks] = None
 ) extends NestingCheck
 
-case class Checked[R](valid: Boolean, results: Seq[R])
+case class Checked[R](valid: Boolean, results: Seq[R], count: Int) {
+  def add(others: Seq[Checked[R]]): Checked[R] = Checked(valid, results, count + Checked.count(others))
+}
 
 object Checked {
-  def valid[R]              = Checked[R](true, Seq())
-  def valid[R](result: R)   = Checked[R](true, Seq(result))
-  def invalid[R](result: R) = Checked[R](false, Seq(result))
+  def apply[R](valid: Boolean, result: R): Checked[R] = Checked[R](valid, Seq(result), 1)
+  def valid[R]                                        = Checked[R](true, Seq(), 1)
+  def valid[R](result: R)                             = Checked[R](true, Seq(result), 1)
+  def invalid[R](result: R)                           = Checked[R](false, Seq(result), 1)
+  def merge[R](checked: Seq[Checked[R]]): Checked[R] = {
+    val valid           = checked.forall(_.valid)
+    val results: Seq[R] = checked.flatMap(_.results)
+    Checked(valid, results, 1 + count(checked))
+  }
+  def count[R](checked: Seq[Checked[R]]): Int = checked.map(_.count).sum
 }
 
 case class Checks(
@@ -250,8 +260,8 @@ case class Checks(
 }
 
 case class Checker[R](
-    check: SimpleCheck => InnerValue => Checked[R],
-    nested: NestingCheck => Seq[Checked[R]] => InnerValue => Checked[R]
+    check: SimpleCheck => Processor.ProcessFun[R],
+    nested: NestingCheck => Processor.MergeFun[R]
 )
 
 object Checks {

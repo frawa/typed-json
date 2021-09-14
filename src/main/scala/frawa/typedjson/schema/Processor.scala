@@ -53,7 +53,7 @@ object Processor {
 
   private def noop[R]: ProcessFun[R]                                            = _ => Checked.valid[R]
   private def simple[R](checker: Checker[R], check: SimpleCheck): ProcessFun[R] = checker.check(check)
-  private def seq[R](ps: Seq[ProcessFun[R]]): ProcessFun[R]                     = value => merge(ps.map(_.apply(value)))
+  private def seq[R](ps: Seq[ProcessFun[R]]): ProcessFun[R]                     = value => Checked.merge(ps.map(_.apply(value)))
   private def option[R](p: Option[ProcessFun[R]]): ProcessFun[R] = {
     p.getOrElse(noop)
   }
@@ -153,12 +153,6 @@ object Processor {
         )(checker.nested(check))
       )
       .getOrElse(noop)
-  }
-
-  private def merge[R](checked: Seq[Checked[R]]): Checked[R] = {
-    val valid           = checked.forall(_.valid)
-    val results: Seq[R] = checked.flatMap(_.results)
-    Checked(valid, results)
   }
 
 }
