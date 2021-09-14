@@ -25,6 +25,8 @@ case class NotInEnum(values: Seq[Value])              extends Observation
 case class MissingProperties(properties: Seq[String]) extends Observation
 case class PatternMismatch(pattern: String)           extends Observation
 case class FormatMismatch(format: String)             extends Observation
+case class MinimumMismatch(min: BigDecimal)           extends Observation
+case class MinItemsMismatch(min: BigDecimal)          extends Observation
 case class UnsupportedFormat(format: String)          extends Observation
 case class UnsupportedCheck(check: Check)             extends Observation
 
@@ -66,6 +68,8 @@ object ValidationChecker {
       case EnumCheck(values)             => checkEnum(values)
       case PatternCheck(pattern)         => checkPattern(pattern)
       case FormatCheck(format)           => checkFormat(format)
+      case MinimumCheck(v)               => checkMinimum(v)
+      case MinItemsCheck(v)              => checkMinItems(v)
       case _                             => _ => Checked.invalid(ValidationResult.invalid(UnsupportedCheck(check)))
     }
   }
@@ -160,7 +164,6 @@ object ValidationChecker {
         calc.invalid(UnsupportedFormat(format), value.pointer)
       }
     }
-
   }
 
   private def checkStringValue(observation: => Observation)(check: String => Boolean): ProcessFun = { value =>
@@ -174,4 +177,37 @@ object ValidationChecker {
     }
   }
 
+  private def checkMinimum(min: BigDecimal): ProcessFun = {
+    checkNumberValue(MinimumMismatch(min)) { v =>
+      min <= v
+    }
+  }
+
+  private def checkNumberValue(observation: => Observation)(check: BigDecimal => Boolean): ProcessFun = { value =>
+    value.value match {
+      case NumberValue(v) =>
+        if (check(v))
+          Checked.valid
+        else
+          calc.invalid(observation, value.pointer)
+      case _ => Checked.valid
+    }
+  }
+
+  private def checkMinItems(min: BigDecimal): ProcessFun = {
+    checkArrayValue(MinItemsMismatch(min)) { v =>
+      min <= v.length
+    }
+  }
+
+  private def checkArrayValue(observation: => Observation)(check: Seq[Value] => Boolean): ProcessFun = { value =>
+    value.value match {
+      case ArrayValue(v) =>
+        if (check(v))
+          Checked.valid
+        else
+          calc.invalid(observation, value.pointer)
+      case _ => Checked.valid
+    }
+  }
 }

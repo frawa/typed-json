@@ -60,7 +60,7 @@ class SchemaSpecTest extends FunSuite {
   test("validate core against validation") {
     validateSpec("core", "validation") { (checked, ignored) =>
       assertEquals(checked.results, Seq())
-      assertEquals(checked.count, 16)
+      assertEquals(checked.count, 17)
       assertEquals(
         ignored,
         Set(
@@ -68,8 +68,6 @@ class SchemaSpecTest extends FunSuite {
           "additionalProperties",
           "exclusiveMinimum",
           "$vocabulary",
-          "minItems",
-          "minimum",
           "$schema",
           "uniqueItems"
         )
@@ -88,7 +86,6 @@ class SchemaSpecTest extends FunSuite {
           "$vocabulary",
           "additionalProperties",
           "propertyNames",
-          "minItems",
           "$schema",
           "$dynamicRef"
         )
@@ -116,7 +113,7 @@ class SchemaSpecTest extends FunSuite {
   test("validate validation against validation") {
     validateSpec("validation", "validation") { (checked, ignored) =>
       assertEquals(checked.results, Seq())
-      assertEquals(checked.count, 16)
+      assertEquals(checked.count, 17)
       assertEquals(
         ignored,
         Set(
@@ -124,8 +121,6 @@ class SchemaSpecTest extends FunSuite {
           "additionalProperties",
           "exclusiveMinimum",
           "$vocabulary",
-          "minItems",
-          "minimum",
           "$schema",
           "uniqueItems"
         )
@@ -144,7 +139,6 @@ class SchemaSpecTest extends FunSuite {
           "$vocabulary",
           "additionalProperties",
           "propertyNames",
-          "minItems",
           "$schema",
           "$dynamicRef"
         )
