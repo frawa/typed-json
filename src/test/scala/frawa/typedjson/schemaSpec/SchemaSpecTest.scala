@@ -12,6 +12,8 @@ import frawa.typedjson.schema.InnerValue
 import frawa.typedjson.schema.Pointer
 import frawa.typedjson.schema.LoadedSchemasResolver
 import frawa.typedjson.parser.Value
+import frawa.typedjson.schema.Checked
+import frawa.typedjson.schema.ValidationResult
 
 class SchemaSpecTest extends FunSuite {
   implicit val zioParser = new ZioParser();
@@ -25,6 +27,19 @@ class SchemaSpecTest extends FunSuite {
     withSchemaValue(name)(value => f(SchemaValue(value)))
   }
 
+  def validateSpec(valueName: String, schemaName: String)(f: (Checked[ValidationResult], Set[String]) => Unit) {
+    withSchemaSpec(schemaName) { schema =>
+      withSchemaValue(valueName) { value =>
+        val result = for {
+          processor <- Processor(schema)(ValidationChecker())
+          checked = processor.process(InnerValue(value))
+        } yield {
+          f(checked, processor.ignoredKeywords)
+        }
+      }
+    }
+  }
+
   test("core") {
     withSchemaSpec("core") { schema =>
       val result = for {
@@ -36,18 +51,46 @@ class SchemaSpecTest extends FunSuite {
     }
   }
 
-  test("validation on core".only) {
-    withSchemaSpec("validation") { schema =>
-      withSchemaValue("core") { value =>
-        val result = for {
-          processor <- Processor(schema)(ValidationChecker())
-          checked = processor.process(InnerValue(value))
-        } yield {
-          checked
-        }
-        assertEquals(result.map(_.count).getOrElse(-1), 16)
-      }
+  test("validate core against validation") {
+    validateSpec("core", "validation") { (checked, ignored) =>
+      assertEquals(checked.count, 16)
+      assertEquals(
+        ignored,
+        Set(
+          "format",
+          "$dynamicAnchor",
+          "additionalProperties",
+          "exclusiveMinimum",
+          "$vocabulary",
+          "default",
+          "minItems",
+          "title",
+          "minimum",
+          "type",
+          "$schema",
+          "uniqueItems"
+        )
+      )
     }
   }
 
+  test("validate core against applicator") {
+    validateSpec("core", "applicator") { (checked, ignored) =>
+      assertEquals(checked.count, 7)
+      assertEquals(
+        ignored,
+        Set(
+          "$dynamicAnchor",
+          "$vocabulary",
+          "additionalProperties",
+          "title",
+          "propertyNames",
+          "default",
+          "minItems",
+          "$schema",
+          "$dynamicRef"
+        )
+      )
+    }
+  }
 }

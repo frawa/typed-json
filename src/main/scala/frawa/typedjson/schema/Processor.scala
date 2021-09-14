@@ -31,7 +31,7 @@ object SchemaValue {
 //   override def resolve(uri: URI): Option[SchemaValue] = resolver.resolve(uri)
 // }
 
-case class Processor[R] private[schema] (process: Processor.ProcessFun[R])
+case class Processor[R] private[schema] (process: Processor.ProcessFun[R], ignoredKeywords: Set[String])
 
 object Processor {
   type SchemaErrors = Checks.SchemaErrors
@@ -43,7 +43,7 @@ object Processor {
     implicit val resolver = LoadedSchemasResolver(schema)
     for {
       checks <- Checks.parseKeywords(schema)
-      processor = Processor(all(checker, checks))
+      processor = Processor(all(checker, checks), checks.ignoredKeywords)
     } yield (processor)
   }
 
