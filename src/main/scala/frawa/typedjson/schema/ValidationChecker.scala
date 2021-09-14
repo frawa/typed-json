@@ -27,6 +27,7 @@ case class PatternMismatch(pattern: String)                   extends Observatio
 case class FormatMismatch(format: String)                     extends Observation
 case class MinimumMismatch(min: BigDecimal, exclude: Boolean) extends Observation
 case class MinItemsMismatch(min: BigDecimal)                  extends Observation
+case class ItemsNotUnique()                                   extends Observation
 case class UnsupportedFormat(format: String)                  extends Observation
 case class UnsupportedCheck(check: Check)                     extends Observation
 
@@ -70,6 +71,7 @@ object ValidationChecker {
       case FormatCheck(format)           => checkFormat(format)
       case MinimumCheck(v, exclude)      => checkMinimum(v, exclude)
       case MinItemsCheck(v)              => checkMinItems(v)
+      case UniqueItemsCheck(v)           => checkUniqueItems(v)
       case _                             => _ => Checked.invalid(ValidationResult.invalid(UnsupportedCheck(check)))
     }
   }
@@ -210,4 +212,11 @@ object ValidationChecker {
       case _ => Checked.valid
     }
   }
+
+  private def checkUniqueItems(unique: Boolean): ProcessFun = {
+    checkArrayValue(ItemsNotUnique()) { v =>
+      unique && v.distinct.length == v.length
+    }
+  }
+
 }
