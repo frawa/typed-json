@@ -12,6 +12,7 @@ import frawa.typedjson.parser.ObjectValue
 import scala.reflect.internal.Reporter
 import java.net.URI
 import scala.reflect.ClassTag
+import scala.util.matching.Regex
 
 sealed trait Observation
 case class FalseSchemaReason()                        extends Observation
@@ -20,6 +21,7 @@ case class NotOneOf(valid: Int)                       extends Observation
 case class NotInvalid()                               extends Observation
 case class NotInEnum(values: Seq[Value])              extends Observation
 case class MissingProperties(properties: Seq[String]) extends Observation
+case class PatternMismatch(patterh: String)           extends Observation
 case class UnsupportedCheck(check: Check)             extends Observation
 
 trait Calculator[R] {
@@ -57,6 +59,7 @@ object ValidationChecker {
       case TrivialCheck(valid)           => checkTrivial(valid)
       case UnionTypeCheck(checks)        => checkUnionType(checks)
       case EnumCheck(values)             => checkEnum(values)
+      case PatternCheck(pattern)         => checkPattern(pattern)
       case _                             => _ => Checked.invalid(ValidationResult.invalid(UnsupportedCheck(check)))
     }
   }
@@ -109,6 +112,17 @@ object ValidationChecker {
       Checked.valid
     } else {
       calc.invalid(NotInEnum(values), value.pointer)
+    }
+  }
+
+  private def checkPattern(pattern: String): ProcessFun = { value =>
+    value.value match {
+      case StringValue(v) =>
+        if (v.matches(pattern))
+          Checked.valid
+        else
+          calc.invalid(PatternMismatch(pattern), value.pointer)
+      case _ => Checked.valid
     }
   }
 }

@@ -42,12 +42,12 @@ class SchemaSpecTest extends FunSuite {
 
   test("validate core against core") {
     validateSpec("core", "core") { (checked, ignored) =>
-      assertEquals(checked.count, 15)
+      assertEquals(checked.results, Seq())
+      assertEquals(checked.count, 17)
       assertEquals(
         ignored,
         Set(
           "format",
-          "pattern",
           "$dynamicAnchor",
           "$vocabulary",
           "additionalProperties",
@@ -60,6 +60,7 @@ class SchemaSpecTest extends FunSuite {
 
   test("validate core against validation") {
     validateSpec("core", "validation") { (checked, ignored) =>
+      assertEquals(checked.results, Seq())
       assertEquals(checked.count, 16)
       assertEquals(
         ignored,
@@ -81,6 +82,7 @@ class SchemaSpecTest extends FunSuite {
 
   test("validate core against applicator") {
     validateSpec("core", "applicator") { (checked, ignored) =>
+      assertEquals(checked.results, Seq())
       assertEquals(checked.count, 7)
       assertEquals(
         ignored,
@@ -99,12 +101,12 @@ class SchemaSpecTest extends FunSuite {
 
   test("validate validation against core") {
     validateSpec("validation", "core") { (checked, ignored) =>
-      assertEquals(checked.count, 15)
+      assertEquals(checked.results, Seq())
+      assertEquals(checked.count, 17)
       assertEquals(
         ignored,
         Set(
           "format",
-          "pattern",
           "$dynamicAnchor",
           "$vocabulary",
           "additionalProperties",
@@ -117,6 +119,7 @@ class SchemaSpecTest extends FunSuite {
 
   test("validate validation against validation") {
     validateSpec("validation", "validation") { (checked, ignored) =>
+      assertEquals(checked.results, Seq())
       assertEquals(checked.count, 16)
       assertEquals(
         ignored,
@@ -138,6 +141,7 @@ class SchemaSpecTest extends FunSuite {
 
   test("validate validation against applicator") {
     validateSpec("validation", "applicator") { (checked, ignored) =>
+      assertEquals(checked.results, Seq())
       assertEquals(checked.count, 7)
       assertEquals(
         ignored,
