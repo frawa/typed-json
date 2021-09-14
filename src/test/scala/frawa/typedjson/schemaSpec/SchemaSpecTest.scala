@@ -53,8 +53,7 @@ class SchemaSpecTest extends FunSuite {
           "additionalProperties",
           "title",
           "propertyNames",
-          "$schema",
-          "$comment"
+          "$schema"
         )
       )
     }
@@ -116,8 +115,7 @@ class SchemaSpecTest extends FunSuite {
           "additionalProperties",
           "title",
           "propertyNames",
-          "$schema",
-          "$comment"
+          "$schema"
         )
       )
     }

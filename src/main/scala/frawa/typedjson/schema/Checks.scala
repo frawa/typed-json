@@ -208,6 +208,11 @@ case class Checks(
         }
       }
 
+      case ("$comment", StringValue(_)) => {
+        // only for schema authors and readers
+        Right(this)
+      }
+
       case _ => Right(withIgnored(keyword))
     }
 
