@@ -46,11 +46,11 @@ case class IfThenElseCheck(
     ifChecks: Option[Checks] = None,
     thenChecks: Option[Checks] = None,
     elseChecks: Option[Checks] = None
-)                                         extends NestingCheck
-case class PatternCheck(pattern: String)  extends SimpleCheck
-case class FormatCheck(format: String)    extends SimpleCheck
-case class MinimumCheck(min: BigDecimal)  extends SimpleCheck
-case class MinItemsCheck(min: BigDecimal) extends SimpleCheck
+)                                                                  extends NestingCheck
+case class PatternCheck(pattern: String)                           extends SimpleCheck
+case class FormatCheck(format: String)                             extends SimpleCheck
+case class MinimumCheck(min: BigDecimal, exclude: Boolean = false) extends SimpleCheck
+case class MinItemsCheck(min: BigDecimal)                          extends SimpleCheck
 
 case class Checked[R](valid: Boolean, results: Seq[R], count: Int) {
   def add(others: Seq[Checked[R]]): Checked[R] = Checked(valid, results, count + Checked.count(others))
@@ -245,6 +245,10 @@ case class Checks(
 
       case ("minimum", NumberValue(v)) => {
         Right(withCheck(MinimumCheck(v)))
+      }
+
+      case ("exclusiveMinimum", NumberValue(v)) => {
+        Right(withCheck(MinimumCheck(v, true)))
       }
 
       case ("minItems", NumberValue(v)) => {

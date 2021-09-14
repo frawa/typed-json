@@ -17,18 +17,18 @@ import java.util.regex.Pattern
 import scala.util.Try
 
 sealed trait Observation
-case class FalseSchemaReason()                        extends Observation
-case class TypeMismatch[T <: Value](expected: String) extends Observation
-case class NotOneOf(valid: Int)                       extends Observation
-case class NotInvalid()                               extends Observation
-case class NotInEnum(values: Seq[Value])              extends Observation
-case class MissingProperties(properties: Seq[String]) extends Observation
-case class PatternMismatch(pattern: String)           extends Observation
-case class FormatMismatch(format: String)             extends Observation
-case class MinimumMismatch(min: BigDecimal)           extends Observation
-case class MinItemsMismatch(min: BigDecimal)          extends Observation
-case class UnsupportedFormat(format: String)          extends Observation
-case class UnsupportedCheck(check: Check)             extends Observation
+case class FalseSchemaReason()                                extends Observation
+case class TypeMismatch[T <: Value](expected: String)         extends Observation
+case class NotOneOf(valid: Int)                               extends Observation
+case class NotInvalid()                                       extends Observation
+case class NotInEnum(values: Seq[Value])                      extends Observation
+case class MissingProperties(properties: Seq[String])         extends Observation
+case class PatternMismatch(pattern: String)                   extends Observation
+case class FormatMismatch(format: String)                     extends Observation
+case class MinimumMismatch(min: BigDecimal, exclude: Boolean) extends Observation
+case class MinItemsMismatch(min: BigDecimal)                  extends Observation
+case class UnsupportedFormat(format: String)                  extends Observation
+case class UnsupportedCheck(check: Check)                     extends Observation
 
 trait Calculator[R] {
   def invalid(observation: Observation, pointer: Pointer): Checked[R]
@@ -68,7 +68,7 @@ object ValidationChecker {
       case EnumCheck(values)             => checkEnum(values)
       case PatternCheck(pattern)         => checkPattern(pattern)
       case FormatCheck(format)           => checkFormat(format)
-      case MinimumCheck(v)               => checkMinimum(v)
+      case MinimumCheck(v, exclude)      => checkMinimum(v, exclude)
       case MinItemsCheck(v)              => checkMinItems(v)
       case _                             => _ => Checked.invalid(ValidationResult.invalid(UnsupportedCheck(check)))
     }
@@ -177,9 +177,9 @@ object ValidationChecker {
     }
   }
 
-  private def checkMinimum(min: BigDecimal): ProcessFun = {
-    checkNumberValue(MinimumMismatch(min)) { v =>
-      min <= v
+  private def checkMinimum(min: BigDecimal, exclude: Boolean): ProcessFun = {
+    checkNumberValue(MinimumMismatch(min, exclude)) { v =>
+      if (exclude) min < v else min <= v
     }
   }
 

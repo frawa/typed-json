@@ -66,7 +66,6 @@ class SchemaSpecTest extends FunSuite {
         Set(
           "$dynamicAnchor",
           "additionalProperties",
-          "exclusiveMinimum",
           "$vocabulary",
           "$schema",
           "uniqueItems"
@@ -119,7 +118,6 @@ class SchemaSpecTest extends FunSuite {
         Set(
           "$dynamicAnchor",
           "additionalProperties",
-          "exclusiveMinimum",
           "$vocabulary",
           "$schema",
           "uniqueItems"
