@@ -51,7 +51,6 @@ class SchemaSpecTest extends FunSuite {
           "$dynamicAnchor",
           "$vocabulary",
           "additionalProperties",
-          "title",
           "propertyNames",
           "$schema"
         )
@@ -70,9 +69,7 @@ class SchemaSpecTest extends FunSuite {
           "additionalProperties",
           "exclusiveMinimum",
           "$vocabulary",
-          "default",
           "minItems",
-          "title",
           "minimum",
           "type",
           "$schema",
@@ -91,9 +88,7 @@ class SchemaSpecTest extends FunSuite {
           "$dynamicAnchor",
           "$vocabulary",
           "additionalProperties",
-          "title",
           "propertyNames",
-          "default",
           "minItems",
           "$schema",
           "$dynamicRef"
@@ -113,7 +108,6 @@ class SchemaSpecTest extends FunSuite {
           "$dynamicAnchor",
           "$vocabulary",
           "additionalProperties",
-          "title",
           "propertyNames",
           "$schema"
         )
@@ -132,9 +126,7 @@ class SchemaSpecTest extends FunSuite {
           "additionalProperties",
           "exclusiveMinimum",
           "$vocabulary",
-          "default",
           "minItems",
-          "title",
           "minimum",
           "type",
           "$schema",
@@ -153,9 +145,7 @@ class SchemaSpecTest extends FunSuite {
           "$dynamicAnchor",
           "$vocabulary",
           "additionalProperties",
-          "title",
           "propertyNames",
-          "default",
           "minItems",
           "$schema",
           "$dynamicRef"

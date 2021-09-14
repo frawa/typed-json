@@ -213,6 +213,21 @@ case class Checks(
         Right(this)
       }
 
+      case ("title", StringValue(_)) => {
+        // ignore annotations
+        Right(this)
+      }
+
+      case ("default", _) => {
+        // ignore annotations
+        Right(this)
+      }
+
+      case ("description", StringValue(_)) => {
+        // ignore annotations
+        Right(this)
+      }
+
       case _ => Right(withIgnored(keyword))
     }
 
