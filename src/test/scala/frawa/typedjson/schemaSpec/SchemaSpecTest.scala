@@ -40,14 +40,23 @@ class SchemaSpecTest extends FunSuite {
     }
   }
 
-  test("core") {
-    withSchemaSpec("core") { schema =>
-      val result = for {
-        processor <- Processor(schema)(ValidationChecker())
-        checked = processor.process(InnerValue(schema.value))
-      } yield {
-        checked
-      }
+  test("validate core against core") {
+    validateSpec("core", "core") { (checked, ignored) =>
+      assertEquals(checked.count, 15)
+      assertEquals(
+        ignored,
+        Set(
+          "format",
+          "pattern",
+          "$dynamicAnchor",
+          "$vocabulary",
+          "additionalProperties",
+          "title",
+          "propertyNames",
+          "$schema",
+          "$comment"
+        )
+      )
     }
   }
 
@@ -76,6 +85,69 @@ class SchemaSpecTest extends FunSuite {
 
   test("validate core against applicator") {
     validateSpec("core", "applicator") { (checked, ignored) =>
+      assertEquals(checked.count, 7)
+      assertEquals(
+        ignored,
+        Set(
+          "$dynamicAnchor",
+          "$vocabulary",
+          "additionalProperties",
+          "title",
+          "propertyNames",
+          "default",
+          "minItems",
+          "$schema",
+          "$dynamicRef"
+        )
+      )
+    }
+  }
+
+  test("validate validation against core") {
+    validateSpec("validation", "core") { (checked, ignored) =>
+      assertEquals(checked.count, 15)
+      assertEquals(
+        ignored,
+        Set(
+          "format",
+          "pattern",
+          "$dynamicAnchor",
+          "$vocabulary",
+          "additionalProperties",
+          "title",
+          "propertyNames",
+          "$schema",
+          "$comment"
+        )
+      )
+    }
+  }
+
+  test("validate validation against validation") {
+    validateSpec("validation", "validation") { (checked, ignored) =>
+      assertEquals(checked.count, 16)
+      assertEquals(
+        ignored,
+        Set(
+          "format",
+          "$dynamicAnchor",
+          "additionalProperties",
+          "exclusiveMinimum",
+          "$vocabulary",
+          "default",
+          "minItems",
+          "title",
+          "minimum",
+          "type",
+          "$schema",
+          "uniqueItems"
+        )
+      )
+    }
+  }
+
+  test("validate validation against applicator") {
+    validateSpec("validation", "applicator") { (checked, ignored) =>
       assertEquals(checked.count, 7)
       assertEquals(
         ignored,
