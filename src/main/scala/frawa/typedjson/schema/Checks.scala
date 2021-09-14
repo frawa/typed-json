@@ -46,7 +46,8 @@ case class IfThenElseCheck(
     thenChecks: Option[Checks] = None,
     elseChecks: Option[Checks] = None
 )                                        extends NestingCheck
-case class PatternCheck(patterh: String) extends SimpleCheck
+case class PatternCheck(pattern: String) extends SimpleCheck
+case class FormatCheck(format: String)   extends SimpleCheck
 
 case class Checked[R](valid: Boolean, results: Seq[R], count: Int) {
   def add(others: Seq[Checked[R]]): Checked[R] = Checked(valid, results, count + Checked.count(others))
@@ -232,6 +233,11 @@ case class Checks(
       // TODO validation vocabulary
       case ("pattern", StringValue(pattern)) => {
         Right(withCheck(PatternCheck(pattern)))
+      }
+
+      // TODO validation vocabulary
+      case ("format", StringValue(format)) => {
+        Right(withCheck(FormatCheck(format)))
       }
 
       case _ => Right(withIgnored(keyword))

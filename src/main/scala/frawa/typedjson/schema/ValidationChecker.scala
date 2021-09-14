@@ -13,6 +13,8 @@ import scala.reflect.internal.Reporter
 import java.net.URI
 import scala.reflect.ClassTag
 import scala.util.matching.Regex
+import java.util.regex.Pattern
+import scala.util.Try
 
 sealed trait Observation
 case class FalseSchemaReason()                        extends Observation
@@ -21,7 +23,9 @@ case class NotOneOf(valid: Int)                       extends Observation
 case class NotInvalid()                               extends Observation
 case class NotInEnum(values: Seq[Value])              extends Observation
 case class MissingProperties(properties: Seq[String]) extends Observation
-case class PatternMismatch(patterh: String)           extends Observation
+case class PatternMismatch(pattern: String)           extends Observation
+case class FormatMismatch(format: String)             extends Observation
+case class UnsupportedFormat(format: String)          extends Observation
 case class UnsupportedCheck(check: Check)             extends Observation
 
 trait Calculator[R] {
@@ -60,6 +64,7 @@ object ValidationChecker {
       case UnionTypeCheck(checks)        => checkUnionType(checks)
       case EnumCheck(values)             => checkEnum(values)
       case PatternCheck(pattern)         => checkPattern(pattern)
+      case FormatCheck(format)           => checkFormat(format)
       case _                             => _ => Checked.invalid(ValidationResult.invalid(UnsupportedCheck(check)))
     }
   }
@@ -125,4 +130,37 @@ object ValidationChecker {
       case _ => Checked.valid
     }
   }
+
+  private def checkFormat(format: String): ProcessFun = {
+    format match {
+      case "regex" =>
+        checkStringValue(FormatMismatch(format)) { v =>
+          Try(Pattern.compile(v)).isSuccess
+        }
+      case "uri" =>
+        checkStringValue(FormatMismatch(format)) { v =>
+          Try(new URI(v)).map(_.isAbsolute).getOrElse(false)
+        }
+      case "uri-reference" =>
+        checkStringValue(FormatMismatch(format)) { v =>
+          Try(new URI(v)).isSuccess
+        }
+      case _ => { value =>
+        calc.invalid(UnsupportedFormat(format), value.pointer)
+      }
+    }
+
+  }
+
+  private def checkStringValue(observation: => Observation)(check: String => Boolean): ProcessFun = { value =>
+    value.value match {
+      case StringValue(v) =>
+        if (check(v))
+          Checked.valid
+        else
+          calc.invalid(observation, value.pointer)
+      case _ => Checked.valid
+    }
+  }
+
 }

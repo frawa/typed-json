@@ -43,11 +43,10 @@ class SchemaSpecTest extends FunSuite {
   test("validate core against core") {
     validateSpec("core", "core") { (checked, ignored) =>
       assertEquals(checked.results, Seq())
-      assertEquals(checked.count, 17)
+      assertEquals(checked.count, 19)
       assertEquals(
         ignored,
         Set(
-          "format",
           "$dynamicAnchor",
           "$vocabulary",
           "additionalProperties",
@@ -65,7 +64,6 @@ class SchemaSpecTest extends FunSuite {
       assertEquals(
         ignored,
         Set(
-          "format",
           "$dynamicAnchor",
           "additionalProperties",
           "exclusiveMinimum",
@@ -102,11 +100,10 @@ class SchemaSpecTest extends FunSuite {
   test("validate validation against core") {
     validateSpec("validation", "core") { (checked, ignored) =>
       assertEquals(checked.results, Seq())
-      assertEquals(checked.count, 17)
+      assertEquals(checked.count, 19)
       assertEquals(
         ignored,
         Set(
-          "format",
           "$dynamicAnchor",
           "$vocabulary",
           "additionalProperties",
@@ -124,7 +121,6 @@ class SchemaSpecTest extends FunSuite {
       assertEquals(
         ignored,
         Set(
-          "format",
           "$dynamicAnchor",
           "additionalProperties",
           "exclusiveMinimum",
