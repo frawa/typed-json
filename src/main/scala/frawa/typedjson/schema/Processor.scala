@@ -114,6 +114,7 @@ object Processor {
       case c: AnyOfCheck            => checkApplicator(checker, c.checks)(checker.nested(check))
       case c: OneOfCheck            => checkApplicator(checker, c.checks)(checker.nested(check))
       case c: IfThenElseCheck       => checkIfThenElse(checker, c)
+      case c: PropertyNamesCheck    => checkPropertyNames(checker, c)
     }
 
   private def checkArrayItems[R](checker: Checker[R], check: ArrayItemsCheck): ProcessFun[R] = {
@@ -153,6 +154,21 @@ object Processor {
         )(checker.nested(check))
       )
       .getOrElse(noop)
+  }
+
+  private def checkPropertyNames[R](checker: Checker[R], check: PropertyNamesCheck): ProcessFun[R] = { value =>
+    value.value match {
+      case ObjectValue(vs) => {
+        val p     = all(checker, check.checks)
+        val merge = checker.nested(check)
+        val names = vs.keySet
+        val checked = names.map { name =>
+          p(InnerValue(StringValue(name), value.pointer / name))
+        }.toSeq
+        merge(checked)(value)
+      }
+      case _ => Checked.valid
+    }
   }
 
 }

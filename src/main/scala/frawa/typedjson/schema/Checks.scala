@@ -52,6 +52,7 @@ case class FormatCheck(format: String)                             extends Simpl
 case class MinimumCheck(min: BigDecimal, exclude: Boolean = false) extends SimpleCheck
 case class MinItemsCheck(min: BigDecimal)                          extends SimpleCheck
 case class UniqueItemsCheck(unique: Boolean)                       extends SimpleCheck
+case class PropertyNamesCheck(checks: Checks)                      extends NestingCheck
 
 case class Checked[R](valid: Boolean, results: Seq[R], count: Int) {
   def add(others: Seq[Checked[R]]): Checked[R] = Checked(valid, results, count + Checked.count(others))
@@ -259,6 +260,13 @@ case class Checks(
       case ("uniqueItems", BoolValue(v)) => {
         Right(withCheck(UniqueItemsCheck(v)))
       }
+
+      case ("propertyNames", value) =>
+        for {
+          checks <- Checks.parseKeywords(SchemaValue(value))
+        } yield {
+          withChecks(checks)(c => withCheck(PropertyNamesCheck(c)))
+        }
 
       case _ => Right(withIgnored(keyword))
     }
