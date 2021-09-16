@@ -78,14 +78,14 @@ object ValidationChecker {
 
   private def nested(check: NestingCheck)(checked: Seq[Checked[ValidationResult]]): ProcessFun = { value =>
     check match {
-      case AllOfCheck(_)            => calc.allOf(checked, value.pointer)
-      case AnyOfCheck(_)            => calc.anyOf(checked, value.pointer)
-      case OneOfCheck(_)            => calc.oneOf(checked, value.pointer)
-      case NotCheck(_)              => calc.not(checked, value.pointer)
-      case ObjectPropertiesCheck(_) => calc.allOf(checked, value.pointer)
-      case ArrayItemsCheck(_)       => calc.allOf(checked, value.pointer)
-      case IfThenElseCheck(_, _, _) => calc.ifThenElse(checked, value.pointer)
-      case PropertyNamesCheck(_)    => calc.allOf(checked, value.pointer)
+      case AllOfCheck(_)                  => calc.allOf(checked, value.pointer)
+      case AnyOfCheck(_)                  => calc.anyOf(checked, value.pointer)
+      case OneOfCheck(_)                  => calc.oneOf(checked, value.pointer)
+      case NotCheck(_)                    => calc.not(checked, value.pointer)
+      case ObjectPropertiesCheck(_, _, _) => calc.allOf(checked, value.pointer)
+      case ArrayItemsCheck(_)             => calc.allOf(checked, value.pointer)
+      case IfThenElseCheck(_, _, _)       => calc.ifThenElse(checked, value.pointer)
+      case PropertyNamesCheck(_)          => calc.allOf(checked, value.pointer)
     }
   }
 

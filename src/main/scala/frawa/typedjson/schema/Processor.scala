@@ -72,17 +72,23 @@ object Processor {
     }
   }
 
-  private def applyToObject[R](p: Map[String, ProcessFun[R]])(merge: MergeFun[R]): ProcessFun[R] = { value =>
-    value.value match {
-      case ObjectValue(vs) => {
-        val inners = vs.view.map { case (key, v) =>
-          (key, InnerValue(v, value.pointer / key))
-        }.toMap
-        val checked = inners.view.flatMap { case (key, v) => p.get(key).map(_.apply(v)) }.toSeq
-        merge(checked)(value)
+  private def applyToObject[R](ps: Seq[(String => Boolean, ProcessFun[R])])(merge: MergeFun[R]): ProcessFun[R] = {
+    value =>
+      value.value match {
+        case ObjectValue(vs) => {
+          val checked = vs.view
+            .map { case (key, v) =>
+              (key, InnerValue(v, value.pointer / key))
+            }
+            .flatMap { case (key, inner) =>
+              val p = ps.find(_._1(key)).map(_._2)
+              p.map(_.apply(inner))
+            }
+            .toSeq
+          merge(checked)(value)
+        }
+        case _ => Checked.valid
       }
-      case _ => Checked.valid
-    }
   }
 
   private def applyToValue[R](ps: Seq[ProcessFun[R]])(merge: MergeFun[R]): ProcessFun[R] = { value =>
@@ -128,12 +134,16 @@ object Processor {
   }
 
   private def checkObjectProperties[R](checker: Checker[R], check: ObjectPropertiesCheck): ProcessFun[R] = {
-    if (check.properties.nonEmpty) {
-      val p = check.properties.view
-        .mapValues(all(checker, _))
-        .toMap
+    val ps1 = check.properties.map { case (key, checks) => ({ k: String => k == key }, all(checker, checks)) }.toSeq
+    val ps2 = check.patternProperties.map { case (regex, checks) =>
+      ({ k: String => k.matches(regex) }, all(checker, checks))
+    }.toSeq
+    val ps3 = check.additionalProperties.map { checks => ({ k: String => true }, all(checker, checks)) }.toSeq
+
+    val ps = ps1 ++ ps2 ++ ps3
+    if (ps.nonEmpty) {
       val merge = checker.nested(check)
-      applyToObject(p)(merge)
+      applyToObject(ps)(merge)
     } else {
       noop
     }

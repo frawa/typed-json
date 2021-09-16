@@ -55,7 +55,8 @@ object SuggestionChecker {
       //         .map(v => ArrayValue(Seq(v)))
       //     }
       //     .getOrElse(Seq(ArrayValue(Seq())))
-      case ObjectPropertiesCheck(properties) =>
+      case ObjectPropertiesCheck(properties, patternProperties, additionalProperties) =>
+        // TODO
         properties.flatMap { case (prop, checks) =>
           checks.checks
             .flatMap(suggestFor(_)(checked))

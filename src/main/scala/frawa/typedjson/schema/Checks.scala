@@ -25,23 +25,27 @@ sealed trait SimpleCheck  extends Check
 sealed trait TypeCheck    extends SimpleCheck
 sealed trait NestingCheck extends Check
 
-case class TrivialCheck(v: Boolean)                               extends SimpleCheck
-case object NullTypeCheck                                         extends TypeCheck
-case object BooleanTypeCheck                                      extends TypeCheck
-case object StringTypeCheck                                       extends TypeCheck
-case object NumberTypeCheck                                       extends TypeCheck
-case object IntegerTypeCheck                                      extends TypeCheck
-case object ArrayTypeCheck                                        extends TypeCheck
-case object ObjectTypeCheck                                       extends TypeCheck
-case class ObjectRequiredCheck(names: Seq[String])                extends SimpleCheck
-case class NotCheck(checks: Checks)                               extends NestingCheck
-case class AllOfCheck(checks: Seq[Checks])                        extends NestingCheck
-case class AnyOfCheck(checks: Seq[Checks])                        extends NestingCheck
-case class OneOfCheck(checks: Seq[Checks])                        extends NestingCheck
-case class UnionTypeCheck(typeChecks: Seq[TypeCheck])             extends SimpleCheck
-case class EnumCheck(values: Seq[Value])                          extends SimpleCheck
-case class ArrayItemsCheck(items: Option[Checks] = None)          extends NestingCheck
-case class ObjectPropertiesCheck(properties: Map[String, Checks]) extends NestingCheck
+case class TrivialCheck(v: Boolean)                      extends SimpleCheck
+case object NullTypeCheck                                extends TypeCheck
+case object BooleanTypeCheck                             extends TypeCheck
+case object StringTypeCheck                              extends TypeCheck
+case object NumberTypeCheck                              extends TypeCheck
+case object IntegerTypeCheck                             extends TypeCheck
+case object ArrayTypeCheck                               extends TypeCheck
+case object ObjectTypeCheck                              extends TypeCheck
+case class ObjectRequiredCheck(names: Seq[String])       extends SimpleCheck
+case class NotCheck(checks: Checks)                      extends NestingCheck
+case class AllOfCheck(checks: Seq[Checks])               extends NestingCheck
+case class AnyOfCheck(checks: Seq[Checks])               extends NestingCheck
+case class OneOfCheck(checks: Seq[Checks])               extends NestingCheck
+case class UnionTypeCheck(typeChecks: Seq[TypeCheck])    extends SimpleCheck
+case class EnumCheck(values: Seq[Value])                 extends SimpleCheck
+case class ArrayItemsCheck(items: Option[Checks] = None) extends NestingCheck
+case class ObjectPropertiesCheck(
+    properties: Map[String, Checks] = Map(),
+    patternProperties: Map[String, Checks] = Map(),
+    additionalProperties: Option[Checks] = None
+) extends NestingCheck
 case class IfThenElseCheck(
     ifChecks: Option[Checks] = None,
     thenChecks: Option[Checks] = None,
@@ -132,18 +136,22 @@ case class Checks(
         }
 
       case ("properties", ObjectValue(properties)) =>
-        val propChecks = properties.view
-          .mapValues(v => Checks.parseKeywords(SchemaValue(v)))
-          .map {
-            case (prop, Right(checks)) => Right((prop, checks))
-            case (prop, Left(errors))  => Left(errors.map(_.prefix(Pointer.empty / prop)))
-          }
-          .toSeq
+        mapChecksFor(properties) { checks =>
+          updateCheck(ObjectPropertiesCheck())(check => check.copy(properties = checks))
+        }
+
+      case ("patternProperties", ObjectValue(properties)) =>
+        mapChecksFor(properties) { checks =>
+          updateCheck(ObjectPropertiesCheck())(check => check.copy(patternProperties = checks))
+        }
+
+      case ("additionalProperties", value) =>
         for {
-          propChecks1 <- sequenceFirstLeft(propChecks)
-          checks = Map.from(propChecks1)
+          checks <- Checks.parseKeywords(SchemaValue(value))
         } yield {
-          withChecks(checks)(ObjectPropertiesCheck)
+          withChecks(checks) { checks =>
+            updateCheck(ObjectPropertiesCheck())(check => check.copy(additionalProperties = Some(checks)))
+          }
         }
 
       case ("required", ArrayValue(values)) => {
@@ -270,6 +278,25 @@ case class Checks(
 
       case _ => Right(withIgnored(keyword))
     }
+
+  private def mapChecksFor(
+      props: Map[String, Value]
+  )(f: Map[String, Checks] => Checks)(implicit resolver: SchemaResolver) = {
+    val propChecks = props.view
+      .mapValues(v => Checks.parseKeywords(SchemaValue(v)))
+      .map {
+        case (prop, Right(checks)) => Right((prop, checks))
+        case (prop, Left(errors))  => Left(errors.map(_.prefix(Pointer.empty / prop)))
+      }
+      .toSeq
+    for {
+      propChecks1 <- sequenceFirstLeft(propChecks)
+      checks1 = Map.from(propChecks1)
+      ignored = checks1.values.flatMap(_.ignoredKeywords).toSet
+    } yield {
+      f(checks1).withIgnored(ignored)
+    }
+  }
 
   private def updateCheck[C <: Check: ClassTag](newCheck: => C)(f: C => C): Checks = {
     val checks1: Seq[Check] =
