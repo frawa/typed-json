@@ -139,7 +139,7 @@ class SchemaResolverTest extends FunSuite {
       )
     )
 
-  case object NySchemaResolver extends SchemaResolver {
+  case object MySchemaResolver extends SchemaResolver {
 
     override val base: Option[URI] = Some(fooUri)
     override def resolve(uri: URI): Option[SchemaValue] = uri match {
@@ -150,17 +150,17 @@ class SchemaResolverTest extends FunSuite {
   }
 
   test("absolute ref") {
-    val resolved = NySchemaResolver.resolveRef(fooId)
+    val resolved = MySchemaResolver.resolveRef(fooId)
     assertEquals(resolved, Some(fooSchema))
   }
 
   test("anchor ref") {
-    val resolved = NySchemaResolver.resolveRef("#gnu")
+    val resolved = MySchemaResolver.resolveRef("#gnu")
     assertEquals(resolved, Some(gnuSchema))
   }
 
   test("path ref") {
-    val resolved = NySchemaResolver.resolveRef("#/$defs/gnu")
+    val resolved = MySchemaResolver.resolveRef("#/$defs/gnu")
     assertEquals(resolved, Some(gnuSchema))
   }
 }

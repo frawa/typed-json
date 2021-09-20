@@ -206,12 +206,30 @@ case class Checks(
         Right(this)
       }
 
+      case ("$dynamicAnchor", StringValue(_)) => {
+        // handled during load
+        Right(this)
+      }
+
       case ("$defs", ObjectValue(_)) => {
         // handled during load
         Right(this)
       }
 
       case ("$ref", StringValue(ref)) => {
+        for {
+          schema <- resolver
+            .resolveRef(ref)
+            .map(Right(_))
+            .getOrElse(Left(Seq(SchemaError(s"""missing reference "${ref}""""))))
+          checks <- Checks.parseKeywords(schema)
+        } yield {
+          withChecks(checks)(identity)
+        }
+      }
+
+      case ("$dynamicRef", StringValue(ref)) => {
+        // TODO use dynamic scope
         for {
           schema <- resolver
             .resolveRef(ref)

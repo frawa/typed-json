@@ -28,6 +28,11 @@ case object LoadedSchemasResolver {
                 val fragment = URI.create("#" + anchor)
                 val uri      = base.map(_.resolve(fragment)).getOrElse(fragment)
                 loaded.add(uri, SchemaValue(value))
+              case ("$dynamicAnchor", StringValue(anchor)) =>
+                // TODO mark dynamic
+                val fragment = URI.create("#" + anchor)
+                val uri      = base.map(_.resolve(fragment)).getOrElse(fragment)
+                loaded.add(uri, SchemaValue(value))
               case _ => loaded.addAll(loadSchemas(propertyValue, loaded.base.orElse(base)))
             }
           }
