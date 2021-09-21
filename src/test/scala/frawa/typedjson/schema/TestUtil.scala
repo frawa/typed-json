@@ -29,4 +29,10 @@ object TestUtil {
     f(SchemaValue(parseValue(text)))
   }
 
+  def withLoadedSchemas(texts: Seq[String])(f: LoadedSchemasResolver => Unit)(implicit parser: Parser) = {
+    val schemas  = texts.map(t => parseValue(t)).map(SchemaValue(_))
+    val resolver = LoadedSchemasResolver(schemas)
+    f(resolver)
+  }
+
 }
