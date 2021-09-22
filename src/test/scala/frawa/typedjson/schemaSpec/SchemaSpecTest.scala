@@ -46,15 +46,10 @@ class SchemaSpecTest extends FunSuite {
   test("validate core against core") {
     validateSpec("core", "core") { (checked, ignored) =>
       assertEquals(checked.results, Seq())
-      assertEquals(checked.count, 30)
+      assertEquals(checked.count, 45)
       assertEquals(
         ignored,
-        Set(
-          "$dynamicAnchor",
-          "$dynamicRef",
-          "$vocabulary",
-          "$schema"
-        )
+        Set("$vocabulary", "$schema")
       )
     }
   }
@@ -65,11 +60,7 @@ class SchemaSpecTest extends FunSuite {
       assertEquals(checked.count, 18)
       assertEquals(
         ignored,
-        Set(
-          "$dynamicAnchor",
-          "$vocabulary",
-          "$schema"
-        )
+        Set("$vocabulary", "$schema")
       )
     }
   }
@@ -77,16 +68,10 @@ class SchemaSpecTest extends FunSuite {
   test("validate core against applicator") {
     validateSpec("core", "applicator") { (checked, ignored) =>
       assertEquals(checked.results, Seq())
-      assertEquals(checked.count, 17)
+      assertEquals(checked.count, 80)
       assertEquals(
         ignored,
-        Set(
-          "$dynamicAnchor",
-          "$dynamicRef",
-          "$vocabulary",
-          "$schema",
-          "$dynamicRef"
-        )
+        Set("$vocabulary", "$schema")
       )
     }
   }
@@ -94,15 +79,10 @@ class SchemaSpecTest extends FunSuite {
   test("validate validation against core") {
     validateSpec("validation", "core") { (checked, ignored) =>
       assertEquals(checked.results, Seq())
-      assertEquals(checked.count, 31)
+      assertEquals(checked.count, 54)
       assertEquals(
         ignored,
-        Set(
-          "$dynamicAnchor",
-          "$dynamicRef",
-          "$vocabulary",
-          "$schema"
-        )
+        Set("$vocabulary", "$schema")
       )
     }
   }
@@ -113,11 +93,7 @@ class SchemaSpecTest extends FunSuite {
       assertEquals(checked.count, 18)
       assertEquals(
         ignored,
-        Set(
-          "$dynamicAnchor",
-          "$vocabulary",
-          "$schema"
-        )
+        Set("$vocabulary", "$schema")
       )
     }
   }
@@ -125,15 +101,10 @@ class SchemaSpecTest extends FunSuite {
   test("validate validation against applicator") {
     validateSpec("validation", "applicator") { (checked, ignored) =>
       assertEquals(checked.results, Seq())
-      assertEquals(checked.count, 28)
+      assertEquals(checked.count, 162)
       assertEquals(
         ignored,
-        Set(
-          "$dynamicAnchor",
-          "$vocabulary",
-          "$schema",
-          "$dynamicRef"
-        )
+        Set("$vocabulary", "$schema")
       )
     }
   }
