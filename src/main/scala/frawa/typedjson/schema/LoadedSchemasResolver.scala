@@ -87,6 +87,7 @@ case class LoadedSchemasResolver(
           dynamicSchemas.get(candidate)
         }
         .headOption
+        .orElse(dynamicSchemas.get(uri))
         .map((_, this))
     } else {
       None

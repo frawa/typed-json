@@ -86,6 +86,7 @@ object ValidationChecker {
       case ArrayItemsCheck(_)             => calc.allOf(checked, value.pointer)
       case IfThenElseCheck(_, _, _)       => calc.ifThenElse(checked, value.pointer)
       case PropertyNamesCheck(_)          => calc.allOf(checked, value.pointer)
+      case DynamicRefCheck(_)             => calc.allOf(checked, value.pointer)
     }
   }
 

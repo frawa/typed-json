@@ -72,23 +72,24 @@ object Processor {
     }
   }
 
-  private def applyToObject[R](ps: Seq[(String => Boolean, ProcessFun[R])])(merge: MergeFun[R]): ProcessFun[R] = {
-    value =>
-      value.value match {
-        case ObjectValue(vs) => {
-          val checked = vs.view
-            .map { case (key, v) =>
-              (key, InnerValue(v, value.pointer / key))
-            }
-            .flatMap { case (key, inner) =>
-              val p = ps.find(_._1(key)).map(_._2)
-              p.map(_.apply(inner))
-            }
-            .toSeq
-          merge(checked)(value)
-        }
-        case _ => Checked.valid
+  private def applyToObject[R](
+      ps: => Seq[(String => Boolean, () => ProcessFun[R])]
+  )(merge: MergeFun[R]): ProcessFun[R] = { value =>
+    value.value match {
+      case ObjectValue(vs) => {
+        val checked = vs.view
+          .map { case (key, v) =>
+            (key, InnerValue(v, value.pointer / key))
+          }
+          .flatMap { case (key, inner) =>
+            val p = ps.find(_._1(key)).map(_._2)
+            p.map(p => p().apply(inner))
+          }
+          .toSeq
+        merge(checked)(value)
       }
+      case _ => Checked.valid
+    }
   }
 
   private def applyToValue[R](ps: Seq[ProcessFun[R]])(merge: MergeFun[R]): ProcessFun[R] = { value =>
@@ -121,6 +122,7 @@ object Processor {
       case c: OneOfCheck            => checkApplicator(checker, c.checks)(checker.nested(check))
       case c: IfThenElseCheck       => checkIfThenElse(checker, c)
       case c: PropertyNamesCheck    => checkPropertyNames(checker, c)
+      case c: DynamicRefCheck       => checkDynamicRef(checker, c)
     }
 
   private def checkArrayItems[R](checker: Checker[R], check: ArrayItemsCheck): ProcessFun[R] = {
@@ -134,11 +136,13 @@ object Processor {
   }
 
   private def checkObjectProperties[R](checker: Checker[R], check: ObjectPropertiesCheck): ProcessFun[R] = {
-    val ps1 = check.properties.map { case (key, checks) => ({ k: String => k == key }, all(checker, checks)) }.toSeq
-    val ps2 = check.patternProperties.map { case (regex, checks) =>
-      ({ k: String => k.matches(regex) }, all(checker, checks))
+    val ps1 = check.properties.map { case (key, checks) =>
+      ({ k: String => k == key }, () => all(checker, checks))
     }.toSeq
-    val ps3 = check.additionalProperties.map { checks => ({ k: String => true }, all(checker, checks)) }.toSeq
+    val ps2 = check.patternProperties.map { case (regex, checks) =>
+      ({ k: String => k.matches(regex) }, () => all(checker, checks))
+    }.toSeq
+    val ps3 = check.additionalProperties.map { checks => ({ k: String => true }, () => all(checker, checks)) }.toSeq
 
     val ps = ps1 ++ ps2 ++ ps3
     if (ps.nonEmpty) {
@@ -181,4 +185,16 @@ object Processor {
     }
   }
 
+  private def checkDynamicRef[R](checker: Checker[R], check: DynamicRefCheck): ProcessFun[R] = {
+    check
+      .resolve()
+      .map(all(checker, _))
+      .swap
+      .map { e =>
+        println("FW", e)
+        e
+      }
+      .swap
+      .getOrElse(noop)
+  }
 }

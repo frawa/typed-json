@@ -50,13 +50,14 @@ case class IfThenElseCheck(
     ifChecks: Option[Checks] = None,
     thenChecks: Option[Checks] = None,
     elseChecks: Option[Checks] = None
-)                                                                  extends NestingCheck
-case class PatternCheck(pattern: String)                           extends SimpleCheck
-case class FormatCheck(format: String)                             extends SimpleCheck
-case class MinimumCheck(min: BigDecimal, exclude: Boolean = false) extends SimpleCheck
-case class MinItemsCheck(min: BigDecimal)                          extends SimpleCheck
-case class UniqueItemsCheck(unique: Boolean)                       extends SimpleCheck
-case class PropertyNamesCheck(checks: Checks)                      extends NestingCheck
+)                                                                           extends NestingCheck
+case class PatternCheck(pattern: String)                                    extends SimpleCheck
+case class FormatCheck(format: String)                                      extends SimpleCheck
+case class MinimumCheck(min: BigDecimal, exclude: Boolean = false)          extends SimpleCheck
+case class MinItemsCheck(min: BigDecimal)                                   extends SimpleCheck
+case class UniqueItemsCheck(unique: Boolean)                                extends SimpleCheck
+case class PropertyNamesCheck(checks: Checks)                               extends NestingCheck
+case class DynamicRefCheck(resolve: () => Either[Seq[SchemaError], Checks]) extends NestingCheck
 
 case class Checked[R](valid: Boolean, results: Seq[R], count: Int) {
   def add(others: Seq[Checked[R]]): Checked[R] = Checked(valid, results, count + Checked.count(others))
@@ -218,26 +219,32 @@ case class Checks(
 
       case ("$ref", StringValue(ref)) => {
         for {
-          schema <- resolver
+          resolution <- resolver
             .resolveRef(ref)
             .map(Right(_))
             .getOrElse(Left(Seq(SchemaError(s"""missing reference "${ref}""""))))
-          checks <- Checks.parseKeywords(schema)
+          schema    = resolution._1
+          resolver1 = resolution._2
+          checks <- Checks.parseKeywords(schema)(resolver1)
         } yield {
           withChecks(checks)(identity)
         }
       }
 
       case ("$dynamicRef", StringValue(ref)) => {
-        // TODO use dynamic scope
         for {
-          schema <- resolver
-            .resolveRef(ref)
+          resolution <- resolver
+            .resolveDynamicRef(ref)
             .map(Right(_))
-            .getOrElse(Left(Seq(SchemaError(s"""missing reference "${ref}""""))))
-          checks <- Checks.parseKeywords(schema)
+            .getOrElse(Left(Seq(SchemaError(s"""missing dynamic reference "${ref}""""))))
+
+          resolveLater = { () =>
+            val schema    = resolution._1
+            val resolver1 = resolution._2
+            Checks.parseKeywords(schema)(resolver1)
+          }
         } yield {
-          withChecks(checks)(identity)
+          withCheck(DynamicRefCheck(resolveLater))
         }
       }
 
@@ -392,4 +399,5 @@ object Checks {
         }
       case _ => Left(Seq(SchemaError(s"invalid schema ${schema}")))
     }
+
 }
