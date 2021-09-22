@@ -22,11 +22,18 @@ case object LoadedSchemasResolver {
   private def loadSchemas(value: Value, base: Option[URI]): LoadedSchemasResolver = {
     value match {
       case ObjectValue(properties) =>
+        val zero = properties
+          .get("$id")
+          .flatMap {
+            case StringValue(id) => Some(empty.add(URI.create(id), SchemaValue(value)))
+            case _               => None
+          }
+          .getOrElse(empty)
         properties
-          .foldLeft(empty) { case (loaded, (property, propertyValue)) =>
+          .foldLeft(zero) { case (loaded, (property, propertyValue)) =>
             (property, propertyValue) match {
               case ("$id", StringValue(id)) =>
-                loaded.add(URI.create(id), SchemaValue(value))
+                loaded
               case ("$anchor", StringValue(anchor)) =>
                 val fragment = URI.create("#" + anchor)
                 val uri = loaded.base
