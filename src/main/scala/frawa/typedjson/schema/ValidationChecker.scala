@@ -35,6 +35,8 @@ case class MaxLengthMismatch(max: BigDecimal)                 extends Observatio
 case class MinLengthMismatch(min: BigDecimal)                 extends Observation
 case class MaxItemsMismatch(max: BigDecimal)                  extends Observation
 case class MinItemsMismatch(min: BigDecimal)                  extends Observation
+case class MaxPropertiesMismatch(max: BigDecimal)             extends Observation
+case class MinPropertiesMismatch(min: BigDecimal)             extends Observation
 
 trait Calculator[R] {
   def invalid(observation: Observation, pointer: Pointer): Checked[R]
@@ -82,6 +84,8 @@ object ValidationChecker {
       case MinLengthCheck(v)             => checkMinLength(v)
       case MaxItemsCheck(v)              => checkMaxItems(v)
       case MinItemsCheck(v)              => checkMinItems(v)
+      case MaxPropertiesCheck(v)         => checkMaxProperties(v)
+      case MinPropertiesCheck(v)         => checkMinProperties(v)
       case _                             => _ => Checked.invalid(ValidationResult.invalid(UnsupportedCheck(check)))
     }
   }
@@ -260,4 +264,29 @@ object ValidationChecker {
       min <= v.length
     }
   }
+
+  private def checkObjectValue(observation: => Observation)(check: Map[String, Value] => Boolean): ProcessFun = {
+    value =>
+      value.value match {
+        case ObjectValue(v) =>
+          if (check(v))
+            Checked.valid
+          else
+            calc.invalid(observation, value.pointer)
+        case _ => Checked.valid
+      }
+  }
+
+  private def checkMaxProperties(max: BigDecimal): ProcessFun = {
+    checkObjectValue(MaxPropertiesMismatch(max)) { v =>
+      max >= v.keySet.size
+    }
+  }
+
+  private def checkMinProperties(min: BigDecimal): ProcessFun = {
+    checkObjectValue(MinPropertiesMismatch(min)) { v =>
+      min <= v.keySet.size
+    }
+  }
+
 }

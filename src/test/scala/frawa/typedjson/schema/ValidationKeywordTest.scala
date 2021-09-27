@@ -281,4 +281,49 @@ class ValidationKeywordTest extends FunSuite {
     }
   }
 
+  test("maxProperties") {
+    withSchema(
+      """|{"maxProperties": 2
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""{"gnu": 1, "bar": 2, "foo": 3}""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(MaxPropertiesMismatch(2))
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)("""{"bar": 2, "foo": 3}""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
+
+  test("minProperties") {
+    withSchema(
+      """|{"minProperties": 3
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""{"bar": 2, "foo": 3}""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(MinPropertiesMismatch(3))
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)("""{"gnu": 1, "bar": 2, "foo": 3}""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
 }

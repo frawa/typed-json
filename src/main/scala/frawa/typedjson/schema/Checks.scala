@@ -63,6 +63,8 @@ case class MaxLengthCheck(max: BigDecimal)                                  exte
 case class MinLengthCheck(min: BigDecimal)                                  extends SimpleCheck
 case class MaxItemsCheck(max: BigDecimal)                                   extends SimpleCheck
 case class MinItemsCheck(min: BigDecimal)                                   extends SimpleCheck
+case class MaxPropertiesCheck(max: BigDecimal)                              extends SimpleCheck
+case class MinPropertiesCheck(min: BigDecimal)                              extends SimpleCheck
 
 case class Checked[R](valid: Boolean, results: Seq[R], count: Int) {
   def add(others: Seq[Checked[R]]): Checked[R] = Checked(valid, results, count + Checked.count(others))
@@ -339,6 +341,17 @@ case class Checks(
       case ("maxItems", NumberValue(v)) if v >= 0 => {
         Right(withCheck(MaxItemsCheck(v)))
       }
+
+      // TODO validation vocabulary
+      case ("maxProperties", NumberValue(v)) if v >= 0 => {
+        Right(withCheck(MaxPropertiesCheck(v)))
+      }
+
+      // TODO validation vocabulary
+      case ("minProperties", NumberValue(v)) if v >= 0 => {
+        Right(withCheck(MinPropertiesCheck(v)))
+      }
+
       case _ => Right(withIgnored(keyword))
     }
 
