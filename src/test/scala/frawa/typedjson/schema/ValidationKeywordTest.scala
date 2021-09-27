@@ -30,8 +30,7 @@ class ValidationKeywordTest extends FunSuite {
 
   test("multipleOf") {
     withSchema(
-      """|{"type": "number",
-         |"multipleOf": 2
+      """|{"multipleOf": 2
          |}""".stripMargin
     ) { schema =>
       validateJson(schema)("""13""") { checked =>
@@ -54,8 +53,7 @@ class ValidationKeywordTest extends FunSuite {
 
   test("maximum") {
     withSchema(
-      """|{"type": "number",
-         |"maximum": 13
+      """|{"maximum": 13
          |}""".stripMargin
     ) { schema =>
       validateJson(schema)("""1313""") { checked =>
@@ -78,8 +76,7 @@ class ValidationKeywordTest extends FunSuite {
 
   test("exclusiveMaximum") {
     withSchema(
-      """|{"type": "number",
-         |"exclusiveMaximum": 13
+      """|{"exclusiveMaximum": 13
          |}""".stripMargin
     ) { schema =>
       validateJson(schema)("""13""") { checked =>
@@ -102,8 +99,7 @@ class ValidationKeywordTest extends FunSuite {
 
   test("minimum") {
     withSchema(
-      """|{"type": "number",
-         |"minimum": 13
+      """|{"minimum": 13
          |}""".stripMargin
     ) { schema =>
       validateJson(schema)("""12""") { checked =>
@@ -126,8 +122,7 @@ class ValidationKeywordTest extends FunSuite {
 
   test("exclusiveMinimum") {
     withSchema(
-      """|{"type": "number",
-         |"exclusiveMinimum": 13
+      """|{"exclusiveMinimum": 13
          |}""".stripMargin
     ) { schema =>
       validateJson(schema)("""13""") { checked =>
@@ -150,8 +145,7 @@ class ValidationKeywordTest extends FunSuite {
 
   test("maxLength") {
     withSchema(
-      """|{"type": "string",
-         |"maxLength": 3
+      """|{"maxLength": 3
          |}""".stripMargin
     ) { schema =>
       validateJson(schema)(""""toto"""") { checked =>
@@ -174,8 +168,7 @@ class ValidationKeywordTest extends FunSuite {
 
   test("minLength") {
     withSchema(
-      """|{"type": "string",
-         |"minLength": 4
+      """|{"minLength": 4
          |}""".stripMargin
     ) { schema =>
       validateJson(schema)(""""bar"""") { checked =>
@@ -191,6 +184,29 @@ class ValidationKeywordTest extends FunSuite {
         )
       }
       validateJson(schema)(""""toto"""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
+
+  test("pattern") {
+    withSchema(
+      """|{"pattern": "foo\\d\\d"
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)(""""foo"""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(PatternMismatch("foo\\d\\d"))
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)(""""foo13"""") { checked =>
         assert(checked.valid)
       }
     }
