@@ -58,6 +58,7 @@ case class MinItemsCheck(min: BigDecimal)                                   exte
 case class UniqueItemsCheck(unique: Boolean)                                extends SimpleCheck
 case class PropertyNamesCheck(checks: Checks)                               extends NestingCheck
 case class DynamicRefCheck(resolve: () => Either[Seq[SchemaError], Checks]) extends NestingCheck
+case class MultipleOfCheck(n: Int)                                          extends SimpleCheck
 
 case class Checked[R](valid: Boolean, results: Seq[R], count: Int) {
   def add(others: Seq[Checked[R]]): Checked[R] = Checked(valid, results, count + Checked.count(others))
@@ -278,10 +279,12 @@ case class Checks(
         Right(withCheck(FormatCheck(format)))
       }
 
+      // TODO validation vocabulary
       case ("minimum", NumberValue(v)) => {
         Right(withCheck(MinimumCheck(v)))
       }
 
+      // TODO validation vocabulary
       case ("exclusiveMinimum", NumberValue(v)) => {
         Right(withCheck(MinimumCheck(v, true)))
       }
@@ -300,6 +303,11 @@ case class Checks(
         } yield {
           withChecks(checks)(c => withCheck(PropertyNamesCheck(c)))
         }
+
+      // TODO validation vocabulary
+      case ("multipleOf", NumberValue(v)) if v > 0 => {
+        Right(withCheck(MultipleOfCheck(v.toInt)))
+      }
 
       case _ => Right(withIgnored(keyword))
     }
