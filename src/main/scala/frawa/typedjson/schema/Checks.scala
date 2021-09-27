@@ -59,6 +59,7 @@ case class UniqueItemsCheck(unique: Boolean)                                exte
 case class PropertyNamesCheck(checks: Checks)                               extends NestingCheck
 case class DynamicRefCheck(resolve: () => Either[Seq[SchemaError], Checks]) extends NestingCheck
 case class MultipleOfCheck(n: Int)                                          extends SimpleCheck
+case class MaximumCheck(max: BigDecimal, exclude: Boolean = false)          extends SimpleCheck
 
 case class Checked[R](valid: Boolean, results: Seq[R], count: Int) {
   def add(others: Seq[Checked[R]]): Checked[R] = Checked(valid, results, count + Checked.count(others))
@@ -307,6 +308,16 @@ case class Checks(
       // TODO validation vocabulary
       case ("multipleOf", NumberValue(v)) if v > 0 => {
         Right(withCheck(MultipleOfCheck(v.toInt)))
+      }
+
+      // TODO validation vocabulary
+      case ("maximum", NumberValue(v)) => {
+        Right(withCheck(MaximumCheck(v)))
+      }
+
+      // TODO validation vocabulary
+      case ("exclusiveMaximum", NumberValue(v)) => {
+        Right(withCheck(MaximumCheck(v, true)))
       }
 
       case _ => Right(withIgnored(keyword))

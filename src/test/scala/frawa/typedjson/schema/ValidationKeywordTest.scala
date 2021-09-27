@@ -34,9 +34,6 @@ class ValidationKeywordTest extends FunSuite {
          |"multipleOf": 2
          |}""".stripMargin
     ) { schema =>
-      validateJson(schema)("""12""") { checked =>
-        assert(checked.valid)
-      }
       validateJson(schema)("""13""") { checked =>
         assertEquals(
           checked.results,
@@ -48,6 +45,57 @@ class ValidationKeywordTest extends FunSuite {
             )
           )
         )
+      }
+      validateJson(schema)("""12""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
+
+  test("maximum") {
+    withSchema(
+      """|{"type": "number",
+         |"maximum": 13
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""1313""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(MaximumMismatch(13, false))
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)("""12""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
+
+  test("exclusiveMaximum") {
+    withSchema(
+      """|{"type": "number",
+         |"exclusiveMaximum": 13
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""13""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(MaximumMismatch(13, true))
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)("""12""") { checked =>
+        assert(checked.valid)
       }
     }
   }
