@@ -26,7 +26,6 @@ case class MissingProperties(properties: Seq[String])         extends Observatio
 case class PatternMismatch(pattern: String)                   extends Observation
 case class FormatMismatch(format: String)                     extends Observation
 case class MinimumMismatch(min: BigDecimal, exclude: Boolean) extends Observation
-case class MinItemsMismatch(min: BigDecimal)                  extends Observation
 case class ItemsNotUnique()                                   extends Observation
 case class UnsupportedFormat(format: String)                  extends Observation
 case class UnsupportedCheck(check: Check)                     extends Observation
@@ -34,6 +33,8 @@ case class NotMultipleOf(n: Int)                              extends Observatio
 case class MaximumMismatch(max: BigDecimal, exclude: Boolean) extends Observation
 case class MaxLengthMismatch(max: BigDecimal)                 extends Observation
 case class MinLengthMismatch(min: BigDecimal)                 extends Observation
+case class MaxItemsMismatch(max: BigDecimal)                  extends Observation
+case class MinItemsMismatch(min: BigDecimal)                  extends Observation
 
 trait Calculator[R] {
   def invalid(observation: Observation, pointer: Pointer): Checked[R]
@@ -74,12 +75,13 @@ object ValidationChecker {
       case PatternCheck(pattern)         => checkPattern(pattern)
       case FormatCheck(format)           => checkFormat(format)
       case MinimumCheck(v, exclude)      => checkMinimum(v, exclude)
-      case MinItemsCheck(v)              => checkMinItems(v)
       case UniqueItemsCheck(v)           => checkUniqueItems(v)
       case MultipleOfCheck(n)            => checkMultipleOf(n)
       case MaximumCheck(v, exclude)      => checkMaximum(v, exclude)
       case MaxLengthCheck(v)             => checkMaxLength(v)
       case MinLengthCheck(v)             => checkMinLength(v)
+      case MaxItemsCheck(v)              => checkMaxItems(v)
+      case MinItemsCheck(v)              => checkMinItems(v)
       case _                             => _ => Checked.invalid(ValidationResult.invalid(UnsupportedCheck(check)))
     }
   }
@@ -206,12 +208,6 @@ object ValidationChecker {
     }
   }
 
-  private def checkMinItems(min: BigDecimal): ProcessFun = {
-    checkArrayValue(MinItemsMismatch(min)) { v =>
-      min <= v.length
-    }
-  }
-
   private def checkArrayValue(observation: => Observation)(check: Seq[Value] => Boolean): ProcessFun = { value =>
     value.value match {
       case ArrayValue(v) =>
@@ -250,6 +246,18 @@ object ValidationChecker {
   private def checkMinLength(min: BigDecimal): ProcessFun = {
     checkStringValue(MinLengthMismatch(min)) { v =>
       v.length >= min
+    }
+  }
+
+  private def checkMaxItems(max: BigDecimal): ProcessFun = {
+    checkArrayValue(MaxItemsMismatch(max)) { v =>
+      max >= v.length
+    }
+  }
+
+  private def checkMinItems(min: BigDecimal): ProcessFun = {
+    checkArrayValue(MinItemsMismatch(min)) { v =>
+      min <= v.length
     }
   }
 }

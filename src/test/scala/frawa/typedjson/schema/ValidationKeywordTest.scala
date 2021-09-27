@@ -211,4 +211,51 @@ class ValidationKeywordTest extends FunSuite {
       }
     }
   }
+
+  test("minItems") {
+    withSchema(
+      """|{"minItems": 3
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""[1,2]""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(MinItemsMismatch(3))
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)("""[2,3,4]""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
+
+  test("maxItems") {
+    withSchema(
+      """|{"maxItems": 2
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""[1,2,3]""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(MaxItemsMismatch(2))
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)("""[2,3]""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
+
 }
