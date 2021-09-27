@@ -16,7 +16,7 @@ import TestUtil._
 import TestSchemas._
 
 class ChecksTest extends FunSuite {
-  implicit val zioParser = new ZioParser();
+  implicit val zioParser = new ZioParser()
 
   private def assertChecks(schema: SchemaValue, allowIgnored: Boolean = false)(
       f: Checks => Unit

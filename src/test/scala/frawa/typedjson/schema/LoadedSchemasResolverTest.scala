@@ -16,7 +16,7 @@ import java.net.URI
 import TestUtil._
 
 class LoadedSchemasResolverTest extends FunSuite {
-  implicit val zioParser = new ZioParser();
+  implicit val zioParser = new ZioParser()
 
   test("first schema loader") {
     withSchema("""{

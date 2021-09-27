@@ -5,8 +5,9 @@ import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.parser._
 import TestUtil._
 import TestSchemas._
+
 class ValidationCheckerTest extends FunSuite {
-  implicit val zioParser = new ZioParser();
+  implicit val zioParser = new ZioParser()
 
   private def assertValidate(text: String)(schema: SchemaValue)(
       f: Checked[ValidationResult] => Unit

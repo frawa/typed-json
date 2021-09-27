@@ -16,11 +16,11 @@ import frawa.typedjson.schema.Checked
 import frawa.typedjson.schema.ValidationResult
 
 class SchemaSpecTest extends FunSuite {
-  implicit val zioParser = new ZioParser();
+  implicit val zioParser = new ZioParser()
 
   def withSchemaValue(name: String)(f: Value => Unit)(implicit parser: Parser) {
     val text = Source.fromFile(s"./schemaSpec/${name}.json").getLines.mkString("\n")
-    f(TestUtil.parseValue(text))
+    f(TestUtil.parseJsonValue(text))
   }
 
   def withSchemaSpec(name: String)(f: SchemaValue => Unit)(implicit parser: Parser) {

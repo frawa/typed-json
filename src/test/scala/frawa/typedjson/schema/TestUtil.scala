@@ -15,22 +15,22 @@ import munit.Assertions._
 
 object TestUtil {
 
-  def parseValue(text: String)(implicit parser: Parser): Value = {
+  def parseJsonValue(text: String)(implicit parser: Parser): Value = {
     parser
       .parse(text)
       .swap
-      .map(message => fail("no schema value", clues(clue(message))))
+      .map(message => fail("no json value", clues(clue(message))))
       .swap
       .toOption
       .get
   }
 
   def withSchema(text: String)(f: SchemaValue => Unit)(implicit parser: Parser) = {
-    f(SchemaValue(parseValue(text)))
+    f(SchemaValue(parseJsonValue(text)))
   }
 
   def withLoadedSchemas(texts: Seq[String])(f: LoadedSchemasResolver => Unit)(implicit parser: Parser) = {
-    val schemas  = texts.map(t => parseValue(t)).map(SchemaValue(_))
+    val schemas  = texts.map(t => parseJsonValue(t)).map(SchemaValue(_))
     val resolver = LoadedSchemasResolver(schemas)
     f(resolver)
   }
