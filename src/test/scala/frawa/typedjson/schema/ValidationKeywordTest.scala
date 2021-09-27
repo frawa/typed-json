@@ -99,4 +99,52 @@ class ValidationKeywordTest extends FunSuite {
       }
     }
   }
+
+  test("miniimum") {
+    withSchema(
+      """|{"type": "number",
+         |"minimum": 13
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""12""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(MinimumMismatch(13, false))
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)("""1313""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
+
+  test("exclusiveMinimum") {
+    withSchema(
+      """|{"type": "number",
+         |"exclusiveMinimum": 13
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""13""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(MinimumMismatch(13, true))
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)("""14""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
 }
