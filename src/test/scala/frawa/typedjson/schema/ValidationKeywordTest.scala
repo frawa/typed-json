@@ -258,4 +258,27 @@ class ValidationKeywordTest extends FunSuite {
     }
   }
 
+  test("uniqueItems") {
+    withSchema(
+      """|{"uniqueItems": true
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""[1,1]""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(ItemsNotUnique())
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)("""[13]""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
+
 }
