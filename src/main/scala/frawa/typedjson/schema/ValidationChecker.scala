@@ -17,26 +17,26 @@ import java.util.regex.Pattern
 import scala.util.Try
 
 sealed trait Observation
-case class FalseSchemaReason()                                extends Observation
-case class TypeMismatch[T <: Value](expected: String)         extends Observation
-case class NotOneOf(valid: Int)                               extends Observation
-case class NotInvalid()                                       extends Observation
-case class NotInEnum(values: Seq[Value])                      extends Observation
-case class MissingProperties(properties: Seq[String])         extends Observation
-case class PatternMismatch(pattern: String)                   extends Observation
-case class FormatMismatch(format: String)                     extends Observation
-case class MinimumMismatch(min: BigDecimal, exclude: Boolean) extends Observation
-case class ItemsNotUnique()                                   extends Observation
-case class UnsupportedFormat(format: String)                  extends Observation
-case class UnsupportedCheck(check: Check)                     extends Observation
-case class NotMultipleOf(n: Int)                              extends Observation
-case class MaximumMismatch(max: BigDecimal, exclude: Boolean) extends Observation
-case class MaxLengthMismatch(max: BigDecimal)                 extends Observation
-case class MinLengthMismatch(min: BigDecimal)                 extends Observation
-case class MaxItemsMismatch(max: BigDecimal)                  extends Observation
-case class MinItemsMismatch(min: BigDecimal)                  extends Observation
-case class MaxPropertiesMismatch(max: BigDecimal)             extends Observation
-case class MinPropertiesMismatch(min: BigDecimal)             extends Observation
+case class FalseSchemaReason()                                 extends Observation
+case class TypeMismatch[T <: Value](expected: String)          extends Observation
+case class NotOneOf(valid: Int)                                extends Observation
+case class NotInvalid()                                        extends Observation
+case class NotInEnum(values: Seq[Value])                       extends Observation
+case class MiissingRequiredProperties(properties: Seq[String]) extends Observation
+case class PatternMismatch(pattern: String)                    extends Observation
+case class FormatMismatch(format: String)                      extends Observation
+case class MinimumMismatch(min: BigDecimal, exclude: Boolean)  extends Observation
+case class ItemsNotUnique()                                    extends Observation
+case class UnsupportedFormat(format: String)                   extends Observation
+case class UnsupportedCheck(check: Check)                      extends Observation
+case class NotMultipleOf(n: Int)                               extends Observation
+case class MaximumMismatch(max: BigDecimal, exclude: Boolean)  extends Observation
+case class MaxLengthMismatch(max: BigDecimal)                  extends Observation
+case class MinLengthMismatch(min: BigDecimal)                  extends Observation
+case class MaxItemsMismatch(max: BigDecimal)                   extends Observation
+case class MinItemsMismatch(min: BigDecimal)                   extends Observation
+case class MaxPropertiesMismatch(max: BigDecimal)              extends Observation
+case class MinPropertiesMismatch(min: BigDecimal)              extends Observation
 
 trait Calculator[R] {
   def invalid(observation: Observation, pointer: Pointer): Checked[R]
@@ -134,7 +134,7 @@ object ValidationChecker {
         if (missingNames.isEmpty) {
           Checked.valid
         } else {
-          calc.invalid(MissingProperties(missingNames), value.pointer)
+          calc.invalid(MiissingRequiredProperties(missingNames), value.pointer)
         }
       }
       case _ => Checked.valid

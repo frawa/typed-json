@@ -326,4 +326,27 @@ class ValidationKeywordTest extends FunSuite {
       }
     }
   }
+
+  test("required") {
+    withSchema(
+      """|{"required": ["bar", "foo"]
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""{"gnu": 1, "bar": 2}""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(MiissingRequiredProperties(Seq("foo")))
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)("""{"bar": 2, "foo": 3}""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
 }
