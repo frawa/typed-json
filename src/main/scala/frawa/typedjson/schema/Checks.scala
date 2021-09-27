@@ -294,7 +294,7 @@ case class Checks(
       }
 
       // TODO validation vocabulary
-      case ("minItems", NumberValue(v)) => {
+      case ("minItems", NumberValue(v)) if v >= 0 => {
         Right(withCheck(MinItemsCheck(v)))
       }
 
@@ -336,7 +336,7 @@ case class Checks(
       }
 
       // TODO validation vocabulary
-      case ("maxItems", NumberValue(v)) => {
+      case ("maxItems", NumberValue(v)) if v >= 0 => {
         Right(withCheck(MaxItemsCheck(v)))
       }
       case _ => Right(withIgnored(keyword))
