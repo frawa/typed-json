@@ -171,4 +171,28 @@ class ValidationKeywordTest extends FunSuite {
       }
     }
   }
+
+  test("minLength") {
+    withSchema(
+      """|{"type": "string",
+         |"minLength": 4
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)(""""bar"""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(MinLengthMismatch(4))
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)(""""toto"""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
 }

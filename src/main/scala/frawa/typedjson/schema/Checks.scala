@@ -61,6 +61,7 @@ case class DynamicRefCheck(resolve: () => Either[Seq[SchemaError], Checks]) exte
 case class MultipleOfCheck(n: Int)                                          extends SimpleCheck
 case class MaximumCheck(max: BigDecimal, exclude: Boolean = false)          extends SimpleCheck
 case class MaxLengthCheck(max: BigDecimal)                                  extends SimpleCheck
+case class MinLengthCheck(min: BigDecimal)                                  extends SimpleCheck
 
 case class Checked[R](valid: Boolean, results: Seq[R], count: Int) {
   def add(others: Seq[Checked[R]]): Checked[R] = Checked(valid, results, count + Checked.count(others))
@@ -324,6 +325,11 @@ case class Checks(
       // TODO validation vocabulary
       case ("maxLength", NumberValue(v)) if v >= 0 => {
         Right(withCheck(MaxLengthCheck(v)))
+      }
+
+      // TODO validation vocabulary
+      case ("minLength", NumberValue(v)) if v >= 0 => {
+        Right(withCheck(MinLengthCheck(v)))
       }
 
       case _ => Right(withIgnored(keyword))
