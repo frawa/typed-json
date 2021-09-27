@@ -19,7 +19,7 @@ class ValidationKeywordTest extends FunSuite {
     val result = for {
       processor <- Processor(schema)(ValidationChecker())
       checked = processor.process(InnerValue(value))
-      _       = assertEquals(processor.ignoredKeywords, Set.empty[String])
+      _       = assertEquals(processor.ignoredKeywords, Set.empty[String], "new keywords")
     } yield {
       f(checked)
     }
@@ -100,7 +100,7 @@ class ValidationKeywordTest extends FunSuite {
     }
   }
 
-  test("miniimum") {
+  test("minimum") {
     withSchema(
       """|{"type": "number",
          |"minimum": 13
@@ -143,6 +143,30 @@ class ValidationKeywordTest extends FunSuite {
         )
       }
       validateJson(schema)("""14""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
+
+  test("maxLength") {
+    withSchema(
+      """|{"type": "string",
+         |"maxLength": 3
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)(""""toto"""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(MaxLengthMismatch(3))
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)(""""bar"""") { checked =>
         assert(checked.valid)
       }
     }

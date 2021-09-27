@@ -32,6 +32,7 @@ case class UnsupportedFormat(format: String)                  extends Observatio
 case class UnsupportedCheck(check: Check)                     extends Observation
 case class NotMultipleOf(n: Int)                              extends Observation
 case class MaximumMismatch(max: BigDecimal, exclude: Boolean) extends Observation
+case class MaxLengthMismatch(max: BigDecimal)                 extends Observation
 
 trait Calculator[R] {
   def invalid(observation: Observation, pointer: Pointer): Checked[R]
@@ -76,6 +77,7 @@ object ValidationChecker {
       case UniqueItemsCheck(v)           => checkUniqueItems(v)
       case MultipleOfCheck(n)            => checkMultipleOf(n)
       case MaximumCheck(v, exclude)      => checkMaximum(v, exclude)
+      case MaxLengthCheck(v)             => checkMaxLength(v)
       case _                             => _ => Checked.invalid(ValidationResult.invalid(UnsupportedCheck(check)))
     }
   }
@@ -234,6 +236,12 @@ object ValidationChecker {
   private def checkMaximum(max: BigDecimal, exclude: Boolean): ProcessFun = {
     checkNumberValue(MaximumMismatch(max, exclude)) { v =>
       if (exclude) max > v else max >= v
+    }
+  }
+
+  private def checkMaxLength(max: BigDecimal): ProcessFun = {
+    checkStringValue(MaxLengthMismatch(max)) { v =>
+      v.length <= max
     }
   }
 }
