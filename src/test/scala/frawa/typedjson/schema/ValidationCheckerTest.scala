@@ -318,7 +318,7 @@ class ValidationCheckerTest extends FunSuite {
           checked,
           Seq(
             WithPointer(
-              result = MiissingRequiredProperties(Seq("titi"))
+              result = MissingRequiredProperties(Seq("titi"))
             )
           )
         )
