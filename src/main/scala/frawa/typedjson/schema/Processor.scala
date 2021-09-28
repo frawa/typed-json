@@ -123,6 +123,7 @@ object Processor {
       case c: IfThenElseCheck       => checkIfThenElse(checker, c)
       case c: PropertyNamesCheck    => checkPropertyNames(checker, c)
       case c: DynamicRefCheck       => checkDynamicRef(checker, c)
+      case c: DependentSchemasCheck => checkDependentSchemas(checker, c)
     }
 
   private def checkArrayItems[R](checker: Checker[R], check: ArrayItemsCheck): ProcessFun[R] = {
@@ -196,5 +197,17 @@ object Processor {
       }
       .swap
       .getOrElse(noop)
+  }
+
+  private def checkDependentSchemas[R](checker: Checker[R], check: DependentSchemasCheck): ProcessFun[R] = { value =>
+    value.value match {
+      case ObjectValue(v) =>
+        val ps      = v.keySet.flatMap(check.checks.get(_)).map(all(checker, _)).toSeq
+        val merge   = checker.nested(check)
+        val checked = ps.map(_.apply(value))
+        merge(checked)(value)
+      case _ => Checked.valid
+    }
+
   }
 }

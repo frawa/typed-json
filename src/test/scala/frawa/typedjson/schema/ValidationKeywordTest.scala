@@ -372,4 +372,33 @@ class ValidationKeywordTest extends FunSuite {
       }
     }
   }
+
+  test("dependentSchemas") {
+    withSchema(
+      """|{"dependentSchemas": {"foo": true, "gnu": false}}
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""{"gnu": 1}""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(FalseSchemaReason())
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)("""{"foo": 1}""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
 }
+
+// TODO
+// - prefixItems
+// - contains
+// - minContains
+// - maxContains

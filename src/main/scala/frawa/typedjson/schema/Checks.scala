@@ -65,7 +65,8 @@ case class MaxItemsCheck(max: BigDecimal)                                   exte
 case class MinItemsCheck(min: BigDecimal)                                   extends SimpleCheck
 case class MaxPropertiesCheck(max: BigDecimal)                              extends SimpleCheck
 case class MinPropertiesCheck(min: BigDecimal)                              extends SimpleCheck
-case class DependentRequiredCheck(v: Map[String, Seq[String]])              extends SimpleCheck
+case class DependentRequiredCheck(required: Map[String, Seq[String]])       extends SimpleCheck
+case class DependentSchemasCheck(checks: Map[String, Checks])               extends NestingCheck
 
 case class Checked[R](valid: Boolean, results: Seq[R], count: Int) {
   def add(others: Seq[Checked[R]]): Checked[R] = Checked(valid, results, count + Checked.count(others))
@@ -372,6 +373,19 @@ case class Checks(
           .flatten
           .toMap
         Right(withCheck(DependentRequiredCheck(vv)))
+      }
+
+      case ("dependentSchemas", ObjectValue(v)) => {
+        val checks0 = v.view.map { case (p, v) =>
+          Checks
+            .parseKeywords(SchemaValue(v))
+            .map(p -> _)
+        }.toSeq
+        for {
+          checks1 <- sequenceAllLefts(checks0).map(_.toMap)
+        } yield {
+          withCheck(DependentSchemasCheck(checks1))
+        }
       }
 
       case _ => Right(withIgnored(keyword))

@@ -103,6 +103,7 @@ object ValidationChecker {
       case IfThenElseCheck(_, _, _)       => calc.ifThenElse(checked, value.pointer)
       case PropertyNamesCheck(_)          => calc.allOf(checked, value.pointer)
       case DynamicRefCheck(_)             => calc.allOf(checked, value.pointer)
+      case DependentSchemasCheck(_)       => calc.allOf(checked, value.pointer)
     }
   }
 
@@ -291,10 +292,10 @@ object ValidationChecker {
     }
   }
 
-  private def checkDependentRequired(dependentRequired: Map[String, Seq[String]]): ProcessFun = { value =>
+  private def checkDependentRequired(required: Map[String, Seq[String]]): ProcessFun = { value =>
     value.value match {
       case ObjectValue(v) =>
-        val missing = dependentRequired
+        val missing = required
           .flatMap { case (property, required) =>
             v
               .get(property)
