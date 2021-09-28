@@ -338,13 +338,36 @@ class ValidationKeywordTest extends FunSuite {
           Seq(
             ValidationResult(
               Seq(
-                WithPointer(MiissingRequiredProperties(Seq("foo")))
+                WithPointer(MissingRequiredProperties(Seq("foo")))
               )
             )
           )
         )
       }
       validateJson(schema)("""{"bar": 2, "foo": 3}""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
+
+  test("dependentRequired") {
+    withSchema(
+      """|{"dependentRequired": {"foo": ["bar", "gnu"]}
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""{"foo": 1, "bar": 2}""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(DependentRequiredMissing(Map("foo" -> Seq("gnu"))))
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)("""{"foo": 1, "bar": 2, "gnu": 3}""") { checked =>
         assert(checked.valid)
       }
     }
