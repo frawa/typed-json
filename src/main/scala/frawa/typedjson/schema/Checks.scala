@@ -409,9 +409,11 @@ case class Checks(
           }
         }
 
+      // TODO validation vocabulary
       case ("minContains", NumberValue(v)) if v >= 0 =>
         Right(updateCheck(ContainsCheck())(check => check.copy(min = Some(v.toInt))))
 
+      // TODO validation vocabulary
       case ("maxContains", NumberValue(v)) if v >= 0 =>
         Right(updateCheck(ContainsCheck())(check => check.copy(max = Some(v.toInt))))
 
