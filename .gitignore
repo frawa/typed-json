@@ -3,3 +3,5 @@ target/
 .bsp/
 .metals/
 metals.sbt
+
+JSON-Schema-Test-Suite/

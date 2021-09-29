@@ -2,6 +2,12 @@
 
 Validating Json with Json Schema in Scala.
 
+# The Test Suite
+
+```
+git clone https://github.com/json-schema-org/JSON-Schema-Test-Suite
+```
+
 # Links
 
 - Json Schema Spec: 
@@ -21,3 +27,5 @@ Validating Json with Json Schema in Scala.
 - https://www.jsonschemavalidator.net/
 
 - ZIO Json https://zio.github.io/zio-json/
+
+
