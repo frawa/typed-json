@@ -38,12 +38,13 @@ case class MinItemsMismatch(min: BigDecimal)                           extends O
 case class MaxPropertiesMismatch(max: BigDecimal)                      extends Observation
 case class MinPropertiesMismatch(min: BigDecimal)                      extends Observation
 case class DependentRequiredMissing(missing: Map[String, Seq[String]]) extends Observation
-
+case class NotContains(valid: Int)                                     extends Observation
 trait Calculator[R] {
   def invalid(observation: Observation, pointer: Pointer): Checked[R]
   def allOf(checked: Seq[Checked[R]], pointer: Pointer): Checked[R]
   def anyOf(checked: Seq[Checked[R]], pointer: Pointer): Checked[R]
   def oneOf(checked: Seq[Checked[R]], pointer: Pointer): Checked[R]
+  def contains(checked: Seq[Checked[R]], pointer: Pointer, min: Option[Int], max: Option[Int]): Checked[R]
   def not(checked: Seq[Checked[R]], pointer: Pointer): Checked[R]
   def ifThenElse(checked: Seq[Checked[R]], pointer: Pointer): Checked[R]
 }
@@ -104,6 +105,7 @@ object ValidationChecker {
       case PropertyNamesCheck(_)          => calc.allOf(checked, value.pointer)
       case DynamicRefCheck(_)             => calc.allOf(checked, value.pointer)
       case DependentSchemasCheck(_)       => calc.allOf(checked, value.pointer)
+      case ContainsCheck(_, min, max)     => calc.contains(checked, value.pointer, min, max)
     }
   }
 

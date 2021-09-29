@@ -48,6 +48,20 @@ class ValidationCalculator extends Calculator[ValidationResult] {
     }
   }
 
+  override def contains(
+      checked: Seq[Checked[ValidationResult]],
+      pointer: Pointer,
+      min: Option[Int],
+      max: Option[Int]
+  ): Checked[ValidationResult] = {
+    val count = checked.count(_.valid)
+    if (min.getOrElse(1) <= count && !max.exists(count > _)) {
+      Checked.valid.add(checked)
+    } else {
+      invalid(NotContains(count), pointer)
+    }
+  }
+
   override def not(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
     if (checked.length == 1 && !checked(0).valid) {
       Checked.valid.add(checked)

@@ -67,6 +67,8 @@ case class MaxPropertiesCheck(max: BigDecimal)                              exte
 case class MinPropertiesCheck(min: BigDecimal)                              extends SimpleCheck
 case class DependentRequiredCheck(required: Map[String, Seq[String]])       extends SimpleCheck
 case class DependentSchemasCheck(checks: Map[String, Checks])               extends NestingCheck
+case class ContainsCheck(schema: Option[Checks] = None, min: Option[Int] = None, max: Option[Int] = None)
+    extends NestingCheck
 
 case class Checked[R](valid: Boolean, results: Seq[R], count: Int) {
   def add(others: Seq[Checked[R]]): Checked[R] = Checked(valid, results, count + Checked.count(others))
@@ -397,6 +399,21 @@ case class Checks(
           withCheck(DependentSchemasCheck(checks1))
         }
       }
+
+      case ("contains", v: ObjectValue) =>
+        for {
+          checks <- Checks.parseKeywords(SchemaValue(v))
+        } yield {
+          withChecks(checks) { checks =>
+            updateCheck(ContainsCheck())(check => check.copy(schema = Some(checks)))
+          }
+        }
+
+      case ("minContains", NumberValue(v)) if v >= 0 =>
+        Right(updateCheck(ContainsCheck())(check => check.copy(min = Some(v.toInt))))
+
+      case ("maxContains", NumberValue(v)) if v >= 0 =>
+        Right(updateCheck(ContainsCheck())(check => check.copy(max = Some(v.toInt))))
 
       case _ => Right(withIgnored(keyword))
     }

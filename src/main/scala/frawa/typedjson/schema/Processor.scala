@@ -126,6 +126,7 @@ object Processor {
       case c: PropertyNamesCheck    => checkPropertyNames(checker, c)
       case c: DynamicRefCheck       => checkDynamicRef(checker, c)
       case c: DependentSchemasCheck => checkDependentSchemas(checker, c)
+      case c: ContainsCheck         => checkContains(checker, c)
     }
 
   private def checkArrayItems[R](checker: Checker[R], check: ArrayItemsCheck): ProcessFun[R] = {
@@ -207,6 +208,20 @@ object Processor {
         merge(checked)(value)
       case _ => Checked.valid
     }
+  }
 
+  private def checkContains[R](checker: Checker[R], check: ContainsCheck): ProcessFun[R] = { value =>
+    value.value match {
+      case ArrayValue(vs) =>
+        val p     = option(check.schema.map(all(checker, _)))
+        val merge = checker.nested(check)
+        val indexed = vs.zipWithIndex
+          .map { case (v, index) =>
+            InnerValue(v, value.pointer / index)
+          }
+        val checked = indexed.map(p(_))
+        merge(checked)(value)
+      case _ => Checked.valid
+    }
   }
 }

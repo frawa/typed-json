@@ -442,10 +442,92 @@ class ValidationKeywordTest extends FunSuite {
       }
     }
   }
-}
 
-// TODO
-// - prefixItems
-// - contains
-// - minContains
-// - maxContains
+  test("contains") {
+    withSchema(
+      """|{"contains": {"type": "number"}
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""["gnu", true]""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(NotContains(0))
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)("""[13, "foo", true]""") { checked =>
+        assert(checked.valid)
+      }
+      validateJson(schema)("""[13, 14, "foo", true]""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
+
+  test("minContains") {
+    withSchema(
+      """|{"contains": {"type": "number"},
+         |"minContains": 2
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""[13, "gnu", true]""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(NotContains(1))
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)("""[13, 14, "foo", true]""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
+
+  test("maxContains") {
+    withSchema(
+      """|{"contains": {"type": "number"},
+         |"maxContains": 2
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""[13, 14, 15, "gnu", true]""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(NotContains(3))
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)("""[13, 14, "foo", true]""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
+
+  test("minContains without contains") {
+    withSchema(
+      """|{"minContains": 2
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""[13, "gnu", true]""") { checked =>
+        assert(checked.valid)
+      }
+      validateJson(schema)("""[13, 14, "foo", true]""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
+}
