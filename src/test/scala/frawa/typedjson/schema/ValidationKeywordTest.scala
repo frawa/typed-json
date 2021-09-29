@@ -395,6 +395,53 @@ class ValidationKeywordTest extends FunSuite {
       }
     }
   }
+
+  test("prefixItems") {
+    withSchema(
+      """|{"prefixItems": [{"type": "number"}, {"type": "string"}]
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""["gnu"]""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(TypeMismatch("number"), Pointer.empty / 0)
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)("""[13, "foo", true]""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
+
+  test("prefixItems and itmes") {
+    withSchema(
+      """|{"prefixItems": [{"type": "number"}, {"type": "string"}],
+         |"items": {"type": "boolean"}
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""[13, "gnu", "boom"]""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(TypeMismatch("boolean"), Pointer.empty / 2)
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)("""[13, "foo", true]""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
 }
 
 // TODO

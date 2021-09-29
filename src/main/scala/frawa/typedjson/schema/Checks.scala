@@ -25,22 +25,22 @@ sealed trait SimpleCheck  extends Check
 sealed trait TypeCheck    extends SimpleCheck
 sealed trait NestingCheck extends Check
 
-case class TrivialCheck(v: Boolean)                      extends SimpleCheck
-case object NullTypeCheck                                extends TypeCheck
-case object BooleanTypeCheck                             extends TypeCheck
-case object StringTypeCheck                              extends TypeCheck
-case object NumberTypeCheck                              extends TypeCheck
-case object IntegerTypeCheck                             extends TypeCheck
-case object ArrayTypeCheck                               extends TypeCheck
-case object ObjectTypeCheck                              extends TypeCheck
-case class ObjectRequiredCheck(names: Seq[String])       extends SimpleCheck
-case class NotCheck(checks: Checks)                      extends NestingCheck
-case class AllOfCheck(checks: Seq[Checks])               extends NestingCheck
-case class AnyOfCheck(checks: Seq[Checks])               extends NestingCheck
-case class OneOfCheck(checks: Seq[Checks])               extends NestingCheck
-case class UnionTypeCheck(typeChecks: Seq[TypeCheck])    extends SimpleCheck
-case class EnumCheck(values: Seq[Value])                 extends SimpleCheck
-case class ArrayItemsCheck(items: Option[Checks] = None) extends NestingCheck
+case class TrivialCheck(v: Boolean)                                                        extends SimpleCheck
+case object NullTypeCheck                                                                  extends TypeCheck
+case object BooleanTypeCheck                                                               extends TypeCheck
+case object StringTypeCheck                                                                extends TypeCheck
+case object NumberTypeCheck                                                                extends TypeCheck
+case object IntegerTypeCheck                                                               extends TypeCheck
+case object ArrayTypeCheck                                                                 extends TypeCheck
+case object ObjectTypeCheck                                                                extends TypeCheck
+case class ObjectRequiredCheck(names: Seq[String])                                         extends SimpleCheck
+case class NotCheck(checks: Checks)                                                        extends NestingCheck
+case class AllOfCheck(checks: Seq[Checks])                                                 extends NestingCheck
+case class AnyOfCheck(checks: Seq[Checks])                                                 extends NestingCheck
+case class OneOfCheck(checks: Seq[Checks])                                                 extends NestingCheck
+case class UnionTypeCheck(typeChecks: Seq[TypeCheck])                                      extends SimpleCheck
+case class EnumCheck(values: Seq[Value])                                                   extends SimpleCheck
+case class ArrayItemsCheck(items: Option[Checks] = None, prefixItems: Seq[Checks] = Seq()) extends NestingCheck
 case class ObjectPropertiesCheck(
     properties: Map[String, Checks] = Map(),
     patternProperties: Map[String, Checks] = Map(),
@@ -143,6 +143,16 @@ case class Checks(
           withChecks(checks) { checks =>
             updateCheck(ArrayItemsCheck())(check => check.copy(items = Some(checks)))
           }
+        }
+
+      case ("prefixItems", ArrayValue(vs)) =>
+        val checks0 = vs.map(v => Checks.parseKeywords(SchemaValue(v)))
+        for {
+          checks <- sequenceAllLefts(checks0)
+        } yield {
+          // withChecks(checks) { checks =>
+          updateCheck(ArrayItemsCheck())(check => check.copy(prefixItems = checks))
+          // }
         }
 
       case ("properties", ObjectValue(properties)) =>
