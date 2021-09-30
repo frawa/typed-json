@@ -233,7 +233,7 @@ object ValidationChecker {
 
   private def checkUniqueItems(unique: Boolean): ProcessFun = {
     checkArrayValue(ItemsNotUnique()) { v =>
-      unique && v.distinct.length == v.length
+      !unique || v.distinct.length == v.length
     }
   }
 
