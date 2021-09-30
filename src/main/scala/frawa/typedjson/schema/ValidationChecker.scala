@@ -158,14 +158,17 @@ object ValidationChecker {
     }
   }
 
-  private def checkPattern(pattern: String): ProcessFun = { value =>
-    value.value match {
-      case StringValue(v) =>
-        if (v.matches(pattern))
-          Checked.valid
-        else
-          calc.invalid(PatternMismatch(pattern), value.pointer)
-      case _ => Checked.valid
+  private def checkPattern(pattern: String): ProcessFun = {
+    val r = pattern.r
+    return { value =>
+      value.value match {
+        case StringValue(v) =>
+          if (r.findFirstIn(v).isDefined)
+            Checked.valid
+          else
+            calc.invalid(PatternMismatch(pattern), value.pointer)
+        case _ => Checked.valid
+      }
     }
   }
 
