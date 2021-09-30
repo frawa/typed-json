@@ -218,14 +218,18 @@ object Processor {
   private def checkContains[R](checker: Checker[R], check: ContainsCheck): ProcessFun[R] = { value =>
     value.value match {
       case ArrayValue(vs) =>
-        val p     = option(check.schema.map(all(checker, _)))
-        val merge = checker.nested(check)
-        val indexed = vs.zipWithIndex
-          .map { case (v, index) =>
-            InnerValue(v, value.pointer / index)
+        check.schema
+          .map { schema =>
+            val p     = all(checker, schema)
+            val merge = checker.nested(check)
+            val indexed = vs.zipWithIndex
+              .map { case (v, index) =>
+                InnerValue(v, value.pointer / index)
+              }
+            val checked = indexed.map(p(_))
+            merge(checked)(value)
           }
-        val checked = indexed.map(p(_))
-        merge(checked)(value)
+          .getOrElse(Checked.valid)
       case _ => Checked.valid
     }
   }

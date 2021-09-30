@@ -511,6 +511,18 @@ class ValidationKeywordTest extends FunSuite {
           )
         )
       }
+      validateJson(schema)("""[]""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(NotContains(0))
+              )
+            )
+          )
+        )
+      }
       validateJson(schema)("""[13, 14, "foo", true]""") { checked =>
         assert(checked.valid)
       }
@@ -520,6 +532,20 @@ class ValidationKeywordTest extends FunSuite {
   test("minContains without contains") {
     withSchema(
       """|{"minContains": 2
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""[13, "gnu", true]""") { checked =>
+        assert(checked.valid)
+      }
+      validateJson(schema)("""[13, 14, "foo", true]""") { checked =>
+        assert(checked.valid)
+      }
+    }
+  }
+
+  test("maxContains without contains") {
+    withSchema(
+      """|{"maxContains": 2
          |}""".stripMargin
     ) { schema =>
       validateJson(schema)("""[13, "gnu", true]""") { checked =>
