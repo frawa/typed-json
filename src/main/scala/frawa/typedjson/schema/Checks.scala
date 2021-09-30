@@ -400,7 +400,7 @@ case class Checks(
         }
       }
 
-      case ("contains", v: ObjectValue) =>
+      case ("contains", v) =>
         for {
           checks <- Checks.parseKeywords(SchemaValue(v))
         } yield {
