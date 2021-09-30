@@ -248,13 +248,13 @@ object ValidationChecker {
 
   private def checkMaxLength(max: BigDecimal): ProcessFun = {
     checkStringValue(MaxLengthMismatch(max)) { v =>
-      v.length <= max
+      v.codePoints().count() <= max
     }
   }
 
   private def checkMinLength(min: BigDecimal): ProcessFun = {
     checkStringValue(MinLengthMismatch(min)) { v =>
-      v.length >= min
+      v.codePoints().count() >= min
     }
   }
 
