@@ -57,7 +57,7 @@ case class MinimumCheck(min: BigDecimal, exclude: Boolean = false)          exte
 case class UniqueItemsCheck(unique: Boolean)                                extends SimpleCheck
 case class PropertyNamesCheck(checks: Checks)                               extends NestingCheck
 case class DynamicRefCheck(resolve: () => Either[Seq[SchemaError], Checks]) extends NestingCheck
-case class MultipleOfCheck(n: Int)                                          extends SimpleCheck
+case class MultipleOfCheck(n: BigDecimal)                                   extends SimpleCheck
 case class MaximumCheck(max: BigDecimal, exclude: Boolean = false)          extends SimpleCheck
 case class MaxLengthCheck(max: BigDecimal)                                  extends SimpleCheck
 case class MinLengthCheck(min: BigDecimal)                                  extends SimpleCheck
@@ -328,7 +328,7 @@ case class Checks(
 
       // TODO validation vocabulary
       case ("multipleOf", NumberValue(v)) if v > 0 => {
-        Right(withCheck(MultipleOfCheck(v.toInt)))
+        Right(withCheck(MultipleOfCheck(v)))
       }
 
       // TODO validation vocabulary

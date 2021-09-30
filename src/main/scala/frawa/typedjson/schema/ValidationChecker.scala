@@ -29,7 +29,7 @@ case class MinimumMismatch(min: BigDecimal, exclude: Boolean)          extends O
 case class ItemsNotUnique()                                            extends Observation
 case class UnsupportedFormat(format: String)                           extends Observation
 case class UnsupportedCheck(check: Check)                              extends Observation
-case class NotMultipleOf(n: Int)                                       extends Observation
+case class NotMultipleOf(n: BigDecimal)                                extends Observation
 case class MaximumMismatch(max: BigDecimal, exclude: Boolean)          extends Observation
 case class MaxLengthMismatch(max: BigDecimal)                          extends Observation
 case class MinLengthMismatch(min: BigDecimal)                          extends Observation
@@ -234,9 +234,9 @@ object ValidationChecker {
     }
   }
 
-  private def checkMultipleOf(n: Int): ProcessFun = {
+  private def checkMultipleOf(n: BigDecimal): ProcessFun = {
     checkNumberValue(NotMultipleOf(n)) { v =>
-      v % n == 0
+      (v / n).isValidInt
     }
   }
 
