@@ -28,9 +28,27 @@ class JsonSchemaTestSuiteTest extends FunSuite {
   val jsonSchemaTestSuiteRoot = Paths.get("./JSON-Schema-Test-Suite/tests")
   val draft                   = "draft2020-12"
 
-  val takeOnly: Option[Int] = Some(1)
+  // TODO unskip
+  val skip = Set(
+    "anchor.json",
+    "content.json",
+    "defs.json",
+    "dynamicRef.json",
+    "format.json",
+    "id.json",
+    "infinite-loop-detection.json",
+    "items.json",
+    "patternProperties.json", // TODO first
+    "properties.json",        // TODO first
+    "ref.json",               // stackoverflow
+    "refRemote.json",
+    "unevaluatedItems.json",
+    "unevaluatedProperties.json",
+    "unknownKeyword.json"
+  )
 
-  val skip = Set("anchor.json", "content.json")
+  val takeOnly: Option[Int] = None
+  // val takeOnly: Option[Int] = Some(33)
 
   override def munitIgnore: Boolean = !Files.exists(jsonSchemaTestSuiteRoot)
 
@@ -44,6 +62,7 @@ class JsonSchemaTestSuiteTest extends FunSuite {
       .asScala
       .toSeq
       .filter(_.getFileName.toString.endsWith(".json"))
+      .sortBy(_.getFileName.toString)
       .toSeq
   }
 
@@ -92,7 +111,14 @@ class JsonSchemaTestSuiteTest extends FunSuite {
     val BoolValue(expected)      = properties("valid")
     val checked                  = processor.process(InnerValue(data))
 
-    assert(checked.valid == expected, failMessage)
+    if (checked.valid != expected) {
+      implicit val loc = munit.Location.empty
+      if (!checked.valid) {
+        assertEquals(checked.results, Seq(), failMessage)
+      } else {
+        fail(failMessage)
+      }
+    }
   }
 
   protected def checkDraft(draft: String): Unit = {
