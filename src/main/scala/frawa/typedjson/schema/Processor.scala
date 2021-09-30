@@ -12,6 +12,7 @@ import frawa.typedjson.parser.ObjectValue
 import scala.reflect.internal.Reporter
 import java.net.URI
 import scala.reflect.ClassTag
+import scala.util.matching.Regex
 
 case class SchemaValue(value: Value)
 
@@ -141,7 +142,11 @@ object Processor {
       ({ k: String => k == key }, () => all(checker, checks))
     }.toSeq
     val ps2 = check.patternProperties.map { case (regex, checks) =>
-      ({ k: String => k.matches(regex) }, () => all(checker, checks))
+      val r = regex.r
+      (
+        { k: String => r.findFirstIn(k).isDefined },
+        () => all(checker, checks)
+      )
     }.toSeq
     val ps3 = check.additionalProperties.map { checks => ({ k: String => true }, () => all(checker, checks)) }.toSeq
 

@@ -530,4 +530,30 @@ class ValidationKeywordTest extends FunSuite {
       }
     }
   }
+
+  test("patternProperties") {
+    withSchema(
+      """|{"patternProperties": { "^f": {} },
+         |"additionalProperties": false
+         |}""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""{"gnu": 13, "bar": true}""") { checked =>
+        assertEquals(
+          checked.results,
+          Seq(
+            ValidationResult(
+              Seq(
+                WithPointer(FalseSchemaReason(), Pointer.empty / "gnu"),
+                WithPointer(FalseSchemaReason(), Pointer.empty / "bar")
+              )
+            )
+          )
+        )
+      }
+      validateJson(schema)("""{"foo": "ok"}]""") { checked =>
+        assertEquals(checked.results, Seq())
+        assert(checked.valid)
+      }
+    }
+  }
 }
