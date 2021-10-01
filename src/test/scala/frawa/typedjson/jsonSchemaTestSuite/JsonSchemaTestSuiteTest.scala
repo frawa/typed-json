@@ -38,7 +38,6 @@ class JsonSchemaTestSuiteTest extends FunSuite {
     "id.json",
     "infinite-loop-detection.json",
     "items.json",
-    // "properties.json", // TODO first
     "ref.json", // stackoverflow
     "refRemote.json",
     "unevaluatedItems.json",
