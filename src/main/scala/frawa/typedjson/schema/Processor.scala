@@ -76,7 +76,7 @@ object Processor {
   }
 
   private def applyToObject[R](
-      ps: => Seq[(String => Boolean, () => ProcessFun[R])]
+      ps: => Seq[PartialFunction[String, () => ProcessFun[R]]]
   )(merge: MergeFun[R]): ProcessFun[R] = { value =>
     value.value match {
       case ObjectValue(vs) => {
@@ -85,7 +85,7 @@ object Processor {
             (key, InnerValue(v, value.pointer / key))
           }
           .flatMap { case (key, inner) =>
-            val p = ps.find(_._1(key)).map(_._2)
+            val p = ps.map(_.lift).flatMap(_(key)).headOption
             p.map(p => p().apply(inner))
           }
           .toSeq
@@ -138,19 +138,32 @@ object Processor {
   }
 
   private def checkObjectProperties[R](checker: Checker[R], check: ObjectPropertiesCheck): ProcessFun[R] = {
-    val ps1 = check.properties.map { case (key, checks) =>
-      ({ k: String => k == key }, () => all(checker, checks))
+    val psProperties = check.properties.map { case (key, checks) =>
+      val partial: PartialFunction[String, () => ProcessFun[R]] = {
+        case k if k == key => () => all(checker, checks)
+      }
+      partial
     }.toSeq
-    val ps2 = check.patternProperties.map { case (regex, checks) =>
-      val r = regex.r
-      (
-        { k: String => r.findFirstIn(k).isDefined },
-        () => all(checker, checks)
-      )
-    }.toSeq
-    val ps3 = check.additionalProperties.map { checks => ({ k: String => true }, () => all(checker, checks)) }.toSeq
 
-    val ps = ps1 ++ ps2 ++ ps3
+    val psOnePattern = check.patternProperties.map { case (regex, checks) =>
+      val r = regex.r
+      val partial: PartialFunction[String, () => ProcessFun[R]] = {
+        case k if r.findFirstIn(k).isDefined => () => all(checker, checks)
+      }
+      partial
+    }.toSeq
+
+    val psAllPattern: PartialFunction[String, () => ProcessFun[R]] = {
+      case k if psOnePattern.exists(_.isDefinedAt(k)) =>
+        () => seq(psOnePattern.map(_.lift).flatMap { p => p(k).map(_.apply()) })
+    }
+
+    val psAdditional = check.additionalProperties.map { checks =>
+      val partial: PartialFunction[String, () => ProcessFun[R]] = { k => () => all(checker, checks) }
+      partial
+    }.toSeq
+
+    val ps = psProperties ++ Seq(psAllPattern) ++ psAdditional
     if (ps.nonEmpty) {
       val merge = checker.nested(check)
       applyToObject(ps)(merge)
