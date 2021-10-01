@@ -240,17 +240,21 @@ object ValidationChecker {
       case "date-time" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
         checkStringValue(FormatMismatch(format)) { v =>
-          "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|(+|-)\\d{2}:\\d{2})".r.matches(v)
+          val `regex-date` = "\\d{4}-\\d{2}-\\d{2}"
+          val `regex-time` = "\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|(+|-)\\d{2}:\\d{2})"
+          s"${`regex-date`}T${`regex-time`}".r.matches(v)
         }
       case "date" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
         checkStringValue(FormatMismatch(format)) { v =>
-          "\\d{4}-\\d{2}-\\d{2}".r.matches(v)
+          val `regex-date` = "\\d{4}-\\d{2}-\\d{2}"
+          `regex-date`.r.matches(v)
         }
       case "time" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
         checkStringValue(FormatMismatch(format)) { v =>
-          "\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|(+|-)\\d{2}:\\d{2})".r.matches(v)
+          val `regex-time` = "\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|(+|-)\\d{2}:\\d{2})"
+          `regex-time`.r.matches(v)
         }
       case "duration" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
