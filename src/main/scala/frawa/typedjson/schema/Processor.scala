@@ -76,7 +76,7 @@ object Processor {
   }
 
   private def applyToObject[R](
-      ps: => Seq[PartialFunction[String, () => ProcessFun[R]]]
+      ps: => PartialFunction[String, () => ProcessFun[R]]
   )(merge: MergeFun[R]): ProcessFun[R] = { value =>
     value.value match {
       case ObjectValue(vs) => {
@@ -85,7 +85,7 @@ object Processor {
             (key, InnerValue(v, value.pointer / key))
           }
           .flatMap { case (key, inner) =>
-            val p = ps.map(_.lift).flatMap(_(key)).headOption
+            val p = ps.lift(key)
             p.map(p => p().apply(inner))
           }
           .toSeq
@@ -145,7 +145,7 @@ object Processor {
       partial
     }.toSeq
 
-    val psOnePattern = check.patternProperties.map { case (regex, checks) =>
+    val psPatterns = check.patternProperties.map { case (regex, checks) =>
       val r = regex.r
       val partial: PartialFunction[String, () => ProcessFun[R]] = {
         case k if r.findFirstIn(k).isDefined => () => all(checker, checks)
@@ -153,23 +153,23 @@ object Processor {
       partial
     }.toSeq
 
-    val psAllPattern: PartialFunction[String, () => ProcessFun[R]] = {
-      case k if psOnePattern.exists(_.isDefinedAt(k)) =>
-        () => seq(psOnePattern.map(_.lift).flatMap { p => p(k).map(_.apply()) })
+    val psBoth = psProperties ++ psPatterns
+
+    val psAll: PartialFunction[String, () => ProcessFun[R]] = {
+      case k if psBoth.exists(_.isDefinedAt(k)) =>
+        () => seq(psBoth.map(_.lift).flatMap { p => p(k).map(_.apply()) })
     }
+
+    // val psPatternFirst = psProperties.map(psAllPattern.orElse(_))
 
     val psAdditional = check.additionalProperties.map { checks =>
       val partial: PartialFunction[String, () => ProcessFun[R]] = { k => () => all(checker, checks) }
       partial
-    }.toSeq
-
-    val ps = psProperties ++ Seq(psAllPattern) ++ psAdditional
-    if (ps.nonEmpty) {
-      val merge = checker.nested(check)
-      applyToObject(ps)(merge)
-    } else {
-      noop
     }
+
+    val ps    = psAdditional.map(psAll.orElse(_)).getOrElse(psAll)
+    val merge = checker.nested(check)
+    applyToObject(ps)(merge)
   }
 
   private def checkApplicator[R](checker: Checker[R], checks: Seq[Checks])(merge: MergeFun[R]): ProcessFun[R] = {
