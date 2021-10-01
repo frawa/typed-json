@@ -178,6 +178,48 @@ object ValidationChecker {
         checkStringValue(FormatMismatch(format)) { v =>
           Try(Pattern.compile(v)).isSuccess
         }
+      case "email" =>
+        checkStringValue(FormatMismatch(format)) { v =>
+          // see https://emailregex.com/
+          val regex =
+            """(?:[a-z\\d!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z\\d!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z\\d](?:[a-z\\d-]*[a-z\\d])?\.)+[a-z\\d](?:[a-z\\d-]*[a-z\\d])?|\[(?:(?:25[0-5]|2[0-4][\\d]|[01]?[\\d][\\d]?)\.){3}(?:25[0-5]|2[0-4][\\d]|[01]?[\\d][\\d]?|[a-z\\d-]*[a-z\\d]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])"""
+          regex.r.matches(v)
+        }
+      case "idn-email" =>
+        checkStringValue(FormatMismatch(format)) { v =>
+          // see https://stackoverflow.com/questions/13992403/regex-validation-of-email-addresses-according-to-rfc5321-rfc5322
+          val regex =
+            """([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|"([]!#-[^-~ \t]|(\\[\t -~]))+")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])""""
+          regex.r.matches(v)
+        }
+      case "hostname" =>
+        checkStringValue(FormatMismatch(format)) { v =>
+          // see https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
+          val regex =
+            """^(([a-zA-Z\\d]|[a-zA-Z\\d][a-zA-Z\\d\-]*[a-zA-Z\\d])\.)*([A-Za-z\\d]|[A-Za-z\\d][A-Za-z\\d\-]*[A-Za-z\\d])$"""
+          regex.r.matches(v)
+        }
+      case "idn-hostname" =>
+        checkStringValue(FormatMismatch(format)) { v =>
+          // see https://stackoverflow.com/questions/11809631/fully-qualified-domain-name-validation/26618995
+          val regex =
+            """(?=^.{4,253}$)(^((?!-)[a-zA-Z\\d-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)"""
+          regex.r.matches(v)
+        }
+      case "ipv4" =>
+        // see https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
+        checkStringValue(FormatMismatch(format)) { v =>
+          val regex =
+            """^(([\\d]|[1-9][\\d]|1[\\d]{2}|2[0-4][\\d]|25[0-5])\.){3}([\\d]|[1-9][\\d]|1[\\d]{2}|2[0-4][\\d]|25[0-5])$"""
+          regex.r.matches(v)
+        }
+      case "ipv6" =>
+        // see https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
+        checkStringValue(FormatMismatch(format)) { v =>
+          val regex =
+            """(([\\da-fA-F]{1,4}:){7,7}[\\da-fA-F]{1,4}|([\\da-fA-F]{1,4}:){1,7}:|([\\da-fA-F]{1,4}:){1,6}:[\\da-fA-F]{1,4}|([\\da-fA-F]{1,4}:){1,5}(:[\\da-fA-F]{1,4}){1,2}|([\\da-fA-F]{1,4}:){1,4}(:[\\da-fA-F]{1,4}){1,3}|([\\da-fA-F]{1,4}:){1,3}(:[\\da-fA-F]{1,4}){1,4}|([\\da-fA-F]{1,4}:){1,2}(:[\\da-fA-F]{1,4}){1,5}|[\\da-fA-F]{1,4}:((:[\\da-fA-F]{1,4}){1,6})|:((:[\\da-fA-F]{1,4}){1,7}|:)|fe80:(:[\\da-fA-F]{0,4}){0,4}%[\\da-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[\\d]){0,1}[\\d])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[\\d]){0,1}[\\d])|([\\da-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[\\d]){0,1}[\\d])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[\\d]){0,1}[\\d]))"""
+          regex.r.matches(v)
+        }
       case "uri" =>
         checkStringValue(FormatMismatch(format)) { v =>
           Try(new URI(v)).map(_.isAbsolute).getOrElse(false)
@@ -185,6 +227,46 @@ object ValidationChecker {
       case "uri-reference" =>
         checkStringValue(FormatMismatch(format)) { v =>
           Try(new URI(v)).isSuccess
+        }
+      case "json-pointer" =>
+        checkStringValue(FormatMismatch(format)) { v =>
+          Try(Pointer.parse(v)).isSuccess
+        }
+      case "relative-json-pointer" =>
+        // TODO relative?
+        checkStringValue(FormatMismatch(format)) { v =>
+          Try(Pointer.parse(v)).isSuccess
+        }
+      case "date-time" =>
+        // https://datatracker.ietf.org/doc/html/rfc3339
+        checkStringValue(FormatMismatch(format)) { v =>
+          "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|(+|-)\\d{2}:\\d{2})".r.matches(v)
+        }
+      case "date" =>
+        // https://datatracker.ietf.org/doc/html/rfc3339
+        checkStringValue(FormatMismatch(format)) { v =>
+          "\\d{4}-\\d{2}-\\d{2}".r.matches(v)
+        }
+      case "time" =>
+        // https://datatracker.ietf.org/doc/html/rfc3339
+        checkStringValue(FormatMismatch(format)) { v =>
+          "\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|(+|-)\\d{2}:\\d{2})".r.matches(v)
+        }
+      case "duration" =>
+        // https://datatracker.ietf.org/doc/html/rfc3339
+        // TODO test me
+        checkStringValue(FormatMismatch(format)) { v =>
+          var `dur-second` = "\\d+S"
+          var `dur-minute` = s"\\d+M(${`dur-second`})?"
+          var `dur-hour`   = s"\\d+H(${`dur-minute`})?"
+          var `dur-day`    = "\\d+D"
+          var `dur-time`   = s"T(${`dur-hour`}|${`dur-minute`}|${`dur-second`})"
+          var `dur-week`   = "\\d+W"
+          var `dur-month`  = s"\\d+M(${`dur-day`})?"
+          var `dur-year`   = s"\\d+Y(${`dur-month`})?"
+          var `dur-date`   = s"(${`dur-day`}|${`dur-month`}|${`dur-year`})(${`dur-time`})?"
+          var duration     = s"P(${`dur-date`}|${`dur-time`}|${`dur-week`})"
+          duration.r.matches(v)
         }
       case _ => { value =>
         calc.invalid(UnsupportedFormat(format), value.pointer)
