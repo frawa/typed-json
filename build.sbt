@@ -6,10 +6,8 @@ ThisBuild / organization := "frawa.typedjson"
 lazy val root = (project in file("."))
   .settings(
     name := "scala-json-schema-validator",
-    libraryDependencies += zioJson,
-    libraryDependencies += munit % Test,
-    testFrameworks += new TestFramework("munit.Framework"),
-    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS")
+    libraryDependencies ++= Seq(zioJson, munit % Test),
+    Test / testOptions += Tests.Argument("+l", "--summary=1")
     // Test / parallelExecution := false,
     // Test / logBuffered := false
   )
