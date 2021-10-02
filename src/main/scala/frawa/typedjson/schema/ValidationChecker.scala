@@ -229,13 +229,18 @@ object ValidationChecker {
           Try(new URI(v)).isSuccess
         }
       case "json-pointer" =>
+        // see https://datatracker.ietf.org/doc/html/rfc6901#page-4
+        // TODO escaping?
+        // Or, Pointer.parse(v)?
         checkStringValue(FormatMismatch(format)) { v =>
-          Try(Pointer.parse(v)).isSuccess
+          val regex = "^/.+$"
+          regex.r.matches(v)
         }
       case "relative-json-pointer" =>
-        // TODO relative?
+        // https://datatracker.ietf.org/doc/html/draft-handrews-relative-json-pointer-01
         checkStringValue(FormatMismatch(format)) { v =>
-          Try(Pointer.parse(v)).isSuccess
+          val regex = "^\\d+#/.+$"
+          regex.r.matches(v)
         }
       case "date-time" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
