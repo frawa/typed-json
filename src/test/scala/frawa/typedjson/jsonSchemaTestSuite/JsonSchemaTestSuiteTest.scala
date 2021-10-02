@@ -32,13 +32,12 @@ class JsonSchemaTestSuiteTest extends FunSuite {
   val skip = Set(
     "anchor.json",
     "content.json",
-    "defs.json",
+    "defs.json", // TODO 1
     "dynamicRef.json",
-    "format.json",
-    "id.json",
-    "infinite-loop-detection.json",
-    "items.json",
-    "ref.json", // stackoverflow
+    "id.json",                      // TODO 3
+    "infinite-loop-detection.json", // TODO 3
+    "items.json",                   // TODO 2
+    "ref.json",                     // stackoverflow
     "refRemote.json",
     "unevaluatedItems.json",
     "unevaluatedProperties.json",
