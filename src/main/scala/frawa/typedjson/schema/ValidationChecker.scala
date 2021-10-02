@@ -15,6 +15,7 @@ import scala.reflect.ClassTag
 import scala.util.matching.Regex
 import java.util.regex.Pattern
 import scala.util.Try
+import java.util.UUID
 
 sealed trait Observation
 case class FalseSchemaReason()                                         extends Observation
@@ -225,8 +226,34 @@ object ValidationChecker {
           Try(new URI(v)).map(_.isAbsolute).getOrElse(false)
         }
       case "uri-reference" =>
+        // TODO reference?
         checkStringValue(FormatMismatch(format)) { v =>
           Try(new URI(v)).isSuccess
+        }
+      case "uri-template" =>
+        // see https://datatracker.ietf.org/doc/html/rfc6570
+        // TODO template?
+        // TODO may use for iri?
+        checkStringValue(FormatMismatch(format)) { v =>
+          Try(new URI(v)).isSuccess
+        }
+      case "iri" =>
+        // see https://datatracker.ietf.org/doc/html/rfc3987
+        // TODO iri
+        checkStringValue(FormatMismatch(format)) { v =>
+          Try(new URI(v)).map(_.isAbsolute).getOrElse(false)
+        }
+      case "iri-reference" =>
+        // see https://datatracker.ietf.org/doc/html/rfc3987
+        // TODO iri
+        // TODO reference?
+        checkStringValue(FormatMismatch(format)) { v =>
+          Try(new URI(v)).isSuccess
+        }
+      case "uuid" =>
+        // see https://datatracker.ietf.org/doc/html/rfc4122
+        checkStringValue(FormatMismatch(format)) { v =>
+          Try(UUID.fromString(v)).isSuccess
         }
       case "json-pointer" =>
         // see https://datatracker.ietf.org/doc/html/rfc6901#page-4
