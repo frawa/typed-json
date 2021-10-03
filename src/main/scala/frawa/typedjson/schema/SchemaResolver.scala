@@ -18,6 +18,7 @@ case class DynamicScope(uris: Seq[URI])
 trait SchemaResolver {
   type Resolution = (SchemaValue, SchemaResolver)
 
+  // TODO remove Option?
   val base: Option[URI] = None
   val scope: Seq[URI]   = Seq.empty
 

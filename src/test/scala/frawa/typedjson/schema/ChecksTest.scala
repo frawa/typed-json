@@ -464,4 +464,30 @@ class ChecksTest extends FunSuite {
     }
   }
 
+  test("recursive $ref/$def".only) {
+    // TODO assert more precisely
+    withSchema(recursiveRefDefsSchema) { schema =>
+      assertChecks(schema) { checks =>
+        assertEquals(
+          checks.checks.size,
+          1
+        )
+      // assertEquals(
+      //   checks.checks,
+      //   Seq()
+      // )
+      }
+    }
+  }
+
+  test("subitem $ref/$def") {
+    withSchema(subItemRefDefsSchema) { schema =>
+      assertChecks(schema) { checks =>
+        assertEquals(
+          checks.checks.length,
+          2
+        )
+      }
+    }
+  }
 }

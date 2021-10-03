@@ -43,7 +43,7 @@ case class Pointer(segments: Seq[Token]) {
   }
 
   def apply(value: Value): Option[Value] = segments.foldLeft(Option(value)) { case (v, segment) =>
-    v.flatMap(v => segment(v))
+    v.flatMap(segment(_))
   }
 }
 
