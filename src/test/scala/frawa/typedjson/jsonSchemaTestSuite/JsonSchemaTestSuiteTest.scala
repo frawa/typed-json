@@ -32,12 +32,10 @@ class JsonSchemaTestSuiteTest extends FunSuite {
   val skip = Set(
     "anchor.json",
     "content.json",
-    "defs.json", // TODO 1
-    "dynamicRef.json",
-    "id.json",                      // TODO 3
-    "infinite-loop-detection.json", // TODO 3
-    "items.json",                   // TODO 2
-    "ref.json",                     // stackoverflow
+    "defs.json",       // TODO 4
+    "dynamicRef.json", // TODO 2
+    "id.json",         // TODO last
+    "ref.json",        // TODO 4, stackoverflow
     "refRemote.json",
     "unevaluatedItems.json",
     "unevaluatedProperties.json",
@@ -86,7 +84,8 @@ class JsonSchemaTestSuiteTest extends FunSuite {
           val ArrayValue(tests) = properties("tests")
 
           val schemaValue = SchemaValue(schema)
-          val processor0  = Processor(schemaValue)(ValidationChecker())
+          // val base        = path.getFileName().toUri()
+          val processor0 = Processor(schemaValue)(ValidationChecker())
           val processor = processor0.swap
             .map(message => fail("no processor", clues(clue(message))))
             .swap
