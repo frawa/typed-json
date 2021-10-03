@@ -4,17 +4,18 @@ import frawa.typedjson.parser.ObjectValue
 import frawa.typedjson.parser.StringValue
 
 object TestSchemas {
-  val nullSchema               = """{"type": "null"}"""
-  val boolSchema               = """{"type": "boolean"}"""
-  val trueSchema               = """true"""
-  val falseSchema              = """false"""
-  val notFalseSchema           = """{"not": false}"""
-  val emtpySchema              = """{}"""
-  val stringSchema             = """{"type": "string"}"""
-  val numberSchema             = """{"type": "number"}"""
-  val arraySchema              = """{"type": "array"}"""
-  val numberArraySchema        = """{"type": "array", "items": { "type": "number"}}"""
-  val totoObjectSchema         = """{
+  val nullSchema        = """{"type": "null"}"""
+  val boolSchema        = """{"type": "boolean"}"""
+  val trueSchema        = """true"""
+  val falseSchema       = """false"""
+  val notFalseSchema    = """{"not": false}"""
+  val emtpySchema       = """{}"""
+  val stringSchema      = """{"type": "string"}"""
+  val numberSchema      = """{"type": "number"}"""
+  val arraySchema       = """{"type": "array"}"""
+  val numberArraySchema = """{"type": "array", "items": { "type": "number"}}"""
+
+  val totoObjectSchema = """{
                            |"type": "object",
                            |"properties": {
                            |  "toto": { "type": "number" },
@@ -22,6 +23,7 @@ object TestSchemas {
                            |}
                            |}
                            |""".stripMargin
+
   val totoRequiredObjectSchema = """{
                                    |"type": "object",
                                    |"required": ["toto", "gnu"],
@@ -32,42 +34,49 @@ object TestSchemas {
                                    |}
                                    |}
                                    |""".stripMargin
-  val allOfSchema              = """{
+
+  val allOfSchema = """{
                       |"allOf": [
                       |  { "type": "number" }
                       |]
                       |}
                       |""".stripMargin
-  val anyOfSchema              = """{
+
+  val anyOfSchema = """{
                       |"anyOf": [
                       |  { "type": "number" },
                       |  { "type": "string" }
                       |]
                       |}
                       |""".stripMargin
-  val oneOfSchema              = """{
+
+  val oneOfSchema = """{
                       |"oneOf": [
                       |  { "type": "number" },
                       |  { "type": "string" }
                       |]
                       |}
                       |""".stripMargin
-  val ifThenElseSchema         = """{
+
+  val ifThenElseSchema = """{
                            |"if": { "type": "number" },
                            |"then": { "type": "number" },
                            |"else": { "type": "string" }
                            |}
                            |""".stripMargin
-  val nullOrStringSchema       = """{"type": ["null","string"]}"""
-  val enumSchema               = """{
+
+  val nullOrStringSchema = """{"type": ["null","string"]}"""
+
+  val enumSchema  = """{
                      |"type": "string",
                      |"enum": ["foo", "bar"]
                      |}""".stripMargin
-  val constSchema              = """{
+  val constSchema = """{
                       |"type": "string",
                       |"const": "first"
                       |}""".stripMargin
-  val idRefDefsSchema          = """{
+
+  val idRefDefsSchema = """{
                           |"$id": "https://example.net/root.json",
                           |"type": "array",
                           |"items": {
@@ -80,6 +89,42 @@ object TestSchemas {
                           |    }
                           |}
                           |}""".stripMargin
+
+  val recursiveRefDefsSchema = """|{
+                                  |"$ref": "#/$defs/list",
+                                  |"$defs": {
+                                  |  "list": {
+                                  |    "oneOf": [
+                                  |      { "$ref": "#/$defs/list" },
+                                  |      { "type": "string" }
+                                  |    ]
+                                  |  }
+                                  |}
+                                  |}
+                                  |""".stripMargin
+
+  val subItemRefDefsSchema = """|{"$defs": {
+                                |"item": {
+                                |  "type": "array",
+                                |  "items": false,
+                                |  "prefixItems": [
+                                |    { "$ref": "#/$defs/sub-item" },
+                                |    { "$ref": "#/$defs/sub-item" }
+                                |  ]
+                                |},
+                                |"sub-item": {
+                                |  "type": "object",
+                                |  "required": ["foo"]
+                                |}
+                                |},
+                                |"type": "array",
+                                |"items": false,
+                                |"prefixItems": [
+                                |  { "$ref": "#/$defs/item" },
+                                |  { "$ref": "#/$defs/item" },
+                                |  { "$ref": "#/$defs/item" }
+                                |]
+                                |}""".stripMargin
 
   val numberSchemaValue = SchemaValue(
     value = ObjectValue(

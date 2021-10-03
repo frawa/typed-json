@@ -32,6 +32,36 @@ class LoadedSchemasResolverTest extends FunSuite {
 
   test("$defs") {
     withSchema("""{
+                 |"type": "null",
+                 |"$defs": {
+                 |    "foo": {
+                 |        "type": "number"
+                 |    }
+                 |}
+                 |}""".stripMargin) { schema =>
+      val resolver = LoadedSchemasResolver(schema)
+      assertEquals(resolver.base, Some(URI.create("")))
+      assertEquals(resolver.schemas.size, 1)
+
+      val expected = SchemaValue(
+        value = ObjectValue(
+          properties = Map(
+            "type" -> StringValue(
+              value = "number"
+            )
+          )
+        )
+      )
+
+      assertEquals(
+        resolver.resolveRef("#/$defs/foo").map(_._1),
+        Some(expected)
+      )
+    }
+  }
+
+  test("$defs with $id") {
+    withSchema("""{
                  |"$id": "https://example.net/root.json",
                  |"type": "null",
                  |"$defs": {
@@ -44,23 +74,30 @@ class LoadedSchemasResolverTest extends FunSuite {
       val resolver = LoadedSchemasResolver(schema)
       val uri      = URI.create("https://example.net/root.json")
       assertEquals(resolver.base, Some(uri))
+      assertEquals(resolver.schemas.size, 2)
       assertEquals(resolver.resolve(uri).map(_._1), Some(schema))
-      assertEquals(
-        resolver.resolve(URI.create("https://example.net/foo.json")).map(_._1),
-        Some(
-          value = SchemaValue(
-            value = ObjectValue(
-              properties = Map(
-                "$id" -> StringValue(
-                  value = "https://example.net/foo.json"
-                ),
-                "type" -> StringValue(
-                  value = "number"
-                )
-              )
+
+      val expected = SchemaValue(
+        value = ObjectValue(
+          properties = Map(
+            "$id" -> StringValue(
+              value = "https://example.net/foo.json"
+            ),
+            "type" -> StringValue(
+              value = "number"
             )
           )
         )
+      )
+
+      assertEquals(
+        resolver.resolveRef("https://example.net/root.json#/$defs/foo").map(_._1),
+        Some(expected)
+      )
+
+      assertEquals(
+        resolver.resolveRef("https://example.net/foo.json").map(_._1),
+        Some(expected)
       )
     }
   }
@@ -160,69 +197,5 @@ class LoadedSchemasResolverTest extends FunSuite {
       assertEquals(scope4, Seq(uriRoot2, uriRoot1))
       assertEquals(scope5, Seq(uriRoot1))
     }
-  }
-}
-
-class SchemaResolverTest extends FunSuite {
-  val fooId  = "https://example.net/foo.json"
-  val fooUri = URI.create(fooId)
-
-  val gnuUri = URI.create("https://example.net/foo.json#gnu")
-  val gnuSchema =
-    SchemaValue(
-      value = ObjectValue(
-        properties = Map(
-          "$anchor" -> StringValue(
-            value = "gnu"
-          ),
-          "type" -> StringValue(
-            value = "string"
-          )
-        )
-      )
-    )
-
-  val fooSchema =
-    SchemaValue(
-      value = ObjectValue(
-        properties = Map(
-          "$id" -> StringValue(
-            value = fooId
-          ),
-          "type" -> StringValue(
-            value = "number"
-          ),
-          "$defs" -> ObjectValue(
-            properties = Map(
-              "gnu" -> gnuSchema.value
-            )
-          )
-        )
-      )
-    )
-
-  case object MySchemaResolver extends SchemaResolver {
-
-    override val base: Option[URI] = Some(fooUri)
-    override def resolve(uri: URI): Option[Resolution] = uri match {
-      case `fooUri` => Some((fooSchema, this))
-      case `gnuUri` => Some((gnuSchema, this))
-      case _        => None
-    }
-  }
-
-  test("absolute ref") {
-    val resolved = MySchemaResolver.resolveRef(fooId).map(_._1)
-    assertEquals(resolved, Some(fooSchema))
-  }
-
-  test("anchor ref") {
-    val resolved = MySchemaResolver.resolveRef("#gnu").map(_._1)
-    assertEquals(resolved, Some(gnuSchema))
-  }
-
-  test("path ref") {
-    val resolved = MySchemaResolver.resolveRef("#/$defs/gnu").map(_._1)
-    assertEquals(resolved, Some(gnuSchema))
   }
 }

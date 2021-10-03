@@ -37,8 +37,22 @@ trait SchemaResolver {
 
   def resolveRef(ref: String): Option[Resolution] = {
     def uri = URI.create(ref)
+
+    if (scope.contains(uri)) {
+      println("BOOM")
+      return None
+    }
+
     if (uri.isAbsolute()) {
-      resolve(uri)
+      if (uri.getFragment != null) {
+        // TODO this is not supposed to happen?
+        val uriWithoutFragment = new URI(uri.getScheme(), uri.getSchemeSpecificPart(), null)
+        val pointer            = Pointer.parse(uri.getFragment())
+        resolve(uriWithoutFragment)
+          .flatMap(resolvePointer(_, pointer))
+      } else {
+        resolve(uri)
+      }
     } else if (uri.getFragment != null && uri.getFragment.startsWith("/")) {
       val pointer = Pointer.parse(uri.getFragment())
       base

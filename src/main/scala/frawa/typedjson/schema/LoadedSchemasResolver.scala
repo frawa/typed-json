@@ -13,42 +13,44 @@ import scala.reflect.internal.Reporter
 import java.net.URI
 
 case object LoadedSchemasResolver {
-  val empty                                             = LoadedSchemasResolver(None)
-  def apply(schema: SchemaValue): LoadedSchemasResolver = loadSchemas(schema.value, None)
+  val empty = LoadedSchemasResolver(None)
+  def apply(schema: SchemaValue): LoadedSchemasResolver = {
+    val firstId = (Pointer.empty / "$id")(schema.value)
+      .flatMap {
+        case StringValue(id) => Some(URI.create(id))
+        case _               => None
+      }
+      .getOrElse(URI.create(""))
+    val first = empty.add(firstId, schema).withBase(firstId)
+    loadSchemas(schema.value, first)
+  }
   def apply(schemas: Seq[SchemaValue]): LoadedSchemasResolver = schemas.foldLeft(empty) { case (resolver, schema) =>
     resolver.addAll(apply(schema))
   }
 
-  private def loadSchemas(value: Value, base: Option[URI]): LoadedSchemasResolver = {
+  private def loadSchemas(value: Value, loaded: LoadedSchemasResolver): LoadedSchemasResolver = {
     value match {
       case ObjectValue(properties) =>
-        val zero = properties
-          .get("$id")
-          .flatMap {
-            case StringValue(id) => Some(empty.add(URI.create(id), SchemaValue(value)))
-            case _               => None
-          }
-          .getOrElse(empty)
         properties
-          .foldLeft(zero) { case (loaded, (property, propertyValue)) =>
+          .foldLeft(loaded) { case (loaded, (property, propertyValue)) =>
             (property, propertyValue) match {
               case ("$id", StringValue(id)) =>
-                loaded
+                val uri  = URI.create(id).normalize()
+                val uri1 = new URI(uri.getScheme, uri.getSchemeSpecificPart, null)
+                loaded.add(uri1, SchemaValue(value))
               case ("$anchor", StringValue(anchor)) =>
                 val fragment = URI.create("#" + anchor)
                 val uri = loaded.base
-                  .orElse(base)
                   .map(_.resolve(fragment))
                   .getOrElse(fragment)
                 loaded.add(uri, SchemaValue(value))
               case ("$dynamicAnchor", StringValue(anchor)) =>
                 val fragment = URI.create("#" + anchor)
                 val uri = loaded.base
-                  .orElse(base)
                   .map(_.resolve(fragment))
                   .getOrElse(fragment)
                 loaded.addDynamic(uri, SchemaValue(value))
-              case _ => loaded.addAll(loadSchemas(propertyValue, loaded.base.orElse(base)))
+              case _ => loaded.addAll(loadSchemas(propertyValue, loaded))
             }
           }
       case _ => empty
