@@ -198,4 +198,128 @@ class LoadedSchemasResolverTest extends FunSuite {
       assertEquals(scope5, Seq(uriRoot1))
     }
   }
+
+  test("$dynamicAnchor".only) {
+    withLoadedSchemas(
+      List("""|{
+              |  "$id": "https://example.net/root",
+              |  "$ref": "list",
+              |  "$defs": {
+              |    "foo": {
+              |      "$anchor": "items",
+              |      "type": "string"
+              |    },
+              |    "list": {
+              |      "$id": "list",
+              |      "type": "array",
+              |      "items": { "$dynamicRef": "#items" },
+              |      "$defs": {
+              |        "items": {
+              |          "$comment": "This is only needed to satisfy the bookending requirement",
+              |          "$dynamicAnchor": "items"
+              |        }
+              |      }
+              |    }
+              |  }
+              |}""".stripMargin)
+    ) { resolver =>
+      val rootId  = "https://example.net/root"
+      val uriRoot = URI.create(rootId)
+
+      assertEquals(resolver.dynamicSchemas.keySet, Set(URI.create("list#items")))
+      assertEquals(
+        resolver.schemas.keySet,
+        Set(
+          uriRoot,
+          URI.create("https://example.net/root#items"),
+          URI.create("list")
+        )
+      )
+
+      val id      = Pointer.empty / "$id"
+      val anchor  = Pointer.empty / "$anchor"
+      val comment = Pointer.empty / "$comment"
+      val ok = for {
+        (schema1, resolver1) <- resolver.resolveRef(rootId)
+        StringValue(id1)     <- id(schema1.value)
+        (schema2, resolver2) <- resolver1.resolveDynamicRef("#items")
+        StringValue(anchor2) <- anchor(schema2.value)
+        // StringValue(comment2) <- comment(schema2.value)
+      } yield {
+        assertEquals(id1, rootId)
+        assertEquals(resolver1.scope, Seq(uriRoot))
+        assertEquals(anchor2, "items")
+        // assertEquals(comment2, "string")
+        assertEquals(resolver2.scope, Seq(uriRoot, URI.create("https://example.net/root#items")))
+        true
+      }
+      ok.getOrElse {
+        fail("unexpected None")
+        false
+      }
+    }
+  }
+
+  test("$dynamicAnchor from root".only) {
+    withLoadedSchemas(
+      List("""|{
+              |  "$id": "https://example.net/root",
+              |  "$ref": "list",
+              |  "$defs": {
+              |    "foo": {
+              |      "$dynamicAnchor": "items",
+              |      "type": "string"
+              |    },
+              |    "list": {
+              |      "$id": "list",
+              |      "type": "array",
+              |      "items": { "$dynamicRef": "#items" },
+              |      "$defs": {
+              |        "items": {
+              |          "$comment": "This is only needed to satisfy the bookending requirement",
+              |          "$dynamicAnchor": "items"
+              |        }
+              |      }
+              |    }
+              |  }
+              |}""".stripMargin)
+    ) { resolver =>
+      val rootId  = "https://example.net/root"
+      val uriRoot = URI.create(rootId)
+
+      assertEquals(
+        resolver.dynamicSchemas.keySet,
+        Set(URI.create("https://example.net/root#items"), URI.create("list#items"))
+      )
+      assertEquals(
+        resolver.schemas.keySet,
+        Set(
+          uriRoot,
+          URI.create("list")
+        )
+      )
+
+      val id            = Pointer.empty / "$id"
+      val dynamicAnchor = Pointer.empty / "$dynamicAnchor"
+      val `type`        = Pointer.empty / "type"
+      val ok = for {
+        (schema1, resolver1)        <- resolver.resolveRef(rootId)
+        StringValue(id1)            <- id(schema1.value)
+        (schema2, resolver2)        <- resolver1.resolveDynamicRef("#items")
+        StringValue(dynamicAnchor2) <- dynamicAnchor(schema2.value)
+        StringValue(type2)          <- `type`(schema2.value)
+      } yield {
+        assertEquals(id1, rootId)
+        assertEquals(resolver1.scope, Seq(uriRoot))
+        assertEquals(dynamicAnchor2, "items")
+        assertEquals(type2, "string")
+        assertEquals(resolver2.scope, Seq(uriRoot))
+        true
+      }
+      ok.getOrElse {
+        fail("unexpected None")
+        false
+      }
+    }
+  }
 }

@@ -135,6 +135,7 @@ object TestSchemas {
       )
     )
   )
+
   val stringSchemaValue = SchemaValue(
     value = ObjectValue(
       properties = Map(
@@ -144,4 +145,5 @@ object TestSchemas {
       )
     )
   )
+
 }

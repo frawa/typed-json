@@ -21,7 +21,7 @@ case object LoadedSchemasResolver {
         case _               => None
       }
       .getOrElse(URI.create(""))
-    val first = empty.add(firstId, schema).withBase(firstId)
+    val first = empty.add(firstId, schema).withBase(firstId).withScope(firstId)
     loadSchemas(schema.value, first)
   }
   def apply(schemas: Seq[SchemaValue]): LoadedSchemasResolver = schemas.foldLeft(empty) { case (resolver, schema) =>
@@ -81,16 +81,22 @@ case class LoadedSchemasResolver(
   private def withScope(uri: URI): LoadedSchemasResolver = this.copy(scope = scope :+ uri)
   override def resolve(uri: URI): Option[Resolution]     = schemas.get(uri).map((_, withBase(uri).withScope(uri)))
   override def resolveDynamic(uri: URI): Option[Resolution] = {
-    if (uri.getFragment != null && dynamicSchemas.contains(uri)) {
-      val fragment = uri.getFragment()
-      scope
-        .flatMap { u =>
-          val candidate = u.resolve("#" + fragment)
-          dynamicSchemas.get(candidate)
-        }
-        .headOption
-        .orElse(dynamicSchemas.get(uri))
-        .map((_, this))
+    if (uri.getFragment != null) {
+      val fragment      = uri.getFragment()
+      val selfCandidate = base.map(_.resolve("#" + fragment))
+      if (selfCandidate.exists(dynamicSchemas.contains(_))) {
+        scope
+          .flatMap { u =>
+            val candidate = u.resolve("#" + fragment)
+            dynamicSchemas
+              .get(candidate)
+          }
+          .headOption
+          .orElse(dynamicSchemas.get(uri))
+          .map((_, this))
+      } else {
+        resolve(uri)
+      }
     } else {
       None
     }

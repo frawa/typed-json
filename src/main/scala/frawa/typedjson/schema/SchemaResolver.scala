@@ -30,9 +30,12 @@ trait SchemaResolver {
     if (uri.isAbsolute()) {
       resolveDynamic(uri)
     } else {
-      base
+      val uri1 = base
         .map(_.resolve(uri))
+      uri1
         .flatMap(resolveDynamic(_))
+        .orElse(resolve(uri))
+        .orElse(uri1.flatMap(resolve(_)))
     }
   }
 
@@ -60,9 +63,12 @@ trait SchemaResolver {
         .flatMap(resolve(_))
         .flatMap(resolvePointer(_, pointer))
     } else {
-      base
+      val uri1 = base
         .map(_.resolve(uri))
+      uri1
         .flatMap(resolve(_))
+        .orElse(resolve(uri))
+        .orElse(uri1.flatMap(resolveDynamic(_)))
     }
   }
 
