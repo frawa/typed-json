@@ -26,16 +26,16 @@ class JsonSchemaTestSuiteTest extends FunSuite {
   implicit val zioParser = new ZioParser()
 
   val jsonSchemaTestSuiteRoot = Paths.get("./JSON-Schema-Test-Suite/tests")
-  val draft                   = "draft2020-12"
+  val version                 = "draft2020-12"
 
   // TODO unskip
   val skip = Set(
     "anchor.json",
     "content.json",
-    "defs.json",       // TODO 4
-    "dynamicRef.json", // TODO 2
-    "id.json",         // TODO last
-    "ref.json",        // TODO 4, stackoverflow
+    "defs.json", // TODO 4
+    // "dynamicRef.json", // TODO 2
+    "id.json",  // TODO last
+    "ref.json", // TODO 4, stackoverflow
     "refRemote.json",
     "unevaluatedItems.json",
     "unevaluatedProperties.json",
@@ -44,6 +44,9 @@ class JsonSchemaTestSuiteTest extends FunSuite {
 
   val takeOnly: Option[Int] = None
   // val takeOnly: Option[Int] = Some(33)
+
+  // val only: Option[String] = None
+  val only: Option[String] = Some("dynamicRef.json")
 
   override def munitIgnore: Boolean = !Files.exists(jsonSchemaTestSuiteRoot)
 
@@ -117,15 +120,23 @@ class JsonSchemaTestSuiteTest extends FunSuite {
     }
   }
 
-  protected def checkDraft(draft: String): Unit = {
-    val list = listTests(draft)
-      .filterNot(p => skip.contains(p.getFileName.toString))
+  protected def checkVersion(version: String): Unit = {
+    val list = listTests(version)
+      .filterNot(p =>
+        skip
+          .contains(p.getFileName.toString)
+      )
+      .filter(p =>
+        only
+          .map(_ == p.getFileName.toString)
+          .getOrElse(true)
+      )
     takeOnly
       .map(takeOnly => list.take(takeOnly))
       .getOrElse(list)
       .foreach(check)
   }
 
-  checkDraft(draft)
+  checkVersion(version)
 
 }
