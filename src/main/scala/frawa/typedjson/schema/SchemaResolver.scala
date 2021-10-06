@@ -24,7 +24,6 @@ trait SchemaResolver {
 
   protected def resolve(uri: URI): Option[Resolution]        = None
   protected def resolveDynamic(uri: URI): Option[Resolution] = None
-  def withScope(uri: URI): SchemaResolver
 
   def resolveDynamicRef(ref: String): Option[Resolution] = {
     def uri = URI.create(ref)
