@@ -24,6 +24,7 @@ trait SchemaResolver {
 
   protected def resolve(uri: URI): Option[Resolution]        = None
   protected def resolveDynamic(uri: URI): Option[Resolution] = None
+  def withScope(uri: URI): SchemaResolver
 
   def resolveDynamicRef(ref: String): Option[Resolution] = {
     def uri = URI.create(ref)
@@ -34,8 +35,6 @@ trait SchemaResolver {
         .map(_.resolve(uri))
       uri1
         .flatMap(resolveDynamic(_))
-        .orElse(resolve(uri))
-        .orElse(uri1.flatMap(resolve(_)))
     }
   }
 
@@ -68,7 +67,6 @@ trait SchemaResolver {
       uri1
         .flatMap(resolve(_))
         .orElse(resolve(uri))
-        .orElse(uri1.flatMap(resolveDynamic(_)))
     }
   }
 
