@@ -137,31 +137,6 @@ class LoadedSchemasResolverTest extends FunSuite {
     }
   }
 
-  test("scope") {
-    withLoadedSchemas(
-      List(
-        """{
-          |"$id": "https://example.net/root1",
-          |"type": "null"
-          |}""".stripMargin,
-        """{
-          |"$id": "https://example.net/root2",
-          |"$ref": "root1"
-          |}""".stripMargin
-      )
-    ) { resolver =>
-      assertEquals(resolver.scope, Seq())
-      val uriRoot2 = URI.create("https://example.net/root2")
-      val uriRoot1 = URI.create("https://example.net/root1")
-      val Some((scope1, scope2)) = for {
-        (schema1, resolver1) <- resolver.resolveRef(uriRoot2.toString)
-        (schema2, resolver2) <- resolver1.resolveRef("root1")
-      } yield ((resolver1.scope, resolver2.scope))
-      assertEquals(scope1, Seq(uriRoot2))
-      assertEquals(scope2, Seq(uriRoot2, uriRoot1))
-    }
-  }
-
   test("$dynamicRef") {
     withLoadedSchemas(
       List(
@@ -177,31 +152,29 @@ class LoadedSchemasResolverTest extends FunSuite {
           |}""".stripMargin
       )
     ) { resolver =>
-      assertEquals(resolver.scope, Seq())
       val uriRoot2 = URI.create("https://example.net/root2")
       val uriRoot1 = URI.create("https://example.net/root1")
       val id       = Pointer.empty / "$id"
-      val scope    = DynamicScope.empty
 
-      val Some((id4, id5, scope4, scope5)) = for {
-        (schema1, resolver1) <- resolver.resolveRef(uriRoot1.toString)
-        (schema2, resolver2) <- resolver.resolveRef(uriRoot2.toString)
-        (schema3, resolver3) <- resolver2.resolveRef("root1")
-        (schema4, resolver4) <- resolver3.resolveDynamicRef("#anchor1", scope)
-        (schema5, resolver5) <- resolver1.resolveDynamicRef("#anchor1", scope)
-        id4    = id(schema4.value)
-        id5    = id(schema5.value)
-        scope4 = resolver4.scope
-        scope5 = resolver5.scope
-      } yield ((id4, id5, scope4, scope5))
-      assertEquals(id4, Some(StringValue("https://example.net/root2")))
-      assertEquals(id5, Some(StringValue("https://example.net/root1")))
-      assertEquals(scope4, Seq(uriRoot2, uriRoot1))
-      assertEquals(scope5, Seq(uriRoot1))
+      val scope1 = DynamicScope.empty.push(uriRoot1)
+      val scope2 = DynamicScope.empty.push(uriRoot2).push(uriRoot1)
+
+      val Some((id1, id2)) = for {
+        (_, resolver1) <- resolver.resolveRef(uriRoot2.toString)
+        (_, resolver2) <- resolver1.resolveRef("root1")
+        (schema1, _)   <- resolver2.resolveDynamicRef("#anchor1", scope2)
+        (schema2, _)   <- resolver1.resolveDynamicRef("#anchor1", scope1)
+        id1 = id(schema1.value)
+        id2 = id(schema2.value)
+      } yield ((id1, id2))
+      assertEquals(id1, Some(StringValue("https://example.net/root2")))
+      assertEquals(id2, Some(StringValue("https://example.net/root1")))
+    // assertEquals(scope4, Seq(uriRoot2, uriRoot1))
+    // assertEquals(scope5, Seq(uriRoot1))
     }
   }
 
-  test("$dynamicAnchor".only) {
+  test("$dynamicAnchor") {
     withLoadedSchemas(
       List("""|{
               |  "$id": "https://example.net/root",
@@ -241,20 +214,16 @@ class LoadedSchemasResolverTest extends FunSuite {
       val id      = Pointer.empty / "$id"
       val anchor  = Pointer.empty / "$anchor"
       val comment = Pointer.empty / "$comment"
-      val scope   = DynamicScope.empty
 
+      val scope = DynamicScope.empty.push(rootId)
       val ok = for {
         (schema1, resolver1) <- resolver.resolveRef(rootId)
         StringValue(id1)     <- id(schema1.value)
         (schema2, resolver2) <- resolver1.resolveDynamicRef("#items", scope)
         StringValue(anchor2) <- anchor(schema2.value)
-        // StringValue(comment2) <- comment(schema2.value)
       } yield {
         assertEquals(id1, rootId)
-        assertEquals(resolver1.scope, Seq(uriRoot))
         assertEquals(anchor2, "items")
-        // assertEquals(comment2, "string")
-        assertEquals(resolver2.scope, Seq(uriRoot, URI.create("https://example.net/root#items")))
         true
       }
       ok.getOrElse {
@@ -264,7 +233,7 @@ class LoadedSchemasResolverTest extends FunSuite {
     }
   }
 
-  test("$dynamicAnchor from root".only) {
+  test("$dynamicAnchor from root") {
     withLoadedSchemas(
       List("""|{
               |  "$id": "https://example.net/root",
@@ -303,10 +272,11 @@ class LoadedSchemasResolverTest extends FunSuite {
         )
       )
 
-      val scope         = DynamicScope.empty
       val id            = Pointer.empty / "$id"
       val dynamicAnchor = Pointer.empty / "$dynamicAnchor"
       val `type`        = Pointer.empty / "type"
+
+      val scope = DynamicScope.empty.push(rootId)
       val ok = for {
         (schema1, resolver1)        <- resolver.resolveRef(rootId)
         StringValue(id1)            <- id(schema1.value)
@@ -315,10 +285,8 @@ class LoadedSchemasResolverTest extends FunSuite {
         StringValue(type2)          <- `type`(schema2.value)
       } yield {
         assertEquals(id1, rootId)
-        assertEquals(resolver1.scope, Seq(uriRoot))
         assertEquals(dynamicAnchor2, "items")
         assertEquals(type2, "string")
-        assertEquals(resolver2.scope, Seq(uriRoot))
         true
       }
       ok.getOrElse {

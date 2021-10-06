@@ -12,8 +12,9 @@ import frawa.typedjson.parser.ObjectValue
 import scala.reflect.internal.Reporter
 import java.net.URI
 
-case object LoadedSchemasResolver {
+object LoadedSchemasResolver {
   val empty = LoadedSchemasResolver(None)
+
   def apply(schema: SchemaValue): LoadedSchemasResolver = {
     val firstId = (Pointer.empty / "$id")(schema.value)
       .flatMap {
@@ -21,7 +22,7 @@ case object LoadedSchemasResolver {
         case _               => None
       }
       .getOrElse(URI.create(""))
-    val first = empty.add(firstId, schema).withBase(firstId).withScope(firstId)
+    val first = empty.add(firstId, schema).withBase(firstId)
     loadSchemas(schema.value, first)
   }
   def apply(schemas: Seq[SchemaValue]): LoadedSchemasResolver = schemas.foldLeft(empty) { case (resolver, schema) =>
@@ -62,8 +63,7 @@ case object LoadedSchemasResolver {
 case class LoadedSchemasResolver(
     override val base: Option[URI],
     schemas: Map[URI, SchemaValue] = Map.empty,
-    dynamicSchemas: Map[URI, SchemaValue] = Map.empty,
-    override val scope: Seq[URI] = Seq.empty
+    dynamicSchemas: Map[URI, SchemaValue] = Map.empty
 ) extends SchemaResolver {
 
   def add(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
@@ -77,9 +77,9 @@ case class LoadedSchemasResolver(
   def addDynamic(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
     this.copy(dynamicSchemas = dynamicSchemas + ((uri, schema)))
 
-  private def withBase(uri: URI): LoadedSchemasResolver  = this.copy(base = Some(uri))
-  private def withScope(uri: URI): LoadedSchemasResolver = this.copy(scope = scope :+ uri)
-  override def resolve(uri: URI): Option[Resolution]     = schemas.get(uri).map((_, withBase(uri).withScope(uri)))
+  private def withBase(uri: URI): LoadedSchemasResolver = this.copy(base = Some(uri))
+
+  override def resolve(uri: URI): Option[Resolution] = schemas.get(uri).map((_, withBase(uri)))
 
   override def resolveDynamic(uri: URI, scope: DynamicScope): Option[Resolution] = {
     if (uri.getFragment != null) {
