@@ -13,8 +13,6 @@ import scala.reflect.internal.Reporter
 import java.net.URI
 import scala.reflect.ClassTag
 
-case class DynamicScope(uris: Seq[URI])
-
 trait SchemaResolver {
   type Resolution = (SchemaValue, SchemaResolver)
 
@@ -22,18 +20,18 @@ trait SchemaResolver {
   val base: Option[URI] = None
   val scope: Seq[URI]   = Seq.empty
 
-  protected def resolve(uri: URI): Option[Resolution]        = None
-  protected def resolveDynamic(uri: URI): Option[Resolution] = None
+  protected def resolve(uri: URI): Option[Resolution]                             = None
+  protected def resolveDynamic(uri: URI, scope: DynamicScope): Option[Resolution] = None
 
-  def resolveDynamicRef(ref: String): Option[Resolution] = {
+  def resolveDynamicRef(ref: String, scope: DynamicScope): Option[Resolution] = {
     def uri = URI.create(ref)
     if (uri.isAbsolute()) {
-      resolveDynamic(uri)
+      resolveDynamic(uri, scope)
     } else {
       val uri1 = base
         .map(_.resolve(uri))
       uri1
-        .flatMap(resolveDynamic(_))
+        .flatMap(resolveDynamic(_, scope))
     }
   }
 

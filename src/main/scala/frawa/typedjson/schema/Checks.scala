@@ -90,7 +90,8 @@ object Checked {
 case class Checks(
     schema: SchemaValue,
     checks: Seq[Check] = Seq.empty[Check],
-    ignoredKeywords: Set[String] = Set.empty
+    ignoredKeywords: Set[String] = Set.empty,
+    scope: DynamicScope = DynamicScope.empty
 ) {
   import Util._
 
@@ -230,6 +231,7 @@ case class Checks(
 
       case ("$dynamicAnchor", StringValue(_)) => {
         // handled during load
+        // FW scope is part of checks not schema loader
         Right(this)
       }
 
@@ -255,7 +257,7 @@ case class Checks(
       case ("$dynamicRef", StringValue(ref)) => {
         for {
           resolution <- resolver
-            .resolveDynamicRef(ref)
+            .resolveDynamicRef(ref, scope)
             .map(Right(_))
             .getOrElse(Left(Seq(SchemaError(s"""missing dynamic reference "${ref}""""))))
 
@@ -496,7 +498,7 @@ case class Checker[R](
 object Checks {
   type SchemaErrors = Seq[SchemaError]
 
-  def parseKeywords(schema: SchemaValue)(implicit resolver: SchemaResolver): Either[SchemaErrors, Checks] =
+  def parseKeywords(schema: SchemaValue)(implicit resolver: SchemaResolver): Either[SchemaErrors, Checks] = {
     schema.value match {
       case BoolValue(v) => Right(Checks(schema).withCheck(TrivialCheck(v)))
       case ObjectValue(keywords) =>
@@ -515,5 +517,6 @@ object Checks {
         }
       case _ => Left(Seq(SchemaError(s"invalid schema ${schema}")))
     }
+  }
 
 }

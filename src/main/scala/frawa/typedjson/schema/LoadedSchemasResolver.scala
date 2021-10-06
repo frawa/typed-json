@@ -80,16 +80,16 @@ case class LoadedSchemasResolver(
   private def withBase(uri: URI): LoadedSchemasResolver  = this.copy(base = Some(uri))
   private def withScope(uri: URI): LoadedSchemasResolver = this.copy(scope = scope :+ uri)
   override def resolve(uri: URI): Option[Resolution]     = schemas.get(uri).map((_, withBase(uri).withScope(uri)))
-  override def resolveDynamic(uri: URI): Option[Resolution] = {
+
+  override def resolveDynamic(uri: URI, scope: DynamicScope): Option[Resolution] = {
     if (uri.getFragment != null) {
       val fragment      = uri.getFragment()
-      val selfCandidate = base.map(_.resolve("#" + fragment))
+      val selfCandidate = base.map(DynamicScope.withFragment(_, fragment))
       if (selfCandidate.exists(dynamicSchemas.contains(_))) {
-        scope
-          .flatMap { u =>
-            val candidate = u.resolve("#" + fragment)
-            dynamicSchemas
-              .get(candidate)
+        scope.candidates
+          .map(DynamicScope.withFragment(_, fragment))
+          .flatMap {
+            dynamicSchemas.get(_)
           }
           .headOption
           .orElse(dynamicSchemas.get(uri))
