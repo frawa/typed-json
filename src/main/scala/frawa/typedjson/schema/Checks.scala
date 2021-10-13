@@ -90,8 +90,7 @@ object Checked {
 case class Checks(
     schema: SchemaValue,
     checks: Seq[Check] = Seq.empty[Check],
-    ignoredKeywords: Set[String] = Set.empty,
-    scope: DynamicScope = DynamicScope.empty
+    ignoredKeywords: Set[String] = Set.empty
 ) {
   import Util._
 
@@ -102,10 +101,11 @@ case class Checks(
   private def withChecks(checks: Seq[Checks])(f: Seq[Checks] => Check): Checks =
     withCheck(f(checks)).withIgnored(checks.flatMap(_.ignoredKeywords).toSet)
   private def withChecks(
-      values: Seq[Value]
+      values: Seq[Value],
+      scope: DynamicScope
   )(f: Seq[Checks] => Check)(implicit resolver: SchemaResolver): Either[SchemaErrors, Checks] = {
     val checks0 = values
-      .map(v => Checks.parseKeywords(SchemaValue(v)))
+      .map(v => Checks.parseKeywords(SchemaValue(v), scope))
       .toSeq
     for {
       checks <- sequenceAllLefts(checks0)
@@ -116,7 +116,10 @@ case class Checks(
 
   type SchemaErrors = Checks.SchemaErrors
 
-  def withKeyword(keyword: String, value: Value)(implicit resolver: SchemaResolver): Either[SchemaErrors, Checks] =
+  def withKeyword(keyword: String, value: Value, scope: DynamicScope)(implicit
+      resolver: SchemaResolver
+  ): Either[SchemaErrors, Checks] = {
+    val scope1 = scope.push(keyword)
     (keyword, value) match {
       // TODO validation vocabulary
       case ("type", StringValue(typeName)) =>
@@ -134,14 +137,14 @@ case class Checks(
 
       case ("not", value) =>
         for {
-          checks <- Checks.parseKeywords(SchemaValue(value))
+          checks <- Checks.parseKeywords(SchemaValue(value), scope1)
         } yield {
           withChecks(checks)(c => withCheck(NotCheck(c)))
         }
 
       case ("items", value) =>
         for {
-          checks <- Checks.parseKeywords(SchemaValue(value))
+          checks <- Checks.parseKeywords(SchemaValue(value), scope1)
         } yield {
           withChecks(checks) { checks =>
             updateCheck(ArrayItemsCheck())(check => check.copy(items = Some(checks)))
@@ -149,28 +152,26 @@ case class Checks(
         }
 
       case ("prefixItems", ArrayValue(vs)) =>
-        val checks0 = vs.map(v => Checks.parseKeywords(SchemaValue(v)))
+        val checks0 = vs.map(v => Checks.parseKeywords(SchemaValue(v), scope1))
         for {
           checks <- sequenceAllLefts(checks0)
         } yield {
-          // withChecks(checks) { checks =>
           updateCheck(ArrayItemsCheck())(check => check.copy(prefixItems = checks))
-          // }
         }
 
       case ("properties", ObjectValue(properties)) =>
-        mapChecksFor(properties) { checks =>
-          updateCheck(ObjectPropertiesCheck())(check => check.copy(properties = checks))
+        mapChecksFor(properties, scope1) { checks =>
+          updateCheck(ObjectPropertiesCheck())(check => check.copy(properties = check.properties ++ checks))
         }
 
       case ("patternProperties", ObjectValue(properties)) =>
-        mapChecksFor(properties) { checks =>
+        mapChecksFor(properties, scope1) { checks =>
           updateCheck(ObjectPropertiesCheck())(check => check.copy(patternProperties = checks))
         }
 
       case ("additionalProperties", value) =>
         for {
-          checks <- Checks.parseKeywords(SchemaValue(value))
+          checks <- Checks.parseKeywords(SchemaValue(value), scope1)
         } yield {
           withChecks(checks) { checks =>
             updateCheck(ObjectPropertiesCheck())(check => check.copy(additionalProperties = Some(checks)))
@@ -183,29 +184,29 @@ case class Checks(
       }
 
       case ("allOf", ArrayValue(values)) => {
-        withChecks(values)(AllOfCheck)
+        withChecks(values, scope1)(AllOfCheck)
       }
 
       case ("anyOf", ArrayValue(values)) => {
-        withChecks(values)(AnyOfCheck)
+        withChecks(values, scope1)(AnyOfCheck)
       }
 
       case ("oneOf", ArrayValue(values)) => {
-        withChecks(values)(OneOfCheck)
+        withChecks(values, scope1)(OneOfCheck)
       }
 
       case ("if", value) =>
-        updateChecks(SchemaValue(value))(IfThenElseCheck()) { (checks, check) =>
+        updateChecks(SchemaValue(value), scope1)(IfThenElseCheck()) { (checks, check) =>
           check.copy(ifChecks = Some(checks))
         }
 
       case ("then", value) =>
-        updateChecks(SchemaValue(value))(IfThenElseCheck()) { (checks, check) =>
+        updateChecks(SchemaValue(value), scope1)(IfThenElseCheck()) { (checks, check) =>
           check.copy(thenChecks = Some(checks))
         }
 
       case ("else", value) =>
-        updateChecks(SchemaValue(value))(IfThenElseCheck()) { (checks, check) =>
+        updateChecks(SchemaValue(value), scope1)(IfThenElseCheck()) { (checks, check) =>
           check.copy(elseChecks = Some(checks))
         }
 
@@ -231,7 +232,6 @@ case class Checks(
 
       case ("$dynamicAnchor", StringValue(_)) => {
         // handled during load
-        // FW scope is part of checks not schema loader
         Right(this)
       }
 
@@ -248,7 +248,7 @@ case class Checks(
             .getOrElse(Left(Seq(SchemaError(s"""missing reference "${ref}""""))))
           schema    = resolution._1
           resolver1 = resolution._2
-          checks <- Checks.parseKeywords(schema)(resolver1)
+          checks <- Checks.parseKeywords(schema, scope1.push(URI.create(ref)))(resolver1)
         } yield {
           withChecks(checks)(identity)
         }
@@ -264,7 +264,7 @@ case class Checks(
           resolveLater = { () =>
             val schema    = resolution._1
             val resolver1 = resolution._2
-            Checks.parseKeywords(schema)(resolver1)
+            Checks.parseKeywords(schema, scope1.push(resolver1.base.getOrElse(URI.create("?"))))(resolver1)
           }
         } yield {
           withCheck(DynamicRefCheck(resolveLater))
@@ -323,7 +323,7 @@ case class Checks(
 
       case ("propertyNames", value) =>
         for {
-          checks <- Checks.parseKeywords(SchemaValue(value))
+          checks <- Checks.parseKeywords(SchemaValue(value), scope1)
         } yield {
           withChecks(checks)(c => withCheck(PropertyNamesCheck(c)))
         }
@@ -392,7 +392,7 @@ case class Checks(
       case ("dependentSchemas", ObjectValue(v)) => {
         val checks0 = v.view.map { case (p, v) =>
           Checks
-            .parseKeywords(SchemaValue(v))
+            .parseKeywords(SchemaValue(v), scope1)
             .map(p -> _)
         }.toSeq
         for {
@@ -404,7 +404,7 @@ case class Checks(
 
       case ("contains", v) =>
         for {
-          checks <- Checks.parseKeywords(SchemaValue(v))
+          checks <- Checks.parseKeywords(SchemaValue(v), scope1)
         } yield {
           withChecks(checks) { checks =>
             updateCheck(ContainsCheck())(check => check.copy(schema = Some(checks)))
@@ -421,12 +421,14 @@ case class Checks(
 
       case _ => Right(withIgnored(keyword))
     }
+  }
 
   private def mapChecksFor(
-      props: Map[String, Value]
+      props: Map[String, Value],
+      scope: DynamicScope
   )(f: Map[String, Checks] => Checks)(implicit resolver: SchemaResolver) = {
     val propChecks = props.view
-      .mapValues(v => Checks.parseKeywords(SchemaValue(v)))
+      .mapValues(v => Checks.parseKeywords(SchemaValue(v), scope))
       .map {
         case (prop, Right(checks)) => Right((prop, checks))
         case (prop, Left(errors))  => Left(errors.map(_.prefix(Pointer.empty / prop)))
@@ -460,10 +462,11 @@ case class Checks(
   }
 
   private def updateChecks[C <: Check: ClassTag](
-      schema: SchemaValue
+      schema: SchemaValue,
+      scope: DynamicScope
   )(newCheck: => C)(f: (Checks, C) => C)(implicit resolver: SchemaResolver): Either[SchemaErrors, Checks] = {
     for {
-      checks <- Checks.parseKeywords(schema)
+      checks <- Checks.parseKeywords(schema, scope)
     } yield {
       withChecks(checks) { checks =>
         updateCheck(newCheck)(f(checks, _))
@@ -498,7 +501,9 @@ case class Checker[R](
 object Checks {
   type SchemaErrors = Seq[SchemaError]
 
-  def parseKeywords(schema: SchemaValue)(implicit resolver: SchemaResolver): Either[SchemaErrors, Checks] = {
+  def parseKeywords(schema: SchemaValue, scope: DynamicScope)(implicit
+      resolver: SchemaResolver
+  ): Either[SchemaErrors, Checks] = {
     schema.value match {
       case BoolValue(v) => Right(Checks(schema).withCheck(TrivialCheck(v)))
       case ObjectValue(keywords) =>
@@ -509,7 +514,7 @@ object Checks {
             .foldLeft[Either[SchemaErrors, Checks]](Right(Checks(schema))) { case (checks, (keyword, value)) =>
               val prefix = Pointer.empty / keyword
               checks
-                .flatMap(_.withKeyword(keyword, value))
+                .flatMap(_.withKeyword(keyword, value, scope))
                 .swap
                 .map(_.map(_.prefix(prefix)))
                 .swap

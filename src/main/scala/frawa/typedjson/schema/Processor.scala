@@ -42,8 +42,9 @@ object Processor {
 
   def apply[R](schema: SchemaValue)(checker: Checker[R]): Either[SchemaErrors, Processor[R]] = {
     implicit val resolver = LoadedSchemasResolver(schema)
+    val scope             = resolver.base.map(DynamicScope.empty.push(_)).getOrElse(DynamicScope.empty)
     for {
-      checks <- Checks.parseKeywords(schema)
+      checks <- Checks.parseKeywords(schema, scope)
       processor = Processor(all(checker, checks), checks.ignoredKeywords)
     } yield (processor)
   }
@@ -210,7 +211,7 @@ object Processor {
       .map(all(checker, _))
       .swap
       .map { e =>
-        println("FW", e)
+        println("dynamic ref failed", e)
         e
       }
       .swap

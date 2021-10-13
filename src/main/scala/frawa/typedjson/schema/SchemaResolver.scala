@@ -57,6 +57,7 @@ trait SchemaResolver {
       val pointer = Pointer.parse(uri.getFragment())
       base
         .flatMap(resolve(_))
+        // .orElse(resolveDynamic(uri, DynamicScope.empty))
         .flatMap(resolvePointer(_, pointer))
     } else {
       val uri1 = base
@@ -64,6 +65,7 @@ trait SchemaResolver {
       uri1
         .flatMap(resolve(_))
         .orElse(resolve(uri))
+        .orElse(resolveDynamic(uri, base.map(DynamicScope.empty.push(_)).getOrElse(DynamicScope.empty)))
     }
   }
 

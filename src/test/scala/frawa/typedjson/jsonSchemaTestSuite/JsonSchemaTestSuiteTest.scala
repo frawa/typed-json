@@ -28,7 +28,7 @@ class JsonSchemaTestSuiteTest extends FunSuite {
   val jsonSchemaTestSuiteRoot = Paths.get("./JSON-Schema-Test-Suite/tests")
   val version                 = "draft2020-12"
 
-  // TODO unskip
+  // TODO unskip 'em
   val skip = Set(
     "anchor.json",
     "content.json",
@@ -47,6 +47,8 @@ class JsonSchemaTestSuiteTest extends FunSuite {
 
   // val only: Option[String] = None
   val only: Option[String] = Some("dynamicRef.json")
+  // val onlyId: Option[String] = None
+  val onlyId: Option[String] = Some("https://test.json-schema.org/relative-dynamic-reference/root")
 
   override def munitIgnore: Boolean = !Files.exists(jsonSchemaTestSuiteRoot)
 
@@ -86,6 +88,20 @@ class JsonSchemaTestSuiteTest extends FunSuite {
           val schema            = properties("schema")
           val ArrayValue(tests) = properties("tests")
 
+          val includedOnlyId = onlyId
+            .flatMap { onlyId =>
+              (Pointer.empty / "$id")
+                .apply(schema)
+                .flatMap { vv =>
+                  vv match {
+                    case StringValue(id) => Some(id)
+                    case _               => None
+                  }
+                }
+                .map(_ == onlyId)
+            }
+          assume(includedOnlyId.getOrElse(true), s"excluded by onlyId=${onlyId}")
+
           val schemaValue = SchemaValue(schema)
           // val base        = path.getFileName().toUri()
           val processor0 = Processor(schemaValue)(ValidationChecker())
@@ -115,6 +131,7 @@ class JsonSchemaTestSuiteTest extends FunSuite {
       if (!checked.valid) {
         assertEquals(checked.results, Seq(), failMessage)
       } else {
+        println("expected valid", expected, checked)
         fail(failMessage)
       }
     }

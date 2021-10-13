@@ -22,8 +22,9 @@ class ChecksTest extends FunSuite {
       f: Checks => Unit
   ) = {
     implicit val resolver = LoadedSchemasResolver(schema)
+    val scope             = DynamicScope.empty
     val withParsed = for {
-      checks <- Checks.parseKeywords(schema)
+      checks <- Checks.parseKeywords(schema, scope)
     } yield {
       if (!allowIgnored) {
         assert(
@@ -44,7 +45,8 @@ class ChecksTest extends FunSuite {
       f: Checks.SchemaErrors => Unit
   ) = {
     implicit val resolver = LoadedSchemasResolver(schema)
-    Checks.parseKeywords(schema) match {
+    val scope             = DynamicScope.empty
+    Checks.parseKeywords(schema, scope) match {
       case Right(_)     => fail("parsing keywords expected to fail")
       case Left(errors) => f(errors)
     }

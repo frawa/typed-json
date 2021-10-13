@@ -38,7 +38,7 @@ object LoadedSchemasResolver {
               case ("$id", StringValue(id)) =>
                 val uri  = URI.create(id).normalize()
                 val uri1 = new URI(uri.getScheme, uri.getSchemeSpecificPart, null)
-                loaded.add(uri1, SchemaValue(value))
+                loaded.add(uri1, SchemaValue(value)).withBase(uri1)
               case ("$anchor", StringValue(anchor)) =>
                 val fragment = URI.create("#" + anchor)
                 val uri = loaded.base
@@ -63,11 +63,11 @@ object LoadedSchemasResolver {
 case class LoadedSchemasResolver(
     override val base: Option[URI],
     schemas: Map[URI, SchemaValue] = Map.empty,
-    dynamicSchemas: Map[URI, SchemaValue] = Map.empty
+    dynamicSchemas: Set[URI] = Set.empty
 ) extends SchemaResolver {
 
   def add(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
-    this.copy(base = Some(uri), schemas = schemas + ((uri, schema)))
+    this.copy(schemas = schemas + ((uri, schema)))
 
   def addAll(other: LoadedSchemasResolver): LoadedSchemasResolver = this.copy(
     schemas = schemas.concat(other.schemas.toIterable),
@@ -75,7 +75,7 @@ case class LoadedSchemasResolver(
   )
 
   def addDynamic(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
-    this.copy(dynamicSchemas = dynamicSchemas + ((uri, schema)))
+    add(uri, schema).copy(dynamicSchemas = dynamicSchemas + uri)
 
   private def withBase(uri: URI): LoadedSchemasResolver = this.copy(base = Some(uri))
 
@@ -83,20 +83,27 @@ case class LoadedSchemasResolver(
 
   override def resolveDynamic(uri: URI, scope: DynamicScope): Option[Resolution] = {
     if (uri.getFragment != null) {
-      val fragment      = uri.getFragment()
-      val selfCandidate = base.map(DynamicScope.withFragment(_, fragment))
-      if (selfCandidate.exists(dynamicSchemas.contains(_))) {
-        scope.candidates
-          .map(DynamicScope.withFragment(_, fragment))
-          .flatMap {
-            dynamicSchemas.get(_)
-          }
-          .headOption
-          .orElse(dynamicSchemas.get(uri))
-          .map((_, this))
-      } else {
-        resolve(uri)
-      }
+      val fragment = uri.getFragment()
+      // TODO prefer scope.candidates.last over base?
+      val selfCandidate = scope.candidates.lastOption
+        .map(DynamicScope.withFragment(_, fragment))
+        .filter(dynamicSchemas.contains(_))
+        .orElse(Some(uri))
+        .filter(dynamicSchemas.contains(_))
+      val dynamicly = selfCandidate
+        .filter(dynamicSchemas.contains(_))
+        .flatMap { self =>
+          scope.candidates
+            .map(DynamicScope.withFragment(_, fragment))
+            .filter(dynamicSchemas.contains(_))
+            .flatMap { candidate =>
+              schemas
+                .get(candidate)
+                .map((_, withBase(candidate)))
+            }
+            .headOption
+        }
+      return dynamicly
     } else {
       None
     }
