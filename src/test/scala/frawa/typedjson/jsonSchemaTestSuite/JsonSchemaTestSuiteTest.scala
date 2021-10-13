@@ -46,9 +46,9 @@ class JsonSchemaTestSuiteTest extends FunSuite {
   // val takeOnly: Option[Int] = Some(33)
 
   // val only: Option[String] = None
-  val only: Option[String] = Some("dynamicRef.json")
-  // val onlyId: Option[String] = None
-  val onlyId: Option[String] = Some("https://test.json-schema.org/relative-dynamic-reference/root")
+  val only: Option[String]   = Some("dynamicRef.json")
+  val onlyId: Option[String] = None
+  // val onlyId: Option[String] = Some("https://test.json-schema.org/relative-dynamic-reference-without-bookend/root")
 
   override def munitIgnore: Boolean = !Files.exists(jsonSchemaTestSuiteRoot)
 
@@ -88,17 +88,15 @@ class JsonSchemaTestSuiteTest extends FunSuite {
           val schema            = properties("schema")
           val ArrayValue(tests) = properties("tests")
 
+          val id = (Pointer.empty / "$id")(schema).flatMap { vv =>
+            vv match {
+              case StringValue(id) => Some(id)
+              case _               => None
+            }
+          }
           val includedOnlyId = onlyId
             .flatMap { onlyId =>
-              (Pointer.empty / "$id")
-                .apply(schema)
-                .flatMap { vv =>
-                  vv match {
-                    case StringValue(id) => Some(id)
-                    case _               => None
-                  }
-                }
-                .map(_ == onlyId)
+              id.map(_ == onlyId)
             }
           assume(includedOnlyId.getOrElse(true), s"excluded by onlyId=${onlyId}")
 
@@ -106,7 +104,7 @@ class JsonSchemaTestSuiteTest extends FunSuite {
           // val base        = path.getFileName().toUri()
           val processor0 = Processor(schemaValue)(ValidationChecker())
           val processor = processor0.swap
-            .map(message => fail("no processor", clues(clue(message))))
+            .map(message => fail("no processor", clues(clue(id), clue(message))))
             .swap
             .toOption
             .get
@@ -131,8 +129,7 @@ class JsonSchemaTestSuiteTest extends FunSuite {
       if (!checked.valid) {
         assertEquals(checked.results, Seq(), failMessage)
       } else {
-        println("expected valid", expected, checked)
-        fail(failMessage)
+        fail("failed", clues(clue(failMessage), clue(expected), clue(checked)))
       }
     }
   }
