@@ -84,7 +84,6 @@ case class LoadedSchemasResolver(
   override def resolveDynamic(uri: URI, scope: DynamicScope): Option[Resolution] = {
     if (uri.getFragment != null) {
       val fragment = uri.getFragment()
-      // TODO prefer scope.candidates.last over base?
       val selfCandidate = scope.candidates.lastOption
         .map(DynamicScope.withFragment(_, fragment))
         .filter(dynamicSchemas.contains(_))
@@ -103,6 +102,7 @@ case class LoadedSchemasResolver(
             }
             .headOption
         }
+        .orElse(resolve(uri))
       return dynamicly
     } else {
       None
