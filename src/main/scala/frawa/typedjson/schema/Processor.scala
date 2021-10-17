@@ -211,6 +211,7 @@ object Processor {
       .map(all(checker, _))
       .swap
       .map { e =>
+        // TODO find a better way to raise an error
         println("dynamic ref failed", e)
         e
       }
