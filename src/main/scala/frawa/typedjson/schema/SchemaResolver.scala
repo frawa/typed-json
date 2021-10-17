@@ -18,7 +18,6 @@ trait SchemaResolver {
 
   // TODO remove Option?
   val base: Option[URI] = None
-  val scope: Seq[URI]   = Seq.empty
 
   protected def resolve(uri: URI): Option[Resolution]                             = None
   protected def resolveDynamic(uri: URI, scope: DynamicScope): Option[Resolution] = None
@@ -28,21 +27,22 @@ trait SchemaResolver {
     if (uri.isAbsolute()) {
       resolveDynamic(uri, scope)
     } else {
-      val uri1 = base
+      base
         .map(_.resolve(uri))
-      uri1
         .flatMap(resolveDynamic(_, scope))
     }
   }
 
   def resolveRef(ref: String): Option[Resolution] = {
-    def uri = URI.create(ref)
+    resolveRef(URI.create(ref))
+  }
 
-    if (scope.contains(uri)) {
-      println("BOOM")
+  def resolveRef(uri: URI): Option[Resolution] = {
+    // println("FW", base, uri)
+    if (base.map(DynamicScope.withoutFragement(_)).contains(DynamicScope.withoutFragement(uri))) {
+      println("FW BOOM", this)
       return None
     }
-
     if (uri.isAbsolute()) {
       if (uri.getFragment != null) {
         // TODO this is not supposed to happen?
@@ -60,12 +60,12 @@ trait SchemaResolver {
         // .orElse(resolveDynamic(uri, DynamicScope.empty))
         .flatMap(resolvePointer(_, pointer))
     } else {
-      val uri1 = base
+      println("FW1313", uri)
+      base
         .map(_.resolve(uri))
-      uri1
         .flatMap(resolve(_))
         .orElse(resolve(uri))
-        .orElse(resolveDynamic(uri, base.map(DynamicScope.empty.push(_)).getOrElse(DynamicScope.empty)))
+      // .orElse(resolveDynamic(uri, base.map(DynamicScope.empty.push(_)).getOrElse(DynamicScope.empty)))
     }
   }
 
