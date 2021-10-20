@@ -19,53 +19,49 @@ trait SchemaResolver {
   // TODO remove Option?
   val base: Option[URI] = None
 
-  protected def resolve(uri: URI): Option[Resolution]                             = None
-  protected def resolveDynamic(uri: URI, scope: DynamicScope): Option[Resolution] = None
+  protected def resolve(uri: URI): Option[Resolution] = None
+  protected def isDynamic(uri: URI): Boolean          = false
 
   def resolveDynamicRef(ref: String, scope: DynamicScope): Option[Resolution] = {
-    def uri = URI.create(ref)
-    if (uri.isAbsolute()) {
-      resolveDynamic(uri, scope)
+    absolute(ref)
+      .flatMap(resolveDynamicRef(_, scope))
+  }
+
+  private def resolveDynamicRef(uri: URI, scope: DynamicScope): Option[Resolution] = {
+    val resolved = resolveRef(uri)
+
+    val dynamic  = isDynamic(uri) || resolved.flatMap(_._2.base).exists(isDynamic(_))
+    val fragment = uri.getFragment()
+    if (dynamic && fragment != null) {
+      scope.candidates
+        .map(DynamicScope.withFragment(_, fragment))
+        .filter(isDynamic(_))
+        .flatMap(resolve(_))
+        .headOption
     } else {
-      base
-        .map(_.resolve(uri))
-        .flatMap(resolveDynamic(_, scope))
+      resolved
     }
+  }
+
+  private def absolute(ref: String): Option[URI] = {
+    val uri = URI.create(ref)
+    Some(uri)
+      .filter(_.isAbsolute())
+      .orElse(base.map(_.resolve(uri)))
   }
 
   def resolveRef(ref: String): Option[Resolution] = {
-    resolveRef(URI.create(ref))
+    absolute(ref)
+      .flatMap(resolveRef(_))
   }
 
-  def resolveRef(uri: URI): Option[Resolution] = {
-    // println("FW", base, uri)
-    if (base.map(DynamicScope.withoutFragement(_)).contains(DynamicScope.withoutFragement(uri))) {
-      println("FW BOOM", this)
-      return None
-    }
-    if (uri.isAbsolute()) {
-      if (uri.getFragment != null) {
-        // TODO this is not supposed to happen?
-        val uriWithoutFragment = new URI(uri.getScheme(), uri.getSchemeSpecificPart(), null)
-        val pointer            = Pointer.parse(uri.getFragment())
-        resolve(uriWithoutFragment)
-          .flatMap(resolvePointer(_, pointer))
-      } else {
-        resolve(uri)
-      }
-    } else if (uri.getFragment != null && uri.getFragment.startsWith("/")) {
+  private def resolveRef(uri: URI): Option[Resolution] = {
+    if (uri.getFragment != null && uri.getFragment.startsWith("/")) {
       val pointer = Pointer.parse(uri.getFragment())
-      base
-        .flatMap(resolve(_))
-        // .orElse(resolveDynamic(uri, DynamicScope.empty))
+      resolve(DynamicScope.withoutFragement(uri))
         .flatMap(resolvePointer(_, pointer))
     } else {
-      println("FW1313", uri)
-      base
-        .map(_.resolve(uri))
-        .flatMap(resolve(_))
-        .orElse(resolve(uri))
-      // .orElse(resolveDynamic(uri, base.map(DynamicScope.empty.push(_)).getOrElse(DynamicScope.empty)))
+      resolve(uri)
     }
   }
 

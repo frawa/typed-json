@@ -77,35 +77,9 @@ case class LoadedSchemasResolver(
   def addDynamic(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
     add(uri, schema).copy(dynamicSchemas = dynamicSchemas + uri)
 
-  private def withBase(uri: URI): LoadedSchemasResolver = this.copy(base = Some(uri))
+  def withBase(uri: URI): LoadedSchemasResolver = this.copy(base = Some(uri))
 
-  override def resolve(uri: URI): Option[Resolution] = schemas.get(uri).map((_, withBase(uri)))
+  override protected def resolve(uri: URI): Option[Resolution] = schemas.get(uri).map((_, withBase(uri)))
+  override protected def isDynamic(uri: URI): Boolean          = dynamicSchemas.contains(uri)
 
-  override def resolveDynamic(uri: URI, scope: DynamicScope): Option[Resolution] = {
-    if (uri.getFragment != null) {
-      val fragment = uri.getFragment()
-      val selfCandidate = scope.candidates.lastOption
-        .map(DynamicScope.withFragment(_, fragment))
-        .filter(dynamicSchemas.contains(_))
-        .orElse(Some(uri))
-        .filter(dynamicSchemas.contains(_))
-      val dynamicly = selfCandidate
-        .filter(dynamicSchemas.contains(_))
-        .flatMap { self =>
-          scope.candidates
-            .map(DynamicScope.withFragment(_, fragment))
-            .filter(dynamicSchemas.contains(_))
-            .flatMap { candidate =>
-              schemas
-                .get(candidate)
-                .map((_, withBase(candidate)))
-            }
-            .headOption
-        }
-        .orElse(resolve(uri))
-      return dynamicly
-    } else {
-      None
-    }
-  }
 }
