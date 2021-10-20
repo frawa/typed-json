@@ -23,14 +23,13 @@ trait SchemaResolver {
   protected def isDynamic(uri: URI): Boolean          = false
 
   def resolveDynamicRef(ref: String, scope: DynamicScope): Option[Resolution] = {
-    absolute(ref)
-      .flatMap(resolveDynamicRef(_, scope))
+    resolveDynamicRef(absolute(ref), scope)
   }
 
   private def resolveDynamicRef(uri: URI, scope: DynamicScope): Option[Resolution] = {
     val resolved = resolveRef(uri)
 
-    val dynamic  = isDynamic(uri) || resolved.flatMap(_._2.base).exists(isDynamic(_))
+    val dynamic  = isDynamic(uri)
     val fragment = uri.getFragment()
     if (dynamic && fragment != null) {
       scope.candidates
@@ -38,21 +37,22 @@ trait SchemaResolver {
         .filter(isDynamic(_))
         .flatMap(resolve(_))
         .headOption
+        .orElse(resolved)
     } else {
       resolved
     }
   }
 
-  private def absolute(ref: String): Option[URI] = {
+  def absolute(ref: String): URI = {
     val uri = URI.create(ref)
     Some(uri)
       .filter(_.isAbsolute())
       .orElse(base.map(_.resolve(uri)))
+      .getOrElse(uri)
   }
 
   def resolveRef(ref: String): Option[Resolution] = {
-    absolute(ref)
-      .flatMap(resolveRef(_))
+    resolveRef(absolute(ref))
   }
 
   private def resolveRef(uri: URI): Option[Resolution] = {

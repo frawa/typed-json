@@ -248,7 +248,7 @@ case class Checks(
             .getOrElse(Left(Seq(SchemaError(s"""missing reference "${ref}""""))))
           schema    = resolution._1
           resolver1 = resolution._2
-          checks <- Checks.parseKeywords(schema, scope1.push(URI.create(ref)))(resolver1)
+          checks <- Checks.parseKeywords(schema, scope1.push(resolver.absolute(ref)))(resolver1)
         } yield {
           withChecks(checks)(identity)
         }
@@ -264,7 +264,7 @@ case class Checks(
           resolveLater = { () =>
             val schema    = resolution._1
             val resolver1 = resolution._2
-            Checks.parseKeywords(schema, scope1.push(resolver1.base.getOrElse(URI.create("?"))))(resolver1)
+            Checks.parseKeywords(schema, scope1.push(resolver.absolute(ref)))(resolver1)
           }
         } yield {
           withCheck(DynamicRefCheck(resolveLater))
@@ -504,6 +504,9 @@ object Checks {
   def parseKeywords(schema: SchemaValue, scope: DynamicScope)(implicit
       resolver: SchemaResolver
   ): Either[SchemaErrors, Checks] = {
+    val scope1 = (Pointer.empty / "$id")(schema.value)
+      .map { case StringValue(id) => scope.push(resolver.absolute(id)) }
+      .getOrElse(scope)
     schema.value match {
       case BoolValue(v) => Right(Checks(schema).withCheck(TrivialCheck(v)))
       case ObjectValue(keywords) =>
@@ -514,7 +517,7 @@ object Checks {
             .foldLeft[Either[SchemaErrors, Checks]](Right(Checks(schema))) { case (checks, (keyword, value)) =>
               val prefix = Pointer.empty / keyword
               checks
-                .flatMap(_.withKeyword(keyword, value, scope))
+                .flatMap(_.withKeyword(keyword, value, scope1))
                 .swap
                 .map(_.map(_.prefix(prefix)))
                 .swap

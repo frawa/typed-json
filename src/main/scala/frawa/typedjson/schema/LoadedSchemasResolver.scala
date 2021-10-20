@@ -36,20 +36,17 @@ object LoadedSchemasResolver {
           .foldLeft(loaded) { case (loaded, (property, propertyValue)) =>
             (property, propertyValue) match {
               case ("$id", StringValue(id)) =>
-                val uri  = URI.create(id).normalize()
-                val uri1 = new URI(uri.getScheme, uri.getSchemeSpecificPart, null)
-                loaded.add(uri1, SchemaValue(value)).withBase(uri1)
+                val uri = loaded.absolute(id)
+                // val uri1 = new URI(uri.getScheme, uri.getSchemeSpecificPart, null)
+                // loaded.add(uri1, SchemaValue(value)).withBase(uri1)
+                // println("FW add", uri)
+                loaded.add(uri, SchemaValue(value)).withBase(uri)
               case ("$anchor", StringValue(anchor)) =>
-                val fragment = URI.create("#" + anchor)
-                val uri = loaded.base
-                  .map(_.resolve(fragment))
-                  .getOrElse(fragment)
+                val uri = loaded.absolute("#" + anchor)
                 loaded.add(uri, SchemaValue(value))
               case ("$dynamicAnchor", StringValue(anchor)) =>
-                val fragment = URI.create("#" + anchor)
-                val uri = loaded.base
-                  .map(_.resolve(fragment))
-                  .getOrElse(fragment)
+                val uri = loaded.absolute("#" + anchor)
+                // println("FW add dynamic", uri)
                 loaded.addDynamic(uri, SchemaValue(value))
               case _ => loaded.addAll(loadSchemas(propertyValue, loaded))
             }
