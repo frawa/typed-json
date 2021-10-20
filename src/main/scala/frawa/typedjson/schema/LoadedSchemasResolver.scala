@@ -32,15 +32,20 @@ object LoadedSchemasResolver {
   private def loadSchemas(value: Value, loaded: LoadedSchemasResolver): LoadedSchemasResolver = {
     value match {
       case ObjectValue(properties) =>
+        val loaded1 = properties
+          .get("$id")
+          .flatMap {
+            case StringValue(id) => Some(loaded.absolute(id))
+            case _               => None
+          }
+          .map(uri => loaded.add(uri, SchemaValue(value)).withBase(DynamicScope.withoutFragement(uri)))
+          .getOrElse(loaded)
         properties
-          .foldLeft(loaded) { case (loaded, (property, propertyValue)) =>
+          .foldLeft(loaded1) { case (loaded, (property, propertyValue)) =>
             (property, propertyValue) match {
               case ("$id", StringValue(id)) =>
-                val uri = loaded.absolute(id)
-                // val uri1 = new URI(uri.getScheme, uri.getSchemeSpecificPart, null)
-                // loaded.add(uri1, SchemaValue(value)).withBase(uri1)
-                // println("FW add", uri)
-                loaded.add(uri, SchemaValue(value)).withBase(uri)
+                // already handled with loaded1
+                loaded
               case ("$anchor", StringValue(anchor)) =>
                 val uri = loaded.absolute("#" + anchor)
                 loaded.add(uri, SchemaValue(value))
