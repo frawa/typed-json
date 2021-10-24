@@ -29,14 +29,15 @@ trait SchemaResolver {
   private def resolveDynamicRef(uri: URI, scope: DynamicScope): Option[Resolution] = {
     val resolved = resolveRef(uri)
 
-    val dynamic  = isDynamic(uri)
     val fragment = uri.getFragment()
+    val dynamic = isDynamic(uri) ||
+      scope.candidates.lastOption.map(DynamicScope.withFragment(_, fragment)).exists(isDynamic((_)))
     if (dynamic && fragment != null) {
       scope.candidates
         .map(DynamicScope.withFragment(_, fragment))
         .filter(isDynamic(_))
-        .flatMap(resolve(_))
         .headOption
+        .flatMap(resolve(_))
         .orElse(resolved)
     } else {
       resolved

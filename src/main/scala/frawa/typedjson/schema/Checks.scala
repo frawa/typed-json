@@ -264,7 +264,8 @@ case class Checks(
           resolveLater = { () =>
             val schema    = resolution._1
             val resolver1 = resolution._2
-            Checks.parseKeywords(schema, scope1.push(resolver.absolute(ref)))(resolver1)
+            // Checks.parseKeywords(schema, scope1.push(resolver.absolute(ref)))(resolver1)
+            Checks.parseKeywords(schema, scope1)(resolver1)
           }
         } yield {
           withCheck(DynamicRefCheck(resolveLater))

@@ -51,7 +51,6 @@ object LoadedSchemasResolver {
                 loaded.add(uri, SchemaValue(value))
               case ("$dynamicAnchor", StringValue(anchor)) =>
                 val uri = loaded.absolute("#" + anchor)
-                // println("FW add dynamic", uri)
                 loaded.addDynamic(uri, SchemaValue(value))
               case _ => loaded.addAll(loadSchemas(propertyValue, loaded))
             }
