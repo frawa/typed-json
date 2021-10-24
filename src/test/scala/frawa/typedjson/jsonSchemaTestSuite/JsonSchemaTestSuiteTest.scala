@@ -33,28 +33,17 @@ class JsonSchemaTestSuiteTest extends FunSuite {
     "anchor.json",
     "content.json",
     "defs.json", // TODO 4
-    // "dynamicRef.json", // TODO 2
-    "id.json",  // TODO last
-    "ref.json", // TODO 4, stackoverflow
+    "id.json",   // TODO last
+    "ref.json",  // TODO 4, stackoverflow
     "refRemote.json",
     "unevaluatedItems.json",
     "unevaluatedProperties.json",
     "unknownKeyword.json"
   )
 
-  val takeOnly: Option[Int] = None
-  // val takeOnly: Option[Int] = Some(33)
-
-  // val only: Option[String] = None
-  val only: Option[String]   = Some("dynamicRef.json")
+  val takeOnly: Option[Int]  = None
+  val only: Option[String]   = None
   val onlyId: Option[String] = None
-  // val onlyId: Option[String] = Some("https://test.json-schema.org/dynamicRef-anchor-same-schema/root")
-  // val onlyId: Option[String] = Some("https://test.json-schema.org/typical-dynamic-resolution/root")
-  // val onlyId: Option[String] = Some("https://test.json-schema.org/dynamic-resolution-ignores-anchors/root")
-  // val onlyId: Option[String] = Some("https://test.json-schema.org/dynamic-ref-leaving-dynamic-scope/main")
-  // val onlyId: Option[String] = Some("https://test.json-schema.org/dynamic-ref-with-multiple-paths/main")
-  // val onlyId: Option[String] = Some("https://test.json-schema.org/dynamic-resolution-without-bookend/root")
-  // val onlyId: Option[String] = Some("https://test.json-schema.org/dynamic-ref-with-multiple-paths/main")
 
   override def munitIgnore: Boolean = !Files.exists(jsonSchemaTestSuiteRoot)
 
