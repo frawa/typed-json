@@ -50,7 +50,7 @@ object Processor {
   }
 
   private def all[R](checker: Checker[R], checks: Checks): ProcessFun[R] = {
-    seq(checks.checks.map(one(checker, _)))
+    seq(checks.checks.map(one(checker, _))).andThen(_.withIgnored(checks.ignoredKeywords))
   }
 
   private def noop[R]: ProcessFun[R]                                            = _ => Checked.valid[R]
@@ -126,7 +126,7 @@ object Processor {
       case c: OneOfCheck            => checkApplicator(checker, c.checks)(checker.nested(check))
       case c: IfThenElseCheck       => checkIfThenElse(checker, c)
       case c: PropertyNamesCheck    => checkPropertyNames(checker, c)
-      case c: LazyResolveCheck      => checkDynamicRef(checker, c)
+      case c: LazyResolveCheck      => checkLazyResolve(checker, c)
       case c: DependentSchemasCheck => checkDependentSchemas(checker, c)
       case c: ContainsCheck         => checkContains(checker, c)
     }
@@ -205,7 +205,7 @@ object Processor {
     }
   }
 
-  private def checkDynamicRef[R](checker: Checker[R], check: LazyResolveCheck): ProcessFun[R] = {
+  private def checkLazyResolve[R](checker: Checker[R], check: LazyResolveCheck): ProcessFun[R] = {
     check
       .resolve()
       .map(all(checker, _))

@@ -70,8 +70,9 @@ case class DependentSchemasCheck(checks: Map[String, Checks])                ext
 case class ContainsCheck(schema: Option[Checks] = None, min: Option[Int] = None, max: Option[Int] = None)
     extends NestingCheck
 
-case class Checked[R](valid: Boolean, results: Seq[R], count: Int) {
+case class Checked[R](valid: Boolean, results: Seq[R], count: Int, ignoredKeywords: Seq[String] = Seq.empty) {
   def add(others: Seq[Checked[R]]): Checked[R] = Checked(valid, results, count + Checked.count(others))
+  def withIgnored(ignored: Set[String])        = this.copy(ignoredKeywords = this.ignoredKeywords ++ ignored)
 }
 
 object Checked {
@@ -82,7 +83,8 @@ object Checked {
   def merge[R](checked: Seq[Checked[R]]): Checked[R] = {
     val valid           = checked.forall(_.valid)
     val results: Seq[R] = checked.flatMap(_.results)
-    Checked(valid, results, 1 + count(checked))
+    val ignoredKeywords = checked.flatMap(_.ignoredKeywords)
+    Checked(valid, results, 1 + count(checked), ignoredKeywords)
   }
   def count[R](checked: Seq[Checked[R]]): Int = checked.map(_.count).sum
 }
