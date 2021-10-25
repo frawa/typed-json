@@ -13,8 +13,11 @@ import scala.reflect.internal.Reporter
 import java.net.URI
 import scala.reflect.ClassTag
 
-trait SchemaResolver {
+object SchemaResolver {
   type Resolution = (SchemaValue, SchemaResolver)
+}
+trait SchemaResolver {
+  type Resolution = SchemaResolver.Resolution
 
   // TODO remove Option?
   val base: Option[URI] = None
@@ -46,10 +49,21 @@ trait SchemaResolver {
 
   def absolute(ref: String): URI = {
     val uri = URI.create(ref)
-    Some(uri)
-      .filter(_.isAbsolute())
-      .orElse(base.map(_.resolve(uri)))
-      .getOrElse(uri)
+    withoutEmptyFragment(
+      Some(uri)
+        .filter(_.isAbsolute())
+        .orElse(base.map(_.resolve(uri)))
+        .getOrElse(uri)
+    )
+  }
+
+  private def withoutEmptyFragment(uri: URI): URI = {
+    val fragment = uri.getFragment()
+    if (fragment != null && fragment.isEmpty()) {
+      DynamicScope.withoutFragement(uri)
+    } else {
+      uri
+    }
   }
 
   def resolveRef(ref: String): Option[Resolution] = {

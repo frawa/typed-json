@@ -126,7 +126,7 @@ object Processor {
       case c: OneOfCheck            => checkApplicator(checker, c.checks)(checker.nested(check))
       case c: IfThenElseCheck       => checkIfThenElse(checker, c)
       case c: PropertyNamesCheck    => checkPropertyNames(checker, c)
-      case c: DynamicRefCheck       => checkDynamicRef(checker, c)
+      case c: LazyResolveCheck      => checkDynamicRef(checker, c)
       case c: DependentSchemasCheck => checkDependentSchemas(checker, c)
       case c: ContainsCheck         => checkContains(checker, c)
     }
@@ -205,7 +205,7 @@ object Processor {
     }
   }
 
-  private def checkDynamicRef[R](checker: Checker[R], check: DynamicRefCheck): ProcessFun[R] = {
+  private def checkDynamicRef[R](checker: Checker[R], check: LazyResolveCheck): ProcessFun[R] = {
     check
       .resolve()
       .map(all(checker, _))
