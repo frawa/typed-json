@@ -24,6 +24,7 @@ trait SchemaResolver {
 
   protected def resolve(uri: URI): Option[Resolution] = None
   protected def isDynamic(uri: URI): Boolean          = false
+  def withBase(uri: URI): SchemaResolver              = this
 
   def resolveDynamicRef(ref: String, scope: DynamicScope): Option[Resolution] = {
     resolveDynamicRef(absolute(ref), scope)
@@ -81,7 +82,7 @@ trait SchemaResolver {
   }
 
   private def resolvePointer(resolution: Resolution, pointer: Pointer): Option[Resolution] = {
-    val (schema, scope) = resolution
-    pointer(schema.value).map(SchemaValue(_)).map((_, scope))
+    val (schema, resolver) = resolution
+    pointer(schema.value).map(SchemaValue(_)).map((_, resolver))
   }
 }

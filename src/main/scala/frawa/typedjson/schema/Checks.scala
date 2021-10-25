@@ -422,7 +422,7 @@ case class Checks(
     val resolveLater = { () =>
       val schema    = resolution._1
       val resolver1 = resolution._2
-      Checks.parseKeywords(schema, scope)(resolver)
+      Checks.parseKeywords(schema, scope)(resolver1)
     }
     LazyResolveCheck(resolveLater)
   }
@@ -511,6 +511,9 @@ object Checks {
     val scope1 = (Pointer.empty / "$id")(schema.value)
       .map { case StringValue(id) => scope.push(resolver.absolute(id)) }
       .getOrElse(scope)
+    val resolver1 = (Pointer.empty / "$id")(schema.value)
+      .map { case StringValue(id) => resolver.withBase(resolver.absolute(id)) }
+      .getOrElse(resolver)
     schema.value match {
       case BoolValue(v) => Right(Checks(schema).withCheck(TrivialCheck(v)))
       case ObjectValue(keywords) =>
@@ -521,7 +524,7 @@ object Checks {
             .foldLeft[Either[SchemaErrors, Checks]](Right(Checks(schema))) { case (checks, (keyword, value)) =>
               val prefix = Pointer.empty / keyword
               checks
-                .flatMap(_.withKeyword(keyword, value, scope1))
+                .flatMap(_.withKeyword(keyword, value, scope1)(resolver1))
                 .swap
                 .map(_.map(_.prefix(prefix)))
                 .swap

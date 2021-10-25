@@ -61,6 +61,7 @@ class SchemaResolverTest extends FunSuite {
       case `gnuUri` => Some((gnuSchema, this))
       case _        => None
     }
+
   }
 
   test("absolute ref") {

@@ -78,8 +78,9 @@ case class LoadedSchemasResolver(
   def addDynamic(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
     add(uri, schema).copy(dynamicSchemas = dynamicSchemas + uri)
 
-  def withBase(uri: URI): LoadedSchemasResolver = this.copy(base = Some(uri))
+  override def withBase(uri: URI): LoadedSchemasResolver = this.copy(base = Some(uri))
 
+  // TODO URI instead of Resolution? push base into super
   override protected def resolve(uri: URI): Option[Resolution] = schemas.get(uri).map((_, withBase(uri)))
   override protected def isDynamic(uri: URI): Boolean          = dynamicSchemas.contains(uri)
 
