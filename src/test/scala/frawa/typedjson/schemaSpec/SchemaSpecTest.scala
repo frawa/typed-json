@@ -34,7 +34,7 @@ class SchemaSpecTest extends FunSuite {
           processor <- Processor(schema)(ValidationChecker())
           checked = processor.process(InnerValue(value))
         } yield {
-          f(checked, processor.ignoredKeywords)
+          f(checked, processor.ignoredKeywords ++ checked.ignoredKeywords)
         }
         result.swap
           .map(message => fail("validating spec failed", clues(clue(message))))
