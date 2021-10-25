@@ -77,4 +77,9 @@ class SchemaResolverTest extends FunSuite {
     val resolved = MySchemaResolver.resolveRef("#/$defs/gnu").map(_._1)
     assertEquals(resolved, Some(gnuSchema))
   }
+
+  test("root ref") {
+    val resolved = MySchemaResolver.resolveRef("#").map(_._1)
+    assertEquals(resolved, Some(fooSchema))
+  }
 }
