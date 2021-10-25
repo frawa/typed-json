@@ -50,23 +50,23 @@ case class IfThenElseCheck(
     ifChecks: Option[Checks] = None,
     thenChecks: Option[Checks] = None,
     elseChecks: Option[Checks] = None
-)                                                                           extends NestingCheck
-case class PatternCheck(pattern: String)                                    extends SimpleCheck
-case class FormatCheck(format: String)                                      extends SimpleCheck
-case class MinimumCheck(min: BigDecimal, exclude: Boolean = false)          extends SimpleCheck
-case class UniqueItemsCheck(unique: Boolean)                                extends SimpleCheck
-case class PropertyNamesCheck(checks: Checks)                               extends NestingCheck
-case class DynamicRefCheck(resolve: () => Either[Seq[SchemaError], Checks]) extends NestingCheck
-case class MultipleOfCheck(n: BigDecimal)                                   extends SimpleCheck
-case class MaximumCheck(max: BigDecimal, exclude: Boolean = false)          extends SimpleCheck
-case class MaxLengthCheck(max: BigDecimal)                                  extends SimpleCheck
-case class MinLengthCheck(min: BigDecimal)                                  extends SimpleCheck
-case class MaxItemsCheck(max: BigDecimal)                                   extends SimpleCheck
-case class MinItemsCheck(min: BigDecimal)                                   extends SimpleCheck
-case class MaxPropertiesCheck(max: BigDecimal)                              extends SimpleCheck
-case class MinPropertiesCheck(min: BigDecimal)                              extends SimpleCheck
-case class DependentRequiredCheck(required: Map[String, Seq[String]])       extends SimpleCheck
-case class DependentSchemasCheck(checks: Map[String, Checks])               extends NestingCheck
+)                                                                            extends NestingCheck
+case class PatternCheck(pattern: String)                                     extends SimpleCheck
+case class FormatCheck(format: String)                                       extends SimpleCheck
+case class MinimumCheck(min: BigDecimal, exclude: Boolean = false)           extends SimpleCheck
+case class UniqueItemsCheck(unique: Boolean)                                 extends SimpleCheck
+case class PropertyNamesCheck(checks: Checks)                                extends NestingCheck
+case class LazyResolveCheck(resolve: () => Either[Seq[SchemaError], Checks]) extends NestingCheck
+case class MultipleOfCheck(n: BigDecimal)                                    extends SimpleCheck
+case class MaximumCheck(max: BigDecimal, exclude: Boolean = false)           extends SimpleCheck
+case class MaxLengthCheck(max: BigDecimal)                                   extends SimpleCheck
+case class MinLengthCheck(min: BigDecimal)                                   extends SimpleCheck
+case class MaxItemsCheck(max: BigDecimal)                                    extends SimpleCheck
+case class MinItemsCheck(min: BigDecimal)                                    extends SimpleCheck
+case class MaxPropertiesCheck(max: BigDecimal)                               extends SimpleCheck
+case class MinPropertiesCheck(min: BigDecimal)                               extends SimpleCheck
+case class DependentRequiredCheck(required: Map[String, Seq[String]])        extends SimpleCheck
+case class DependentSchemasCheck(checks: Map[String, Checks])                extends NestingCheck
 case class ContainsCheck(schema: Option[Checks] = None, min: Option[Int] = None, max: Option[Int] = None)
     extends NestingCheck
 
@@ -246,11 +246,9 @@ case class Checks(
             .resolveRef(ref)
             .map(Right(_))
             .getOrElse(Left(Seq(SchemaError(s"""missing reference "${ref}""""))))
-          schema    = resolution._1
-          resolver1 = resolution._2
-          checks <- Checks.parseKeywords(schema, scope1.push(resolver.absolute(ref)))(resolver1)
+          check = lazyResolveCheck(resolution, scope1)
         } yield {
-          withChecks(checks)(identity)
+          withCheck(check)
         }
       }
 
@@ -260,15 +258,9 @@ case class Checks(
             .resolveDynamicRef(ref, scope)
             .map(Right(_))
             .getOrElse(Left(Seq(SchemaError(s"""missing dynamic reference "${ref}""""))))
-
-          resolveLater = { () =>
-            val schema    = resolution._1
-            val resolver1 = resolution._2
-            // Checks.parseKeywords(schema, scope1.push(resolver.absolute(ref)))(resolver1)
-            Checks.parseKeywords(schema, scope1)(resolver1)
-          }
+          check = lazyResolveCheck(resolution, scope1)
         } yield {
-          withCheck(DynamicRefCheck(resolveLater))
+          withCheck(check)
         }
       }
 
@@ -422,6 +414,17 @@ case class Checks(
 
       case _ => Right(withIgnored(keyword))
     }
+  }
+
+  private def lazyResolveCheck(resolution: SchemaResolver.Resolution, scope: DynamicScope)(implicit
+      resolver: SchemaResolver
+  ): LazyResolveCheck = {
+    val resolveLater = { () =>
+      val schema    = resolution._1
+      val resolver1 = resolution._2
+      Checks.parseKeywords(schema, scope)(resolver)
+    }
+    LazyResolveCheck(resolveLater)
   }
 
   private def mapChecksFor(

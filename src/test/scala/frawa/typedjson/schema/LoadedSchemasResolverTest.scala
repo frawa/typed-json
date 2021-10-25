@@ -203,14 +203,14 @@ class LoadedSchemasResolverTest extends FunSuite {
     ) { resolver =>
       val uriRoot = URI.create(id)
 
-      assertEquals(resolver.dynamicSchemas, Set(URI.create("list#items")))
+      assertEquals(resolver.dynamicSchemas, Set(uriRoot.resolve(URI.create("list#items"))))
       assertEquals(
         resolver.schemas.keySet,
         Set(
           uriRoot,
           URI.create(s"${id}#items"),
-          URI.create("list"),
-          URI.create("list#items")
+          uriRoot.resolve(URI.create("list")),
+          uriRoot.resolve(URI.create("list#items"))
         )
       )
 
@@ -265,7 +265,7 @@ class LoadedSchemasResolverTest extends FunSuite {
 
       assertEquals(
         resolver.dynamicSchemas,
-        Set(URI.create(s"${id}#items"), URI.create("list#items"))
+        Set(URI.create(s"${id}#items"), uriRoot.resolve(URI.create("list#items")))
       )
       assertEquals(
         resolver.schemas.keySet,
@@ -273,8 +273,8 @@ class LoadedSchemasResolverTest extends FunSuite {
           uriRoot,
           URI.create("https://example.net/root"),
           URI.create("https://example.net/root#items"),
-          URI.create("list"),
-          URI.create("list#items")
+          uriRoot.resolve(URI.create("list")),
+          uriRoot.resolve(URI.create("list#items"))
         )
       )
 
