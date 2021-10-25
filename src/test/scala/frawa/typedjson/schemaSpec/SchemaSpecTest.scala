@@ -46,7 +46,7 @@ class SchemaSpecTest extends FunSuite {
   test("validate core against core") {
     validateSpec("core", "core") { (checked, ignored) =>
       assertEquals(checked.results, Seq())
-      assertEquals(checked.count, 50)
+      assertEquals(checked.count, 54)
       assertEquals(
         ignored,
         Set("$vocabulary", "$schema")
@@ -57,7 +57,7 @@ class SchemaSpecTest extends FunSuite {
   test("validate core against validation") {
     validateSpec("core", "validation") { (checked, ignored) =>
       assertEquals(checked.results, Seq())
-      assertEquals(checked.count, 19)
+      assertEquals(checked.count, 22)
       assertEquals(
         ignored,
         Set("$vocabulary", "$schema")
@@ -79,7 +79,7 @@ class SchemaSpecTest extends FunSuite {
   test("validate validation against core") {
     validateSpec("validation", "core") { (checked, ignored) =>
       assertEquals(checked.results, Seq())
-      assertEquals(checked.count, 60)
+      assertEquals(checked.count, 65)
       assertEquals(
         ignored,
         Set("$vocabulary", "$schema")
@@ -90,7 +90,7 @@ class SchemaSpecTest extends FunSuite {
   test("validate validation against validation") {
     validateSpec("validation", "validation") { (checked, ignored) =>
       assertEquals(checked.results, Seq())
-      assertEquals(checked.count, 19)
+      assertEquals(checked.count, 22)
       assertEquals(
         ignored,
         Set("$vocabulary", "$schema")
@@ -101,7 +101,7 @@ class SchemaSpecTest extends FunSuite {
   test("validate validation against applicator") {
     validateSpec("validation", "applicator") { (checked, ignored) =>
       assertEquals(checked.results, Seq())
-      assertEquals(checked.count, 167)
+      assertEquals(checked.count, 168)
       assertEquals(
         ignored,
         Set("$vocabulary", "$schema")
