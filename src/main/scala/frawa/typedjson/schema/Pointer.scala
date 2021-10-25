@@ -18,7 +18,7 @@ object Pointer {
           .replace("~0", "~")
       )
       .filter(_.length() > 0)
-      .map(FieldToken(_))
+      .map(t => t.toIntOption.map(ArrayIndexToken(_)).getOrElse(FieldToken(t)))
   )
 
 }
@@ -60,7 +60,8 @@ case class ArrayIndexToken(index: Int) extends Token {
       } else {
         None
       }
-    case _ => None
+    case ObjectValue(properties) => properties.get(index.toString)
+    case _                       => None
   }
 }
 case class FieldToken(field: String) extends Token {

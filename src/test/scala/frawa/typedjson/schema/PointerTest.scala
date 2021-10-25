@@ -73,4 +73,30 @@ class PointerTest extends FunSuite {
     assertEquals((Pointer.empty / "bar")(value), None)
   }
 
+  test("parsing roundtrip") {
+    assertEquals(Pointer.parse(Pointer.empty.toString), Pointer.empty)
+    val p1 = Pointer.empty / "foo"
+    assertEquals(Pointer.parse(p1.toString), p1)
+    val p2 = Pointer.empty / "foo" / 13
+    assertEquals(Pointer.parse(p2.toString), p2)
+
+    val s1 = ""
+    assertEquals(Pointer.parse(s1).toString, s1)
+    val s2 = "/foo"
+    assertEquals(Pointer.parse(s2).toString, s2)
+    val s3 = "/foo/13"
+    assertEquals(Pointer.parse(s3).toString, s3)
+  }
+
+  test("get parsed array item") {
+    val value = ArrayValue(Seq(NumberValue(13), NumberValue(14)))
+    assertEquals(Pointer.parse("/1")(value), Some(NumberValue(14)))
+    assertEquals(Pointer.parse("/13")(value), None)
+  }
+
+  test("parsed object field item") {
+    val value = ObjectValue(Map("foo" -> NumberValue(13), "14" -> NumberValue(14)))
+    assertEquals(Pointer.parse("/foo")(value), Some(NumberValue(13)))
+    assertEquals(Pointer.parse("/14")(value), Some(NumberValue(14)))
+  }
 }
