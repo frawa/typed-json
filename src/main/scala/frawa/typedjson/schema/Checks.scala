@@ -180,6 +180,17 @@ case class Checks(
           }
         }
 
+      case ("unevaluatedProperties", value) =>
+        // TODO needs to be implemented against "annotation results"
+        // for now mapping on additionalProperties ...
+        for {
+          checks <- Checks.parseKeywords(SchemaValue(value), scope1)
+        } yield {
+          withChecks(checks) { checks =>
+            updateCheck(ObjectPropertiesCheck())(check => check.copy(additionalProperties = Some(checks)))
+          }
+        }
+
       case ("required", ArrayValue(values)) => {
         def names = toStrings(values)
         Right(withCheck(ObjectRequiredCheck(names)))
