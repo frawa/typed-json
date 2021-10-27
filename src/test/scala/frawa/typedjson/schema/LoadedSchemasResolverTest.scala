@@ -158,7 +158,6 @@ class LoadedSchemasResolverTest extends FunSuite {
     ) { resolver =>
       val uriRoot1 = URI.create(id1)
       val uriRoot2 = URI.create(id2)
-      val getId    = Pointer.empty / "$id"
 
       val scope1 = DynamicScope.empty.push(uriRoot1)
       val scope2 = DynamicScope.empty.push(uriRoot2).push(uriRoot1)
@@ -168,11 +167,11 @@ class LoadedSchemasResolverTest extends FunSuite {
       val Some((idA, idB)) = for {
         (schemaA, _) <- resolver1.resolveDynamicRef("#anchor1", scope2)
         (schemaB, _) <- resolver1.resolveDynamicRef("#anchor1", scope1)
-        idA          <- getId(schemaA.value)
-        idB          <- getId(schemaB.value)
+        idA          <- SchemaValue.id(schemaA)
+        idB          <- SchemaValue.id(schemaB)
       } yield ((idA, idB))
-      assertEquals(idA, StringValue(id2))
-      assertEquals(idB, StringValue(id1))
+      assertEquals(idA, id2)
+      assertEquals(idB, id1)
     }
   }
 
@@ -214,14 +213,13 @@ class LoadedSchemasResolverTest extends FunSuite {
         )
       )
 
-      val getId      = Pointer.empty / "$id"
       val getAnchor  = Pointer.empty / "$anchor"
       val getComment = Pointer.empty / "$comment"
 
       val scope = DynamicScope.empty.push(uriRoot)
       val ok = for {
         (schema1, resolver1) <- resolver.resolveRef(id)
-        StringValue(id1)     <- getId(schema1.value)
+        id1                  <- SchemaValue.id(schema1)
         (schema2, resolver2) <- resolver1.resolveDynamicRef("#items", scope)
         StringValue(anchor2) <- getAnchor(schema2.value)
       } yield {
@@ -278,14 +276,13 @@ class LoadedSchemasResolverTest extends FunSuite {
         )
       )
 
-      val getId            = Pointer.empty / "$id"
       val getDynamicAnchor = Pointer.empty / "$dynamicAnchor"
       val getType          = Pointer.empty / "type"
 
       val scope = DynamicScope.empty.push(uriRoot)
       val ok = for {
         (schema1, resolver1)        <- resolver.resolveRef(id)
-        StringValue(id1)            <- getId(schema1.value)
+        id1                         <- SchemaValue.id(schema1)
         (schema2, resolver2)        <- resolver1.resolveDynamicRef("#items", scope)
         StringValue(dynamicAnchor2) <- getDynamicAnchor(schema2.value)
         StringValue(type2)          <- getType(schema2.value)

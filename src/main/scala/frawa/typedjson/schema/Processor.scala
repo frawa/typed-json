@@ -21,6 +21,13 @@ object SchemaValue {
     for {
       value <- parser.parse(json)
     } yield SchemaValue(value)
+
+  def id(schema: SchemaValue): Option[String] = {
+    (Pointer.empty / "$id")(schema.value).flatMap {
+      case StringValue(id) => Some(id)
+      case _               => None
+    }
+  }
 }
 
 // case object RootSchemaResolver extends SchemaResolver {
@@ -41,6 +48,7 @@ object Processor {
   type MergeFun[R]   = Seq[Checked[R]] => ProcessFun[R]
 
   def apply[R](schema: SchemaValue)(checker: Checker[R]): Either[SchemaErrors, Processor[R]] = {
+    // fallback resolver for 'remote' URIs?
     implicit val resolver = LoadedSchemasResolver(schema)
     val scope             = resolver.base.map(DynamicScope.empty.push(_)).getOrElse(DynamicScope.empty)
     for {

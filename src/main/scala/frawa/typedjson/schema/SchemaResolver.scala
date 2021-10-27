@@ -16,6 +16,7 @@ import scala.reflect.ClassTag
 object SchemaResolver {
   type Resolution = (SchemaValue, SchemaResolver)
 }
+
 trait SchemaResolver {
   type Resolution = SchemaResolver.Resolution
 
