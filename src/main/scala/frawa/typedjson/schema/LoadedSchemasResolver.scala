@@ -13,14 +13,14 @@ import scala.reflect.internal.Reporter
 import java.net.URI
 
 object LoadedSchemasResolver {
+  type LazyResolver = URI => Option[SchemaValue]
+
   val empty = LoadedSchemasResolver(None)
 
   def apply(schema: SchemaValue): LoadedSchemasResolver = {
-    val firstId = (Pointer.empty / "$id")(schema.value)
-      .flatMap {
-        case StringValue(id) => Some(URI.create(id))
-        case _               => None
-      }
+    val firstId = SchemaValue
+      .id(schema)
+      .map(URI.create(_))
       .getOrElse(URI.create(""))
     val first = empty.add(firstId, schema).withBase(firstId)
     loadSchemas(schema.value, first)
@@ -64,7 +64,8 @@ object LoadedSchemasResolver {
 case class LoadedSchemasResolver(
     override val base: Option[URI],
     schemas: Map[URI, SchemaValue] = Map.empty,
-    dynamicSchemas: Set[URI] = Set.empty
+    dynamicSchemas: Set[URI] = Set.empty,
+    lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
 ) extends SchemaResolver {
 
   def add(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
@@ -81,7 +82,10 @@ case class LoadedSchemasResolver(
   override def withBase(uri: URI): LoadedSchemasResolver = this.copy(base = Some(uri))
 
   // TODO URI instead of Resolution? push base into super
-  override protected def resolve(uri: URI): Option[Resolution] = schemas.get(uri).map((_, withBase(uri)))
-  override protected def isDynamic(uri: URI): Boolean          = dynamicSchemas.contains(uri)
+  override protected def resolve(uri: URI): Option[Resolution] = schemas
+    .get(uri)
+    .orElse(lazyResolver.flatMap(_.apply(uri)))
+    .map((_, withBase(uri)))
+  override protected def isDynamic(uri: URI): Boolean = dynamicSchemas.contains(uri)
 
 }

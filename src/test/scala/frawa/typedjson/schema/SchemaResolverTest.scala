@@ -83,4 +83,5 @@ class SchemaResolverTest extends FunSuite {
     val resolved = MySchemaResolver.resolveRef("#").map(_._1)
     assertEquals(resolved, Some(fooSchema))
   }
+
 }
