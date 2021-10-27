@@ -44,7 +44,7 @@ class SchemaSpecTest extends FunSuite {
   }
 
   test("validate core against core") {
-    validateSpec("core", "core") { (checked, ignored) =>
+    validateSpec("meta/core", "meta/core") { (checked, ignored) =>
       assertEquals(checked.results, Seq())
       assertEquals(checked.count, 54)
       assertEquals(
@@ -55,7 +55,7 @@ class SchemaSpecTest extends FunSuite {
   }
 
   test("validate core against validation") {
-    validateSpec("core", "validation") { (checked, ignored) =>
+    validateSpec("meta/core", "meta/validation") { (checked, ignored) =>
       assertEquals(checked.results, Seq())
       assertEquals(checked.count, 22)
       assertEquals(
@@ -66,7 +66,7 @@ class SchemaSpecTest extends FunSuite {
   }
 
   test("validate core against applicator") {
-    validateSpec("core", "applicator") { (checked, ignored) =>
+    validateSpec("meta/core", "meta/applicator") { (checked, ignored) =>
       assertEquals(checked.results, Seq())
       assertEquals(checked.count, 84)
       assertEquals(
@@ -77,7 +77,7 @@ class SchemaSpecTest extends FunSuite {
   }
 
   test("validate validation against core") {
-    validateSpec("validation", "core") { (checked, ignored) =>
+    validateSpec("meta/validation", "meta/core") { (checked, ignored) =>
       assertEquals(checked.results, Seq())
       assertEquals(checked.count, 65)
       assertEquals(
@@ -88,7 +88,7 @@ class SchemaSpecTest extends FunSuite {
   }
 
   test("validate validation against validation") {
-    validateSpec("validation", "validation") { (checked, ignored) =>
+    validateSpec("meta/validation", "meta/validation") { (checked, ignored) =>
       assertEquals(checked.results, Seq())
       assertEquals(checked.count, 22)
       assertEquals(
@@ -99,7 +99,7 @@ class SchemaSpecTest extends FunSuite {
   }
 
   test("validate validation against applicator") {
-    validateSpec("validation", "applicator") { (checked, ignored) =>
+    validateSpec("meta/validation", "meta/applicator") { (checked, ignored) =>
       assertEquals(checked.results, Seq())
       assertEquals(checked.count, 168)
       assertEquals(
