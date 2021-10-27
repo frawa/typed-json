@@ -521,11 +521,13 @@ object Checks {
   def parseKeywords(schema: SchemaValue, scope: DynamicScope)(implicit
       resolver: SchemaResolver
   ): Either[SchemaErrors, Checks] = {
-    val scope1 = (Pointer.empty / "$id")(schema.value)
-      .map { case StringValue(id) => scope.push(resolver.absolute(id)) }
+    val scope1 = SchemaValue
+      .id(schema)
+      .map(id => scope.push(resolver.absolute(id)))
       .getOrElse(scope)
-    val resolver1 = (Pointer.empty / "$id")(schema.value)
-      .map { case StringValue(id) => resolver.withBase(resolver.absolute(id)) }
+    val resolver1 = SchemaValue
+      .id(schema)
+      .map(id => resolver.withBase(resolver.absolute(id)))
       .getOrElse(resolver)
     schema.value match {
       case BoolValue(v) => Right(Checks(schema).withCheck(TrivialCheck(v)))
