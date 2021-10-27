@@ -33,8 +33,8 @@ class JsonSchemaTestSuiteTest extends FunSuite {
   val skip = Set(
     "anchor.json",
     "content.json",
-    "defs.json", // TODO meta schema
-    "id.json",   // TODO meta schema
+    "defs.json", // TODO meta schema with ignored keywords: deprecated, $vocabulary, $schema
+    "id.json",   // TODO $id in enum is not an id
     "refRemote.json",
     "unevaluatedItems.json",
     "unevaluatedProperties.json",
