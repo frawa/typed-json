@@ -18,15 +18,24 @@ object LoadedSchemasResolver {
   val empty = LoadedSchemasResolver(None)
 
   def apply(schema: SchemaValue): LoadedSchemasResolver = {
+    apply(schema, None)
+  }
+
+  def apply(schema: SchemaValue, lazyResolver: Option[LazyResolver]): LoadedSchemasResolver = {
     val firstId = SchemaValue
       .id(schema)
       .map(URI.create(_))
       .getOrElse(URI.create(""))
-    val first = empty.add(firstId, schema).withBase(firstId)
+    val zero  = lazyResolver.map(empty.withLazyResolver(_)).getOrElse(empty)
+    val first = zero.add(firstId, schema).withBase(firstId)
     loadSchemas(schema.value, first)
   }
-  def apply(schemas: Seq[SchemaValue]): LoadedSchemasResolver = schemas.foldLeft(empty) { case (resolver, schema) =>
-    resolver.addAll(apply(schema))
+
+  def apply(schemas: Seq[SchemaValue], lazyResolver: Option[LazyResolver]): LoadedSchemasResolver = {
+    val zero = lazyResolver.map(empty.withLazyResolver(_)).getOrElse(empty)
+    schemas.foldLeft(empty) { case (resolver, schema) =>
+      resolver.addAll(apply(schema))
+    }
   }
 
   private def loadSchemas(value: Value, loaded: LoadedSchemasResolver): LoadedSchemasResolver = {
@@ -67,6 +76,9 @@ case class LoadedSchemasResolver(
     dynamicSchemas: Set[URI] = Set.empty,
     lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
 ) extends SchemaResolver {
+
+  def withLazyResolver(lazyResolver: LoadedSchemasResolver.LazyResolver): LoadedSchemasResolver =
+    this.copy(lazyResolver = Some(lazyResolver))
 
   def add(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
     this.copy(schemas = schemas + ((uri, schema)))

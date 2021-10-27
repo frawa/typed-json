@@ -47,9 +47,11 @@ object Processor {
   type ProcessFun[R] = InnerValue => Checked[R]
   type MergeFun[R]   = Seq[Checked[R]] => ProcessFun[R]
 
-  def apply[R](schema: SchemaValue)(checker: Checker[R]): Either[SchemaErrors, Processor[R]] = {
+  def apply[R](schema: SchemaValue, lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None)(
+      checker: Checker[R]
+  ): Either[SchemaErrors, Processor[R]] = {
     // fallback resolver for 'remote' URIs?
-    implicit val resolver = LoadedSchemasResolver(schema)
+    implicit val resolver = LoadedSchemasResolver(schema, lazyResolver)
     val scope             = resolver.base.map(DynamicScope.empty.push(_)).getOrElse(DynamicScope.empty)
     for {
       checks <- Checks.parseKeywords(schema, scope)

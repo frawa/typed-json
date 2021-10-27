@@ -31,7 +31,7 @@ object TestUtil {
 
   def withLoadedSchemas(texts: Seq[String])(f: LoadedSchemasResolver => Unit)(implicit parser: Parser) = {
     val schemas  = texts.map(t => parseJsonValue(t)).map(SchemaValue(_))
-    val resolver = LoadedSchemasResolver(schemas)
+    val resolver = LoadedSchemasResolver(schemas, None)
     f(resolver)
   }
 

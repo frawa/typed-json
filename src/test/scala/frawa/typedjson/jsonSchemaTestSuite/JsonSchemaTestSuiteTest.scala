@@ -21,6 +21,7 @@ import frawa.typedjson.parser.ObjectValue
 import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.BoolValue
+import frawa.typedjson.schema.SpecMetaSchemas
 
 class JsonSchemaTestSuiteTest extends FunSuite {
   implicit val zioParser = new ZioParser()
@@ -32,9 +33,8 @@ class JsonSchemaTestSuiteTest extends FunSuite {
   val skip = Set(
     "anchor.json",
     "content.json",
-    "defs.json", // TODO 4
-    "id.json",   // TODO last
-    "ref.json",  // TODO 4, stackoverflow
+    "defs.json", // TODO meta schema
+    "id.json",   // TODO meta schema
     "refRemote.json",
     "unevaluatedItems.json",
     "unevaluatedProperties.json",
@@ -83,21 +83,17 @@ class JsonSchemaTestSuiteTest extends FunSuite {
           val schema            = properties("schema")
           val ArrayValue(tests) = properties("tests")
 
-          val id = (Pointer.empty / "$id")(schema).flatMap { vv =>
-            vv match {
-              case StringValue(id) => Some(id)
-              case _               => None
-            }
-          }
+          val id = SchemaValue.id(SchemaValue(schema))
           val includedOnlyId = onlyId
             .flatMap { onlyId =>
               id.map(_ == onlyId)
             }
           assume(includedOnlyId.getOrElse(true), s"excluded by onlyId=${onlyId}")
 
-          val schemaValue = SchemaValue(schema)
+          val lazyResolver = SpecMetaSchemas.lazyResolver
+          val schemaValue  = SchemaValue(schema)
           // val base        = path.getFileName().toUri()
-          val processor0 = Processor(schemaValue)(ValidationChecker())
+          val processor0 = Processor(schemaValue, Some(lazyResolver))(ValidationChecker())
           val processor = processor0.swap
             .map(message => fail("no processor", clues(clue(id), clue(message))))
             .swap
