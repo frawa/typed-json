@@ -3,7 +3,7 @@ package frawa.typedjson.schema
 import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.StringValue
 
-object Util {
+object SeqUtil {
 
   def sequenceFirstLeft[E, T](eithers: Seq[Either[E, T]]): Either[E, Seq[T]] = {
     eithers.foldLeft[Either[E, Seq[T]]](Right[E, Seq[T]](Seq()))((acc, v) => acc.flatMap(acc => v.map(acc :+ _)))

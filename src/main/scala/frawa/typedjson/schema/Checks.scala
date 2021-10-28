@@ -94,7 +94,7 @@ case class Checks(
     checks: Seq[Check] = Seq.empty[Check],
     ignoredKeywords: Set[String] = Set.empty
 ) {
-  import Util._
+  import SeqUtil._
 
   private def withCheck(check: Check): Checks                         = this.copy(checks = checks :+ check)
   private def withChecks(checks: Checks)(f: Checks => Checks): Checks = f(checks).withIgnored(checks.ignoredKeywords)
