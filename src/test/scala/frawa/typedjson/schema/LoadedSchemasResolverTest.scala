@@ -298,4 +298,17 @@ class LoadedSchemasResolverTest extends FunSuite {
       }
     }
   }
+
+  test("caching lazy resolutions") {
+    withLoadedSchemas(Seq()) { resolver =>
+      assertEquals(resolver.resolveRef("missing"), None)
+
+      val resolver1 = resolver.withLazyResolver { case _ => Some(SchemaValue(NullValue)) }
+
+      val Some((schema, resolver2)) = resolver1.resolveRef("cacheme")
+      assertEquals(schema, SchemaValue(NullValue))
+      assertEquals(resolver2.isInstanceOf[LoadedSchemasResolver], true)
+      assertEquals(resolver2.asInstanceOf[LoadedSchemasResolver].schemas.keySet, Set(URI.create("cacheme")))
+    }
+  }
 }

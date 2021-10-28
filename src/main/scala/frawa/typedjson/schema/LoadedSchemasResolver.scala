@@ -17,22 +17,21 @@ object LoadedSchemasResolver {
 
   val empty = LoadedSchemasResolver(URI.create(""))
 
-  def apply(schema: SchemaValue): LoadedSchemasResolver = {
-    apply(schema, None)
+  def apply(schema: SchemaValue, lazyResolver: Option[LazyResolver]): LoadedSchemasResolver = {
+    val resolver = apply(schema)
+    lazyResolver.map(resolver.withLazyResolver(_)).getOrElse(resolver)
   }
 
-  def apply(schema: SchemaValue, lazyResolver: Option[LazyResolver]): LoadedSchemasResolver = {
+  def apply(schema: SchemaValue): LoadedSchemasResolver = {
     val firstId = SchemaValue
       .id(schema)
       .map(URI.create(_))
       .getOrElse(URI.create(""))
-    val zero  = lazyResolver.map(empty.withLazyResolver(_)).getOrElse(empty)
-    val first = zero.add(firstId, schema).withBase(firstId)
+    val first = empty.add(firstId, schema).withBase(firstId)
     loadSchemas(schema.value, first)
   }
 
-  def apply(schemas: Seq[SchemaValue], lazyResolver: Option[LazyResolver]): LoadedSchemasResolver = {
-    val zero = lazyResolver.map(empty.withLazyResolver(_)).getOrElse(empty)
+  def apply(schemas: Seq[SchemaValue]): LoadedSchemasResolver = {
     schemas.foldLeft(empty) { case (resolver, schema) =>
       resolver.addAll(apply(schema))
     }
@@ -96,8 +95,12 @@ case class LoadedSchemasResolver(
   // TODO URI instead of Resolution? push base into super
   override protected def resolve(uri: URI): Option[Resolution] = schemas
     .get(uri)
-    .orElse(lazyResolver.flatMap(_.apply(uri)))
     .map((_, withBase(uri)))
+    .orElse(
+      lazyResolver
+        .flatMap(_.apply(uri))
+        .map(schema => (schema, add(uri, schema).withBase(uri)))
+    )
   override protected def isDynamic(uri: URI): Boolean = dynamicSchemas.contains(uri)
 
 }
