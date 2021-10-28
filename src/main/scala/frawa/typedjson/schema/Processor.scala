@@ -52,7 +52,7 @@ object Processor {
   ): Either[SchemaErrors, Processor[R]] = {
     // fallback resolver for 'remote' URIs?
     implicit val resolver = LoadedSchemasResolver(schema, lazyResolver)
-    val scope             = resolver.base.map(DynamicScope.empty.push(_)).getOrElse(DynamicScope.empty)
+    val scope             = DynamicScope.empty.push(resolver.base)
     for {
       checks <- Checks.parseKeywords(schema, scope)
       processor = Processor(all(checker, checks), checks.ignoredKeywords)

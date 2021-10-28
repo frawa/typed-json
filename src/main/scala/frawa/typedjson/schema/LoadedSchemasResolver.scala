@@ -15,7 +15,7 @@ import java.net.URI
 object LoadedSchemasResolver {
   type LazyResolver = URI => Option[SchemaValue]
 
-  val empty = LoadedSchemasResolver(None)
+  val empty = LoadedSchemasResolver(URI.create(""))
 
   def apply(schema: SchemaValue): LoadedSchemasResolver = {
     apply(schema, None)
@@ -71,7 +71,7 @@ object LoadedSchemasResolver {
 }
 
 case class LoadedSchemasResolver(
-    override val base: Option[URI],
+    override val base: URI,
     schemas: Map[URI, SchemaValue] = Map.empty,
     dynamicSchemas: Set[URI] = Set.empty,
     lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
@@ -91,7 +91,7 @@ case class LoadedSchemasResolver(
   def addDynamic(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
     add(uri, schema).copy(dynamicSchemas = dynamicSchemas + uri)
 
-  override def withBase(uri: URI): LoadedSchemasResolver = this.copy(base = Some(uri))
+  override def withBase(uri: URI): LoadedSchemasResolver = this.copy(base = uri)
 
   // TODO URI instead of Resolution? push base into super
   override protected def resolve(uri: URI): Option[Resolution] = schemas

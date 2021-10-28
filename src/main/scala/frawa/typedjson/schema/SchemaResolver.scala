@@ -20,8 +20,7 @@ object SchemaResolver {
 trait SchemaResolver {
   type Resolution = SchemaResolver.Resolution
 
-  // TODO remove Option?
-  val base: Option[URI] = None
+  val base: URI
 
   protected def resolve(uri: URI): Option[Resolution] = None
   protected def isDynamic(uri: URI): Boolean          = false
@@ -54,8 +53,7 @@ trait SchemaResolver {
     withoutEmptyFragment(
       Some(uri)
         .filter(_.isAbsolute())
-        .orElse(base.map(_.resolve(uri)))
-        .getOrElse(uri)
+        .getOrElse(base.resolve(uri))
     )
   }
 

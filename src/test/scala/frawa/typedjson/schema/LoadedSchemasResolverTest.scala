@@ -26,7 +26,7 @@ class LoadedSchemasResolverTest extends FunSuite {
                   |}""".stripMargin) { schema =>
       val resolver = LoadedSchemasResolver(schema)
       val uri      = URI.create(id)
-      assertEquals(resolver.base, Some(uri))
+      assertEquals(resolver.base, uri)
       assertEquals(resolver.resolveRef(id).map(_._1), Some(schema))
     }
   }
@@ -41,7 +41,7 @@ class LoadedSchemasResolverTest extends FunSuite {
                  |}
                  |}""".stripMargin) { schema =>
       val resolver = LoadedSchemasResolver(schema)
-      assertEquals(resolver.base, Some(URI.create("")))
+      assertEquals(resolver.base, URI.create(""))
       assertEquals(resolver.schemas.size, 1)
 
       val expected = SchemaValue(
@@ -75,7 +75,7 @@ class LoadedSchemasResolverTest extends FunSuite {
                   |}""".stripMargin) { schema =>
       val resolver = LoadedSchemasResolver(schema)
       val uri      = URI.create(id)
-      assertEquals(resolver.base, Some(uri))
+      assertEquals(resolver.base, uri)
       assertEquals(resolver.schemas.size, 2)
       assertEquals(resolver.resolveRef(id).map(_._1), Some(schema))
 
@@ -118,7 +118,7 @@ class LoadedSchemasResolverTest extends FunSuite {
                   |}""".stripMargin) { schema =>
       val resolver = LoadedSchemasResolver(schema)
       val uri      = URI.create(id)
-      assertEquals(resolver.base, Some(uri))
+      assertEquals(resolver.base, uri)
       assertEquals(resolver.resolveRef(id).map(_._1), Some(schema))
       val expected = SchemaValue(
         value = ObjectValue(
