@@ -9,7 +9,7 @@ object Pointer {
   def apply(index: Int): Pointer    = Pointer.empty / index
   def apply(field: String): Pointer = Pointer.empty / field
 
-  def parse(spec: String): Pointer = Pointer( // TODO ArrayIndexToken?
+  def parse(spec: String): Pointer = Pointer(
     spec
       .split("/")
       .map(field =>

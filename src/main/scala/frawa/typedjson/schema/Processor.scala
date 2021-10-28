@@ -30,15 +30,6 @@ object SchemaValue {
   }
 }
 
-// case object RootSchemaResolver extends SchemaResolver {
-//   override def resolve(uri: URI): Option[SchemaValue] = None
-// }
-
-// case class RelativeSchemaResolver(id: String, resolver: SchemaResolver) extends SchemaResolver {
-//   override val base                                   = Some(URI.create(id).normalize())
-//   override def resolve(uri: URI): Option[SchemaValue] = resolver.resolve(uri)
-// }
-
 case class Processor[R] private[schema] (process: Processor.ProcessFun[R], ignoredKeywords: Set[String])
 
 object Processor {
@@ -50,9 +41,9 @@ object Processor {
   def apply[R](schema: SchemaValue, lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None)(
       checker: Checker[R]
   ): Either[SchemaErrors, Processor[R]] = {
-    // fallback resolver for 'remote' URIs?
     implicit val resolver = LoadedSchemasResolver(schema, lazyResolver)
-    val scope             = DynamicScope.empty.push(resolver.base)
+
+    val scope = DynamicScope.empty.push(resolver.base)
     for {
       checks <- Checks.parseKeywords(schema, scope)
       processor = Processor(all(checker, checks), checks.ignoredKeywords)
@@ -170,8 +161,6 @@ object Processor {
       case k if psBoth.exists(_.isDefinedAt(k)) =>
         () => seq(psBoth.map(_.lift).flatMap { p => p(k).map(_.apply()) })
     }
-
-    // val psPatternFirst = psProperties.map(psAllPattern.orElse(_))
 
     val psAdditional = check.additionalProperties.map { checks =>
       val partial: PartialFunction[String, () => ProcessFun[R]] = { k => () => all(checker, checks) }
