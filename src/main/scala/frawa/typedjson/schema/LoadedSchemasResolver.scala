@@ -44,7 +44,7 @@ object LoadedSchemasResolver {
           .get("$id")
           .flatMap(Value.asString)
           .map(loaded.absolute(_))
-          .map(uri => loaded.add(uri, SchemaValue(value)).withBase(DynamicScope.withoutFragement(uri)))
+          .map(uri => loaded.add(uri, SchemaValue(value)).withBase(UriUtil.withoutFragement(uri)))
           .getOrElse(loaded)
         properties
           .foldLeft(loaded1) { case (loaded, (property, propertyValue)) =>

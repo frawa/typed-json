@@ -6,6 +6,7 @@ import java.net.URI
 
 case class DynamicScope(uris: Seq[URI]) {
   import DynamicScope._
+  import UriUtil._
 
   def candidates: Seq[URI] = uris
     .map(withoutFragement)
@@ -30,10 +31,4 @@ case class DynamicScope(uris: Seq[URI]) {
 
 object DynamicScope {
   def empty: DynamicScope = DynamicScope(Seq())
-
-  def withoutFragement(uri: URI): URI = new URI(uri.getScheme(), uri.getSchemeSpecificPart(), null)
-  def withFragment(uri: URI, pointer: Pointer): URI =
-    new URI(uri.getScheme(), uri.getSchemeSpecificPart(), pointer.toString)
-  def withFragment(uri: URI, fragment: String): URI =
-    new URI(uri.getScheme(), uri.getSchemeSpecificPart(), fragment)
 }
