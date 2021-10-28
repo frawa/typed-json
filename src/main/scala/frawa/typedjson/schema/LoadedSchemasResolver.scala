@@ -42,10 +42,8 @@ object LoadedSchemasResolver {
       case ObjectValue(properties) =>
         val loaded1 = properties
           .get("$id")
-          .flatMap {
-            case StringValue(id) => Some(loaded.absolute(id))
-            case _               => None
-          }
+          .flatMap(Value.asString)
+          .map(loaded.absolute(_))
           .map(uri => loaded.add(uri, SchemaValue(value)).withBase(DynamicScope.withoutFragement(uri)))
           .getOrElse(loaded)
         properties
@@ -79,20 +77,19 @@ case class LoadedSchemasResolver(
   def withLazyResolver(lazyResolver: LoadedSchemasResolver.LazyResolver): LoadedSchemasResolver =
     this.copy(lazyResolver = Some(lazyResolver))
 
-  def add(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
+  private def add(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
     this.copy(schemas = schemas + ((uri, schema)))
 
-  def addAll(other: LoadedSchemasResolver): LoadedSchemasResolver = this.copy(
+  private def addAll(other: LoadedSchemasResolver): LoadedSchemasResolver = this.copy(
     schemas = schemas.concat(other.schemas.toIterable),
     dynamicSchemas = dynamicSchemas.concat(other.dynamicSchemas.toIterable)
   )
 
-  def addDynamic(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
+  private def addDynamic(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
     add(uri, schema).copy(dynamicSchemas = dynamicSchemas + uri)
 
   override def withBase(uri: URI): LoadedSchemasResolver = this.copy(base = uri)
 
-  // TODO URI instead of Resolution? push base into super
   override protected def resolve(uri: URI): Option[Resolution] = schemas
     .get(uri)
     .map((_, withBase(uri)))
@@ -101,6 +98,7 @@ case class LoadedSchemasResolver(
         .flatMap(_.apply(uri))
         .map(schema => (schema, add(uri, schema).withBase(uri)))
     )
+
   override protected def isDynamic(uri: URI): Boolean = dynamicSchemas.contains(uri)
 
 }
