@@ -18,23 +18,21 @@ import frawa.typedjson.schema.SpecMetaSchemas
 
 class SchemaSpecTest extends FunSuite {
   implicit val zioParser = new ZioParser()
+  val resolver           = SpecMetaSchemas.lazyResolver
+  val base               = SpecMetaSchemas.draft202012
 
-  def withSchemaValue(name: String)(f: Value => Unit)(implicit parser: Parser) {
-    val text = Source.fromFile(s"./schemaSpec/${name}.json").getLines.mkString("\n")
-    f(TestUtil.parseJsonValue(text))
-  }
-
-  def withSchemaSpec(name: String)(f: SchemaValue => Unit)(implicit parser: Parser) {
-    withSchemaValue(name)(value => f(SchemaValue(value)))
+  def withSchemaSpec(name: String)(f: SchemaValue => Unit) {
+    val Some(schema) = resolver(base.resolve(name))
+    f(schema)
   }
 
   def validateSpec(valueName: String, schemaName: String)(f: (Checked[ValidationResult], Set[String]) => Unit) {
     withSchemaSpec(schemaName) { schema =>
-      withSchemaValue(valueName) { value =>
+      withSchemaSpec(valueName) { value =>
         val lazyResolver = SpecMetaSchemas.lazyResolver
         val result = for {
           processor <- Processor(schema, Some(lazyResolver))(ValidationChecker())
-          checked = processor.process(InnerValue(value))
+          checked = processor.process(InnerValue(value.value))
         } yield {
           f(checked, processor.ignoredKeywords ++ checked.ignoredKeywords)
         }
