@@ -18,11 +18,6 @@ object Util {
     }
   }
 
-  def toStrings(values: Seq[Value]): Seq[String] = values.flatMap {
-    case StringValue(v) => Some(v)
-    case _              => None
-  }
-
   def debugTraceValue[T](title: String): T => T = { v =>
     println(title, v)
     v

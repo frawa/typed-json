@@ -23,4 +23,6 @@ object Value {
     case StringValue(v) => Some(v)
     case _              => None
   }
+
+  def asStrings(values: Seq[Value]): Seq[String] = values.flatMap(asString)
 }

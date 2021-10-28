@@ -133,7 +133,7 @@ case class Checks(
 
       // TODO validation vocabulary
       case ("type", ArrayValue(values)) => {
-        def typeNames = toStrings(values)
+        def typeNames = Value.asStrings(values)
         Right(withCheck(UnionTypeCheck(typeNames.flatMap(getTypeCheck(_)))))
       }
 
@@ -192,7 +192,7 @@ case class Checks(
         }
 
       case ("required", ArrayValue(values)) => {
-        def names = toStrings(values)
+        def names = Value.asStrings(values)
         Right(withCheck(ObjectRequiredCheck(names)))
       }
 
