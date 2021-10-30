@@ -1,10 +1,10 @@
 # Backlog
 
 ## Doing
+- copyright and license
 - consolidate ignored keywords and schema errors, also across lazy
 
 ## TODO
-- copyright and license
 - review and refactor: Checks
 - review and refactor: implicits
 - review and refactor: ctor/apply args
