@@ -25,7 +25,7 @@ import frawa.typedjson.parser.NullValue
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue
-import scala.reflect.internal.Reporter
+
 import java.net.URI
 import scala.reflect.ClassTag
 import scala.util.matching.Regex

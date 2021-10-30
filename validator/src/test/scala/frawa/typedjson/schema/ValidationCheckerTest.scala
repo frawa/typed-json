@@ -15,7 +15,7 @@ class ValidationCheckerTest extends FunSuite {
     val withParsed = for {
       value     <- Parser(text)
       processor <- Processor(schema)(ValidationChecker())
-      checked = processor.process(InnerValue(value, Pointer.empty))
+      checked = processor(InnerValue(value, Pointer.empty))
     } yield {
       f(checked)
     }

@@ -26,15 +26,15 @@ class SchemaSpecTest extends FunSuite {
     f(schema)
   }
 
-  def validateSpec(valueName: String, schemaName: String)(f: (Checked[ValidationResult], Set[String]) => Unit) {
+  def validateSpec(valueName: String, schemaName: String)(f: Checked[ValidationResult] => Unit) {
     withSchemaSpec(schemaName) { schema =>
       withSchemaSpec(valueName) { value =>
         val lazyResolver = SpecMetaSchemas.lazyResolver
         val result = for {
           processor <- Processor(schema, Some(lazyResolver))(ValidationChecker())
-          checked = processor.process(InnerValue(value.value))
+          checked = processor(InnerValue(value.value))
         } yield {
-          f(checked, processor.ignoredKeywords ++ checked.ignoredKeywords)
+          f(checked)
         }
         result.swap
           .map(message => fail("validating spec failed", clues(clue(message))))
@@ -44,66 +44,66 @@ class SchemaSpecTest extends FunSuite {
   }
 
   test("validate core against core") {
-    validateSpec("meta/core", "meta/core") { (checked, ignored) =>
+    validateSpec("meta/core", "meta/core") { checked =>
       assertEquals(checked.results, Seq())
       assertEquals(checked.count, 54)
       assertEquals(
-        ignored,
+        checked.validation.ignoredKeywords,
         Set("$vocabulary", "$schema")
       )
     }
   }
 
   test("validate core against validation") {
-    validateSpec("meta/core", "meta/validation") { (checked, ignored) =>
+    validateSpec("meta/core", "meta/validation") { checked =>
       assertEquals(checked.results, Seq())
       assertEquals(checked.count, 22)
       assertEquals(
-        ignored,
+        checked.validation.ignoredKeywords,
         Set("$vocabulary", "$schema")
       )
     }
   }
 
   test("validate core against applicator") {
-    validateSpec("meta/core", "meta/applicator") { (checked, ignored) =>
+    validateSpec("meta/core", "meta/applicator") { checked =>
       assertEquals(checked.results, Seq())
       assertEquals(checked.count, 84)
       assertEquals(
-        ignored,
+        checked.validation.ignoredKeywords,
         Set("$vocabulary", "$schema")
       )
     }
   }
 
   test("validate validation against core") {
-    validateSpec("meta/validation", "meta/core") { (checked, ignored) =>
+    validateSpec("meta/validation", "meta/core") { checked =>
       assertEquals(checked.results, Seq())
       assertEquals(checked.count, 65)
       assertEquals(
-        ignored,
+        checked.validation.ignoredKeywords,
         Set("$vocabulary", "$schema")
       )
     }
   }
 
   test("validate validation against validation") {
-    validateSpec("meta/validation", "meta/validation") { (checked, ignored) =>
+    validateSpec("meta/validation", "meta/validation") { checked =>
       assertEquals(checked.results, Seq())
       assertEquals(checked.count, 22)
       assertEquals(
-        ignored,
+        checked.validation.ignoredKeywords,
         Set("$vocabulary", "$schema")
       )
     }
   }
 
   test("validate validation against applicator") {
-    validateSpec("meta/validation", "meta/applicator") { (checked, ignored) =>
+    validateSpec("meta/validation", "meta/applicator") { checked =>
       assertEquals(checked.results, Seq())
       assertEquals(checked.count, 168)
       assertEquals(
-        ignored,
+        checked.validation.ignoredKeywords,
         Set("$vocabulary", "$schema")
       )
     }

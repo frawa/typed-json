@@ -18,8 +18,8 @@ class ValidationKeywordTest extends FunSuite {
     val value = parseJsonValue(jsonText)
     val result = for {
       processor <- Processor(schema)(ValidationChecker())
-      checked = processor.process(InnerValue(value))
-      _       = assertEquals(processor.ignoredKeywords, Set.empty[String], "new keywords")
+      checked = processor(InnerValue(value))
+      _       = assertEquals(processor.validation.ignoredKeywords, Set.empty[String], "new keywords")
     } yield {
       f(checked)
     }

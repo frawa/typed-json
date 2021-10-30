@@ -25,21 +25,21 @@ import frawa.typedjson.parser.NullValue
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue
-import scala.reflect.internal.Reporter
+
 import java.net.URI
 import scala.reflect.ClassTag
 
 class ValidationCalculator extends Calculator[ValidationResult] {
   override def allOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
     if (checked.isEmpty || checked.forall(_.valid)) {
-      Checked.valid.add(checked)
+      Checked.valid.count(checked)
     } else {
       invalid(checked)
     }
   }
 
   private def invalid(checked: Seq[Checked[ValidationResult]]): Checked[ValidationResult] =
-    Checked.invalid(ValidationResult.invalid(checked.flatMap(_.results.flatMap(_.errors)))).add(checked)
+    Checked.invalid(ValidationResult.invalid(checked.flatMap(_.results.flatMap(_.errors)))).count(checked)
 
   override def invalid(observation: Observation, pointer: Pointer): Checked[ValidationResult] = Checked.invalid(
     ValidationResult.invalid(observation, pointer)
@@ -47,7 +47,7 @@ class ValidationCalculator extends Calculator[ValidationResult] {
 
   override def anyOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
     if (checked.isEmpty || checked.exists(_.valid)) {
-      Checked.valid.add(checked)
+      Checked.valid.count(checked)
     } else {
       invalid(checked)
     }
@@ -56,7 +56,7 @@ class ValidationCalculator extends Calculator[ValidationResult] {
   override def oneOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
     val count = checked.count(_.valid)
     if (count == 1) {
-      Checked.valid.add(checked)
+      Checked.valid.count(checked)
     } else if (count == 0) {
       invalid(checked)
     } else {
@@ -72,7 +72,7 @@ class ValidationCalculator extends Calculator[ValidationResult] {
   ): Checked[ValidationResult] = {
     val count = checked.count(_.valid)
     if (min.getOrElse(1) <= count && !max.exists(count > _)) {
-      Checked.valid.add(checked)
+      Checked.valid.count(checked)
     } else {
       invalid(NotContains(count), pointer)
     }
@@ -80,7 +80,7 @@ class ValidationCalculator extends Calculator[ValidationResult] {
 
   override def not(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
     if (checked.length == 1 && !checked(0).valid) {
-      Checked.valid.add(checked)
+      Checked.valid.count(checked)
     } else {
       invalid(NotInvalid(), pointer)
     }

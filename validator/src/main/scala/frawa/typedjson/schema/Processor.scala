@@ -16,16 +16,16 @@
 
 package frawa.typedjson.schema
 
-import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.parser.Parser
-import frawa.typedjson.parser.NumberValue
+import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.BoolValue
 import frawa.typedjson.parser.NullValue
-import frawa.typedjson.parser.StringValue
-import frawa.typedjson.parser.ArrayValue
+import frawa.typedjson.parser.NumberValue
 import frawa.typedjson.parser.ObjectValue
-import scala.reflect.internal.Reporter
+import frawa.typedjson.parser.Parser
+import frawa.typedjson.parser.StringValue
+import frawa.typedjson.parser.Value
+import frawa.typedjson.parser.ZioParser
+
 import java.net.URI
 import scala.reflect.ClassTag
 import scala.util.matching.Regex
@@ -46,8 +46,8 @@ object SchemaValue {
   }
 }
 
-case class Processor[R] private[schema] (process: Processor.ProcessFun[R], ignoredKeywords: Set[String]) {
-  // TODO return consolidated result with ignored keywords and schema errors
+case class Processor[R] private[schema] (private val process: Processor.ProcessFun[R], validation: SchemaValidation) {
+  def apply(value: InnerValue): Checked[R] = process(value)
 }
 
 object Processor {
@@ -64,12 +64,13 @@ object Processor {
     val scope = DynamicScope.empty.push(resolver.base)
     for {
       checks <- Checks.parseKeywords(schema, scope)
-      processor = Processor(all(checker, checks), checks.ignoredKeywords)
+      processor = Processor(all(checker, checks), SchemaValidation.empty.addIgnoredKeywords(checks.ignoredKeywords))
     } yield (processor)
   }
 
   private def all[R](checker: Checker[R], checks: Checks): ProcessFun[R] = {
-    seq(checks.checks.map(one(checker, _))).andThen(_.withIgnored(checks.ignoredKeywords))
+    seq(checks.checks.map(one(checker, _)))
+      .andThen(_.add(SchemaValidation.empty.addIgnoredKeywords(checks.ignoredKeywords)))
   }
 
   private def noop[R]: ProcessFun[R]                                            = _ => Checked.valid[R]
@@ -225,7 +226,7 @@ object Processor {
   private def checkLazyResolve[R](checker: Checker[R], check: LazyResolveCheck): ProcessFun[R] = {
     check.resolve() match {
       case Right(checks) => all(checker, checks)
-      case Left(errors)  => _ => Checked.invalid.withSchemaErrors(errors)
+      case Left(errors)  => _ => Checked.invalid.add(SchemaValidation.empty.addErrors(errors))
     }
   }
 

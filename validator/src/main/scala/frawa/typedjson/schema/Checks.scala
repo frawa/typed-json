@@ -28,9 +28,22 @@ import frawa.typedjson.parser.ZioParser
 
 import java.net.URI
 import scala.reflect.ClassTag
-import scala.reflect.internal.Reporter
 
 case class InnerValue(value: Value, pointer: Pointer = Pointer.empty)
+
+case class SchemaValidation(errors: Seq[SchemaError], ignoredKeywords: Set[String], pointer: Pointer = Pointer.empty) {
+  def addIgnoredKeywords(ignoredKeywords: Set[String]): SchemaValidation =
+    copy(ignoredKeywords = this.ignoredKeywords ++ ignoredKeywords)
+  def addErrors(erros: Seq[SchemaError]): SchemaValidation =
+    copy(errors = this.errors ++ errors)
+  def prefix(prefix: Pointer): SchemaValidation = this.copy(pointer = prefix / this.pointer)
+  def combine(other: SchemaValidation): SchemaValidation =
+    copy(errors = this.errors ++ other.errors, ignoredKeywords = this.ignoredKeywords ++ other.ignoredKeywords)
+}
+
+object SchemaValidation {
+  val empty = SchemaValidation(Seq.empty, Set.empty)
+}
 
 case class SchemaError(message: String, pointer: Pointer = Pointer.empty) {
   def prefix(prefix: Pointer): SchemaError = SchemaError(message, prefix / pointer)
@@ -90,12 +103,10 @@ case class Checked[R](
     valid: Boolean,
     results: Seq[R],
     count: Int,
-    ignoredKeywords: Seq[String] = Seq.empty,
-    errors: Seq[SchemaError] = Seq.empty
+    validation: SchemaValidation = SchemaValidation.empty
 ) {
-  def add(others: Seq[Checked[R]]): Checked[R]  = Checked(valid, results, count + Checked.count(others))
-  def withIgnored(ignored: Set[String])         = this.copy(ignoredKeywords = this.ignoredKeywords ++ ignored)
-  def withSchemaErrors(erros: Seq[SchemaError]) = this.copy(errors = this.errors ++ errors)
+  def count(others: Seq[Checked[R]]): Checked[R]    = this.copy(count = this.count + Checked.count(others))
+  def add(validation: SchemaValidation): Checked[R] = this.copy(validation = this.validation.combine(validation))
 }
 
 object Checked {
@@ -107,8 +118,8 @@ object Checked {
   def merge[R](checked: Seq[Checked[R]]): Checked[R] = {
     val valid           = checked.forall(_.valid)
     val results: Seq[R] = checked.flatMap(_.results)
-    val ignoredKeywords = checked.flatMap(_.ignoredKeywords)
-    Checked(valid, results, 1 + count(checked), ignoredKeywords)
+    val vaidation       = checked.map(_.validation).reduceOption(_.combine(_)).getOrElse(SchemaValidation.empty)
+    Checked(valid, results, 1 + count(checked), vaidation)
   }
   def count[R](checked: Seq[Checked[R]]): Int = checked.map(_.count).sum
 }

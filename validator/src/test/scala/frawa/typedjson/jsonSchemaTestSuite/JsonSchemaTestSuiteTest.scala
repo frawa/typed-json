@@ -100,7 +100,7 @@ class JsonSchemaTestSuiteTest extends FunSuite {
             .toOption
             .get
 
-          assertEquals(processor.ignoredKeywords, Set.empty[String])
+          assertEquals(processor.validation.ignoredKeywords, Set.empty[String])
 
           tests.foreach(assertOne(processor))
         }
@@ -113,7 +113,7 @@ class JsonSchemaTestSuiteTest extends FunSuite {
     val data                     = properties("data")
     val StringValue(failMessage) = properties("description")
     val BoolValue(expected)      = properties("valid")
-    val checked                  = processor.process(InnerValue(data))
+    val checked                  = processor(InnerValue(data))
 
     if (checked.valid != expected) {
       implicit val loc = munit.Location.empty

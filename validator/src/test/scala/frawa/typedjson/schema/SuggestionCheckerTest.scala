@@ -17,7 +17,7 @@ class SuggestCheckerTest extends FunSuite {
     val withParsed = for {
       value     <- Parser(text)
       processor <- Processor(schema)(SuggestionChecker(at))
-      result = processor.process(InnerValue(value, Pointer.empty))
+      result = processor(InnerValue(value, Pointer.empty))
     } yield {
       // TODO avoid the flattening
       f(result.results.flatMap(_.suggestions).distinct)

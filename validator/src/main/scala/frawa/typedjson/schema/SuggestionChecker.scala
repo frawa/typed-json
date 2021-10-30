@@ -17,7 +17,7 @@
 package frawa.typedjson.schema
 
 import frawa.typedjson.parser.Value
-import shapeless.the
+
 import frawa.typedjson.parser.ObjectValue
 import frawa.typedjson.parser.NullValue
 import frawa.typedjson.parser.ArrayValue
