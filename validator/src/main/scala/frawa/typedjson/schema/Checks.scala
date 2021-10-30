@@ -132,29 +132,25 @@ case class Checks(
 ) {
   import SeqUtil._
 
-  private def withCheck(check: Check): Checks                         = this.copy(checks = checks :+ check)
-  private def withChecks(checks: Checks)(f: Checks => Checks): Checks = f(checks).withIgnored(checks.ignoredKeywords)
-  private def withChecks(checks: Map[String, Checks])(f: Map[String, Checks] => Check): Checks =
-    withCheck(f(checks)).withIgnored(checks.values.flatMap(_.ignoredKeywords).toSet)
-  private def withChecks(checks: Seq[Checks])(f: Seq[Checks] => Check): Checks =
-    withCheck(f(checks)).withIgnored(checks.flatMap(_.ignoredKeywords).toSet)
-  private def withChecks(
-      values: Seq[Value],
+  private def add(check: Check): Checks = this.copy(checks = checks :+ check)
+
+  private def addAll(
+      values: Seq[SchemaValue],
       scope: DynamicScope
   )(f: Seq[Checks] => Check)(implicit resolver: SchemaResolver): Either[SchemaErrors, Checks] = {
     val checks0 = values
-      .map(v => Checks.parseKeywords(SchemaValue(v), scope))
+      .map(v => Checks.parseKeywords(v, scope))
       .toSeq
     for {
       checks <- sequenceAllLefts(checks0)
     } yield {
-      withChecks(checks)(f)
+      add(f(checks)).withIgnored(checks.flatMap(_.ignoredKeywords).toSet)
     }
   }
 
   type SchemaErrors = Checks.SchemaErrors
 
-  def withKeyword(keyword: String, value: Value, scope: DynamicScope)(implicit
+  private def withKeyword(keyword: String, value: Value, scope: DynamicScope)(implicit
       resolver: SchemaResolver
   ): Either[SchemaErrors, Checks] = {
     val scope1 = scope.push(keyword)
@@ -163,30 +159,28 @@ case class Checks(
       case ("type", StringValue(typeName)) =>
         Right(
           getTypeCheck(typeName)
-            .map(withCheck(_))
+            .map(add(_))
             .getOrElse(withIgnored(s"${keyword}-${typeName}"))
         )
 
       // TODO validation vocabulary
       case ("type", ArrayValue(values)) => {
         def typeNames = Value.asStrings(values)
-        Right(withCheck(UnionTypeCheck(typeNames.flatMap(getTypeCheck(_)))))
+        Right(add(UnionTypeCheck(typeNames.flatMap(getTypeCheck(_)))))
       }
 
       case ("not", value) =>
         for {
           checks <- Checks.parseKeywords(SchemaValue(value), scope1)
         } yield {
-          withChecks(checks)(c => withCheck(NotCheck(c)))
+          add(NotCheck(checks))
         }
 
       case ("items", value) =>
         for {
           checks <- Checks.parseKeywords(SchemaValue(value), scope1)
         } yield {
-          withChecks(checks) { checks =>
-            updateCheck(ArrayItemsCheck())(check => check.copy(items = Some(checks)))
-          }
+          updateCheck(ArrayItemsCheck())(check => check.copy(items = Some(checks)))
         }
 
       case ("prefixItems", ArrayValue(vs)) =>
@@ -211,9 +205,7 @@ case class Checks(
         for {
           checks <- Checks.parseKeywords(SchemaValue(value), scope1)
         } yield {
-          withChecks(checks) { checks =>
-            updateCheck(ObjectPropertiesCheck())(check => check.copy(additionalProperties = Some(checks)))
-          }
+          updateCheck(ObjectPropertiesCheck())(check => check.copy(additionalProperties = Some(checks)))
         }
 
       case ("unevaluatedProperties", value) =>
@@ -222,26 +214,24 @@ case class Checks(
         for {
           checks <- Checks.parseKeywords(SchemaValue(value), scope1)
         } yield {
-          withChecks(checks) { checks =>
-            updateCheck(ObjectPropertiesCheck())(check => check.copy(additionalProperties = Some(checks)))
-          }
+          updateCheck(ObjectPropertiesCheck())(check => check.copy(additionalProperties = Some(checks)))
         }
 
       case ("required", ArrayValue(values)) => {
         def names = Value.asStrings(values)
-        Right(withCheck(ObjectRequiredCheck(names)))
+        Right(add(ObjectRequiredCheck(names)))
       }
 
       case ("allOf", ArrayValue(values)) => {
-        withChecks(values, scope1)(AllOfCheck)
+        addAll(values.map(SchemaValue(_)), scope1)(AllOfCheck)
       }
 
       case ("anyOf", ArrayValue(values)) => {
-        withChecks(values, scope1)(AnyOfCheck)
+        addAll(values.map(SchemaValue(_)), scope1)(AnyOfCheck)
       }
 
       case ("oneOf", ArrayValue(values)) => {
-        withChecks(values, scope1)(OneOfCheck)
+        addAll(values.map(SchemaValue(_)), scope1)(OneOfCheck)
       }
 
       case ("if", value) =>
@@ -261,12 +251,12 @@ case class Checks(
 
       // TODO validation vocabulary
       case ("enum", ArrayValue(values)) => {
-        Right(withCheck(EnumCheck(values)))
+        Right(add(EnumCheck(values)))
       }
 
       // TODO validation vocabulary
       case ("const", value) => {
-        Right(withCheck(EnumCheck(Seq(value))))
+        Right(add(EnumCheck(Seq(value))))
       }
 
       case ("$id", StringValue(_)) => {
@@ -297,7 +287,7 @@ case class Checks(
             .getOrElse(Left(Seq(SchemaError(s"""missing reference "${ref}""""))))
           check = lazyResolveCheck(resolution, scope1)
         } yield {
-          withCheck(check)
+          add(check)
         }
       }
 
@@ -309,7 +299,7 @@ case class Checks(
             .getOrElse(Left(Seq(SchemaError(s"""missing dynamic reference "${ref}""""))))
           check = lazyResolveCheck(resolution, scope1)
         } yield {
-          withCheck(check)
+          add(check)
         }
       }
 
@@ -335,79 +325,79 @@ case class Checks(
 
       // TODO validation vocabulary
       case ("pattern", StringValue(pattern)) => {
-        Right(withCheck(PatternCheck(pattern)))
+        Right(add(PatternCheck(pattern)))
       }
 
       // TODO validation vocabulary
       case ("format", StringValue(format)) => {
-        Right(withCheck(FormatCheck(format)))
+        Right(add(FormatCheck(format)))
       }
 
       // TODO validation vocabulary
       case ("minimum", NumberValue(v)) => {
-        Right(withCheck(MinimumCheck(v)))
+        Right(add(MinimumCheck(v)))
       }
 
       // TODO validation vocabulary
       case ("exclusiveMinimum", NumberValue(v)) => {
-        Right(withCheck(MinimumCheck(v, true)))
+        Right(add(MinimumCheck(v, true)))
       }
 
       // TODO validation vocabulary
       case ("minItems", NumberValue(v)) if v >= 0 => {
-        Right(withCheck(MinItemsCheck(v)))
+        Right(add(MinItemsCheck(v)))
       }
 
       // TODO validation vocabulary
       case ("uniqueItems", BoolValue(v)) => {
-        Right(withCheck(UniqueItemsCheck(v)))
+        Right(add(UniqueItemsCheck(v)))
       }
 
       case ("propertyNames", value) =>
         for {
           checks <- Checks.parseKeywords(SchemaValue(value), scope1)
         } yield {
-          withChecks(checks)(c => withCheck(PropertyNamesCheck(c)))
+          add(PropertyNamesCheck(checks))
         }
 
       // TODO validation vocabulary
       case ("multipleOf", NumberValue(v)) if v > 0 => {
-        Right(withCheck(MultipleOfCheck(v)))
+        Right(add(MultipleOfCheck(v)))
       }
 
       // TODO validation vocabulary
       case ("maximum", NumberValue(v)) => {
-        Right(withCheck(MaximumCheck(v)))
+        Right(add(MaximumCheck(v)))
       }
 
       // TODO validation vocabulary
       case ("exclusiveMaximum", NumberValue(v)) => {
-        Right(withCheck(MaximumCheck(v, true)))
+        Right(add(MaximumCheck(v, true)))
       }
 
       // TODO validation vocabulary
       case ("maxLength", NumberValue(v)) if v >= 0 => {
-        Right(withCheck(MaxLengthCheck(v)))
+        Right(add(MaxLengthCheck(v)))
       }
 
       // TODO validation vocabulary
       case ("minLength", NumberValue(v)) if v >= 0 => {
-        Right(withCheck(MinLengthCheck(v)))
+        Right(add(MinLengthCheck(v)))
       }
 
       // TODO validation vocabulary
       case ("maxItems", NumberValue(v)) if v >= 0 => {
-        Right(withCheck(MaxItemsCheck(v)))
+        Right(add(MaxItemsCheck(v)))
       }
 
       // TODO validation vocabulary
       case ("maxProperties", NumberValue(v)) if v >= 0 => {
-        Right(withCheck(MaxPropertiesCheck(v)))
+        Right(add(MaxPropertiesCheck(v)))
       }
 
       // TODO validation vocabulary
       case ("minProperties", NumberValue(v)) if v >= 0 => {
-        Right(withCheck(MinPropertiesCheck(v)))
+        Right(add(MinPropertiesCheck(v)))
       }
 
       // TODO validation vocabulary
@@ -428,7 +418,7 @@ case class Checks(
           }
           .flatten
           .toMap
-        Right(withCheck(DependentRequiredCheck(vv)))
+        Right(add(DependentRequiredCheck(vv)))
       }
 
       case ("dependentSchemas", ObjectValue(v)) => {
@@ -440,7 +430,7 @@ case class Checks(
         for {
           checks1 <- sequenceAllLefts(checks0).map(_.toMap)
         } yield {
-          withCheck(DependentSchemasCheck(checks1))
+          add(DependentSchemasCheck(checks1))
         }
       }
 
@@ -448,9 +438,9 @@ case class Checks(
         for {
           checks <- Checks.parseKeywords(SchemaValue(v), scope1)
         } yield {
-          withChecks(checks) { checks =>
-            updateCheck(ContainsCheck())(check => check.copy(schema = Some(checks)))
-          }
+          // withChecks(checks) { checks =>
+          updateCheck(ContainsCheck())(check => check.copy(schema = Some(checks)))
+          // }
         }
 
       // TODO validation vocabulary
@@ -521,9 +511,7 @@ case class Checks(
     for {
       checks <- Checks.parseKeywords(schema, scope)
     } yield {
-      withChecks(checks) { checks =>
-        updateCheck(newCheck)(f(checks, _))
-      }
+      updateCheck(newCheck)(f(checks, _))
     }
   }
 
@@ -566,10 +554,10 @@ object Checks {
       .map(id => resolver.withBase(resolver.absolute(id)))
       .getOrElse(resolver)
     schema.value match {
-      case BoolValue(v) => Right(Checks(schema).withCheck(TrivialCheck(v)))
+      case BoolValue(v) => Right(Checks(schema).add(TrivialCheck(v)))
       case ObjectValue(keywords) =>
         if (keywords.isEmpty) {
-          Right(Checks(schema).withCheck(TrivialCheck(true)))
+          Right(Checks(schema).add(TrivialCheck(true)))
         } else {
           keywords
             .foldLeft[Either[SchemaErrors, Checks]](Right(Checks(schema))) { case (checks, (keyword, value)) =>
