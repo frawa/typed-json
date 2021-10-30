@@ -46,7 +46,7 @@ object SchemaValue {
   }
 }
 
-case class Processor[R] private[schema] (private val process: Processor.ProcessFun[R], validation: SchemaValidation) {
+case class Processor[R] private[schema] (private val process: Processor.ProcessFun[R], validation: SchemaQuality) {
   def apply(value: InnerValue): Checked[R] = process(value)
 }
 
@@ -64,13 +64,13 @@ object Processor {
     val scope = DynamicScope.empty.push(resolver.base)
     for {
       checks <- Checks.parseKeywords(schema, scope)
-      processor = Processor(all(checker, checks), SchemaValidation.empty.addIgnoredKeywords(checks.ignoredKeywords))
+      processor = Processor(all(checker, checks), SchemaQuality.empty.addIgnoredKeywords(checks.ignoredKeywords))
     } yield (processor)
   }
 
   private def all[R](checker: Checker[R], checks: Checks): ProcessFun[R] = {
     seq(checks.checks.map(one(checker, _)))
-      .andThen(_.add(SchemaValidation.empty.addIgnoredKeywords(checks.ignoredKeywords)))
+      .andThen(_.add(SchemaQuality.empty.addIgnoredKeywords(checks.ignoredKeywords)))
   }
 
   private def noop[R]: ProcessFun[R]                                            = _ => Checked.valid[R]
@@ -226,7 +226,7 @@ object Processor {
   private def checkLazyResolve[R](checker: Checker[R], check: LazyResolveCheck): ProcessFun[R] = {
     check.resolve() match {
       case Right(checks) => all(checker, checks)
-      case Left(errors)  => _ => Checked.invalid.add(SchemaValidation.empty.addErrors(errors))
+      case Left(errors)  => _ => Checked.invalid.add(SchemaQuality.empty.addErrors(errors))
     }
   }
 

@@ -31,18 +31,19 @@ import scala.reflect.ClassTag
 
 case class InnerValue(value: Value, pointer: Pointer = Pointer.empty)
 
-case class SchemaValidation(errors: Seq[SchemaError], ignoredKeywords: Set[String], pointer: Pointer = Pointer.empty) {
-  def addIgnoredKeywords(ignoredKeywords: Set[String]): SchemaValidation =
+case class SchemaQuality(errors: Seq[SchemaError], ignoredKeywords: Set[String], pointer: Pointer = Pointer.empty) {
+  def addIgnoredKeywords(ignoredKeywords: Set[String]): SchemaQuality =
     copy(ignoredKeywords = this.ignoredKeywords ++ ignoredKeywords)
-  def addErrors(erros: Seq[SchemaError]): SchemaValidation =
+
+  def addErrors(erros: Seq[SchemaError]): SchemaQuality =
     copy(errors = this.errors ++ errors)
-  def prefix(prefix: Pointer): SchemaValidation = this.copy(pointer = prefix / this.pointer)
-  def combine(other: SchemaValidation): SchemaValidation =
+
+  def combine(other: SchemaQuality): SchemaQuality =
     copy(errors = this.errors ++ other.errors, ignoredKeywords = this.ignoredKeywords ++ other.ignoredKeywords)
 }
 
-object SchemaValidation {
-  val empty = SchemaValidation(Seq.empty, Set.empty)
+object SchemaQuality {
+  val empty = SchemaQuality(Seq.empty, Set.empty)
 }
 
 case class SchemaError(message: String, pointer: Pointer = Pointer.empty) {
@@ -103,10 +104,10 @@ case class Checked[R](
     valid: Boolean,
     results: Seq[R],
     count: Int,
-    validation: SchemaValidation = SchemaValidation.empty
+    validation: SchemaQuality = SchemaQuality.empty
 ) {
-  def count(others: Seq[Checked[R]]): Checked[R]    = this.copy(count = this.count + Checked.count(others))
-  def add(validation: SchemaValidation): Checked[R] = this.copy(validation = this.validation.combine(validation))
+  def count(others: Seq[Checked[R]]): Checked[R] = this.copy(count = this.count + Checked.count(others))
+  def add(validation: SchemaQuality): Checked[R] = this.copy(validation = this.validation.combine(validation))
 }
 
 object Checked {
@@ -118,7 +119,7 @@ object Checked {
   def merge[R](checked: Seq[Checked[R]]): Checked[R] = {
     val valid           = checked.forall(_.valid)
     val results: Seq[R] = checked.flatMap(_.results)
-    val vaidation       = checked.map(_.validation).reduceOption(_.combine(_)).getOrElse(SchemaValidation.empty)
+    val vaidation       = checked.map(_.validation).reduceOption(_.combine(_)).getOrElse(SchemaQuality.empty)
     Checked(valid, results, 1 + count(checked), vaidation)
   }
   def count[R](checked: Seq[Checked[R]]): Int = checked.map(_.count).sum

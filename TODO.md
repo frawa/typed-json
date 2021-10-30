@@ -1,10 +1,9 @@
 # Backlog
 
 ## Doing
-- consolidate ignored keywords and schema errors, also across lazy
+- review and refactor: Checks
 
 ## TODO
-- review and refactor: Checks
 - review and refactor: implicits
 - review and refactor: ctor/apply args
 - review and refactor: tests
@@ -20,6 +19,7 @@
 - benching
 
 ## Done
+- consolidate ignored keywords and schema errors, also across lazy
 - copyright and license
 - review and refactor: SchemaResolver et al
 - inline spec meta schemas, via macros at compile time
