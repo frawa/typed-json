@@ -70,15 +70,23 @@ case class DependentSchemasCheck(checks: Map[String, Checks])                ext
 case class ContainsCheck(schema: Option[Checks] = None, min: Option[Int] = None, max: Option[Int] = None)
     extends NestingCheck
 
-case class Checked[R](valid: Boolean, results: Seq[R], count: Int, ignoredKeywords: Seq[String] = Seq.empty) {
-  def add(others: Seq[Checked[R]]): Checked[R] = Checked(valid, results, count + Checked.count(others))
-  def withIgnored(ignored: Set[String])        = this.copy(ignoredKeywords = this.ignoredKeywords ++ ignored)
+case class Checked[R](
+    valid: Boolean,
+    results: Seq[R],
+    count: Int,
+    ignoredKeywords: Seq[String] = Seq.empty,
+    errors: Seq[SchemaError] = Seq.empty
+) {
+  def add(others: Seq[Checked[R]]): Checked[R]  = Checked(valid, results, count + Checked.count(others))
+  def withIgnored(ignored: Set[String])         = this.copy(ignoredKeywords = this.ignoredKeywords ++ ignored)
+  def withSchemaErrors(erros: Seq[SchemaError]) = this.copy(errors = this.errors ++ errors)
 }
 
 object Checked {
   def apply[R](valid: Boolean, result: R): Checked[R] = Checked[R](valid, Seq(result), 1)
   def valid[R]                                        = Checked[R](true, Seq(), 1)
   def valid[R](result: R)                             = Checked[R](true, Seq(result), 1)
+  def invalid[R]                                      = Checked[R](false, Seq(), 1)
   def invalid[R](result: R)                           = Checked[R](false, Seq(result), 1)
   def merge[R](checked: Seq[Checked[R]]): Checked[R] = {
     val valid           = checked.forall(_.valid)

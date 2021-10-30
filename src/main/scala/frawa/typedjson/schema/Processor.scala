@@ -30,7 +30,9 @@ object SchemaValue {
   }
 }
 
-case class Processor[R] private[schema] (process: Processor.ProcessFun[R], ignoredKeywords: Set[String])
+case class Processor[R] private[schema] (process: Processor.ProcessFun[R], ignoredKeywords: Set[String]) {
+  // TODO return consolidated result with ignored keywords and schema errors
+}
 
 object Processor {
   type SchemaErrors = Checks.SchemaErrors
@@ -205,17 +207,10 @@ object Processor {
   }
 
   private def checkLazyResolve[R](checker: Checker[R], check: LazyResolveCheck): ProcessFun[R] = {
-    check
-      .resolve()
-      .map(all(checker, _))
-      .swap
-      .map { e =>
-        // TODO find a better way to raise an error
-        println("dynamic ref failed", e)
-        e
-      }
-      .swap
-      .getOrElse(noop)
+    check.resolve() match {
+      case Right(checks) => all(checker, checks)
+      case Left(errors)  => _ => Checked.invalid.withSchemaErrors(errors)
+    }
   }
 
   private def checkDependentSchemas[R](checker: Checker[R], check: DependentSchemasCheck): ProcessFun[R] = { value =>

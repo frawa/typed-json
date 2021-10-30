@@ -1,7 +1,7 @@
 # Backlog
 
 ## Doing
-- review and refactor: SchemaResolver et al
+- consolidate ignored keywords and schema errors, also across lazy
 
 ## TODO
 - copyright and license
@@ -20,6 +20,7 @@
 - benching
 
 ## Done
+- review and refactor: SchemaResolver et al
 - inline spec meta schemas, via macros at compile time
 - test caching of lazy loaded schemas
 - validate against 'official' test suite

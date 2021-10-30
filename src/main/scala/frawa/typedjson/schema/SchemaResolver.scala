@@ -24,10 +24,24 @@ trait SchemaResolver {
 
   protected def resolve(uri: URI): Option[Resolution] = None
   protected def isDynamic(uri: URI): Boolean          = false
-  def withBase(uri: URI): SchemaResolver              = this
+
+  def withBase(uri: URI): SchemaResolver = this
+
+  def absolute(ref: String): URI = {
+    val uri = URI.create(ref)
+    withoutEmptyFragment(
+      Some(uri)
+        .filter(_.isAbsolute())
+        .getOrElse(base.resolve(uri))
+    )
+  }
 
   def resolveDynamicRef(ref: String, scope: DynamicScope): Option[Resolution] = {
     resolveDynamicRef(absolute(ref), scope)
+  }
+
+  def resolveRef(ref: String): Option[Resolution] = {
+    resolveRef(absolute(ref))
   }
 
   private def resolveDynamicRef(uri: URI, scope: DynamicScope): Option[Resolution] = {
@@ -48,15 +62,6 @@ trait SchemaResolver {
     }
   }
 
-  def absolute(ref: String): URI = {
-    val uri = URI.create(ref)
-    withoutEmptyFragment(
-      Some(uri)
-        .filter(_.isAbsolute())
-        .getOrElse(base.resolve(uri))
-    )
-  }
-
   private def withoutEmptyFragment(uri: URI): URI = {
     val fragment = uri.getFragment()
     if (fragment != null && fragment.isEmpty()) {
@@ -64,10 +69,6 @@ trait SchemaResolver {
     } else {
       uri
     }
-  }
-
-  def resolveRef(ref: String): Option[Resolution] = {
-    resolveRef(absolute(ref))
   }
 
   private def resolveRef(uri: URI): Option[Resolution] = {

@@ -74,20 +74,6 @@ case class LoadedSchemasResolver(
     lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
 ) extends SchemaResolver {
 
-  def withLazyResolver(lazyResolver: LoadedSchemasResolver.LazyResolver): LoadedSchemasResolver =
-    this.copy(lazyResolver = Some(lazyResolver))
-
-  private def add(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
-    this.copy(schemas = schemas + ((uri, schema)))
-
-  private def addAll(other: LoadedSchemasResolver): LoadedSchemasResolver = this.copy(
-    schemas = schemas.concat(other.schemas.toIterable),
-    dynamicSchemas = dynamicSchemas.concat(other.dynamicSchemas.toIterable)
-  )
-
-  private def addDynamic(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
-    add(uri, schema).copy(dynamicSchemas = dynamicSchemas + uri)
-
   override def withBase(uri: URI): LoadedSchemasResolver = this.copy(base = uri)
 
   override protected def resolve(uri: URI): Option[Resolution] = schemas
@@ -101,4 +87,17 @@ case class LoadedSchemasResolver(
 
   override protected def isDynamic(uri: URI): Boolean = dynamicSchemas.contains(uri)
 
+  def withLazyResolver(lazyResolver: LoadedSchemasResolver.LazyResolver): LoadedSchemasResolver =
+    this.copy(lazyResolver = Some(lazyResolver))
+
+  private def add(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
+    this.copy(schemas = schemas + ((uri, schema)))
+
+  private def addAll(other: LoadedSchemasResolver): LoadedSchemasResolver = this.copy(
+    schemas = schemas.concat(other.schemas.toIterable),
+    dynamicSchemas = dynamicSchemas.concat(other.dynamicSchemas.toIterable)
+  )
+
+  private def addDynamic(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
+    add(uri, schema).copy(dynamicSchemas = dynamicSchemas + uri)
 }
