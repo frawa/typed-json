@@ -1,12 +1,10 @@
 # Backlog
 
 ## Doing
-- review and refactor: Checks
+- review and refactor: tests
 
 ## TODO
 - review and refactor: implicits
-- review and refactor: ctor/apply args
-- review and refactor: tests
 - support annotations
 - support 'unevaluatedProperties'
 - support 'unevaluatedItems'
@@ -19,6 +17,8 @@
 - benching
 
 ## Done
+- review and refactor: ctor/apply args
+- review and refactor: Checks
 - consolidate ignored keywords and schema errors, also across lazy
 - copyright and license
 - review and refactor: SchemaResolver et al

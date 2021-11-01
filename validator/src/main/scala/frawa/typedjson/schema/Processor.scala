@@ -33,11 +33,6 @@ import scala.util.matching.Regex
 case class SchemaValue(value: Value)
 
 object SchemaValue {
-  def apply(json: String)(implicit parser: Parser): Either[String, SchemaValue] =
-    for {
-      value <- parser.parse(json)
-    } yield SchemaValue(value)
-
   def id(schema: SchemaValue): Option[String] = {
     (Pointer.empty / "$id")(schema.value).flatMap {
       case StringValue(id) => Some(id)
@@ -75,7 +70,7 @@ object Processor {
 
   private def noop[R]: ProcessFun[R]                                            = _ => Checked.valid[R]
   private def simple[R](checker: Checker[R], check: SimpleCheck): ProcessFun[R] = checker.check(check)
-  private def seq[R](ps: Seq[ProcessFun[R]]): ProcessFun[R]                     = value => Checked.merge(ps.map(_.apply(value)))
+  private def seq[R](ps: Seq[ProcessFun[R]]): ProcessFun[R]                     = value => Checked.merge(ps.map(_(value)))
   private def option[R](p: Option[ProcessFun[R]]): ProcessFun[R] = {
     p.getOrElse(noop)
   }
@@ -107,7 +102,7 @@ object Processor {
           }
           .flatMap { case (key, inner) =>
             val p = ps.lift(key)
-            p.map(p => p().apply(inner))
+            p.map(p => p()(inner))
           }
           .toSeq
         merge(checked)(value)
@@ -117,7 +112,7 @@ object Processor {
   }
 
   private def applyToValue[R](ps: Seq[ProcessFun[R]])(merge: MergeFun[R]): ProcessFun[R] = { value =>
-    val checked = ps.map(_.apply(value))
+    val checked = ps.map(_(value))
     merge(checked)(value)
   }
 
@@ -178,7 +173,7 @@ object Processor {
 
     val psAll: PartialFunction[String, () => ProcessFun[R]] = {
       case k if psBoth.exists(_.isDefinedAt(k)) =>
-        () => seq(psBoth.map(_.lift).flatMap { p => p(k).map(_.apply()) })
+        () => seq(psBoth.map(_.lift).flatMap { p => p(k).map(_()) })
     }
 
     val psAdditional = check.additionalProperties.map { checks =>
@@ -235,7 +230,7 @@ object Processor {
       case ObjectValue(v) =>
         val ps      = v.keySet.flatMap(check.checks.get(_)).map(all(checker, _)).toSeq
         val merge   = checker.nested(check)
-        val checked = ps.map(_.apply(value))
+        val checked = ps.map(_(value))
         merge(checked)(value)
       case _ => Checked.valid
     }

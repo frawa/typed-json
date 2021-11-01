@@ -21,7 +21,8 @@ import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue
 
 object Pointer {
-  def empty                         = new Pointer(Nil)
+  def empty = new Pointer(Nil)
+
   def apply(index: Int): Pointer    = Pointer.empty / index
   def apply(field: String): Pointer = Pointer.empty / field
 
