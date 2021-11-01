@@ -19,6 +19,7 @@ package frawa.typedjson.schema
 import java.net.URI
 import scala.io.Source
 import frawa.typedjson.parser.Parser
+import frawa.typedjson.parser._
 import frawa.typedjson.macros.Macros
 object SpecMetaSchemas {
 
@@ -32,8 +33,7 @@ object SpecMetaSchemas {
 
   private def resolve202012(relative: URI)(implicit parser: Parser): Option[SchemaValue] = {
     val name = relative.getSchemeSpecificPart()
-
-    val text = name match {
+    name match {
       case "schema"                 => Some(schemaContent)
       case "meta/applicator"        => Some(applicatorContent)
       case "meta/content"           => Some(contentContent)
@@ -44,28 +44,15 @@ object SpecMetaSchemas {
       case "meta/validation"        => Some(validationContent)
       case _                        => None
     }
-
-    text.flatMap(
-      parser
-        .parse(_)
-        .map(SchemaValue(_))
-        .swap
-        .map(message => {
-          println("error loading spec meta schema", message)
-          message
-        })
-        .swap
-        .toOption
-    )
   }
 
   import Macros._
-  private val schemaContent           = fileContent("./schemaSpec/schema.json")
-  private val applicatorContent       = fileContent("./schemaSpec/meta/applicator.json")
-  private val contentContent          = fileContent("./schemaSpec/meta/content.json")
-  private val coreContent             = fileContent("./schemaSpec/meta/core.json")
-  private val formatAnnotationContent = fileContent("./schemaSpec/meta/format-annotation.json")
-  private val metaDataContent         = fileContent("./schemaSpec/meta/meta-data.json")
-  private val unevaluatedContent      = fileContent("./schemaSpec/meta/unevaluated.json")
-  private val validationContent       = fileContent("./schemaSpec/meta/validation.json")
+  private val schemaContent           = SchemaValue(jsonContent("./schemaSpec/schema.json"))
+  private val applicatorContent       = SchemaValue(jsonContent("./schemaSpec/meta/applicator.json"))
+  private val contentContent          = SchemaValue(jsonContent("./schemaSpec/meta/content.json"))
+  private val coreContent             = SchemaValue(jsonContent("./schemaSpec/meta/core.json"))
+  private val formatAnnotationContent = SchemaValue(jsonContent("./schemaSpec/meta/format-annotation.json"))
+  private val metaDataContent         = SchemaValue(jsonContent("./schemaSpec/meta/meta-data.json"))
+  private val unevaluatedContent      = SchemaValue(jsonContent("./schemaSpec/meta/unevaluated.json"))
+  private val validationContent       = SchemaValue(jsonContent("./schemaSpec/meta/validation.json"))
 }

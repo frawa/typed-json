@@ -24,6 +24,7 @@ lazy val macros = (project in file("macros"))
     name := "scala-json-schema-macros",
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value
   )
+  .dependsOn(parser)
 
 lazy val validator = (project in file("validator"))
   .dependsOn(parser, macros)
