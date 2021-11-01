@@ -12,16 +12,7 @@ class ValidationCheckerTest extends FunSuite {
   private def assertValidate(text: String)(schema: SchemaValue)(
       f: Checked[ValidationResult] => Unit
   ) = {
-    val withParsed = for {
-      value     <- Parser(text)
-      processor <- Processor(schema)(ValidationChecker())
-      checked = processor(InnerValue(value, Pointer.empty))
-    } yield {
-      f(checked)
-    }
-    withParsed.swap
-      .map(message => fail("parsing failed", clues(clue(message))))
-      .swap
+    assertChecked(ValidationChecker())(schema, text)(f)
   }
 
   private def assertErrors(checked: Checked[ValidationResult], expected: Seq[WithPointer[Observation]]): Unit = {

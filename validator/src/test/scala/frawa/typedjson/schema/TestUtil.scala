@@ -35,4 +35,40 @@ object TestUtil {
     f(resolver)
   }
 
+  def assertChecked[R](
+      checker: Checker[R]
+  )(schema: SchemaValue, valueText: String)(f: Checked[R] => Unit)(implicit parser: Parser) = {
+    withStrictProcessor(checker)(schema) { processor =>
+      val value   = parseJsonValue(valueText)
+      val checked = processor(InnerValue(value))
+      f(checked)
+    }
+  }
+
+  def withProcessor[R](
+      checker: Checker[R]
+  )(schema: SchemaValue, lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None)(
+      f: Processor[R] => Unit
+  )(implicit parser: Parser) = {
+    val result = for {
+      processor <- Processor(schema, lazyResolver)(checker)
+    } yield {
+      f(processor)
+    }
+    result.swap
+      .map(message => fail("creating processor failed", clues(clue(message))))
+      .swap
+  }
+
+  def withStrictProcessor[R](
+      checker: Checker[R]
+  )(schema: SchemaValue, lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None)(
+      f: Processor[R] => Unit
+  )(implicit parser: Parser) = {
+    withProcessor(checker)(schema, lazyResolver) { processor =>
+      assertEquals(processor.validation.ignoredKeywords, Set.empty[String], "new keywords")
+      f(processor)
+    }
+  }
+
 }

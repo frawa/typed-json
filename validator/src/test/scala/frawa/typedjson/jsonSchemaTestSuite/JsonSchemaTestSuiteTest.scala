@@ -22,7 +22,7 @@ import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.BoolValue
 import frawa.typedjson.schema.SpecMetaSchemas
-
+import TestUtil._
 class JsonSchemaTestSuiteTest extends FunSuite {
   implicit val zioParser = new ZioParser()
 
@@ -90,19 +90,11 @@ class JsonSchemaTestSuiteTest extends FunSuite {
             }
           assume(includedOnlyId.getOrElse(true), s"excluded by onlyId=${onlyId}")
 
-          val lazyResolver = SpecMetaSchemas.lazyResolver
+          val lazyResolver = Some(SpecMetaSchemas.lazyResolver)
           val schemaValue  = SchemaValue(schema)
-          // val base        = path.getFileName().toUri()
-          val processor0 = Processor(schemaValue, Some(lazyResolver))(ValidationChecker())
-          val processor = processor0.swap
-            .map(message => fail("no processor", clues(clue(id), clue(message))))
-            .swap
-            .toOption
-            .get
-
-          assertEquals(processor.validation.ignoredKeywords, Set.empty[String])
-
-          tests.foreach(assertOne(processor))
+          withStrictProcessor(ValidationChecker())(schemaValue, lazyResolver) { processor =>
+            tests.foreach(assertOne(processor))
+          }
         }
       case _ => fail("invalid test json")
     }

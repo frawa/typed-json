@@ -15,17 +15,7 @@ class ValidationKeywordTest extends FunSuite {
   implicit val zioParser = new ZioParser()
 
   def validateJson(schema: SchemaValue)(jsonText: String)(f: Checked[ValidationResult] => Unit) = {
-    val value = parseJsonValue(jsonText)
-    val result = for {
-      processor <- Processor(schema)(ValidationChecker())
-      checked = processor(InnerValue(value))
-      _       = assertEquals(processor.validation.ignoredKeywords, Set.empty[String], "new keywords")
-    } yield {
-      f(checked)
-    }
-    result.swap
-      .map(message => fail("validating spec failed", clues(clue(message))))
-      .swap
+    assertChecked(ValidationChecker())(schema, jsonText)(f)
   }
 
   test("multipleOf") {

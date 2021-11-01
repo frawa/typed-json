@@ -14,17 +14,9 @@ class SuggestCheckerTest extends FunSuite {
   private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
       f: Seq[Value] => Unit
   ) = {
-    val withParsed = for {
-      value     <- Parser(text)
-      processor <- Processor(schema)(SuggestionChecker(at))
-      result = processor(InnerValue(value, Pointer.empty))
-    } yield {
-      // TODO avoid the flattening
-      f(result.results.flatMap(_.suggestions).distinct)
+    assertChecked(SuggestionChecker(at))(schema, text) { checked =>
+      f(checked.results.flatMap(_.suggestions).distinct)
     }
-    withParsed.swap
-      .map(message => fail("parsing failed", clues(clue(message))))
-      .swap
   }
 
   test("suggest property") {

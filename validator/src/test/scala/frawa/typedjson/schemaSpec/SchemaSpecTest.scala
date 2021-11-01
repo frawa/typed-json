@@ -15,11 +15,12 @@ import frawa.typedjson.parser.Value
 import frawa.typedjson.schema.Checked
 import frawa.typedjson.schema.ValidationResult
 import frawa.typedjson.schema.SpecMetaSchemas
-
+import TestUtil._
 class SchemaSpecTest extends FunSuite {
   implicit val zioParser = new ZioParser()
   val resolver           = SpecMetaSchemas.lazyResolver
   val base               = SpecMetaSchemas.draft202012
+  val lazyResolver       = Some(SpecMetaSchemas.lazyResolver)
 
   def withSchemaSpec(name: String)(f: SchemaValue => Unit) {
     val Some(schema) = resolver(base.resolve(name))
@@ -29,16 +30,10 @@ class SchemaSpecTest extends FunSuite {
   def validateSpec(valueName: String, schemaName: String)(f: Checked[ValidationResult] => Unit) {
     withSchemaSpec(schemaName) { schema =>
       withSchemaSpec(valueName) { value =>
-        val lazyResolver = SpecMetaSchemas.lazyResolver
-        val result = for {
-          processor <- Processor(schema, Some(lazyResolver))(ValidationChecker())
-          checked = processor(InnerValue(value.value))
-        } yield {
+        withProcessor(ValidationChecker())(schema, lazyResolver) { processor =>
+          val checked = processor(InnerValue(value.value))
           f(checked)
         }
-        result.swap
-          .map(message => fail("validating spec failed", clues(clue(message))))
-          .swap
       }
     }
   }
