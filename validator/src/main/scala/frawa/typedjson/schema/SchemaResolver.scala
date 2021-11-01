@@ -25,6 +25,7 @@ import frawa.typedjson.parser.Parser
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.ZioParser
+import UriUtil._
 
 import java.net.URI
 import scala.reflect.ClassTag
@@ -44,11 +45,11 @@ trait SchemaResolver {
   def withBase(uri: URI): SchemaResolver = this
 
   def absolute(ref: String): URI = {
-    val uri = URI.create(ref)
+    val uri1 = uri(ref)
     withoutEmptyFragment(
-      Some(uri)
+      Some(uri1)
         .filter(_.isAbsolute())
-        .getOrElse(base.resolve(uri))
+        .getOrElse(base.resolve(uri1))
     )
   }
 

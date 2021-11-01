@@ -4,72 +4,74 @@ import munit.FunSuite
 import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.parser.Parser
 import java.net.URI
+import UriUtil._
 
 class DynamicScopeTest extends FunSuite {
+  import DynamicScope._
 
   test("empty") {
-    assertEquals(DynamicScope.empty.candidates, Seq())
+    assertEquals(empty.candidates, Seq())
   }
 
   test("push first pointer segment") {
-    val scope = DynamicScope.empty.push("toto")
-    assertEquals(scope.uris, Seq(URI.create("#/toto")))
+    val scope = empty.push("toto")
+    assertEquals(scope.uris, Seq(uri("#/toto")))
   }
 
   test("push more pointer segments") {
-    val scope = DynamicScope.empty
+    val scope = empty
       .push("toto")
       .push("titi")
     assertEquals(
       scope.uris,
       Seq(
-        URI.create("#/toto"),
-        URI.create("#/toto/titi")
+        uri("#/toto"),
+        uri("#/toto/titi")
       )
     )
   }
 
   test("push uri") {
-    val scope = DynamicScope.empty
-      .push(URI.create("toto"))
-      .push(URI.create("titi"))
+    val scope = empty
+      .push(uri("toto"))
+      .push(uri("titi"))
     assertEquals(
       scope.uris,
       Seq(
-        URI.create("toto"),
-        URI.create("titi")
+        uri("toto"),
+        uri("titi")
       )
     )
   }
 
   test("push mixed") {
-    val scope = DynamicScope.empty
-      .push(URI.create("toto"))
+    val scope = empty
+      .push(uri("toto"))
       .push("foo")
-      .push(URI.create("titi"))
+      .push(uri("titi"))
       .push("bar")
     assertEquals(
       scope.uris,
       Seq(
-        URI.create("toto"),
-        URI.create("toto#/foo"),
-        URI.create("titi"),
-        URI.create("titi#/bar")
+        uri("toto"),
+        uri("toto#/foo"),
+        uri("titi"),
+        uri("titi#/bar")
       )
     )
   }
 
   test("candidates without fragement") {
-    val scope = DynamicScope.empty
-      .push(URI.create("toto"))
+    val scope = empty
+      .push(uri("toto"))
       .push("foo")
-      .push(URI.create("titi"))
+      .push(uri("titi"))
       .push("bar")
     assertEquals(
       scope.candidates,
       Seq(
-        URI.create("toto"),
-        URI.create("titi")
+        uri("toto"),
+        uri("titi")
       )
     )
   }

@@ -29,14 +29,14 @@ case class DynamicScope(uris: Seq[URI]) {
     .distinct
 
   def push(segment: String): DynamicScope = {
-    val uri = uris.lastOption.getOrElse(URI.create(""))
+    val uri1 = uris.lastOption.getOrElse(uri(""))
     val pointer = uris.lastOption
       .map(_.getFragment())
       .filter(_ != null)
       .map(Pointer.parse(_))
       .getOrElse(Pointer.empty)
     val pushPointer = pointer / segment
-    val next        = withFragment(uri, pushPointer)
+    val next        = withFragment(uri1, pushPointer)
     DynamicScope(uris :+ next)
   }
 

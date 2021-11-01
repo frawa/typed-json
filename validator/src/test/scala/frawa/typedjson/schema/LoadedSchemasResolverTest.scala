@@ -14,6 +14,7 @@ import scala.reflect.internal.Reporter
 import munit.Assertions._
 import java.net.URI
 import TestUtil._
+import UriUtil._
 
 class LoadedSchemasResolverTest extends FunSuite {
   implicit val zioParser = new ZioParser()
@@ -25,8 +26,8 @@ class LoadedSchemasResolverTest extends FunSuite {
                   |"type": "null"
                   |}""".stripMargin) { schema =>
       val resolver = LoadedSchemasResolver(schema)
-      val uri      = URI.create(id)
-      assertEquals(resolver.base, uri)
+      val uri1     = uri(id)
+      assertEquals(resolver.base, uri1)
       assertEquals(resolver.resolveRef(id).map(_._1), Some(schema))
     }
   }
@@ -41,7 +42,7 @@ class LoadedSchemasResolverTest extends FunSuite {
                  |}
                  |}""".stripMargin) { schema =>
       val resolver = LoadedSchemasResolver(schema)
-      assertEquals(resolver.base, URI.create(""))
+      assertEquals(resolver.base, uri(""))
       assertEquals(resolver.schemas.size, 1)
 
       val expected = SchemaValue(
@@ -74,8 +75,8 @@ class LoadedSchemasResolverTest extends FunSuite {
                   |}
                   |}""".stripMargin) { schema =>
       val resolver = LoadedSchemasResolver(schema)
-      val uri      = URI.create(id)
-      assertEquals(resolver.base, uri)
+      val uri1     = uri(id)
+      assertEquals(resolver.base, uri1)
       assertEquals(resolver.schemas.size, 2)
       assertEquals(resolver.resolveRef(id).map(_._1), Some(schema))
 
@@ -117,8 +118,8 @@ class LoadedSchemasResolverTest extends FunSuite {
                   |}
                   |}""".stripMargin) { schema =>
       val resolver = LoadedSchemasResolver(schema)
-      val uri      = URI.create(id)
-      assertEquals(resolver.base, uri)
+      val uri1     = uri(id)
+      assertEquals(resolver.base, uri1)
       assertEquals(resolver.resolveRef(id).map(_._1), Some(schema))
       val expected = SchemaValue(
         value = ObjectValue(
@@ -156,8 +157,8 @@ class LoadedSchemasResolverTest extends FunSuite {
            |}""".stripMargin
       )
     ) { resolver =>
-      val uriRoot1 = URI.create(id1)
-      val uriRoot2 = URI.create(id2)
+      val uriRoot1 = uri(id1)
+      val uriRoot2 = uri(id2)
 
       val scope1 = DynamicScope.empty.push(uriRoot1)
       val scope2 = DynamicScope.empty.push(uriRoot2).push(uriRoot1)
@@ -200,16 +201,16 @@ class LoadedSchemasResolverTest extends FunSuite {
                |  }
                |}""".stripMargin)
     ) { resolver =>
-      val uriRoot = URI.create(id)
+      val uriRoot = uri(id)
 
-      assertEquals(resolver.dynamicSchemas, Set(uriRoot.resolve(URI.create("list#items"))))
+      assertEquals(resolver.dynamicSchemas, Set(uriRoot.resolve(uri("list#items"))))
       assertEquals(
         resolver.schemas.keySet,
         Set(
           uriRoot,
-          URI.create(s"${id}#items"),
-          uriRoot.resolve(URI.create("list")),
-          uriRoot.resolve(URI.create("list#items"))
+          uri(s"${id}#items"),
+          uriRoot.resolve(uri("list")),
+          uriRoot.resolve(uri("list#items"))
         )
       )
 
@@ -259,20 +260,20 @@ class LoadedSchemasResolverTest extends FunSuite {
                |  }
                |}""".stripMargin)
     ) { resolver =>
-      val uriRoot = URI.create(id)
+      val uriRoot = uri(id)
 
       assertEquals(
         resolver.dynamicSchemas,
-        Set(URI.create(s"${id}#items"), uriRoot.resolve(URI.create("list#items")))
+        Set(uri(s"${id}#items"), uriRoot.resolve(uri("list#items")))
       )
       assertEquals(
         resolver.schemas.keySet,
         Set(
           uriRoot,
-          URI.create("https://example.net/root"),
-          URI.create("https://example.net/root#items"),
-          uriRoot.resolve(URI.create("list")),
-          uriRoot.resolve(URI.create("list#items"))
+          uri("https://example.net/root"),
+          uri("https://example.net/root#items"),
+          uriRoot.resolve(uri("list")),
+          uriRoot.resolve(uri("list#items"))
         )
       )
 
@@ -308,7 +309,7 @@ class LoadedSchemasResolverTest extends FunSuite {
       val Some((schema, resolver2)) = resolver1.resolveRef("cacheme")
       assertEquals(schema, SchemaValue(NullValue))
       assertEquals(resolver2.isInstanceOf[LoadedSchemasResolver], true)
-      assertEquals(resolver2.asInstanceOf[LoadedSchemasResolver].schemas.keySet, Set(URI.create("cacheme")))
+      assertEquals(resolver2.asInstanceOf[LoadedSchemasResolver].schemas.keySet, Set(uri("cacheme")))
     }
   }
 }

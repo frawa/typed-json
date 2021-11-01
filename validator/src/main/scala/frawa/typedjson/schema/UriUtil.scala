@@ -20,6 +20,8 @@ import java.net.URI
 
 object UriUtil {
 
+  def uri(value: String): URI = URI.create(value)
+
   def withoutFragement(uri: URI): URI = new URI(uri.getScheme(), uri.getSchemeSpecificPart(), null)
 
   def withFragment(uri: URI, pointer: Pointer): URI =

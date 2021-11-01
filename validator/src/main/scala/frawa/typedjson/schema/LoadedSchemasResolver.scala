@@ -25,13 +25,14 @@ import frawa.typedjson.parser.Parser
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.ZioParser
+import UriUtil._
 
 import java.net.URI
 
 object LoadedSchemasResolver {
   type LazyResolver = URI => Option[SchemaValue]
 
-  val empty = LoadedSchemasResolver(URI.create(""))
+  val empty = LoadedSchemasResolver(uri(""))
 
   def apply(schema: SchemaValue, lazyResolver: Option[LazyResolver]): LoadedSchemasResolver = {
     val resolver = apply(schema)
@@ -41,8 +42,8 @@ object LoadedSchemasResolver {
   def apply(schema: SchemaValue): LoadedSchemasResolver = {
     val firstId = SchemaValue
       .id(schema)
-      .map(URI.create(_))
-      .getOrElse(URI.create(""))
+      .map(uri(_))
+      .getOrElse(uri(""))
     val first = empty.add(firstId, schema).withBase(firstId)
     loadSchemas(schema.value, first)
   }

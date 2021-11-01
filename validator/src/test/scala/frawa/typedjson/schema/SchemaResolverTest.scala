@@ -14,12 +14,13 @@ import scala.reflect.internal.Reporter
 import munit.Assertions._
 import java.net.URI
 import TestUtil._
+import UriUtil._
 
 class SchemaResolverTest extends FunSuite {
   val fooId  = "https://example.net/foo.json"
-  val fooUri = URI.create(fooId)
+  val fooUri = uri(fooId)
 
-  val gnuUri = URI.create("https://example.net/foo.json#gnu")
+  val gnuUri = uri("https://example.net/foo.json#gnu")
   val gnuSchema =
     SchemaValue(
       value = ObjectValue(
