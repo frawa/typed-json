@@ -33,6 +33,7 @@ import java.util.regex.Pattern
 import scala.util.Try
 import java.util.UUID
 
+// TODO rename to something like "Error"
 sealed trait Observation
 case class FalseSchemaReason()                                         extends Observation
 case class TypeMismatch[T <: Value](expected: String)                  extends Observation
@@ -56,6 +57,12 @@ case class MaxPropertiesMismatch(max: BigDecimal)                      extends O
 case class MinPropertiesMismatch(min: BigDecimal)                      extends Observation
 case class DependentRequiredMissing(missing: Map[String, Seq[String]]) extends Observation
 case class NotContains(valid: Int)                                     extends Observation
+
+// TODO rename to something like "Annotation"
+sealed trait Observation2
+case class LargestIndex(index: Int)        extends Observation2
+case class ValidIndices(indices: Seq[Int]) extends Observation2
+
 trait Calculator[R] {
   def invalid(observation: Observation, pointer: Pointer): Checked[R]
   def allOf(checked: Seq[Checked[R]], pointer: Pointer): Checked[R]
@@ -117,14 +124,23 @@ object ValidationChecker {
       case OneOfCheck(_)                  => calc.oneOf(checked, value.pointer)
       case NotCheck(_)                    => calc.not(checked, value.pointer)
       case ObjectPropertiesCheck(_, _, _) => calc.allOf(checked, value.pointer)
-      case ArrayItemsCheck(_, _)          => calc.allOf(checked, value.pointer)
-      case IfThenElseCheck(_, _, _)       => calc.ifThenElse(checked, value.pointer)
-      case PropertyNamesCheck(_)          => calc.allOf(checked, value.pointer)
-      case c: LazyResolveCheck            => calc.allOf(checked, value.pointer)
-      case DependentSchemasCheck(_)       => calc.allOf(checked, value.pointer)
-      case ContainsCheck(_, min, max)     => calc.contains(checked, value.pointer, min, max)
+      case ArrayItemsCheck(_, prefixItems) =>
+        addAnnotation(calc.allOf(checked, value.pointer), largestIndex(checked, prefixItems.size))
+      case IfThenElseCheck(_, _, _)   => calc.ifThenElse(checked, value.pointer)
+      case PropertyNamesCheck(_)      => calc.allOf(checked, value.pointer)
+      case c: LazyResolveCheck        => calc.allOf(checked, value.pointer)
+      case DependentSchemasCheck(_)   => calc.allOf(checked, value.pointer)
+      case ContainsCheck(_, min, max) => calc.contains(checked, value.pointer, min, max)
     }
   }
+
+  private def addAnnotation(
+      checked: Checked[ValidationResult],
+      annotation: Option[Observation2]
+  ): Checked[ValidationResult] =
+    annotation
+      .map(annotation => checked.copy(results = checked.results :+ ValidationResult.valid(annotation)))
+      .getOrElse(checked)
 
   private def checkType[T <: Value: ClassTag](observation: TypeMismatch[T]): ProcessFun = value =>
     value.value match {
@@ -448,7 +464,15 @@ object ValidationChecker {
           calc.invalid(DependentRequiredMissing(missing), value.pointer)
       case _ => Checked.valid
     }
+  }
 
+  private def largestIndex(checked: Seq[Checked[ValidationResult]], prefixItems: Int): Option[Observation2] = {
+    val lastValid = checked.lastIndexWhere(_.valid, prefixItems)
+    if (-1 < lastValid) {
+      Some(LargestIndex(scala.math.min(lastValid, prefixItems - 1)))
+    } else {
+      None
+    }
   }
 
 }

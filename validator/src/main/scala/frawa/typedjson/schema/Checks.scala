@@ -119,8 +119,8 @@ object Checked {
   def merge[R](checked: Seq[Checked[R]]): Checked[R] = {
     val valid           = checked.forall(_.valid)
     val results: Seq[R] = checked.flatMap(_.results)
-    val vaidation       = checked.map(_.validation).reduceOption(_.combine(_)).getOrElse(SchemaQuality.empty)
-    Checked(valid, results, 1 + count(checked), vaidation)
+    val validation      = checked.map(_.validation).reduceOption(_.combine(_)).getOrElse(SchemaQuality.empty)
+    Checked(valid, results, 1 + count(checked), validation)
   }
   def count[R](checked: Seq[Checked[R]]): Int = checked.map(_.count).sum
 }
