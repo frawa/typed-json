@@ -1,11 +1,11 @@
 # Backlog
 
 ## Doing
-- review and refactor: tests
+- track keywordLocation, absoluteKeywordLocation, and instanceLocation on checks
+- support annotations
 
 ## TODO
 - review and refactor: implicits
-- support annotations
 - support 'unevaluatedProperties'
 - support 'unevaluatedItems'
 - fix ignored suites in JsonSchemaTestTestSuite
@@ -17,6 +17,7 @@
 - benching
 
 ## Done
+- review and refactor: tests
 - review and refactor: ctor/apply args
 - review and refactor: Checks
 - consolidate ignored keywords and schema errors, also across lazy
