@@ -75,7 +75,7 @@ object SuggestionChecker {
         // TODO
         properties.flatMap { case (prop, checks) =>
           checks.checks
-            .flatMap(suggestFor(_)(checked))
+            .flatMap(check => suggestFor(check.value)(checked))
             .map(v => ObjectValue(Map(prop -> v)))
         }.toSeq
       case ObjectRequiredCheck(required) => Seq(ObjectValue(Map.from(required.map((_, NullValue)))))
@@ -87,7 +87,7 @@ object SuggestionChecker {
         Seq(ifChecks, thenChecks, elseChecks)
           .flatMap(identity)
           .flatMap(_.checks)
-          .flatMap(suggestFor(_)(checked))
+          .flatMap(check => suggestFor(check.value)(checked))
       case UnionTypeCheck(checks) => checks.flatMap(suggestFor(_)(checked))
       case EnumCheck(values)      => values
       case _                      => checked.flatMap(_.results).flatMap(_.suggestions)

@@ -120,7 +120,7 @@ object ValidationChecker {
       case ArrayItemsCheck(_, _)          => calc.allOf(checked, value.pointer)
       case IfThenElseCheck(_, _, _)       => calc.ifThenElse(checked, value.pointer)
       case PropertyNamesCheck(_)          => calc.allOf(checked, value.pointer)
-      case LazyResolveCheck(_)            => calc.allOf(checked, value.pointer)
+      case c: LazyResolveCheck            => calc.allOf(checked, value.pointer)
       case DependentSchemasCheck(_)       => calc.allOf(checked, value.pointer)
       case ContainsCheck(_, min, max)     => calc.contains(checked, value.pointer, min, max)
     }

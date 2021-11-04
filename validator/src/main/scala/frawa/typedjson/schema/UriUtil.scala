@@ -30,4 +30,5 @@ object UriUtil {
   def withFragment(uri: URI, fragment: String): URI =
     new URI(uri.getScheme(), uri.getSchemeSpecificPart(), fragment)
 
+  case class WithLocation[+T](uri: URI, value: T)
 }

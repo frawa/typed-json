@@ -80,23 +80,23 @@ case class IfThenElseCheck(
     ifChecks: Option[Checks] = None,
     thenChecks: Option[Checks] = None,
     elseChecks: Option[Checks] = None
-)                                                                            extends NestingCheck
-case class PatternCheck(pattern: String)                                     extends SimpleCheck
-case class FormatCheck(format: String)                                       extends SimpleCheck
-case class MinimumCheck(min: BigDecimal, exclude: Boolean = false)           extends SimpleCheck
-case class UniqueItemsCheck(unique: Boolean)                                 extends SimpleCheck
-case class PropertyNamesCheck(checks: Checks)                                extends NestingCheck
-case class LazyResolveCheck(resolve: () => Either[Seq[SchemaError], Checks]) extends NestingCheck
-case class MultipleOfCheck(n: BigDecimal)                                    extends SimpleCheck
-case class MaximumCheck(max: BigDecimal, exclude: Boolean = false)           extends SimpleCheck
-case class MaxLengthCheck(max: BigDecimal)                                   extends SimpleCheck
-case class MinLengthCheck(min: BigDecimal)                                   extends SimpleCheck
-case class MaxItemsCheck(max: BigDecimal)                                    extends SimpleCheck
-case class MinItemsCheck(min: BigDecimal)                                    extends SimpleCheck
-case class MaxPropertiesCheck(max: BigDecimal)                               extends SimpleCheck
-case class MinPropertiesCheck(min: BigDecimal)                               extends SimpleCheck
-case class DependentRequiredCheck(required: Map[String, Seq[String]])        extends SimpleCheck
-case class DependentSchemasCheck(checks: Map[String, Checks])                extends NestingCheck
+)                                                                                                   extends NestingCheck
+case class PatternCheck(pattern: String)                                                            extends SimpleCheck
+case class FormatCheck(format: String)                                                              extends SimpleCheck
+case class MinimumCheck(min: BigDecimal, exclude: Boolean = false)                                  extends SimpleCheck
+case class UniqueItemsCheck(unique: Boolean)                                                        extends SimpleCheck
+case class PropertyNamesCheck(checks: Checks)                                                       extends NestingCheck
+case class LazyResolveCheck(val resolved: URI, val resolve: () => Either[Seq[SchemaError], Checks]) extends NestingCheck
+case class MultipleOfCheck(n: BigDecimal)                                                           extends SimpleCheck
+case class MaximumCheck(max: BigDecimal, exclude: Boolean = false)                                  extends SimpleCheck
+case class MaxLengthCheck(max: BigDecimal)                                                          extends SimpleCheck
+case class MinLengthCheck(min: BigDecimal)                                                          extends SimpleCheck
+case class MaxItemsCheck(max: BigDecimal)                                                           extends SimpleCheck
+case class MinItemsCheck(min: BigDecimal)                                                           extends SimpleCheck
+case class MaxPropertiesCheck(max: BigDecimal)                                                      extends SimpleCheck
+case class MinPropertiesCheck(min: BigDecimal)                                                      extends SimpleCheck
+case class DependentRequiredCheck(required: Map[String, Seq[String]])                               extends SimpleCheck
+case class DependentSchemasCheck(checks: Map[String, Checks])                                       extends NestingCheck
 case class ContainsCheck(schema: Option[Checks] = None, min: Option[Int] = None, max: Option[Int] = None)
     extends NestingCheck
 
@@ -127,20 +127,19 @@ object Checked {
 
 case class Checks(
     schema: SchemaValue,
-    checks: Seq[Check] = Seq.empty[Check],
+    checks: Seq[Checks.CheckWithLocation] = Seq.empty[Checks.CheckWithLocation],
     ignoredKeywords: Set[String] = Set.empty
 ) {
   import SeqUtil._
+  import Checks._
 
-  private def add(check: Check): Checks = this.copy(checks = checks :+ check)
+  private def add(check: Check)(implicit scope: DynamicScope): Checks =
+    this.copy(checks = checks :+ localized(check, scope))
 
   private def addAll(
-      values: Seq[SchemaValue],
-      scope: DynamicScope
-  )(f: Seq[Checks] => Check)(implicit resolver: SchemaResolver): Either[SchemaErrors, Checks] = {
-    val checks0 = values
-      .map(v => Checks.parseKeywords(v, scope))
-      .toSeq
+      values: Seq[SchemaValue]
+  )(f: Seq[Checks] => Check)(implicit resolver: SchemaResolver, scope: DynamicScope): Either[SchemaErrors, Checks] = {
+    val checks0 = values.zipWithIndex.map { case (v, i) => Checks.parseKeywords(v, scope.push(i)) }.toSeq
     for {
       checks <- sequenceAllLefts(checks0)
     } yield {
@@ -153,7 +152,7 @@ case class Checks(
   private def withKeyword(keyword: String, value: Value, scope: DynamicScope)(implicit
       resolver: SchemaResolver
   ): Either[SchemaErrors, Checks] = {
-    val scope1 = scope.push(keyword)
+    implicit val scope1 = scope.push(keyword)
     (keyword, value) match {
       // TODO validation vocabulary
       case ("type", StringValue(typeName)) =>
@@ -223,29 +222,29 @@ case class Checks(
       }
 
       case ("allOf", ArrayValue(values)) => {
-        addAll(values.map(SchemaValue(_)), scope1)(AllOfCheck)
+        addAll(values.map(SchemaValue(_)))(AllOfCheck)
       }
 
       case ("anyOf", ArrayValue(values)) => {
-        addAll(values.map(SchemaValue(_)), scope1)(AnyOfCheck)
+        addAll(values.map(SchemaValue(_)))(AnyOfCheck)
       }
 
       case ("oneOf", ArrayValue(values)) => {
-        addAll(values.map(SchemaValue(_)), scope1)(OneOfCheck)
+        addAll(values.map(SchemaValue(_)))(OneOfCheck)
       }
 
       case ("if", value) =>
-        updateChecks(SchemaValue(value), scope1)(IfThenElseCheck()) { (checks, check) =>
+        updateChecks(SchemaValue(value))(IfThenElseCheck()) { (checks, check) =>
           check.copy(ifChecks = Some(checks))
         }
 
       case ("then", value) =>
-        updateChecks(SchemaValue(value), scope1)(IfThenElseCheck()) { (checks, check) =>
+        updateChecks(SchemaValue(value))(IfThenElseCheck()) { (checks, check) =>
           check.copy(thenChecks = Some(checks))
         }
 
       case ("else", value) =>
-        updateChecks(SchemaValue(value), scope1)(IfThenElseCheck()) { (checks, check) =>
+        updateChecks(SchemaValue(value))(IfThenElseCheck()) { (checks, check) =>
           check.copy(elseChecks = Some(checks))
         }
 
@@ -463,7 +462,8 @@ case class Checks(
       val resolver1 = resolution._2
       Checks.parseKeywords(schema, scope)(resolver1)
     }
-    LazyResolveCheck(resolveLater)
+    val resolved = resolution._2.base
+    LazyResolveCheck(resolved, resolveLater)
   }
 
   private def mapChecksFor(
@@ -471,7 +471,9 @@ case class Checks(
       scope: DynamicScope
   )(f: Map[String, Checks] => Checks)(implicit resolver: SchemaResolver) = {
     val propChecks = props.view
-      .mapValues(v => Checks.parseKeywords(SchemaValue(v), scope))
+      .map { case (prop, v) =>
+        (prop, Checks.parseKeywords(SchemaValue(v), scope.push(prop)))
+      }
       .map {
         case (prop, Right(checks)) => Right((prop, checks))
         case (prop, Left(errors))  => Left(errors.map(_.prefix(Pointer.empty / prop)))
@@ -486,28 +488,29 @@ case class Checks(
     }
   }
 
-  private def updateCheck[C <: Check: ClassTag](newCheck: => C)(f: C => C): Checks = {
-    val checks1: Seq[Check] =
+  private def updateCheck[C <: Check: ClassTag](newCheck: => C)(f: C => C)(implicit scope: DynamicScope): Checks = {
+    val checks1: Seq[CheckWithLocation] =
       if (
         checks.exists {
-          case check: C => true
-          case other    => false
+          case UriUtil.WithLocation(uri, check: C) => true
+          case _                                   => false
         }
       ) {
         checks
       } else {
-        checks :+ newCheck
+        checks :+ localized(newCheck, scope)
       }
     this.copy(checks = checks1.map {
-      case check: C => f(check)
-      case other    => other
+      case UriUtil.WithLocation(uri, check: C) => UriUtil.WithLocation(uri, f(check))
+      case c @ _                               => c
     })
   }
 
   private def updateChecks[C <: Check: ClassTag](
-      schema: SchemaValue,
-      scope: DynamicScope
-  )(newCheck: => C)(f: (Checks, C) => C)(implicit resolver: SchemaResolver): Either[SchemaErrors, Checks] = {
+      schema: SchemaValue
+  )(
+      newCheck: => C
+  )(f: (Checks, C) => C)(implicit resolver: SchemaResolver, scope: DynamicScope): Either[SchemaErrors, Checks] = {
     for {
       checks <- Checks.parseKeywords(schema, scope)
     } yield {
@@ -540,12 +543,13 @@ case class Checker[R](
 )
 
 object Checks {
-  type SchemaErrors = Seq[SchemaError]
+  type SchemaErrors      = Seq[SchemaError]
+  type CheckWithLocation = UriUtil.WithLocation[Check]
 
   def parseKeywords(schema: SchemaValue, scope: DynamicScope)(implicit
       resolver: SchemaResolver
   ): Either[SchemaErrors, Checks] = {
-    val scope1 = SchemaValue
+    implicit val scope1 = SchemaValue
       .id(schema)
       .map(id => scope.push(resolver.absolute(id)))
       .getOrElse(scope)
@@ -573,4 +577,8 @@ object Checks {
     }
   }
 
+  def localized(check: Check, scope: DynamicScope): CheckWithLocation = {
+    import UriUtil._
+    scope.uris.lastOption.map(WithLocation(_, check)).getOrElse(WithLocation(uri("#"), check))
+  }
 }

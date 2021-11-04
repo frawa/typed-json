@@ -16,6 +16,9 @@ import TestUtil._
 import TestSchemas._
 
 class ChecksTest extends FunSuite {
+  import Checks._
+  import UriUtil._
+
   implicit val zioParser = new ZioParser()
 
   private def assertChecks(schema: SchemaValue, allowIgnored: Boolean = false)(
@@ -52,10 +55,27 @@ class ChecksTest extends FunSuite {
     }
   }
 
+  private val noResolve: () => Either[Seq[SchemaError], Checks] = () => Left(Seq.empty[SchemaError])
+
+  private def assertable(checks: Checks): Checks = checks.copy(checks = checks.checks.map(assertable))
+  // private def assertable[T](checks: Seq[T]): Seq[T] = checks.map(assertable)
+  private def assertable(check: Checks.CheckWithLocation): Checks.CheckWithLocation =
+    check.copy(value = assertable(check.value))
+  private def assertable(check: Check): Check = check match {
+    case ArrayItemsCheck(items, prefixItems) =>
+      ArrayItemsCheck(
+        items.map(assertable),
+        prefixItems
+          .map(assertable)
+      )
+    case LazyResolveCheck(resolved, resolve) => LazyResolveCheck(resolved, noResolve)
+    case _                                   => check
+  }
+
   test("null") {
     withSchema(nullSchema) { schema =>
       assertChecks(schema) { checks =>
-        assertEquals(checks.checks, Seq(NullTypeCheck))
+        assertEquals(checks.checks, Seq(WithLocation(uri("#/type"), NullTypeCheck)))
       }
     }
   }
@@ -63,7 +83,7 @@ class ChecksTest extends FunSuite {
   test("boolean") {
     withSchema(boolSchema) { schema =>
       assertChecks(schema) { checks =>
-        assertEquals(checks.checks, Seq(BooleanTypeCheck))
+        assertEquals(checks.checks, Seq(WithLocation(uri("#/type"), BooleanTypeCheck)))
       }
     }
   }
@@ -71,7 +91,7 @@ class ChecksTest extends FunSuite {
   test("true schema") {
     withSchema(trueSchema) { schema =>
       assertChecks(schema) { checks =>
-        assertEquals(checks.checks, Seq(TrivialCheck(true)))
+        assertEquals(checks.checks, Seq(WithLocation(uri("#"), TrivialCheck(true))))
       }
     }
   }
@@ -79,7 +99,7 @@ class ChecksTest extends FunSuite {
   test("false schema") {
     withSchema(falseSchema) { schema =>
       assertChecks(schema) { checks =>
-        assertEquals(checks.checks, Seq(TrivialCheck(false)))
+        assertEquals(checks.checks, Seq(WithLocation(uri("#"), TrivialCheck(false))))
       }
     }
   }
@@ -98,14 +118,17 @@ class ChecksTest extends FunSuite {
         assertEquals(
           checks.checks,
           Seq(
-            NotCheck(
-              Checks(
-                SchemaValue(
-                  value = BoolValue(
-                    value = false
-                  )
-                ),
-                Seq(TrivialCheck(false))
+            WithLocation(
+              uri("#/not"),
+              NotCheck(
+                Checks(
+                  SchemaValue(
+                    value = BoolValue(
+                      value = false
+                    )
+                  ),
+                  Seq(WithLocation(uri("#/not"), TrivialCheck(false)))
+                )
               )
             )
           )
@@ -133,7 +156,7 @@ class ChecksTest extends FunSuite {
   test("empty schema") {
     withSchema(emtpySchema) { schema =>
       assertChecks(schema) { checks =>
-        assertEquals(checks.checks, Seq(TrivialCheck(true)))
+        assertEquals(checks.checks, Seq(WithLocation(uri("#"), TrivialCheck(true))))
       }
     }
   }
@@ -141,7 +164,7 @@ class ChecksTest extends FunSuite {
   test("string") {
     withSchema(stringSchema) { schema =>
       assertChecks(schema) { checks =>
-        assertEquals(checks.checks, Seq(StringTypeCheck))
+        assertEquals(checks.checks, Seq(WithLocation(uri("#/type"), StringTypeCheck)))
       }
     }
   }
@@ -149,7 +172,7 @@ class ChecksTest extends FunSuite {
   test("number") {
     withSchema(numberSchema) { schema =>
       assertChecks(schema) { checks =>
-        assertEquals(checks.checks, Seq(NumberTypeCheck))
+        assertEquals(checks.checks, Seq(WithLocation(uri("#/type"), NumberTypeCheck)))
       }
     }
   }
@@ -157,7 +180,7 @@ class ChecksTest extends FunSuite {
   test("array") {
     withSchema(arraySchema) { schema =>
       assertChecks(schema) { checks =>
-        assertEquals(checks.checks, Seq(ArrayTypeCheck))
+        assertEquals(checks.checks, Seq(WithLocation(uri("#/type"), ArrayTypeCheck)))
       }
     }
   }
@@ -168,12 +191,15 @@ class ChecksTest extends FunSuite {
         assertEquals(
           checks.checks,
           Seq(
-            ArrayTypeCheck,
-            ArrayItemsCheck(
-              Some(
-                Checks(
-                  numberSchemaValue,
-                  Seq(NumberTypeCheck)
+            WithLocation(uri("#/type"), ArrayTypeCheck),
+            WithLocation(
+              uri("#/items"),
+              ArrayItemsCheck(
+                Some(
+                  Checks(
+                    numberSchemaValue,
+                    Seq(WithLocation(uri("#/items/type"), NumberTypeCheck))
+                  )
                 )
               )
             )
@@ -186,15 +212,18 @@ class ChecksTest extends FunSuite {
         assertEquals(
           checks.checks,
           Seq(
-            ArrayItemsCheck(
-              Some(
-                Checks(
-                  numberSchemaValue,
-                  Seq(NumberTypeCheck)
+            WithLocation(
+              uri("#/items"),
+              ArrayItemsCheck(
+                Some(
+                  Checks(
+                    numberSchemaValue,
+                    Seq(WithLocation(uri("#/items/type"), NumberTypeCheck))
+                  )
                 )
               )
             ),
-            ArrayTypeCheck
+            WithLocation(uri("#/type"), ArrayTypeCheck)
           )
         )
       }
@@ -207,22 +236,25 @@ class ChecksTest extends FunSuite {
         assertEquals(
           checks.checks,
           Seq(
-            ObjectTypeCheck,
-            ObjectPropertiesCheck(
-              Map(
-                "toto" -> Checks(
-                  numberSchemaValue,
-                  checks = List(
-                    NumberTypeCheck
+            WithLocation(uri("#/type"), ObjectTypeCheck),
+            WithLocation(
+              uri("#/properties"),
+              ObjectPropertiesCheck(
+                Map(
+                  "toto" -> Checks(
+                    numberSchemaValue,
+                    checks = List(
+                      WithLocation(uri("#/properties/toto/type"), NumberTypeCheck)
+                    ),
+                    ignoredKeywords = Set()
                   ),
-                  ignoredKeywords = Set()
-                ),
-                "titi" -> Checks(
-                  stringSchemaValue,
-                  checks = List(
-                    StringTypeCheck
-                  ),
-                  ignoredKeywords = Set()
+                  "titi" -> Checks(
+                    stringSchemaValue,
+                    checks = List(
+                      WithLocation(uri("#/properties/titi/type"), StringTypeCheck)
+                    ),
+                    ignoredKeywords = Set()
+                  )
                 )
               )
             )
@@ -242,10 +274,13 @@ class ChecksTest extends FunSuite {
         assertEquals(
           checks.checks,
           Seq(
-            ObjectTypeCheck,
-            ObjectRequiredCheck(
-              names = IndexedSeq(
-                "titi"
+            WithLocation(uri("#/type"), ObjectTypeCheck),
+            WithLocation(
+              uri("#/required"),
+              ObjectRequiredCheck(
+                names = IndexedSeq(
+                  "titi"
+                )
               )
             )
           )
@@ -260,14 +295,17 @@ class ChecksTest extends FunSuite {
         assertEquals(
           checks.checks,
           Seq(
-            AllOfCheck(
-              Seq(
-                Checks(
-                  numberSchemaValue,
-                  checks = List(
-                    NumberTypeCheck
-                  ),
-                  ignoredKeywords = Set()
+            WithLocation(
+              uri("#/allOf"),
+              AllOfCheck(
+                Seq(
+                  Checks(
+                    numberSchemaValue,
+                    checks = List(
+                      WithLocation(uri("#/allOf/0/type"), NumberTypeCheck)
+                    ),
+                    ignoredKeywords = Set()
+                  )
                 )
               )
             )
@@ -283,37 +321,40 @@ class ChecksTest extends FunSuite {
         assertEquals(
           checks.checks,
           Seq(
-            AnyOfCheck(
-              Seq(
-                Checks(
-                  schema = SchemaValue(
-                    value = ObjectValue(
-                      properties = Map(
-                        "type" -> StringValue(
-                          value = "number"
+            WithLocation(
+              uri("#/anyOf"),
+              AnyOfCheck(
+                Seq(
+                  Checks(
+                    schema = SchemaValue(
+                      value = ObjectValue(
+                        properties = Map(
+                          "type" -> StringValue(
+                            value = "number"
+                          )
                         )
                       )
-                    )
+                    ),
+                    checks = List(
+                      WithLocation(uri("#/anyOf/0/type"), NumberTypeCheck)
+                    ),
+                    ignoredKeywords = Set()
                   ),
-                  checks = List(
-                    NumberTypeCheck
-                  ),
-                  ignoredKeywords = Set()
-                ),
-                Checks(
-                  schema = SchemaValue(
-                    value = ObjectValue(
-                      properties = Map(
-                        "type" -> StringValue(
-                          value = "string"
+                  Checks(
+                    schema = SchemaValue(
+                      value = ObjectValue(
+                        properties = Map(
+                          "type" -> StringValue(
+                            value = "string"
+                          )
                         )
                       )
-                    )
-                  ),
-                  checks = List(
-                    StringTypeCheck
-                  ),
-                  ignoredKeywords = Set()
+                    ),
+                    checks = List(
+                      WithLocation(uri("#/anyOf/1/type"), StringTypeCheck)
+                    ),
+                    ignoredKeywords = Set()
+                  )
                 )
               )
             )
@@ -329,21 +370,24 @@ class ChecksTest extends FunSuite {
         assertEquals(
           checks.checks,
           Seq(
-            OneOfCheck(
-              Seq(
-                Checks(
-                  numberSchemaValue,
-                  checks = List(
-                    NumberTypeCheck
+            WithLocation(
+              uri("#/oneOf"),
+              OneOfCheck(
+                Seq(
+                  Checks(
+                    numberSchemaValue,
+                    checks = List(
+                      WithLocation(uri("#/oneOf/0/type"), NumberTypeCheck)
+                    ),
+                    ignoredKeywords = Set()
                   ),
-                  ignoredKeywords = Set()
-                ),
-                Checks(
-                  stringSchemaValue,
-                  checks = List(
-                    StringTypeCheck
-                  ),
-                  ignoredKeywords = Set()
+                  Checks(
+                    stringSchemaValue,
+                    checks = List(
+                      WithLocation(uri("#/oneOf/1/type"), StringTypeCheck)
+                    ),
+                    ignoredKeywords = Set()
+                  )
                 )
               )
             )
@@ -359,10 +403,13 @@ class ChecksTest extends FunSuite {
         assertEquals(
           checks.checks,
           Seq(
-            IfThenElseCheck(
-              Some(Checks(numberSchemaValue, Seq(NumberTypeCheck), Set())),
-              Some(Checks(numberSchemaValue, Seq(NumberTypeCheck), Set())),
-              Some(Checks(stringSchemaValue, Seq(StringTypeCheck), Set()))
+            WithLocation(
+              uri("#/if"),
+              IfThenElseCheck(
+                Some(Checks(numberSchemaValue, Seq(WithLocation(uri("#/if/type"), NumberTypeCheck)), Set())),
+                Some(Checks(numberSchemaValue, Seq(WithLocation(uri("#/then/type"), NumberTypeCheck)), Set())),
+                Some(Checks(stringSchemaValue, Seq(WithLocation(uri("#/else/type"), StringTypeCheck)), Set()))
+              )
             )
           )
         )
@@ -376,10 +423,13 @@ class ChecksTest extends FunSuite {
         assertEquals(
           checks.checks,
           Seq(
-            UnionTypeCheck(
-              Seq(
-                NullTypeCheck,
-                StringTypeCheck
+            WithLocation(
+              uri("#/type"),
+              UnionTypeCheck(
+                Seq(
+                  NullTypeCheck,
+                  StringTypeCheck
+                )
               )
             )
           )
@@ -394,14 +444,17 @@ class ChecksTest extends FunSuite {
         assertEquals(
           checks.checks,
           Seq(
-            StringTypeCheck,
-            EnumCheck(
-              values = Seq(
-                StringValue(
-                  value = "foo"
-                ),
-                StringValue(
-                  value = "bar"
+            WithLocation(uri("#/type"), StringTypeCheck),
+            WithLocation(
+              uri("#/enum"),
+              EnumCheck(
+                values = Seq(
+                  StringValue(
+                    value = "foo"
+                  ),
+                  StringValue(
+                    value = "bar"
+                  )
                 )
               )
             )
@@ -417,11 +470,14 @@ class ChecksTest extends FunSuite {
         assertEquals(
           checks.checks,
           Seq(
-            StringTypeCheck,
-            EnumCheck(
-              values = Seq(
-                StringValue(
-                  value = "first"
+            WithLocation(uri("#/type"), StringTypeCheck),
+            WithLocation(
+              uri("#/const"),
+              EnumCheck(
+                values = Seq(
+                  StringValue(
+                    value = "first"
+                  )
                 )
               )
             )
@@ -435,28 +491,31 @@ class ChecksTest extends FunSuite {
     withSchema(idRefDefsSchema) { schema =>
       assertChecks(schema) { checks =>
         assertEquals(
-          checks.checks,
+          assertable(checks).checks,
           Seq(
-            ArrayTypeCheck,
-            ArrayItemsCheck(
-              items = Some(
-                value = Checks(
-                  schema = SchemaValue(
-                    value = ObjectValue(
-                      properties = Map(
-                        "$anchor" -> StringValue(
-                          value = "item"
-                        ),
-                        "type" -> StringValue(
-                          value = "number"
+            WithLocation(uri("https://example.net/root.json#/type"), ArrayTypeCheck),
+            WithLocation(
+              uri("https://example.net/root.json#/items"),
+              ArrayItemsCheck(
+                items = Some(
+                  value = Checks(
+                    schema = SchemaValue(
+                      value = ObjectValue(
+                        properties = Map(
+                          "$ref" -> StringValue(
+                            value = "#item"
+                          )
                         )
                       )
-                    )
-                  ),
-                  checks = List(
-                    NumberTypeCheck
-                  ),
-                  ignoredKeywords = Set()
+                    ),
+                    checks = List(
+                      WithLocation(
+                        uri("https://example.net/root.json#/items/$ref"),
+                        new LazyResolveCheck(uri("https://example.net/root.json#item"), noResolve)
+                      )
+                    ),
+                    ignoredKeywords = Set()
+                  )
                 )
               )
             )
@@ -466,7 +525,7 @@ class ChecksTest extends FunSuite {
     }
   }
 
-  test("recursive $ref/$def".only) {
+  test("recursive $ref/$def") {
     // TODO assert more precisely
     withSchema(recursiveRefDefsSchema) { schema =>
       assertChecks(schema) { checks =>
@@ -474,10 +533,6 @@ class ChecksTest extends FunSuite {
           checks.checks.size,
           1
         )
-      // assertEquals(
-      //   checks.checks,
-      //   Seq()
-      // )
       }
     }
   }

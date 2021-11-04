@@ -46,8 +46,9 @@ case class Processor[R] private[schema] (private val process: Processor.ProcessF
 }
 
 object Processor {
-  type SchemaErrors = Checks.SchemaErrors
+  import Checks.CheckWithLocation
 
+  type SchemaErrors  = Checks.SchemaErrors
   type ProcessFun[R] = InnerValue => Checked[R]
   type MergeFun[R]   = Seq[Checked[R]] => ProcessFun[R]
 
@@ -125,8 +126,8 @@ object Processor {
     merge(Seq(checked))(value)
   }
 
-  private def one[R](checker: Checker[R], check: Check): ProcessFun[R] =
-    check match {
+  private def one[R](checker: Checker[R], check: CheckWithLocation): ProcessFun[R] =
+    check.value match {
       case c: SimpleCheck  => simple(checker, c)
       case c: NestingCheck => nesting(checker, c)
     }
