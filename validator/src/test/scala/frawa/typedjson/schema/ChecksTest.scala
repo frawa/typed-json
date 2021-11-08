@@ -57,6 +57,7 @@ class ChecksTest extends FunSuite {
 
   private val noResolve: () => Either[Seq[SchemaError], Checks] = () => Left(Seq.empty[SchemaError])
 
+  // TODO use implicits?
   private def assertable(checks: Checks): Checks = checks.copy(checks = checks.checks.map(assertable))
   // private def assertable[T](checks: Seq[T]): Seq[T] = checks.map(assertable)
   private def assertable(check: Checks.CheckWithLocation): Checks.CheckWithLocation =
@@ -65,8 +66,7 @@ class ChecksTest extends FunSuite {
     case ArrayItemsCheck(items, prefixItems) =>
       ArrayItemsCheck(
         items.map(assertable),
-        prefixItems
-          .map(assertable)
+        prefixItems.map(assertable)
       )
     case LazyResolveCheck(resolved, resolve) => LazyResolveCheck(resolved, noResolve)
     case _                                   => check
