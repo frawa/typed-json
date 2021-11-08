@@ -23,6 +23,8 @@ import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.BoolValue
 import frawa.typedjson.schema.SpecMetaSchemas
 import TestUtil._
+import munit.TestOptions
+
 class JsonSchemaTestSuiteTest extends FunSuite {
   implicit val zioParser = new ZioParser()
 
@@ -31,19 +33,22 @@ class JsonSchemaTestSuiteTest extends FunSuite {
 
   // TODO unskip 'em
   val skip = Set(
-    "anchor.json",
-    "content.json",
-    "defs.json", // TODO meta schema with ignored keywords: deprecated, $vocabulary, $schema
-    "id.json",   // TODO $id in enum is not an id
-    "refRemote.json",
-    "unevaluatedItems.json",
+    "anchor.json",    // TODO anchor inside enum is not an id
+    "content.json",   // TODO keywords contentMediaType, contentEncoding, contentSchema
+    "defs.json",      // TODO meta schema with ignored keywords: deprecated, $vocabulary, $schema
+    "id.json",        // TODO $id inside enum is not an id
+    "refRemote.json", // TODO resolve URI as remote URL
+    // "unevaluatedItems.json",
     "unevaluatedProperties.json",
-    "unknownKeyword.json"
+    "unknownKeyword.json" // TODO $id inside an unknown keyword
   )
 
-  val takeOnly: Option[Int]  = None
-  val only: Option[String]   = None
-  val onlyId: Option[String] = None
+  val takeOnly: Option[Int] = None
+  // val only: Option[String]   = None
+  val only: Option[String]            = Some("unevaluatedItems.json")
+  val onlyId: Option[String]          = None
+  val onlyDescription: Option[String] = None
+  // val onlyDescription: Option[String] = Some("unevaluatedItems with nested tuple")
 
   override def munitIgnore: Boolean = !Files.exists(jsonSchemaTestSuiteRoot)
 
@@ -79,7 +84,12 @@ class JsonSchemaTestSuiteTest extends FunSuite {
         val StringValue(description) = properties("description")
         val testName                 = s"${path.getFileName} - ${description}"
 
-        test(testName) {
+        val onlyTestName = onlyDescription
+          .filter(description.startsWith(_))
+          .map(_ => testName.only)
+          .getOrElse(new TestOptions(testName))
+
+        test(onlyTestName) {
           val schema            = properties("schema")
           val ArrayValue(tests) = properties("tests")
 
