@@ -55,22 +55,26 @@ sealed trait SimpleCheck  extends Check
 sealed trait TypeCheck    extends SimpleCheck
 sealed trait NestingCheck extends Check
 
-case class TrivialCheck(v: Boolean)                                                        extends SimpleCheck
-case object NullTypeCheck                                                                  extends TypeCheck
-case object BooleanTypeCheck                                                               extends TypeCheck
-case object StringTypeCheck                                                                extends TypeCheck
-case object NumberTypeCheck                                                                extends TypeCheck
-case object IntegerTypeCheck                                                               extends TypeCheck
-case object ArrayTypeCheck                                                                 extends TypeCheck
-case object ObjectTypeCheck                                                                extends TypeCheck
-case class ObjectRequiredCheck(names: Seq[String])                                         extends SimpleCheck
-case class NotCheck(checks: Checks)                                                        extends NestingCheck
-case class AllOfCheck(checks: Seq[Checks])                                                 extends NestingCheck
-case class AnyOfCheck(checks: Seq[Checks])                                                 extends NestingCheck
-case class OneOfCheck(checks: Seq[Checks])                                                 extends NestingCheck
-case class UnionTypeCheck(typeChecks: Seq[TypeCheck])                                      extends SimpleCheck
-case class EnumCheck(values: Seq[Value])                                                   extends SimpleCheck
-case class ArrayItemsCheck(items: Option[Checks] = None, prefixItems: Seq[Checks] = Seq()) extends NestingCheck
+case class TrivialCheck(v: Boolean)                   extends SimpleCheck
+case object NullTypeCheck                             extends TypeCheck
+case object BooleanTypeCheck                          extends TypeCheck
+case object StringTypeCheck                           extends TypeCheck
+case object NumberTypeCheck                           extends TypeCheck
+case object IntegerTypeCheck                          extends TypeCheck
+case object ArrayTypeCheck                            extends TypeCheck
+case object ObjectTypeCheck                           extends TypeCheck
+case class ObjectRequiredCheck(names: Seq[String])    extends SimpleCheck
+case class NotCheck(checks: Checks)                   extends NestingCheck
+case class AllOfCheck(checks: Seq[Checks])            extends NestingCheck
+case class AnyOfCheck(checks: Seq[Checks])            extends NestingCheck
+case class OneOfCheck(checks: Seq[Checks])            extends NestingCheck
+case class UnionTypeCheck(typeChecks: Seq[TypeCheck]) extends SimpleCheck
+case class EnumCheck(values: Seq[Value])              extends SimpleCheck
+case class ArrayItemsCheck(
+    items: Option[Checks] = None,
+    prefixItems: Seq[Checks] = Seq()
+    // unevaluated: Option[Checks] = None
+) extends NestingCheck
 case class ObjectPropertiesCheck(
     properties: Map[String, Checks] = Map(),
     patternProperties: Map[String, Checks] = Map(),
@@ -99,6 +103,7 @@ case class DependentRequiredCheck(required: Map[String, Seq[String]])           
 case class DependentSchemasCheck(checks: Map[String, Checks])                                       extends NestingCheck
 case class ContainsCheck(schema: Option[Checks] = None, min: Option[Int] = None, max: Option[Int] = None)
     extends NestingCheck
+case class UnevaluatedItemsCheck(itemChecks: Checks, unevaluated: Checks) extends NestingCheck
 
 case class Checked[R](
     valid: Boolean,
@@ -107,9 +112,11 @@ case class Checked[R](
     validation: SchemaQuality = SchemaQuality.empty,
     count: Int = 1
 ) {
-  def count(others: Seq[Checked[R]]): Checked[R] = this.copy(count = this.count + Checked.count(others))
+  def count(others: Seq[Checked[R]]): Checked[R] =
+    this.copy(count = this.count + Checked.count(others)).add(others.flatMap(_.annotations))
   def add(validation: SchemaQuality): Checked[R] = this.copy(validation = this.validation.combine(validation))
   def add(annotation: Checked.Annotation)        = this.copy(annotations = this.annotations :+ annotation)
+  def add(annotations: Seq[Checked.Annotation])  = this.copy(annotations = this.annotations ++ annotations)
 }
 
 // TODO rename to something like "Annotation"
@@ -201,6 +208,14 @@ case class Checks(
         } yield {
           updateCheck(ArrayItemsCheck())(check => check.copy(prefixItems = checks))
         }
+
+      case ("unevaluatedItems", v) => {
+        for {
+          checks <- Checks.parseKeywords(SchemaValue(v), scope1)
+        } yield {
+          Checks(schema).add(UnevaluatedItemsCheck(this, checks))(scope)
+        }
+      }
 
       case ("properties", ObjectValue(properties)) =>
         mapChecksFor(properties, scope1) { checks =>
@@ -449,9 +464,7 @@ case class Checks(
         for {
           checks <- Checks.parseKeywords(SchemaValue(v), scope1)
         } yield {
-          // withChecks(checks) { checks =>
           updateCheck(ContainsCheck())(check => check.copy(schema = Some(checks)))
-          // }
         }
 
       // TODO validation vocabulary

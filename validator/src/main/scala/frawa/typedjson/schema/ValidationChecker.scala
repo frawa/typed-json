@@ -126,6 +126,7 @@ object ValidationChecker {
       case c: LazyResolveCheck        => calc.allOf(checked, value.pointer)
       case DependentSchemasCheck(_)   => calc.allOf(checked, value.pointer)
       case ContainsCheck(_, min, max) => calc.contains(checked, value.pointer, min, max)
+      case c: UnevaluatedItemsCheck   => calc.allOf(checked, value.pointer)
     }
   }
 

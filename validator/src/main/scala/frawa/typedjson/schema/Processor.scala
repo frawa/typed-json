@@ -76,10 +76,6 @@ object Processor {
     p.getOrElse(noop)
   }
 
-  private def annot[R](fun: ProcessFun[R], annotation: Observation2): ProcessFun[R] = { value =>
-    fun(value).add(WithPointer(annotation, value.pointer))
-  }
-
   private def applyToArray[R](pPrefix: Seq[ProcessFun[R]], pItems: Option[ProcessFun[R]])(
       merge: MergeFun[R]
   ): ProcessFun[R] = { value: InnerValue =>
@@ -90,10 +86,9 @@ object Processor {
             InnerValue(v, value.pointer / index)
           }
         val checkedPrefix = pPrefix.zip(indexed).map { case (p, v) => p(v) }
-        val checked       = pItems.map(pItems => indexed.drop(pPrefix.length).map(pItems)).getOrElse(Seq())
+        val checked       = pItems.map(pItems => indexed.drop(pPrefix.size).map(pItems)).getOrElse(Seq())
         val size          = checkedPrefix.size + checked.size
-        merge(checkedPrefix ++ checked)(value)
-          .add(WithPointer(EvaluatedIndices(size)))
+        merge(checkedPrefix ++ checked)(value).add(WithPointer(EvaluatedIndices(size)))
       }
       case _ => Checked.valid
     }
@@ -154,6 +149,7 @@ object Processor {
       case c: LazyResolveCheck      => checkLazyResolve(checker, c)
       case c: DependentSchemasCheck => checkDependentSchemas(checker, c)
       case c: ContainsCheck         => checkContains(checker, c)
+      case c: UnevaluatedItemsCheck => checkUnevaluated(checker, c)
     }
 
   private def checkArrayItems[R](checker: Checker[R], check: ArrayItemsCheck): ProcessFun[R] = {
@@ -262,6 +258,36 @@ object Processor {
           }
           .getOrElse(Checked.valid)
       case _ => Checked.valid
+    }
+  }
+
+  private def checkUnevaluated[R](checker: Checker[R], check: UnevaluatedItemsCheck): ProcessFun[R] = { value =>
+    val p       = all(checker, check.itemChecks)
+    val checked = p(value)
+    value.value match {
+      case ArrayValue(vs) =>
+        val pUnevaluated = all(checker, check.unevaluated)
+        val indexed = vs.zipWithIndex
+          .map { case (v, index) =>
+            InnerValue(v, value.pointer / index)
+          }
+        val evaluated = checked.annotations
+          .filter(_.pointer == Pointer.empty)
+          .flatMap {
+            case WithPointer(EvaluatedIndices(size), _) => Some(size)
+            case _                                      => None
+          }
+          .maxOption
+        val checkedUnevaluated = evaluated
+          .map(evaluated =>
+            indexed
+              .drop(evaluated)
+              .map(pUnevaluated)
+          )
+          .getOrElse(Seq())
+        val merge = checker.nested(check)
+        merge(Seq(checked) ++ checkedUnevaluated)(value)
+      case _ => checked
     }
   }
 }
