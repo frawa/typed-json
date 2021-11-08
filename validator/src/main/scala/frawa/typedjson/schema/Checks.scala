@@ -103,24 +103,36 @@ case class ContainsCheck(schema: Option[Checks] = None, min: Option[Int] = None,
 case class Checked[R](
     valid: Boolean,
     results: Seq[R],
-    count: Int,
-    validation: SchemaQuality = SchemaQuality.empty
+    annotations: Seq[Checked.Annotation] = Seq.empty,
+    validation: SchemaQuality = SchemaQuality.empty,
+    count: Int = 1
 ) {
   def count(others: Seq[Checked[R]]): Checked[R] = this.copy(count = this.count + Checked.count(others))
   def add(validation: SchemaQuality): Checked[R] = this.copy(validation = this.validation.combine(validation))
+  def add(annotation: Checked.Annotation)        = this.copy(annotations = this.annotations :+ annotation)
 }
 
+// TODO rename to something like "Annotation"
+sealed trait Observation2
+case class LargestIndex(index: Int)                     extends Observation2
+case class ValidIndices(indices: Seq[Int])              extends Observation2
+case class EvaluatedIndices(size: Int)                  extends Observation2
+case class EvaluatedProperties(properties: Set[String]) extends Observation2
+
 object Checked {
-  def apply[R](valid: Boolean, result: R): Checked[R] = Checked[R](valid, Seq(result), 1)
-  def valid[R]                                        = Checked[R](true, Seq(), 1)
-  def valid[R](result: R)                             = Checked[R](true, Seq(result), 1)
-  def invalid[R]                                      = Checked[R](false, Seq(), 1)
-  def invalid[R](result: R)                           = Checked[R](false, Seq(result), 1)
+  type Annotation = WithPointer[Observation2]
+
+  def apply[R](valid: Boolean, result: R): Checked[R] = Checked[R](valid, Seq(result))
+  def valid[R]                                        = Checked[R](true, Seq())
+  def valid[R](result: R)                             = Checked[R](true, Seq(result))
+  def invalid[R]                                      = Checked[R](false, Seq())
+  def invalid[R](result: R)                           = Checked[R](false, Seq(result))
   def merge[R](checked: Seq[Checked[R]]): Checked[R] = {
     val valid           = checked.forall(_.valid)
     val results: Seq[R] = checked.flatMap(_.results)
     val validation      = checked.map(_.validation).reduceOption(_.combine(_)).getOrElse(SchemaQuality.empty)
-    Checked(valid, results, 1 + count(checked), validation)
+    val annotations     = checked.flatMap(_.annotations)
+    Checked(valid, results, annotations, validation, 1 + count(checked))
   }
   def count[R](checked: Seq[Checked[R]]): Int = checked.map(_.count).sum
 }

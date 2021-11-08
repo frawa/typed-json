@@ -58,11 +58,6 @@ case class MinPropertiesMismatch(min: BigDecimal)                      extends O
 case class DependentRequiredMissing(missing: Map[String, Seq[String]]) extends Observation
 case class NotContains(valid: Int)                                     extends Observation
 
-// TODO rename to something like "Annotation"
-sealed trait Observation2
-case class LargestIndex(index: Int)        extends Observation2
-case class ValidIndices(indices: Seq[Int]) extends Observation2
-
 trait Calculator[R] {
   def invalid(observation: Observation, pointer: Pointer): Checked[R]
   def allOf(checked: Seq[Checked[R]], pointer: Pointer): Checked[R]
@@ -125,7 +120,7 @@ object ValidationChecker {
       case NotCheck(_)                    => calc.not(checked, value.pointer)
       case ObjectPropertiesCheck(_, _, _) => calc.allOf(checked, value.pointer)
       case ArrayItemsCheck(_, prefixItems) =>
-        addAnnotation(calc.allOf(checked, value.pointer), largestIndex(checked, prefixItems.size))
+        addAnnotation(calc.allOf(checked, value.pointer), largestIndex(checked, prefixItems.size), value.pointer)
       case IfThenElseCheck(_, _, _)   => calc.ifThenElse(checked, value.pointer)
       case PropertyNamesCheck(_)      => calc.allOf(checked, value.pointer)
       case c: LazyResolveCheck        => calc.allOf(checked, value.pointer)
@@ -136,10 +131,11 @@ object ValidationChecker {
 
   private def addAnnotation(
       checked: Checked[ValidationResult],
-      annotation: Option[Observation2]
+      annotation: Option[Observation2],
+      pointer: Pointer
   ): Checked[ValidationResult] =
     annotation
-      .map(annotation => checked.copy(results = checked.results :+ ValidationResult.valid(annotation)))
+      .map(annotation => checked.add(WithPointer(annotation, pointer)))
       .getOrElse(checked)
 
   private def checkType[T <: Value: ClassTag](observation: TypeMismatch[T]): ProcessFun = value =>

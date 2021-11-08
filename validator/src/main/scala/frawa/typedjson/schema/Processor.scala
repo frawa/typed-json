@@ -76,20 +76,27 @@ object Processor {
     p.getOrElse(noop)
   }
 
-  private def applyToArray[R](pPrefix: Seq[ProcessFun[R]], pItems: ProcessFun[R])(merge: MergeFun[R]): ProcessFun[R] = {
-    value: InnerValue =>
-      value.value match {
-        case ArrayValue(vs) => {
-          val indexed = vs.zipWithIndex
-            .map { case (v, index) =>
-              InnerValue(v, value.pointer / index)
-            }
-          val checkedPrefix = pPrefix.zip(indexed).map { case (p, v) => p(v) }
-          val checked       = indexed.drop(pPrefix.length).map(pItems)
-          merge(checkedPrefix ++ checked)(value)
-        }
-        case _ => Checked.valid
+  private def annot[R](fun: ProcessFun[R], annotation: Observation2): ProcessFun[R] = { value =>
+    fun(value).add(WithPointer(annotation, value.pointer))
+  }
+
+  private def applyToArray[R](pPrefix: Seq[ProcessFun[R]], pItems: Option[ProcessFun[R]])(
+      merge: MergeFun[R]
+  ): ProcessFun[R] = { value: InnerValue =>
+    value.value match {
+      case ArrayValue(vs) => {
+        val indexed = vs.zipWithIndex
+          .map { case (v, index) =>
+            InnerValue(v, value.pointer / index)
+          }
+        val checkedPrefix = pPrefix.zip(indexed).map { case (p, v) => p(v) }
+        val checked       = pItems.map(pItems => indexed.drop(pPrefix.length).map(pItems)).getOrElse(Seq())
+        val size          = checkedPrefix.size + checked.size
+        merge(checkedPrefix ++ checked)(value)
+          .add(WithPointer(EvaluatedIndices(size)))
       }
+      case _ => Checked.valid
+    }
   }
 
   private def applyToObject[R](
@@ -97,16 +104,18 @@ object Processor {
   )(merge: MergeFun[R]): ProcessFun[R] = { value =>
     value.value match {
       case ObjectValue(vs) => {
-        val checked = vs.view
+        val evaluated = vs.view
           .map { case (key, v) =>
             (key, InnerValue(v, value.pointer / key))
           }
           .flatMap { case (key, inner) =>
             val p = ps.lift(key)
-            p.map(p => p()(inner))
+            p.map(p => (key, p()(inner)))
           }
           .toSeq
-        merge(checked)(value)
+        val checked       = evaluated.map(_._2)
+        val evaluatedKeys = EvaluatedProperties(evaluated.map(_._1).toSet)
+        merge(checked)(value).add(WithPointer(evaluatedKeys, value.pointer))
       }
       case _ => Checked.valid
     }
@@ -149,7 +158,7 @@ object Processor {
 
   private def checkArrayItems[R](checker: Checker[R], check: ArrayItemsCheck): ProcessFun[R] = {
     val pPrefix = check.prefixItems.map(all(checker, _))
-    val pItems  = option(check.items.map(all(checker, _)))
+    val pItems  = check.items.map(all(checker, _))
     val merge   = checker.nested(check)
     applyToArray(pPrefix, pItems)(merge)
   }

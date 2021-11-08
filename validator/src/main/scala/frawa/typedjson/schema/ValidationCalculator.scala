@@ -73,7 +73,7 @@ class ValidationCalculator extends Calculator[ValidationResult] {
     val count = checked.count(_.valid)
     if (min.getOrElse(1) <= count && !max.exists(count > _)) {
       val validIndices = checked.zipWithIndex.filter(_._1.valid).map(_._2)
-      Checked.valid.count(checked).copy(results = Seq(ValidationResult.valid(ValidIndices(validIndices), pointer)))
+      Checked.valid.count(checked).add(WithPointer(ValidIndices(validIndices), pointer))
     } else {
       invalid(NotContains(count), pointer)
     }

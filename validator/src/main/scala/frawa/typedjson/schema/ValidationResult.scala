@@ -26,22 +26,16 @@ import frawa.typedjson.parser.ObjectValue
 
 // TODO no defaults?
 case class ValidationResult(
-    errors: Seq[ValidationResult.Error] = Seq.empty,
-    annotations: Seq[ValidationResult.Annotation] = Seq.empty
+    errors: Seq[ValidationResult.Error]
 )
 
 object ValidationResult {
-  type Error      = WithPointer[Observation]
-  type Annotation = WithPointer[Observation2]
+  type Error = WithPointer[Observation]
 
-  def invalid(errors: Seq[Error]): ValidationResult = ValidationResult(errors, Seq())
+  def invalid(errors: Seq[Error]): ValidationResult = ValidationResult(errors)
+
   def invalid(observation: Observation, pointer: Pointer = Pointer.empty): ValidationResult = invalid(
     Seq(WithPointer(observation, pointer))
-  )
-
-  def valid(annotations: Seq[Annotation]): ValidationResult = ValidationResult(Seq(), annotations)
-  def valid(annotation: Observation2, pointer: Pointer = Pointer.empty): ValidationResult = valid(
-    Seq(WithPointer(annotation, pointer))
   )
 
 }

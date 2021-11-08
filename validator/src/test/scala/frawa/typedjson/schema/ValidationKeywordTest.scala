@@ -19,10 +19,6 @@ class ValidationKeywordTest extends FunSuite {
     assertChecked(ValidationChecker())(schema, jsonText)(f)
   }
 
-  private def annotations(checked: Checked[ValidationResult]): Seq[ValidationResult.Annotation] = {
-    checked.results.flatMap(_.annotations)
-  }
-
   test("multipleOf") {
     withSchema(
       """|{"multipleOf": 2
@@ -42,7 +38,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""12""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq())
+        assertEquals(checked.annotations, Seq())
       }
     }
   }
@@ -66,7 +62,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""12""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq())
+        assertEquals(checked.annotations, Seq())
       }
     }
   }
@@ -90,7 +86,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""12""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq())
+        assertEquals(checked.annotations, Seq())
       }
     }
   }
@@ -114,7 +110,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""1313""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq())
+        assertEquals(checked.annotations, Seq())
       }
     }
   }
@@ -138,7 +134,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""14""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq())
+        assertEquals(checked.annotations, Seq())
       }
     }
   }
@@ -162,7 +158,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)(""""bar"""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq())
+        assertEquals(checked.annotations, Seq())
       }
     }
   }
@@ -186,7 +182,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)(""""toto"""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq())
+        assertEquals(checked.annotations, Seq())
       }
     }
   }
@@ -210,7 +206,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)(""""foo13"""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq())
+        assertEquals(checked.annotations, Seq())
       }
     }
   }
@@ -234,7 +230,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""[2,3,4]""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq())
+        assertEquals(checked.annotations, Seq())
       }
     }
   }
@@ -258,7 +254,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""[2,3]""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq())
+        assertEquals(checked.annotations, Seq())
       }
     }
   }
@@ -282,7 +278,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""[13]""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq())
+        assertEquals(checked.annotations, Seq())
       }
     }
   }
@@ -306,7 +302,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""{"bar": 2, "foo": 3}""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq())
+        assertEquals(checked.annotations, Seq())
       }
     }
   }
@@ -330,7 +326,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""{"gnu": 1, "bar": 2, "foo": 3}""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq())
+        assertEquals(checked.annotations, Seq())
       }
     }
   }
@@ -354,7 +350,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""{"bar": 2, "foo": 3}""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq())
+        assertEquals(checked.annotations, Seq())
       }
     }
   }
@@ -378,7 +374,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""{"foo": 1, "bar": 2, "gnu": 3}""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq())
+        assertEquals(checked.annotations, Seq())
       }
     }
   }
@@ -402,7 +398,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""{"foo": 1}""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq())
+        assertEquals(checked.annotations, Seq())
       }
     }
   }
@@ -426,7 +422,13 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""[13, "foo", true]""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq(WithPointer(LargestIndex(1), Pointer.empty)))
+        assertEquals(
+          checked.annotations,
+          Seq(
+            WithPointer(LargestIndex(1), Pointer.empty),
+            WithPointer(EvaluatedIndices(2), Pointer.empty)
+          )
+        )
       }
     }
   }
@@ -445,14 +447,19 @@ class ValidationKeywordTest extends FunSuite {
               Seq(
                 WithPointer(TypeMismatch("boolean"), Pointer.empty / 2)
               )
-            ),
-            ValidationResult(annotations = Seq(WithPointer(LargestIndex(1), Pointer.empty)))
+            )
           )
         )
       }
       validateJson(schema)("""[13, "foo", true]""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq(WithPointer(LargestIndex(1), Pointer.empty)))
+        assertEquals(
+          checked.annotations,
+          Seq(
+            WithPointer(LargestIndex(1), Pointer.empty),
+            WithPointer(EvaluatedIndices(3), Pointer.empty)
+          )
+        )
       }
     }
   }
@@ -476,11 +483,16 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""[13, "foo", true]""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq(WithPointer(ValidIndices(Seq(0)), Pointer.empty)))
+        assertEquals(checked.annotations, Seq(WithPointer(ValidIndices(Seq(0)), Pointer.empty)))
       }
       validateJson(schema)("""[13, 14, "foo", true]""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq(WithPointer(ValidIndices(Seq(0, 1)), Pointer.empty)))
+        assertEquals(
+          checked.annotations,
+          Seq(
+            WithPointer(ValidIndices(Seq(0, 1)), Pointer.empty)
+          )
+        )
       }
     }
   }
@@ -505,7 +517,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""[13, 14, "foo", true]""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq(WithPointer(ValidIndices(Seq(0, 1)), Pointer.empty)))
+        assertEquals(checked.annotations, Seq(WithPointer(ValidIndices(Seq(0, 1)), Pointer.empty)))
       }
     }
   }
@@ -542,7 +554,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""[13, 14, "foo", true]""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq(WithPointer(ValidIndices(Seq(0, 1)), Pointer.empty)))
+        assertEquals(checked.annotations, Seq(WithPointer(ValidIndices(Seq(0, 1)), Pointer.empty)))
       }
     }
   }
@@ -554,11 +566,11 @@ class ValidationKeywordTest extends FunSuite {
     ) { schema =>
       validateJson(schema)("""[13, "gnu", true]""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq())
+        assertEquals(checked.annotations, Seq())
       }
       validateJson(schema)("""[13, 14, "foo", true]""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq())
+        assertEquals(checked.annotations, Seq())
       }
     }
   }
@@ -570,11 +582,11 @@ class ValidationKeywordTest extends FunSuite {
     ) { schema =>
       validateJson(schema)("""[13, "gnu", true]""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq())
+        assertEquals(checked.annotations, Seq())
       }
       validateJson(schema)("""[13, 14, "foo", true]""") { checked =>
         assert(checked.valid)
-        assertEquals(annotations(checked), Seq())
+        assertEquals(checked.annotations, Seq())
       }
     }
   }
@@ -601,6 +613,7 @@ class ValidationKeywordTest extends FunSuite {
       validateJson(schema)("""{"foo": "ok"}]""") { checked =>
         assertEquals(checked.results, Seq())
         assert(checked.valid)
+        assertEquals(checked.annotations, Seq(WithPointer(EvaluatedProperties(Set("foo")), Pointer.empty)))
       }
     }
   }
