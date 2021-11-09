@@ -43,8 +43,8 @@ class JsonSchemaTestSuiteTest extends FunSuite {
   )
 
   val takeOnly: Option[Int] = None
-  // val only: Option[String]   = None
-  val only: Option[String]            = Some("unevaluatedItems.json")
+  val only: Option[String]  = None
+  // val only: Option[String]            = Some("unevaluatedItems.json")
   val onlyId: Option[String]          = None
   val onlyDescription: Option[String] = None
 
