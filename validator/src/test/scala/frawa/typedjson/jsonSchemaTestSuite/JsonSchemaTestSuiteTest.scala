@@ -33,18 +33,16 @@ class JsonSchemaTestSuiteTest extends FunSuite {
 
   // TODO unskip 'em
   val skip = Set(
-    "anchor.json",    // TODO anchor inside enum is not an id
-    "content.json",   // TODO keywords contentMediaType, contentEncoding, contentSchema
-    "defs.json",      // TODO meta schema with ignored keywords: deprecated, $vocabulary, $schema
-    "id.json",        // TODO $id inside enum is not an id
-    "refRemote.json", // TODO resolve URI as remote URL
-    "unevaluatedProperties.json",
+    "anchor.json",        // TODO anchor inside enum is not an id
+    "content.json",       // TODO keywords contentMediaType, contentEncoding, contentSchema
+    "defs.json",          // TODO meta schema with ignored keywords: deprecated, $vocabulary, $schema
+    "id.json",            // TODO $id inside enum is not an id
+    "refRemote.json",     // TODO resolve URI as remote URL
     "unknownKeyword.json" // TODO $id inside an unknown keyword
   )
 
-  val takeOnly: Option[Int] = None
-  val only: Option[String]  = None
-  // val only: Option[String]            = Some("unevaluatedItems.json")
+  val takeOnly: Option[Int]           = None
+  val only: Option[String]            = None
   val onlyId: Option[String]          = None
   val onlyDescription: Option[String] = None
 

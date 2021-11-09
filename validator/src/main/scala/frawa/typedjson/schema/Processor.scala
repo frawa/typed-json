@@ -109,8 +109,9 @@ object Processor {
           }
           .toSeq
         val checked       = evaluated.map(_._2)
-        val evaluatedKeys = EvaluatedProperties(evaluated.map(_._1).toSet)
-        merge(checked)(value).add(WithPointer(evaluatedKeys, value.pointer))
+        val evaluatedKeys = EvaluatedProperties(evaluated.filter(_._2.valid).map(_._1).toSet)
+        val annotation    = WithPointer(evaluatedKeys, value.pointer)
+        merge(checked)(value).add(annotation)
       }
       case _ => Checked.valid
     }
@@ -137,18 +138,19 @@ object Processor {
 
   private def nesting[R](checker: Checker[R], check: NestingCheck): ProcessFun[R] =
     check match {
-      case c: ArrayItemsCheck       => checkArrayItems(checker, c)
-      case c: ObjectPropertiesCheck => checkObjectProperties(checker, c)
-      case c: NotCheck              => checkApplicator(checker, Seq(c.checks))(checker.nested(check))
-      case c: AllOfCheck            => checkApplicator(checker, c.checks)(checker.nested(check))
-      case c: AnyOfCheck            => checkApplicator(checker, c.checks)(checker.nested(check))
-      case c: OneOfCheck            => checkApplicator(checker, c.checks)(checker.nested(check))
-      case c: IfThenElseCheck       => checkIfThenElse(checker, c)
-      case c: PropertyNamesCheck    => checkPropertyNames(checker, c)
-      case c: LazyResolveCheck      => checkLazyResolve(checker, c)
-      case c: DependentSchemasCheck => checkDependentSchemas(checker, c)
-      case c: ContainsCheck         => checkContains(checker, c)
-      case c: UnevaluatedItemsCheck => checkUnevaluated(checker, c)
+      case c: ArrayItemsCheck            => checkArrayItems(checker, c)
+      case c: ObjectPropertiesCheck      => checkObjectProperties(checker, c)
+      case c: NotCheck                   => checkApplicator(checker, Seq(c.checks))(checker.nested(check))
+      case c: AllOfCheck                 => checkApplicator(checker, c.checks)(checker.nested(check))
+      case c: AnyOfCheck                 => checkApplicator(checker, c.checks)(checker.nested(check))
+      case c: OneOfCheck                 => checkApplicator(checker, c.checks)(checker.nested(check))
+      case c: IfThenElseCheck            => checkIfThenElse(checker, c)
+      case c: PropertyNamesCheck         => checkPropertyNames(checker, c)
+      case c: LazyResolveCheck           => checkLazyResolve(checker, c)
+      case c: DependentSchemasCheck      => checkDependentSchemas(checker, c)
+      case c: ContainsCheck              => checkContains(checker, c)
+      case c: UnevaluatedItemsCheck      => checkUnevaluated(checker, c)
+      case c: UnevaluatedPropertiesCheck => checkUnevaluated(checker, c)
     }
 
   private def checkArrayItems[R](checker: Checker[R], check: ArrayItemsCheck): ProcessFun[R] = {
@@ -215,9 +217,11 @@ object Processor {
         val merge = checker.nested(check)
         val names = vs.keySet
         val checked = names.map { name =>
-          p(InnerValue(StringValue(name), value.pointer / name))
+          (name, p(InnerValue(StringValue(name), value.pointer / name)))
         }.toSeq
-        merge(checked)(value)
+        val validNames = checked.filter(_._2.valid).map(_._1).toSet
+        val annotation = WithPointer(EvaluatedProperties(validNames), value.pointer)
+        merge(checked.map(_._2))(value).add(annotation)
       }
       case _ => Checked.valid
     }
@@ -262,7 +266,7 @@ object Processor {
   }
 
   private def checkUnevaluated[R](checker: Checker[R], check: UnevaluatedItemsCheck): ProcessFun[R] = { value =>
-    val p       = all(checker, check.itemChecks)
+    val p       = all(checker, check.pushedChecks)
     val checked = p(value)
     value.value match {
       case ArrayValue(vs) =>
@@ -285,6 +289,34 @@ object Processor {
         val merge      = checker.nested(check)
         val allIndices = Seq.range(0, vs.size)
         merge(Seq(checked) ++ checkedUnevaluated)(value).add(WithPointer(EvaluatedIndices(allIndices), value.pointer))
+      case _ => checked
+    }
+  }
+
+  private def checkUnevaluated[R](checker: Checker[R], check: UnevaluatedPropertiesCheck): ProcessFun[R] = { value =>
+    val p       = all(checker, check.pushedChecks)
+    val checked = p(value)
+    value.value match {
+      case ObjectValue(vs) =>
+        val evaluated = checked.annotations
+          .filter(_.pointer == value.pointer)
+          .flatMap {
+            case WithPointer(EvaluatedProperties(properties), _) => properties
+            case _                                               => Seq()
+          }
+          .toSet
+        val pUnevaluated = all(checker, check.unevaluated)
+        val checkedUnevaluated = vs
+          .filterNot { case (prop, _) => evaluated.contains(prop) }
+          .map { case (prop, v) =>
+            pUnevaluated(InnerValue(v, value.pointer / prop))
+          }
+          .toSeq
+        // println("FW", value.pointer, evaluated, checked.annotations, checkedUnevaluated.size)
+        val merge         = checker.nested(check)
+        val allProperties = vs.keySet
+        merge(Seq(checked) ++ checkedUnevaluated)(value)
+          .add(WithPointer(EvaluatedProperties(allProperties), value.pointer))
       case _ => checked
     }
   }

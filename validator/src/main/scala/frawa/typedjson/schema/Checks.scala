@@ -103,7 +103,8 @@ case class DependentRequiredCheck(required: Map[String, Seq[String]])           
 case class DependentSchemasCheck(checks: Map[String, Checks])                                       extends NestingCheck
 case class ContainsCheck(schema: Option[Checks] = None, min: Option[Int] = None, max: Option[Int] = None)
     extends NestingCheck
-case class UnevaluatedItemsCheck(itemChecks: Checks, unevaluated: Checks) extends NestingCheck
+case class UnevaluatedItemsCheck(pushedChecks: Checks, unevaluated: Checks)      extends NestingCheck
+case class UnevaluatedPropertiesCheck(pushedChecks: Checks, unevaluated: Checks) extends NestingCheck
 
 case class Checked[R](
     valid: Boolean,
@@ -232,14 +233,13 @@ case class Checks(
           updateCheck(ObjectPropertiesCheck())(check => check.copy(additionalProperties = Some(checks)))
         }
 
-      case ("unevaluatedProperties", value) =>
-        // TODO needs to be implemented against "annotation results"
-        // for now mapping on additionalProperties ...
+      case ("unevaluatedProperties", v) => {
         for {
-          checks <- Checks.parseKeywords(SchemaValue(value), scope1)
+          checks <- Checks.parseKeywords(SchemaValue(v), scope1)
         } yield {
-          updateCheck(ObjectPropertiesCheck())(check => check.copy(additionalProperties = Some(checks)))
+          Checks(schema).add(UnevaluatedPropertiesCheck(this, checks))(scope)
         }
+      }
 
       case ("required", ArrayValue(values)) => {
         def names = Value.asStrings(values)
