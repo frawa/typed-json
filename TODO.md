@@ -1,15 +1,13 @@
 # Backlog
 
 ## Doing
-- track keywordLocation, absoluteKeywordLocation, and instanceLocation on checks
-- support annotations
+- support earlier version of spec, via JsonSchemaTestTestSuite
 
 ## TODO
+- support annotations
+- JsonSchemaTestTestSuite data as git submodule?
 - review and refactor: implicits
-- support 'unevaluatedProperties'
-- support 'unevaluatedItems'
 - fix ignored suites in JsonSchemaTestTestSuite
-- support earlier version of spec, via JsonSchemaTestTestSuite
 - support ScalaJS
 - CI, circle CI?
 - publish released versions
@@ -17,6 +15,9 @@
 - benching
 
 ## Done
+- support 'unevaluatedProperties'
+- support 'unevaluatedItems'
+- (sort of) track keywordLocation, absoluteKeywordLocation, and instanceLocation on checks
 - review and refactor: tests
 - review and refactor: ctor/apply args
 - review and refactor: Checks
