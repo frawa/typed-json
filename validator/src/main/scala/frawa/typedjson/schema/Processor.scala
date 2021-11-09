@@ -87,8 +87,8 @@ object Processor {
           }
         val checkedPrefix = pPrefix.zip(indexed).map { case (p, v) => p(v) }
         val checked       = pItems.map(pItems => indexed.drop(pPrefix.size).map(pItems)).getOrElse(Seq())
-        val size          = checkedPrefix.size + checked.size
-        merge(checkedPrefix ++ checked)(value).add(WithPointer(EvaluatedIndices(size)))
+        val indices       = Seq.range(0, checkedPrefix.size + checked.size)
+        merge(checkedPrefix ++ checked)(value).add(WithPointer(EvaluatedIndices(indices)))
       }
       case _ => Checked.valid
     }
@@ -125,9 +125,8 @@ object Processor {
       merge: MergeFun[R]
   ): ProcessFun[R] = { value =>
     val ifChecked = pIf(value)
-    val pBranch   = if (ifChecked.valid) pThen else pElse
-    val checked   = pBranch(value)
-    merge(Seq(checked))(value)
+    val checked   = if (ifChecked.valid) Seq(ifChecked, pThen(value)) else Seq(pElse(value))
+    merge(checked)(value)
   }
 
   private def one[R](checker: Checker[R], check: CheckWithLocation): ProcessFun[R] =
@@ -253,8 +252,9 @@ object Processor {
               .map { case (v, index) =>
                 InnerValue(v, value.pointer / index)
               }
-            val checked = indexed.map(p(_))
-            merge(checked)(value)
+            val checked      = indexed.map(p(_))
+            val validIndices = checked.zipWithIndex.filter(_._1.valid).map(_._2)
+            merge(checked)(value).add(WithPointer(EvaluatedIndices(validIndices), value.pointer))
           }
           .getOrElse(Checked.valid)
       case _ => Checked.valid
@@ -266,27 +266,25 @@ object Processor {
     val checked = p(value)
     value.value match {
       case ArrayValue(vs) =>
-        val pUnevaluated = all(checker, check.unevaluated)
-        val indexed = vs.zipWithIndex
-          .map { case (v, index) =>
-            InnerValue(v, value.pointer / index)
-          }
         val evaluated = checked.annotations
           .filter(_.pointer == Pointer.empty)
           .flatMap {
-            case WithPointer(EvaluatedIndices(size), _) => Some(size)
-            case _                                      => None
+            case WithPointer(EvaluatedIndices(indices), _) => indices
+            case _                                         => Seq()
           }
-          .maxOption
-        val checkedUnevaluated = evaluated
-          .map(evaluated =>
-            indexed
-              .drop(evaluated)
-              .map(pUnevaluated)
-          )
-          .getOrElse(Seq())
-        val merge = checker.nested(check)
-        merge(Seq(checked) ++ checkedUnevaluated)(value)
+          .toSet
+        val pUnevaluated = all(checker, check.unevaluated)
+        val indexed = vs.zipWithIndex
+          .map { case (v, index) =>
+            (index, InnerValue(v, value.pointer / index))
+          }
+        val checkedUnevaluated = indexed
+          .filterNot { case (index, _) => evaluated.contains(index) }
+          .map(_._2)
+          .map(pUnevaluated)
+        val merge      = checker.nested(check)
+        val allIndices = Seq.range(0, vs.size)
+        merge(Seq(checked) ++ checkedUnevaluated)(value).add(WithPointer(EvaluatedIndices(allIndices), value.pointer))
       case _ => checked
     }
   }

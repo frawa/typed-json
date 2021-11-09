@@ -425,8 +425,7 @@ class ValidationKeywordTest extends FunSuite {
         assertEquals(
           checked.annotations,
           Seq(
-            WithPointer(LargestIndex(1), Pointer.empty),
-            WithPointer(EvaluatedIndices(2), Pointer.empty)
+            WithPointer(EvaluatedIndices(Seq(0, 1)), Pointer.empty)
           )
         )
       }
@@ -456,8 +455,7 @@ class ValidationKeywordTest extends FunSuite {
         assertEquals(
           checked.annotations,
           Seq(
-            WithPointer(LargestIndex(1), Pointer.empty),
-            WithPointer(EvaluatedIndices(3), Pointer.empty)
+            WithPointer(EvaluatedIndices(Seq(0, 1, 2)), Pointer.empty)
           )
         )
       }
@@ -483,14 +481,14 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""[13, "foo", true]""") { checked =>
         assert(checked.valid)
-        assertEquals(checked.annotations, Seq(WithPointer(ValidIndices(Seq(0)), Pointer.empty)))
+        assertEquals(checked.annotations, Seq(WithPointer(EvaluatedIndices(Seq(0)), Pointer.empty)))
       }
       validateJson(schema)("""[13, 14, "foo", true]""") { checked =>
         assert(checked.valid)
         assertEquals(
           checked.annotations,
           Seq(
-            WithPointer(ValidIndices(Seq(0, 1)), Pointer.empty)
+            WithPointer(EvaluatedIndices(Seq(0, 1)), Pointer.empty)
           )
         )
       }
@@ -517,7 +515,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""[13, 14, "foo", true]""") { checked =>
         assert(checked.valid)
-        assertEquals(checked.annotations, Seq(WithPointer(ValidIndices(Seq(0, 1)), Pointer.empty)))
+        assertEquals(checked.annotations, Seq(WithPointer(EvaluatedIndices(Seq(0, 1)), Pointer.empty)))
       }
     }
   }
@@ -554,7 +552,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""[13, 14, "foo", true]""") { checked =>
         assert(checked.valid)
-        assertEquals(checked.annotations, Seq(WithPointer(ValidIndices(Seq(0, 1)), Pointer.empty)))
+        assertEquals(checked.annotations, Seq(WithPointer(EvaluatedIndices(Seq(0, 1)), Pointer.empty)))
       }
     }
   }

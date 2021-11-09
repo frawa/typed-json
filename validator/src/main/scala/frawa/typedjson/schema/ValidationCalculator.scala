@@ -47,20 +47,20 @@ class ValidationCalculator extends Calculator[ValidationResult] {
 
   override def anyOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
     if (checked.isEmpty || checked.exists(_.valid)) {
-      Checked.valid.count(checked)
+      Checked.valid.count(checked.filter(_.valid))
     } else {
       invalid(checked)
     }
   }
 
   override def oneOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
-    val count = checked.count(_.valid)
-    if (count == 1) {
-      Checked.valid.count(checked)
-    } else if (count == 0) {
+    val valids = checked.filter(_.valid)
+    if (valids.size == 1) {
+      Checked.valid.count(valids)
+    } else if (valids.isEmpty) {
       invalid(checked)
     } else {
-      invalid(NotOneOf(count), pointer)
+      invalid(NotOneOf(valids.size), pointer)
     }
   }
 
@@ -72,8 +72,7 @@ class ValidationCalculator extends Calculator[ValidationResult] {
   ): Checked[ValidationResult] = {
     val count = checked.count(_.valid)
     if (min.getOrElse(1) <= count && !max.exists(count > _)) {
-      val validIndices = checked.zipWithIndex.filter(_._1.valid).map(_._2)
-      Checked.valid.count(checked).add(WithPointer(ValidIndices(validIndices), pointer))
+      Checked.valid.count(checked)
     } else {
       invalid(NotContains(count), pointer)
     }

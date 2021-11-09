@@ -38,7 +38,6 @@ class JsonSchemaTestSuiteTest extends FunSuite {
     "defs.json",      // TODO meta schema with ignored keywords: deprecated, $vocabulary, $schema
     "id.json",        // TODO $id inside enum is not an id
     "refRemote.json", // TODO resolve URI as remote URL
-    // "unevaluatedItems.json",
     "unevaluatedProperties.json",
     "unknownKeyword.json" // TODO $id inside an unknown keyword
   )
@@ -48,7 +47,6 @@ class JsonSchemaTestSuiteTest extends FunSuite {
   val only: Option[String]            = Some("unevaluatedItems.json")
   val onlyId: Option[String]          = None
   val onlyDescription: Option[String] = None
-  // val onlyDescription: Option[String] = Some("unevaluatedItems with nested tuple")
 
   override def munitIgnore: Boolean = !Files.exists(jsonSchemaTestSuiteRoot)
 

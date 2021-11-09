@@ -121,9 +121,7 @@ case class Checked[R](
 
 // TODO rename to something like "Annotation"
 sealed trait Observation2
-case class LargestIndex(index: Int)                     extends Observation2
-case class ValidIndices(indices: Seq[Int])              extends Observation2
-case class EvaluatedIndices(size: Int)                  extends Observation2
+case class EvaluatedIndices(indices: Seq[Int])          extends Observation2
 case class EvaluatedProperties(properties: Set[String]) extends Observation2
 
 object Checked {
