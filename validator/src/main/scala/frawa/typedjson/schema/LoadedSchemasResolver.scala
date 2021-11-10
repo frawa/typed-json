@@ -75,8 +75,8 @@ object LoadedSchemasResolver {
               case ("$dynamicAnchor", StringValue(anchor)) =>
                 val uri = loaded.absolute("#" + anchor)
                 loaded.addDynamic(uri, SchemaValue(value))
-              case _ if hasNestedSchemaValue(property )=> loaded.addAll(loadSchemas(propertyValue, loaded))
-              case _ => loaded
+              case _ if hasNestedSchemaValue(property) => loaded.addAll(loadSchemas(propertyValue, loaded))
+              case _                                   => loaded
             }
           }
       case ArrayValue(vs) =>
@@ -88,8 +88,9 @@ object LoadedSchemasResolver {
     }
   }
 
-  private val excludeFromNesting : Set[String]= Set(
-  "enum", "const"
+  private val excludeFromNesting: Set[String] = Set(
+    "enum",
+    "const"
   )
 
   private def hasNestedSchemaValue(property: String): Boolean = {
