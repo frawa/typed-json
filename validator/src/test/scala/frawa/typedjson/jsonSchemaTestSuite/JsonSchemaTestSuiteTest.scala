@@ -38,7 +38,6 @@ class JsonSchemaTestSuiteTest extends FunSuite {
     "refRemote.json" // TODO resolve URI as remote URL
   )
 
-  val takeOnly: Option[Int]           = None
   val only: Option[String]            = None
   val onlyId: Option[String]          = None
   val onlyDescription: Option[String] = None
@@ -131,10 +130,7 @@ class JsonSchemaTestSuiteTest extends FunSuite {
           .map(_ == p.getFileName.toString)
           .getOrElse(true)
       )
-    takeOnly
-      .map(takeOnly => list.take(takeOnly))
-      .getOrElse(list)
-      .foreach(check)
+    list.foreach(check)
   }
 
   checkVersion(version)
