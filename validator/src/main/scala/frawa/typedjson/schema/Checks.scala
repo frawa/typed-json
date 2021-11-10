@@ -445,8 +445,8 @@ case class Checks(
         Right(add(DependentRequiredCheck(vv)))
       }
 
-      case ("dependentSchemas", ObjectValue(v)) => {
-        val checks0 = v.view.map { case (p, v) =>
+      case ("dependentSchemas", ObjectValue(ps)) => {
+        val checks0 = ps.view.map { case (p, v) =>
           Checks
             .parseKeywords(SchemaValue(v), scope1)
             .map(p -> _)

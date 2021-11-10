@@ -75,26 +75,49 @@ object LoadedSchemasResolver {
               case ("$dynamicAnchor", StringValue(anchor)) =>
                 val uri = loaded.absolute("#" + anchor)
                 loaded.addDynamic(uri, SchemaValue(value))
-              case _ if hasNestedSchemaValue(property) => loaded.addAll(loadSchemas(propertyValue, loaded))
-              case _                                   => loaded
+              case _ => loadNestedSchemaValues(property, propertyValue, loaded)
             }
-          }
-      case ArrayValue(vs) =>
-        vs
-          .foldLeft(loaded) { case (loaded, v) =>
-            loaded.addAll(loadSchemas(v, loaded))
           }
       case _ => empty
     }
   }
 
-  private val excludeFromNesting: Set[String] = Set(
-    "enum",
-    "const"
+  private val getterByKeyword: Map[String, NestedSchemaGetter] = Map(
+    "not"                   -> selfSchema,
+    "items"                 -> selfSchema,
+    "prefixItems"           -> arraySchemas,
+    "unevaluatedItems"      -> selfSchema,
+    "properties"            -> objectSchemas,
+    "patternProperties"     -> objectSchemas,
+    "additionalProperties"  -> selfSchema,
+    "unevaluatedProperties" -> selfSchema,
+    "allOf"                 -> arraySchemas,
+    "anyOf"                 -> arraySchemas,
+    "oneOf"                 -> arraySchemas,
+    "if"                    -> selfSchema,
+    "then"                  -> selfSchema,
+    "else"                  -> selfSchema,
+    "$defs"                 -> objectSchemas,
+    "propertyNames"         -> selfSchema,
+    "dependentSchemas"      -> objectSchemas,
+    "contains"              -> selfSchema
   )
 
-  private def hasNestedSchemaValue(property: String): Boolean = {
-    !excludeFromNesting.contains(property)
+  private type NestedSchemaGetter = Value => Seq[Value]
+
+  private def selfSchema: NestedSchemaGetter    = v => Seq(v)
+  private def arraySchemas: NestedSchemaGetter  = { case ArrayValue(vs) => vs }
+  private def objectSchemas: NestedSchemaGetter = { case ObjectValue(ps) => ps.values.toSeq }
+
+  private def loadNestedSchemaValues(
+      property: String,
+      value: Value,
+      loaded: LoadedSchemasResolver
+  ): LoadedSchemasResolver = {
+    val nested = getterByKeyword.get(property).map(_(value)).getOrElse(Seq.empty)
+    nested.foldLeft(loaded) { case (loaded, v) =>
+      loaded.addAll(loadSchemas(v, loaded))
+    }
   }
 
 }
