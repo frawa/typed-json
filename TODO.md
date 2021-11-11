@@ -5,6 +5,8 @@
 
 ## TODO
 - support annotations
+- handle ingoredKeywords with annotations?
+- streamline SchemaQuality
 - JsonSchemaTestTestSuite data as git submodule?
 - review and refactor: implicits
 - fix ignored suites in JsonSchemaTestTestSuite
