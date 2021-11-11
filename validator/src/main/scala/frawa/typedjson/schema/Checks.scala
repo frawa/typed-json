@@ -35,7 +35,7 @@ case class SchemaQuality(errors: Seq[SchemaError], ignoredKeywords: Set[String],
   def addIgnoredKeywords(ignoredKeywords: Set[String]): SchemaQuality =
     copy(ignoredKeywords = this.ignoredKeywords ++ ignoredKeywords)
 
-  def addErrors(erros: Seq[SchemaError]): SchemaQuality =
+  def addErrors(errors: Seq[SchemaError]): SchemaQuality =
     copy(errors = this.errors ++ errors)
 
   def combine(other: SchemaQuality): SchemaQuality =
@@ -113,11 +113,18 @@ case class Checked[R](
     validation: SchemaQuality = SchemaQuality.empty,
     count: Int = 1
 ) {
-  def count(others: Seq[Checked[R]]): Checked[R] =
-    this.copy(count = this.count + Checked.count(others)).add(others.flatMap(_.annotations))
+  def add(others: Seq[Checked[R]]): Checked[R] =
+    this
+      .copy(count = this.count + Checked.count(others))
+      .addAnnotations(others.flatMap(_.annotations))
+      .addValidations(others.map(_.validation))
   def add(validation: SchemaQuality): Checked[R] = this.copy(validation = this.validation.combine(validation))
-  def add(annotation: Checked.Annotation)        = this.copy(annotations = this.annotations :+ annotation)
-  def add(annotations: Seq[Checked.Annotation])  = this.copy(annotations = this.annotations ++ annotations)
+  private def addValidations(validations: Seq[SchemaQuality]): Checked[R] =
+    this.copy(validation = validations.foldLeft(this.validation)(_.combine(_)))
+
+  def add(annotation: Checked.Annotation) = this.copy(annotations = this.annotations :+ annotation)
+  private def addAnnotations(annotations: Seq[Checked.Annotation]) =
+    this.copy(annotations = this.annotations ++ annotations)
 }
 
 // TODO rename to something like "Annotation"
@@ -133,6 +140,7 @@ object Checked {
   def valid[R](result: R)                             = Checked[R](true, Seq(result))
   def invalid[R]                                      = Checked[R](false, Seq())
   def invalid[R](result: R)                           = Checked[R](false, Seq(result))
+
   def merge[R](checked: Seq[Checked[R]]): Checked[R] = {
     val valid           = checked.forall(_.valid)
     val results: Seq[R] = checked.flatMap(_.results)
@@ -308,6 +316,7 @@ case class Checks(
           resolution <- resolver
             .resolveRef(ref)
             .map(Right(_))
+            // .getOrElse(throw new IllegalStateException(s"$ref not found"))
             .getOrElse(Left(Seq(SchemaError(s"""missing reference "${ref}""""))))
           check = lazyResolveCheck(resolution, scope1)
         } yield {
@@ -492,7 +501,7 @@ case class Checks(
   private def mapChecksFor(
       props: Map[String, Value],
       scope: DynamicScope
-  )(f: Map[String, Checks] => Checks)(implicit resolver: SchemaResolver) = {
+  )(f: Map[String, Checks] => Checks)(implicit resolver: SchemaResolver): Either[Seq[SchemaError], Checks] = {
     val propChecks = props.view
       .map { case (prop, v) =>
         (prop, Checks.parseKeywords(SchemaValue(v), scope.push(prop)))
@@ -503,7 +512,7 @@ case class Checks(
       }
       .toSeq
     for {
-      propChecks1 <- sequenceFirstLeft(propChecks)
+      propChecks1 <- sequenceAllLefts(propChecks)
       checks1 = Map.from(propChecks1)
       ignored = checks1.values.flatMap(_.ignoredKeywords).toSet
     } yield {
@@ -590,10 +599,11 @@ object Checks {
             .foldLeft[Either[SchemaErrors, Checks]](Right(Checks(schema))) { case (checks, (keyword, value)) =>
               val prefix = Pointer.empty / keyword
               checks
-                .flatMap(_.withKeyword(keyword, value, scope1)(resolver1))
-                .swap
-                .map(_.map(_.prefix(prefix)))
-                .swap
+                .flatMap(
+                  _.withKeyword(keyword, value, scope1)(resolver1).swap
+                    .map(_.map(_.prefix(prefix)))
+                    .swap
+                )
             }
         }
       case _ => Left(Seq(SchemaError(s"invalid schema ${schema}")))

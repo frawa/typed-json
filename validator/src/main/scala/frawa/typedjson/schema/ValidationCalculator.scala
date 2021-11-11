@@ -32,14 +32,14 @@ import scala.reflect.ClassTag
 class ValidationCalculator extends Calculator[ValidationResult] {
   override def allOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
     if (checked.isEmpty || checked.forall(_.valid)) {
-      Checked.valid.count(checked)
+      Checked.valid
     } else {
       invalid(checked)
     }
   }
 
   private def invalid(checked: Seq[Checked[ValidationResult]]): Checked[ValidationResult] =
-    Checked.invalid(ValidationResult.invalid(checked.flatMap(_.results.flatMap(_.errors)))).count(checked)
+    Checked.invalid(ValidationResult.invalid(checked.flatMap(_.results.flatMap(_.errors))))
 
   override def invalid(observation: Observation, pointer: Pointer): Checked[ValidationResult] = Checked.invalid(
     ValidationResult.invalid(observation, pointer)
@@ -47,7 +47,7 @@ class ValidationCalculator extends Calculator[ValidationResult] {
 
   override def anyOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
     if (checked.isEmpty || checked.exists(_.valid)) {
-      Checked.valid.count(checked.filter(_.valid))
+      Checked.valid
     } else {
       invalid(checked)
     }
@@ -56,7 +56,7 @@ class ValidationCalculator extends Calculator[ValidationResult] {
   override def oneOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
     val valids = checked.filter(_.valid)
     if (valids.size == 1) {
-      Checked.valid.count(valids)
+      Checked.valid
     } else if (valids.isEmpty) {
       invalid(checked)
     } else {
@@ -72,7 +72,7 @@ class ValidationCalculator extends Calculator[ValidationResult] {
   ): Checked[ValidationResult] = {
     val count = checked.count(_.valid)
     if (min.getOrElse(1) <= count && !max.exists(count > _)) {
-      Checked.valid.count(checked)
+      Checked.valid
     } else {
       invalid(NotContains(count), pointer)
     }
@@ -80,7 +80,7 @@ class ValidationCalculator extends Calculator[ValidationResult] {
 
   override def not(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
     if (checked.length == 1 && !checked(0).valid) {
-      Checked.valid.count(checked)
+      Checked.valid
     } else {
       invalid(NotInvalid(), pointer)
     }
