@@ -83,6 +83,7 @@ object ValidationChecker {
   private type ProcessFun = Processor.ProcessFun[ValidationResult]
 
   private def check(check: SimpleCheck): ProcessFun = {
+    // println("FW", check)
     check match {
       case NullTypeCheck                 => checkType(nullTypeMismatch)
       case BooleanTypeCheck              => checkType(booleanTypeMismatch)
@@ -93,7 +94,6 @@ object ValidationChecker {
       case ObjectTypeCheck               => checkType(objectTypeMismatch)
       case ObjectRequiredCheck(required) => checkObjectRequired(required)
       case TrivialCheck(valid)           => checkTrivial(valid)
-      case UnionTypeCheck(checks)        => checkUnionType(checks)
       case EnumCheck(values)             => checkEnum(values)
       case PatternCheck(pattern)         => checkPattern(pattern)
       case FormatCheck(format)           => checkFormat(format)
@@ -118,6 +118,7 @@ object ValidationChecker {
       case AnyOfCheck(_)                   => calc.anyOf(checked, value.pointer)
       case OneOfCheck(_)                   => calc.oneOf(checked, value.pointer)
       case NotCheck(_)                     => calc.not(checked, value.pointer)
+      case UnionTypeCheck(checks)          => calc.oneOf(checked, value.pointer)
       case ObjectPropertiesCheck(_, _, _)  => calc.allOf(checked, value.pointer)
       case ArrayItemsCheck(_, prefixItems) => calc.allOf(checked, value.pointer)
       case IfThenElseCheck(_, _, _)        => calc.ifThenElse(checked, value.pointer)
@@ -174,10 +175,6 @@ object ValidationChecker {
       }
       case _ => Checked.valid
     }
-  }
-
-  private def checkUnionType(checks: Seq[TypeCheck]): ProcessFun = { value =>
-    calc.oneOf(checks.map(check(_)(value)), value.pointer)
   }
 
   private def checkEnum(values: Seq[Value]): ProcessFun = { value =>

@@ -427,8 +427,8 @@ class ChecksTest extends FunSuite {
               uri("#/type"),
               UnionTypeCheck(
                 Seq(
-                  NullTypeCheck,
-                  StringTypeCheck
+                  WithLocation(uri("#/type"), NullTypeCheck),
+                  WithLocation(uri("#/type"), StringTypeCheck)
                 )
               )
             )

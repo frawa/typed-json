@@ -88,9 +88,9 @@ object SuggestionChecker {
           .flatMap(identity)
           .flatMap(_.checks)
           .flatMap(check => suggestFor(check.value)(checked))
-      case UnionTypeCheck(checks) => checks.flatMap(suggestFor(_)(checked))
-      case EnumCheck(values)      => values
-      case _                      => checked.flatMap(_.results).flatMap(_.suggestions)
+      // case UnionTypeCheck(checks) => checks.flatMap(suggestFor(_)(checked))
+      case EnumCheck(values) => values
+      case _                 => checked.flatMap(_.results).flatMap(_.suggestions)
     }
   }
 }

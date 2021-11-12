@@ -102,6 +102,7 @@ object Processor {
   private def applyToObject[R](
       ps: => PartialFunction[String, () => ProcessFun[R]]
   )(merge: MergeFun[R]): ProcessFun[R] = { value =>
+    println("FWFW applyToObject", value, ps.getClass())
     value.value match {
       case ObjectValue(vs) => {
         val evaluated = vs.view
@@ -110,6 +111,7 @@ object Processor {
           }
           .flatMap { case (key, inner) =>
             val p = ps.lift(key)
+            println("FWFW applyToObject", key, p.isDefined)
             p.map(p => (key, p()(inner)))
           }
           .toSeq
@@ -135,11 +137,16 @@ object Processor {
     mergeAll(merge, checked, value)
   }
 
-  private def one[R](checker: Checker[R], check: CheckWithLocation): ProcessFun[R] =
+  private def one[R](checker: Checker[R], check: CheckWithLocation): ProcessFun[R] = {
     check.value match {
-      case c: SimpleCheck  => simple(checker, c)
-      case c: NestingCheck => nesting(checker, c)
+      case c: SimpleCheck =>
+        // println("FW simple", check)
+        simple(checker, c)
+      case c: NestingCheck =>
+        println("FW nesting", check.uri, check.value.getClass())
+        nesting(checker, c)
     }
+  }
 
   private def nesting[R](checker: Checker[R], check: NestingCheck): ProcessFun[R] =
     check match {
@@ -149,6 +156,7 @@ object Processor {
       case c: AllOfCheck                 => checkApplicator(checker, c.checks)(checker.nested(check))
       case c: AnyOfCheck                 => checkApplicator(checker, c.checks)(checker.nested(check))
       case c: OneOfCheck                 => checkApplicator(checker, c.checks)(checker.nested(check))
+      case c: UnionTypeCheck             => checkUnionType(checker, c)(checker.nested(check))
       case c: IfThenElseCheck            => checkIfThenElse(checker, c)
       case c: PropertyNamesCheck         => checkPropertyNames(checker, c)
       case c: LazyResolveCheck           => checkLazyResolve(checker, c)
@@ -168,7 +176,9 @@ object Processor {
   private def checkObjectProperties[R](checker: Checker[R], check: ObjectPropertiesCheck): ProcessFun[R] = {
     val psProperties = check.properties.map { case (key, checks) =>
       val partial: PartialFunction[String, () => ProcessFun[R]] = {
-        case k if k == key => () => all(checker, checks)
+        case k if k == key =>
+          println("FW properties key", key)
+          () => all(checker, checks)
       }
       partial
     }.toSeq
@@ -195,11 +205,24 @@ object Processor {
 
     val ps    = psAdditional.map(psAll.orElse(_)).getOrElse(psAll)
     val merge = checker.nested(check)
-    applyToObject(ps)(merge)
+    if (check.properties.keySet.contains("type"))
+      println("FW checkObjectProperties0", check.properties.keySet)
+    value => {
+      if (check.properties.keySet.contains("type"))
+        println("FW checkObjectProperties", check.properties.keySet, value.pointer)
+      else
+        println("FW ?", check)
+      applyToObject(ps)(merge)(value)
+    }
   }
 
   private def checkApplicator[R](checker: Checker[R], checks: Seq[Checks])(merge: MergeFun[R]): ProcessFun[R] = {
-    val p = checks.map(all(checker, (_)))
+    val p = checks.map(all(checker, _))
+    applyToValue(p)(merge)
+  }
+
+  private def checkUnionType[R](checker: Checker[R], check: UnionTypeCheck)(merge: MergeFun[R]): ProcessFun[R] = {
+    val p = check.checks.map(one(checker, _))
     applyToValue(p)(merge)
   }
 

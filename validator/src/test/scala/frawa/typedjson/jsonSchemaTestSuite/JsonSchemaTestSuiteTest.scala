@@ -38,7 +38,8 @@ class JsonSchemaTestSuiteTest extends FunSuite {
     "refRemote.json" // TODO resolve URI as remote URL
   )
 
-  val only: Option[String]            = None
+  val only: Option[String] = None
+  // val only: Option[String]            = Some("defs.json")
   val onlyId: Option[String]          = None
   val onlyDescription: Option[String] = None
 
@@ -112,6 +113,8 @@ class JsonSchemaTestSuiteTest extends FunSuite {
     if (checked.valid != expected) {
       implicit val loc = munit.Location.empty
       if (!checked.valid) {
+        assertEquals(checked.validation.errors, Seq(), failMessage)
+        assertEquals(checked.validation.ignoredKeywords, Set.empty[String], failMessage)
         assertEquals(checked.results, Seq(), failMessage)
       } else {
         fail("failed", clues(clue(failMessage), clue(expected), clue(checked)))
