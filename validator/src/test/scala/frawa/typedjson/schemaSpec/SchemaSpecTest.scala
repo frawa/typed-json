@@ -52,7 +52,7 @@ class SchemaSpecTest extends FunSuite {
   test("validate core against validation") {
     validateSpec("meta/core", "meta/validation") { checked =>
       assertEquals(checked.results, Seq())
-      assertEquals(checked.count, 22)
+      assertEquals(checked.count, 17)
       assertEquals(
         checked.validation.ignoredKeywords,
         Set("$vocabulary", "$schema")
@@ -85,7 +85,7 @@ class SchemaSpecTest extends FunSuite {
   test("validate validation against validation") {
     validateSpec("meta/validation", "meta/validation") { checked =>
       assertEquals(checked.results, Seq())
-      assertEquals(checked.count, 22)
+      assertEquals(checked.count, 17)
       assertEquals(
         checked.validation.ignoredKeywords,
         Set("$vocabulary", "$schema")
