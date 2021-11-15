@@ -31,7 +31,7 @@ lazy val validator = (project in file("validator"))
   .settings(
     name := "scala-json-schema-validator",
     libraryDependencies += munit % Test,
-    Test / testOptions += Tests.Argument("+l", "--summary=1")
+    Test / testOptions += Tests.Argument("+l", "-q", "--summary=2")
     // Test / parallelExecution := false,
     // Test / logBuffered := false
   )
