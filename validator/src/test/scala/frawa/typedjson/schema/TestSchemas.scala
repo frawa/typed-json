@@ -188,9 +188,12 @@ object TestSchemas {
                           |}""".stripMargin
 
   val refToValidationSpec = """{
-                              |"$id": "https://example.net/root.json",
-                              |"$ref": "https://json-schema.org/draft/2020-12/meta/validation",
-                              |"$ref": "https://json-schema.org/draft/2020-12/meta/core"
+                              |"$id": "https://json-schema.org/draft/2020-12/partial",
+                              |"$dynamicAnchor": "meta",
+                              |"allOf": [
+                              |  {"$ref": "https://json-schema.org/draft/2020-12/meta/validation"},
+                              |  {"$ref": "https://json-schema.org/draft/2020-12/meta/core"}
+                              |]
                               |}""".stripMargin
 
   val refIndirectToValidationSpec = """{

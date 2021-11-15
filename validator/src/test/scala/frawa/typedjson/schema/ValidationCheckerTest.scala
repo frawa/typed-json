@@ -732,84 +732,22 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("$ref to validation spec, with two '$ref's".ignore) {
+  test("$ref to validation spec, with two '$ref's") {
     val lazyResolver = Some(SpecMetaSchemas.lazyResolver)
 
     withSchema(refToValidationSpec) { schema =>
       assertValidate("""{ "$defs": { "foo": { "type": "boolean" } } }""".stripMargin)(schema, lazyResolver) { checked =>
         assertErrors(checked, Seq())
         assertEquals(checked.validation.errors, Seq())
-        // assertEquals(checked.annotations, Seq(WithPointer(EvaluatedProperties(Set("type")))))
         assertEquals(checked.valid, true)
       }
       assertValidate("""{ "$defs": { "foo": { "type": ["boolean"] } } }""".stripMargin)(schema, lazyResolver) {
         checked =>
           assertErrors(checked, Seq())
           assertEquals(checked.validation.errors, Seq())
-          // assertEquals(
-          //   checked.annotations,
-          //   Seq(
-          //     WithPointer(EvaluatedIndices(Seq(0))),
-          //     WithPointer(EvaluatedProperties(Set("type")))
-          //   )
-          // )
           assertEquals(checked.valid, true)
       }
-      assertValidate("""{ "$defs": { "foo": { "type": ["boolean"] } } }""".stripMargin)(schema, lazyResolver) {
-        checked =>
-          assertErrors(
-            checked,
-            Seq(
-              WithPointer(
-                result = NotInEnum(
-                  values = Seq("array", "boolean", "integer", "null", "number", "object", "string").map(StringValue(_))
-                ),
-                pointer = Pointer.parse("/type")
-              ),
-              WithPointer(
-                result = TypeMismatch(
-                  expected = "array"
-                ),
-                pointer = Pointer.parse("/type")
-              )
-            )
-          )
-          assertEquals(checked.valid, false)
-      }
-    }
-  }
-
-  test("$ref indirect to validation spec".ignore) {
-    val lazyResolver = Some(SpecMetaSchemas.lazyResolver)
-
-    withSchema(refIndirectToValidationSpec) { schema =>
-      assertValidate("""{ "$defs": { "foo": { "type": "boolean" } } }""".stripMargin)(schema, lazyResolver) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.validation.errors, Seq())
-        // assertEquals(
-        //   checked.annotations,
-        //   Seq(
-        //     WithPointer(EvaluatedProperties(Set())),
-        //     WithPointer(EvaluatedProperties(Set("type")))
-        //   )
-        // )
-        assertEquals(checked.valid, true)
-      }
-      assertValidate("""{ "$defs": { "foo": { "type": ["boolean"] } } }""".stripMargin)(schema, lazyResolver) {
-        checked =>
-          assertErrors(checked, Seq())
-          assertEquals(checked.validation.errors, Seq())
-          // assertEquals(
-          //   checked.annotations,
-          //   Seq(
-          //     WithPointer(EvaluatedProperties(Set())),
-          //     WithPointer(EvaluatedIndices(Seq(0))),
-          //     WithPointer(EvaluatedProperties(Set("type")))
-          //   )
-          // )
-          assertEquals(checked.valid, true)
-      }
-      assertValidate("""{ "$defs": { "foo": { "type": 1 } } }""".stripMargin)(schema, lazyResolver) { checked =>
+      assertValidate("""{ "$defs": { "foo": { "type": 13 } } }""".stripMargin)(schema, lazyResolver) { checked =>
         assertErrors(
           checked,
           Seq(
@@ -817,13 +755,13 @@ class ValidationCheckerTest extends FunSuite {
               result = NotInEnum(
                 values = Seq("array", "boolean", "integer", "null", "number", "object", "string").map(StringValue(_))
               ),
-              pointer = Pointer.parse("/type")
+              pointer = Pointer.parse("/$defs/foo/type")
             ),
             WithPointer(
               result = TypeMismatch(
                 expected = "array"
               ),
-              pointer = Pointer.parse("/type")
+              pointer = Pointer.parse("/$defs/foo/type")
             )
           )
         )
@@ -831,4 +769,5 @@ class ValidationCheckerTest extends FunSuite {
       }
     }
   }
+
 }

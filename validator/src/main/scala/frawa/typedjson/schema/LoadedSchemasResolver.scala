@@ -78,7 +78,7 @@ object LoadedSchemasResolver {
               case _ => loadNestedSchemaValues(property, propertyValue, loaded)
             }
           }
-      case _ => empty
+      case _ => loaded
     }
   }
 
@@ -137,7 +137,11 @@ case class LoadedSchemasResolver(
     .orElse(
       lazyResolver
         .flatMap(_.apply(uri))
-        .map(schema => (schema, add(uri, schema).withBase(uri)))
+        .map { schema =>
+          val loaded1 = add(uri, schema).withBase(uri)
+          val loaded2 = LoadedSchemasResolver.loadSchemas(schema.value, loaded1)
+          (schema, loaded2)
+        }
     )
 
   override protected def isDynamic(uri: URI): Boolean = dynamicSchemas.contains(uri)
