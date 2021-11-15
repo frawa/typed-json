@@ -1,20 +1,25 @@
 # Backlog
 
 ## Doing
-- support earlier version of spec, via JsonSchemaTestTestSuite
 
 ## TODO
-- do not prefix results, but push value pointer into checker
-- support annotations
-- handle ingoredKeywords with annotations?
-- streamline SchemaQuality
-- JsonSchemaTestTestSuite data as git submodule?
-- review and refactor: implicits
-- fix ignored suites in JsonSchemaTestTestSuite
 - support ScalaJS
-- CI, circle CI?
+- CI, circle CI, GH actions?
+- better names, eg. Checks -> Keywords
+- better package name
+- cristalize API with an example
+- handle ingoredKeywords with annotations?
+- review and refactor: implicits
+- streamline SchemaQuality
+- do not prefix results, but push value pointer into checker
+- fully support annotations
+- support earlier version of spec, via JsonSchemaTestTestSuite
+- JsonSchemaTestTestSuite data as git submodule?
 - publish released versions
-- vocabulary?
+- support $schema?
+- fix ignored suites in JsonSchemaTestTestSuite
+- support $vocabulary?
+- support deprecated?
 - benching
 
 ## Done
