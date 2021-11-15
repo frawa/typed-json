@@ -83,7 +83,6 @@ object ValidationChecker {
   private type ProcessFun = Processor.ProcessFun[ValidationResult]
 
   private def check(check: SimpleCheck): ProcessFun = {
-    // println("FW", check)
     check match {
       case NullTypeCheck                 => checkType(nullTypeMismatch)
       case BooleanTypeCheck              => checkType(booleanTypeMismatch)

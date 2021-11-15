@@ -93,9 +93,9 @@ class JsonSchemaTestSuiteTest extends FunSuite {
             }
           assume(includedOnlyId.getOrElse(true), s"excluded by onlyId=${onlyId}")
 
-          val lazyResolver = Some(SpecMetaSchemas.lazyResolver)
-          val schemaValue  = SchemaValue(schema)
-          withStrictProcessor(ValidationChecker())(schemaValue, lazyResolver) { processor =>
+          implicit val lazyResolver = Some(SpecMetaSchemas.lazyResolver)
+          val schemaValue           = SchemaValue(schema)
+          withStrictProcessor(ValidationChecker())(schemaValue) { processor =>
             tests.foreach(assertOne(processor))
           }
         }
@@ -117,7 +117,7 @@ class JsonSchemaTestSuiteTest extends FunSuite {
         assertEquals(checked.validation.ignoredKeywords, Set.empty[String], failMessage)
         assertEquals(checked.results, Seq(), failMessage)
       } else {
-        fail("failed", clues(clue(failMessage), clue(expected), clue(checked)))
+        fail("unexpected valid", clues(clue(failMessage), clue(expected), clue(checked)))
       }
     }
   }

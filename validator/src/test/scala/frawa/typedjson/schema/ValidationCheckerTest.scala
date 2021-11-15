@@ -732,7 +732,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("$ref to validation spec".only) {
+  test("$ref to validation spec, with two '$ref's".ignore) {
     val lazyResolver = Some(SpecMetaSchemas.lazyResolver)
 
     withSchema(refToValidationSpec) { schema =>
@@ -779,7 +779,7 @@ class ValidationCheckerTest extends FunSuite {
     }
   }
 
-  test("$ref indirect to validation spec") {
+  test("$ref indirect to validation spec".ignore) {
     val lazyResolver = Some(SpecMetaSchemas.lazyResolver)
 
     withSchema(refIndirectToValidationSpec) { schema =>
