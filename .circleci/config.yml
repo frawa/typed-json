@@ -35,7 +35,7 @@ jobs:
       - restore_cache:
           key: sbt-cache
 
-      - run: cat /dev/null | sbt compile
+      - run: cat /dev/null | ./sbt compile
 
       - save_cache:
           key: sbt-cache
@@ -45,4 +45,4 @@ jobs:
             - "~/.m2"
 
       # run tests!
-      - run: cat /dev/null | sbt test
+      - run: cat /dev/null | ./sbt test
