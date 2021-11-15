@@ -1,10 +1,11 @@
 # Backlog
 
 ## Doing
+- CI, circle CI, GH actions?
 
 ## TODO
 - support ScalaJS
-- CI, circle CI, GH actions?
+- support ScalaNative
 - better names, eg. Checks -> Keywords
 - better package name
 - cristalize API with an example
