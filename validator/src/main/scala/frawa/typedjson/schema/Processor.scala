@@ -102,7 +102,6 @@ object Processor {
   private def applyToObject[R](
       ps: => PartialFunction[String, () => ProcessFun[R]]
   )(merge: MergeFun[R]): ProcessFun[R] = { value =>
-    println("FWFW applyToObject", value, ps.getClass())
     value.value match {
       case ObjectValue(vs) => {
         val evaluated = vs.view
@@ -111,7 +110,6 @@ object Processor {
           }
           .flatMap { case (key, inner) =>
             val p = ps.lift(key)
-            println("FWFW applyToObject", key, p.isDefined)
             p.map(p => (key, p()(inner)))
           }
           .toSeq
@@ -177,7 +175,6 @@ object Processor {
     val psProperties = check.properties.map { case (key, checks) =>
       val partial: PartialFunction[String, () => ProcessFun[R]] = {
         case k if k == key =>
-          println("FW properties key", key)
           () => all(checker, checks)
       }
       partial
@@ -205,13 +202,7 @@ object Processor {
 
     val ps    = psAdditional.map(psAll.orElse(_)).getOrElse(psAll)
     val merge = checker.nested(check)
-    if (check.properties.keySet.contains("type"))
-      println("FW checkObjectProperties0", check.properties.keySet)
     value => {
-      if (check.properties.keySet.contains("type"))
-        println("FW checkObjectProperties", check.properties.keySet, value.pointer)
-      else
-        println("FW ?", check)
       applyToObject(ps)(merge)(value)
     }
   }

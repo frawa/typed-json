@@ -228,7 +228,6 @@ case class Checks(
       }
 
       case ("properties", ObjectValue(properties)) =>
-        println("FW properties", properties.keySet, scope1.uris.lastOption)
         mapChecksFor(properties, scope1) { checks =>
           updateCheck(ObjectPropertiesCheck())(check => check.copy(properties = check.properties ++ checks))
         }
@@ -287,7 +286,6 @@ case class Checks(
 
       // TODO validation vocabulary
       case ("enum", ArrayValue(values)) => {
-        println("FW enum", scope1.uris.lastOption)
         Right(add(EnumCheck(values)))
       }
 
@@ -487,6 +485,19 @@ case class Checks(
       case ("maxContains", NumberValue(v)) if v >= 0 =>
         Right(updateCheck(ContainsCheck())(check => check.copy(max = Some(v.toInt))))
 
+      // // TODO
+      // case ("$vocabulary", v) => {
+      //   Right(this)
+      // }
+      // // TODO
+      // case ("$schema", v) => {
+      //   Right(this)
+      // }
+      // // TODO
+      // case ("deprecated", v) => {
+      //   Right(this)
+      // }
+
       case _ => Right(withIgnored(keyword))
     }
   }
@@ -497,7 +508,6 @@ case class Checks(
     val resolveLater = { () =>
       val schema    = resolution._1
       val resolver1 = resolution._2
-      println("FW resolveLater", resolver1.base)
       Checks.parseKeywords(schema, scope)(resolver1)
     }
     val resolved = resolution._2.base
