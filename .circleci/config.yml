@@ -33,17 +33,16 @@ jobs:
 
       # Download and cache dependencies
       - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "build.sbt" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+          key: sbt-cache
 
-      - run: cat /dev/null | sbt test:compile
+      - run: cat /dev/null | sbt compile
 
       - save_cache:
+          key: sbt-cache
           paths:
-            - ~/.m2
-          key: v1-dependencies--{{ checksum "build.sbt" }}
+            - "~/.ivy2/cache"
+            - "~/.sbt"
+            - "~/.m2"
 
       # run tests!
-      - run: cat /dev/null | sbt test:test
+      - run: cat /dev/null | sbt test
