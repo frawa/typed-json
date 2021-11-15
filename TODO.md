@@ -4,6 +4,7 @@
 - support earlier version of spec, via JsonSchemaTestTestSuite
 
 ## TODO
+- do not prefix results, but push value pointer into checker
 - support annotations
 - handle ingoredKeywords with annotations?
 - streamline SchemaQuality
