@@ -137,11 +137,12 @@ object Processor {
 
   private def one[R](checker: Checker[R], check: CheckWithLocation): ProcessFun[R] = {
     check.value match {
-      case c: SimpleCheck =>
-        simple(checker, c)
-      case c: NestingCheck =>
-        //println("FW nesting", check.uri, check.value.getClass())
-        nesting(checker, c)
+      case c: SimpleCheck => { value =>
+        simple(checker, c)(value)
+      }
+      case c: NestingCheck => { value =>
+        nesting(checker, c)(value)
+      }
     }
   }
 

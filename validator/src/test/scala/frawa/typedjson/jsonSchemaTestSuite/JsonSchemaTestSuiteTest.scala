@@ -34,12 +34,10 @@ class JsonSchemaTestSuiteTest extends FunSuite {
   // TODO unskip 'em
   val skip = Set(
     "content.json",  // TODO keywords contentMediaType, contentEncoding, contentSchema
-    "defs.json",     // TODO meta schema with ignored keywords: deprecated, $vocabulary, $schema
     "refRemote.json" // TODO resolve URI as remote URL
   )
 
-  val only: Option[String] = None
-  // val only: Option[String]            = Some("defs.json")
+  val only: Option[String]            = None
   val onlyId: Option[String]          = None
   val onlyDescription: Option[String] = None
 
