@@ -146,4 +146,55 @@ object TestSchemas {
     )
   )
 
+  val refInPropertiesSchema = """{
+                                |"$id": "https://example.net/root.json",
+                                |"type": "object",
+                                |"properties": {
+                                |    "foo": { "$ref": "#foo" }
+                                |},
+                                |"$defs": {
+                                |    "foo": {
+                                |        "$anchor": "foo",
+                                |        "type": "number"
+                                |    }
+                                |}
+                                |}""".stripMargin
+
+  val refAtRootSchema = """{
+                          |"$id": "https://example.net/root.json",
+                          |"$ref": "#object",
+                          |"$defs": {
+                          |    "object": {
+                          |      "$anchor": "object",
+                          |      "type": "object",
+                          |      "properties": {
+                          |         "foo": {
+                          |           "anyOf": [
+                          |             { "$ref": "#/$defs/numberType" },
+                          |             {
+                          |               "type": "array",
+                          |               "items": { "$ref": "#/$defs/numberType" },
+                          |               "minItems": 1,
+                          |               "uniqueItems": true
+                          |             }
+                          |           ]
+                          |         }
+                          |      }  
+                          |    },
+                          |    "numberType": {
+                          |       "type": "number"
+                          |    }
+                          |}
+                          |}""".stripMargin
+
+  val refToValidationSpec = """{
+                              |"$id": "https://example.net/root.json",
+                              |"$ref": "https://json-schema.org/draft/2020-12/meta/validation",
+                              |"$ref": "https://json-schema.org/draft/2020-12/meta/core"
+                              |}""".stripMargin
+
+  val refIndirectToValidationSpec = """{
+                                      |"$id": "https://example.net/root.json",
+                                      |"$ref": "https://json-schema.org/draft/2020-12/schema"
+                                      |}""".stripMargin
 }

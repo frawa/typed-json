@@ -9,9 +9,13 @@ import TestSchemas._
 class ValidationCheckerTest extends FunSuite {
   implicit val zioParser = new ZioParser()
 
-  private def assertValidate(text: String)(schema: SchemaValue)(
+  private def assertValidate(text: String)(
+      schema: SchemaValue,
+      lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
+  )(
       f: Checked[ValidationResult] => Unit
   ) = {
+    implicit val l = lazyResolver
     assertChecked(ValidationChecker())(schema, text)(f)
   }
 
@@ -662,6 +666,164 @@ class ValidationCheckerTest extends FunSuite {
               pointer = Pointer(
                 segments = Nil
               )
+            )
+          )
+        )
+        assertEquals(checked.valid, false)
+      }
+    }
+  }
+
+  test("$ref in properties") {
+    withSchema(refInPropertiesSchema) { schema =>
+      assertValidate("""{ "foo": 13 }""".stripMargin)(schema) { checked =>
+        assertErrors(checked, Seq())
+        assertEquals(checked.valid, true)
+      }
+      assertValidate("""{ "foo": true }""".stripMargin)(schema) { checked =>
+        assertErrors(
+          checked,
+          Seq(
+            WithPointer(
+              result = TypeMismatch(
+                expected = "number"
+              ),
+              pointer = Pointer.parse("/foo")
+            )
+          )
+        )
+        assertEquals(checked.valid, false)
+      }
+    }
+  }
+
+  test("$ref at root") {
+    withSchema(refAtRootSchema) { schema =>
+      assertValidate("""{ "foo": 13 }""".stripMargin)(schema) { checked =>
+        assertErrors(checked, Seq())
+        assertEquals(checked.validation.errors, Seq())
+        assertEquals(checked.valid, true)
+      }
+      assertValidate("""{ "foo": [13] }""".stripMargin)(schema) { checked =>
+        assertErrors(checked, Seq())
+        assertEquals(checked.validation.errors, Seq())
+        assertEquals(checked.valid, true)
+      }
+      assertValidate("""{ "foo": true }""".stripMargin)(schema) { checked =>
+        assertErrors(
+          checked,
+          Seq(
+            WithPointer(
+              result = TypeMismatch(
+                expected = "number"
+              ),
+              pointer = Pointer.parse("/foo")
+            ),
+            WithPointer(
+              result = TypeMismatch(
+                expected = "array"
+              ),
+              pointer = Pointer.parse("/foo")
+            )
+          )
+        )
+        assertEquals(checked.valid, false)
+      }
+    }
+  }
+
+  test("$ref to validation spec".only) {
+    val lazyResolver = Some(SpecMetaSchemas.lazyResolver)
+
+    withSchema(refToValidationSpec) { schema =>
+      assertValidate("""{ "$defs": { "foo": { "type": "boolean" } } }""".stripMargin)(schema, lazyResolver) { checked =>
+        assertErrors(checked, Seq())
+        assertEquals(checked.validation.errors, Seq())
+        // assertEquals(checked.annotations, Seq(WithPointer(EvaluatedProperties(Set("type")))))
+        assertEquals(checked.valid, true)
+      }
+      assertValidate("""{ "$defs": { "foo": { "type": ["boolean"] } } }""".stripMargin)(schema, lazyResolver) {
+        checked =>
+          assertErrors(checked, Seq())
+          assertEquals(checked.validation.errors, Seq())
+          // assertEquals(
+          //   checked.annotations,
+          //   Seq(
+          //     WithPointer(EvaluatedIndices(Seq(0))),
+          //     WithPointer(EvaluatedProperties(Set("type")))
+          //   )
+          // )
+          assertEquals(checked.valid, true)
+      }
+      assertValidate("""{ "$defs": { "foo": { "type": ["boolean"] } } }""".stripMargin)(schema, lazyResolver) {
+        checked =>
+          assertErrors(
+            checked,
+            Seq(
+              WithPointer(
+                result = NotInEnum(
+                  values = Seq("array", "boolean", "integer", "null", "number", "object", "string").map(StringValue(_))
+                ),
+                pointer = Pointer.parse("/type")
+              ),
+              WithPointer(
+                result = TypeMismatch(
+                  expected = "array"
+                ),
+                pointer = Pointer.parse("/type")
+              )
+            )
+          )
+          assertEquals(checked.valid, false)
+      }
+    }
+  }
+
+  test("$ref indirect to validation spec") {
+    val lazyResolver = Some(SpecMetaSchemas.lazyResolver)
+
+    withSchema(refIndirectToValidationSpec) { schema =>
+      assertValidate("""{ "$defs": { "foo": { "type": "boolean" } } }""".stripMargin)(schema, lazyResolver) { checked =>
+        assertErrors(checked, Seq())
+        assertEquals(checked.validation.errors, Seq())
+        // assertEquals(
+        //   checked.annotations,
+        //   Seq(
+        //     WithPointer(EvaluatedProperties(Set())),
+        //     WithPointer(EvaluatedProperties(Set("type")))
+        //   )
+        // )
+        assertEquals(checked.valid, true)
+      }
+      assertValidate("""{ "$defs": { "foo": { "type": ["boolean"] } } }""".stripMargin)(schema, lazyResolver) {
+        checked =>
+          assertErrors(checked, Seq())
+          assertEquals(checked.validation.errors, Seq())
+          // assertEquals(
+          //   checked.annotations,
+          //   Seq(
+          //     WithPointer(EvaluatedProperties(Set())),
+          //     WithPointer(EvaluatedIndices(Seq(0))),
+          //     WithPointer(EvaluatedProperties(Set("type")))
+          //   )
+          // )
+          assertEquals(checked.valid, true)
+      }
+      assertValidate("""{ "$defs": { "foo": { "type": 1 } } }""".stripMargin)(schema, lazyResolver) { checked =>
+        assertErrors(
+          checked,
+          Seq(
+            WithPointer(
+              result = NotInEnum(
+                values = Seq("array", "boolean", "integer", "null", "number", "object", "string").map(StringValue(_))
+              ),
+              pointer = Pointer.parse("/type")
+            ),
+            WithPointer(
+              result = TypeMismatch(
+                expected = "array"
+              ),
+              pointer = Pointer.parse("/type")
             )
           )
         )

@@ -14,6 +14,7 @@ import scala.reflect.internal.Reporter
 import munit.Assertions._
 
 object TestUtil {
+  implicit val lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
 
   def parseJsonValue(text: String)(implicit parser: Parser): Value = {
     parser
@@ -37,7 +38,9 @@ object TestUtil {
 
   def assertChecked[R](
       checker: Checker[R]
-  )(schema: SchemaValue, valueText: String)(f: Checked[R] => Unit)(implicit parser: Parser) = {
+  )(schema: SchemaValue, valueText: String)(
+      f: Checked[R] => Unit
+  )(implicit parser: Parser, lazyResolver: Option[LoadedSchemasResolver.LazyResolver]) = {
     withStrictProcessor(checker)(schema) { processor =>
       val value   = parseJsonValue(valueText)
       val checked = processor(InnerValue(value))
@@ -62,9 +65,9 @@ object TestUtil {
 
   def withStrictProcessor[R](
       checker: Checker[R]
-  )(schema: SchemaValue, lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None)(
+  )(schema: SchemaValue)(
       f: Processor[R] => Unit
-  )(implicit parser: Parser) = {
+  )(implicit parser: Parser, lazyResolver: Option[LoadedSchemasResolver.LazyResolver]) = {
     withProcessor(checker)(schema, lazyResolver) { processor =>
       assertEquals(processor.validation.ignoredKeywords, Set.empty[String], "new keywords")
       f(processor)
