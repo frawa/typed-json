@@ -32,12 +32,22 @@ class JsonSchemaTestSuiteTest extends FunSuite {
   val version                 = "draft2020-12"
 
   // TODO unskip 'em
-  val skip = Set(
+  val ignore = Set(
     "content.json",  // TODO keywords contentMediaType, contentEncoding, contentSchema
     "refRemote.json" // TODO resolve URI as remote URL
   )
 
-  val only: Option[String]            = None
+  // TODO unskip 'em
+  val ignoreDescription = Map(
+    "dynamicRef.json" -> Set(
+      "strict-tree schema, guards against misspelled properties",                     // TODO resolve URI as remote URL
+      "tests for implementation dynamic anchor and reference link",                   // TODO resolve URI as remote URL
+      "Tests for implementation dynamic anchor and reference link. Reference should " // TODO resolve URI as remote URL
+    )
+  )
+
+  val only: Option[String] = None
+  // val only: Option[String]            = Some("dynamicRef.json")
   val onlyId: Option[String]          = None
   val onlyDescription: Option[String] = None
 
@@ -75,12 +85,18 @@ class JsonSchemaTestSuiteTest extends FunSuite {
         val StringValue(description) = properties("description")
         val testName                 = s"${path.getFileName} - ${description}"
 
-        val onlyTestName = onlyDescription
+        val useTestName = onlyDescription
           .filter(description.startsWith(_))
           .map(_ => testName.only)
+          .orElse(
+            ignoreDescription
+              .get(path.getFileName.toString)
+              .flatMap(_.find(description.startsWith(_)))
+              .map(_ => testName.ignore)
+          )
           .getOrElse(new TestOptions(testName))
 
-        test(onlyTestName) {
+        test(useTestName) {
           val schema            = properties("schema")
           val ArrayValue(tests) = properties("tests")
 
@@ -122,10 +138,7 @@ class JsonSchemaTestSuiteTest extends FunSuite {
 
   protected def checkVersion(version: String): Unit = {
     val list = listTests(version)
-      .filterNot(p =>
-        skip
-          .contains(p.getFileName.toString)
-      )
+      .filterNot(p => ignore.contains(p.getFileName.toString))
       .filter(p =>
         only
           .map(_ == p.getFileName.toString)
