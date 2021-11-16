@@ -1,30 +1,32 @@
 # Backlog
 
 ## Doing
-- CI, circle CI, GH actions?
+- latest dependencies
 
 ## TODO
-- support ScalaJS
-- latest dependencies
-- support ScalaNative
 - better names, eg. Checks -> Keywords
 - better package name
 - cristalize API with an example
+- isolate dependency on zio-json
+- publish released versions
 - handle ingoredKeywords with annotations?
 - review and refactor: implicits
 - streamline SchemaQuality
 - do not prefix results, but push value pointer into checker
 - fully support annotations
 - support earlier version of spec, via JsonSchemaTestTestSuite
-- JsonSchemaTestTestSuite data as git submodule?
-- publish released versions
 - support $schema?
 - fix ignored suites in JsonSchemaTestTestSuite
 - support $vocabulary?
 - support deprecated?
 - benching
+- support ScalaNative?
+- CI on GH Actions?
 
 ## Done
+- support ScalaJS
+- CI, circle CI
+- JsonSchemaTestTestSuite data as git submodule?
 - support 'unevaluatedProperties'
 - support 'unevaluatedItems'
 - (sort of) track keywordLocation, absoluteKeywordLocation, and instanceLocation on checks
