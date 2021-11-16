@@ -43,6 +43,9 @@ class JsonSchemaTestSuiteTest extends FunSuite {
       "strict-tree schema, guards against misspelled properties",                     // TODO resolve URI as remote URL
       "tests for implementation dynamic anchor and reference link",                   // TODO resolve URI as remote URL
       "Tests for implementation dynamic anchor and reference link. Reference should " // TODO resolve URI as remote URL
+    ),
+    "vocabulary.json" -> Set(
+      "schema that uses custom metaschema with with no validation vocabulary" // TODO support $schema
     )
   )
 
