@@ -1,7 +1,7 @@
 import Dependencies._
 
-addCommandAlias("lint", "fmtCheck;fixCheck")
-addCommandAlias("lintFix", "fixFix;fmtFix")
+addCommandAlias("lint", "headerCheckAll;fmtCheck;fixCheck")
+addCommandAlias("lintFix", "headerCreateAll;fixFix;fmtFix")
 addCommandAlias("fmtCheck", "all scalafmtCheck scalafmtSbtCheck")
 addCommandAlias("fmtFix", "all scalafmt scalafmtSbt")
 addCommandAlias("fixCheck", "scalafixAll --check")
