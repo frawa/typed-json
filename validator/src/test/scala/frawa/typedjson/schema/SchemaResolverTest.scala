@@ -1,27 +1,17 @@
 package frawa.typedjson.schema
 
 import munit.FunSuite
-import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.parser.Parser
-import frawa.typedjson.parser.NumberValue
-import frawa.typedjson.parser.BoolValue
-import frawa.typedjson.parser.NullValue
-import frawa.typedjson.parser.StringValue
-import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue
-import scala.reflect.internal.Reporter
-import munit.Assertions._
 import java.net.URI
-import TestUtil._
 import UriUtil._
+import frawa.typedjson.parser.StringValue
 
 class SchemaResolverTest extends FunSuite {
-  val fooId  = "https://example.net/foo.json"
-  val fooUri = uri(fooId)
+  val fooId       = "https://example.net/foo.json"
+  val fooUri: URI = uri(fooId)
 
-  val gnuUri = uri("https://example.net/foo.json#gnu")
-  val gnuSchema =
+  val gnuUri: URI = uri("https://example.net/foo.json#gnu")
+  val gnuSchema: SchemaValue =
     SchemaValue(
       value = ObjectValue(
         properties = Map(
@@ -35,7 +25,7 @@ class SchemaResolverTest extends FunSuite {
       )
     )
 
-  val fooSchema =
+  val fooSchema: SchemaValue =
     SchemaValue(
       value = ObjectValue(
         properties = Map(

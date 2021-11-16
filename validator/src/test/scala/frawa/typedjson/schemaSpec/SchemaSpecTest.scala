@@ -3,24 +3,21 @@ package frawa.typedjson.schemaSpec
 import munit.FunSuite
 import frawa.typedjson.schema.SchemaValue
 import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.parser.Parser
-import scala.io.Source
-import frawa.typedjson.schema.TestUtil
-import frawa.typedjson.schema.Processor
 import frawa.typedjson.schema.ValidationChecker
-import frawa.typedjson.schema.InnerValue
-import frawa.typedjson.schema.Pointer
-import frawa.typedjson.schema.LoadedSchemasResolver
-import frawa.typedjson.parser.Value
 import frawa.typedjson.schema.Checked
 import frawa.typedjson.schema.ValidationResult
 import frawa.typedjson.schema.SpecMetaSchemas
-import TestUtil._
+import frawa.typedjson.schema.LoadedSchemasResolver
+import frawa.typedjson.schema.InnerValue
+
+import frawa.typedjson.schema.TestUtil._
+
 class SchemaSpecTest extends FunSuite {
-  implicit val zioParser = new ZioParser()
-  val resolver           = SpecMetaSchemas.lazyResolver
-  val base               = SpecMetaSchemas.draft202012
-  val lazyResolver       = Some(SpecMetaSchemas.lazyResolver)
+  implicit val zioParser: ZioParser = new ZioParser()
+
+  val resolver                                               = SpecMetaSchemas.lazyResolver
+  val base                                                   = SpecMetaSchemas.draft202012
+  val lazyResolver: Some[LoadedSchemasResolver.LazyResolver] = Some(SpecMetaSchemas.lazyResolver)
 
   def withSchemaSpec(name: String)(f: SchemaValue => Unit): Unit = {
     val Some(schema) = resolver(base.resolve(name))

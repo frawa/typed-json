@@ -3,16 +3,12 @@ package frawa.typedjson.schemaSpec
 import munit.FunSuite
 import frawa.typedjson.schema.SchemaValue
 import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.parser.Parser
 import scala.io.Source
 import frawa.typedjson.schema.TestUtil
 import frawa.typedjson.schema.Processor
 import frawa.typedjson.schema.ValidationChecker
 import frawa.typedjson.schema.InnerValue
-import frawa.typedjson.schema.Pointer
-import frawa.typedjson.schema.LoadedSchemasResolver
 import frawa.typedjson.parser.Value
-import frawa.typedjson.schema.Checked
 import frawa.typedjson.schema.ValidationResult
 import java.nio.file.Paths
 import java.nio.file.Files
@@ -26,19 +22,19 @@ import TestUtil._
 import munit.TestOptions
 
 class JsonSchemaTestSuiteTest extends FunSuite {
-  implicit val zioParser = new ZioParser()
+  implicit val zioParser: ZioParser = new ZioParser()
 
-  val jsonSchemaTestSuiteRoot = Paths.get("./JSON-Schema-Test-Suite/tests")
+  val jsonSchemaTestSuiteRoot: Path = Paths.get("./JSON-Schema-Test-Suite/tests")
   val version                 = "draft2020-12"
 
   // TODO unskip 'em
-  val ignore = Set(
+  val ignore: Set[String] = Set(
     "content.json",  // TODO keywords contentMediaType, contentEncoding, contentSchema
     "refRemote.json" // TODO resolve URI as remote URL
   )
 
   // TODO unskip 'em
-  val ignoreDescription = Map(
+  val ignoreDescription: Map[String,Set[String]] = Map(
     "dynamicRef.json" -> Set(
       "strict-tree schema, guards against misspelled properties",                     // TODO resolve URI as remote URL
       "tests for implementation dynamic anchor and reference link",                   // TODO resolve URI as remote URL

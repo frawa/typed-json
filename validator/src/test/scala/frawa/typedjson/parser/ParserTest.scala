@@ -3,7 +3,7 @@ package frawa.typedjson.parser
 import munit._
 
 class ParserTest extends FunSuite {
-  implicit val zioParser = new ZioParser();
+  implicit val zioParser: ZioParser = new ZioParser();
 
   test("basic types") {
     assertEquals(Parser("""13"""), Right(NumberValue(13)))

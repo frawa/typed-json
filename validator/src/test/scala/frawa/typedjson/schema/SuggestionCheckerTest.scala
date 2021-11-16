@@ -2,14 +2,13 @@ package frawa.typedjson.schema
 
 import munit.FunSuite
 import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.parser.Parser
 import frawa.typedjson.parser.{ObjectValue, NullValue, NumberValue, StringValue, ArrayValue, BoolValue}
 import TestUtil._
 import TestSchemas._
 import frawa.typedjson.parser.Value
 
 class SuggestCheckerTest extends FunSuite {
-  implicit val zioParser = new ZioParser()
+  implicit val zioParser: ZioParser = new ZioParser()
 
   private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
       f: Seq[Value] => Unit

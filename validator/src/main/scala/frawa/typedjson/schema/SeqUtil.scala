@@ -16,9 +16,6 @@
 
 package frawa.typedjson.schema
 
-import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.StringValue
-
 object SeqUtil {
 
   def sequenceFirstLeft[E, T](eithers: Seq[Either[E, T]]): Either[E, Seq[T]] = {

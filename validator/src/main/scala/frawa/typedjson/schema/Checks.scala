@@ -18,13 +18,10 @@ package frawa.typedjson.schema
 
 import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.BoolValue
-import frawa.typedjson.parser.NullValue
 import frawa.typedjson.parser.NumberValue
 import frawa.typedjson.parser.ObjectValue
-import frawa.typedjson.parser.Parser
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.ZioParser
 
 import java.net.URI
 import scala.reflect.ClassTag
@@ -43,7 +40,7 @@ case class SchemaQuality(errors: Seq[SchemaError], ignoredKeywords: Set[String],
 }
 
 object SchemaQuality {
-  val empty = SchemaQuality(Seq.empty, Set.empty)
+  val empty: SchemaQuality = SchemaQuality(Seq.empty, Set.empty)
 }
 
 case class SchemaError(message: String, pointer: Pointer = Pointer.empty) {
@@ -122,7 +119,7 @@ case class Checked[R](
   private def addValidations(validations: Seq[SchemaQuality]): Checked[R] =
     this.copy(validation = validations.foldLeft(this.validation)(_.combine(_)))
 
-  def add(annotation: Checked.Annotation) = this.copy(annotations = this.annotations :+ annotation)
+  def add(annotation: Checked.Annotation): Checked[R] = this.copy(annotations = this.annotations :+ annotation)
   private def addAnnotations(annotations: Seq[Checked.Annotation]) =
     this.copy(annotations = this.annotations ++ annotations)
 }
@@ -136,10 +133,10 @@ object Checked {
   type Annotation = WithPointer[Observation2]
 
   def apply[R](valid: Boolean, result: R): Checked[R] = Checked[R](valid, Seq(result))
-  def valid[R]                                        = Checked[R](true, Seq())
-  def valid[R](result: R)                             = Checked[R](true, Seq(result))
-  def invalid[R]                                      = Checked[R](false, Seq())
-  def invalid[R](result: R)                           = Checked[R](false, Seq(result))
+  def valid[R]: Checked[R]                            = Checked[R](true, Seq())
+  def valid[R](result: R): Checked[R]                 = Checked[R](true, Seq(result))
+  def invalid[R]: Checked[R]                          = Checked[R](false, Seq())
+  def invalid[R](result: R): Checked[R]               = Checked[R](false, Seq(result))
 
   def merge[R](checked: Seq[Checked[R]]): Checked[R] = {
     val valid           = checked.forall(_.valid)
@@ -502,9 +499,7 @@ case class Checks(
     }
   }
 
-  private def lazyResolveCheck(resolution: SchemaResolver.Resolution, scope: DynamicScope)(implicit
-      resolver: SchemaResolver
-  ): LazyResolveCheck = {
+  private def lazyResolveCheck(resolution: SchemaResolver.Resolution, scope: DynamicScope): LazyResolveCheck = {
     val resolveLater = { () =>
       val schema    = resolution._1
       val resolver1 = resolution._2

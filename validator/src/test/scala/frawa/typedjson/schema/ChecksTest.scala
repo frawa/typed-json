@@ -1,25 +1,17 @@
 package frawa.typedjson.schema
 
 import munit.FunSuite
-import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.parser.Parser
-import frawa.typedjson.parser.NumberValue
 import frawa.typedjson.parser.BoolValue
-import frawa.typedjson.parser.NullValue
 import frawa.typedjson.parser.StringValue
-import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue
-import scala.reflect.internal.Reporter
-import munit.Assertions._
 import TestUtil._
 import TestSchemas._
 
 class ChecksTest extends FunSuite {
-  import Checks._
   import UriUtil._
 
-  implicit val zioParser = new ZioParser()
+  implicit val zioParser: ZioParser = new ZioParser()
 
   private def assertChecks(schema: SchemaValue, allowIgnored: Boolean = false)(
       f: Checks => Unit

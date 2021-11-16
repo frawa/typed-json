@@ -15,7 +15,7 @@ object TestSchemas {
   val arraySchema       = """{"type": "array"}"""
   val numberArraySchema = """{"type": "array", "items": { "type": "number"}}"""
 
-  val totoObjectSchema = """{
+  val totoObjectSchema: String = """{
                            |"type": "object",
                            |"properties": {
                            |  "toto": { "type": "number" },
@@ -24,7 +24,7 @@ object TestSchemas {
                            |}
                            |""".stripMargin
 
-  val totoRequiredObjectSchema = """{
+  val totoRequiredObjectSchema: String = """{
                                    |"type": "object",
                                    |"required": ["toto", "gnu"],
                                    |"properties": {
@@ -35,14 +35,14 @@ object TestSchemas {
                                    |}
                                    |""".stripMargin
 
-  val allOfSchema = """{
+  val allOfSchema: String = """{
                       |"allOf": [
                       |  { "type": "number" }
                       |]
                       |}
                       |""".stripMargin
 
-  val anyOfSchema = """{
+  val anyOfSchema: String = """{
                       |"anyOf": [
                       |  { "type": "number" },
                       |  { "type": "string" }
@@ -50,7 +50,7 @@ object TestSchemas {
                       |}
                       |""".stripMargin
 
-  val oneOfSchema = """{
+  val oneOfSchema: String = """{
                       |"oneOf": [
                       |  { "type": "number" },
                       |  { "type": "string" }
@@ -58,7 +58,7 @@ object TestSchemas {
                       |}
                       |""".stripMargin
 
-  val ifThenElseSchema = """{
+  val ifThenElseSchema: String = """{
                            |"if": { "type": "number" },
                            |"then": { "type": "number" },
                            |"else": { "type": "string" }
@@ -67,16 +67,16 @@ object TestSchemas {
 
   val nullOrStringSchema = """{"type": ["null","string"]}"""
 
-  val enumSchema  = """{
+  val enumSchema: String  = """{
                      |"type": "string",
                      |"enum": ["foo", "bar"]
                      |}""".stripMargin
-  val constSchema = """{
+  val constSchema: String = """{
                       |"type": "string",
                       |"const": "first"
                       |}""".stripMargin
 
-  val idRefDefsSchema = """{
+  val idRefDefsSchema: String = """{
                           |"$id": "https://example.net/root.json",
                           |"type": "array",
                           |"items": {
@@ -90,7 +90,7 @@ object TestSchemas {
                           |}
                           |}""".stripMargin
 
-  val recursiveRefDefsSchema = """|{
+  val recursiveRefDefsSchema: String = """|{
                                   |"$ref": "#/$defs/list",
                                   |"$defs": {
                                   |  "list": {
@@ -103,7 +103,7 @@ object TestSchemas {
                                   |}
                                   |""".stripMargin
 
-  val subItemRefDefsSchema = """|{"$defs": {
+  val subItemRefDefsSchema: String = """|{"$defs": {
                                 |"item": {
                                 |  "type": "array",
                                 |  "items": false,
@@ -126,7 +126,7 @@ object TestSchemas {
                                 |]
                                 |}""".stripMargin
 
-  val numberSchemaValue = SchemaValue(
+  val numberSchemaValue: SchemaValue = SchemaValue(
     value = ObjectValue(
       properties = Map(
         "type" -> StringValue(
@@ -136,7 +136,7 @@ object TestSchemas {
     )
   )
 
-  val stringSchemaValue = SchemaValue(
+  val stringSchemaValue: SchemaValue = SchemaValue(
     value = ObjectValue(
       properties = Map(
         "type" -> StringValue(
@@ -146,7 +146,7 @@ object TestSchemas {
     )
   )
 
-  val refInPropertiesSchema = """{
+  val refInPropertiesSchema: String = """{
                                 |"$id": "https://example.net/root.json",
                                 |"type": "object",
                                 |"properties": {
@@ -160,7 +160,7 @@ object TestSchemas {
                                 |}
                                 |}""".stripMargin
 
-  val refAtRootSchema = """{
+  val refAtRootSchema: String = """{
                           |"$id": "https://example.net/root.json",
                           |"$ref": "#object",
                           |"$defs": {
@@ -187,7 +187,7 @@ object TestSchemas {
                           |}
                           |}""".stripMargin
 
-  val refToValidationSpec = """{
+  val refToValidationSpec: String = """{
                               |"$id": "https://json-schema.org/draft/2020-12/partial",
                               |"$dynamicAnchor": "meta",
                               |"allOf": [
@@ -196,7 +196,7 @@ object TestSchemas {
                               |]
                               |}""".stripMargin
 
-  val refIndirectToValidationSpec = """{
+  val refIndirectToValidationSpec: String = """{
                                       |"$id": "https://example.net/root.json",
                                       |"$ref": "https://json-schema.org/draft/2020-12/schema"
                                       |}""".stripMargin

@@ -1,9 +1,6 @@
 package frawa.typedjson.schema
 
 import munit.FunSuite
-import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.parser.Parser
-import java.net.URI
 import UriUtil._
 
 class DynamicScopeTest extends FunSuite {

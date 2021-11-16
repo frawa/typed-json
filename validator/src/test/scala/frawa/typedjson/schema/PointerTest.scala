@@ -1,10 +1,9 @@
 package frawa.typedjson.schema
 
 import munit._
-import frawa.typedjson.parser.NullValue
-import frawa.typedjson.parser.NumberValue
 import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue
+import frawa.typedjson.parser.NumberValue
 
 // see https://datatracker.ietf.org/doc/html/rfc6901
 

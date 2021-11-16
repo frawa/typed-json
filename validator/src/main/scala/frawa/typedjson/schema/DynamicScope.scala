@@ -16,12 +16,9 @@
 
 package frawa.typedjson.schema
 
-import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.StringValue
 import java.net.URI
 
 case class DynamicScope(uris: Seq[URI]) {
-  import DynamicScope._
   import UriUtil._
 
   def candidates: Seq[URI] = uris

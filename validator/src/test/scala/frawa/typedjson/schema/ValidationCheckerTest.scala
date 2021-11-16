@@ -7,7 +7,7 @@ import TestUtil._
 import TestSchemas._
 
 class ValidationCheckerTest extends FunSuite {
-  implicit val zioParser = new ZioParser()
+  implicit val zioParser: ZioParser = new ZioParser()
 
   private def assertValidate(text: String)(
       schema: SchemaValue,

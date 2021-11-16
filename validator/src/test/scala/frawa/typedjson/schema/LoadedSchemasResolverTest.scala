@@ -1,23 +1,15 @@
 package frawa.typedjson.schema
 
 import munit.FunSuite
-import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.parser.Parser
-import frawa.typedjson.parser.NumberValue
-import frawa.typedjson.parser.BoolValue
 import frawa.typedjson.parser.NullValue
 import frawa.typedjson.parser.StringValue
-import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue
-import scala.reflect.internal.Reporter
-import munit.Assertions._
-import java.net.URI
 import TestUtil._
 import UriUtil._
+import frawa.typedjson.parser.ZioParser
 
 class LoadedSchemasResolverTest extends FunSuite {
-  implicit val zioParser = new ZioParser()
+  implicit val zioParser: ZioParser = new ZioParser()
 
   test("first schema loader") {
     val id = "https://example.net/root.json"
@@ -214,8 +206,8 @@ class LoadedSchemasResolverTest extends FunSuite {
         )
       )
 
-      val getAnchor  = Pointer.empty / "$anchor"
-      val getComment = Pointer.empty / "$comment"
+      val getAnchor = Pointer.empty / "$anchor"
+      Pointer.empty / "$comment"
 
       val scope = DynamicScope.empty.push(uriRoot)
       val ok = for {

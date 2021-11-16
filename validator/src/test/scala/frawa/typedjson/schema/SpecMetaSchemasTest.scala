@@ -1,16 +1,16 @@
 package frawa.typedjson.schema
 
 import munit.FunSuite
-import java.net.URI
 import UriUtil._
 import frawa.typedjson.parser.ZioParser
+import java.net.URI
 
 class SpecMetaSchemasTest extends FunSuite {
-  implicit val zioParser = new ZioParser()
+  implicit val zioParser: ZioParser = new ZioParser()
 
-  val schemaId  = "https://json-schema.org/draft/2020-12/schema"
-  val schemaUri = uri(schemaId)
-  val coreUri   = schemaUri.resolve("meta/core")
+  val schemaId       = "https://json-schema.org/draft/2020-12/schema"
+  val schemaUri: URI = uri(schemaId)
+  val coreUri: URI   = schemaUri.resolve("meta/core")
 
   test("load schema") {
     val schema = SpecMetaSchemas.lazyResolver.apply(schemaUri)

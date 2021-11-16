@@ -16,19 +16,9 @@
 
 package frawa.typedjson.schema
 
-import frawa.typedjson.parser.ArrayValue
-import frawa.typedjson.parser.BoolValue
-import frawa.typedjson.parser.NullValue
-import frawa.typedjson.parser.NumberValue
-import frawa.typedjson.parser.ObjectValue
-import frawa.typedjson.parser.Parser
-import frawa.typedjson.parser.StringValue
-import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.ZioParser
 import UriUtil._
 
 import java.net.URI
-import scala.reflect.ClassTag
 
 object SchemaResolver {
   type Resolution = (SchemaValue, SchemaResolver)
