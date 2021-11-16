@@ -42,7 +42,8 @@ val strictScalacSettings = Seq(
 lazy val root = (project in file("."))
   .settings(sharedSettings)
   .settings(
-    name := "scala-json-schema-validator-root"
+    name    := "scala-json-schema-validator-root",
+    publish := false
   )
   .aggregate(parser.jvm, parser.js, macros.jvm, validator.jvm, validator.js)
 
