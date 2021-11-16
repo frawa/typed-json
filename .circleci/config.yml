@@ -36,6 +36,7 @@ jobs:
           key: sbt-cache
 
       - run: cat /dev/null | ./sbt compile
+      - run: cat /dev/null | ./sbt lint
 
       - save_cache:
           key: sbt-cache
