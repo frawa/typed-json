@@ -45,4 +45,4 @@ jobs:
       # run tests!
       - run: cat /dev/null | ./sbt test
       - store_test_results:
-          path: "validator/target/test-reports"
+          path: "validator/.jvm/target/test-reports"
