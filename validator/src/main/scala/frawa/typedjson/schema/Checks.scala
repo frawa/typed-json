@@ -84,7 +84,7 @@ case class IfThenElseCheck(
     ifChecks: Option[Checks] = None,
     thenChecks: Option[Checks] = None,
     elseChecks: Option[Checks] = None
-)                                                                                                   extends NestingCheck
+) extends NestingCheck
 case class PatternCheck(pattern: String)                                                            extends SimpleCheck
 case class FormatCheck(format: String)                                                              extends SimpleCheck
 case class MinimumCheck(min: BigDecimal, exclude: Boolean = false)                                  extends SimpleCheck
