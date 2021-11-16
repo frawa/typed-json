@@ -5,6 +5,7 @@
 
 ## TODO
 - support ScalaJS
+- latest dependencies
 - support ScalaNative
 - better names, eg. Checks -> Keywords
 - better package name
