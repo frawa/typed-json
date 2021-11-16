@@ -29,6 +29,7 @@ object Pointer {
   def parse(spec: String): Pointer = Pointer(
     spec
       .split("/")
+      .toIndexedSeq
       .map(field =>
         field
           .replace("~1", "/")

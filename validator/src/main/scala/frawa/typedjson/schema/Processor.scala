@@ -17,18 +17,9 @@
 package frawa.typedjson.schema
 
 import frawa.typedjson.parser.ArrayValue
-import frawa.typedjson.parser.BoolValue
-import frawa.typedjson.parser.NullValue
-import frawa.typedjson.parser.NumberValue
 import frawa.typedjson.parser.ObjectValue
-import frawa.typedjson.parser.Parser
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.ZioParser
-
-import java.net.URI
-import scala.reflect.ClassTag
-import scala.util.matching.Regex
 
 case class SchemaValue(value: Value)
 
@@ -71,7 +62,7 @@ object Processor {
 
   private def noop[R]: ProcessFun[R]                                            = _ => Checked.valid[R]
   private def simple[R](checker: Checker[R], check: SimpleCheck): ProcessFun[R] = checker.check(check)
-  private def seq[R](ps: Seq[ProcessFun[R]]): ProcessFun[R]                     = value => Checked.merge(ps.map(_(value)))
+  private def seq[R](ps: Seq[ProcessFun[R]]): ProcessFun[R] = value => Checked.merge(ps.map(_(value)))
   private def option[R](p: Option[ProcessFun[R]]): ProcessFun[R] = {
     p.getOrElse(noop)
   }

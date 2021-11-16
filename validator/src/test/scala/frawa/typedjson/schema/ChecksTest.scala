@@ -1,25 +1,33 @@
+/*
+ * Copyright 2021 Frank Wagner
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package frawa.typedjson.schema
 
 import munit.FunSuite
-import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.parser.Parser
-import frawa.typedjson.parser.NumberValue
 import frawa.typedjson.parser.BoolValue
-import frawa.typedjson.parser.NullValue
 import frawa.typedjson.parser.StringValue
-import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue
-import scala.reflect.internal.Reporter
-import munit.Assertions._
 import TestUtil._
 import TestSchemas._
 
 class ChecksTest extends FunSuite {
-  import Checks._
   import UriUtil._
 
-  implicit val zioParser = new ZioParser()
+  implicit val zioParser: ZioParser = new ZioParser()
 
   private def assertChecks(schema: SchemaValue, allowIgnored: Boolean = false)(
       f: Checks => Unit

@@ -1,33 +1,46 @@
+/*
+ * Copyright 2021 Frank Wagner
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package frawa.typedjson.schemaSpec
 
 import munit.FunSuite
 import frawa.typedjson.schema.SchemaValue
 import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.parser.Parser
-import scala.io.Source
-import frawa.typedjson.schema.TestUtil
-import frawa.typedjson.schema.Processor
 import frawa.typedjson.schema.ValidationChecker
-import frawa.typedjson.schema.InnerValue
-import frawa.typedjson.schema.Pointer
-import frawa.typedjson.schema.LoadedSchemasResolver
-import frawa.typedjson.parser.Value
 import frawa.typedjson.schema.Checked
 import frawa.typedjson.schema.ValidationResult
 import frawa.typedjson.schema.SpecMetaSchemas
-import TestUtil._
-class SchemaSpecTest extends FunSuite {
-  implicit val zioParser = new ZioParser()
-  val resolver           = SpecMetaSchemas.lazyResolver
-  val base               = SpecMetaSchemas.draft202012
-  val lazyResolver       = Some(SpecMetaSchemas.lazyResolver)
+import frawa.typedjson.schema.LoadedSchemasResolver
+import frawa.typedjson.schema.InnerValue
 
-  def withSchemaSpec(name: String)(f: SchemaValue => Unit) {
+import frawa.typedjson.schema.TestUtil._
+
+class SchemaSpecTest extends FunSuite {
+  implicit val zioParser: ZioParser = new ZioParser()
+
+  val resolver                                               = SpecMetaSchemas.lazyResolver
+  val base                                                   = SpecMetaSchemas.draft202012
+  val lazyResolver: Some[LoadedSchemasResolver.LazyResolver] = Some(SpecMetaSchemas.lazyResolver)
+
+  def withSchemaSpec(name: String)(f: SchemaValue => Unit): Unit = {
     val Some(schema) = resolver(base.resolve(name))
     f(schema)
   }
 
-  def validateSpec(valueName: String, schemaName: String)(f: Checked[ValidationResult] => Unit) {
+  def validateSpec(valueName: String, schemaName: String)(f: Checked[ValidationResult] => Unit): Unit = {
     withSchemaSpec(schemaName) { schema =>
       withSchemaSpec(valueName) { value =>
         withProcessor(ValidationChecker())(schema, lazyResolver) { processor =>

@@ -17,8 +17,6 @@
 package frawa.typedjson.schema
 
 import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.parser.Parser
 import frawa.typedjson.parser.NumberValue
 import frawa.typedjson.parser.BoolValue
 import frawa.typedjson.parser.NullValue
@@ -28,7 +26,6 @@ import frawa.typedjson.parser.ObjectValue
 
 import java.net.URI
 import scala.reflect.ClassTag
-import scala.util.matching.Regex
 import java.util.regex.Pattern
 import scala.util.Try
 import java.util.UUID
@@ -129,15 +126,6 @@ object ValidationChecker {
       case c: UnevaluatedPropertiesCheck   => calc.allOf(checked, value.pointer)
     }
   }
-
-  private def addAnnotation(
-      checked: Checked[ValidationResult],
-      annotation: Option[Observation2],
-      pointer: Pointer
-  ): Checked[ValidationResult] =
-    annotation
-      .map(annotation => checked.add(WithPointer(annotation, pointer)))
-      .getOrElse(checked)
 
   private def checkType[T <: Value: ClassTag](observation: TypeMismatch[T]): ProcessFun = value =>
     value.value match {
@@ -317,16 +305,16 @@ object ValidationChecker {
         // https://datatracker.ietf.org/doc/html/rfc3339
         // TODO test me
         checkStringValue(FormatMismatch(format)) { v =>
-          var `dur-second` = "\\d+S"
-          var `dur-minute` = s"\\d+M(${`dur-second`})?"
-          var `dur-hour`   = s"\\d+H(${`dur-minute`})?"
-          var `dur-day`    = "\\d+D"
-          var `dur-time`   = s"T(${`dur-hour`}|${`dur-minute`}|${`dur-second`})"
-          var `dur-week`   = "\\d+W"
-          var `dur-month`  = s"\\d+M(${`dur-day`})?"
-          var `dur-year`   = s"\\d+Y(${`dur-month`})?"
-          var `dur-date`   = s"(${`dur-day`}|${`dur-month`}|${`dur-year`})(${`dur-time`})?"
-          var duration     = s"P(${`dur-date`}|${`dur-time`}|${`dur-week`})"
+          val `dur-second` = "\\d+S"
+          val `dur-minute` = s"\\d+M(${`dur-second`})?"
+          val `dur-hour`   = s"\\d+H(${`dur-minute`})?"
+          val `dur-day`    = "\\d+D"
+          val `dur-time`   = s"T(${`dur-hour`}|${`dur-minute`}|${`dur-second`})"
+          val `dur-week`   = "\\d+W"
+          val `dur-month`  = s"\\d+M(${`dur-day`})?"
+          val `dur-year`   = s"\\d+Y(${`dur-month`})?"
+          val `dur-date`   = s"(${`dur-day`}|${`dur-month`}|${`dur-year`})(${`dur-time`})?"
+          val duration     = s"P(${`dur-date`}|${`dur-time`}|${`dur-week`})"
           duration.r.matches(v)
         }
       case _ => { value =>

@@ -17,23 +17,21 @@
 package frawa.typedjson.schema
 
 import java.net.URI
-import scala.io.Source
-import frawa.typedjson.parser.Parser
 import frawa.typedjson.parser._
 import frawa.typedjson.macros.Macros
 import UriUtil._
 
 object SpecMetaSchemas {
 
-  val draft202012 = uri("https://json-schema.org/draft/2020-12/")
+  val draft202012: URI = uri("https://json-schema.org/draft/2020-12/")
 
-  def lazyResolver(implicit parser: Parser): LoadedSchemasResolver.LazyResolver = { uri =>
+  def lazyResolver: LoadedSchemasResolver.LazyResolver = { uri =>
     if (uri.getSchemeSpecificPart.startsWith(draft202012.getSchemeSpecificPart)) {
       resolve202012(draft202012.relativize(uri))
     } else { None }
   }
 
-  private def resolve202012(relative: URI)(implicit parser: Parser): Option[SchemaValue] = {
+  private def resolve202012(relative: URI): Option[SchemaValue] = {
     val name = relative.getSchemeSpecificPart()
     name match {
       case "schema"                 => Some(schemaContent)

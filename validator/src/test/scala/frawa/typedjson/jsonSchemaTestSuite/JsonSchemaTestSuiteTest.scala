@@ -1,18 +1,30 @@
+/*
+ * Copyright 2021 Frank Wagner
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package frawa.typedjson.schemaSpec
 
 import munit.FunSuite
 import frawa.typedjson.schema.SchemaValue
 import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.parser.Parser
 import scala.io.Source
 import frawa.typedjson.schema.TestUtil
 import frawa.typedjson.schema.Processor
 import frawa.typedjson.schema.ValidationChecker
 import frawa.typedjson.schema.InnerValue
-import frawa.typedjson.schema.Pointer
-import frawa.typedjson.schema.LoadedSchemasResolver
 import frawa.typedjson.parser.Value
-import frawa.typedjson.schema.Checked
 import frawa.typedjson.schema.ValidationResult
 import java.nio.file.Paths
 import java.nio.file.Files
@@ -26,19 +38,19 @@ import TestUtil._
 import munit.TestOptions
 
 class JsonSchemaTestSuiteTest extends FunSuite {
-  implicit val zioParser = new ZioParser()
+  implicit val zioParser: ZioParser = new ZioParser()
 
-  val jsonSchemaTestSuiteRoot = Paths.get("./JSON-Schema-Test-Suite/tests")
+  val jsonSchemaTestSuiteRoot: Path = Paths.get("./JSON-Schema-Test-Suite/tests")
   val version                 = "draft2020-12"
 
   // TODO unskip 'em
-  val ignore = Set(
+  val ignore: Set[String] = Set(
     "content.json",  // TODO keywords contentMediaType, contentEncoding, contentSchema
     "refRemote.json" // TODO resolve URI as remote URL
   )
 
   // TODO unskip 'em
-  val ignoreDescription = Map(
+  val ignoreDescription: Map[String,Set[String]] = Map(
     "dynamicRef.json" -> Set(
       "strict-tree schema, guards against misspelled properties",                     // TODO resolve URI as remote URL
       "tests for implementation dynamic anchor and reference link",                   // TODO resolve URI as remote URL
@@ -71,7 +83,7 @@ class JsonSchemaTestSuiteTest extends FunSuite {
   }
 
   private def check(path: Path): Unit = {
-    val text = Source.fromFile(path.toFile).getLines.mkString("\n")
+    val text = Source.fromFile(path.toFile).getLines().mkString("\n")
     checkSuite(path)(TestUtil.parseJsonValue(text))
   }
 

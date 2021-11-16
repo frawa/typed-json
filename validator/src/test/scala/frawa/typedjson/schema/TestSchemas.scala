@@ -1,3 +1,19 @@
+/*
+ * Copyright 2021 Frank Wagner
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package frawa.typedjson.schema
 
 import frawa.typedjson.parser.ObjectValue
@@ -15,7 +31,7 @@ object TestSchemas {
   val arraySchema       = """{"type": "array"}"""
   val numberArraySchema = """{"type": "array", "items": { "type": "number"}}"""
 
-  val totoObjectSchema = """{
+  val totoObjectSchema: String = """{
                            |"type": "object",
                            |"properties": {
                            |  "toto": { "type": "number" },
@@ -24,7 +40,7 @@ object TestSchemas {
                            |}
                            |""".stripMargin
 
-  val totoRequiredObjectSchema = """{
+  val totoRequiredObjectSchema: String = """{
                                    |"type": "object",
                                    |"required": ["toto", "gnu"],
                                    |"properties": {
@@ -35,14 +51,14 @@ object TestSchemas {
                                    |}
                                    |""".stripMargin
 
-  val allOfSchema = """{
+  val allOfSchema: String = """{
                       |"allOf": [
                       |  { "type": "number" }
                       |]
                       |}
                       |""".stripMargin
 
-  val anyOfSchema = """{
+  val anyOfSchema: String = """{
                       |"anyOf": [
                       |  { "type": "number" },
                       |  { "type": "string" }
@@ -50,7 +66,7 @@ object TestSchemas {
                       |}
                       |""".stripMargin
 
-  val oneOfSchema = """{
+  val oneOfSchema: String = """{
                       |"oneOf": [
                       |  { "type": "number" },
                       |  { "type": "string" }
@@ -58,7 +74,7 @@ object TestSchemas {
                       |}
                       |""".stripMargin
 
-  val ifThenElseSchema = """{
+  val ifThenElseSchema: String = """{
                            |"if": { "type": "number" },
                            |"then": { "type": "number" },
                            |"else": { "type": "string" }
@@ -67,16 +83,16 @@ object TestSchemas {
 
   val nullOrStringSchema = """{"type": ["null","string"]}"""
 
-  val enumSchema  = """{
+  val enumSchema: String  = """{
                      |"type": "string",
                      |"enum": ["foo", "bar"]
                      |}""".stripMargin
-  val constSchema = """{
+  val constSchema: String = """{
                       |"type": "string",
                       |"const": "first"
                       |}""".stripMargin
 
-  val idRefDefsSchema = """{
+  val idRefDefsSchema: String = """{
                           |"$id": "https://example.net/root.json",
                           |"type": "array",
                           |"items": {
@@ -90,7 +106,7 @@ object TestSchemas {
                           |}
                           |}""".stripMargin
 
-  val recursiveRefDefsSchema = """|{
+  val recursiveRefDefsSchema: String = """|{
                                   |"$ref": "#/$defs/list",
                                   |"$defs": {
                                   |  "list": {
@@ -103,7 +119,7 @@ object TestSchemas {
                                   |}
                                   |""".stripMargin
 
-  val subItemRefDefsSchema = """|{"$defs": {
+  val subItemRefDefsSchema: String = """|{"$defs": {
                                 |"item": {
                                 |  "type": "array",
                                 |  "items": false,
@@ -126,7 +142,7 @@ object TestSchemas {
                                 |]
                                 |}""".stripMargin
 
-  val numberSchemaValue = SchemaValue(
+  val numberSchemaValue: SchemaValue = SchemaValue(
     value = ObjectValue(
       properties = Map(
         "type" -> StringValue(
@@ -136,7 +152,7 @@ object TestSchemas {
     )
   )
 
-  val stringSchemaValue = SchemaValue(
+  val stringSchemaValue: SchemaValue = SchemaValue(
     value = ObjectValue(
       properties = Map(
         "type" -> StringValue(
@@ -146,7 +162,7 @@ object TestSchemas {
     )
   )
 
-  val refInPropertiesSchema = """{
+  val refInPropertiesSchema: String = """{
                                 |"$id": "https://example.net/root.json",
                                 |"type": "object",
                                 |"properties": {
@@ -160,7 +176,7 @@ object TestSchemas {
                                 |}
                                 |}""".stripMargin
 
-  val refAtRootSchema = """{
+  val refAtRootSchema: String = """{
                           |"$id": "https://example.net/root.json",
                           |"$ref": "#object",
                           |"$defs": {
@@ -187,7 +203,7 @@ object TestSchemas {
                           |}
                           |}""".stripMargin
 
-  val refToValidationSpec = """{
+  val refToValidationSpec: String = """{
                               |"$id": "https://json-schema.org/draft/2020-12/partial",
                               |"$dynamicAnchor": "meta",
                               |"allOf": [
@@ -196,7 +212,7 @@ object TestSchemas {
                               |]
                               |}""".stripMargin
 
-  val refIndirectToValidationSpec = """{
+  val refIndirectToValidationSpec: String = """{
                                       |"$id": "https://example.net/root.json",
                                       |"$ref": "https://json-schema.org/draft/2020-12/schema"
                                       |}""".stripMargin
