@@ -1,10 +1,13 @@
 import Dependencies._
 
+addCommandAlias("lint", "all scalafmtCheck scalafmtSbtCheck")
+addCommandAlias("lintFix", "all scalafmt scalafmtSbt")
+
 val sharedSettings = Seq(
-  scalaVersion := "2.13.6",
-  organization := "frawa.typedjson",
+  scalaVersion     := "2.13.6",
+  organization     := "frawa.typedjson",
   organizationName := "Frank Wagner",
-  startYear := Some(2021),
+  startYear        := Some(2021),
   licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt"))
 )
 
@@ -56,7 +59,7 @@ lazy val macros = crossProject(JSPlatform, JVMPlatform)
   .settings(sharedSettings)
   .settings(sharedScalacSettings)
   .settings(
-    name := "scala-json-schema-macros",
+    name                                   := "scala-json-schema-macros",
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value
   )
   .dependsOn(parser)
@@ -70,7 +73,7 @@ lazy val validator =
     .settings(sharedScalacSettings)
     .settings(strictScalacSettings)
     .settings(
-      name := "scala-json-schema-validator",
+      name                        := "scala-json-schema-validator",
       libraryDependencies += munit % Test,
       Test / testOptions += Tests.Argument("+l", "-q", "--summary=0")
     )
