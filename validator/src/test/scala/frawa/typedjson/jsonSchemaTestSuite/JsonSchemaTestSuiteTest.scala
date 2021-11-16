@@ -71,7 +71,7 @@ class JsonSchemaTestSuiteTest extends FunSuite {
   }
 
   private def check(path: Path): Unit = {
-    val text = Source.fromFile(path.toFile).getLines.mkString("\n")
+    val text = Source.fromFile(path.toFile).getLines().mkString("\n")
     checkSuite(path)(TestUtil.parseJsonValue(text))
   }
 

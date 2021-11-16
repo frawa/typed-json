@@ -22,12 +22,12 @@ class SchemaSpecTest extends FunSuite {
   val base               = SpecMetaSchemas.draft202012
   val lazyResolver       = Some(SpecMetaSchemas.lazyResolver)
 
-  def withSchemaSpec(name: String)(f: SchemaValue => Unit) {
+  def withSchemaSpec(name: String)(f: SchemaValue => Unit): Unit = {
     val Some(schema) = resolver(base.resolve(name))
     f(schema)
   }
 
-  def validateSpec(valueName: String, schemaName: String)(f: Checked[ValidationResult] => Unit) {
+  def validateSpec(valueName: String, schemaName: String)(f: Checked[ValidationResult] => Unit): Unit = {
     withSchemaSpec(schemaName) { schema =>
       withSchemaSpec(valueName) { value =>
         withProcessor(ValidationChecker())(schema, lazyResolver) { processor =>

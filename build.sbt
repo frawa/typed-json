@@ -9,8 +9,8 @@ val sharedSettings = Seq(
   ThisBuild / scalacOptions ++= Seq(
     "-encoding",
     "utf8",
-    // "-Xfatal-warnings",
-    // "-deprecation"
+    "-Xfatal-warnings",
+    "-deprecation",
     "-unchecked"
     // "-language:implicitConversions",
     // "-language:higherKinds",
