@@ -1,7 +1,11 @@
 import Dependencies._
 
-addCommandAlias("lint", "all scalafmtCheck scalafmtSbtCheck")
-addCommandAlias("lintFix", "all scalafmt scalafmtSbt")
+addCommandAlias("lint", "all fmtCheck fixCheck")
+addCommandAlias("lintFix", "all fmtFix fixFix")
+addCommandAlias("fmtCheck", "all scalafmtCheck scalafmtSbtCheck")
+addCommandAlias("fmtFix", "all scalafmt scalafmtSbt")
+addCommandAlias("fixCheck", "scalafixAll --check")
+addCommandAlias("fixFix", "scalafixAll")
 
 val sharedSettings = Seq(
   scalaVersion     := "2.13.6",
@@ -13,16 +17,20 @@ val sharedSettings = Seq(
 
 val sharedScalacSettings = Seq(
   scalacOptions ++= Seq(
+    "-Wunused:imports",
     "-Xfatal-warnings",
     "-deprecation",
     "-unchecked"
-  )
+  ),
+  semanticdbEnabled                      := true,
+  semanticdbVersion                      := scalafixSemanticdb.revision,
+  ThisBuild / scalafixScalaBinaryVersion := "2.13"
 )
 
 val strictScalacSettings = Seq(
   scalacOptions ++= Seq(
     "-Xlint:inaccessible",
-    // "-Xlint:unused",
+    "-Xlint:unused",
     "-Xlint:nonlocal-return",
     "-Xlint:deprecation"
     // "-language:implicitConversions",
