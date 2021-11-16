@@ -1,7 +1,7 @@
 import Dependencies._
 
-addCommandAlias("lint", "all fmtCheck fixCheck")
-addCommandAlias("lintFix", "all fmtFix fixFix")
+addCommandAlias("lint", "fmtCheck;fixCheck")
+addCommandAlias("lintFix", "fixFix;fmtFix")
 addCommandAlias("fmtCheck", "all scalafmtCheck scalafmtSbtCheck")
 addCommandAlias("fmtFix", "all scalafmt scalafmtSbt")
 addCommandAlias("fixCheck", "scalafixAll --check")
@@ -30,7 +30,6 @@ val sharedScalacSettings = Seq(
 val strictScalacSettings = Seq(
   scalacOptions ++= Seq(
     "-Xlint:inaccessible",
-    "-Xlint:unused",
     "-Xlint:nonlocal-return",
     "-Xlint:deprecation"
     // "-language:implicitConversions",
