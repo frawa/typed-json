@@ -19,16 +19,12 @@ package frawa.typedjson.schemaSpec
 import munit.FunSuite
 import frawa.typedjson.schema.SchemaValue
 import frawa.typedjson.parser.ZioParser
-import scala.io.Source
 import frawa.typedjson.schema.TestUtil
 import frawa.typedjson.schema.Processor
 import frawa.typedjson.schema.ValidationChecker
 import frawa.typedjson.schema.InnerValue
 import frawa.typedjson.parser.Value
 import frawa.typedjson.schema.ValidationResult
-import java.nio.file.Paths
-import java.nio.file.Files
-import java.nio.file.Path
 import frawa.typedjson.parser.ObjectValue
 import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.StringValue
@@ -40,8 +36,9 @@ import munit.TestOptions
 class JsonSchemaTestSuiteTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()
 
-  val jsonSchemaTestSuiteRoot: Path = Paths.get("./JSON-Schema-Test-Suite/tests")
-  val version                 = "draft2020-12"
+  import frawa.typedjson.macros.Macros._
+  private val draft2020Files: Map[String, String] =
+    folderContents("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
 
   // TODO unskip 'em
   val ignore: Set[String] = Set(
@@ -50,7 +47,7 @@ class JsonSchemaTestSuiteTest extends FunSuite {
   )
 
   // TODO unskip 'em
-  val ignoreDescription: Map[String,Set[String]] = Map(
+  val ignoreDescription: Map[String, Set[String]] = Map(
     "dynamicRef.json" -> Set(
       "strict-tree schema, guards against misspelled properties",                     // TODO resolve URI as remote URL
       "tests for implementation dynamic anchor and reference link",                   // TODO resolve URI as remote URL
@@ -66,46 +63,30 @@ class JsonSchemaTestSuiteTest extends FunSuite {
   val onlyId: Option[String]          = None
   val onlyDescription: Option[String] = None
 
-  override def munitIgnore: Boolean = !Files.exists(jsonSchemaTestSuiteRoot)
-
-  private def listTests(draft: String): Seq[Path] = {
-    import scala.jdk.CollectionConverters._
-
-    val draftPath = jsonSchemaTestSuiteRoot.resolve(draft)
-    Files
-      .list(draftPath)
-      .iterator
-      .asScala
-      .toSeq
-      .filter(_.getFileName.toString.endsWith(".json"))
-      .sortBy(_.getFileName.toString)
-      .toSeq
+  private def check(fileAndContent: (String, String)): Unit = {
+    val (file, content) = fileAndContent
+    checkSuite(file)(TestUtil.parseJsonValue(content))
   }
 
-  private def check(path: Path): Unit = {
-    val text = Source.fromFile(path.toFile).getLines().mkString("\n")
-    checkSuite(path)(TestUtil.parseJsonValue(text))
-  }
-
-  private def checkSuite(path: Path)(testSuiteValue: Value): Unit = {
+  private def checkSuite(file: String)(testSuiteValue: Value): Unit = {
     testSuiteValue match {
-      case ArrayValue(tests) => tests.foreach(checkTest(path))
+      case ArrayValue(tests) => tests.foreach(checkTest(file))
       case _                 => fail("invalid test json suite")
     }
   }
 
-  private def checkTest(path: Path)(testValue: Value): Unit = {
+  private def checkTest(file: String)(testValue: Value): Unit = {
     testValue match {
       case ObjectValue(properties) =>
         val StringValue(description) = properties("description")
-        val testName                 = s"${path.getFileName} - ${description}"
+        val testName                 = s"${file} - ${description}"
 
         val useTestName = onlyDescription
           .filter(description.startsWith(_))
           .map(_ => testName.only)
           .orElse(
             ignoreDescription
-              .get(path.getFileName.toString)
+              .get(file)
               .flatMap(_.find(description.startsWith(_)))
               .map(_ => testName.ignore)
           )
@@ -151,17 +132,20 @@ class JsonSchemaTestSuiteTest extends FunSuite {
     }
   }
 
-  protected def checkVersion(version: String): Unit = {
-    val list = listTests(version)
-      .filterNot(p => ignore.contains(p.getFileName.toString))
-      .filter(p =>
+  protected def checkFiles(files: Map[String, String]): Unit = {
+    files
+      .filterNot { case (file, _) =>
+        ignore
+          .contains(file)
+      }
+      .filter { case (file, _) =>
         only
-          .map(_ == p.getFileName.toString)
+          .map(_ == file)
           .getOrElse(true)
-      )
-    list.foreach(check)
+      }
+      .foreach(check)
   }
 
-  checkVersion(version)
+  checkFiles(draft2020Files)
 
 }

@@ -42,7 +42,8 @@ val strictScalacSettings = Seq(
 lazy val root = (project in file("."))
   .settings(sharedSettings)
   .settings(
-    name := "scala-json-schema-validator-root"
+    name    := "scala-json-schema-validator-root",
+    publish := false
   )
   .aggregate(parser.jvm, parser.js, macros.jvm, validator.jvm, validator.js)
 
@@ -55,8 +56,13 @@ lazy val parser =
     .settings(sharedScalacSettings)
     .settings(strictScalacSettings)
     .settings(
-      name := "scala-json-schema-parser",
-      libraryDependencies ++= Seq(zioJson)
+      name := "scala-json-schema-parser"
+    )
+    .jvmSettings(
+      libraryDependencies += "dev.zio" %% "zio-json" % zioJsonVersion
+    )
+    .jsSettings(
+      libraryDependencies += "dev.zio" %%% "zio-json" % zioJsonVersion
     )
 
 lazy val macros = crossProject(JSPlatform, JVMPlatform)
@@ -80,10 +86,17 @@ lazy val validator =
     .settings(sharedScalacSettings)
     .settings(strictScalacSettings)
     .settings(
-      name                        := "scala-json-schema-validator",
-      libraryDependencies += munit % Test,
+      name := "scala-json-schema-validator"
+    )
+    .settings(
       Test / testOptions += Tests.Argument("+l", "-q", "--summary=0")
     )
-    .jsSettings()
-    .jvmSettings()
+    .jvmSettings(
+      libraryDependencies += "org.scalameta" %% "munit" % munitVersion % Test
+    )
+    .jsSettings(
+      libraryDependencies += "org.scalameta" %%% "munit" % munitVersion % Test
+    )
     .dependsOn(parser, macros)
+
+lazy val validatorJS = validator.js

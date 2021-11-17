@@ -44,5 +44,11 @@ jobs:
 
       # run tests!
       - run: cat /dev/null | ./sbt test
+      - run:
+          name: gather tests
+          command: |
+            mkdir -p test-reports/validatorJS test-reports/validatorJVM
+            cp validator/.jvm/target/test-reports/* test-reports/validatorJVM
+            cp validator/.js/target/test-reports/* test-reports/validatorJS
       - store_test_results:
-          path: "validator/.jvm/target/test-reports"
+          path: "test-reports"
