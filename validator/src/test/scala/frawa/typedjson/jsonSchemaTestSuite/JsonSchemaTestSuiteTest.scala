@@ -49,11 +49,6 @@ class JsonSchemaTestSuiteTest extends FunSuite {
 
   // TODO unskip 'em
   val ignoreDescription: Map[String, Set[String]] = Map(
-    "dynamicRef.json" -> Set(
-      "strict-tree schema, guards against misspelled properties",                     // TODO resolve URI as remote URL
-      "tests for implementation dynamic anchor and reference link",                   // TODO resolve URI as remote URL
-      "Tests for implementation dynamic anchor and reference link. Reference should " // TODO resolve URI as remote URL
-    ),
     "vocabulary.json" -> Set(
       "schema that uses custom metaschema with with no validation vocabulary" // TODO support $schema
     ),
@@ -62,11 +57,9 @@ class JsonSchemaTestSuiteTest extends FunSuite {
     )
   )
 
-  val only: Option[String] = None
-  // val only: Option[String]   = Some("refRemote.json")
+  val only: Option[String]            = None
   val onlyId: Option[String]          = None
   val onlyDescription: Option[String] = None
-  // val onlyDescription: Option[String] = Some("base URI change - change folder")
 
   private def check(fileAndContent: (String, String)): Unit = {
     val (file, content) = fileAndContent
