@@ -4,6 +4,8 @@
 - support remotes in JsonSchemaTestTestSuite
 
 ## TODO
+- fix: "missing schema" from lazy resolution is dropped on the way up
+- fix: bug in refRemote.json "base URI change - change folder"
 - support optional/ in JsonSchemaTestTestSuite
 - better artifact names 
 - better package name
