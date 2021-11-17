@@ -1,13 +1,16 @@
 # Backlog
 
 ## Doing
-- latest dependencies
-
+- JsonSchemaTestTestSuite with ScalaJS
 ## TODO
-- better names, eg. Checks -> Keywords
+- support remotes in JsonSchemaTestTestSuite
+- support optional/ in JsonSchemaTestTestSuite
+- better artifact names 
 - better package name
+- better names, eg. Checks -> Keywords
 - cristalize API with an example
 - isolate dependency on zio-json
+- latest dependencies
 - publish released versions
 - handle ingoredKeywords with annotations?
 - review and refactor: implicits
@@ -17,6 +20,7 @@
 - support earlier version of spec, via JsonSchemaTestTestSuite
 - support $schema?
 - fix ignored suites in JsonSchemaTestTestSuite
+- latest dependencies
 - support $vocabulary?
 - support deprecated?
 - benching
@@ -24,6 +28,7 @@
 - CI on GH Actions?
 
 ## Done
+- latest dependencies
 - support ScalaJS
 - CI, circle CI
 - JsonSchemaTestTestSuite data as git submodule?
