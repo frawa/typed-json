@@ -609,16 +609,29 @@ object Checks {
           keywords
             .foldLeft[Either[SchemaErrors, Checks]](Right(Checks(schema))) { case (checks, (keyword, value)) =>
               val prefix = Pointer.empty / keyword
-              checks
-                .flatMap(
-                  _.withKeyword(keyword, value, scope1)(resolver1).swap
-                    .map(_.map(_.prefix(prefix)))
-                    .swap
-                )
+              accumulate(
+                checks,
+                checks
+                  .flatMap(
+                    _.withKeyword(keyword, value, scope1)(resolver1).swap
+                      .map(_.map(_.prefix(prefix)))
+                      .swap
+                  )
+              )
             }
         }
       case _ => Left(Seq(SchemaError(s"invalid schema ${schema}")))
     }
+  }
+
+  private def accumulate(
+      previous: Either[SchemaErrors, Checks],
+      current: Either[SchemaErrors, Checks]
+  ): Either[SchemaErrors, Checks] = (previous, current) match {
+    case (Right(previous), Right(current)) => Right(current)
+    case (Right(_), Left(errors))          => Left(errors)
+    case (Left(previous), Left(errors))    => Left(previous :++ errors)
+    case (Left(previous), _)               => Left(previous)
   }
 
   def localized(check: Check, scope: DynamicScope): CheckWithLocation = {
