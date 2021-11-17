@@ -1,10 +1,9 @@
 # Backlog
 
 ## Doing
-- support remotes in JsonSchemaTestTestSuite
+- fix: "missing schema" from lazy resolution is dropped on the way up
 
 ## TODO
-- fix: "missing schema" from lazy resolution is dropped on the way up
 - fix: bug in refRemote.json "base URI change - change folder"
 - support optional/ in JsonSchemaTestTestSuite
 - better artifact names 
@@ -30,6 +29,7 @@
 - CI on GH Actions?
 
 ## Done
+- support remotes in JsonSchemaTestTestSuite
 - JsonSchemaTestTestSuite with ScalaJS
 - latest dependencies
 - support ScalaJS
