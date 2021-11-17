@@ -26,6 +26,8 @@ import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.ZioParser
 
 import scala.io.Source
+import java.nio.file.Files
+import java.nio.file.Paths
 
 object Macros {
   import scala.language.experimental.macros
@@ -79,4 +81,33 @@ object Macros {
   private def contentOf(path: String): String = {
     Source.fromFile(path).getLines().mkString("\n")
   }
+
+  def folderContents(path: String, ext: String): Map[String, String] = macro folderContents_impl
+
+  def folderContents_impl(c: Context)(path: c.Expr[String], ext: c.Expr[String]): c.Expr[Map[String, String]] = {
+    import c.universe._
+    val Literal(Constant(pathValue: String)) = path.tree
+    val Literal(Constant(extValue: String))  = ext.tree
+    // WONTWORK, pulls closure into scope
+    // val pathValue = c.eval(c.Expr[String](c.untypecheck(path.tree)))
+    // val extValue  = c.eval(c.Expr[String](c.untypecheck(ext.tree)))
+    val content = folderContentsOf(pathValue, extValue)
+    c.Expr(q"""$content""")
+  }
+
+  private def folderContentsOf(path: String, ext: String): Map[String, String] = {
+    import scala.jdk.CollectionConverters._
+    Files
+      .list(Paths.get(path))
+      .iterator
+      .asScala
+      .toSeq
+      .filterNot(_.toFile().isDirectory)
+      .filter(_.getFileName.toString.endsWith(ext))
+      .sortBy(_.getFileName.toString)
+      .toSeq
+      .map(path => (path.getFileName().toString(), contentOf(path.toAbsolutePath().toString)))
+      .toMap
+  }
+
 }
