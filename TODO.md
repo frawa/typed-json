@@ -1,9 +1,9 @@
 # Backlog
 
 ## Doing
-- JsonSchemaTestTestSuite with ScalaJS
-## TODO
 - support remotes in JsonSchemaTestTestSuite
+
+## TODO
 - support optional/ in JsonSchemaTestTestSuite
 - better artifact names 
 - better package name
@@ -28,6 +28,7 @@
 - CI on GH Actions?
 
 ## Done
+- JsonSchemaTestTestSuite with ScalaJS
 - latest dependencies
 - support ScalaJS
 - CI, circle CI
