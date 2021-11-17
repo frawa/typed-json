@@ -46,7 +46,7 @@ jobs:
       - run: cat /dev/null | ./sbt test
       - run: |
           mkdir -p test-reports/validatorJS test-reports/validatorJVM
-          cp validator/.jvm/target/test-reports test-reports/validatorJVM
-          cp validator/.js/target/test-reports test-reports/validatorJS
+          cp validator/.jvm/target/test-reports/* test-reports/validatorJVM
+          cp validator/.js/target/test-reports/* test-reports/validatorJS
       - store_test_results:
           path: "test-reports"
