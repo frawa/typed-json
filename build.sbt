@@ -81,10 +81,13 @@ lazy val validator =
     .settings(sharedScalacSettings)
     .settings(strictScalacSettings)
     .settings(
-      name                        := "scala-json-schema-validator",
-      libraryDependencies += munit % Test,
+      name := "scala-json-schema-validator",
       Test / testOptions += Tests.Argument("+l", "-q", "--summary=0")
     )
-    .jsSettings()
-    .jvmSettings()
+    .jsSettings(
+      libraryDependencies += "org.scalameta" %%% "munit" % munitVersion % Test
+    )
+    .jvmSettings(libraryDependencies += "org.scalameta" %% "munit" % munitVersion % Test)
     .dependsOn(parser, macros)
+
+lazy val validatorJS = validator.js
