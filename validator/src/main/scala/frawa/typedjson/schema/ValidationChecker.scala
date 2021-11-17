@@ -382,14 +382,25 @@ object ValidationChecker {
 
   private def checkMaxLength(max: BigDecimal): ProcessFun = {
     checkStringValue(MaxLengthMismatch(max)) { v =>
-      v.codePoints().count() <= max
+      countCharPoints(v) <= max
     }
   }
 
   private def checkMinLength(min: BigDecimal): ProcessFun = {
     checkStringValue(MinLengthMismatch(min)) { v =>
-      v.codePoints().count() >= min
+      countCharPoints(v) >= min
     }
+  }
+
+  private def countCharPoints(text: String): Int = {
+    import java.lang.Character
+    var i     = 0
+    var count = 0
+    while (i < text.length()) {
+      i += Character.charCount(text.codePointAt(i))
+      count += 1
+    }
+    count
   }
 
   private def checkMaxItems(max: BigDecimal): ProcessFun = {
