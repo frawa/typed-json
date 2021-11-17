@@ -32,6 +32,8 @@ import frawa.typedjson.parser.BoolValue
 import frawa.typedjson.schema.SpecMetaSchemas
 import TestUtil._
 import munit.TestOptions
+import java.net.URI
+import frawa.typedjson.jsonSchemaTestSuite.Remotes
 
 class JsonSchemaTestSuiteTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()
@@ -42,8 +44,7 @@ class JsonSchemaTestSuiteTest extends FunSuite {
 
   // TODO unskip 'em
   val ignore: Set[String] = Set(
-    "content.json",  // TODO keywords contentMediaType, contentEncoding, contentSchema
-    "refRemote.json" // TODO resolve URI as remote URL
+    "content.json" // TODO keywords contentMediaType, contentEncoding, contentSchema
   )
 
   // TODO unskip 'em
@@ -55,13 +56,17 @@ class JsonSchemaTestSuiteTest extends FunSuite {
     ),
     "vocabulary.json" -> Set(
       "schema that uses custom metaschema with with no validation vocabulary" // TODO support $schema
+    ),
+    "refRemote.json" -> Set(
+      "base URI change - change folder" // TODO BUG!
     )
   )
 
   val only: Option[String] = None
-  // val only: Option[String]            = Some("dynamicRef.json")
+  // val only: Option[String]   = Some("refRemote.json")
   val onlyId: Option[String]          = None
   val onlyDescription: Option[String] = None
+  // val onlyDescription: Option[String] = Some("base URI change - change folder")
 
   private def check(fileAndContent: (String, String)): Unit = {
     val (file, content) = fileAndContent
@@ -103,8 +108,9 @@ class JsonSchemaTestSuiteTest extends FunSuite {
             }
           assume(includedOnlyId.getOrElse(true), s"excluded by onlyId=${onlyId}")
 
-          implicit val lazyResolver = Some(SpecMetaSchemas.lazyResolver)
-          val schemaValue           = SchemaValue(schema)
+          val lazyResolver = (uri: URI) => SpecMetaSchemas.lazyResolver(uri).orElse(Remotes.lazyResolver(uri))
+          implicit val useLazyResolver = Some(lazyResolver)
+          val schemaValue              = SchemaValue(schema)
           withStrictProcessor(ValidationChecker())(schemaValue) { processor =>
             tests.foreach(assertOne(processor))
           }
