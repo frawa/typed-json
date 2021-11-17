@@ -35,6 +35,7 @@ object UriUtil {
   case class WithLocation[+T](uri: URI, value: T)
 
   private def escape(value: String): String = {
+    // this is because the ScalaJS implementation of URI might fail
     value.replace("\\", "_")
   }
 }
