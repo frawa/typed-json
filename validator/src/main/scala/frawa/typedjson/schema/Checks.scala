@@ -105,7 +105,7 @@ case class UnevaluatedPropertiesCheck(pushedChecks: Checks, unevaluated: Checks)
 
 case class Checked[R](
     valid: Boolean,
-    results: Seq[R],
+    results: Seq[R] = Seq.empty,
     annotations: Seq[Checked.Annotation] = Seq.empty,
     validation: SchemaQuality = SchemaQuality.empty,
     count: Int = 1
@@ -133,9 +133,9 @@ object Checked {
   type Annotation = WithPointer[Observation2]
 
   def apply[R](valid: Boolean, result: R): Checked[R] = Checked[R](valid, Seq(result))
-  def valid[R]: Checked[R]                            = Checked[R](true, Seq())
+  def valid[R]: Checked[R]                            = Checked[R](true)
   def valid[R](result: R): Checked[R]                 = Checked[R](true, Seq(result))
-  def invalid[R]: Checked[R]                          = Checked[R](false, Seq())
+  def invalid[R]: Checked[R]                          = Checked[R](false)
   def invalid[R](result: R): Checked[R]               = Checked[R](false, Seq(result))
 
   def merge[R](checked: Seq[Checked[R]]): Checked[R] = {

@@ -25,8 +25,14 @@ class ValidationCalculator extends Calculator[ValidationResult] {
     }
   }
 
-  private def invalid(checked: Seq[Checked[ValidationResult]]): Checked[ValidationResult] =
-    Checked.invalid(ValidationResult.invalid(checked.flatMap(_.results.flatMap(_.errors))))
+  private def invalid(checked: Seq[Checked[ValidationResult]]): Checked[ValidationResult] = {
+    val errors = checked.flatMap(_.results.flatMap(_.errors))
+    if (errors.isEmpty) {
+      Checked.invalid
+    } else {
+      Checked.invalid(ValidationResult.invalid(errors))
+    }
+  }
 
   override def invalid(observation: Observation, pointer: Pointer): Checked[ValidationResult] = Checked.invalid(
     ValidationResult.invalid(observation, pointer)

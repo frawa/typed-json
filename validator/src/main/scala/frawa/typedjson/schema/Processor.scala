@@ -87,7 +87,7 @@ object Processor {
 
   // TODO return a ProcessFun[R]?
   private def mergeAll[R](merge: MergeFun[R], cs: Seq[Checked[R]], value: InnerValue): Checked[R] = {
-    merge(cs)(value).add(cs.filter(_.valid))
+    merge(cs)(value).add(cs)
   }
 
   private def applyToObject[R](

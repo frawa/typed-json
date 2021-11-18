@@ -110,20 +110,20 @@ object ValidationChecker {
 
   private def nested(check: NestingCheck)(checked: Seq[Checked[ValidationResult]]): ProcessFun = { value =>
     check match {
-      case AllOfCheck(_)                   => calc.allOf(checked, value.pointer)
-      case AnyOfCheck(_)                   => calc.anyOf(checked, value.pointer)
-      case OneOfCheck(_)                   => calc.oneOf(checked, value.pointer)
-      case NotCheck(_)                     => calc.not(checked, value.pointer)
-      case UnionTypeCheck(checks)          => calc.oneOf(checked, value.pointer)
-      case ObjectPropertiesCheck(_, _, _)  => calc.allOf(checked, value.pointer)
-      case ArrayItemsCheck(_, prefixItems) => calc.allOf(checked, value.pointer)
-      case IfThenElseCheck(_, _, _)        => calc.ifThenElse(checked, value.pointer)
-      case PropertyNamesCheck(_)           => calc.allOf(checked, value.pointer)
-      case c: LazyResolveCheck             => calc.allOf(checked, value.pointer)
-      case DependentSchemasCheck(_)        => calc.allOf(checked, value.pointer)
-      case ContainsCheck(_, min, max)      => calc.contains(checked, value.pointer, min, max)
-      case c: UnevaluatedItemsCheck        => calc.allOf(checked, value.pointer)
-      case c: UnevaluatedPropertiesCheck   => calc.allOf(checked, value.pointer)
+      case AllOfCheck(_)                  => calc.allOf(checked, value.pointer)
+      case AnyOfCheck(_)                  => calc.anyOf(checked, value.pointer)
+      case OneOfCheck(_)                  => calc.oneOf(checked, value.pointer)
+      case NotCheck(_)                    => calc.not(checked, value.pointer)
+      case UnionTypeCheck(_)              => calc.oneOf(checked, value.pointer)
+      case ObjectPropertiesCheck(_, _, _) => calc.allOf(checked, value.pointer)
+      case ArrayItemsCheck(_, _)          => calc.allOf(checked, value.pointer)
+      case IfThenElseCheck(_, _, _)       => calc.ifThenElse(checked, value.pointer)
+      case PropertyNamesCheck(_)          => calc.allOf(checked, value.pointer)
+      case c: LazyResolveCheck            => calc.allOf(checked, value.pointer)
+      case DependentSchemasCheck(_)       => calc.allOf(checked, value.pointer)
+      case ContainsCheck(_, min, max)     => calc.contains(checked, value.pointer, min, max)
+      case c: UnevaluatedItemsCheck       => calc.allOf(checked, value.pointer)
+      case c: UnevaluatedPropertiesCheck  => calc.allOf(checked, value.pointer)
     }
   }
 
