@@ -27,7 +27,6 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite {
   override val ignore: Set[String] = Set(
     "date-time.json",
     "date.json",
-    "idn-email.json",
     "idn-hostname.json",
     "ipv4.json",
     "ipv6.json",
