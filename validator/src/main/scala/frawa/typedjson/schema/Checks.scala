@@ -142,7 +142,7 @@ object Checked {
     val valid           = checked.forall(_.valid)
     val results: Seq[R] = checked.flatMap(_.results)
     val validation      = checked.map(_.validation).reduceOption(_.combine(_)).getOrElse(SchemaQuality.empty)
-    val annotations     = checked.flatMap(_.annotations)
+    val annotations     = checked.filter(_.valid).flatMap(_.annotations)
     Checked(valid, results, annotations, validation, 1 + count(checked))
   }
   def count[R](checked: Seq[Checked[R]]): Int = checked.map(_.count).sum
