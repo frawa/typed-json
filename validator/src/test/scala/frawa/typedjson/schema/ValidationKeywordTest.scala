@@ -629,4 +629,29 @@ class ValidationKeywordTest extends FunSuite {
       }
     }
   }
+
+  test("missing deep lazy $ref raises error") {
+    withSchema(
+      """|{
+         |"$id": "http://myhost:1313/",
+         |"items": {"$ref": "myItems"},
+         |"$defs": {
+         |  "foo": {
+         |    "$id": "myItems",
+         |    "items": {"$ref": "missing.json"}
+         |  }
+         |}
+         |}
+         |""".stripMargin
+    ) { schema =>
+      validateJson(schema)("""[ 13 ]""") { checked =>
+        assertEquals(checked.valid, false)
+        assertEquals(
+          checked.validation.errors,
+          Seq(SchemaError("missing reference \"missing.json\"", Pointer.parse("items/$ref")))
+        )
+        assertEquals(checked.annotations, Seq())
+      }
+    }
+  }
 }
