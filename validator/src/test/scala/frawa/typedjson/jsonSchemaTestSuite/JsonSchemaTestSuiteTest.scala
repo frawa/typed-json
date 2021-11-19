@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.schemaSpec
+package frawa.typedjson.jsonSchemaTestSuite
 
 import munit.FunSuite
 import frawa.typedjson.schema.SchemaValue
@@ -51,9 +51,6 @@ class JsonSchemaTestSuiteTest extends FunSuite {
   val ignoreDescription: Map[String, Set[String]] = Map(
     "vocabulary.json" -> Set(
       "schema that uses custom metaschema with with no validation vocabulary" // TODO support $schema
-    ),
-    "refRemote.json" -> Set(
-      "base URI change - change folder" // TODO BUG!
     )
   )
 
@@ -138,9 +135,7 @@ class JsonSchemaTestSuiteTest extends FunSuite {
           .contains(file)
       }
       .filter { case (file, _) =>
-        only
-          .map(_ == file)
-          .getOrElse(true)
+        only.forall(_ == file)
       }
       .foreach(check)
   }

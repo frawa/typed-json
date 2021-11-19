@@ -501,9 +501,7 @@ case class Checks(
 
   private def lazyResolveCheck(resolution: SchemaResolver.Resolution, scope: DynamicScope): LazyResolveCheck = {
     val resolveLater = { () =>
-      val schema    = resolution._1
-      val resolver1 = resolution._2
-      Checks.parseKeywords(schema, scope)(resolver1)
+      Checks.parseKeywords(resolution, scope)
     }
     val resolved = resolution._2.base
     LazyResolveCheck(resolved, resolveLater)
@@ -592,14 +590,22 @@ object Checks {
   def parseKeywords(schema: SchemaValue, scope: DynamicScope)(implicit
       resolver: SchemaResolver
   ): Either[SchemaErrors, Checks] = {
-    implicit val scope1 = SchemaValue
-      .id(schema)
-      .map(id => scope.push(resolver.absolute(id)))
-      .getOrElse(scope)
     val resolver1 = SchemaValue
       .id(schema)
       .map(id => resolver.withBase(resolver.absolute(id)))
       .getOrElse(resolver)
+    val resolution: SchemaResolver.Resolution = (schema, resolver1)
+    parseKeywords(resolution, scope)
+  }
+
+  def parseKeywords(resolution: SchemaResolver.Resolution, scope: DynamicScope): Either[SchemaErrors, Checks] = {
+    val schema    = resolution._1
+    val resolver1 = resolution._2
+//    implicit val scope1 = scope.push(resolver1.base)
+    implicit val scope1 = SchemaValue
+      .id(schema)
+      .map(id => scope.push(resolver1.absolute(id)))
+      .getOrElse(scope)
     schema.value match {
       case BoolValue(v) => Right(Checks(schema).add(TrivialCheck(v)))
       case ObjectValue(keywords) =>

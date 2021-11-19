@@ -31,13 +31,13 @@ object LoadedSchemasResolver {
 
   def apply(schema: SchemaValue, lazyResolver: Option[LazyResolver]): LoadedSchemasResolver = {
     val resolver = apply(schema)
-    lazyResolver.map(resolver.withLazyResolver(_)).getOrElse(resolver)
+    lazyResolver.map(resolver.withLazyResolver).getOrElse(resolver)
   }
 
   def apply(schema: SchemaValue): LoadedSchemasResolver = {
     val firstId = SchemaValue
       .id(schema)
-      .map(uri(_))
+      .map(uri)
       .getOrElse(uri(""))
     val first = empty.add(firstId, schema).withBase(firstId)
     loadSchemas(schema.value, first)
@@ -55,7 +55,7 @@ object LoadedSchemasResolver {
         val loaded1 = properties
           .get("$id")
           .flatMap(Value.asString)
-          .map(loaded.absolute(_))
+          .map(loaded.absolute)
           .map(uri => loaded.add(uri, SchemaValue(value)).withBase(UriUtil.withoutFragement(uri)))
           .getOrElse(loaded)
         properties
@@ -128,12 +128,12 @@ case class LoadedSchemasResolver(
 
   override protected def resolve(uri: URI): Option[Resolution] = schemas
     .get(uri)
-    .map((_, withBase(uri)))
+    .map((_, this.withBase(uri)))
     .orElse(
       lazyResolver
-        .flatMap(_.apply(uri))
+        .flatMap(_(uri))
         .map { schema =>
-          val loaded1 = add(uri, schema).withBase(uri)
+          val loaded1 = this.add(uri, schema).withBase(uri)
           val loaded2 = LoadedSchemasResolver.loadSchemas(schema.value, loaded1)
           (schema, loaded2)
         }
