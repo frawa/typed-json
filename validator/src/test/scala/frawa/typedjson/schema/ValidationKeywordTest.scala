@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.schemaSpec
+package frawa.typedjson.schema
 
 import frawa.typedjson.parser.ZioParser
 import munit.FunSuite
@@ -27,7 +27,9 @@ import frawa.typedjson.schema._
 class ValidationKeywordTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()
 
-  def validateJson(schema: SchemaValue)(jsonText: String)(f: Checked[ValidationResult] => Unit): Either[Nothing,Unit] = {
+  def validateJson(
+      schema: SchemaValue
+  )(jsonText: String)(f: Checked[ValidationResult] => Unit): Either[Nothing, Unit] = {
     assertChecked(ValidationChecker())(schema, jsonText)(f)
   }
 
