@@ -28,7 +28,9 @@ class JsonSchemaTestSuite extends FunSuite {
 
   protected val ignore: Set[String] = Set()
 
-  protected val ignoreDescription: Map[String, Set[String]] = Map()
+  protected val ignoreDescriptionByFile: Map[String, Set[String]] = Map()
+  protected type TestId = (String, String) // (file,description)
+  protected val ignoreFailMessageByDescription: Map[TestId, Set[String]] = Map()
 
   protected val only: Option[String]            = None
   protected val onlyId: Option[String]          = None
@@ -56,7 +58,7 @@ class JsonSchemaTestSuite extends FunSuite {
           .filter(description.startsWith(_))
           .map(_ => testName.only)
           .orElse(
-            ignoreDescription
+            ignoreDescriptionByFile
               .get(file)
               .flatMap(_.find(description.startsWith(_)))
               .map(_ => testName.ignore)
@@ -77,29 +79,38 @@ class JsonSchemaTestSuite extends FunSuite {
           val lazyResolver = (uri: URI) => SpecMetaSchemas.lazyResolver(uri).orElse(Remotes.lazyResolver(uri))
           implicit val useLazyResolver = Some(lazyResolver)
           val schemaValue              = SchemaValue(schema)
+          val testId                   = (file, description)
           withStrictProcessor(ValidationChecker())(schemaValue) { processor =>
-            tests.foreach(assertOne(processor))
+            tests.foreach(assertOne(processor, testId))
           }
         }
       case _ => fail("invalid test json")
     }
   }
 
-  private def assertOne(processor: Processor[ValidationResult]): Value => Unit = { value =>
+  private def assertOne(processor: Processor[ValidationResult], testId: TestId): Value => Unit = { value =>
     val ObjectValue(properties)  = value
     val data                     = properties("data")
     val StringValue(failMessage) = properties("description")
     val BoolValue(expected)      = properties("valid")
     val checked                  = processor(InnerValue(data))
 
-    if (checked.valid != expected) {
-      implicit val loc = munit.Location.empty
-      if (!checked.valid) {
-        assertEquals(checked.validation.errors, Seq(), failMessage)
-        assertEquals(checked.validation.ignoredKeywords, Set.empty[String], failMessage)
-        assertEquals(checked.results, Seq(), failMessage)
-      } else {
-        fail("unexpected valid", clues(clue(failMessage), clue(expected), clue(checked)))
+    val ignoreMe = ignoreFailMessageByDescription
+      .get(testId)
+      .forall(_.exists(failMessage.startsWith))
+    if (ignoreMe) {
+      // TODO log on test runner?
+      println("IGNORING", testId, failMessage)
+    } else {
+      if (checked.valid != expected) {
+        implicit val loc = munit.Location.empty
+        if (!checked.valid) {
+          assertEquals(checked.validation.errors, Seq(), failMessage)
+          assertEquals(checked.validation.ignoredKeywords, Set.empty[String], failMessage)
+          assertEquals(checked.results, Seq(), failMessage)
+        } else {
+          fail("unexpected valid", clues(clue(failMessage), clue(expected), clue(checked)))
+        }
       }
     }
   }
