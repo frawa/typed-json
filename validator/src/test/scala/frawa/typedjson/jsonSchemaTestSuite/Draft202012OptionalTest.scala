@@ -16,24 +16,21 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-class Draft202012Test extends JsonSchemaTestSuite {
+class Draft202012OptionalTest extends JsonSchemaTestSuite {
 
   import frawa.typedjson.macros.Macros._
-  private val draft202012Files: Map[String, String] =
-    folderContents("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
+
+  private val draft202012OptionalFiles: Map[String, String] =
+    folderContents("./JSON-Schema-Test-Suite/tests/draft2020-12/optional", ".json")
 
   // TODO un-ignore 'em
   override val ignore: Set[String] = Set(
-    "content.json" // TODO keywords contentMediaType, contentEncoding, contentSchema
+    "bignum.json", // TODO bug in Zio parser, refusing BigDecimal("12345678910111213141516171819202122232425262728293031")
+    "ecmascript-regex.json",
+    "float-overflow.json",
+    "format-assertion.json",
+    "refOfUnknownKeyword.json"
   )
 
-  // TODO un-ignore 'em
-  override val ignoreDescription: Map[String, Set[String]] = Map(
-    "vocabulary.json" -> Set(
-      "schema that uses custom metaschema with with no validation vocabulary" // TODO support $schema
-    )
-  )
-
-  checkFiles(draft202012Files)
-
+  checkFiles(draft202012OptionalFiles)
 }

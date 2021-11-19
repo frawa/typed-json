@@ -16,24 +16,29 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-class Draft202012Test extends JsonSchemaTestSuite {
+class Draft202012OptionalFormatTest extends JsonSchemaTestSuite {
 
   import frawa.typedjson.macros.Macros._
-  private val draft202012Files: Map[String, String] =
-    folderContents("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
+
+  private val draft202012OptionalFormatFiles: Map[String, String] =
+    folderContents("./JSON-Schema-Test-Suite/tests/draft2020-12/optional/format", ".json")
 
   // TODO un-ignore 'em
   override val ignore: Set[String] = Set(
-    "content.json" // TODO keywords contentMediaType, contentEncoding, contentSchema
+    "date-time.json",
+    "date.json",
+    "hostname.json",
+    "idn-email.json",
+    "idn-hostname.json",
+    "ipv4.json",
+    "ipv6.json",
+    "iri.json",
+    "json-pointer.json",
+    "relative-json-pointer.json",
+    "time.json",
+    "uri-template.json",
+    "uuid.json"
   )
 
-  // TODO un-ignore 'em
-  override val ignoreDescription: Map[String, Set[String]] = Map(
-    "vocabulary.json" -> Set(
-      "schema that uses custom metaschema with with no validation vocabulary" // TODO support $schema
-    )
-  )
-
-  checkFiles(draft202012Files)
-
+  checkFiles(draft202012OptionalFormatFiles)
 }
