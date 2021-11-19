@@ -1,10 +1,9 @@
 # Backlog
 
 ## Doing
-- fix: "missing schema" from lazy resolution is dropped on the way up
+- review and refactor: implicits
 
 ## TODO
-- fix: bug in refRemote.json "base URI change - change folder"
 - support optional/ in JsonSchemaTestTestSuite
 - better artifact names 
 - better package name
@@ -14,7 +13,6 @@
 - latest dependencies
 - publish released versions
 - handle ingoredKeywords with annotations?
-- review and refactor: implicits
 - streamline SchemaQuality
 - do not prefix results, but push value pointer into checker
 - fully support annotations
@@ -29,6 +27,8 @@
 - CI on GH Actions?
 
 ## Done
+- fix: bug in refRemote.json "base URI change - change folder"
+- fix: "missing schema" from lazy resolution is dropped on the way up
 - support remotes in JsonSchemaTestTestSuite
 - JsonSchemaTestTestSuite with ScalaJS
 - latest dependencies
