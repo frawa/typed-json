@@ -16,47 +16,23 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import munit.FunSuite
-import frawa.typedjson.schema.SchemaValue
-import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.schema.TestUtil
-import frawa.typedjson.schema.Processor
-import frawa.typedjson.schema.ValidationChecker
-import frawa.typedjson.schema.InnerValue
-import frawa.typedjson.parser.Value
-import frawa.typedjson.schema.ValidationResult
-import frawa.typedjson.parser.ObjectValue
-import frawa.typedjson.parser.ArrayValue
-import frawa.typedjson.parser.StringValue
-import frawa.typedjson.parser.BoolValue
-import frawa.typedjson.schema.SpecMetaSchemas
-import TestUtil._
-import munit.TestOptions
-import java.net.URI
-import frawa.typedjson.jsonSchemaTestSuite.Remotes
+import frawa.typedjson.parser._
+import frawa.typedjson.schema.TestUtil._
+import frawa.typedjson.schema._
+import munit.{FunSuite, TestOptions}
 
-class JsonSchemaTestSuiteTest extends FunSuite {
+import java.net.URI
+
+class JsonSchemaTestSuite extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()
 
-  import frawa.typedjson.macros.Macros._
-  private val draft2020Files: Map[String, String] =
-    folderContents("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
+  protected val ignore: Set[String] = Set()
 
-  // TODO unskip 'em
-  val ignore: Set[String] = Set(
-    "content.json" // TODO keywords contentMediaType, contentEncoding, contentSchema
-  )
+  protected val ignoreDescription: Map[String, Set[String]] = Map()
 
-  // TODO unskip 'em
-  val ignoreDescription: Map[String, Set[String]] = Map(
-    "vocabulary.json" -> Set(
-      "schema that uses custom metaschema with with no validation vocabulary" // TODO support $schema
-    )
-  )
-
-  val only: Option[String]            = None
-  val onlyId: Option[String]          = None
-  val onlyDescription: Option[String] = None
+  protected val only: Option[String]            = None
+  protected val onlyId: Option[String]          = None
+  protected val onlyDescription: Option[String] = None
 
   private def check(fileAndContent: (String, String)): Unit = {
     val (file, content) = fileAndContent
@@ -139,7 +115,5 @@ class JsonSchemaTestSuiteTest extends FunSuite {
       }
       .foreach(check)
   }
-
-  checkFiles(draft2020Files)
 
 }
