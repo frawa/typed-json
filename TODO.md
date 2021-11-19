@@ -1,13 +1,13 @@
 # Backlog
 
 ## Doing
-- review and refactor: implicits
+- support optional/ in JsonSchemaTestTestSuite
 
 ## TODO
-- support optional/ in JsonSchemaTestTestSuite
-- better artifact names 
-- better package name
 - better names, eg. Checks -> Keywords
+- better artifact names
+- better package name
+- review and refactor: implicits
 - cristalize API with an example
 - isolate dependency on zio-json
 - latest dependencies
