@@ -34,7 +34,7 @@ object Remotes {
   }
 
   private def resolveRemotes(relative: URI): Option[SchemaValue] = {
-    val name     = relative.getSchemeSpecificPart()
+    val name     = relative.getSchemeSpecificPart
     val segments = name.split('/').toArray
     if (segments.length == 2) {
       segments(0) match {
