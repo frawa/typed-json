@@ -27,7 +27,6 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite {
   override val ignore: Set[String] = Set(
     "date-time.json",
     "date.json",
-    "hostname.json",
     "idn-email.json",
     "idn-hostname.json",
     "ipv4.json",
@@ -38,6 +37,14 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite {
     "time.json",
     "uri-template.json",
     "uuid.json"
+  )
+
+  override protected val ignoreFailMessageByDescription: Map[TestId, Set[String]] = Map(
+    ("hostname.json", "validation of host names") -> Set(
+      "a valid punycoded IDN hostname",
+      "a host name with a component too long",
+      "exceeds maximum label length"
+    )
   )
 
   checkFiles(draft202012OptionalFormatFiles)
