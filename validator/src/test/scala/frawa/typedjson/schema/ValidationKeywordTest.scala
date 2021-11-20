@@ -648,7 +648,7 @@ class ValidationKeywordTest extends FunSuite {
         assertEquals(checked.valid, false)
         assertEquals(
           checked.validation.errors,
-          Seq(SchemaError("missing reference \"missing.json\"", Pointer.parse("items/$ref")))
+          Seq(SchemaError("missing reference \"missing.json\"", Pointer.parse("/items/$ref")))
         )
         assertEquals(checked.annotations, Seq())
       }

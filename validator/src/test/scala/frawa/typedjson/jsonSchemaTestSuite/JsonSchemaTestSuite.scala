@@ -97,7 +97,7 @@ class JsonSchemaTestSuite extends FunSuite {
 
     val ignoreMe = ignoreFailMessageByDescription
       .get(testId)
-      .forall(_.exists(failMessage.startsWith))
+      .exists(ignored => ignored.exists(failMessage.startsWith))
     if (ignoreMe) {
       // TODO log on test runner?
       println("IGNORING", testId, failMessage)

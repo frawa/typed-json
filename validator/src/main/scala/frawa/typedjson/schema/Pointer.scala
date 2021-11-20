@@ -28,15 +28,15 @@ object Pointer {
 
   def parse(spec: String): Pointer = Pointer(
     spec
-      .split("/")
+      .split("/", -1)
       .toIndexedSeq
       .map(field =>
         field
           .replace("~1", "/")
           .replace("~0", "~")
       )
-      .filter(_.length() > 0)
-      .map(t => t.toIntOption.map(ArrayIndexToken(_)).getOrElse(FieldToken(t)))
+      .drop(1)
+      .map(t => t.toIntOption.map(ArrayIndexToken).getOrElse(FieldToken(t)))
   )
 
 }

@@ -28,14 +28,8 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite {
     "date-time.json",
     "date.json",
     "idn-hostname.json",
-    "ipv4.json",
-    "ipv6.json",
-    "iri.json",
-    "json-pointer.json",
-    "relative-json-pointer.json",
     "time.json",
-    "uri-template.json",
-    "uuid.json"
+    "uri-template.json"
   )
 
   override protected val ignoreFailMessageByDescription: Map[TestId, Set[String]] = Map(
@@ -43,6 +37,31 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite {
       "a valid punycoded IDN hostname",
       "a host name with a component too long",
       "exceeds maximum label length"
+    ),
+    ("idn-email.json", "validation of an internationalized e-mail addresses") -> Set(
+      "a valid idn e-mail (example@example.test in Hangul)"
+    ),
+    ("ipv6.json", "validation of IPv6 addresses") -> Set(
+      "mixed format with the ipv4 section as decimal octets",
+      "zone id is not a part of ipv6 address",
+      "a long valid ipv6"
+    ),
+    ("iri.json", "validation of IRIs") -> Set(
+      "an invalid IRI based on IPv6"
+    ),
+    ("iri-reference.json", "validation of IRI References") -> Set(
+      "a valid IRI Reference" // TODO fails on JS, passes on JVM
+    ),
+    ("relative-json-pointer.json", "validation of Relative JSON Pointers (RJP)") -> Set(
+      "negative prefix",
+      "## is not a valid json-pointer",
+      "zero cannot be followed by other digits, plus octothorpe"
+    ),
+    ("uri.json", "validation of URIs") -> Set(
+      "an invalid URI with comma in scheme" // TODO fails on JS, passes on JVM
+    ),
+    ("uuid.json", "uuid format") -> Set(
+      "wrong length"
     )
   )
 
