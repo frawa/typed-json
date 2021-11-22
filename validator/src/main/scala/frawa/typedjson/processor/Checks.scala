@@ -22,7 +22,7 @@ import frawa.typedjson.parser.NumberValue
 import frawa.typedjson.parser.ObjectValue
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.Value
-import frawa.typedjson.processor.SchemaQuality.{
+import frawa.typedjson.processor.SchemaProblems.{
   InvalidSchemaValue,
   MissingDynamicReference,
   MissingReference,
@@ -68,22 +68,22 @@ case class IfThenElseCheck(
     thenChecks: Option[Checks] = None,
     elseChecks: Option[Checks] = None
 ) extends NestingCheck
-case class PatternCheck(pattern: String)                                                            extends SimpleCheck
-case class FormatCheck(format: String)                                                              extends SimpleCheck
-case class MinimumCheck(min: BigDecimal, exclude: Boolean = false)                                  extends SimpleCheck
-case class UniqueItemsCheck(unique: Boolean)                                                        extends SimpleCheck
-case class PropertyNamesCheck(checks: Checks)                                                       extends NestingCheck
-case class LazyResolveCheck(val resolved: URI, val resolve: () => Either[Seq[SchemaError], Checks]) extends NestingCheck
-case class MultipleOfCheck(n: BigDecimal)                                                           extends SimpleCheck
-case class MaximumCheck(max: BigDecimal, exclude: Boolean = false)                                  extends SimpleCheck
-case class MaxLengthCheck(max: BigDecimal)                                                          extends SimpleCheck
-case class MinLengthCheck(min: BigDecimal)                                                          extends SimpleCheck
-case class MaxItemsCheck(max: BigDecimal)                                                           extends SimpleCheck
-case class MinItemsCheck(min: BigDecimal)                                                           extends SimpleCheck
-case class MaxPropertiesCheck(max: BigDecimal)                                                      extends SimpleCheck
-case class MinPropertiesCheck(min: BigDecimal)                                                      extends SimpleCheck
-case class DependentRequiredCheck(required: Map[String, Seq[String]])                               extends SimpleCheck
-case class DependentSchemasCheck(checks: Map[String, Checks])                                       extends NestingCheck
+case class PatternCheck(pattern: String)                                                    extends SimpleCheck
+case class FormatCheck(format: String)                                                      extends SimpleCheck
+case class MinimumCheck(min: BigDecimal, exclude: Boolean = false)                          extends SimpleCheck
+case class UniqueItemsCheck(unique: Boolean)                                                extends SimpleCheck
+case class PropertyNamesCheck(checks: Checks)                                               extends NestingCheck
+case class LazyResolveCheck(resolved: URI, resolve: () => Either[Seq[SchemaError], Checks]) extends NestingCheck
+case class MultipleOfCheck(n: BigDecimal)                                                   extends SimpleCheck
+case class MaximumCheck(max: BigDecimal, exclude: Boolean = false)                          extends SimpleCheck
+case class MaxLengthCheck(max: BigDecimal)                                                  extends SimpleCheck
+case class MinLengthCheck(min: BigDecimal)                                                  extends SimpleCheck
+case class MaxItemsCheck(max: BigDecimal)                                                   extends SimpleCheck
+case class MinItemsCheck(min: BigDecimal)                                                   extends SimpleCheck
+case class MaxPropertiesCheck(max: BigDecimal)                                              extends SimpleCheck
+case class MinPropertiesCheck(min: BigDecimal)                                              extends SimpleCheck
+case class DependentRequiredCheck(required: Map[String, Seq[String]])                       extends SimpleCheck
+case class DependentSchemasCheck(checks: Map[String, Checks])                               extends NestingCheck
 case class ContainsCheck(schema: Option[Checks] = None, min: Option[Int] = None, max: Option[Int] = None)
     extends NestingCheck
 case class UnevaluatedItemsCheck(pushedChecks: Checks, unevaluated: Checks)      extends NestingCheck
@@ -108,7 +108,7 @@ case class Checks(
   private def addAll(
       values: Seq[SchemaValue]
   )(f: Seq[Checks] => Check)(implicit resolver: SchemaResolver, scope: DynamicScope): Either[SchemaErrors, Checks] = {
-    val checks0 = values.zipWithIndex.map { case (v, i) => Checks.parseKeywords(v, scope.push(i)) }.toSeq
+    val checks0 = values.zipWithIndex.map { case (v, i) => Checks.parseKeywords(v, scope.push(i)) }
     for {
       checks <- sequenceAllLefts(checks0)
     } yield {
@@ -121,24 +121,25 @@ case class Checks(
   private def withKeyword(keyword: String, value: Value, scope: DynamicScope)(implicit
       resolver: SchemaResolver
   ): Either[SchemaErrors, Checks] = {
-    implicit val scope1 = scope.push(keyword)
+    implicit val scope1: DynamicScope = scope.push(keyword)
     (keyword, value) match {
       // TODO validation vocabulary
       case ("type", StringValue(typeName)) =>
         Right(
           getTypeCheck(typeName)
             .map(add(_))
-            .getOrElse(withIgnored(s"${keyword}-${typeName}"))
+            .getOrElse(withIgnored(s"$keyword-$typeName"))
         )
 
       // TODO validation vocabulary
-      case ("type", ArrayValue(values)) => {
+      case ("type", ArrayValue(values)) =>
         def typeNames = Value.asStrings(values)
+
         def checks = typeNames
-          .flatMap(getTypeCheck(_))
+          .flatMap(getTypeCheck)
           .map(localized(_, scope1))
+
         Right(add(UnionTypeCheck(checks)))
-      }
 
       case ("not", value) =>
         for {
@@ -162,13 +163,12 @@ case class Checks(
           updateCheck(ArrayItemsCheck())(check => check.copy(prefixItems = checks))
         }
 
-      case ("unevaluatedItems", v) => {
+      case ("unevaluatedItems", v) =>
         for {
           checks <- Checks.parseKeywords(SchemaValue(v), scope1)
         } yield {
           Checks(schema).add(UnevaluatedItemsCheck(this, checks))(scope)
         }
-      }
 
       case ("properties", ObjectValue(properties)) =>
         mapChecksFor(properties, scope1) { checks =>
@@ -187,30 +187,26 @@ case class Checks(
           updateCheck(ObjectPropertiesCheck())(check => check.copy(additionalProperties = Some(checks)))
         }
 
-      case ("unevaluatedProperties", v) => {
+      case ("unevaluatedProperties", v) =>
         for {
           checks <- Checks.parseKeywords(SchemaValue(v), scope1)
         } yield {
           Checks(schema).add(UnevaluatedPropertiesCheck(this, checks))(scope)
         }
-      }
 
-      case ("required", ArrayValue(values)) => {
+      case ("required", ArrayValue(values)) =>
         def names = Value.asStrings(values)
+
         Right(add(ObjectRequiredCheck(names)))
-      }
 
-      case ("allOf", ArrayValue(values)) => {
+      case ("allOf", ArrayValue(values)) =>
         addAll(values.map(SchemaValue(_)))(AllOfCheck)
-      }
 
-      case ("anyOf", ArrayValue(values)) => {
+      case ("anyOf", ArrayValue(values)) =>
         addAll(values.map(SchemaValue(_)))(AnyOfCheck)
-      }
 
-      case ("oneOf", ArrayValue(values)) => {
+      case ("oneOf", ArrayValue(values)) =>
         addAll(values.map(SchemaValue(_)))(OneOfCheck)
-      }
 
       case ("if", value) =>
         updateChecks(SchemaValue(value))(IfThenElseCheck()) { (checks, check) =>
@@ -228,36 +224,30 @@ case class Checks(
         }
 
       // TODO validation vocabulary
-      case ("enum", ArrayValue(values)) => {
+      case ("enum", ArrayValue(values)) =>
         Right(add(EnumCheck(values)))
-      }
 
       // TODO validation vocabulary
-      case ("const", value) => {
+      case ("const", value) =>
         Right(add(EnumCheck(Seq(value))))
-      }
 
-      case ("$id", StringValue(_)) => {
+      case ("$id", StringValue(_)) =>
         // handled during load
         Right(this)
-      }
 
-      case ("$anchor", StringValue(_)) => {
+      case ("$anchor", StringValue(_)) =>
         // handled during load
         Right(this)
-      }
 
-      case ("$dynamicAnchor", StringValue(_)) => {
+      case ("$dynamicAnchor", StringValue(_)) =>
         // handled during load
         Right(this)
-      }
 
-      case ("$defs", ObjectValue(_)) => {
+      case ("$defs", ObjectValue(_)) =>
         // handled during load
         Right(this)
-      }
 
-      case ("$ref", StringValue(ref)) => {
+      case ("$ref", StringValue(ref)) =>
         for {
           resolution <- resolver
             .resolveRef(ref)
@@ -268,9 +258,8 @@ case class Checks(
         } yield {
           add(check)
         }
-      }
 
-      case ("$dynamicRef", StringValue(ref)) => {
+      case ("$dynamicRef", StringValue(ref)) =>
         for {
           resolution <- resolver
             .resolveDynamicRef(ref, scope)
@@ -280,57 +269,46 @@ case class Checks(
         } yield {
           add(check)
         }
-      }
 
-      case ("$comment", StringValue(_)) => {
+      case ("$comment", StringValue(_)) =>
         // only for schema authors and readers
         Right(this)
-      }
 
-      case ("title", StringValue(_)) => {
+      case ("title", StringValue(_)) =>
         // ignore annotations
         Right(this)
-      }
 
-      case ("default", _) => {
+      case ("default", _) =>
         // ignore annotations
         Right(this)
-      }
 
-      case ("description", StringValue(_)) => {
+      case ("description", StringValue(_)) =>
         // ignore annotations
         Right(this)
-      }
 
       // TODO validation vocabulary
-      case ("pattern", StringValue(pattern)) => {
+      case ("pattern", StringValue(pattern)) =>
         Right(add(PatternCheck(pattern)))
-      }
 
       // TODO validation vocabulary
-      case ("format", StringValue(format)) => {
+      case ("format", StringValue(format)) =>
         Right(add(FormatCheck(format)))
-      }
 
       // TODO validation vocabulary
-      case ("minimum", NumberValue(v)) => {
+      case ("minimum", NumberValue(v)) =>
         Right(add(MinimumCheck(v)))
-      }
 
       // TODO validation vocabulary
-      case ("exclusiveMinimum", NumberValue(v)) => {
-        Right(add(MinimumCheck(v, true)))
-      }
+      case ("exclusiveMinimum", NumberValue(v)) =>
+        Right(add(MinimumCheck(v, exclude = true)))
 
       // TODO validation vocabulary
-      case ("minItems", NumberValue(v)) if v >= 0 => {
+      case ("minItems", NumberValue(v)) if v >= 0 =>
         Right(add(MinItemsCheck(v)))
-      }
 
       // TODO validation vocabulary
-      case ("uniqueItems", BoolValue(v)) => {
+      case ("uniqueItems", BoolValue(v)) =>
         Right(add(UniqueItemsCheck(v)))
-      }
 
       case ("propertyNames", value) =>
         for {
@@ -340,67 +318,55 @@ case class Checks(
         }
 
       // TODO validation vocabulary
-      case ("multipleOf", NumberValue(v)) if v > 0 => {
+      case ("multipleOf", NumberValue(v)) if v > 0 =>
         Right(add(MultipleOfCheck(v)))
-      }
 
       // TODO validation vocabulary
-      case ("maximum", NumberValue(v)) => {
+      case ("maximum", NumberValue(v)) =>
         Right(add(MaximumCheck(v)))
-      }
 
       // TODO validation vocabulary
-      case ("exclusiveMaximum", NumberValue(v)) => {
-        Right(add(MaximumCheck(v, true)))
-      }
+      case ("exclusiveMaximum", NumberValue(v)) =>
+        Right(add(MaximumCheck(v, exclude = true)))
 
       // TODO validation vocabulary
-      case ("maxLength", NumberValue(v)) if v >= 0 => {
+      case ("maxLength", NumberValue(v)) if v >= 0 =>
         Right(add(MaxLengthCheck(v)))
-      }
 
       // TODO validation vocabulary
-      case ("minLength", NumberValue(v)) if v >= 0 => {
+      case ("minLength", NumberValue(v)) if v >= 0 =>
         Right(add(MinLengthCheck(v)))
-      }
 
       // TODO validation vocabulary
-      case ("maxItems", NumberValue(v)) if v >= 0 => {
+      case ("maxItems", NumberValue(v)) if v >= 0 =>
         Right(add(MaxItemsCheck(v)))
-      }
 
       // TODO validation vocabulary
-      case ("maxProperties", NumberValue(v)) if v >= 0 => {
+      case ("maxProperties", NumberValue(v)) if v >= 0 =>
         Right(add(MaxPropertiesCheck(v)))
-      }
 
       // TODO validation vocabulary
-      case ("minProperties", NumberValue(v)) if v >= 0 => {
+      case ("minProperties", NumberValue(v)) if v >= 0 =>
         Right(add(MinPropertiesCheck(v)))
-      }
 
       // TODO validation vocabulary
-      case ("dependentRequired", ObjectValue(v)) => {
-        val vv = v.view
-          .map {
-            case (p, ArrayValue(vs)) =>
-              Some(
-                (
-                  p,
-                  vs.flatMap {
-                    case StringValue(value) => Some(value)
-                    case _                  => None
-                  }
-                )
+      case ("dependentRequired", ObjectValue(v)) =>
+        val vv = v.view.flatMap {
+          case (p, ArrayValue(vs)) =>
+            Some(
+              (
+                p,
+                vs.flatMap {
+                  case StringValue(value) => Some(value)
+                  case _                  => None
+                }
               )
-            case _ => None
-          }
-          .flatten
-          .toMap
+            )
+          case _ => None
+        }.toMap
         Right(add(DependentRequiredCheck(vv)))
-      }
 
-      case ("dependentSchemas", ObjectValue(ps)) => {
+      case ("dependentSchemas", ObjectValue(ps)) =>
         val checks0 = ps.view.map { case (p, v) =>
           Checks
             .parseKeywords(SchemaValue(v), scope1)
@@ -411,7 +377,6 @@ case class Checks(
         } yield {
           add(DependentSchemasCheck(checks1))
         }
-      }
 
       case ("contains", v) =>
         for {
@@ -479,8 +444,8 @@ case class Checks(
     val checks1: Seq[CheckWithLocation] =
       if (
         checks.exists {
-          case UriUtil.WithLocation(uri, check: C) => true
-          case _                                   => false
+          case UriUtil.WithLocation(_, _: C) => true
+          case _                             => false
         }
       ) {
         checks
@@ -548,7 +513,7 @@ object Checks {
     val schema    = resolution._1
     val resolver1 = resolution._2
 //    implicit val scope1 = scope.push(resolver1.base)
-    implicit val scope1 = SchemaValue
+    implicit val scope1: DynamicScope = SchemaValue
       .id(schema)
       .map(id => scope.push(resolver1.absolute(id)))
       .getOrElse(scope)
@@ -580,10 +545,10 @@ object Checks {
       previous: Either[SchemaErrors, Checks],
       current: Either[SchemaErrors, Checks]
   ): Either[SchemaErrors, Checks] = (previous, current) match {
-    case (Right(previous), Right(current)) => Right(current)
-    case (Right(_), Left(errors))          => Left(errors)
-    case (Left(previous), Left(errors))    => Left(previous :++ errors)
-    case (Left(previous), _)               => Left(previous)
+    case (Right(_), Right(current))     => Right(current)
+    case (Right(_), Left(errors))       => Left(errors)
+    case (Left(previous), Left(errors)) => Left(previous :++ errors)
+    case (Left(previous), _)            => Left(previous)
   }
 
   def localized(check: Check, scope: DynamicScope): CheckWithLocation = {

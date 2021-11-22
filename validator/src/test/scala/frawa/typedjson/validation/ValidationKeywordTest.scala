@@ -18,7 +18,7 @@ package frawa.typedjson.validation
 
 import frawa.typedjson
 import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.processor.SchemaQuality.MissingReference
+import frawa.typedjson.processor.SchemaProblems.MissingReference
 import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.processor._
 import munit.FunSuite
@@ -655,7 +655,7 @@ class ValidationKeywordTest extends FunSuite {
       validateJson(schema)("""[ 13 ]""") { checked =>
         assertEquals(checked.valid, false)
         assertEquals(
-          checked.validation.errors,
+          checked.problems.errors,
           Seq(WithPointer(MissingReference("missing.json"), Pointer.parse("/items/$ref")))
         )
         assertEquals(checked.annotations, Seq())

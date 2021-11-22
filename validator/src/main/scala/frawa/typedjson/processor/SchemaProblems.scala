@@ -18,23 +18,22 @@ package frawa.typedjson.processor
 
 import frawa.typedjson.parser.Value
 
-case class SchemaQuality(
-    errors: Seq[SchemaQuality.SchemaError],
-    ignoredKeywords: Set[String],
-    pointer: Pointer = Pointer.empty
+case class SchemaProblems(
+    errors: Seq[SchemaProblems.SchemaError],
+    ignoredKeywords: Set[String]
 ) {
-  def addIgnoredKeywords(ignoredKeywords: Set[String]): SchemaQuality =
+  def addIgnoredKeywords(ignoredKeywords: Set[String]): SchemaProblems =
     copy(ignoredKeywords = this.ignoredKeywords ++ ignoredKeywords)
 
-  def addErrors(errors: Seq[SchemaQuality.SchemaError]): SchemaQuality =
+  def addErrors(errors: Seq[SchemaProblems.SchemaError]): SchemaProblems =
     copy(errors = this.errors ++ errors)
 
-  def combine(other: SchemaQuality): SchemaQuality =
+  def combine(other: SchemaProblems): SchemaProblems =
     copy(errors = this.errors ++ other.errors, ignoredKeywords = this.ignoredKeywords ++ other.ignoredKeywords)
 }
 
-object SchemaQuality {
-  val empty: SchemaQuality = SchemaQuality(Seq.empty, Set.empty)
+object SchemaProblems {
+  val empty: SchemaProblems = SchemaProblems(Seq.empty, Set.empty)
 
   trait Error
   case class InvalidSchemaValue(schema: Value)    extends Error

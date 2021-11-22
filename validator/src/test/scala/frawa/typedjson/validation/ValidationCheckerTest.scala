@@ -719,12 +719,12 @@ class ValidationCheckerTest extends FunSuite {
     withSchema(refAtRootSchema) { schema =>
       assertValidate("""{ "foo": 13 }""".stripMargin)(schema) { checked =>
         assertErrors(checked, Seq())
-        assertEquals(checked.validation.errors, Seq())
+        assertEquals(checked.problems.errors, Seq())
         assertEquals(checked.valid, true)
       }
       assertValidate("""{ "foo": [13] }""".stripMargin)(schema) { checked =>
         assertErrors(checked, Seq())
-        assertEquals(checked.validation.errors, Seq())
+        assertEquals(checked.problems.errors, Seq())
         assertEquals(checked.valid, true)
       }
       assertValidate("""{ "foo": true }""".stripMargin)(schema) { checked =>
@@ -756,13 +756,13 @@ class ValidationCheckerTest extends FunSuite {
     withSchema(refToValidationSpec) { schema =>
       assertValidate("""{ "$defs": { "foo": { "type": "boolean" } } }""".stripMargin)(schema, lazyResolver) { checked =>
         assertErrors(checked, Seq())
-        assertEquals(checked.validation.errors, Seq())
+        assertEquals(checked.problems.errors, Seq())
         assertEquals(checked.valid, true)
       }
       assertValidate("""{ "$defs": { "foo": { "type": ["boolean"] } } }""".stripMargin)(schema, lazyResolver) {
         checked =>
           assertErrors(checked, Seq())
-          assertEquals(checked.validation.errors, Seq())
+          assertEquals(checked.problems.errors, Seq())
           assertEquals(checked.valid, true)
       }
       assertValidate("""{ "$defs": { "foo": { "type": 13 } } }""".stripMargin)(schema, lazyResolver) { checked =>

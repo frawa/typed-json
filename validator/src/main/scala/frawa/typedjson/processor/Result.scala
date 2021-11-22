@@ -28,9 +28,9 @@ object Result {
   def merge[R](checked: Seq[Result[R]]): Result[R] = {
     val valid           = checked.forall(_.valid)
     val results: Seq[R] = checked.flatMap(_.results)
-    val validation      = checked.map(_.validation).reduceOption(_.combine(_)).getOrElse(SchemaQuality.empty)
+    val problems        = checked.map(_.problems).reduceOption(_.combine(_)).getOrElse(SchemaProblems.empty)
     val annotations     = checked.filter(_.valid).flatMap(_.annotations)
-    Result(valid, results, annotations, validation, 1 + count(checked))
+    Result(valid, results, annotations, problems, 1 + count(checked))
   }
   def count[R](checked: Seq[Result[R]]): Int = checked.map(_.count).sum
 }
@@ -39,19 +39,22 @@ case class Result[R](
     valid: Boolean,
     results: Seq[R] = Seq.empty,
     annotations: Seq[Result.Annotation] = Seq.empty,
-    validation: SchemaQuality = SchemaQuality.empty,
+    problems: SchemaProblems = SchemaProblems.empty,
     count: Int = 1
 ) {
   def add(others: Seq[Result[R]]): Result[R] =
     this
       .copy(count = this.count + Result.count(others))
       .addAnnotations(others.flatMap(_.annotations))
-      .addValidations(others.map(_.validation))
-  def add(validation: SchemaQuality): Result[R] = this.copy(validation = this.validation.combine(validation))
-  private def addValidations(validations: Seq[SchemaQuality]): Result[R] =
-    this.copy(validation = validations.foldLeft(this.validation)(_.combine(_)))
+      .addValidations(others.map(_.problems))
+
+  def add(validation: SchemaProblems): Result[R] = this.copy(problems = this.problems.combine(validation))
+
+  private def addValidations(validations: Seq[SchemaProblems]): Result[R] =
+    this.copy(problems = validations.foldLeft(this.problems)(_.combine(_)))
 
   def add(annotation: Result.Annotation): Result[R] = this.copy(annotations = this.annotations :+ annotation)
+
   private def addAnnotations(annotations: Seq[Result.Annotation]) =
     this.copy(annotations = this.annotations ++ annotations)
 }

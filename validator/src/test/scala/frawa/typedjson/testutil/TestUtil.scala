@@ -76,7 +76,7 @@ object TestUtil {
       f: Processor[R] => Unit
   )(implicit lazyResolver: Option[LoadedSchemasResolver.LazyResolver]): Either[Nothing, Unit] = {
     withProcessor(checker)(schema, lazyResolver) { processor =>
-      assertEquals(processor.validation.ignoredKeywords, Set.empty[String], "new keywords")
+      assertEquals(processor.problems.ignoredKeywords, Set.empty[String], "new keywords")
       f(processor)
     }
   }

@@ -53,7 +53,7 @@ class MetaSchemaTest extends FunSuite {
       assertEquals(checked.results, Seq())
       assertEquals(checked.count, 54)
       assertEquals(
-        checked.validation.ignoredKeywords,
+        checked.problems.ignoredKeywords,
         Set("$vocabulary", "$schema")
       )
     }
@@ -64,7 +64,7 @@ class MetaSchemaTest extends FunSuite {
       assertEquals(checked.results, Seq())
       assertEquals(checked.count, 22)
       assertEquals(
-        checked.validation.ignoredKeywords,
+        checked.problems.ignoredKeywords,
         Set("$vocabulary", "$schema")
       )
     }
@@ -75,7 +75,7 @@ class MetaSchemaTest extends FunSuite {
       assertEquals(checked.results, Seq())
       assertEquals(checked.count, 84)
       assertEquals(
-        checked.validation.ignoredKeywords,
+        checked.problems.ignoredKeywords,
         Set("$vocabulary", "$schema")
       )
     }
@@ -86,7 +86,7 @@ class MetaSchemaTest extends FunSuite {
       assertEquals(checked.results, Seq())
       assertEquals(checked.count, 65)
       assertEquals(
-        checked.validation.ignoredKeywords,
+        checked.problems.ignoredKeywords,
         Set("$vocabulary", "$schema")
       )
     }
@@ -97,7 +97,7 @@ class MetaSchemaTest extends FunSuite {
       assertEquals(checked.results, Seq())
       assertEquals(checked.count, 22)
       assertEquals(
-        checked.validation.ignoredKeywords,
+        checked.problems.ignoredKeywords,
         Set("$vocabulary", "$schema")
       )
     }
@@ -108,7 +108,7 @@ class MetaSchemaTest extends FunSuite {
       assertEquals(checked.results, Seq())
       assertEquals(checked.count, 168)
       assertEquals(
-        checked.validation.ignoredKeywords,
+        checked.problems.ignoredKeywords,
         Set("$vocabulary", "$schema")
       )
     }

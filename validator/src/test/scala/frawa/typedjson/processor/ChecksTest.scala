@@ -18,7 +18,7 @@ package frawa.typedjson.processor
 
 import munit.FunSuite
 import frawa.typedjson.parser.{BoolValue, NumberValue, ObjectValue, StringValue, ZioParser}
-import frawa.typedjson.processor.SchemaQuality.{InvalidSchemaValue, SchemaError}
+import frawa.typedjson.processor.SchemaProblems.{InvalidSchemaValue, SchemaError}
 import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.testutil.TestSchemas._
 

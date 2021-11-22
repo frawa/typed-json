@@ -125,8 +125,8 @@ class JsonSchemaTestSuite extends FunSuite {
     if (checked.valid != data.expectedValid) {
       implicit val loc = munit.Location.empty
       if (!checked.valid) {
-        assertEquals(checked.validation.errors, Seq(), data.failMessage)
-        assertEquals(checked.validation.ignoredKeywords, Set.empty[String], data.failMessage)
+        assertEquals(checked.problems.errors, Seq(), data.failMessage)
+        assertEquals(checked.problems.ignoredKeywords, Set.empty[String], data.failMessage)
         assertEquals(checked.results, Seq(), data.failMessage)
       } else {
         fail("unexpected valid", clues(clue(data.failMessage), clue(data.expectedValid), clue(checked)))

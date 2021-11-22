@@ -22,7 +22,7 @@ import frawa.typedjson.parser.ObjectValue
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.processor
 
-case class Processor[R] private[processor] (private val process: Processor.ProcessFun[R], validation: SchemaQuality) {
+case class Processor[R] private[processor] (private val process: Processor.ProcessFun[R], problems: SchemaProblems) {
   def apply(value: InnerValue): Result[R] = process(value)
 }
 
@@ -41,13 +41,13 @@ object Processor {
     val scope = DynamicScope.empty.push(resolver.base)
     for {
       checks <- Checks.parseKeywords(schema, scope)
-      processor = Processor(all(checker, checks), SchemaQuality.empty.addIgnoredKeywords(checks.ignoredKeywords))
+      processor = Processor(all(checker, checks), SchemaProblems.empty.addIgnoredKeywords(checks.ignoredKeywords))
     } yield processor
   }
 
   private def all[R](checker: Checker[R], checks: Checks): ProcessFun[R] = {
     seq(checks.checks.map(one(checker, _)))
-      .andThen(_.add(SchemaQuality.empty.addIgnoredKeywords(checks.ignoredKeywords)))
+      .andThen(_.add(SchemaProblems.empty.addIgnoredKeywords(checks.ignoredKeywords)))
   }
 
   private def noop[R]: ProcessFun[R]                                            = _ => Result.valid[R]
@@ -225,8 +225,8 @@ object Processor {
       case Right(checks) => all(checker, checks)
       case Left(errors) =>
         _ =>
-          val validation = SchemaQuality.empty.addErrors(errors)
-          Result.invalid.add(validation)
+          val problems = SchemaProblems.empty.addErrors(errors)
+          Result.invalid.add(problems)
     }
   }
 
