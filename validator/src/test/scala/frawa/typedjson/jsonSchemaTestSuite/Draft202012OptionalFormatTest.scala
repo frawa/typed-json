@@ -28,7 +28,6 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite {
     "date-time.json",
     "date.json",
     "idn-hostname.json",
-//    "time.json",
     "uri-template.json"
   )
 
