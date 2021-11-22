@@ -13,24 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package frawa.typedjson.schema
 
 import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue
 import frawa.typedjson.parser.StringValue
-import frawa.typedjson.parser.Value
-
-case class SchemaValue(value: Value)
-
-object SchemaValue {
-  def id(schema: SchemaValue): Option[String] = {
-    (Pointer.empty / "$id")(schema.value).flatMap {
-      case StringValue(id) => Some(id)
-      case _               => None
-    }
-  }
-}
 
 case class Processor[R] private[schema] (private val process: Processor.ProcessFun[R], validation: SchemaQuality) {
   def apply(value: InnerValue): Checked[R] = process(value)
@@ -46,13 +33,13 @@ object Processor {
   def apply[R](schema: SchemaValue, lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None)(
       checker: Checker[R]
   ): Either[SchemaErrors, Processor[R]] = {
-    implicit val resolver = LoadedSchemasResolver(schema, lazyResolver)
+    implicit val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema, lazyResolver)
 
     val scope = DynamicScope.empty.push(resolver.base)
     for {
       checks <- Checks.parseKeywords(schema, scope)
       processor = Processor(all(checker, checks), SchemaQuality.empty.addIgnoredKeywords(checks.ignoredKeywords))
-    } yield (processor)
+    } yield processor
   }
 
   private def all[R](checker: Checker[R], checks: Checks): ProcessFun[R] = {
@@ -71,7 +58,7 @@ object Processor {
       merge: MergeFun[R]
   ): ProcessFun[R] = { value: InnerValue =>
     value.value match {
-      case ArrayValue(vs) => {
+      case ArrayValue(vs) =>
         val indexed = vs.zipWithIndex
           .map { case (v, index) =>
             InnerValue(v, value.pointer / index)
@@ -80,7 +67,6 @@ object Processor {
         val checked       = pItems.map(pItems => indexed.drop(pPrefix.size).map(pItems)).getOrElse(Seq())
         val indices       = Seq.range(0, checkedPrefix.size + checked.size)
         mergeAll(merge, checkedPrefix ++ checked, value).add(WithPointer(EvaluatedIndices(indices)))
-      }
       case _ => Checked.valid
     }
   }
@@ -94,7 +80,7 @@ object Processor {
       ps: => PartialFunction[String, () => ProcessFun[R]]
   )(merge: MergeFun[R]): ProcessFun[R] = { value =>
     value.value match {
-      case ObjectValue(vs) => {
+      case ObjectValue(vs) =>
         val evaluated = vs.view
           .map { case (key, v) =>
             (key, InnerValue(v, value.pointer / key))
@@ -108,7 +94,6 @@ object Processor {
         val evaluatedKeys = EvaluatedProperties(evaluated.filter(_._2.valid).map(_._1).toSet)
         val annotation    = WithPointer(evaluatedKeys, value.pointer)
         mergeAll(merge, checked, value).add(annotation)
-      }
       case _ => Checked.valid
     }
   }
@@ -128,12 +113,8 @@ object Processor {
 
   private def one[R](checker: Checker[R], check: CheckWithLocation): ProcessFun[R] = {
     check.value match {
-      case c: SimpleCheck => { value =>
-        simple(checker, c)(value)
-      }
-      case c: NestingCheck => { value =>
-        nesting(checker, c)(value)
-      }
+      case c: SimpleCheck  => value => simple(checker, c)(value)
+      case c: NestingCheck => value => nesting(checker, c)(value)
     }
   }
 
@@ -187,7 +168,7 @@ object Processor {
     }
 
     val psAdditional = check.additionalProperties.map { checks =>
-      val partial: PartialFunction[String, () => ProcessFun[R]] = { k => () => all(checker, checks) }
+      val partial: PartialFunction[String, () => ProcessFun[R]] = { _ => () => all(checker, checks) }
       partial
     }
 
@@ -222,7 +203,7 @@ object Processor {
 
   private def checkPropertyNames[R](checker: Checker[R], check: PropertyNamesCheck): ProcessFun[R] = { value =>
     value.value match {
-      case ObjectValue(vs) => {
+      case ObjectValue(vs) =>
         val p     = all(checker, check.checks)
         val merge = checker.nested(check)
         val names = vs.keySet
@@ -232,7 +213,6 @@ object Processor {
         val validNames = checked.filter(_._2.valid).map(_._1).toSet
         val annotation = WithPointer(EvaluatedProperties(validNames), value.pointer)
         mergeAll(merge, checked.map(_._2), value).add(annotation)
-      }
       case _ => Checked.valid
     }
   }
@@ -250,7 +230,7 @@ object Processor {
   private def checkDependentSchemas[R](checker: Checker[R], check: DependentSchemasCheck): ProcessFun[R] = { value =>
     value.value match {
       case ObjectValue(v) =>
-        val ps      = v.keySet.flatMap(check.checks.get(_)).map(all(checker, _)).toSeq
+        val ps      = v.keySet.flatMap(check.checks.get).map(all(checker, _)).toSeq
         val merge   = checker.nested(check)
         val checked = ps.map(_(value))
         mergeAll(merge, checked, value)
