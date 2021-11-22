@@ -27,10 +27,6 @@ import frawa.typedjson.util.UriUtil
 import java.net.URI
 import scala.reflect.ClassTag
 
-case class SchemaError(message: String, pointer: Pointer = Pointer.empty) {
-  def prefix(prefix: Pointer): SchemaError = SchemaError(message, prefix / pointer)
-}
-
 sealed trait Check
 sealed trait SimpleCheck  extends Check
 sealed trait TypeCheck    extends SimpleCheck

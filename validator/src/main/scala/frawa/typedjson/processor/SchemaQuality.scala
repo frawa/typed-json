@@ -16,6 +16,10 @@
 
 package frawa.typedjson.processor
 
+case class SchemaError(message: String, pointer: Pointer = Pointer.empty) {
+  def prefix(prefix: Pointer): SchemaError = SchemaError(message, prefix / pointer)
+}
+
 case class SchemaQuality(errors: Seq[SchemaError], ignoredKeywords: Set[String], pointer: Pointer = Pointer.empty) {
   def addIgnoredKeywords(ignoredKeywords: Set[String]): SchemaQuality =
     copy(ignoredKeywords = this.ignoredKeywords ++ ignoredKeywords)
