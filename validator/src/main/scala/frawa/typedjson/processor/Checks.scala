@@ -22,6 +22,12 @@ import frawa.typedjson.parser.NumberValue
 import frawa.typedjson.parser.ObjectValue
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.Value
+import frawa.typedjson.processor.SchemaQuality.{
+  InvalidSchemaValue,
+  MissingDynamicReference,
+  MissingReference,
+  SchemaError
+}
 import frawa.typedjson.util.UriUtil
 
 import java.net.URI
@@ -257,7 +263,7 @@ case class Checks(
             .resolveRef(ref)
             .map(Right(_))
             // .getOrElse(throw new IllegalStateException(s"$ref not found"))
-            .getOrElse(Left(Seq(SchemaError(s"""missing reference "${ref}""""))))
+            .getOrElse(Left(Seq(WithPointer(MissingReference(ref)))))
           check = lazyResolveCheck(resolution, scope1)
         } yield {
           add(check)
@@ -269,7 +275,7 @@ case class Checks(
           resolution <- resolver
             .resolveDynamicRef(ref, scope)
             .map(Right(_))
-            .getOrElse(Left(Seq(SchemaError(s"""missing dynamic reference "${ref}""""))))
+            .getOrElse(Left(Seq(WithPointer(MissingDynamicReference(ref)))))
           check = lazyResolveCheck(resolution, scope1)
         } yield {
           add(check)
@@ -566,7 +572,7 @@ object Checks {
               )
             }
         }
-      case _ => Left(Seq(SchemaError(s"invalid schema ${schema}")))
+      case _ => Left(Seq(WithPointer(InvalidSchemaValue(schema.value))))
     }
   }
 

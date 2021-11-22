@@ -17,10 +17,8 @@
 package frawa.typedjson.processor
 
 import munit.FunSuite
-import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.parser.BoolValue
-import frawa.typedjson.parser.StringValue
-import frawa.typedjson.parser.ObjectValue
+import frawa.typedjson.parser.{BoolValue, NumberValue, ObjectValue, StringValue, ZioParser}
+import frawa.typedjson.processor.SchemaQuality.{InvalidSchemaValue, SchemaError}
 import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.testutil.TestSchemas._
 
@@ -148,7 +146,7 @@ class ChecksTest extends FunSuite {
   test("invalid schema") {
     withSchema("""13""") { schema =>
       assertSchemaErrors(schema) { errors =>
-        assertEquals(errors, Seq(SchemaError("invalid schema SchemaValue(NumberValue(13))")))
+        assertEquals(errors, Seq(WithPointer(InvalidSchemaValue(NumberValue(13)))))
       }
     }
   }
@@ -156,7 +154,7 @@ class ChecksTest extends FunSuite {
   test("invalid deep schema") {
     withSchema("""{"not": "gnu"}""") { schema =>
       assertSchemaErrors(schema) { errors =>
-        assertEquals(errors, Seq(SchemaError("invalid schema SchemaValue(StringValue(gnu))", Pointer.empty / "not")))
+        assertEquals(errors, Seq(WithPointer(InvalidSchemaValue(StringValue("gnu")), Pointer.empty / "not")))
       }
     }
   }

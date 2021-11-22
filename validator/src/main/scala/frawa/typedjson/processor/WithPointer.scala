@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package frawa.typedjson.processor
 
-case class WithPointer[+R](result: R, pointer: Pointer = Pointer.empty)
+case class WithPointer[+R](result: R, pointer: Pointer = Pointer.empty) {
+  def prefix(prefix: Pointer): WithPointer[R] = this.copy(pointer = prefix / this.pointer)
+}

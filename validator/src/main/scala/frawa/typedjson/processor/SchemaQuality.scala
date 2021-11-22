@@ -16,15 +16,17 @@
 
 package frawa.typedjson.processor
 
-case class SchemaError(message: String, pointer: Pointer = Pointer.empty) {
-  def prefix(prefix: Pointer): SchemaError = SchemaError(message, prefix / pointer)
-}
+import frawa.typedjson.parser.Value
 
-case class SchemaQuality(errors: Seq[SchemaError], ignoredKeywords: Set[String], pointer: Pointer = Pointer.empty) {
+case class SchemaQuality(
+    errors: Seq[SchemaQuality.SchemaError],
+    ignoredKeywords: Set[String],
+    pointer: Pointer = Pointer.empty
+) {
   def addIgnoredKeywords(ignoredKeywords: Set[String]): SchemaQuality =
     copy(ignoredKeywords = this.ignoredKeywords ++ ignoredKeywords)
 
-  def addErrors(errors: Seq[SchemaError]): SchemaQuality =
+  def addErrors(errors: Seq[SchemaQuality.SchemaError]): SchemaQuality =
     copy(errors = this.errors ++ errors)
 
   def combine(other: SchemaQuality): SchemaQuality =
@@ -33,4 +35,11 @@ case class SchemaQuality(errors: Seq[SchemaError], ignoredKeywords: Set[String],
 
 object SchemaQuality {
   val empty: SchemaQuality = SchemaQuality(Seq.empty, Set.empty)
+
+  trait Error
+  case class InvalidSchemaValue(schema: Value)    extends Error
+  case class MissingReference(ref: String)        extends Error
+  case class MissingDynamicReference(ref: String) extends Error
+
+  type SchemaError = WithPointer[Error]
 }
