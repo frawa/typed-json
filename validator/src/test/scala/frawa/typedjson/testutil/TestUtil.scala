@@ -44,11 +44,11 @@ object TestUtil {
   }
 
   def assertResult[R](
-      checker: Checker[R]
+      eval: Eval[R]
   )(schema: SchemaValue, valueText: String)(
       f: Result[R] => Unit
   )(implicit parser: Parser, lazyResolver: Option[LoadedSchemasResolver.LazyResolver]): Either[Nothing, Unit] = {
-    withStrictProcessor(checker)(schema) { processor =>
+    withStrictProcessor(eval)(schema) { processor =>
       val value  = parseJsonValue(valueText)
       val result = processor(InnerValue(value))
       f(result)
@@ -56,12 +56,12 @@ object TestUtil {
   }
 
   def withProcessor[R](
-      checker: Checker[R]
+      eval: Eval[R]
   )(schema: SchemaValue, lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None)(
       f: Processor[R] => Unit
   ): Either[Nothing, Unit] = {
     val result = for {
-      processor <- Processor(schema, lazyResolver)(checker)
+      processor <- Processor(schema, lazyResolver)(eval)
     } yield {
       f(processor)
     }
@@ -71,11 +71,11 @@ object TestUtil {
   }
 
   def withStrictProcessor[R](
-      checker: Checker[R]
+      eval: Eval[R]
   )(schema: SchemaValue)(
       f: Processor[R] => Unit
   )(implicit lazyResolver: Option[LoadedSchemasResolver.LazyResolver]): Either[Nothing, Unit] = {
-    withProcessor(checker)(schema, lazyResolver) { processor =>
+    withProcessor(eval)(schema, lazyResolver) { processor =>
       assertEquals(processor.problems.ignoredKeywords, Set.empty[String], "new keywords")
       f(processor)
     }

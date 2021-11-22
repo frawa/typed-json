@@ -29,7 +29,7 @@ class ValidationKeywordTest extends FunSuite {
   def validateJson(
       schema: SchemaValue
   )(jsonText: String)(f: Result[ValidationResult] => Unit): Either[Nothing, Unit] = {
-    assertResult(ValidationChecker())(schema, jsonText)(f)
+    assertResult(ValidationEval())(schema, jsonText)(f)
   }
 
   test("multipleOf") {

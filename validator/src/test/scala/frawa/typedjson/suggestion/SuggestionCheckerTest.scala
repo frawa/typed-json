@@ -22,14 +22,14 @@ import frawa.typedjson.testutil.TestUtil.{assertResult, withSchema}
 import frawa.typedjson.processor.{LoadedSchemasResolver, Pointer, SchemaValue}
 import munit.FunSuite
 
-class SuggestCheckerTest extends FunSuite {
+class SuggestEvalTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()
 
   private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
       f: Seq[Value] => Unit
   ) = {
     implicit val l: Option[LoadedSchemasResolver.LazyResolver] = None
-    assertResult(SuggestionChecker(at))(schema, text) { result =>
+    assertResult(SuggestionEval(at))(schema, text) { result =>
       f(result.results.flatMap(_.suggestions).distinct)
     }
   }

@@ -61,9 +61,9 @@ trait Calculator[R] {
   def not(results: Seq[Result[R]], pointer: Pointer): Result[R]
   def ifThenElse(results: Seq[Result[R]], pointer: Pointer): Result[R]
 }
-object ValidationChecker {
+object ValidationEval {
 
-  def apply(): Checker[ValidationResult] = Checker(simple, nested)
+  def apply(): Eval[ValidationResult] = Eval(simple, nested)
 
   private val calc: Calculator[ValidationResult] = new ValidationCalculator()
 

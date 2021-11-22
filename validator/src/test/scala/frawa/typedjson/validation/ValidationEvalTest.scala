@@ -24,7 +24,7 @@ import frawa.typedjson.testutil.TestUtil.{assertResult, withSchema}
 import frawa.typedjson.processor._
 import munit.FunSuite
 
-class ValidationCheckerTest extends FunSuite {
+class ValidationEvalTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()
 
   private def assertValidate(text: String)(
@@ -34,7 +34,7 @@ class ValidationCheckerTest extends FunSuite {
       f: Result[ValidationResult] => Unit
   ) = {
     implicit val lr = lazyResolver
-    assertResult(ValidationChecker())(schema, text)(f)
+    assertResult(ValidationEval())(schema, text)(f)
   }
 
   private def assertErrors(result: Result[ValidationResult], expected: Seq[WithPointer[Observation]]): Unit = {

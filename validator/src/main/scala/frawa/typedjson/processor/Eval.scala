@@ -16,7 +16,7 @@
 
 package frawa.typedjson.processor
 
-case class Checker[R](
+case class Eval[R](
     simple: SimpleKeyword => Processor.ProcessFun[R],
     nested: NestingKeyword => Processor.MergeFun[R]
 )

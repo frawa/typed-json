@@ -21,7 +21,7 @@ import frawa.typedjson.parser.{BoolValue, ObjectValue, StringValue, _}
 import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.processor._
 import frawa.typedjson.testutil.TestUtil
-import frawa.typedjson.validation.{ValidationChecker, ValidationResult}
+import frawa.typedjson.validation.{ValidationEval, ValidationResult}
 import munit.{FunSuite, TestOptions}
 
 import java.net.URI
@@ -88,7 +88,7 @@ class JsonSchemaTestSuite extends FunSuite {
 
         val hasIgnoredFailMessage = ignoreFailMessageByDescription.contains(testId)
         if (oneTestPerData || hasIgnoredFailMessage) {
-          withStrictProcessor(ValidationChecker())(schemaValue) { processor =>
+          withStrictProcessor(ValidationEval())(schemaValue) { processor =>
             tests.foreach { value =>
               val data     = testData(value)
               val testName = s"${file} | ${data.failMessage} | ${description}"
@@ -106,7 +106,7 @@ class JsonSchemaTestSuite extends FunSuite {
           }
         } else {
           test(suiteOptions) {
-            withStrictProcessor(ValidationChecker())(schemaValue) { processor =>
+            withStrictProcessor(ValidationEval())(schemaValue) { processor =>
               tests
                 .map(testData)
                 .foreach {
