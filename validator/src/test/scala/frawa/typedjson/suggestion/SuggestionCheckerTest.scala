@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.schema
+package frawa.typedjson.suggestion
 
+import frawa.typedjson.parser._
+import frawa.typedjson.schema.TestSchemas.{numberArraySchema, totoObjectSchema, totoRequiredObjectSchema}
+import frawa.typedjson.schema.TestUtil.{assertChecked, withSchema}
+import frawa.typedjson.schema.{LoadedSchemasResolver, Pointer, SchemaValue}
 import munit.FunSuite
-import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.parser.{ObjectValue, NullValue, NumberValue, StringValue, ArrayValue, BoolValue}
-import TestUtil._
-import TestSchemas._
-import frawa.typedjson.parser.Value
 
 class SuggestCheckerTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()
@@ -29,6 +28,7 @@ class SuggestCheckerTest extends FunSuite {
   private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
       f: Seq[Value] => Unit
   ) = {
+    implicit val l: Option[LoadedSchemasResolver.LazyResolver] = None
     assertChecked(SuggestionChecker(at))(schema, text) { checked =>
       f(checked.results.flatMap(_.suggestions).distinct)
     }

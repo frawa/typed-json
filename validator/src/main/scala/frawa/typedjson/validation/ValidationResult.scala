@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.schema
+package frawa.typedjson.validation
 
-import frawa.typedjson.parser.{StringValue, Value}
+import frawa.typedjson.schema.{Pointer, WithPointer}
 
-case class SchemaValue(value: Value)
+// TODO no defaults?
+case class ValidationResult(
+    errors: Seq[ValidationResult.Error]
+)
 
-object SchemaValue {
-  def id(schema: SchemaValue): Option[String] = {
-    (Pointer.empty / "$id")(schema.value).flatMap {
-      case StringValue(id) => Some(id)
-      case _               => None
-    }
-  }
+object ValidationResult {
+  type Error = WithPointer[Observation]
+
+  def invalid(errors: Seq[Error]): ValidationResult = ValidationResult(errors)
+
+  def invalid(observation: Observation, pointer: Pointer = Pointer.empty): ValidationResult = invalid(
+    Seq(WithPointer(observation, pointer))
+  )
+
 }

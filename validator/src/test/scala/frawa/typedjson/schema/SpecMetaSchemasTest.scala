@@ -18,7 +18,9 @@ package frawa.typedjson.schema
 
 import munit.FunSuite
 import UriUtil._
+import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser.ZioParser
+
 import java.net.URI
 
 class SpecMetaSchemasTest extends FunSuite {
@@ -29,12 +31,12 @@ class SpecMetaSchemasTest extends FunSuite {
   val coreUri: URI   = schemaUri.resolve("meta/core")
 
   test("load schema") {
-    val schema = SpecMetaSchemas.lazyResolver.apply(schemaUri)
+    val schema = MetaSchemas.lazyResolver.apply(schemaUri)
     assertEquals(schema.flatMap(SchemaValue.id(_)), Some(schemaUri.toString))
   }
 
   test("load relative meta schema") {
-    val schema = SpecMetaSchemas.lazyResolver.apply(coreUri)
+    val schema = MetaSchemas.lazyResolver.apply(coreUri)
     assertEquals(schema.flatMap(SchemaValue.id(_)), Some(coreUri.toString))
   }
 }

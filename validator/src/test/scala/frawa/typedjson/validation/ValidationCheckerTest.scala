@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.schema
+package frawa.typedjson.validation
 
-import munit.FunSuite
-import frawa.typedjson.parser.ZioParser
+import frawa.typedjson
+import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser._
-import TestUtil._
-import TestSchemas._
+import frawa.typedjson.schema.TestSchemas._
+import frawa.typedjson.schema.TestUtil.{assertChecked, withSchema}
+import frawa.typedjson.schema._
+import munit.FunSuite
 
 class ValidationCheckerTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()
@@ -31,7 +33,7 @@ class ValidationCheckerTest extends FunSuite {
   )(
       f: Checked[ValidationResult] => Unit
   ) = {
-    implicit val l = lazyResolver
+    implicit val lr = lazyResolver
     assertChecked(ValidationChecker())(schema, text)(f)
   }
 
@@ -88,7 +90,7 @@ class ValidationCheckerTest extends FunSuite {
         assertErrors(
           checked,
           Seq(
-            WithPointer(
+            typedjson.schema.WithPointer(
               result = FalseSchemaReason(),
               pointer = Pointer(
                 segments = Nil
@@ -102,7 +104,7 @@ class ValidationCheckerTest extends FunSuite {
         assertErrors(
           checked,
           Seq(
-            WithPointer(
+            typedjson.schema.WithPointer(
               result = FalseSchemaReason(),
               pointer = Pointer(
                 segments = Nil
@@ -116,7 +118,7 @@ class ValidationCheckerTest extends FunSuite {
         assertErrors(
           checked,
           Seq(
-            WithPointer(
+            typedjson.schema.WithPointer(
               result = FalseSchemaReason(),
               pointer = Pointer(
                 segments = Nil
@@ -169,7 +171,7 @@ class ValidationCheckerTest extends FunSuite {
         assertErrors(
           checked,
           Seq(
-            WithPointer(
+            typedjson.schema.WithPointer(
               result = NotInvalid(),
               pointer = Pointer(
                 segments = Nil
@@ -183,7 +185,7 @@ class ValidationCheckerTest extends FunSuite {
         assertErrors(
           checked,
           Seq(
-            WithPointer(
+            typedjson.schema.WithPointer(
               result = NotInvalid(),
               pointer = Pointer(
                 segments = Nil
@@ -197,7 +199,7 @@ class ValidationCheckerTest extends FunSuite {
         assertErrors(
           checked,
           Seq(
-            WithPointer(
+            typedjson.schema.WithPointer(
               result = NotInvalid(),
               pointer = Pointer(
                 segments = Nil
@@ -252,7 +254,7 @@ class ValidationCheckerTest extends FunSuite {
   test("array item") {
     withSchema(numberArraySchema) { schema =>
       assertValidate("""[true]""")(schema) { checked =>
-        assertErrors(checked, Seq(WithPointer(TypeMismatch("number"), Pointer(0))))
+        assertErrors(checked, Seq(typedjson.schema.WithPointer(TypeMismatch("number"), Pointer(0))))
         assertEquals(checked.valid, false)
       }
       assertValidate("""[13]""")(schema) { checked =>
@@ -293,7 +295,7 @@ class ValidationCheckerTest extends FunSuite {
                        |"titi": true
                        |}
                        |""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / "titi")))
+        assertErrors(checked, Seq(typedjson.schema.WithPointer(TypeMismatch("string"), Pointer.empty / "titi")))
         assertEquals(checked.valid, false)
       }
     }
@@ -620,7 +622,7 @@ class ValidationCheckerTest extends FunSuite {
         assertErrors(
           checked,
           Seq(
-            WithPointer(
+            typedjson.schema.WithPointer(
               result = TypeMismatch(
                 expected = "string"
               ),
@@ -628,7 +630,7 @@ class ValidationCheckerTest extends FunSuite {
                 segments = Nil
               )
             ),
-            WithPointer(
+            typedjson.schema.WithPointer(
               result = NotInEnum(
                 values = List(
                   StringValue(
@@ -647,7 +649,7 @@ class ValidationCheckerTest extends FunSuite {
         assertErrors(
           checked,
           Seq(
-            WithPointer(
+            typedjson.schema.WithPointer(
               result = NotInEnum(
                 values = List(
                   StringValue(
@@ -675,7 +677,7 @@ class ValidationCheckerTest extends FunSuite {
         assertErrors(
           checked,
           Seq(
-            WithPointer(
+            typedjson.schema.WithPointer(
               result = TypeMismatch(
                 expected = "array"
               ),
@@ -700,7 +702,7 @@ class ValidationCheckerTest extends FunSuite {
         assertErrors(
           checked,
           Seq(
-            WithPointer(
+            typedjson.schema.WithPointer(
               result = TypeMismatch(
                 expected = "number"
               ),
@@ -729,13 +731,13 @@ class ValidationCheckerTest extends FunSuite {
         assertErrors(
           checked,
           Seq(
-            WithPointer(
+            typedjson.schema.WithPointer(
               result = TypeMismatch(
                 expected = "number"
               ),
               pointer = Pointer.parse("/foo")
             ),
-            WithPointer(
+            typedjson.schema.WithPointer(
               result = TypeMismatch(
                 expected = "array"
               ),
@@ -749,7 +751,7 @@ class ValidationCheckerTest extends FunSuite {
   }
 
   test("$ref to validation spec, with two '$ref's") {
-    val lazyResolver = Some(SpecMetaSchemas.lazyResolver)
+    val lazyResolver = Some(MetaSchemas.lazyResolver)
 
     withSchema(refToValidationSpec) { schema =>
       assertValidate("""{ "$defs": { "foo": { "type": "boolean" } } }""".stripMargin)(schema, lazyResolver) { checked =>
@@ -767,13 +769,13 @@ class ValidationCheckerTest extends FunSuite {
         assertErrors(
           checked,
           Seq(
-            WithPointer(
+            typedjson.schema.WithPointer(
               result = NotInEnum(
                 values = Seq("array", "boolean", "integer", "null", "number", "object", "string").map(StringValue(_))
               ),
               pointer = Pointer.parse("/$defs/foo/type")
             ),
-            WithPointer(
+            typedjson.schema.WithPointer(
               result = TypeMismatch(
                 expected = "array"
               ),

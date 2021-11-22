@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.schema
+package frawa.typedjson.validation
 
-import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.NumberValue
-import frawa.typedjson.parser.BoolValue
-import frawa.typedjson.parser.NullValue
-import frawa.typedjson.parser.StringValue
-import frawa.typedjson.parser.ArrayValue
-import frawa.typedjson.parser.ObjectValue
+import frawa.typedjson.parser._
+import frawa.typedjson.schema._
 
 import java.net.URI
 //import java.time.OffsetTime
 //import java.time.format.{DateTimeFormatter, ResolverStyle}
-import scala.reflect.ClassTag
-import java.util.regex.Pattern
-import scala.util.Try
 import java.util.UUID
+import java.util.regex.Pattern
+import scala.reflect.ClassTag
+import scala.util.Try
 
 // TODO rename to something like "Error"
 sealed trait Observation
@@ -419,7 +414,6 @@ object ValidationChecker {
   }
 
   private def countCharPoints(text: String): Int = {
-    import java.lang.Character
     var i     = 0
     var count = 0
     while (i < text.length()) {

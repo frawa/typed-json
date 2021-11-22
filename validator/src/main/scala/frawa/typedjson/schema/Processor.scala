@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package frawa.typedjson.schema
 
+import frawa.typedjson
 import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue
 import frawa.typedjson.parser.StringValue
+import frawa.typedjson.schema
 
 case class Processor[R] private[schema] (private val process: Processor.ProcessFun[R], validation: SchemaQuality) {
   def apply(value: InnerValue): Checked[R] = process(value)
@@ -92,7 +95,7 @@ object Processor {
           .toSeq
         val checked       = evaluated.map(_._2)
         val evaluatedKeys = EvaluatedProperties(evaluated.filter(_._2.valid).map(_._1).toSet)
-        val annotation    = WithPointer(evaluatedKeys, value.pointer)
+        val annotation    = schema.WithPointer(evaluatedKeys, value.pointer)
         mergeAll(merge, checked, value).add(annotation)
       case _ => Checked.valid
     }
@@ -211,7 +214,7 @@ object Processor {
           (name, p(InnerValue(StringValue(name), value.pointer / name)))
         }.toSeq
         val validNames = checked.filter(_._2.valid).map(_._1).toSet
-        val annotation = WithPointer(EvaluatedProperties(validNames), value.pointer)
+        val annotation = schema.WithPointer(EvaluatedProperties(validNames), value.pointer)
         mergeAll(merge, checked.map(_._2), value).add(annotation)
       case _ => Checked.valid
     }
@@ -251,7 +254,9 @@ object Processor {
               }
             val checked      = indexed.map(p(_))
             val validIndices = checked.zipWithIndex.filter(_._1.valid).map(_._2)
-            mergeAll(merge, checked, value).add(WithPointer(EvaluatedIndices(validIndices), value.pointer))
+            mergeAll(merge, checked, value).add(
+              typedjson.schema.WithPointer(EvaluatedIndices(validIndices), value.pointer)
+            )
           }
           .getOrElse(Checked.valid)
       case _ => Checked.valid
@@ -282,7 +287,7 @@ object Processor {
         val merge      = checker.nested(check)
         val allIndices = Seq.range(0, vs.size)
         mergeAll(merge, Seq(checked) ++ checkedUnevaluated, value)
-          .add(WithPointer(EvaluatedIndices(allIndices), value.pointer))
+          .add(schema.WithPointer(EvaluatedIndices(allIndices), value.pointer))
       case _ => checked
     }
   }
@@ -309,7 +314,7 @@ object Processor {
         val merge         = checker.nested(check)
         val allProperties = vs.keySet
         mergeAll(merge, Seq(checked) ++ checkedUnevaluated, value)
-          .add(WithPointer(EvaluatedProperties(allProperties), value.pointer))
+          .add(schema.WithPointer(EvaluatedProperties(allProperties), value.pointer))
       case _ => checked
     }
   }

@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.schema
+package frawa.typedjson.validation
 
+import frawa.typedjson
 import frawa.typedjson.parser.ZioParser
-import munit.FunSuite
-import frawa.typedjson.schema.SchemaValue
-import frawa.typedjson.schema.Checked
-import frawa.typedjson.schema.ValidationResult
 import frawa.typedjson.schema.TestUtil._
 import frawa.typedjson.schema._
+import munit.FunSuite
 
 class ValidationKeywordTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()
@@ -428,7 +426,7 @@ class ValidationKeywordTest extends FunSuite {
           Seq(
             ValidationResult(
               Seq(
-                WithPointer(TypeMismatch("number"), Pointer.empty / 0)
+                typedjson.schema.WithPointer(TypeMismatch("number"), Pointer.empty / 0)
               )
             )
           )
@@ -439,7 +437,7 @@ class ValidationKeywordTest extends FunSuite {
         assertEquals(
           checked.annotations,
           Seq(
-            WithPointer(EvaluatedIndices(Seq(0, 1)), Pointer.empty)
+            typedjson.schema.WithPointer(EvaluatedIndices(Seq(0, 1)), Pointer.empty)
           )
         )
       }
@@ -458,7 +456,7 @@ class ValidationKeywordTest extends FunSuite {
           Seq(
             ValidationResult(
               Seq(
-                WithPointer(TypeMismatch("boolean"), Pointer.empty / 2)
+                typedjson.schema.WithPointer(TypeMismatch("boolean"), Pointer.empty / 2)
               )
             )
           )
@@ -469,7 +467,7 @@ class ValidationKeywordTest extends FunSuite {
         assertEquals(
           checked.annotations,
           Seq(
-            WithPointer(EvaluatedIndices(Seq(0, 1, 2)), Pointer.empty)
+            typedjson.schema.WithPointer(EvaluatedIndices(Seq(0, 1, 2)), Pointer.empty)
           )
         )
       }
@@ -495,14 +493,14 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""[13, "foo", true]""") { checked =>
         assert(checked.valid)
-        assertEquals(checked.annotations, Seq(WithPointer(EvaluatedIndices(Seq(0)), Pointer.empty)))
+        assertEquals(checked.annotations, Seq(typedjson.schema.WithPointer(EvaluatedIndices(Seq(0)), Pointer.empty)))
       }
       validateJson(schema)("""[13, 14, "foo", true]""") { checked =>
         assert(checked.valid)
         assertEquals(
           checked.annotations,
           Seq(
-            WithPointer(EvaluatedIndices(Seq(0, 1)), Pointer.empty)
+            typedjson.schema.WithPointer(EvaluatedIndices(Seq(0, 1)), Pointer.empty)
           )
         )
       }
@@ -529,7 +527,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""[13, 14, "foo", true]""") { checked =>
         assert(checked.valid)
-        assertEquals(checked.annotations, Seq(WithPointer(EvaluatedIndices(Seq(0, 1)), Pointer.empty)))
+        assertEquals(checked.annotations, Seq(typedjson.schema.WithPointer(EvaluatedIndices(Seq(0, 1)), Pointer.empty)))
       }
     }
   }
@@ -566,7 +564,7 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""[13, 14, "foo", true]""") { checked =>
         assert(checked.valid)
-        assertEquals(checked.annotations, Seq(WithPointer(EvaluatedIndices(Seq(0, 1)), Pointer.empty)))
+        assertEquals(checked.annotations, Seq(typedjson.schema.WithPointer(EvaluatedIndices(Seq(0, 1)), Pointer.empty)))
       }
     }
   }
@@ -615,8 +613,8 @@ class ValidationKeywordTest extends FunSuite {
           Seq(
             ValidationResult(
               Seq(
-                WithPointer(FalseSchemaReason(), Pointer.empty / "gnu"),
-                WithPointer(FalseSchemaReason(), Pointer.empty / "bar")
+                typedjson.schema.WithPointer(FalseSchemaReason(), Pointer.empty / "gnu"),
+                typedjson.schema.WithPointer(FalseSchemaReason(), Pointer.empty / "bar")
               )
             )
           )
@@ -625,7 +623,10 @@ class ValidationKeywordTest extends FunSuite {
       validateJson(schema)("""{"foo": "ok"}]""") { checked =>
         assertEquals(checked.results, Seq())
         assert(checked.valid)
-        assertEquals(checked.annotations, Seq(WithPointer(EvaluatedProperties(Set("foo")), Pointer.empty)))
+        assertEquals(
+          checked.annotations,
+          Seq(typedjson.schema.WithPointer(EvaluatedProperties(Set("foo")), Pointer.empty))
+        )
       }
     }
   }

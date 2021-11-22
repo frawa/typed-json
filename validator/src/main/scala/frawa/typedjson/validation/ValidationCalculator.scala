@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.schema
+package frawa.typedjson.validation
+
+import frawa.typedjson.schema.{Checked, Pointer}
 
 class ValidationCalculator extends Calculator[ValidationResult] {
   override def allOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {

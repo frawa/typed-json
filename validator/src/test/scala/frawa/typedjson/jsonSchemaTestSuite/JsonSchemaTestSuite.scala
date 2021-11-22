@@ -16,9 +16,11 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
+import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser.{BoolValue, ObjectValue, StringValue, _}
 import frawa.typedjson.schema.TestUtil._
 import frawa.typedjson.schema._
+import frawa.typedjson.validation.{ValidationChecker, ValidationResult}
 import munit.{FunSuite, TestOptions}
 
 import java.net.URI
@@ -78,7 +80,7 @@ class JsonSchemaTestSuite extends FunSuite {
           }
         assume(includedOnlyId.getOrElse(true), s"excluded by onlyId=${onlyId}")
 
-        val lazyResolver             = (uri: URI) => SpecMetaSchemas.lazyResolver(uri).orElse(Remotes.lazyResolver(uri))
+        val lazyResolver             = (uri: URI) => MetaSchemas.lazyResolver(uri).orElse(Remotes.lazyResolver(uri))
         implicit val useLazyResolver = Some(lazyResolver)
         val schemaValue              = SchemaValue(schema)
         val testId                   = (file, description)

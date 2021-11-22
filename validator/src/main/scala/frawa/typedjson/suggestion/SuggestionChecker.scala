@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.schema
+package frawa.typedjson.suggestion
 
-import frawa.typedjson.parser.Value
-
-import frawa.typedjson.parser.ObjectValue
-import frawa.typedjson.parser.NullValue
-import frawa.typedjson.parser.ArrayValue
-import frawa.typedjson.parser.BoolValue
-import frawa.typedjson.parser.StringValue
-import frawa.typedjson.parser.NumberValue
+import frawa.typedjson.parser._
+import frawa.typedjson.schema._
+import frawa.typedjson.validation.{ValidationChecker, ValidationResult}
 
 case class SuggestionResult(suggestions: Seq[Value], validated: Checked[ValidationResult])
 

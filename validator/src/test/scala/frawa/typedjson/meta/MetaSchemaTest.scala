@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.schemaSpec
+package frawa.typedjson.meta
 
 import munit.FunSuite
 import frawa.typedjson.schema.SchemaValue
 import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.schema.ValidationChecker
 import frawa.typedjson.schema.Checked
-import frawa.typedjson.schema.ValidationResult
-import frawa.typedjson.schema.SpecMetaSchemas
 import frawa.typedjson.schema.LoadedSchemasResolver
 import frawa.typedjson.schema.InnerValue
-
 import frawa.typedjson.schema.TestUtil._
+import frawa.typedjson.validation.{ValidationChecker, ValidationResult}
 
-class SchemaSpecTest extends FunSuite {
+class MetaSchemaTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()
 
-  val resolver                                               = SpecMetaSchemas.lazyResolver
-  val base                                                   = SpecMetaSchemas.draft202012
-  val lazyResolver: Some[LoadedSchemasResolver.LazyResolver] = Some(SpecMetaSchemas.lazyResolver)
+  val resolver                                               = MetaSchemas.lazyResolver
+  val base                                                   = MetaSchemas.draft202012
+  val lazyResolver: Some[LoadedSchemasResolver.LazyResolver] = Some(MetaSchemas.lazyResolver)
 
   def withSchemaSpec(name: String)(f: SchemaValue => Unit): Unit = {
     val Some(schema) = resolver(base.resolve(name))

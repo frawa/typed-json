@@ -16,20 +16,4 @@
 
 package frawa.typedjson.schema
 
-// TODO no defaults?
-case class ValidationResult(
-    errors: Seq[ValidationResult.Error]
-)
-
-object ValidationResult {
-  type Error = WithPointer[Observation]
-
-  def invalid(errors: Seq[Error]): ValidationResult = ValidationResult(errors)
-
-  def invalid(observation: Observation, pointer: Pointer = Pointer.empty): ValidationResult = invalid(
-    Seq(WithPointer(observation, pointer))
-  )
-
-}
-
 case class WithPointer[+R](result: R, pointer: Pointer = Pointer.empty)

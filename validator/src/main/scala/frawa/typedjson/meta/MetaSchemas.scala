@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.schema
+package frawa.typedjson.meta
+
+import frawa.typedjson.macros.Macros
+import frawa.typedjson.schema.UriUtil.uri
+import frawa.typedjson.schema.{LoadedSchemasResolver, SchemaValue}
+import frawa.typedjson.parser._
 
 import java.net.URI
-import frawa.typedjson.parser._
-import frawa.typedjson.macros.Macros
-import UriUtil._
 
-object SpecMetaSchemas {
+object MetaSchemas {
 
   val draft202012: URI = uri("https://json-schema.org/draft/2020-12/")
 
@@ -32,7 +34,7 @@ object SpecMetaSchemas {
   }
 
   private def resolve202012(relative: URI): Option[SchemaValue] = {
-    val name = relative.getSchemeSpecificPart()
+    val name = relative.getSchemeSpecificPart
     name match {
       case "schema"                 => Some(schemaContent)
       case "meta/applicator"        => Some(applicatorContent)
@@ -47,12 +49,13 @@ object SpecMetaSchemas {
   }
 
   import Macros._
-  private val schemaContent           = SchemaValue(jsonContent("./schemaSpec/schema.json"))
-  private val applicatorContent       = SchemaValue(jsonContent("./schemaSpec/meta/applicator.json"))
-  private val contentContent          = SchemaValue(jsonContent("./schemaSpec/meta/content.json"))
-  private val coreContent             = SchemaValue(jsonContent("./schemaSpec/meta/core.json"))
-  private val formatAnnotationContent = SchemaValue(jsonContent("./schemaSpec/meta/format-annotation.json"))
-  private val metaDataContent         = SchemaValue(jsonContent("./schemaSpec/meta/meta-data.json"))
-  private val unevaluatedContent      = SchemaValue(jsonContent("./schemaSpec/meta/unevaluated.json"))
-  private val validationContent       = SchemaValue(jsonContent("./schemaSpec/meta/validation.json"))
+
+  private val schemaContent           = SchemaValue(jsonContent("./metaSchemas/schema.json"))
+  private val applicatorContent       = SchemaValue(jsonContent("./metaSchemas/meta/applicator.json"))
+  private val contentContent          = SchemaValue(jsonContent("./metaSchemas/meta/content.json"))
+  private val coreContent             = SchemaValue(jsonContent("./metaSchemas/meta/core.json"))
+  private val formatAnnotationContent = SchemaValue(jsonContent("./metaSchemas/meta/format-annotation.json"))
+  private val metaDataContent         = SchemaValue(jsonContent("./metaSchemas/meta/meta-data.json"))
+  private val unevaluatedContent      = SchemaValue(jsonContent("./metaSchemas/meta/unevaluated.json"))
+  private val validationContent       = SchemaValue(jsonContent("./metaSchemas/meta/validation.json"))
 }
