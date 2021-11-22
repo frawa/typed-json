@@ -22,7 +22,7 @@ import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.schema.Checked
 import frawa.typedjson.schema.LoadedSchemasResolver
 import frawa.typedjson.schema.InnerValue
-import frawa.typedjson.schema.TestUtil._
+import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.validation.{ValidationChecker, ValidationResult}
 
 class MetaSchemaTest extends FunSuite {

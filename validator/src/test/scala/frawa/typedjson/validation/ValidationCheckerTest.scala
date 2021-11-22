@@ -19,8 +19,8 @@ package frawa.typedjson.validation
 import frawa.typedjson
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser._
-import frawa.typedjson.schema.TestSchemas._
-import frawa.typedjson.schema.TestUtil.{assertChecked, withSchema}
+import frawa.typedjson.testutil.TestSchemas._
+import frawa.typedjson.testutil.TestUtil.{assertChecked, withSchema}
 import frawa.typedjson.schema._
 import munit.FunSuite
 

@@ -20,7 +20,7 @@ import munit.FunSuite
 import frawa.typedjson.parser.NullValue
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.ObjectValue
-import TestUtil._
+import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.util.UriUtil._
 import frawa.typedjson.parser.ZioParser
 

@@ -18,7 +18,7 @@ package frawa.typedjson.validation
 
 import frawa.typedjson
 import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.schema.TestUtil._
+import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.schema._
 import munit.FunSuite
 

@@ -21,8 +21,8 @@ import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.parser.BoolValue
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.ObjectValue
-import TestUtil._
-import TestSchemas._
+import frawa.typedjson.testutil.TestUtil._
+import frawa.typedjson.testutil.TestSchemas._
 
 class ChecksTest extends FunSuite {
   import frawa.typedjson.util.UriUtil._
