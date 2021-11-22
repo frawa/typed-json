@@ -22,118 +22,117 @@ import frawa.typedjson.processor.SchemaProblems.{InvalidSchemaValue, SchemaError
 import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.testutil.TestSchemas._
 
-class ChecksTest extends FunSuite {
+class KeywordsTest extends FunSuite {
   import frawa.typedjson.util.UriUtil._
 
   implicit val zioParser: ZioParser = new ZioParser()
 
-  private def assertChecks(schema: SchemaValue, allowIgnored: Boolean = false)(
-      f: Checks => Unit
+  private def assertKeywords(schema: SchemaValue, allowIgnored: Boolean = false)(
+      f: Keywords => Unit
   ) = {
     implicit val resolver = LoadedSchemasResolver(schema)
     val scope             = DynamicScope.empty
     val withParsed = for {
-      checks <- Checks.parseKeywords(schema, scope)
+      keywords <- Keywords.parseKeywords(schema, scope)
     } yield {
       if (!allowIgnored) {
         assert(
-          checks.ignoredKeywords.isEmpty,
-          clue(s"""unexpected ignored keywords: ${checks.ignoredKeywords.mkString(",")}""")
+          keywords.ignored.isEmpty,
+          clue(s"""unexpected ignored keywords: ${keywords.ignored.mkString(",")}""")
         )
       }
-      f(checks)
+      f(keywords)
     }
     withParsed.swap
       .map(messages => fail("parsing keywords failed", clues(clue(messages))))
       .swap
   }
 
-  private def assertChecksWithIgnored(schema: SchemaValue) = assertChecks(schema, true) _
+  private def assertChecksWithIgnored(schema: SchemaValue) = assertKeywords(schema, true) _
 
   private def assertSchemaErrors(schema: SchemaValue)(
-      f: Checks.SchemaErrors => Unit
+      f: Keywords.SchemaErrors => Unit
   ) = {
     implicit val resolver = LoadedSchemasResolver(schema)
     val scope             = DynamicScope.empty
-    Checks.parseKeywords(schema, scope) match {
+    Keywords.parseKeywords(schema, scope) match {
       case Right(_)     => fail("parsing keywords expected to fail")
       case Left(errors) => f(errors)
     }
   }
 
-  private val noResolve: () => Either[Seq[SchemaError], Checks] = () => Left(Seq.empty[SchemaError])
+  private val noResolve: () => Either[Seq[SchemaError], Keywords] = () => Left(Seq.empty[SchemaError])
 
   // TODO use implicits?
-  private def assertable(checks: Checks): Checks = checks.copy(checks = checks.checks.map(assertable))
-  // private def assertable[T](checks: Seq[T]): Seq[T] = checks.map(assertable)
-  private def assertable(check: Checks.CheckWithLocation): Checks.CheckWithLocation =
-    check.copy(value = assertable(check.value))
-  private def assertable(check: Check): Check = check match {
-    case ArrayItemsCheck(items, prefixItems) =>
-      ArrayItemsCheck(
+  private def assertable(keywords: Keywords): Keywords = keywords.copy(keywords = keywords.keywords.map(assertable))
+  private def assertable(keyword: Keywords.KeywordWithLocation): Keywords.KeywordWithLocation =
+    keyword.copy(value = assertable(keyword.value))
+  private def assertable(keyword: Keyword): Keyword = keyword match {
+    case ArrayItemsKeyword(items, prefixItems) =>
+      ArrayItemsKeyword(
         items.map(assertable),
         prefixItems.map(assertable)
       )
-    case LazyResolveCheck(resolved, resolve) => LazyResolveCheck(resolved, noResolve)
-    case _                                   => check
+    case LazyResolveKeyword(resolved, _) => LazyResolveKeyword(resolved, noResolve)
+    case _                               => keyword
   }
 
   test("null") {
     withSchema(nullSchema) { schema =>
-      assertChecks(schema) { checks =>
-        assertEquals(checks.checks, Seq(WithLocation(uri("#/type"), NullTypeCheck)))
+      assertKeywords(schema) { keywords =>
+        assertEquals(keywords.keywords, Seq(WithLocation(uri("#/type"), NullTypeKeyword)))
       }
     }
   }
 
   test("boolean") {
     withSchema(boolSchema) { schema =>
-      assertChecks(schema) { checks =>
-        assertEquals(checks.checks, Seq(WithLocation(uri("#/type"), BooleanTypeCheck)))
+      assertKeywords(schema) { keywords =>
+        assertEquals(keywords.keywords, Seq(WithLocation(uri("#/type"), BooleanTypeKeyword)))
       }
     }
   }
 
   test("true schema") {
     withSchema(trueSchema) { schema =>
-      assertChecks(schema) { checks =>
-        assertEquals(checks.checks, Seq(WithLocation(uri("#"), TrivialCheck(true))))
+      assertKeywords(schema) { keywords =>
+        assertEquals(keywords.keywords, Seq(WithLocation(uri("#"), TrivialKeyword(true))))
       }
     }
   }
 
   test("false schema") {
     withSchema(falseSchema) { schema =>
-      assertChecks(schema) { checks =>
-        assertEquals(checks.checks, Seq(WithLocation(uri("#"), TrivialCheck(false))))
+      assertKeywords(schema) { keywords =>
+        assertEquals(keywords.keywords, Seq(WithLocation(uri("#"), TrivialKeyword(false))))
       }
     }
   }
 
   test("ignored keyword") {
     withSchema("""{"ignored": false}""") { schema =>
-      assertChecksWithIgnored(schema) { checks =>
-        assertEquals(checks.ignoredKeywords, Set("ignored"))
+      assertChecksWithIgnored(schema) { keywords =>
+        assertEquals(keywords.ignored, Set("ignored"))
       }
     }
   }
 
   test("not false") {
     withSchema(notFalseSchema) { schema =>
-      assertChecks(schema) { checks =>
+      assertKeywords(schema) { keywords =>
         assertEquals(
-          checks.checks,
+          keywords.keywords,
           Seq(
             WithLocation(
               uri("#/not"),
-              NotCheck(
-                Checks(
+              NotKeyword(
+                Keywords(
                   SchemaValue(
                     value = BoolValue(
                       value = false
                     )
                   ),
-                  Seq(WithLocation(uri("#/not"), TrivialCheck(false)))
+                  Seq(WithLocation(uri("#/not"), TrivialKeyword(false)))
                 )
               )
             )
@@ -161,50 +160,50 @@ class ChecksTest extends FunSuite {
 
   test("empty schema") {
     withSchema(emtpySchema) { schema =>
-      assertChecks(schema) { checks =>
-        assertEquals(checks.checks, Seq(WithLocation(uri("#"), TrivialCheck(true))))
+      assertKeywords(schema) { keywords =>
+        assertEquals(keywords.keywords, Seq(WithLocation(uri("#"), TrivialKeyword(true))))
       }
     }
   }
 
   test("string") {
     withSchema(stringSchema) { schema =>
-      assertChecks(schema) { checks =>
-        assertEquals(checks.checks, Seq(WithLocation(uri("#/type"), StringTypeCheck)))
+      assertKeywords(schema) { keywords =>
+        assertEquals(keywords.keywords, Seq(WithLocation(uri("#/type"), StringTypeKeyword)))
       }
     }
   }
 
   test("number") {
     withSchema(numberSchema) { schema =>
-      assertChecks(schema) { checks =>
-        assertEquals(checks.checks, Seq(WithLocation(uri("#/type"), NumberTypeCheck)))
+      assertKeywords(schema) { keywords =>
+        assertEquals(keywords.keywords, Seq(WithLocation(uri("#/type"), NumberTypeKeyword)))
       }
     }
   }
 
   test("array") {
     withSchema(arraySchema) { schema =>
-      assertChecks(schema) { checks =>
-        assertEquals(checks.checks, Seq(WithLocation(uri("#/type"), ArrayTypeCheck)))
+      assertKeywords(schema) { keywords =>
+        assertEquals(keywords.keywords, Seq(WithLocation(uri("#/type"), ArrayTypeKeyword)))
       }
     }
   }
 
   test("array with items") {
     withSchema(numberArraySchema) { schema =>
-      assertChecks(schema) { checks =>
+      assertKeywords(schema) { keywords =>
         assertEquals(
-          checks.checks,
+          keywords.keywords,
           Seq(
-            WithLocation(uri("#/type"), ArrayTypeCheck),
+            WithLocation(uri("#/type"), ArrayTypeKeyword),
             WithLocation(
               uri("#/items"),
-              ArrayItemsCheck(
+              ArrayItemsKeyword(
                 Some(
-                  Checks(
+                  Keywords(
                     numberSchemaValue,
-                    Seq(WithLocation(uri("#/items/type"), NumberTypeCheck))
+                    Seq(WithLocation(uri("#/items/type"), NumberTypeKeyword))
                   )
                 )
               )
@@ -214,22 +213,22 @@ class ChecksTest extends FunSuite {
       }
     }
     withSchema("""{"items": { "type": "number"}, "type": "array"}""") { schema =>
-      assertChecks(schema) { checks =>
+      assertKeywords(schema) { keywords =>
         assertEquals(
-          checks.checks,
+          keywords.keywords,
           Seq(
             WithLocation(
               uri("#/items"),
-              ArrayItemsCheck(
+              ArrayItemsKeyword(
                 Some(
-                  Checks(
+                  Keywords(
                     numberSchemaValue,
-                    Seq(WithLocation(uri("#/items/type"), NumberTypeCheck))
+                    Seq(WithLocation(uri("#/items/type"), NumberTypeKeyword))
                   )
                 )
               )
             ),
-            WithLocation(uri("#/type"), ArrayTypeCheck)
+            WithLocation(uri("#/type"), ArrayTypeKeyword)
           )
         )
       }
@@ -238,28 +237,28 @@ class ChecksTest extends FunSuite {
 
   test("object") {
     withSchema(totoObjectSchema) { schema =>
-      assertChecks(schema) { checks =>
+      assertKeywords(schema) { keywords =>
         assertEquals(
-          checks.checks,
+          keywords.keywords,
           Seq(
-            WithLocation(uri("#/type"), ObjectTypeCheck),
+            WithLocation(uri("#/type"), ObjectTypeKeyword),
             WithLocation(
               uri("#/properties"),
-              ObjectPropertiesCheck(
+              ObjectPropertiesKeyword(
                 Map(
-                  "toto" -> Checks(
+                  "toto" -> Keywords(
                     numberSchemaValue,
-                    checks = List(
-                      WithLocation(uri("#/properties/toto/type"), NumberTypeCheck)
+                    keywords = List(
+                      WithLocation(uri("#/properties/toto/type"), NumberTypeKeyword)
                     ),
-                    ignoredKeywords = Set()
+                    ignored = Set()
                   ),
-                  "titi" -> Checks(
+                  "titi" -> Keywords(
                     stringSchemaValue,
-                    checks = List(
-                      WithLocation(uri("#/properties/titi/type"), StringTypeCheck)
+                    keywords = List(
+                      WithLocation(uri("#/properties/titi/type"), StringTypeKeyword)
                     ),
-                    ignoredKeywords = Set()
+                    ignored = Set()
                   )
                 )
               )
@@ -276,14 +275,14 @@ class ChecksTest extends FunSuite {
                  |"required": ["titi"]
                  |}
                  |""".stripMargin) { schema =>
-      assertChecks(schema) { checks =>
+      assertKeywords(schema) { keywords =>
         assertEquals(
-          checks.checks,
+          keywords.keywords,
           Seq(
-            WithLocation(uri("#/type"), ObjectTypeCheck),
+            WithLocation(uri("#/type"), ObjectTypeKeyword),
             WithLocation(
               uri("#/required"),
-              ObjectRequiredCheck(
+              ObjectRequiredKeyword(
                 names = IndexedSeq(
                   "titi"
                 )
@@ -297,20 +296,20 @@ class ChecksTest extends FunSuite {
 
   test("allOf") {
     withSchema(allOfSchema) { schema =>
-      assertChecks(schema) { checks =>
+      assertKeywords(schema) { keywords =>
         assertEquals(
-          checks.checks,
+          keywords.keywords,
           Seq(
             WithLocation(
               uri("#/allOf"),
-              AllOfCheck(
+              AllOfKeyword(
                 Seq(
-                  Checks(
+                  Keywords(
                     numberSchemaValue,
-                    checks = List(
-                      WithLocation(uri("#/allOf/0/type"), NumberTypeCheck)
+                    keywords = List(
+                      WithLocation(uri("#/allOf/0/type"), NumberTypeKeyword)
                     ),
-                    ignoredKeywords = Set()
+                    ignored = Set()
                   )
                 )
               )
@@ -323,15 +322,15 @@ class ChecksTest extends FunSuite {
 
   test("anyOf") {
     withSchema(anyOfSchema) { schema =>
-      assertChecks(schema) { checks =>
+      assertKeywords(schema) { keywords =>
         assertEquals(
-          checks.checks,
+          keywords.keywords,
           Seq(
             WithLocation(
               uri("#/anyOf"),
-              AnyOfCheck(
+              AnyOfKeyword(
                 Seq(
-                  Checks(
+                  Keywords(
                     schema = SchemaValue(
                       value = ObjectValue(
                         properties = Map(
@@ -341,12 +340,12 @@ class ChecksTest extends FunSuite {
                         )
                       )
                     ),
-                    checks = List(
-                      WithLocation(uri("#/anyOf/0/type"), NumberTypeCheck)
+                    keywords = List(
+                      WithLocation(uri("#/anyOf/0/type"), NumberTypeKeyword)
                     ),
-                    ignoredKeywords = Set()
+                    ignored = Set()
                   ),
-                  Checks(
+                  Keywords(
                     schema = SchemaValue(
                       value = ObjectValue(
                         properties = Map(
@@ -356,10 +355,10 @@ class ChecksTest extends FunSuite {
                         )
                       )
                     ),
-                    checks = List(
-                      WithLocation(uri("#/anyOf/1/type"), StringTypeCheck)
+                    keywords = List(
+                      WithLocation(uri("#/anyOf/1/type"), StringTypeKeyword)
                     ),
-                    ignoredKeywords = Set()
+                    ignored = Set()
                   )
                 )
               )
@@ -372,27 +371,27 @@ class ChecksTest extends FunSuite {
 
   test("oneOf") {
     withSchema(oneOfSchema) { schema =>
-      assertChecks(schema) { checks =>
+      assertKeywords(schema) { keywords =>
         assertEquals(
-          checks.checks,
+          keywords.keywords,
           Seq(
             WithLocation(
               uri("#/oneOf"),
-              OneOfCheck(
+              OneOfKeyword(
                 Seq(
-                  Checks(
+                  Keywords(
                     numberSchemaValue,
-                    checks = List(
-                      WithLocation(uri("#/oneOf/0/type"), NumberTypeCheck)
+                    keywords = List(
+                      WithLocation(uri("#/oneOf/0/type"), NumberTypeKeyword)
                     ),
-                    ignoredKeywords = Set()
+                    ignored = Set()
                   ),
-                  Checks(
+                  Keywords(
                     stringSchemaValue,
-                    checks = List(
-                      WithLocation(uri("#/oneOf/1/type"), StringTypeCheck)
+                    keywords = List(
+                      WithLocation(uri("#/oneOf/1/type"), StringTypeKeyword)
                     ),
-                    ignoredKeywords = Set()
+                    ignored = Set()
                   )
                 )
               )
@@ -405,16 +404,16 @@ class ChecksTest extends FunSuite {
 
   test("if/then/else") {
     withSchema(ifThenElseSchema) { schema =>
-      assertChecks(schema) { checks =>
+      assertKeywords(schema) { keywords =>
         assertEquals(
-          checks.checks,
+          keywords.keywords,
           Seq(
             WithLocation(
               uri("#/if"),
-              IfThenElseCheck(
-                Some(Checks(numberSchemaValue, Seq(WithLocation(uri("#/if/type"), NumberTypeCheck)), Set())),
-                Some(Checks(numberSchemaValue, Seq(WithLocation(uri("#/then/type"), NumberTypeCheck)), Set())),
-                Some(Checks(stringSchemaValue, Seq(WithLocation(uri("#/else/type"), StringTypeCheck)), Set()))
+              IfThenElseKeyword(
+                Some(Keywords(numberSchemaValue, Seq(WithLocation(uri("#/if/type"), NumberTypeKeyword)), Set())),
+                Some(Keywords(numberSchemaValue, Seq(WithLocation(uri("#/then/type"), NumberTypeKeyword)), Set())),
+                Some(Keywords(stringSchemaValue, Seq(WithLocation(uri("#/else/type"), StringTypeKeyword)), Set()))
               )
             )
           )
@@ -425,16 +424,16 @@ class ChecksTest extends FunSuite {
 
   test("null or string") {
     withSchema(nullOrStringSchema) { schema =>
-      assertChecks(schema) { checks =>
+      assertKeywords(schema) { keywords =>
         assertEquals(
-          checks.checks,
+          keywords.keywords,
           Seq(
             WithLocation(
               uri("#/type"),
-              UnionTypeCheck(
+              UnionTypeKeyword(
                 Seq(
-                  WithLocation(uri("#/type"), NullTypeCheck),
-                  WithLocation(uri("#/type"), StringTypeCheck)
+                  WithLocation(uri("#/type"), NullTypeKeyword),
+                  WithLocation(uri("#/type"), StringTypeKeyword)
                 )
               )
             )
@@ -446,14 +445,14 @@ class ChecksTest extends FunSuite {
 
   test("enum") {
     withSchema(enumSchema) { schema =>
-      assertChecks(schema) { checks =>
+      assertKeywords(schema) { keywords =>
         assertEquals(
-          checks.checks,
+          keywords.keywords,
           Seq(
-            WithLocation(uri("#/type"), StringTypeCheck),
+            WithLocation(uri("#/type"), StringTypeKeyword),
             WithLocation(
               uri("#/enum"),
-              EnumCheck(
+              EnumKeyword(
                 values = Seq(
                   StringValue(
                     value = "foo"
@@ -472,14 +471,14 @@ class ChecksTest extends FunSuite {
 
   test("const") {
     withSchema(constSchema) { schema =>
-      assertChecks(schema) { checks =>
+      assertKeywords(schema) { keywords =>
         assertEquals(
-          checks.checks,
+          keywords.keywords,
           Seq(
-            WithLocation(uri("#/type"), StringTypeCheck),
+            WithLocation(uri("#/type"), StringTypeKeyword),
             WithLocation(
               uri("#/const"),
-              EnumCheck(
+              EnumKeyword(
                 values = Seq(
                   StringValue(
                     value = "first"
@@ -495,16 +494,16 @@ class ChecksTest extends FunSuite {
 
   test("$id/$ref/$def") {
     withSchema(idRefDefsSchema) { schema =>
-      assertChecks(schema) { checks =>
+      assertKeywords(schema) { keywords =>
         assertEquals(
-          assertable(checks).checks,
+          assertable(keywords).keywords,
           Seq(
-            WithLocation(uri("https://example.net/root.json#/type"), ArrayTypeCheck),
+            WithLocation(uri("https://example.net/root.json#/type"), ArrayTypeKeyword),
             WithLocation(
               uri("https://example.net/root.json#/items"),
-              ArrayItemsCheck(
+              ArrayItemsKeyword(
                 items = Some(
-                  value = Checks(
+                  value = Keywords(
                     schema = SchemaValue(
                       value = ObjectValue(
                         properties = Map(
@@ -514,13 +513,13 @@ class ChecksTest extends FunSuite {
                         )
                       )
                     ),
-                    checks = List(
+                    keywords = List(
                       WithLocation(
                         uri("https://example.net/root.json#/items/$ref"),
-                        new LazyResolveCheck(uri("https://example.net/root.json#item"), noResolve)
+                        new LazyResolveKeyword(uri("https://example.net/root.json#item"), noResolve)
                       )
                     ),
-                    ignoredKeywords = Set()
+                    ignored = Set()
                   )
                 )
               )
@@ -534,9 +533,9 @@ class ChecksTest extends FunSuite {
   test("recursive $ref/$def") {
     // TODO assert more precisely
     withSchema(recursiveRefDefsSchema) { schema =>
-      assertChecks(schema) { checks =>
+      assertKeywords(schema) { keywords =>
         assertEquals(
-          checks.checks.size,
+          keywords.keywords.size,
           1
         )
       }
@@ -545,9 +544,9 @@ class ChecksTest extends FunSuite {
 
   test("subitem $ref/$def") {
     withSchema(subItemRefDefsSchema) { schema =>
-      assertChecks(schema) { checks =>
+      assertKeywords(schema) { keywords =>
         assertEquals(
-          checks.checks.length,
+          keywords.keywords.length,
           2
         )
       }

@@ -26,19 +26,19 @@ object SuggestionChecker {
 
   def apply(at: Pointer): Checker[SuggestionResult] = Checker(check(at), nested(at))
 
-  private def check(at: Pointer)(check: SimpleCheck)(value: InnerValue): Result[SuggestionResult] = {
+  private def check(at: Pointer)(check: SimpleKeyword)(value: InnerValue): Result[SuggestionResult] = {
     if (at == value.pointer) {
       val suggestions = suggestFor(check)(Seq(Result.valid))
       Result.valid(SuggestionResult(suggestions, Result.valid))
     } else {
-      val checked = ValidationChecker().check(check)(value)
+      val checked = ValidationChecker().simple(check)(value)
       Result(checked.valid, SuggestionResult(Seq(), checked))
     }
   }
 
   private def nested(
       at: Pointer
-  )(check: NestingCheck)(checked: Seq[Result[SuggestionResult]])(value: InnerValue): Result[SuggestionResult] = {
+  )(check: NestingKeyword)(checked: Seq[Result[SuggestionResult]])(value: InnerValue): Result[SuggestionResult] = {
     if (at == value.pointer) {
       val suggestions = suggestFor(check)(checked)
       Result.valid(SuggestionResult(suggestions, Result.valid))
@@ -50,42 +50,34 @@ object SuggestionChecker {
     }
   }
 
-  private def suggestFor(check: Check)(checked: Seq[Result[SuggestionResult]]): Seq[Value] = {
+  private def suggestFor(check: Keyword)(checked: Seq[Result[SuggestionResult]]): Seq[Value] = {
     check match {
-      case NullTypeCheck    => Seq(NullValue)
-      case BooleanTypeCheck => Seq(BoolValue(true))
-      case StringTypeCheck  => Seq(StringValue(""))
-      case NumberTypeCheck  => Seq(NumberValue(0))
-      case ArrayTypeCheck   => Seq(ArrayValue(Seq()))
-      case ObjectTypeCheck  => Seq(ObjectValue(Map()))
-      // case ArrayItemsCheck(items) =>
-      //   items
-      //     .map { checks =>
-      //       checks.checks
-      //         .flatMap(suggestFor(_))
-      //         .map(v => ArrayValue(Seq(v)))
-      //     }
-      //     .getOrElse(Seq(ArrayValue(Seq())))
-      case ObjectPropertiesCheck(properties, patternProperties, additionalProperties) =>
+      case NullTypeKeyword                           => Seq(NullValue)
+      case BooleanTypeKeyword                        => Seq(BoolValue(true))
+      case StringTypeKeyword                         => Seq(StringValue(""))
+      case NumberTypeKeyword                         => Seq(NumberValue(0))
+      case ArrayTypeKeyword                          => Seq(ArrayValue(Seq()))
+      case ObjectTypeKeyword                         => Seq(ObjectValue(Map()))
+      case ObjectPropertiesKeyword(properties, _, _) =>
         // TODO
-        properties.flatMap { case (prop, checks) =>
-          checks.checks
-            .flatMap(check => suggestFor(check.value)(checked))
+        properties.flatMap { case (prop, keywords) =>
+          keywords.keywords
+            .flatMap(keyword => suggestFor(keyword.value)(checked))
             .map(v => ObjectValue(Map(prop -> v)))
         }.toSeq
-      case ObjectRequiredCheck(required) => Seq(ObjectValue(Map.from(required.map((_, NullValue)))))
-      case TrivialCheck(valid)           => Seq()
+      case ObjectRequiredKeyword(required) => Seq(ObjectValue(Map.from(required.map((_, NullValue)))))
+      case TrivialKeyword(valid)           => Seq()
       // case AllOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_))
       // case AnyOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_))
       // case OneOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_))
-      case IfThenElseCheck(ifChecks, thenChecks, elseChecks) =>
+      case IfThenElseKeyword(ifChecks, thenChecks, elseChecks) =>
         Seq(ifChecks, thenChecks, elseChecks)
           .flatMap(identity)
-          .flatMap(_.checks)
+          .flatMap(_.keywords)
           .flatMap(check => suggestFor(check.value)(checked))
       // case UnionTypeCheck(checks) => checks.flatMap(suggestFor(_)(checked))
-      case EnumCheck(values) => values
-      case _                 => checked.flatMap(_.results).flatMap(_.suggestions)
+      case EnumKeyword(values) => values
+      case _                   => checked.flatMap(_.results).flatMap(_.suggestions)
     }
   }
 }

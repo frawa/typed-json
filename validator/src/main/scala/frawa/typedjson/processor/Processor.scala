@@ -27,9 +27,9 @@ case class Processor[R] private[processor] (private val process: Processor.Proce
 }
 
 object Processor {
-  import Checks.CheckWithLocation
+  import Keywords.KeywordWithLocation
 
-  type SchemaErrors  = Checks.SchemaErrors
+  type SchemaErrors  = Keywords.SchemaErrors
   type ProcessFun[R] = InnerValue => Result[R]
   type MergeFun[R]   = Seq[Result[R]] => ProcessFun[R]
 
@@ -40,18 +40,18 @@ object Processor {
 
     val scope = DynamicScope.empty.push(resolver.base)
     for {
-      checks <- Checks.parseKeywords(schema, scope)
-      processor = Processor(all(checker, checks), SchemaProblems.empty.addIgnoredKeywords(checks.ignoredKeywords))
+      keywords <- Keywords.parseKeywords(schema, scope)
+      processor = Processor(all(checker, keywords), SchemaProblems.empty.addIgnoredKeywords(keywords.ignored))
     } yield processor
   }
 
-  private def all[R](checker: Checker[R], checks: Checks): ProcessFun[R] = {
-    seq(checks.checks.map(one(checker, _)))
-      .andThen(_.add(SchemaProblems.empty.addIgnoredKeywords(checks.ignoredKeywords)))
+  private def all[R](checker: Checker[R], keywords: Keywords): ProcessFun[R] = {
+    seq(keywords.keywords.map(one(checker, _)))
+      .andThen(_.add(SchemaProblems.empty.addIgnoredKeywords(keywords.ignored)))
   }
 
-  private def noop[R]: ProcessFun[R]                                            = _ => Result.valid[R]
-  private def simple[R](checker: Checker[R], check: SimpleCheck): ProcessFun[R] = checker.check(check)
+  private def noop[R]: ProcessFun[R]                                              = _ => Result.valid[R]
+  private def simple[R](checker: Checker[R], check: SimpleKeyword): ProcessFun[R] = checker.simple(check)
   private def seq[R](ps: Seq[ProcessFun[R]]): ProcessFun[R] = value => Result.merge(ps.map(_(value)))
   private def option[R](p: Option[ProcessFun[R]]): ProcessFun[R] = {
     p.getOrElse(noop)
@@ -114,51 +114,51 @@ object Processor {
     mergeAll(merge, checked, value)
   }
 
-  private def one[R](checker: Checker[R], check: CheckWithLocation): ProcessFun[R] = {
+  private def one[R](checker: Checker[R], check: KeywordWithLocation): ProcessFun[R] = {
     check.value match {
-      case c: SimpleCheck  => value => simple(checker, c)(value)
-      case c: NestingCheck => value => nesting(checker, c)(value)
+      case c: SimpleKeyword  => value => simple(checker, c)(value)
+      case c: NestingKeyword => value => nesting(checker, c)(value)
     }
   }
 
-  private def nesting[R](checker: Checker[R], check: NestingCheck): ProcessFun[R] =
+  private def nesting[R](checker: Checker[R], check: NestingKeyword): ProcessFun[R] =
     check match {
-      case c: ArrayItemsCheck            => checkArrayItems(checker, c)
-      case c: ObjectPropertiesCheck      => checkObjectProperties(checker, c)
-      case c: NotCheck                   => checkApplicator(checker, Seq(c.checks))(checker.nested(check))
-      case c: AllOfCheck                 => checkApplicator(checker, c.checks)(checker.nested(check))
-      case c: AnyOfCheck                 => checkApplicator(checker, c.checks)(checker.nested(check))
-      case c: OneOfCheck                 => checkApplicator(checker, c.checks)(checker.nested(check))
-      case c: UnionTypeCheck             => checkUnionType(checker, c)(checker.nested(check))
-      case c: IfThenElseCheck            => checkIfThenElse(checker, c)
-      case c: PropertyNamesCheck         => checkPropertyNames(checker, c)
-      case c: LazyResolveCheck           => checkLazyResolve(checker, c)
-      case c: DependentSchemasCheck      => checkDependentSchemas(checker, c)
-      case c: ContainsCheck              => checkContains(checker, c)
-      case c: UnevaluatedItemsCheck      => checkUnevaluated(checker, c)
-      case c: UnevaluatedPropertiesCheck => checkUnevaluated(checker, c)
+      case c: ArrayItemsKeyword            => checkArrayItems(checker, c)
+      case c: ObjectPropertiesKeyword      => checkObjectProperties(checker, c)
+      case c: NotKeyword                   => checkApplicator(checker, Seq(c.keywords))(checker.nested(check))
+      case c: AllOfKeyword                 => checkApplicator(checker, c.keywords)(checker.nested(check))
+      case c: AnyOfKeyword                 => checkApplicator(checker, c.keywords)(checker.nested(check))
+      case c: OneOfKeyword                 => checkApplicator(checker, c.keywords)(checker.nested(check))
+      case c: UnionTypeKeyword             => checkUnionType(checker, c)(checker.nested(check))
+      case c: IfThenElseKeyword            => checkIfThenElse(checker, c)
+      case c: PropertyNamesKeyword         => checkPropertyNames(checker, c)
+      case c: LazyResolveKeyword           => checkLazyResolve(checker, c)
+      case c: DependentSchemasKeyword      => checkDependentSchemas(checker, c)
+      case c: ContainsKeyword              => checkContains(checker, c)
+      case c: UnevaluatedItemsKeyword      => checkUnevaluated(checker, c)
+      case c: UnevaluatedPropertiesKeyword => checkUnevaluated(checker, c)
     }
 
-  private def checkArrayItems[R](checker: Checker[R], check: ArrayItemsCheck): ProcessFun[R] = {
+  private def checkArrayItems[R](checker: Checker[R], check: ArrayItemsKeyword): ProcessFun[R] = {
     val pPrefix = check.prefixItems.map(all(checker, _))
     val pItems  = check.items.map(all(checker, _))
     val merge   = checker.nested(check)
     applyToArray(pPrefix, pItems)(merge)
   }
 
-  private def checkObjectProperties[R](checker: Checker[R], check: ObjectPropertiesCheck): ProcessFun[R] = {
-    val psProperties = check.properties.map { case (key, checks) =>
+  private def checkObjectProperties[R](checker: Checker[R], keyword: ObjectPropertiesKeyword): ProcessFun[R] = {
+    val psProperties = keyword.properties.map { case (key, keywords) =>
       val partial: PartialFunction[String, () => ProcessFun[R]] = {
         case k if k == key =>
-          () => all(checker, checks)
+          () => all(checker, keywords)
       }
       partial
     }.toSeq
 
-    val psPatterns = check.patternProperties.map { case (regex, checks) =>
+    val psPatterns = keyword.patternProperties.map { case (regex, keywords) =>
       val r = regex.r
       val partial: PartialFunction[String, () => ProcessFun[R]] = {
-        case k if r.findFirstIn(k).isDefined => () => all(checker, checks)
+        case k if r.findFirstIn(k).isDefined => () => all(checker, keywords)
       }
       partial
     }.toSeq
@@ -170,45 +170,45 @@ object Processor {
         () => seq(psBoth.map(_.lift).flatMap { p => p(k).map(_()) })
     }
 
-    val psAdditional = check.additionalProperties.map { checks =>
-      val partial: PartialFunction[String, () => ProcessFun[R]] = { _ => () => all(checker, checks) }
+    val psAdditional = keyword.additionalProperties.map { keywords =>
+      val partial: PartialFunction[String, () => ProcessFun[R]] = { _ => () => all(checker, keywords) }
       partial
     }
 
     val ps    = psAdditional.map(psAll.orElse(_)).getOrElse(psAll)
-    val merge = checker.nested(check)
+    val merge = checker.nested(keyword)
     value => {
       applyToObject(ps)(merge)(value)
     }
   }
 
-  private def checkApplicator[R](checker: Checker[R], checks: Seq[Checks])(merge: MergeFun[R]): ProcessFun[R] = {
-    val p = checks.map(all(checker, _))
+  private def checkApplicator[R](checker: Checker[R], keywords: Seq[Keywords])(merge: MergeFun[R]): ProcessFun[R] = {
+    val p = keywords.map(all(checker, _))
     applyToValue(p)(merge)
   }
 
-  private def checkUnionType[R](checker: Checker[R], check: UnionTypeCheck)(merge: MergeFun[R]): ProcessFun[R] = {
-    val p = check.checks.map(one(checker, _))
+  private def checkUnionType[R](checker: Checker[R], keyword: UnionTypeKeyword)(merge: MergeFun[R]): ProcessFun[R] = {
+    val p = keyword.keywords.map(one(checker, _))
     applyToValue(p)(merge)
   }
 
-  private def checkIfThenElse[R](checker: Checker[R], check: IfThenElseCheck): ProcessFun[R] = {
-    check.ifChecks
+  private def checkIfThenElse[R](checker: Checker[R], keyword: IfThenElseKeyword): ProcessFun[R] = {
+    keyword.ifKeywords
       .map(ifChecks =>
         applyCondition(
           all(checker, ifChecks),
-          option(check.thenChecks.map(all(checker, _))),
-          option(check.elseChecks.map(all(checker, _)))
-        )(checker.nested(check))
+          option(keyword.thenKeywords.map(all(checker, _))),
+          option(keyword.elseKeywords.map(all(checker, _)))
+        )(checker.nested(keyword))
       )
       .getOrElse(noop)
   }
 
-  private def checkPropertyNames[R](checker: Checker[R], check: PropertyNamesCheck): ProcessFun[R] = { value =>
+  private def checkPropertyNames[R](checker: Checker[R], keyword: PropertyNamesKeyword): ProcessFun[R] = { value =>
     value.value match {
       case ObjectValue(vs) =>
-        val p     = all(checker, check.checks)
-        val merge = checker.nested(check)
+        val p     = all(checker, keyword.keywords)
+        val merge = checker.nested(keyword)
         val names = vs.keySet
         val checked = names.map { name =>
           (name, p(InnerValue(StringValue(name), value.pointer / name)))
@@ -220,9 +220,9 @@ object Processor {
     }
   }
 
-  private def checkLazyResolve[R](checker: Checker[R], check: LazyResolveCheck): ProcessFun[R] = {
-    check.resolve() match {
-      case Right(checks) => all(checker, checks)
+  private def checkLazyResolve[R](checker: Checker[R], keyword: LazyResolveKeyword): ProcessFun[R] = {
+    keyword.resolve() match {
+      case Right(keywords) => all(checker, keywords)
       case Left(errors) =>
         _ =>
           val problems = SchemaProblems.empty.addErrors(errors)
@@ -230,24 +230,25 @@ object Processor {
     }
   }
 
-  private def checkDependentSchemas[R](checker: Checker[R], check: DependentSchemasCheck): ProcessFun[R] = { value =>
-    value.value match {
-      case ObjectValue(v) =>
-        val ps      = v.keySet.flatMap(check.checks.get).map(all(checker, _)).toSeq
-        val merge   = checker.nested(check)
-        val checked = ps.map(_(value))
-        mergeAll(merge, checked, value)
-      case _ => Result.valid
-    }
+  private def checkDependentSchemas[R](checker: Checker[R], keyword: DependentSchemasKeyword): ProcessFun[R] = {
+    value =>
+      value.value match {
+        case ObjectValue(v) =>
+          val ps      = v.keySet.flatMap(keyword.keywords.get).map(all(checker, _)).toSeq
+          val merge   = checker.nested(keyword)
+          val checked = ps.map(_(value))
+          mergeAll(merge, checked, value)
+        case _ => Result.valid
+      }
   }
 
-  private def checkContains[R](checker: Checker[R], check: ContainsCheck): ProcessFun[R] = { value =>
+  private def checkContains[R](checker: Checker[R], keyword: ContainsKeyword): ProcessFun[R] = { value =>
     value.value match {
       case ArrayValue(vs) =>
-        check.schema
+        keyword.schema
           .map { schema =>
             val p     = all(checker, schema)
-            val merge = checker.nested(check)
+            val merge = checker.nested(keyword)
             val indexed = vs.zipWithIndex
               .map { case (v, index) =>
                 InnerValue(v, value.pointer / index)
@@ -263,8 +264,8 @@ object Processor {
     }
   }
 
-  private def checkUnevaluated[R](checker: Checker[R], check: UnevaluatedItemsCheck): ProcessFun[R] = { value =>
-    val p       = all(checker, check.pushedChecks)
+  private def checkUnevaluated[R](checker: Checker[R], keyword: UnevaluatedItemsKeyword): ProcessFun[R] = { value =>
+    val p       = all(checker, keyword.pushed)
     val checked = p(value)
     value.value match {
       case ArrayValue(vs) =>
@@ -275,7 +276,7 @@ object Processor {
             case _                                         => Seq()
           }
           .toSet
-        val pUnevaluated = all(checker, check.unevaluated)
+        val pUnevaluated = all(checker, keyword.unevaluated)
         val indexed = vs.zipWithIndex
           .map { case (v, index) =>
             (index, InnerValue(v, value.pointer / index))
@@ -284,7 +285,7 @@ object Processor {
           .filterNot { case (index, _) => evaluated.contains(index) }
           .map(_._2)
           .map(pUnevaluated)
-        val merge      = checker.nested(check)
+        val merge      = checker.nested(keyword)
         val allIndices = Seq.range(0, vs.size)
         mergeAll(merge, Seq(checked) ++ checkedUnevaluated, value)
           .add(processor.WithPointer(EvaluatedIndices(allIndices), value.pointer))
@@ -292,30 +293,31 @@ object Processor {
     }
   }
 
-  private def checkUnevaluated[R](checker: Checker[R], check: UnevaluatedPropertiesCheck): ProcessFun[R] = { value =>
-    val p       = all(checker, check.pushedChecks)
-    val checked = p(value)
-    value.value match {
-      case ObjectValue(vs) =>
-        val evaluated = checked.annotations
-          .filter(_.pointer == value.pointer)
-          .flatMap {
-            case WithPointer(EvaluatedProperties(properties), _) => properties
-            case _                                               => Seq()
-          }
-          .toSet
-        val pUnevaluated = all(checker, check.unevaluated)
-        val checkedUnevaluated = vs
-          .filterNot { case (prop, _) => evaluated.contains(prop) }
-          .map { case (prop, v) =>
-            pUnevaluated(InnerValue(v, value.pointer / prop))
-          }
-          .toSeq
-        val merge         = checker.nested(check)
-        val allProperties = vs.keySet
-        mergeAll(merge, Seq(checked) ++ checkedUnevaluated, value)
-          .add(processor.WithPointer(EvaluatedProperties(allProperties), value.pointer))
-      case _ => checked
-    }
+  private def checkUnevaluated[R](checker: Checker[R], keyword: UnevaluatedPropertiesKeyword): ProcessFun[R] = {
+    value =>
+      val p       = all(checker, keyword.pushed)
+      val checked = p(value)
+      value.value match {
+        case ObjectValue(vs) =>
+          val evaluated = checked.annotations
+            .filter(_.pointer == value.pointer)
+            .flatMap {
+              case WithPointer(EvaluatedProperties(properties), _) => properties
+              case _                                               => Seq()
+            }
+            .toSet
+          val pUnevaluated = all(checker, keyword.unevaluated)
+          val checkedUnevaluated = vs
+            .filterNot { case (prop, _) => evaluated.contains(prop) }
+            .map { case (prop, v) =>
+              pUnevaluated(InnerValue(v, value.pointer / prop))
+            }
+            .toSeq
+          val merge         = checker.nested(keyword)
+          val allProperties = vs.keySet
+          mergeAll(merge, Seq(checked) ++ checkedUnevaluated, value)
+            .add(processor.WithPointer(EvaluatedProperties(allProperties), value.pointer))
+        case _ => checked
+      }
   }
 }

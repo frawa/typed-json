@@ -40,7 +40,7 @@ case class FormatMismatch(format: String)                              extends O
 case class MinimumMismatch(min: BigDecimal, exclude: Boolean)          extends Observation
 case class ItemsNotUnique()                                            extends Observation
 case class UnsupportedFormat(format: String)                           extends Observation
-case class UnsupportedCheck(check: Check)                              extends Observation
+case class UnsupportedCheck(check: Keyword)                            extends Observation
 case class NotMultipleOf(n: BigDecimal)                                extends Observation
 case class MaximumMismatch(max: BigDecimal, exclude: Boolean)          extends Observation
 case class MaxLengthMismatch(max: BigDecimal)                          extends Observation
@@ -76,51 +76,51 @@ object ValidationChecker {
 
   private type ProcessFun = Processor.ProcessFun[ValidationResult]
 
-  private def check(check: SimpleCheck): ProcessFun = {
+  private def check(check: SimpleKeyword): ProcessFun = {
     check match {
-      case NullTypeCheck                 => checkType(nullTypeMismatch)
-      case BooleanTypeCheck              => checkType(booleanTypeMismatch)
-      case StringTypeCheck               => checkType(stringTypeMismatch)
-      case NumberTypeCheck               => checkType(numberTypeMismatch)
-      case IntegerTypeCheck              => checkInteger()
-      case ArrayTypeCheck                => checkType(arrayTypeMismatch)
-      case ObjectTypeCheck               => checkType(objectTypeMismatch)
-      case ObjectRequiredCheck(required) => checkObjectRequired(required)
-      case TrivialCheck(valid)           => checkTrivial(valid)
-      case EnumCheck(values)             => checkEnum(values)
-      case PatternCheck(pattern)         => checkPattern(pattern)
-      case FormatCheck(format)           => checkFormat(format)
-      case MinimumCheck(v, exclude)      => checkMinimum(v, exclude)
-      case UniqueItemsCheck(v)           => checkUniqueItems(v)
-      case MultipleOfCheck(n)            => checkMultipleOf(n)
-      case MaximumCheck(v, exclude)      => checkMaximum(v, exclude)
-      case MaxLengthCheck(v)             => checkMaxLength(v)
-      case MinLengthCheck(v)             => checkMinLength(v)
-      case MaxItemsCheck(v)              => checkMaxItems(v)
-      case MinItemsCheck(v)              => checkMinItems(v)
-      case MaxPropertiesCheck(v)         => checkMaxProperties(v)
-      case MinPropertiesCheck(v)         => checkMinProperties(v)
-      case DependentRequiredCheck(v)     => checkDependentRequired(v)
-      case _                             => _ => Result.invalid(ValidationResult.invalid(UnsupportedCheck(check)))
+      case NullTypeKeyword                 => checkType(nullTypeMismatch)
+      case BooleanTypeKeyword              => checkType(booleanTypeMismatch)
+      case StringTypeKeyword               => checkType(stringTypeMismatch)
+      case NumberTypeKeyword               => checkType(numberTypeMismatch)
+      case IntegerTypeKeyword              => checkInteger()
+      case ArrayTypeKeyword                => checkType(arrayTypeMismatch)
+      case ObjectTypeKeyword               => checkType(objectTypeMismatch)
+      case ObjectRequiredKeyword(required) => checkObjectRequired(required)
+      case TrivialKeyword(valid)           => checkTrivial(valid)
+      case EnumKeyword(values)             => checkEnum(values)
+      case PatternKeyword(pattern)         => checkPattern(pattern)
+      case FormatKeyword(format)           => checkFormat(format)
+      case MinimumKeyword(v, exclude)      => checkMinimum(v, exclude)
+      case UniqueItemsKeyword(v)           => checkUniqueItems(v)
+      case MultipleOfKeyword(n)            => checkMultipleOf(n)
+      case MaximumKeyword(v, exclude)      => checkMaximum(v, exclude)
+      case MaxLengthKeyword(v)             => checkMaxLength(v)
+      case MinLengthKeyword(v)             => checkMinLength(v)
+      case MaxItemsKeyword(v)              => checkMaxItems(v)
+      case MinItemsKeyword(v)              => checkMinItems(v)
+      case MaxPropertiesKeyword(v)         => checkMaxProperties(v)
+      case MinPropertiesKeyword(v)         => checkMinProperties(v)
+      case DependentRequiredKeyword(v)     => checkDependentRequired(v)
+      case _                               => _ => Result.invalid(ValidationResult.invalid(UnsupportedCheck(check)))
     }
   }
 
-  private def nested(check: NestingCheck)(checked: Seq[Result[ValidationResult]]): ProcessFun = { value =>
+  private def nested(check: NestingKeyword)(checked: Seq[Result[ValidationResult]]): ProcessFun = { value =>
     check match {
-      case AllOfCheck(_)                  => calc.allOf(checked, value.pointer)
-      case AnyOfCheck(_)                  => calc.anyOf(checked, value.pointer)
-      case OneOfCheck(_)                  => calc.oneOf(checked, value.pointer)
-      case NotCheck(_)                    => calc.not(checked, value.pointer)
-      case UnionTypeCheck(_)              => calc.oneOf(checked, value.pointer)
-      case ObjectPropertiesCheck(_, _, _) => calc.allOf(checked, value.pointer)
-      case ArrayItemsCheck(_, _)          => calc.allOf(checked, value.pointer)
-      case IfThenElseCheck(_, _, _)       => calc.ifThenElse(checked, value.pointer)
-      case PropertyNamesCheck(_)          => calc.allOf(checked, value.pointer)
-      case c: LazyResolveCheck            => calc.allOf(checked, value.pointer)
-      case DependentSchemasCheck(_)       => calc.allOf(checked, value.pointer)
-      case ContainsCheck(_, min, max)     => calc.contains(checked, value.pointer, min, max)
-      case c: UnevaluatedItemsCheck       => calc.allOf(checked, value.pointer)
-      case c: UnevaluatedPropertiesCheck  => calc.allOf(checked, value.pointer)
+      case AllOfKeyword(_)                  => calc.allOf(checked, value.pointer)
+      case AnyOfKeyword(_)                  => calc.anyOf(checked, value.pointer)
+      case OneOfKeyword(_)                  => calc.oneOf(checked, value.pointer)
+      case NotKeyword(_)                    => calc.not(checked, value.pointer)
+      case UnionTypeKeyword(_)              => calc.oneOf(checked, value.pointer)
+      case ObjectPropertiesKeyword(_, _, _) => calc.allOf(checked, value.pointer)
+      case ArrayItemsKeyword(_, _)          => calc.allOf(checked, value.pointer)
+      case IfThenElseKeyword(_, _, _)       => calc.ifThenElse(checked, value.pointer)
+      case PropertyNamesKeyword(_)          => calc.allOf(checked, value.pointer)
+      case c: LazyResolveKeyword            => calc.allOf(checked, value.pointer)
+      case DependentSchemasKeyword(_)       => calc.allOf(checked, value.pointer)
+      case ContainsKeyword(_, min, max)     => calc.contains(checked, value.pointer, min, max)
+      case c: UnevaluatedItemsKeyword       => calc.allOf(checked, value.pointer)
+      case c: UnevaluatedPropertiesKeyword  => calc.allOf(checked, value.pointer)
     }
   }
 
