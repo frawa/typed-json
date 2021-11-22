@@ -25,6 +25,8 @@ import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue
 
 import java.net.URI
+//import java.time.OffsetTime
+//import java.time.format.{DateTimeFormatter, ResolverStyle}
 import scala.reflect.ClassTag
 import java.util.regex.Pattern
 import scala.util.Try
@@ -285,9 +287,10 @@ object ValidationChecker {
       case "date-time" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
         checkStringValue(FormatMismatch(format)) { v =>
-          val `regex-date` = "\\d{4}-\\d{2}-\\d{2}"
-          val `regex-time` = "\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|(+|-)\\d{2}:\\d{2})"
-          s"${`regex-date`}T${`regex-time`}".r.matches(v)
+          val regex_date = "\\d{4}-\\d{2}-\\d{2}"
+          val regex_time = "\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|([+\\-])\\d{2}:\\d{2})"
+          val date_time  = s"${regex_date}T${regex_time}"
+          date_time.r.matches(v)
         }
       case "date" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
@@ -301,9 +304,28 @@ object ValidationChecker {
         // https://datatracker.ietf.org/doc/html/rfc3339
         checkStringValue(FormatMismatch(format)) { v =>
           val `regex-time` = {
-            "\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|(+|-)\\d{2}:\\d{2})".r
+            "(\\d{2}):(\\d{2}):(\\d{2})(\\.\\d+)?(Z|([+\\-]\\d{2}:\\d{2}))".r
           }
-          `regex-time`.matches(v)
+          `regex-time`
+            .findFirstMatchIn(v)
+            .exists { m =>
+              val hour   = m.group(1).toInt
+              val minute = m.group(2).toInt
+              val second = m.group(3).toInt
+              Range.inclusive(0, 23).contains(hour) &&
+              Range.inclusive(0, 59).contains(minute) &&
+              Range.inclusive(0, 59).contains(second)
+            }
+//          Try {
+////            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss[.SSS]XXX")
+//            val formatter = DateTimeFormatter
+//              .ofPattern("HH:mm:ss[.SSS]XXX")
+//              .withResolverStyle(ResolverStyle.STRICT);
+//            OffsetTime.parse(v, formatter)
+//          }.recover { ex =>
+//            println("FW ?", ex)
+//            throw ex
+//          }.isSuccess
         }
       case "duration" =>
         // https://datatracker.ietf.org/doc/html/rfc3339

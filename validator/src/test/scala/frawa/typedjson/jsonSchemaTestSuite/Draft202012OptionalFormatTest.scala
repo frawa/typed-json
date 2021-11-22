@@ -28,7 +28,7 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite {
     "date-time.json",
     "date.json",
     "idn-hostname.json",
-    "time.json",
+//    "time.json",
     "uri-template.json"
   )
 
@@ -62,6 +62,18 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite {
     ),
     ("uuid.json", "uuid format") -> Set(
       "wrong length"
+    ),
+    ("time.json", "validation of time strings") -> Set(
+      "a valid time string with leap second, Zulu",
+      "valid leap second, zero time-offset",
+      "valid leap second, positive time-offset",
+      "valid leap second, large positive time-offset",
+      "valid leap second, negative time-offset",
+      "valid leap second, large negative time-offset",
+      "a valid time string with case-insensitive Z",
+      "an invalid time string with invalid time numoffset hour",
+      "an invalid time string with invalid time numoffset minute",
+      "an invalid time string with invalid time with both Z and numoffset"
     )
   )
 
