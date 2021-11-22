@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.schema
+package frawa.typedjson.processor
 
-import frawa.typedjson.parser.Value
+import frawa.typedjson.parser.{StringValue, Value}
 
-case class InnerValue(value: Value, pointer: Pointer = Pointer.empty)
+case class SchemaValue(value: Value)
+
+object SchemaValue {
+  def id(schema: SchemaValue): Option[String] = {
+    (Pointer.empty / "$id")(schema.value).flatMap {
+      case StringValue(id) => Some(id)
+      case _               => None
+    }
+  }
+}

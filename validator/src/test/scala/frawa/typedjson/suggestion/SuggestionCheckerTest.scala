@@ -19,7 +19,7 @@ package frawa.typedjson.suggestion
 import frawa.typedjson.parser._
 import frawa.typedjson.testutil.TestSchemas.{numberArraySchema, totoObjectSchema, totoRequiredObjectSchema}
 import frawa.typedjson.testutil.TestUtil.{assertChecked, withSchema}
-import frawa.typedjson.schema.{LoadedSchemasResolver, Pointer, SchemaValue}
+import frawa.typedjson.processor.{LoadedSchemasResolver, Pointer, SchemaValue}
 import munit.FunSuite
 
 class SuggestCheckerTest extends FunSuite {

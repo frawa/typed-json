@@ -17,11 +17,11 @@
 package frawa.typedjson.meta
 
 import munit.FunSuite
-import frawa.typedjson.schema.SchemaValue
+import frawa.typedjson.processor.SchemaValue
 import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.schema.Checked
-import frawa.typedjson.schema.LoadedSchemasResolver
-import frawa.typedjson.schema.InnerValue
+import frawa.typedjson.processor.Checked
+import frawa.typedjson.processor.LoadedSchemasResolver
+import frawa.typedjson.processor.InnerValue
 import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.validation.{ValidationChecker, ValidationResult}
 

@@ -17,7 +17,7 @@
 package frawa.typedjson.suggestion
 
 import frawa.typedjson.parser._
-import frawa.typedjson.schema._
+import frawa.typedjson.processor._
 import frawa.typedjson.validation.{ValidationChecker, ValidationResult}
 
 case class SuggestionResult(suggestions: Seq[Value], validated: Checked[ValidationResult])

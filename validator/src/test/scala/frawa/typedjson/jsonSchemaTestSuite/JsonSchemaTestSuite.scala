@@ -19,7 +19,7 @@ package frawa.typedjson.jsonSchemaTestSuite
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser.{BoolValue, ObjectValue, StringValue, _}
 import frawa.typedjson.testutil.TestUtil._
-import frawa.typedjson.schema._
+import frawa.typedjson.processor._
 import frawa.typedjson.testutil.TestUtil
 import frawa.typedjson.validation.{ValidationChecker, ValidationResult}
 import munit.{FunSuite, TestOptions}

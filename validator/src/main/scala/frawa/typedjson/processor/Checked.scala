@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.schema
+package frawa.typedjson.processor
 
 object Checked {
   type Annotation = WithPointer[Observation2]

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.schema
+package frawa.typedjson.processor
 
 import frawa.typedjson.util.UriUtil
 import frawa.typedjson.util.UriUtil._

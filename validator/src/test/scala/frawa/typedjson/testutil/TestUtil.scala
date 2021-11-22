@@ -1,7 +1,7 @@
 package frawa.typedjson.testutil
 
 import frawa.typedjson.parser.{Parser, Value}
-import frawa.typedjson.schema._
+import frawa.typedjson.processor._
 import munit.Assertions.{assertEquals, clue, clues, fail}
 
 object TestUtil {

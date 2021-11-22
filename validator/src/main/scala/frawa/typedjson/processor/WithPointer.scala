@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.schema
+package frawa.typedjson.processor
 
 case class WithPointer[+R](result: R, pointer: Pointer = Pointer.empty)

@@ -16,7 +16,7 @@
 
 package frawa.typedjson.validation
 
-import frawa.typedjson.schema.{Pointer, WithPointer}
+import frawa.typedjson.processor.{Pointer, WithPointer}
 
 // TODO no defaults?
 case class ValidationResult(

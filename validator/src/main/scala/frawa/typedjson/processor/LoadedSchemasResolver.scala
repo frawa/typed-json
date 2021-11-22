@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.schema
+package frawa.typedjson.processor
 
 import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue

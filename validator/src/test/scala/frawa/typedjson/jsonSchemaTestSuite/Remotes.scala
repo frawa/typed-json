@@ -17,10 +17,10 @@
 package frawa.typedjson.jsonSchemaTestSuite
 
 import java.net.URI
-import frawa.typedjson.schema.LoadedSchemasResolver
+import frawa.typedjson.processor.LoadedSchemasResolver
 import frawa.typedjson.parser.Parser
 import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.schema.SchemaValue
+import frawa.typedjson.processor.SchemaValue
 import frawa.typedjson.util.UriUtil
 
 object Remotes {
