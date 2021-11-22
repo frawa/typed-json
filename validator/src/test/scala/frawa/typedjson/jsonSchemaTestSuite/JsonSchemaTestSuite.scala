@@ -16,9 +16,12 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
+import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser.{BoolValue, ObjectValue, StringValue, _}
-import frawa.typedjson.schema.TestUtil._
-import frawa.typedjson.schema._
+import frawa.typedjson.testutil.TestUtil._
+import frawa.typedjson.processor._
+import frawa.typedjson.testutil.TestUtil
+import frawa.typedjson.validation.{ValidationEval, ValidationResult}
 import munit.{FunSuite, TestOptions}
 
 import java.net.URI
@@ -78,14 +81,14 @@ class JsonSchemaTestSuite extends FunSuite {
           }
         assume(includedOnlyId.getOrElse(true), s"excluded by onlyId=${onlyId}")
 
-        val lazyResolver             = (uri: URI) => SpecMetaSchemas.lazyResolver(uri).orElse(Remotes.lazyResolver(uri))
+        val lazyResolver             = (uri: URI) => MetaSchemas.lazyResolver(uri).orElse(Remotes.lazyResolver(uri))
         implicit val useLazyResolver = Some(lazyResolver)
         val schemaValue              = SchemaValue(schema)
         val testId                   = (file, description)
 
         val hasIgnoredFailMessage = ignoreFailMessageByDescription.contains(testId)
         if (oneTestPerData || hasIgnoredFailMessage) {
-          withStrictProcessor(ValidationChecker())(schemaValue) { processor =>
+          withStrictProcessor(ValidationEval())(schemaValue) { processor =>
             tests.foreach { value =>
               val data     = testData(value)
               val testName = s"${file} | ${data.failMessage} | ${description}"
@@ -103,7 +106,7 @@ class JsonSchemaTestSuite extends FunSuite {
           }
         } else {
           test(suiteOptions) {
-            withStrictProcessor(ValidationChecker())(schemaValue) { processor =>
+            withStrictProcessor(ValidationEval())(schemaValue) { processor =>
               tests
                 .map(testData)
                 .foreach {
@@ -117,16 +120,16 @@ class JsonSchemaTestSuite extends FunSuite {
   }
 
   private def assertOne(processor: Processor[ValidationResult]): TestData => Unit = { data =>
-    val checked = processor(InnerValue(data.data))
+    val result = processor(InnerValue(data.data))
 
-    if (checked.valid != data.expectedValid) {
+    if (result.valid != data.expectedValid) {
       implicit val loc = munit.Location.empty
-      if (!checked.valid) {
-        assertEquals(checked.validation.errors, Seq(), data.failMessage)
-        assertEquals(checked.validation.ignoredKeywords, Set.empty[String], data.failMessage)
-        assertEquals(checked.results, Seq(), data.failMessage)
+      if (!result.valid) {
+        assertEquals(result.problems.errors, Seq(), data.failMessage)
+        assertEquals(result.problems.ignoredKeywords, Set.empty[String], data.failMessage)
+        assertEquals(result.results, Seq(), data.failMessage)
       } else {
-        fail("unexpected valid", clues(clue(data.failMessage), clue(data.expectedValid), clue(checked)))
+        fail("unexpected valid", clues(clue(data.failMessage), clue(data.expectedValid), clue(result)))
       }
     }
   }

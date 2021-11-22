@@ -78,9 +78,7 @@ object Macros {
     c.Expr(q"""$value""")
   }
 
-  private def contentOf(path: String): String = {
-    Source.fromFile(path).getLines().mkString("\n")
-  }
+  private def contentOf(path: String): String = Source.fromFile(path).getLines().mkString("\n")
 
   def folderContents(path: String, ext: String): Map[String, String] = macro folderContents_impl
 
@@ -105,7 +103,6 @@ object Macros {
       .filterNot(_.toFile().isDirectory)
       .filter(_.getFileName.toString.endsWith(ext))
       .sortBy(_.getFileName.toString)
-      .toSeq
       .map(path => (path.getFileName().toString(), contentOf(path.toAbsolutePath().toString)))
       .toMap
   }

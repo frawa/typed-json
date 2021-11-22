@@ -59,10 +59,12 @@ lazy val parser =
       name := "scala-json-schema-parser"
     )
     .jvmSettings(
-      libraryDependencies += "dev.zio" %% "zio-json" % zioJsonVersion
+      libraryDependencies += "dev.zio"       %% "zio-json" % zioJsonVersion,
+      libraryDependencies += "org.scalameta" %% "munit"    % munitVersion % Test
     )
     .jsSettings(
-      libraryDependencies += "dev.zio" %%% "zio-json" % zioJsonVersion
+      libraryDependencies += "dev.zio"       %%% "zio-json" % zioJsonVersion,
+      libraryDependencies += "org.scalameta" %%% "munit"    % munitVersion % Test
     )
 
 lazy val macros = crossProject(JSPlatform, JVMPlatform)
