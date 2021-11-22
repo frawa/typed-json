@@ -48,7 +48,7 @@ class KeywordsTest extends FunSuite {
       .swap
   }
 
-  private def assertChecksWithIgnored(schema: SchemaValue) = assertKeywords(schema, true) _
+  private def assertKeywordsWithIgnored(schema: SchemaValue) = assertKeywords(schema, true) _
 
   private def assertSchemaErrors(schema: SchemaValue)(
       f: Keywords.SchemaErrors => Unit
@@ -111,7 +111,7 @@ class KeywordsTest extends FunSuite {
 
   test("ignored keyword") {
     withSchema("""{"ignored": false}""") { schema =>
-      assertChecksWithIgnored(schema) { keywords =>
+      assertKeywordsWithIgnored(schema) { keywords =>
         assertEquals(keywords.ignored, Set("ignored"))
       }
     }

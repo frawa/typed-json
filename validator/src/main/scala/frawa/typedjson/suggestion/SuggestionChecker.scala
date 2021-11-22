@@ -31,27 +31,27 @@ object SuggestionChecker {
       val suggestions = suggestFor(check)(Seq(Result.valid))
       Result.valid(SuggestionResult(suggestions, Result.valid))
     } else {
-      val checked = ValidationChecker().simple(check)(value)
-      Result(checked.valid, SuggestionResult(Seq(), checked))
+      val result = ValidationChecker().simple(check)(value)
+      Result(result.valid, SuggestionResult(Seq(), result))
     }
   }
 
   private def nested(
       at: Pointer
-  )(check: NestingKeyword)(checked: Seq[Result[SuggestionResult]])(value: InnerValue): Result[SuggestionResult] = {
+  )(check: NestingKeyword)(result: Seq[Result[SuggestionResult]])(value: InnerValue): Result[SuggestionResult] = {
     if (at == value.pointer) {
-      val suggestions = suggestFor(check)(checked)
+      val suggestions = suggestFor(check)(result)
       Result.valid(SuggestionResult(suggestions, Result.valid))
     } else {
-      val suggestions = checked.flatMap(_.results).flatMap(_.suggestions)
-      val validated   = checked.flatMap(_.results).map(_.validated)
+      val suggestions = result.flatMap(_.results).flatMap(_.suggestions)
+      val validated   = result.flatMap(_.results).map(_.validated)
       val nested      = ValidationChecker().nested(check)(validated)(value)
       Result.valid(SuggestionResult(suggestions, nested))
     }
   }
 
-  private def suggestFor(check: Keyword)(checked: Seq[Result[SuggestionResult]]): Seq[Value] = {
-    check match {
+  private def suggestFor(keyword: Keyword)(results: Seq[Result[SuggestionResult]]): Seq[Value] = {
+    keyword match {
       case NullTypeKeyword                           => Seq(NullValue)
       case BooleanTypeKeyword                        => Seq(BoolValue(true))
       case StringTypeKeyword                         => Seq(StringValue(""))
@@ -62,22 +62,17 @@ object SuggestionChecker {
         // TODO
         properties.flatMap { case (prop, keywords) =>
           keywords.keywords
-            .flatMap(keyword => suggestFor(keyword.value)(checked))
+            .flatMap(keyword => suggestFor(keyword.value)(results))
             .map(v => ObjectValue(Map(prop -> v)))
         }.toSeq
       case ObjectRequiredKeyword(required) => Seq(ObjectValue(Map.from(required.map((_, NullValue)))))
-      case TrivialKeyword(valid)           => Seq()
-      // case AllOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_))
-      // case AnyOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_))
-      // case OneOfCheck(checks)            => checks.flatMap(_.checks).flatMap(suggestFor(_))
+      case TrivialKeyword(_)               => Seq()
       case IfThenElseKeyword(ifChecks, thenChecks, elseChecks) =>
-        Seq(ifChecks, thenChecks, elseChecks)
-          .flatMap(identity)
+        Seq(ifChecks, thenChecks, elseChecks).flatten
           .flatMap(_.keywords)
-          .flatMap(check => suggestFor(check.value)(checked))
-      // case UnionTypeCheck(checks) => checks.flatMap(suggestFor(_)(checked))
+          .flatMap(check => suggestFor(check.value)(results))
       case EnumKeyword(values) => values
-      case _                   => checked.flatMap(_.results).flatMap(_.suggestions)
+      case _                   => results.flatMap(_.results).flatMap(_.suggestions)
     }
   }
 }

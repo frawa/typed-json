@@ -66,10 +66,10 @@ object Processor {
           .map { case (v, index) =>
             InnerValue(v, value.pointer / index)
           }
-        val checkedPrefix = pPrefix.zip(indexed).map { case (p, v) => p(v) }
-        val checked       = pItems.map(pItems => indexed.drop(pPrefix.size).map(pItems)).getOrElse(Seq())
-        val indices       = Seq.range(0, checkedPrefix.size + checked.size)
-        mergeAll(merge, checkedPrefix ++ checked, value).add(WithPointer(EvaluatedIndices(indices)))
+        val resultPrefix = pPrefix.zip(indexed).map { case (p, v) => p(v) }
+        val result       = pItems.map(pItems => indexed.drop(pPrefix.size).map(pItems)).getOrElse(Seq())
+        val indices      = Seq.range(0, resultPrefix.size + result.size)
+        mergeAll(merge, resultPrefix ++ result, value).add(WithPointer(EvaluatedIndices(indices)))
       case _ => Result.valid
     }
   }
@@ -93,25 +93,25 @@ object Processor {
             p.map(p => (key, p()(inner)))
           }
           .toSeq
-        val checked       = evaluated.map(_._2)
+        val result        = evaluated.map(_._2)
         val evaluatedKeys = EvaluatedProperties(evaluated.filter(_._2.valid).map(_._1).toSet)
         val annotation    = processor.WithPointer(evaluatedKeys, value.pointer)
-        mergeAll(merge, checked, value).add(annotation)
+        mergeAll(merge, result, value).add(annotation)
       case _ => Result.valid
     }
   }
 
   private def applyToValue[R](ps: Seq[ProcessFun[R]])(merge: MergeFun[R]): ProcessFun[R] = { value =>
-    val checked = ps.map(_(value))
-    mergeAll(merge, checked, value)
+    val result = ps.map(_(value))
+    mergeAll(merge, result, value)
   }
 
   private def applyCondition[R](pIf: ProcessFun[R], pThen: ProcessFun[R], pElse: ProcessFun[R])(
       merge: MergeFun[R]
   ): ProcessFun[R] = { value =>
-    val ifChecked = pIf(value)
-    val checked   = if (ifChecked.valid) Seq(ifChecked, pThen(value)) else Seq(pElse(value))
-    mergeAll(merge, checked, value)
+    val ifResult = pIf(value)
+    val result   = if (ifResult.valid) Seq(ifResult, pThen(value)) else Seq(pElse(value))
+    mergeAll(merge, result, value)
   }
 
   private def one[R](checker: Checker[R], check: KeywordWithLocation): ProcessFun[R] = {
@@ -210,12 +210,12 @@ object Processor {
         val p     = all(checker, keyword.keywords)
         val merge = checker.nested(keyword)
         val names = vs.keySet
-        val checked = names.map { name =>
+        val result = names.map { name =>
           (name, p(InnerValue(StringValue(name), value.pointer / name)))
         }.toSeq
-        val validNames = checked.filter(_._2.valid).map(_._1).toSet
+        val validNames = result.filter(_._2.valid).map(_._1).toSet
         val annotation = processor.WithPointer(EvaluatedProperties(validNames), value.pointer)
-        mergeAll(merge, checked.map(_._2), value).add(annotation)
+        mergeAll(merge, result.map(_._2), value).add(annotation)
       case _ => Result.valid
     }
   }
@@ -234,10 +234,10 @@ object Processor {
     value =>
       value.value match {
         case ObjectValue(v) =>
-          val ps      = v.keySet.flatMap(keyword.keywords.get).map(all(checker, _)).toSeq
-          val merge   = checker.nested(keyword)
-          val checked = ps.map(_(value))
-          mergeAll(merge, checked, value)
+          val ps     = v.keySet.flatMap(keyword.keywords.get).map(all(checker, _)).toSeq
+          val merge  = checker.nested(keyword)
+          val result = ps.map(_(value))
+          mergeAll(merge, result, value)
         case _ => Result.valid
       }
   }
@@ -253,9 +253,9 @@ object Processor {
               .map { case (v, index) =>
                 InnerValue(v, value.pointer / index)
               }
-            val checked      = indexed.map(p(_))
-            val validIndices = checked.zipWithIndex.filter(_._1.valid).map(_._2)
-            mergeAll(merge, checked, value).add(
+            val result       = indexed.map(p(_))
+            val validIndices = result.zipWithIndex.filter(_._1.valid).map(_._2)
+            mergeAll(merge, result, value).add(
               typedjson.processor.WithPointer(EvaluatedIndices(validIndices), value.pointer)
             )
           }
@@ -265,11 +265,11 @@ object Processor {
   }
 
   private def checkUnevaluated[R](checker: Checker[R], keyword: UnevaluatedItemsKeyword): ProcessFun[R] = { value =>
-    val p       = all(checker, keyword.pushed)
-    val checked = p(value)
+    val p      = all(checker, keyword.pushed)
+    val result = p(value)
     value.value match {
       case ArrayValue(vs) =>
-        val evaluated = checked.annotations
+        val evaluated = result.annotations
           .filter(_.pointer == Pointer.empty)
           .flatMap {
             case WithPointer(EvaluatedIndices(indices), _) => indices
@@ -281,25 +281,25 @@ object Processor {
           .map { case (v, index) =>
             (index, InnerValue(v, value.pointer / index))
           }
-        val checkedUnevaluated = indexed
+        val resultUnevaluated = indexed
           .filterNot { case (index, _) => evaluated.contains(index) }
           .map(_._2)
           .map(pUnevaluated)
         val merge      = checker.nested(keyword)
         val allIndices = Seq.range(0, vs.size)
-        mergeAll(merge, Seq(checked) ++ checkedUnevaluated, value)
+        mergeAll(merge, Seq(result) ++ resultUnevaluated, value)
           .add(processor.WithPointer(EvaluatedIndices(allIndices), value.pointer))
-      case _ => checked
+      case _ => result
     }
   }
 
   private def checkUnevaluated[R](checker: Checker[R], keyword: UnevaluatedPropertiesKeyword): ProcessFun[R] = {
     value =>
-      val p       = all(checker, keyword.pushed)
-      val checked = p(value)
+      val p      = all(checker, keyword.pushed)
+      val result = p(value)
       value.value match {
         case ObjectValue(vs) =>
-          val evaluated = checked.annotations
+          val evaluated = result.annotations
             .filter(_.pointer == value.pointer)
             .flatMap {
               case WithPointer(EvaluatedProperties(properties), _) => properties
@@ -307,7 +307,7 @@ object Processor {
             }
             .toSet
           val pUnevaluated = all(checker, keyword.unevaluated)
-          val checkedUnevaluated = vs
+          val resultUnevaluated = vs
             .filterNot { case (prop, _) => evaluated.contains(prop) }
             .map { case (prop, v) =>
               pUnevaluated(InnerValue(v, value.pointer / prop))
@@ -315,9 +315,9 @@ object Processor {
             .toSeq
           val merge         = checker.nested(keyword)
           val allProperties = vs.keySet
-          mergeAll(merge, Seq(checked) ++ checkedUnevaluated, value)
+          mergeAll(merge, Seq(result) ++ resultUnevaluated, value)
             .add(processor.WithPointer(EvaluatedProperties(allProperties), value.pointer))
-        case _ => checked
+        case _ => result
       }
   }
 }

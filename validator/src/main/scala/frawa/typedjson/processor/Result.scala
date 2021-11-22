@@ -25,14 +25,14 @@ object Result {
   def invalid[R]: Result[R]                          = Result[R](false)
   def invalid[R](result: R): Result[R]               = Result[R](false, Seq(result))
 
-  def merge[R](checked: Seq[Result[R]]): Result[R] = {
-    val valid           = checked.forall(_.valid)
-    val results: Seq[R] = checked.flatMap(_.results)
-    val problems        = checked.map(_.problems).reduceOption(_.combine(_)).getOrElse(SchemaProblems.empty)
-    val annotations     = checked.filter(_.valid).flatMap(_.annotations)
-    Result(valid, results, annotations, problems, 1 + count(checked))
+  def merge[R](allResults: Seq[Result[R]]): Result[R] = {
+    val valid       = allResults.forall(_.valid)
+    val results     = allResults.flatMap(_.results)
+    val problems    = allResults.map(_.problems).reduceOption(_.combine(_)).getOrElse(SchemaProblems.empty)
+    val annotations = allResults.filter(_.valid).flatMap(_.annotations)
+    Result(valid, results, annotations, problems, 1 + count(allResults))
   }
-  def count[R](checked: Seq[Result[R]]): Int = checked.map(_.count).sum
+  def count[R](results: Seq[Result[R]]): Int = results.map(_.count).sum
 }
 
 case class Result[R](

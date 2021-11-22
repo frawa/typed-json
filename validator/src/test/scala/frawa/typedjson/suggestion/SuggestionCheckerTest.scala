@@ -18,7 +18,7 @@ package frawa.typedjson.suggestion
 
 import frawa.typedjson.parser._
 import frawa.typedjson.testutil.TestSchemas.{numberArraySchema, totoObjectSchema, totoRequiredObjectSchema}
-import frawa.typedjson.testutil.TestUtil.{assertChecked, withSchema}
+import frawa.typedjson.testutil.TestUtil.{assertResult, withSchema}
 import frawa.typedjson.processor.{LoadedSchemasResolver, Pointer, SchemaValue}
 import munit.FunSuite
 
@@ -29,8 +29,8 @@ class SuggestCheckerTest extends FunSuite {
       f: Seq[Value] => Unit
   ) = {
     implicit val l: Option[LoadedSchemasResolver.LazyResolver] = None
-    assertChecked(SuggestionChecker(at))(schema, text) { checked =>
-      f(checked.results.flatMap(_.suggestions).distinct)
+    assertResult(SuggestionChecker(at))(schema, text) { result =>
+      f(result.results.flatMap(_.suggestions).distinct)
     }
   }
 

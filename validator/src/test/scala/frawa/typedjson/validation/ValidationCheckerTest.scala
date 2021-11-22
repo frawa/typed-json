@@ -20,7 +20,7 @@ import frawa.typedjson
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser._
 import frawa.typedjson.testutil.TestSchemas._
-import frawa.typedjson.testutil.TestUtil.{assertChecked, withSchema}
+import frawa.typedjson.testutil.TestUtil.{assertResult, withSchema}
 import frawa.typedjson.processor._
 import munit.FunSuite
 
@@ -34,61 +34,61 @@ class ValidationCheckerTest extends FunSuite {
       f: Result[ValidationResult] => Unit
   ) = {
     implicit val lr = lazyResolver
-    assertChecked(ValidationChecker())(schema, text)(f)
+    assertResult(ValidationChecker())(schema, text)(f)
   }
 
-  private def assertErrors(checked: Result[ValidationResult], expected: Seq[WithPointer[Observation]]): Unit = {
-    assertEquals(checked.results.flatMap(_.errors), expected)
+  private def assertErrors(result: Result[ValidationResult], expected: Seq[WithPointer[Observation]]): Unit = {
+    assertEquals(result.results.flatMap(_.errors), expected)
   }
 
   test("null") {
     withSchema(nullSchema) { schema =>
-      assertValidate("""null""")(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""null""")(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""13""")(schema) { checked =>
-        assertErrors(checked, Seq(WithPointer(TypeMismatch("null"))))
-        assertEquals(checked.valid, false)
+      assertValidate("""13""")(schema) { result =>
+        assertErrors(result, Seq(WithPointer(TypeMismatch("null"))))
+        assertEquals(result.valid, false)
       }
     }
   }
 
   test("boolean") {
     withSchema(boolSchema) { schema =>
-      assertValidate("""true""")(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""true""")(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""13""")(schema) { checked =>
-        assertErrors(checked, Seq(WithPointer(TypeMismatch("boolean"))))
-        assertEquals(checked.valid, false)
+      assertValidate("""13""")(schema) { result =>
+        assertErrors(result, Seq(WithPointer(TypeMismatch("boolean"))))
+        assertEquals(result.valid, false)
       }
     }
   }
 
   test("true schema") {
     withSchema(trueSchema) { schema =>
-      assertValidate("""null""")(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""null""")(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""13""")(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""13""")(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""{}""")(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""{}""")(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
     }
   }
 
   test("false schema") {
     withSchema(falseSchema) { schema =>
-      assertValidate("""null""")(schema) { checked =>
+      assertValidate("""null""")(schema) { result =>
         assertErrors(
-          checked,
+          result,
           Seq(
             typedjson.processor.WithPointer(
               result = FalseSchemaReason(),
@@ -98,11 +98,11 @@ class ValidationCheckerTest extends FunSuite {
             )
           )
         )
-        assertEquals(checked.valid, false)
+        assertEquals(result.valid, false)
       }
-      assertValidate("""13""")(schema) { checked =>
+      assertValidate("""13""")(schema) { result =>
         assertErrors(
-          checked,
+          result,
           Seq(
             typedjson.processor.WithPointer(
               result = FalseSchemaReason(),
@@ -112,11 +112,11 @@ class ValidationCheckerTest extends FunSuite {
             )
           )
         )
-        assertEquals(checked.valid, false)
+        assertEquals(result.valid, false)
       }
-      assertValidate("""{}""")(schema) { checked =>
+      assertValidate("""{}""")(schema) { result =>
         assertErrors(
-          checked,
+          result,
           Seq(
             typedjson.processor.WithPointer(
               result = FalseSchemaReason(),
@@ -126,50 +126,50 @@ class ValidationCheckerTest extends FunSuite {
             )
           )
         )
-        assertEquals(checked.valid, false)
+        assertEquals(result.valid, false)
       }
     }
   }
 
   test("not false") {
     withSchema(notFalseSchema) { schema =>
-      assertValidate("""null""")(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""null""")(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""13""")(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""13""")(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""{}""")(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""{}""")(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
     }
   }
 
   test("empty schema") {
     withSchema(emtpySchema) { schema =>
-      assertValidate("""null""")(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""null""")(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""13""")(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""13""")(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""{}""")(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""{}""")(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
     }
   }
 
   test("not empty") {
     withSchema("""{"not": {}}""") { schema =>
-      assertValidate("""null""")(schema) { checked =>
+      assertValidate("""null""")(schema) { result =>
         assertErrors(
-          checked,
+          result,
           Seq(
             typedjson.processor.WithPointer(
               result = NotInvalid(),
@@ -179,11 +179,11 @@ class ValidationCheckerTest extends FunSuite {
             )
           )
         )
-        assertEquals(checked.valid, false)
+        assertEquals(result.valid, false)
       }
-      assertValidate("""13""")(schema) { checked =>
+      assertValidate("""13""")(schema) { result =>
         assertErrors(
-          checked,
+          result,
           Seq(
             typedjson.processor.WithPointer(
               result = NotInvalid(),
@@ -193,11 +193,11 @@ class ValidationCheckerTest extends FunSuite {
             )
           )
         )
-        assertEquals(checked.valid, false)
+        assertEquals(result.valid, false)
       }
-      assertValidate("""{}""")(schema) { checked =>
+      assertValidate("""{}""")(schema) { result =>
         assertErrors(
-          checked,
+          result,
           Seq(
             typedjson.processor.WithPointer(
               result = NotInvalid(),
@@ -207,59 +207,59 @@ class ValidationCheckerTest extends FunSuite {
             )
           )
         )
-        assertEquals(checked.valid, false)
+        assertEquals(result.valid, false)
       }
     }
   }
 
   test("string") {
     withSchema(stringSchema) { schema =>
-      assertValidate(""""hello"""")(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate(""""hello"""")(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""13""")(schema) { checked =>
-        assertErrors(checked, Seq(WithPointer(TypeMismatch("string"))))
-        assertEquals(checked.valid, false)
+      assertValidate("""13""")(schema) { result =>
+        assertErrors(result, Seq(WithPointer(TypeMismatch("string"))))
+        assertEquals(result.valid, false)
       }
     }
   }
 
   test("number") {
     withSchema(numberSchema) { schema =>
-      assertValidate("""13""")(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""13""")(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""null""")(schema) { checked =>
-        assertErrors(checked, Seq(WithPointer(TypeMismatch("number"))))
-        assertEquals(checked.valid, false)
+      assertValidate("""null""")(schema) { result =>
+        assertErrors(result, Seq(WithPointer(TypeMismatch("number"))))
+        assertEquals(result.valid, false)
       }
     }
   }
 
   test("array") {
     withSchema(numberArraySchema) { schema =>
-      assertValidate("""[13]""")(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""[13]""")(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""null""")(schema) { checked =>
-        assertErrors(checked, Seq(WithPointer(TypeMismatch("array"))))
-        assertEquals(checked.valid, false)
+      assertValidate("""null""")(schema) { result =>
+        assertErrors(result, Seq(WithPointer(TypeMismatch("array"))))
+        assertEquals(result.valid, false)
       }
     }
   }
 
   test("array item") {
     withSchema(numberArraySchema) { schema =>
-      assertValidate("""[true]""")(schema) { checked =>
-        assertErrors(checked, Seq(typedjson.processor.WithPointer(TypeMismatch("number"), Pointer(0))))
-        assertEquals(checked.valid, false)
+      assertValidate("""[true]""")(schema) { result =>
+        assertErrors(result, Seq(typedjson.processor.WithPointer(TypeMismatch("number"), Pointer(0))))
+        assertEquals(result.valid, false)
       }
-      assertValidate("""[13]""")(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""[13]""")(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
     }
   }
@@ -270,20 +270,20 @@ class ValidationCheckerTest extends FunSuite {
                        |"toto": 13,
                        |"titi": "hello"
                        |}
-                       |"""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+                       |"""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""null""")(schema) { checked =>
+      assertValidate("""null""")(schema) { result =>
         assertErrors(
-          checked,
+          result,
           Seq(
             WithPointer(
               TypeMismatch("object")
             )
           )
         )
-        assertEquals(checked.valid, false)
+        assertEquals(result.valid, false)
       }
     }
   }
@@ -294,9 +294,9 @@ class ValidationCheckerTest extends FunSuite {
                        |"toto": 13,
                        |"titi": true
                        |}
-                       |""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq(typedjson.processor.WithPointer(TypeMismatch("string"), Pointer.empty / "titi")))
-        assertEquals(checked.valid, false)
+                       |""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq(typedjson.processor.WithPointer(TypeMismatch("string"), Pointer.empty / "titi")))
+        assertEquals(result.valid, false)
       }
     }
   }
@@ -306,9 +306,9 @@ class ValidationCheckerTest extends FunSuite {
       assertValidate("""{
                        |"toto": 13
                        |}
-                       |""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+                       |""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
     }
   }
@@ -326,9 +326,9 @@ class ValidationCheckerTest extends FunSuite {
       assertValidate("""{
                        |"toto": 13
                        |}
-                       |""".stripMargin)(schema) { checked =>
+                       |""".stripMargin)(schema) { result =>
         assertErrors(
-          checked,
+          result,
           Seq(
             WithPointer(
               result = MissingRequiredProperties(Seq("titi"))
@@ -341,9 +341,9 @@ class ValidationCheckerTest extends FunSuite {
 
   test("allOf") {
     withSchema(allOfSchema) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
     }
   }
@@ -356,42 +356,42 @@ class ValidationCheckerTest extends FunSuite {
                  |]
                  |}
                  |""".stripMargin) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq(WithPointer(TypeMismatch("string"))))
-        assertEquals(checked.valid, false)
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq(WithPointer(TypeMismatch("string"))))
+        assertEquals(result.valid, false)
       }
     }
   }
 
   test("anyOf") {
     withSchema(anyOfSchema) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
     }
   }
 
   test("failed anyOf") {
     withSchema(anyOfSchema) { schema =>
-      assertValidate("""true""".stripMargin)(schema) { checked =>
+      assertValidate("""true""".stripMargin)(schema) { result =>
         assertErrors(
-          checked,
+          result,
           Seq(
             WithPointer(TypeMismatch("number")),
             WithPointer(TypeMismatch("string"))
           )
         )
-        assertEquals(checked.valid, false)
+        assertEquals(result.valid, false)
       }
     }
   }
 
   test("oneOf") {
     withSchema(oneOfSchema) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
     }
   }
@@ -404,15 +404,15 @@ class ValidationCheckerTest extends FunSuite {
                  |]
                  |}
                  |""".stripMargin) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { checked =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
         assertErrors(
-          checked,
+          result,
           Seq(
             WithPointer(TypeMismatch("string")),
             WithPointer(TypeMismatch("boolean"))
           )
         )
-        assertEquals(checked.valid, false)
+        assertEquals(result.valid, false)
       }
     }
   }
@@ -425,14 +425,14 @@ class ValidationCheckerTest extends FunSuite {
                  |]
                  |}
                  |""".stripMargin) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { checked =>
+      assertValidate("""1313""".stripMargin)(schema) { result =>
         assertErrors(
-          checked,
+          result,
           Seq(
             WithPointer(NotOneOf(2))
           )
         )
-        assertEquals(checked.valid, false)
+        assertEquals(result.valid, false)
 
       }
     }
@@ -443,9 +443,9 @@ class ValidationCheckerTest extends FunSuite {
                  |"not": { "type": "number" }
                  |}
                  |""".stripMargin) { schema =>
-      assertValidate("""true""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""true""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
     }
   }
@@ -455,26 +455,26 @@ class ValidationCheckerTest extends FunSuite {
                  |"not": { "type": "number" }
                  |}
                  |""".stripMargin) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq(WithPointer(NotInvalid())))
-        assertEquals(checked.valid, false)
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq(WithPointer(NotInvalid())))
+        assertEquals(result.valid, false)
       }
     }
   }
 
   test("if/then/else") {
     withSchema(ifThenElseSchema) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate(""""string"""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate(""""string"""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""null""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq(WithPointer(TypeMismatch("string"))))
-        assertEquals(checked.valid, false)
+      assertValidate("""null""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq(WithPointer(TypeMismatch("string"))))
+        assertEquals(result.valid, false)
       }
     }
   }
@@ -486,17 +486,17 @@ class ValidationCheckerTest extends FunSuite {
                  |"else": { "type": "string" }
                  |}
                  |""".stripMargin) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate(""""string"""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate(""""string"""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""null""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq(WithPointer(TypeMismatch("string"))))
-        assertEquals(checked.valid, false)
+      assertValidate("""null""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq(WithPointer(TypeMismatch("string"))))
+        assertEquals(result.valid, false)
       }
     }
   }
@@ -507,17 +507,17 @@ class ValidationCheckerTest extends FunSuite {
                  |"else": { "type": "string" }
                  |}
                  |""".stripMargin) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate(""""string"""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate(""""string"""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""null""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq(WithPointer(TypeMismatch("string"))))
-        assertEquals(checked.valid, false)
+      assertValidate("""null""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq(WithPointer(TypeMismatch("string"))))
+        assertEquals(result.valid, false)
       }
     }
   }
@@ -528,13 +528,13 @@ class ValidationCheckerTest extends FunSuite {
                  |"then": { "type": "number" }
                  |}
                  |""".stripMargin) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate(""""string"""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate(""""string"""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
     }
   }
@@ -545,57 +545,57 @@ class ValidationCheckerTest extends FunSuite {
                  |"else": { "type": "string" }
                  |}
                  |""".stripMargin) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""1313""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate(""""string"""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate(""""string"""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""null""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""null""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
     }
   }
 
   test("null or string") {
     withSchema(nullOrStringSchema) { schema =>
-      assertValidate("""null""")(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""null""")(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate(""""hello"""")(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate(""""hello"""")(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""13""")(schema) { checked =>
+      assertValidate("""13""")(schema) { result =>
         assertErrors(
-          checked,
+          result,
           Seq(
             WithPointer(TypeMismatch("null")),
             WithPointer(TypeMismatch("string"))
           )
         )
-        assertEquals(checked.valid, false)
+        assertEquals(result.valid, false)
       }
     }
   }
 
   test("enum") {
     withSchema(enumSchema) { schema =>
-      assertValidate(""""foo"""")(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate(""""foo"""")(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate(""""bar"""")(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate(""""bar"""")(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate(""""hello"""")(schema) { checked =>
+      assertValidate(""""hello"""")(schema) { result =>
         assertErrors(
-          checked,
+          result,
           Seq(
             WithPointer(
               NotInEnum(
@@ -607,20 +607,20 @@ class ValidationCheckerTest extends FunSuite {
             )
           )
         )
-        assertEquals(checked.valid, false)
+        assertEquals(result.valid, false)
       }
     }
   }
 
   test("const") {
     withSchema(constSchema) { schema =>
-      assertValidate(""""first"""")(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate(""""first"""")(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""{}""".stripMargin)(schema) { checked =>
+      assertValidate("""{}""".stripMargin)(schema) { result =>
         assertErrors(
-          checked,
+          result,
           Seq(
             typedjson.processor.WithPointer(
               result = TypeMismatch(
@@ -645,9 +645,9 @@ class ValidationCheckerTest extends FunSuite {
           )
         )
       }
-      assertValidate(""""second"""")(schema) { checked =>
+      assertValidate(""""second"""")(schema) { result =>
         assertErrors(
-          checked,
+          result,
           Seq(
             typedjson.processor.WithPointer(
               result = NotInEnum(
@@ -669,13 +669,13 @@ class ValidationCheckerTest extends FunSuite {
 
   test("$id/$ref/$def") {
     withSchema(idRefDefsSchema) { schema =>
-      assertValidate("""[1313]""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""[1313]""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate(""""string"""".stripMargin)(schema) { checked =>
+      assertValidate(""""string"""".stripMargin)(schema) { result =>
         assertErrors(
-          checked,
+          result,
           Seq(
             typedjson.processor.WithPointer(
               result = TypeMismatch(
@@ -687,20 +687,20 @@ class ValidationCheckerTest extends FunSuite {
             )
           )
         )
-        assertEquals(checked.valid, false)
+        assertEquals(result.valid, false)
       }
     }
   }
 
   test("$ref in properties") {
     withSchema(refInPropertiesSchema) { schema =>
-      assertValidate("""{ "foo": 13 }""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""{ "foo": 13 }""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""{ "foo": true }""".stripMargin)(schema) { checked =>
+      assertValidate("""{ "foo": true }""".stripMargin)(schema) { result =>
         assertErrors(
-          checked,
+          result,
           Seq(
             typedjson.processor.WithPointer(
               result = TypeMismatch(
@@ -710,26 +710,26 @@ class ValidationCheckerTest extends FunSuite {
             )
           )
         )
-        assertEquals(checked.valid, false)
+        assertEquals(result.valid, false)
       }
     }
   }
 
   test("$ref at root") {
     withSchema(refAtRootSchema) { schema =>
-      assertValidate("""{ "foo": 13 }""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.problems.errors, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""{ "foo": 13 }""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.problems.errors, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""{ "foo": [13] }""".stripMargin)(schema) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.problems.errors, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""{ "foo": [13] }""".stripMargin)(schema) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.problems.errors, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""{ "foo": true }""".stripMargin)(schema) { checked =>
+      assertValidate("""{ "foo": true }""".stripMargin)(schema) { result =>
         assertErrors(
-          checked,
+          result,
           Seq(
             typedjson.processor.WithPointer(
               result = TypeMismatch(
@@ -745,7 +745,7 @@ class ValidationCheckerTest extends FunSuite {
             )
           )
         )
-        assertEquals(checked.valid, false)
+        assertEquals(result.valid, false)
       }
     }
   }
@@ -754,20 +754,20 @@ class ValidationCheckerTest extends FunSuite {
     val lazyResolver = Some(MetaSchemas.lazyResolver)
 
     withSchema(refToValidationSpec) { schema =>
-      assertValidate("""{ "$defs": { "foo": { "type": "boolean" } } }""".stripMargin)(schema, lazyResolver) { checked =>
-        assertErrors(checked, Seq())
-        assertEquals(checked.problems.errors, Seq())
-        assertEquals(checked.valid, true)
+      assertValidate("""{ "$defs": { "foo": { "type": "boolean" } } }""".stripMargin)(schema, lazyResolver) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.problems.errors, Seq())
+        assertEquals(result.valid, true)
       }
       assertValidate("""{ "$defs": { "foo": { "type": ["boolean"] } } }""".stripMargin)(schema, lazyResolver) {
-        checked =>
-          assertErrors(checked, Seq())
-          assertEquals(checked.problems.errors, Seq())
-          assertEquals(checked.valid, true)
+        result =>
+          assertErrors(result, Seq())
+          assertEquals(result.problems.errors, Seq())
+          assertEquals(result.valid, true)
       }
-      assertValidate("""{ "$defs": { "foo": { "type": 13 } } }""".stripMargin)(schema, lazyResolver) { checked =>
+      assertValidate("""{ "$defs": { "foo": { "type": 13 } } }""".stripMargin)(schema, lazyResolver) { result =>
         assertErrors(
-          checked,
+          result,
           Seq(
             typedjson.processor.WithPointer(
               result = NotInEnum(
@@ -783,7 +783,7 @@ class ValidationCheckerTest extends FunSuite {
             )
           )
         )
-        assertEquals(checked.valid, false)
+        assertEquals(result.valid, false)
       }
     }
   }

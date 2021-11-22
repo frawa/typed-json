@@ -43,15 +43,15 @@ object TestUtil {
     f(resolver)
   }
 
-  def assertChecked[R](
+  def assertResult[R](
       checker: Checker[R]
   )(schema: SchemaValue, valueText: String)(
       f: Result[R] => Unit
   )(implicit parser: Parser, lazyResolver: Option[LoadedSchemasResolver.LazyResolver]): Either[Nothing, Unit] = {
     withStrictProcessor(checker)(schema) { processor =>
-      val value   = parseJsonValue(valueText)
-      val checked = processor(InnerValue(value))
-      f(checked)
+      val value  = parseJsonValue(valueText)
+      val result = processor(InnerValue(value))
+      f(result)
     }
   }
 

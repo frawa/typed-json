@@ -54,16 +54,16 @@ case class NotContains(valid: Int)                                     extends O
 
 trait Calculator[R] {
   def invalid(observation: Observation, pointer: Pointer): Result[R]
-  def allOf(checked: Seq[Result[R]], pointer: Pointer): Result[R]
-  def anyOf(checked: Seq[Result[R]], pointer: Pointer): Result[R]
-  def oneOf(checked: Seq[Result[R]], pointer: Pointer): Result[R]
-  def contains(checked: Seq[Result[R]], pointer: Pointer, min: Option[Int], max: Option[Int]): Result[R]
-  def not(checked: Seq[Result[R]], pointer: Pointer): Result[R]
-  def ifThenElse(checked: Seq[Result[R]], pointer: Pointer): Result[R]
+  def allOf(results: Seq[Result[R]], pointer: Pointer): Result[R]
+  def anyOf(results: Seq[Result[R]], pointer: Pointer): Result[R]
+  def oneOf(results: Seq[Result[R]], pointer: Pointer): Result[R]
+  def contains(results: Seq[Result[R]], pointer: Pointer, min: Option[Int], max: Option[Int]): Result[R]
+  def not(results: Seq[Result[R]], pointer: Pointer): Result[R]
+  def ifThenElse(results: Seq[Result[R]], pointer: Pointer): Result[R]
 }
 object ValidationChecker {
 
-  def apply(): Checker[ValidationResult] = Checker(check, nested)
+  def apply(): Checker[ValidationResult] = Checker(simple, nested)
 
   private val calc: Calculator[ValidationResult] = new ValidationCalculator()
 
@@ -76,8 +76,8 @@ object ValidationChecker {
 
   private type ProcessFun = Processor.ProcessFun[ValidationResult]
 
-  private def check(check: SimpleKeyword): ProcessFun = {
-    check match {
+  private def simple(keyword: SimpleKeyword): ProcessFun = {
+    keyword match {
       case NullTypeKeyword                 => checkType(nullTypeMismatch)
       case BooleanTypeKeyword              => checkType(booleanTypeMismatch)
       case StringTypeKeyword               => checkType(stringTypeMismatch)
@@ -101,26 +101,26 @@ object ValidationChecker {
       case MaxPropertiesKeyword(v)         => checkMaxProperties(v)
       case MinPropertiesKeyword(v)         => checkMinProperties(v)
       case DependentRequiredKeyword(v)     => checkDependentRequired(v)
-      case _                               => _ => Result.invalid(ValidationResult.invalid(UnsupportedCheck(check)))
+      case _                               => _ => Result.invalid(ValidationResult.invalid(UnsupportedCheck(keyword)))
     }
   }
 
-  private def nested(check: NestingKeyword)(checked: Seq[Result[ValidationResult]]): ProcessFun = { value =>
-    check match {
-      case AllOfKeyword(_)                  => calc.allOf(checked, value.pointer)
-      case AnyOfKeyword(_)                  => calc.anyOf(checked, value.pointer)
-      case OneOfKeyword(_)                  => calc.oneOf(checked, value.pointer)
-      case NotKeyword(_)                    => calc.not(checked, value.pointer)
-      case UnionTypeKeyword(_)              => calc.oneOf(checked, value.pointer)
-      case ObjectPropertiesKeyword(_, _, _) => calc.allOf(checked, value.pointer)
-      case ArrayItemsKeyword(_, _)          => calc.allOf(checked, value.pointer)
-      case IfThenElseKeyword(_, _, _)       => calc.ifThenElse(checked, value.pointer)
-      case PropertyNamesKeyword(_)          => calc.allOf(checked, value.pointer)
-      case c: LazyResolveKeyword            => calc.allOf(checked, value.pointer)
-      case DependentSchemasKeyword(_)       => calc.allOf(checked, value.pointer)
-      case ContainsKeyword(_, min, max)     => calc.contains(checked, value.pointer, min, max)
-      case c: UnevaluatedItemsKeyword       => calc.allOf(checked, value.pointer)
-      case c: UnevaluatedPropertiesKeyword  => calc.allOf(checked, value.pointer)
+  private def nested(keyword: NestingKeyword)(results: Seq[Result[ValidationResult]]): ProcessFun = { value =>
+    keyword match {
+      case AllOfKeyword(_)                  => calc.allOf(results, value.pointer)
+      case AnyOfKeyword(_)                  => calc.anyOf(results, value.pointer)
+      case OneOfKeyword(_)                  => calc.oneOf(results, value.pointer)
+      case NotKeyword(_)                    => calc.not(results, value.pointer)
+      case UnionTypeKeyword(_)              => calc.oneOf(results, value.pointer)
+      case ObjectPropertiesKeyword(_, _, _) => calc.allOf(results, value.pointer)
+      case ArrayItemsKeyword(_, _)          => calc.allOf(results, value.pointer)
+      case IfThenElseKeyword(_, _, _)       => calc.ifThenElse(results, value.pointer)
+      case PropertyNamesKeyword(_)          => calc.allOf(results, value.pointer)
+      case c: LazyResolveKeyword            => calc.allOf(results, value.pointer)
+      case DependentSchemasKeyword(_)       => calc.allOf(results, value.pointer)
+      case ContainsKeyword(_, min, max)     => calc.contains(results, value.pointer, min, max)
+      case c: UnevaluatedItemsKeyword       => calc.allOf(results, value.pointer)
+      case c: UnevaluatedPropertiesKeyword  => calc.allOf(results, value.pointer)
     }
   }
 

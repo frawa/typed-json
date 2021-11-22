@@ -120,16 +120,16 @@ class JsonSchemaTestSuite extends FunSuite {
   }
 
   private def assertOne(processor: Processor[ValidationResult]): TestData => Unit = { data =>
-    val checked = processor(InnerValue(data.data))
+    val result = processor(InnerValue(data.data))
 
-    if (checked.valid != data.expectedValid) {
+    if (result.valid != data.expectedValid) {
       implicit val loc = munit.Location.empty
-      if (!checked.valid) {
-        assertEquals(checked.problems.errors, Seq(), data.failMessage)
-        assertEquals(checked.problems.ignoredKeywords, Set.empty[String], data.failMessage)
-        assertEquals(checked.results, Seq(), data.failMessage)
+      if (!result.valid) {
+        assertEquals(result.problems.errors, Seq(), data.failMessage)
+        assertEquals(result.problems.ignoredKeywords, Set.empty[String], data.failMessage)
+        assertEquals(result.results, Seq(), data.failMessage)
       } else {
-        fail("unexpected valid", clues(clue(data.failMessage), clue(data.expectedValid), clue(checked)))
+        fail("unexpected valid", clues(clue(data.failMessage), clue(data.expectedValid), clue(result)))
       }
     }
   }
