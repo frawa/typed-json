@@ -88,11 +88,6 @@ case class ContainsKeyword(schema: Option[Keywords] = None, min: Option[Int] = N
 case class UnevaluatedItemsKeyword(pushed: Keywords, unevaluated: Keywords)      extends NestingKeyword
 case class UnevaluatedPropertiesKeyword(pushed: Keywords, unevaluated: Keywords) extends NestingKeyword
 
-// TODO rename to something like "Annotation"
-sealed trait Observation2
-case class EvaluatedIndices(indices: Seq[Int])          extends Observation2
-case class EvaluatedProperties(properties: Set[String]) extends Observation2
-
 case class Keywords(
     schema: SchemaValue,
     keywords: Seq[Keywords.KeywordWithLocation] = Seq.empty[Keywords.KeywordWithLocation],

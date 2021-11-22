@@ -16,14 +16,18 @@
 
 package frawa.typedjson.processor
 
+sealed trait Evaluated
+case class EvaluatedIndices(indices: Seq[Int])          extends Evaluated
+case class EvaluatedProperties(properties: Set[String]) extends Evaluated
+
 object Result {
-  type Annotation = WithPointer[Observation2]
+  type Annotation = WithPointer[Evaluated]
 
   def apply[R](valid: Boolean, result: R): Result[R] = Result[R](valid, Seq(result))
-  def valid[R]: Result[R]                            = Result[R](true)
-  def valid[R](result: R): Result[R]                 = Result[R](true, Seq(result))
-  def invalid[R]: Result[R]                          = Result[R](false)
-  def invalid[R](result: R): Result[R]               = Result[R](false, Seq(result))
+  def valid[R]: Result[R]                            = Result[R](valid = true)
+  def valid[R](result: R): Result[R]                 = Result[R](valid = true, Seq(result))
+  def invalid[R]: Result[R]                          = Result[R](valid = false)
+  def invalid[R](result: R): Result[R]               = Result[R](valid = false, Seq(result))
 
   def merge[R](allResults: Seq[Result[R]]): Result[R] = {
     val valid       = allResults.forall(_.valid)
