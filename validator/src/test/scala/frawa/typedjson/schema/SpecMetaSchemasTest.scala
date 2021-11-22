@@ -17,7 +17,7 @@
 package frawa.typedjson.schema
 
 import munit.FunSuite
-import UriUtil._
+import frawa.typedjson.util.UriUtil._
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser.ZioParser
 

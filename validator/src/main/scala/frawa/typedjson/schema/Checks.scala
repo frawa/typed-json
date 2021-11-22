@@ -22,6 +22,7 @@ import frawa.typedjson.parser.NumberValue
 import frawa.typedjson.parser.ObjectValue
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.Value
+import frawa.typedjson.util.UriUtil
 
 import java.net.URI
 import scala.reflect.ClassTag
@@ -96,7 +97,7 @@ case class Checks(
     checks: Seq[Checks.CheckWithLocation] = Seq.empty[Checks.CheckWithLocation],
     ignoredKeywords: Set[String] = Set.empty
 ) {
-  import SeqUtil._
+  import frawa.typedjson.util.SeqUtil._
   import Checks._
 
   private def add(check: Check)(implicit scope: DynamicScope): Checks =
@@ -584,7 +585,7 @@ object Checks {
   }
 
   def localized(check: Check, scope: DynamicScope): CheckWithLocation = {
-    import UriUtil._
+    import frawa.typedjson.util.UriUtil._
     scope.uris.lastOption.map(WithLocation(_, check)).getOrElse(WithLocation(uri("#"), check))
   }
 }

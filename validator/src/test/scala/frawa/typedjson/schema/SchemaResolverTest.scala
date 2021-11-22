@@ -19,7 +19,7 @@ package frawa.typedjson.schema
 import munit.FunSuite
 import frawa.typedjson.parser.ObjectValue
 import java.net.URI
-import UriUtil._
+import frawa.typedjson.util.UriUtil._
 import frawa.typedjson.parser.StringValue
 
 class SchemaResolverTest extends FunSuite {

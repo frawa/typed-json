@@ -25,7 +25,7 @@ import TestUtil._
 import TestSchemas._
 
 class ChecksTest extends FunSuite {
-  import UriUtil._
+  import frawa.typedjson.util.UriUtil._
 
   implicit val zioParser: ZioParser = new ZioParser()
 

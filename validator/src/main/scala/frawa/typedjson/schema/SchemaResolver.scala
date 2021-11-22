@@ -16,7 +16,8 @@
 
 package frawa.typedjson.schema
 
-import UriUtil._
+import frawa.typedjson.util.UriUtil
+import frawa.typedjson.util.UriUtil._
 
 import java.net.URI
 

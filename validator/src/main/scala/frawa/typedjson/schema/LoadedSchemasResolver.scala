@@ -20,7 +20,8 @@ import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.ObjectValue
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.Value
-import UriUtil._
+import frawa.typedjson.util.UriUtil
+import frawa.typedjson.util.UriUtil._
 
 import java.net.URI
 
