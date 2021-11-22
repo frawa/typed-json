@@ -53,13 +53,13 @@ case class DependentRequiredMissing(missing: Map[String, Seq[String]]) extends O
 case class NotContains(valid: Int)                                     extends Observation
 
 trait Calculator[R] {
-  def invalid(observation: Observation, pointer: Pointer): Checked[R]
-  def allOf(checked: Seq[Checked[R]], pointer: Pointer): Checked[R]
-  def anyOf(checked: Seq[Checked[R]], pointer: Pointer): Checked[R]
-  def oneOf(checked: Seq[Checked[R]], pointer: Pointer): Checked[R]
-  def contains(checked: Seq[Checked[R]], pointer: Pointer, min: Option[Int], max: Option[Int]): Checked[R]
-  def not(checked: Seq[Checked[R]], pointer: Pointer): Checked[R]
-  def ifThenElse(checked: Seq[Checked[R]], pointer: Pointer): Checked[R]
+  def invalid(observation: Observation, pointer: Pointer): Result[R]
+  def allOf(checked: Seq[Result[R]], pointer: Pointer): Result[R]
+  def anyOf(checked: Seq[Result[R]], pointer: Pointer): Result[R]
+  def oneOf(checked: Seq[Result[R]], pointer: Pointer): Result[R]
+  def contains(checked: Seq[Result[R]], pointer: Pointer, min: Option[Int], max: Option[Int]): Result[R]
+  def not(checked: Seq[Result[R]], pointer: Pointer): Result[R]
+  def ifThenElse(checked: Seq[Result[R]], pointer: Pointer): Result[R]
 }
 object ValidationChecker {
 
@@ -101,11 +101,11 @@ object ValidationChecker {
       case MaxPropertiesCheck(v)         => checkMaxProperties(v)
       case MinPropertiesCheck(v)         => checkMinProperties(v)
       case DependentRequiredCheck(v)     => checkDependentRequired(v)
-      case _                             => _ => Checked.invalid(ValidationResult.invalid(UnsupportedCheck(check)))
+      case _                             => _ => Result.invalid(ValidationResult.invalid(UnsupportedCheck(check)))
     }
   }
 
-  private def nested(check: NestingCheck)(checked: Seq[Checked[ValidationResult]]): ProcessFun = { value =>
+  private def nested(check: NestingCheck)(checked: Seq[Result[ValidationResult]]): ProcessFun = { value =>
     check match {
       case AllOfCheck(_)                  => calc.allOf(checked, value.pointer)
       case AnyOfCheck(_)                  => calc.anyOf(checked, value.pointer)
@@ -126,7 +126,7 @@ object ValidationChecker {
 
   private def checkType[T <: Value: ClassTag](observation: TypeMismatch[T]): ProcessFun = value =>
     value.value match {
-      case v: T => Checked.valid
+      case v: T => Result.valid
       case _    => calc.invalid(observation, value.pointer)
     }
 
@@ -134,7 +134,7 @@ object ValidationChecker {
     value.value match {
       case NumberValue(v) =>
         if (v.isValidLong)
-          Checked.valid
+          Result.valid
         else
           calc.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
       case _ => calc.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
@@ -142,7 +142,7 @@ object ValidationChecker {
 
   private def checkTrivial(valid: Boolean): ProcessFun = { value =>
     if (valid)
-      Checked.valid
+      Result.valid
     else
       calc.invalid(FalseSchemaReason(), value.pointer)
   }
@@ -152,18 +152,18 @@ object ValidationChecker {
       case ObjectValue(propertiesValues) => {
         val missingNames = required.filter(!propertiesValues.contains(_))
         if (missingNames.isEmpty) {
-          Checked.valid
+          Result.valid
         } else {
           calc.invalid(MissingRequiredProperties(missingNames), value.pointer)
         }
       }
-      case _ => Checked.valid
+      case _ => Result.valid
     }
   }
 
   private def checkEnum(values: Seq[Value]): ProcessFun = { value =>
     if (values.contains(value.value)) {
-      Checked.valid
+      Result.valid
     } else {
       calc.invalid(NotInEnum(values), value.pointer)
     }
@@ -175,10 +175,10 @@ object ValidationChecker {
       value.value match {
         case StringValue(v) =>
           if (r.findFirstIn(v).isDefined)
-            Checked.valid
+            Result.valid
           else
             calc.invalid(PatternMismatch(pattern), value.pointer)
-        case _ => Checked.valid
+        case _ => Result.valid
       }
     }
   }
@@ -348,10 +348,10 @@ object ValidationChecker {
     value.value match {
       case StringValue(v) =>
         if (check(v))
-          Checked.valid
+          Result.valid
         else
           calc.invalid(observation, value.pointer)
-      case _ => Checked.valid
+      case _ => Result.valid
     }
   }
 
@@ -365,10 +365,10 @@ object ValidationChecker {
     value.value match {
       case NumberValue(v) =>
         if (check(v))
-          Checked.valid
+          Result.valid
         else
           calc.invalid(observation, value.pointer)
-      case _ => Checked.valid
+      case _ => Result.valid
     }
   }
 
@@ -376,10 +376,10 @@ object ValidationChecker {
     value.value match {
       case ArrayValue(v) =>
         if (check(v))
-          Checked.valid
+          Result.valid
         else
           calc.invalid(observation, value.pointer)
-      case _ => Checked.valid
+      case _ => Result.valid
     }
   }
 
@@ -440,10 +440,10 @@ object ValidationChecker {
       value.value match {
         case ObjectValue(v) =>
           if (check(v))
-            Checked.valid
+            Result.valid
           else
             calc.invalid(observation, value.pointer)
-        case _ => Checked.valid
+        case _ => Result.valid
       }
   }
 
@@ -471,10 +471,10 @@ object ValidationChecker {
               .map(property -> _)
           }
         if (missing.isEmpty)
-          Checked.valid
+          Result.valid
         else
           calc.invalid(DependentRequiredMissing(missing), value.pointer)
-      case _ => Checked.valid
+      case _ => Result.valid
     }
   }
 

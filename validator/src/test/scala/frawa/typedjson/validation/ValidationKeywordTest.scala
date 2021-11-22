@@ -27,7 +27,7 @@ class ValidationKeywordTest extends FunSuite {
 
   def validateJson(
       schema: SchemaValue
-  )(jsonText: String)(f: Checked[ValidationResult] => Unit): Either[Nothing, Unit] = {
+  )(jsonText: String)(f: Result[ValidationResult] => Unit): Either[Nothing, Unit] = {
     assertChecked(ValidationChecker())(schema, jsonText)(f)
   }
 

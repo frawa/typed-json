@@ -16,42 +16,42 @@
 
 package frawa.typedjson.processor
 
-object Checked {
+object Result {
   type Annotation = WithPointer[Observation2]
 
-  def apply[R](valid: Boolean, result: R): Checked[R] = Checked[R](valid, Seq(result))
-  def valid[R]: Checked[R]                            = Checked[R](true)
-  def valid[R](result: R): Checked[R]                 = Checked[R](true, Seq(result))
-  def invalid[R]: Checked[R]                          = Checked[R](false)
-  def invalid[R](result: R): Checked[R]               = Checked[R](false, Seq(result))
+  def apply[R](valid: Boolean, result: R): Result[R] = Result[R](valid, Seq(result))
+  def valid[R]: Result[R]                            = Result[R](true)
+  def valid[R](result: R): Result[R]                 = Result[R](true, Seq(result))
+  def invalid[R]: Result[R]                          = Result[R](false)
+  def invalid[R](result: R): Result[R]               = Result[R](false, Seq(result))
 
-  def merge[R](checked: Seq[Checked[R]]): Checked[R] = {
+  def merge[R](checked: Seq[Result[R]]): Result[R] = {
     val valid           = checked.forall(_.valid)
     val results: Seq[R] = checked.flatMap(_.results)
     val validation      = checked.map(_.validation).reduceOption(_.combine(_)).getOrElse(SchemaQuality.empty)
     val annotations     = checked.filter(_.valid).flatMap(_.annotations)
-    Checked(valid, results, annotations, validation, 1 + count(checked))
+    Result(valid, results, annotations, validation, 1 + count(checked))
   }
-  def count[R](checked: Seq[Checked[R]]): Int = checked.map(_.count).sum
+  def count[R](checked: Seq[Result[R]]): Int = checked.map(_.count).sum
 }
 
-case class Checked[R](
+case class Result[R](
     valid: Boolean,
     results: Seq[R] = Seq.empty,
-    annotations: Seq[Checked.Annotation] = Seq.empty,
+    annotations: Seq[Result.Annotation] = Seq.empty,
     validation: SchemaQuality = SchemaQuality.empty,
     count: Int = 1
 ) {
-  def add(others: Seq[Checked[R]]): Checked[R] =
+  def add(others: Seq[Result[R]]): Result[R] =
     this
-      .copy(count = this.count + Checked.count(others))
+      .copy(count = this.count + Result.count(others))
       .addAnnotations(others.flatMap(_.annotations))
       .addValidations(others.map(_.validation))
-  def add(validation: SchemaQuality): Checked[R] = this.copy(validation = this.validation.combine(validation))
-  private def addValidations(validations: Seq[SchemaQuality]): Checked[R] =
+  def add(validation: SchemaQuality): Result[R] = this.copy(validation = this.validation.combine(validation))
+  private def addValidations(validations: Seq[SchemaQuality]): Result[R] =
     this.copy(validation = validations.foldLeft(this.validation)(_.combine(_)))
 
-  def add(annotation: Checked.Annotation): Checked[R] = this.copy(annotations = this.annotations :+ annotation)
-  private def addAnnotations(annotations: Seq[Checked.Annotation]) =
+  def add(annotation: Result.Annotation): Result[R] = this.copy(annotations = this.annotations :+ annotation)
+  private def addAnnotations(annotations: Seq[Result.Annotation]) =
     this.copy(annotations = this.annotations ++ annotations)
 }

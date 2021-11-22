@@ -20,37 +20,37 @@ import frawa.typedjson.parser._
 import frawa.typedjson.processor._
 import frawa.typedjson.validation.{ValidationChecker, ValidationResult}
 
-case class SuggestionResult(suggestions: Seq[Value], validated: Checked[ValidationResult])
+case class SuggestionResult(suggestions: Seq[Value], validated: Result[ValidationResult])
 
 object SuggestionChecker {
 
   def apply(at: Pointer): Checker[SuggestionResult] = Checker(check(at), nested(at))
 
-  private def check(at: Pointer)(check: SimpleCheck)(value: InnerValue): Checked[SuggestionResult] = {
+  private def check(at: Pointer)(check: SimpleCheck)(value: InnerValue): Result[SuggestionResult] = {
     if (at == value.pointer) {
-      val suggestions = suggestFor(check)(Seq(Checked.valid))
-      Checked.valid(SuggestionResult(suggestions, Checked.valid))
+      val suggestions = suggestFor(check)(Seq(Result.valid))
+      Result.valid(SuggestionResult(suggestions, Result.valid))
     } else {
       val checked = ValidationChecker().check(check)(value)
-      Checked(checked.valid, SuggestionResult(Seq(), checked))
+      Result(checked.valid, SuggestionResult(Seq(), checked))
     }
   }
 
   private def nested(
       at: Pointer
-  )(check: NestingCheck)(checked: Seq[Checked[SuggestionResult]])(value: InnerValue): Checked[SuggestionResult] = {
+  )(check: NestingCheck)(checked: Seq[Result[SuggestionResult]])(value: InnerValue): Result[SuggestionResult] = {
     if (at == value.pointer) {
       val suggestions = suggestFor(check)(checked)
-      Checked.valid(SuggestionResult(suggestions, Checked.valid))
+      Result.valid(SuggestionResult(suggestions, Result.valid))
     } else {
       val suggestions = checked.flatMap(_.results).flatMap(_.suggestions)
       val validated   = checked.flatMap(_.results).map(_.validated)
       val nested      = ValidationChecker().nested(check)(validated)(value)
-      Checked.valid(SuggestionResult(suggestions, nested))
+      Result.valid(SuggestionResult(suggestions, nested))
     }
   }
 
-  private def suggestFor(check: Check)(checked: Seq[Checked[SuggestionResult]]): Seq[Value] = {
+  private def suggestFor(check: Check)(checked: Seq[Result[SuggestionResult]]): Seq[Value] = {
     check match {
       case NullTypeCheck    => Seq(NullValue)
       case BooleanTypeCheck => Seq(BoolValue(true))

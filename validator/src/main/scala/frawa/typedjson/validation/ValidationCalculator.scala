@@ -16,42 +16,42 @@
 
 package frawa.typedjson.validation
 
-import frawa.typedjson.processor.{Checked, Pointer}
+import frawa.typedjson.processor.{Result, Pointer}
 
 class ValidationCalculator extends Calculator[ValidationResult] {
-  override def allOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
+  override def allOf(checked: Seq[Result[ValidationResult]], pointer: Pointer): Result[ValidationResult] = {
     if (checked.isEmpty || checked.forall(_.valid)) {
-      Checked.valid
+      Result.valid
     } else {
       invalid(checked)
     }
   }
 
-  private def invalid(checked: Seq[Checked[ValidationResult]]): Checked[ValidationResult] = {
+  private def invalid(checked: Seq[Result[ValidationResult]]): Result[ValidationResult] = {
     val errors = checked.flatMap(_.results.flatMap(_.errors))
     if (errors.isEmpty) {
-      Checked.invalid
+      Result.invalid
     } else {
-      Checked.invalid(ValidationResult.invalid(errors))
+      Result.invalid(ValidationResult.invalid(errors))
     }
   }
 
-  override def invalid(observation: Observation, pointer: Pointer): Checked[ValidationResult] = Checked.invalid(
+  override def invalid(observation: Observation, pointer: Pointer): Result[ValidationResult] = Result.invalid(
     ValidationResult.invalid(observation, pointer)
   )
 
-  override def anyOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
+  override def anyOf(checked: Seq[Result[ValidationResult]], pointer: Pointer): Result[ValidationResult] = {
     if (checked.isEmpty || checked.exists(_.valid)) {
-      Checked.valid
+      Result.valid
     } else {
       invalid(checked)
     }
   }
 
-  override def oneOf(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
+  override def oneOf(checked: Seq[Result[ValidationResult]], pointer: Pointer): Result[ValidationResult] = {
     val valids = checked.filter(_.valid)
     if (valids.size == 1) {
-      Checked.valid
+      Result.valid
     } else if (valids.isEmpty) {
       invalid(checked)
     } else {
@@ -60,31 +60,31 @@ class ValidationCalculator extends Calculator[ValidationResult] {
   }
 
   override def contains(
-      checked: Seq[Checked[ValidationResult]],
+      checked: Seq[Result[ValidationResult]],
       pointer: Pointer,
       min: Option[Int],
       max: Option[Int]
-  ): Checked[ValidationResult] = {
+  ): Result[ValidationResult] = {
     val count = checked.count(_.valid)
     if (min.getOrElse(1) <= count && !max.exists(count > _)) {
-      Checked.valid
+      Result.valid
     } else {
       invalid(NotContains(count), pointer)
     }
   }
 
-  override def not(checked: Seq[Checked[ValidationResult]], pointer: Pointer): Checked[ValidationResult] = {
+  override def not(checked: Seq[Result[ValidationResult]], pointer: Pointer): Result[ValidationResult] = {
     if (checked.length == 1 && !checked(0).valid) {
-      Checked.valid
+      Result.valid
     } else {
       invalid(NotInvalid(), pointer)
     }
   }
 
   override def ifThenElse(
-      checked: Seq[Checked[ValidationResult]],
+      checked: Seq[Result[ValidationResult]],
       pointer: Pointer
-  ): Checked[ValidationResult] = {
+  ): Result[ValidationResult] = {
     allOf(checked, pointer)
   }
 

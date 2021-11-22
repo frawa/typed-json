@@ -31,13 +31,13 @@ class ValidationCheckerTest extends FunSuite {
       schema: SchemaValue,
       lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
   )(
-      f: Checked[ValidationResult] => Unit
+      f: Result[ValidationResult] => Unit
   ) = {
     implicit val lr = lazyResolver
     assertChecked(ValidationChecker())(schema, text)(f)
   }
 
-  private def assertErrors(checked: Checked[ValidationResult], expected: Seq[WithPointer[Observation]]): Unit = {
+  private def assertErrors(checked: Result[ValidationResult], expected: Seq[WithPointer[Observation]]): Unit = {
     assertEquals(checked.results.flatMap(_.errors), expected)
   }
 

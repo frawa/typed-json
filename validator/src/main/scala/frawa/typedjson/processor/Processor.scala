@@ -23,15 +23,15 @@ import frawa.typedjson.parser.StringValue
 import frawa.typedjson.processor
 
 case class Processor[R] private[processor] (private val process: Processor.ProcessFun[R], validation: SchemaQuality) {
-  def apply(value: InnerValue): Checked[R] = process(value)
+  def apply(value: InnerValue): Result[R] = process(value)
 }
 
 object Processor {
   import Checks.CheckWithLocation
 
   type SchemaErrors  = Checks.SchemaErrors
-  type ProcessFun[R] = InnerValue => Checked[R]
-  type MergeFun[R]   = Seq[Checked[R]] => ProcessFun[R]
+  type ProcessFun[R] = InnerValue => Result[R]
+  type MergeFun[R]   = Seq[Result[R]] => ProcessFun[R]
 
   def apply[R](schema: SchemaValue, lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None)(
       checker: Checker[R]
@@ -50,9 +50,9 @@ object Processor {
       .andThen(_.add(SchemaQuality.empty.addIgnoredKeywords(checks.ignoredKeywords)))
   }
 
-  private def noop[R]: ProcessFun[R]                                            = _ => Checked.valid[R]
+  private def noop[R]: ProcessFun[R]                                            = _ => Result.valid[R]
   private def simple[R](checker: Checker[R], check: SimpleCheck): ProcessFun[R] = checker.check(check)
-  private def seq[R](ps: Seq[ProcessFun[R]]): ProcessFun[R] = value => Checked.merge(ps.map(_(value)))
+  private def seq[R](ps: Seq[ProcessFun[R]]): ProcessFun[R] = value => Result.merge(ps.map(_(value)))
   private def option[R](p: Option[ProcessFun[R]]): ProcessFun[R] = {
     p.getOrElse(noop)
   }
@@ -70,12 +70,12 @@ object Processor {
         val checked       = pItems.map(pItems => indexed.drop(pPrefix.size).map(pItems)).getOrElse(Seq())
         val indices       = Seq.range(0, checkedPrefix.size + checked.size)
         mergeAll(merge, checkedPrefix ++ checked, value).add(WithPointer(EvaluatedIndices(indices)))
-      case _ => Checked.valid
+      case _ => Result.valid
     }
   }
 
   // TODO return a ProcessFun[R]?
-  private def mergeAll[R](merge: MergeFun[R], cs: Seq[Checked[R]], value: InnerValue): Checked[R] = {
+  private def mergeAll[R](merge: MergeFun[R], cs: Seq[Result[R]], value: InnerValue): Result[R] = {
     merge(cs)(value).add(cs)
   }
 
@@ -97,7 +97,7 @@ object Processor {
         val evaluatedKeys = EvaluatedProperties(evaluated.filter(_._2.valid).map(_._1).toSet)
         val annotation    = processor.WithPointer(evaluatedKeys, value.pointer)
         mergeAll(merge, checked, value).add(annotation)
-      case _ => Checked.valid
+      case _ => Result.valid
     }
   }
 
@@ -216,7 +216,7 @@ object Processor {
         val validNames = checked.filter(_._2.valid).map(_._1).toSet
         val annotation = processor.WithPointer(EvaluatedProperties(validNames), value.pointer)
         mergeAll(merge, checked.map(_._2), value).add(annotation)
-      case _ => Checked.valid
+      case _ => Result.valid
     }
   }
 
@@ -226,7 +226,7 @@ object Processor {
       case Left(errors) =>
         _ =>
           val validation = SchemaQuality.empty.addErrors(errors)
-          Checked.invalid.add(validation)
+          Result.invalid.add(validation)
     }
   }
 
@@ -237,7 +237,7 @@ object Processor {
         val merge   = checker.nested(check)
         val checked = ps.map(_(value))
         mergeAll(merge, checked, value)
-      case _ => Checked.valid
+      case _ => Result.valid
     }
   }
 
@@ -258,8 +258,8 @@ object Processor {
               typedjson.processor.WithPointer(EvaluatedIndices(validIndices), value.pointer)
             )
           }
-          .getOrElse(Checked.valid)
-      case _ => Checked.valid
+          .getOrElse(Result.valid)
+      case _ => Result.valid
     }
   }
 

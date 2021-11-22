@@ -19,7 +19,7 @@ package frawa.typedjson.meta
 import munit.FunSuite
 import frawa.typedjson.processor.SchemaValue
 import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.processor.Checked
+import frawa.typedjson.processor.Result
 import frawa.typedjson.processor.LoadedSchemasResolver
 import frawa.typedjson.processor.InnerValue
 import frawa.typedjson.testutil.TestUtil._
@@ -37,7 +37,7 @@ class MetaSchemaTest extends FunSuite {
     f(schema)
   }
 
-  def validateSpec(valueName: String, schemaName: String)(f: Checked[ValidationResult] => Unit): Unit = {
+  def validateSpec(valueName: String, schemaName: String)(f: Result[ValidationResult] => Unit): Unit = {
     withSchemaSpec(schemaName) { schema =>
       withSchemaSpec(valueName) { value =>
         withProcessor(ValidationChecker())(schema, lazyResolver) { processor =>
