@@ -24,7 +24,7 @@ import frawa.typedjson.processor
 
 case class Processor[R] private[processor] (private val process: Processor.ProcessFun[R]) {
   def apply(value: InnerValue): Result[R]              = process(value)
-  def andThen(f: Result[R] => Result[R]): Processor[R] = Processor(process.andThen(f))
+  def andThen(f: Result[R] => Result[R]): Processor[R] = this.copy(process = process.andThen(f))
 }
 
 object Processor {
