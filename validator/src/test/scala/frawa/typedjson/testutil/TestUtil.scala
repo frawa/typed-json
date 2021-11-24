@@ -34,7 +34,7 @@ object TestUtil {
   }
 
   def withSchema(text: String)(f: SchemaValue => Unit)(implicit parser: Parser): Unit = {
-    f(SchemaValue(parseJsonValue(text)))
+    f(SchemaValue.root(parseJsonValue(text)))
   }
 
   def withLoadedSchemas(texts: Seq[String])(f: LoadedSchemasResolver => Unit)(implicit parser: Parser): Unit = {

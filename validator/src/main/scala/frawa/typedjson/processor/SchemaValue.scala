@@ -17,12 +17,28 @@
 package frawa.typedjson.processor
 
 import frawa.typedjson.parser.{StringValue, Value}
+import frawa.typedjson.util.UriUtil.uri
 
-case class SchemaValue(value: Value)
+import java.net.URI
+
+trait SchemaValue {
+  val value: Value
+}
+case class SchemaValue1(value: Value)                       extends SchemaValue
+case class RootSchemaValue(value: Value, meta: Option[URI]) extends SchemaValue
+case class MetaSchemaValue(value: Value)                    extends SchemaValue
 
 object SchemaValue {
+  def apply(value: Value): SchemaValue = SchemaValue1(value)
+
+  def root(value: Value): RootSchemaValue = RootSchemaValue(value, get("$schema", value).map(uri))
+
   def id(schema: SchemaValue): Option[String] = {
-    (Pointer.empty / "$id")(schema.value).flatMap {
+    get("$id", schema.value)
+  }
+
+  private def get(property: String, value: Value): Option[String] = {
+    (Pointer.empty / property)(value).flatMap {
       case StringValue(id) => Some(id)
       case _               => None
     }

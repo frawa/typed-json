@@ -26,7 +26,7 @@ import frawa.typedjson.util.UriUtil._
 import java.net.URI
 
 object LoadedSchemasResolver {
-  type LazyResolver = URI => Option[SchemaValue]
+  type LazyResolver = URI => Option[RootSchemaValue]
 
   val empty: LoadedSchemasResolver = LoadedSchemasResolver(uri(""))
 

@@ -17,10 +17,9 @@
 package frawa.typedjson.jsonSchemaTestSuite
 
 import java.net.URI
-import frawa.typedjson.processor.LoadedSchemasResolver
+import frawa.typedjson.processor.{LoadedSchemasResolver, RootSchemaValue, SchemaValue}
 import frawa.typedjson.parser.Parser
 import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.processor.SchemaValue
 import frawa.typedjson.util.UriUtil
 
 object Remotes {
@@ -33,7 +32,7 @@ object Remotes {
     } else { None }
   }
 
-  private def resolveRemotes(relative: URI): Option[SchemaValue] = {
+  private def resolveRemotes(relative: URI): Option[RootSchemaValue] = {
     val name     = relative.getSchemeSpecificPart
     val segments = name.split('/').toArray
     if (segments.length == 2) {
@@ -51,7 +50,7 @@ object Remotes {
 
   private val parser: Parser = new ZioParser()
 
-  private def toSchemaValue(text: String): Option[SchemaValue] = {
+  private def toSchemaValue(text: String): Option[RootSchemaValue] = {
     parser
       .parse(text)
       .swap
@@ -59,7 +58,7 @@ object Remotes {
         throw new IllegalArgumentException(e)
       }
       .swap
-      .map(SchemaValue(_))
+      .map(SchemaValue.root)
       .toOption
   }
 
