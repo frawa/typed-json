@@ -1,29 +1,30 @@
 # Backlog
 
 ## Doing
-- handle ingoredKeywords with annotations?
+- support $schema?
 
 ## TODO
-- support $schema?
 - support $vocabulary?
 - better artifact names
 - review and refactor: implicits
 - crystallize API with an example
+- produce output schema from annotations/errors
+- post process annotations?
 - isolate dependency on zio-json
 - latest dependencies
 - publish released versions
 - do not prefix results, but push value pointer into checker?
-- fully support annotations, wrt output meta schema
 - support earlier version of spec, via JsonSchemaTestTestSuite
 - support missing formats (all those RFCs ..)
 - fix ignored suites in JsonSchemaTestTestSuite
 - latest dependencies
 - support deprecated?
 - benching
-- support ScalaNative?
+- support ScalaNative? Or GraalVM?
 - CI on GH Actions?
 
 ## Done
+- handle ingoredKeywords with annotations
 - better package name
 - better names, eg. Checks -> Keywords
 - streamline SchemaQuality
