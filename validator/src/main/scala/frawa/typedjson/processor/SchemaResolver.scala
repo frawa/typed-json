@@ -55,15 +55,14 @@ trait SchemaResolver {
   private def resolveDynamicRef(uri: URI, scope: DynamicScope): Option[Resolution] = {
     val resolved = resolveRef(uri)
 
-    val fragment = uri.getFragment()
+    val fragment = uri.getFragment
     val dynamic = isDynamic(uri) ||
-      scope.candidates.lastOption.map(UriUtil.withFragment(_, fragment)).exists(isDynamic((_)))
+      scope.candidates.lastOption.map(UriUtil.withFragment(_, fragment)).exists(isDynamic)
     if (dynamic && fragment != null) {
       scope.candidates
         .map(UriUtil.withFragment(_, fragment))
-        .filter(isDynamic(_))
-        .headOption
-        .flatMap(resolve(_))
+        .find(isDynamic)
+        .flatMap(resolve)
         .orElse(resolved)
     } else {
       resolved
@@ -81,7 +80,7 @@ trait SchemaResolver {
 
   private def resolveRef(uri: URI): Option[Resolution] = {
     if (uri.getFragment != null && uri.getFragment.startsWith("/")) {
-      val pointer = Pointer.parse(uri.getFragment())
+      val pointer = Pointer.parse(uri.getFragment)
       resolve(UriUtil.withoutFragement(uri))
         .flatMap(resolvePointer(_, pointer))
     } else {

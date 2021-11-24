@@ -19,6 +19,7 @@ package frawa.typedjson.validation
 import frawa.typedjson
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser._
+import frawa.typedjson.processor.LoadedSchemasResolver.LazyResolver
 import frawa.typedjson.testutil.TestSchemas._
 import frawa.typedjson.testutil.TestUtil.{assertResult, withSchema}
 import frawa.typedjson.processor._
@@ -34,7 +35,7 @@ class ValidationEvalTest extends FunSuite {
   )(
       f: Result[ValidationResult] => Unit
   ) = {
-    implicit val lr = lazyResolver
+    implicit val lr: Option[LazyResolver] = lazyResolver
     assertResult(ValidationEval())(schema, text, strict)(f)
   }
 
