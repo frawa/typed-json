@@ -22,8 +22,9 @@ import frawa.typedjson.parser.ObjectValue
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.processor
 
-case class Processor[R] private[processor] (private val process: Processor.ProcessFun[R], problems: SchemaProblems) {
-  def apply(value: InnerValue): Result[R] = process(value)
+case class Processor[R] private[processor] (private val process: Processor.ProcessFun[R]) {
+  def apply(value: InnerValue): Result[R]              = process(value)
+  def andThen(f: Result[R] => Result[R]): Processor[R] = Processor(process.andThen(f))
 }
 
 object Processor {
@@ -41,13 +42,13 @@ object Processor {
     val scope = DynamicScope.empty.push(resolver.base)
     for {
       keywords <- Keywords.parseKeywords(schema, scope)
-      processor = Processor(all(eval, keywords), SchemaProblems.empty.addIgnoredKeywords(keywords.ignored))
+      processor = Processor(all(eval, keywords).andThen(_.addIgnoredKeywords(keywords.ignored, Pointer.empty)))
     } yield processor
   }
 
-  private def all[R](eval: Eval[R], keywords: Keywords): ProcessFun[R] = {
+  private def all[R](eval: Eval[R], keywords: Keywords): ProcessFun[R] = { value =>
     seq(keywords.keywords.map(one(eval, _)))
-      .andThen(_.add(SchemaProblems.empty.addIgnoredKeywords(keywords.ignored)))
+      .andThen(_.addIgnoredKeywords(keywords.ignored, value.pointer))(value)
   }
 
   private def noop[R]: ProcessFun[R]                                          = _ => Result.valid[R]

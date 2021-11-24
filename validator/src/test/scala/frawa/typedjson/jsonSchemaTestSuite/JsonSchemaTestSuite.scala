@@ -106,7 +106,7 @@ class JsonSchemaTestSuite extends FunSuite {
           }
         } else {
           test(suiteOptions) {
-            withStrictProcessor(ValidationEval())(schemaValue) { processor =>
+            withProcessor(ValidationEval())(schemaValue) { processor =>
               tests
                 .map(testData)
                 .foreach {
@@ -126,7 +126,7 @@ class JsonSchemaTestSuite extends FunSuite {
       implicit val loc = munit.Location.empty
       if (!result.valid) {
         assertEquals(result.problems.errors, Seq(), data.failMessage)
-        assertEquals(result.problems.ignoredKeywords, Set.empty[String], data.failMessage)
+        assertEquals(result.ignoredKeywords(), Set.empty[String], data.failMessage)
         assertEquals(result.results, Seq(), data.failMessage)
       } else {
         fail("unexpected valid", clues(clue(data.failMessage), clue(data.expectedValid), clue(result)))

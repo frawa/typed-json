@@ -29,12 +29,13 @@ class ValidationEvalTest extends FunSuite {
 
   private def assertValidate(text: String)(
       schema: SchemaValue,
-      lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
+      lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None,
+      strict: Boolean = true
   )(
       f: Result[ValidationResult] => Unit
   ) = {
     implicit val lr = lazyResolver
-    assertResult(ValidationEval())(schema, text)(f)
+    assertResult(ValidationEval())(schema, text, strict)(f)
   }
 
   private def assertErrors(result: Result[ValidationResult], expected: Seq[WithPointer[Observation]]): Unit = {
@@ -754,36 +755,44 @@ class ValidationEvalTest extends FunSuite {
     val lazyResolver = Some(MetaSchemas.lazyResolver)
 
     withSchema(refToValidationSpec) { schema =>
-      assertValidate("""{ "$defs": { "foo": { "type": "boolean" } } }""".stripMargin)(schema, lazyResolver) { result =>
+      assertValidate("""{ "$defs": { "foo": { "type": "boolean" } } }""".stripMargin)(
+        schema,
+        lazyResolver,
+        strict = false
+      ) { result =>
         assertErrors(result, Seq())
         assertEquals(result.problems.errors, Seq())
         assertEquals(result.valid, true)
       }
-      assertValidate("""{ "$defs": { "foo": { "type": ["boolean"] } } }""".stripMargin)(schema, lazyResolver) {
-        result =>
-          assertErrors(result, Seq())
-          assertEquals(result.problems.errors, Seq())
-          assertEquals(result.valid, true)
+      assertValidate("""{ "$defs": { "foo": { "type": ["boolean"] } } }""".stripMargin)(
+        schema,
+        lazyResolver,
+        strict = false
+      ) { result =>
+        assertErrors(result, Seq())
+        assertEquals(result.problems.errors, Seq())
+        assertEquals(result.valid, true)
       }
-      assertValidate("""{ "$defs": { "foo": { "type": 13 } } }""".stripMargin)(schema, lazyResolver) { result =>
-        assertErrors(
-          result,
-          Seq(
-            typedjson.processor.WithPointer(
-              result = NotInEnum(
-                values = Seq("array", "boolean", "integer", "null", "number", "object", "string").map(StringValue(_))
+      assertValidate("""{ "$defs": { "foo": { "type": 13 } } }""".stripMargin)(schema, lazyResolver, strict = false) {
+        result =>
+          assertErrors(
+            result,
+            Seq(
+              typedjson.processor.WithPointer(
+                result = NotInEnum(
+                  values = Seq("array", "boolean", "integer", "null", "number", "object", "string").map(StringValue)
+                ),
+                pointer = Pointer.parse("/$defs/foo/type")
               ),
-              pointer = Pointer.parse("/$defs/foo/type")
-            ),
-            typedjson.processor.WithPointer(
-              result = TypeMismatch(
-                expected = "array"
-              ),
-              pointer = Pointer.parse("/$defs/foo/type")
+              typedjson.processor.WithPointer(
+                result = TypeMismatch(
+                  expected = "array"
+                ),
+                pointer = Pointer.parse("/$defs/foo/type")
+              )
             )
           )
-        )
-        assertEquals(result.valid, false)
+          assertEquals(result.valid, false)
       }
     }
   }

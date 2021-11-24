@@ -19,6 +19,7 @@ package frawa.typedjson.processor
 sealed trait Evaluated
 case class EvaluatedIndices(indices: Seq[Int])          extends Evaluated
 case class EvaluatedProperties(properties: Set[String]) extends Evaluated
+case class Ignored(keywords: Set[String])               extends Evaluated
 
 object Result {
   type Annotation = WithPointer[Evaluated]
@@ -36,6 +37,7 @@ object Result {
     val annotations = allResults.filter(_.valid).flatMap(_.annotations)
     Result(valid, results, annotations, problems, 1 + count(allResults))
   }
+
   def count[R](results: Seq[Result[R]]): Int = results.map(_.count).sum
 }
 
@@ -50,15 +52,33 @@ case class Result[R](
     this
       .copy(count = this.count + Result.count(others))
       .addAnnotations(others.flatMap(_.annotations))
-      .addValidations(others.map(_.problems))
+      .addProblems(others.map(_.problems))
 
-  def add(validation: SchemaProblems): Result[R] = this.copy(problems = this.problems.combine(validation))
+  def add(problem: SchemaProblems): Result[R] = this.copy(problems = this.problems.combine(problem))
 
-  private def addValidations(validations: Seq[SchemaProblems]): Result[R] =
-    this.copy(problems = validations.foldLeft(this.problems)(_.combine(_)))
+  private def addProblems(problems: Seq[SchemaProblems]): Result[R] =
+    this.copy(problems = problems.foldLeft(this.problems)(_.combine(_)))
 
   def add(annotation: Result.Annotation): Result[R] = this.copy(annotations = this.annotations :+ annotation)
 
-  private def addAnnotations(annotations: Seq[Result.Annotation]) =
+  private def addAnnotations(annotations: Seq[Result.Annotation]): Result[R] =
     this.copy(annotations = this.annotations ++ annotations)
+
+  def addIgnoredKeywords(ignored: Set[String], pointer: Pointer): Result[R] =
+    if (ignored.isEmpty) {
+      this
+    } else {
+      add(WithPointer(Ignored(ignored), pointer))
+    }
+
+  def ignoredKeywords(): Set[String] = {
+    annotations
+      .flatMap {
+        case WithPointer(Ignored(ignored), _) => Some(ignored)
+        case _                                => None
+      }
+      .reduceOption(_ ++ _)
+      .getOrElse(Set.empty)
+  }
+
 }

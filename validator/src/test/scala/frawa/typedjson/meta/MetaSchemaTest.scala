@@ -17,20 +17,17 @@
 package frawa.typedjson.meta
 
 import munit.FunSuite
-import frawa.typedjson.processor.SchemaValue
+import frawa.typedjson.processor.{InnerValue, LoadedSchemasResolver, Result, SchemaValue}
 import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.processor.Result
-import frawa.typedjson.processor.LoadedSchemasResolver
-import frawa.typedjson.processor.InnerValue
 import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.validation.{ValidationEval, ValidationResult}
 
 class MetaSchemaTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()
 
-  val resolver                                               = MetaSchemas.lazyResolver
-  val base                                                   = MetaSchemas.draft202012
-  val lazyResolver: Some[LoadedSchemasResolver.LazyResolver] = Some(MetaSchemas.lazyResolver)
+  private val resolver                                               = MetaSchemas.lazyResolver
+  private val base                                                   = MetaSchemas.draft202012
+  private val lazyResolver: Some[LoadedSchemasResolver.LazyResolver] = Some(MetaSchemas.lazyResolver)
 
   def withSchemaSpec(name: String)(f: SchemaValue => Unit): Unit = {
     val Some(schema) = resolver(base.resolve(name))
@@ -40,7 +37,7 @@ class MetaSchemaTest extends FunSuite {
   def validateSpec(valueName: String, schemaName: String)(f: Result[ValidationResult] => Unit): Unit = {
     withSchemaSpec(schemaName) { schema =>
       withSchemaSpec(valueName) { value =>
-        withProcessor(ValidationEval())(schema, lazyResolver) { processor =>
+        withProcessor(ValidationEval())(schema, lazyResolver = lazyResolver) { processor =>
           val result = processor(InnerValue(value.value))
           f(result)
         }
@@ -53,7 +50,7 @@ class MetaSchemaTest extends FunSuite {
       assertEquals(result.results, Seq())
       assertEquals(result.count, 54)
       assertEquals(
-        result.problems.ignoredKeywords,
+        result.ignoredKeywords(),
         Set("$vocabulary", "$schema")
       )
     }
@@ -64,7 +61,7 @@ class MetaSchemaTest extends FunSuite {
       assertEquals(result.results, Seq())
       assertEquals(result.count, 22)
       assertEquals(
-        result.problems.ignoredKeywords,
+        result.ignoredKeywords(),
         Set("$vocabulary", "$schema")
       )
     }
@@ -75,7 +72,7 @@ class MetaSchemaTest extends FunSuite {
       assertEquals(result.results, Seq())
       assertEquals(result.count, 84)
       assertEquals(
-        result.problems.ignoredKeywords,
+        result.ignoredKeywords(),
         Set("$vocabulary", "$schema")
       )
     }
@@ -86,7 +83,7 @@ class MetaSchemaTest extends FunSuite {
       assertEquals(result.results, Seq())
       assertEquals(result.count, 65)
       assertEquals(
-        result.problems.ignoredKeywords,
+        result.ignoredKeywords(),
         Set("$vocabulary", "$schema")
       )
     }
@@ -97,7 +94,7 @@ class MetaSchemaTest extends FunSuite {
       assertEquals(result.results, Seq())
       assertEquals(result.count, 22)
       assertEquals(
-        result.problems.ignoredKeywords,
+        result.ignoredKeywords(),
         Set("$vocabulary", "$schema")
       )
     }
@@ -108,7 +105,7 @@ class MetaSchemaTest extends FunSuite {
       assertEquals(result.results, Seq())
       assertEquals(result.count, 168)
       assertEquals(
-        result.problems.ignoredKeywords,
+        result.ignoredKeywords(),
         Set("$vocabulary", "$schema")
       )
     }
