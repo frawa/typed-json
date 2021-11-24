@@ -48,7 +48,7 @@ lazy val root = (project in file("."))
   .aggregate(parser.jvm, parser.js, macros.jvm, validator.jvm, validator.js)
 
 lazy val parser =
-  crossProject(JSPlatform, JVMPlatform)
+  crossProject(JVMPlatform, JSPlatform)
     .withoutSuffixFor(JVMPlatform)
     .crossType(CrossType.Pure)
     .in(file("parser"))
@@ -67,7 +67,7 @@ lazy val parser =
       libraryDependencies += "org.scalameta" %%% "munit"    % munitVersion % Test
     )
 
-lazy val macros = crossProject(JSPlatform, JVMPlatform)
+lazy val macros = crossProject(JVMPlatform, JSPlatform)
   .withoutSuffixFor(JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("macros"))
