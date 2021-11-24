@@ -25,9 +25,9 @@ import frawa.typedjson.validation.{ValidationEval, ValidationResult}
 class MetaSchemaTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()
 
-  private val resolver                                               = MetaSchemas.lazyResolver
-  private val base                                                   = MetaSchemas.draft202012
-  private val lazyResolver: Some[LoadedSchemasResolver.LazyResolver] = Some(MetaSchemas.lazyResolver)
+  private val resolver                                                        = MetaSchemas.lazyResolver
+  private val base                                                            = MetaSchemas.draft202012
+  private implicit val lazyResolver: Some[LoadedSchemasResolver.LazyResolver] = Some(MetaSchemas.lazyResolver)
 
   def withSchemaSpec(name: String)(f: SchemaValue => Unit): Unit = {
     val Some(schema) = resolver(base.resolve(name))
@@ -37,7 +37,7 @@ class MetaSchemaTest extends FunSuite {
   def validateSpec(valueName: String, schemaName: String)(f: Result[ValidationResult] => Unit): Unit = {
     withSchemaSpec(schemaName) { schema =>
       withSchemaSpec(valueName) { value =>
-        withProcessor(ValidationEval())(schema, lazyResolver = lazyResolver) { processor =>
+        withProcessor(ValidationEval())(schema) { processor =>
           val result = processor(InnerValue(value.value))
           f(result)
         }

@@ -88,7 +88,7 @@ class JsonSchemaTestSuite extends FunSuite {
 
         val hasIgnoredFailMessage = ignoreFailMessageByDescription.contains(testId)
         if (oneTestPerData || hasIgnoredFailMessage) {
-          withStrictProcessor(ValidationEval())(schemaValue) { processor =>
+          withProcessor(ValidationEval())(schemaValue) { processor =>
             tests.foreach { value =>
               val data     = testData(value)
               val testName = s"${file} | ${data.failMessage} | ${description}"
