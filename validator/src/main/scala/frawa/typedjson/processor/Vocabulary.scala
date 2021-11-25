@@ -120,7 +120,7 @@ object Vocabulary {
       }
       .toSeq
     SeqUtil
-      .sequenceAllLefts2(vocabularies)
+      .sequenceAllLefts(vocabularies)
       .map(_.foldLeft(specVocabularies(coreId))(_.combine(_)))
       .swap
       .map(_.reduce(_.combine(_)))
