@@ -16,11 +16,11 @@
 
 package frawa.typedjson.meta
 
-import munit.FunSuite
-import frawa.typedjson.processor.{InnerValue, LoadedSchemasResolver, Result, SchemaValue}
 import frawa.typedjson.parser.ZioParser
+import frawa.typedjson.processor.{InnerValue, LoadedSchemasResolver, Result, SchemaValue}
 import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.validation.{ValidationEval, ValidationResult}
+import munit.FunSuite
 
 class MetaSchemaTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()

@@ -30,13 +30,12 @@ case class Processor[R] private[processor] (private val process: Processor.Proce
 object Processor {
   import Keywords.KeywordWithLocation
 
-  type SchemaErrors  = Keywords.SchemaErrors
   type ProcessFun[R] = InnerValue => Result[R]
   type MergeFun[R]   = Seq[Result[R]] => ProcessFun[R]
 
   def apply[R](schema: SchemaValue, lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None)(
       eval: Eval[R]
-  ): Either[SchemaErrors, Processor[R]] = {
+  ): Either[SchemaProblems, Processor[R]] = {
     implicit val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema, lazyResolver)
 
     val scope = DynamicScope.empty.push(resolver.base)
@@ -224,10 +223,7 @@ object Processor {
   private def checkLazyResolve[R](eval: Eval[R], keyword: LazyResolveKeyword): ProcessFun[R] = {
     keyword.resolve() match {
       case Right(keywords) => all(eval, keywords)
-      case Left(errors) =>
-        _ =>
-          val problems = SchemaProblems.empty.addErrors(errors)
-          Result.invalid.add(problems)
+      case Left(problems)  => _ => Result.invalid.add(problems)
     }
   }
 

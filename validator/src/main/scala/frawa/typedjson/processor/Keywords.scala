@@ -22,12 +22,7 @@ import frawa.typedjson.parser.NumberValue
 import frawa.typedjson.parser.ObjectValue
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.Value
-import frawa.typedjson.processor.SchemaProblems.{
-  InvalidSchemaValue,
-  MissingDynamicReference,
-  MissingReference,
-  SchemaError
-}
+import frawa.typedjson.processor.SchemaProblems.{InvalidSchemaValue, MissingDynamicReference, MissingReference}
 import frawa.typedjson.util.UriUtil
 
 import java.net.URI
@@ -67,22 +62,22 @@ case class IfThenElseKeyword(
     thenKeywords: Option[Keywords] = None,
     elseKeywords: Option[Keywords] = None
 ) extends NestingKeyword
-case class PatternKeyword(pattern: String)                                                      extends SimpleKeyword
-case class FormatKeyword(format: String)                                                        extends SimpleKeyword
-case class MinimumKeyword(min: BigDecimal, exclude: Boolean = false)                            extends SimpleKeyword
-case class UniqueItemsKeyword(unique: Boolean)                                                  extends SimpleKeyword
-case class PropertyNamesKeyword(keywords: Keywords)                                             extends NestingKeyword
-case class LazyResolveKeyword(resolved: URI, resolve: () => Either[Seq[SchemaError], Keywords]) extends NestingKeyword
-case class MultipleOfKeyword(n: BigDecimal)                                                     extends SimpleKeyword
-case class MaximumKeyword(max: BigDecimal, exclude: Boolean = false)                            extends SimpleKeyword
-case class MaxLengthKeyword(max: BigDecimal)                                                    extends SimpleKeyword
-case class MinLengthKeyword(min: BigDecimal)                                                    extends SimpleKeyword
-case class MaxItemsKeyword(max: BigDecimal)                                                     extends SimpleKeyword
-case class MinItemsKeyword(min: BigDecimal)                                                     extends SimpleKeyword
-case class MaxPropertiesKeyword(max: BigDecimal)                                                extends SimpleKeyword
-case class MinPropertiesKeyword(min: BigDecimal)                                                extends SimpleKeyword
-case class DependentRequiredKeyword(required: Map[String, Seq[String]])                         extends SimpleKeyword
-case class DependentSchemasKeyword(keywords: Map[String, Keywords])                             extends NestingKeyword
+case class PatternKeyword(pattern: String)                                                    extends SimpleKeyword
+case class FormatKeyword(format: String)                                                      extends SimpleKeyword
+case class MinimumKeyword(min: BigDecimal, exclude: Boolean = false)                          extends SimpleKeyword
+case class UniqueItemsKeyword(unique: Boolean)                                                extends SimpleKeyword
+case class PropertyNamesKeyword(keywords: Keywords)                                           extends NestingKeyword
+case class LazyResolveKeyword(resolved: URI, resolve: () => Either[SchemaProblems, Keywords]) extends NestingKeyword
+case class MultipleOfKeyword(n: BigDecimal)                                                   extends SimpleKeyword
+case class MaximumKeyword(max: BigDecimal, exclude: Boolean = false)                          extends SimpleKeyword
+case class MaxLengthKeyword(max: BigDecimal)                                                  extends SimpleKeyword
+case class MinLengthKeyword(min: BigDecimal)                                                  extends SimpleKeyword
+case class MaxItemsKeyword(max: BigDecimal)                                                   extends SimpleKeyword
+case class MinItemsKeyword(min: BigDecimal)                                                   extends SimpleKeyword
+case class MaxPropertiesKeyword(max: BigDecimal)                                              extends SimpleKeyword
+case class MinPropertiesKeyword(min: BigDecimal)                                              extends SimpleKeyword
+case class DependentRequiredKeyword(required: Map[String, Seq[String]])                       extends SimpleKeyword
+case class DependentSchemasKeyword(keywords: Map[String, Keywords])                           extends NestingKeyword
 case class ContainsKeyword(schema: Option[Keywords] = None, min: Option[Int] = None, max: Option[Int] = None)
     extends NestingKeyword
 case class UnevaluatedItemsKeyword(pushed: Keywords, unevaluated: Keywords)      extends NestingKeyword
@@ -103,20 +98,20 @@ case class Keywords(
       schemas: Seq[SchemaValue]
   )(
       f: Seq[Keywords] => Keyword
-  )(implicit resolver: SchemaResolver, scope: DynamicScope): Either[SchemaErrors, Keywords] = {
+  )(implicit resolver: SchemaResolver, scope: DynamicScope): Either[SchemaProblems, Keywords] = {
     val keywords0 = schemas.zipWithIndex.map { case (v, i) => Keywords.parseKeywords(v, scope.push(i)) }
     for {
-      keywords <- sequenceAllLefts(keywords0)
+      keywords <- combineAllLefts(keywords0)(SchemaProblems.combine)
     } yield {
       add(f(keywords)).withIgnored(keywords.flatMap(_.ignored).toSet)
     }
   }
 
-  type SchemaErrors = Keywords.SchemaErrors
+//  type SchemaErrors = Keywords.SchemaErrors
 
   private def withKeyword(keyword: String, value: Value, scope: DynamicScope)(implicit
       resolver: SchemaResolver
-  ): Either[SchemaErrors, Keywords] = {
+  ): Either[SchemaProblems, Keywords] = {
     implicit val scope1: DynamicScope = scope.push(keyword)
     (keyword, value) match {
       // TODO validation vocabulary
@@ -154,7 +149,7 @@ case class Keywords(
       case ("prefixItems", ArrayValue(vs)) =>
         val keywords0 = vs.map(v => Keywords.parseKeywords(SchemaValue(v), scope1))
         for {
-          keywords <- sequenceAllLefts(keywords0)
+          keywords <- combineAllLefts(keywords0)(SchemaProblems.combine)
         } yield {
           updateKeyword(ArrayItemsKeyword())(check => check.copy(prefixItems = keywords))
         }
@@ -249,7 +244,7 @@ case class Keywords(
             .resolveRef(ref)
             .map(Right(_))
             // .getOrElse(throw new IllegalStateException(s"$ref not found"))
-            .getOrElse(Left(Seq(WithPointer(MissingReference(ref)))))
+            .getOrElse(Left(SchemaProblems(MissingReference(ref))))
           keyword = lazyResolve(resolution, scope1)
         } yield {
           add(keyword)
@@ -260,7 +255,7 @@ case class Keywords(
           resolution <- resolver
             .resolveDynamicRef(ref, scope)
             .map(Right(_))
-            .getOrElse(Left(Seq(WithPointer(MissingDynamicReference(ref)))))
+            .getOrElse(Left(SchemaProblems(MissingDynamicReference(ref))))
           keyword = lazyResolve(resolution, scope1)
         } yield {
           add(keyword)
@@ -369,7 +364,7 @@ case class Keywords(
             .map(p -> _)
         }.toSeq
         for {
-          keywords <- sequenceAllLefts(keywords0).map(_.toMap)
+          keywords <- combineAllLefts(keywords0)(SchemaProblems.combine).map(_.toMap)
         } yield {
           add(DependentSchemasKeyword(keywords))
         }
@@ -389,12 +384,12 @@ case class Keywords(
       case ("maxContains", NumberValue(v)) if v >= 0 =>
         Right(updateKeyword(ContainsKeyword())(keyword => keyword.copy(max = Some(v.toInt))))
 
+//      case ("$schema", v) => {
+//        Right(this)
+//      }
+
       // // TODO
       // case ("$vocabulary", v) => {
-      //   Right(this)
-      // }
-      // // TODO
-      // case ("$schema", v) => {
       //   Right(this)
       // }
       // // TODO
@@ -417,18 +412,18 @@ case class Keywords(
   private def mapKeywordsFor(
       props: Map[String, Value],
       scope: DynamicScope
-  )(f: Map[String, Keywords] => Keywords)(implicit resolver: SchemaResolver): Either[Seq[SchemaError], Keywords] = {
+  )(f: Map[String, Keywords] => Keywords)(implicit resolver: SchemaResolver): Either[SchemaProblems, Keywords] = {
     val propKeywords0 = props.view
       .map { case (prop, v) =>
         (prop, Keywords.parseKeywords(SchemaValue(v), scope.push(prop)))
       }
       .map {
         case (prop, Right(keywords)) => Right((prop, keywords))
-        case (prop, Left(errors))    => Left(errors.map(_.prefix(Pointer.empty / prop)))
+        case (prop, Left(problems))  => Left(problems.prefix(Pointer.empty / prop))
       }
       .toSeq
     for {
-      propKeywords <- sequenceAllLefts(propKeywords0)
+      propKeywords <- combineAllLefts(propKeywords0)(SchemaProblems.combine)
       keywords = Map.from(propKeywords)
       ignored  = keywords.values.flatMap(_.ignored).toSet
     } yield {
@@ -460,7 +455,7 @@ case class Keywords(
       schema: SchemaValue
   )(
       newKeyword: => K
-  )(f: (Keywords, K) => K)(implicit resolver: SchemaResolver, scope: DynamicScope): Either[SchemaErrors, Keywords] = {
+  )(f: (Keywords, K) => K)(implicit resolver: SchemaResolver, scope: DynamicScope): Either[SchemaProblems, Keywords] = {
     for {
       keywords <- Keywords.parseKeywords(schema, scope)
     } yield {
@@ -488,12 +483,11 @@ case class Keywords(
 }
 
 object Keywords {
-  type SchemaErrors        = Seq[SchemaError]
   type KeywordWithLocation = UriUtil.WithLocation[Keyword]
 
   def parseKeywords(schema: SchemaValue, scope: DynamicScope)(implicit
       resolver: SchemaResolver
-  ): Either[SchemaErrors, Keywords] = {
+  ): Either[SchemaProblems, Keywords] = {
     val resolver1 = SchemaValue
       .id(schema)
       .map(id => resolver.withBase(resolver.absolute(id)))
@@ -502,46 +496,52 @@ object Keywords {
     parseKeywords(resolution, scope)
   }
 
-  def parseKeywords(resolution: SchemaResolver.Resolution, scope: DynamicScope): Either[SchemaErrors, Keywords] = {
+  def parseKeywords(resolution: SchemaResolver.Resolution, scope: DynamicScope): Either[SchemaProblems, Keywords] = {
     val schema    = resolution._1
     val resolver1 = resolution._2
-//    implicit val scope1 = scope.push(resolver1.base)
     implicit val scope1: DynamicScope = SchemaValue
       .id(schema)
       .map(id => scope.push(resolver1.absolute(id)))
       .getOrElse(scope)
+
+// TODO
+// - create meta schema
+// - parse keywords in meta schema
+// - propagate parsed meta keywords
+// - validate current schema against meta keywords
+
     schema.value match {
       case BoolValue(v) => Right(Keywords(schema).add(TrivialKeyword(v)))
-      case ObjectValue(keywords) =>
-        if (keywords.isEmpty) {
+      case ObjectValue(properties) =>
+        if (properties.isEmpty) {
           Right(Keywords(schema).add(TrivialKeyword(true)))
         } else {
-          keywords
-            .foldLeft[Either[SchemaErrors, Keywords]](Right(Keywords(schema))) { case (keywords, (keyword, value)) =>
+          properties
+            .foldLeft[Either[SchemaProblems, Keywords]](Right(Keywords(schema))) { case (keywords, (keyword, value)) =>
               val prefix = Pointer.empty / keyword
               accumulate(
                 keywords,
                 keywords
                   .flatMap(
                     _.withKeyword(keyword, value, scope1)(resolver1).swap
-                      .map(_.map(_.prefix(prefix)))
+                      .map(_.prefix(prefix))
                       .swap
                   )
               )
             }
         }
-      case _ => Left(Seq(WithPointer(InvalidSchemaValue(schema.value))))
+      case _ => Left(SchemaProblems(InvalidSchemaValue(schema.value)))
     }
   }
 
   private def accumulate(
-      previous: Either[SchemaErrors, Keywords],
-      current: Either[SchemaErrors, Keywords]
-  ): Either[SchemaErrors, Keywords] = (previous, current) match {
-    case (Right(_), Right(current))     => Right(current)
-    case (Right(_), Left(errors))       => Left(errors)
-    case (Left(previous), Left(errors)) => Left(previous :++ errors)
-    case (Left(previous), _)            => Left(previous)
+      previous: Either[SchemaProblems, Keywords],
+      current: Either[SchemaProblems, Keywords]
+  ): Either[SchemaProblems, Keywords] = (previous, current) match {
+    case (Right(_), Right(current))       => Right(current)
+    case (Right(_), Left(problems))       => Left(problems)
+    case (Left(previous), Left(problems)) => Left(previous.combine(problems))
+    case (Left(previous), _)              => Left(previous)
   }
 
   def localized(keyword: Keyword, scope: DynamicScope): KeywordWithLocation = {

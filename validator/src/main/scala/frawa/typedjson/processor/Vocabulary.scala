@@ -116,7 +116,7 @@ object Vocabulary {
         specVocabularies
           .get(id)
           .map(Right(_))
-          .getOrElse(Left(SchemaProblems(Seq(WithPointer(SchemaProblems.UnknownRequiredVocabulary(id))))))
+          .getOrElse(Left(SchemaProblems(SchemaProblems.UnknownRequiredVocabulary(id))))
       }
       .toSeq
     SeqUtil

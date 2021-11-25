@@ -16,11 +16,11 @@
 
 package frawa.typedjson.processor
 
-import munit.FunSuite
-import frawa.typedjson.parser.{BoolValue, NumberValue, ObjectValue, StringValue, ZioParser}
-import frawa.typedjson.processor.SchemaProblems.{InvalidSchemaValue, SchemaError}
-import frawa.typedjson.testutil.TestUtil._
+import frawa.typedjson.parser._
+import frawa.typedjson.processor.SchemaProblems.InvalidSchemaValue
 import frawa.typedjson.testutil.TestSchemas._
+import frawa.typedjson.testutil.TestUtil._
+import munit.FunSuite
 
 class KeywordsTest extends FunSuite {
   import frawa.typedjson.util.UriUtil._
@@ -50,8 +50,8 @@ class KeywordsTest extends FunSuite {
 
   private def assertKeywordsWithIgnored(schema: SchemaValue) = assertKeywords(schema, true) _
 
-  private def assertSchemaErrors(schema: SchemaValue)(
-      f: Keywords.SchemaErrors => Unit
+  private def assertSchemaProblems(schema: SchemaValue)(
+      f: SchemaProblems => Unit
   ) = {
     implicit val resolver = LoadedSchemasResolver(schema)
     val scope             = DynamicScope.empty
@@ -61,7 +61,7 @@ class KeywordsTest extends FunSuite {
     }
   }
 
-  private val noResolve: () => Either[Seq[SchemaError], Keywords] = () => Left(Seq.empty[SchemaError])
+  private val noResolve: () => Either[SchemaProblems, Keywords] = () => Left(SchemaProblems.empty)
 
   // TODO use implicits?
   private def assertable(keywords: Keywords): Keywords = keywords.copy(keywords = keywords.keywords.map(assertable))
@@ -144,16 +144,19 @@ class KeywordsTest extends FunSuite {
 
   test("invalid schema") {
     withSchema("""13""") { schema =>
-      assertSchemaErrors(schema) { errors =>
-        assertEquals(errors, Seq(WithPointer(InvalidSchemaValue(NumberValue(13)))))
+      assertSchemaProblems(schema) { problems =>
+        assertEquals(problems, SchemaProblems(InvalidSchemaValue(NumberValue(13))))
       }
     }
   }
 
   test("invalid deep schema") {
     withSchema("""{"not": "gnu"}""") { schema =>
-      assertSchemaErrors(schema) { errors =>
-        assertEquals(errors, Seq(WithPointer(InvalidSchemaValue(StringValue("gnu")), Pointer.empty / "not")))
+      assertSchemaProblems(schema) { problems =>
+        assertEquals(
+          problems,
+          SchemaProblems(Seq(WithPointer(InvalidSchemaValue(StringValue("gnu")), Pointer.empty / "not")))
+        )
       }
     }
   }

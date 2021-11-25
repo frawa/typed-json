@@ -26,12 +26,17 @@ case class SchemaProblems(
   def addErrors(errors: Seq[SchemaProblems.SchemaError]): SchemaProblems =
     copy(errors = this.errors ++ errors)
 
+  def prefix(pointer: Pointer): SchemaProblems =
+    copy(errors = this.errors.map(_.prefix(pointer)))
+
   def combine(other: SchemaProblems): SchemaProblems =
     copy(errors = this.errors ++ other.errors)
 }
 
 object SchemaProblems {
   val empty: SchemaProblems = SchemaProblems(Seq.empty)
+
+  def apply(error: Error): SchemaProblems = SchemaProblems(Seq(WithPointer(error)))
 
   trait Error
   case class InvalidSchemaValue(schema: Value)    extends Error
@@ -40,4 +45,6 @@ object SchemaProblems {
   case class UnknownRequiredVocabulary(id: URI)   extends Error
 
   type SchemaError = WithPointer[Error]
+
+  def combine(a: SchemaProblems, b: SchemaProblems): SchemaProblems = a.combine(b)
 }

@@ -40,6 +40,12 @@ object SeqUtil {
     }
   }
 
+  def combineAllLefts[E, V](as: Seq[Either[E, V]])(combine: (E, E) => E): Either[E, Seq[V]] = {
+    sequenceAllLefts2(as).swap
+      .map(_.reduce(combine))
+      .swap
+  }
+
   def debugTraceValue[T](title: String): T => T = { v =>
     println(title, v)
     v

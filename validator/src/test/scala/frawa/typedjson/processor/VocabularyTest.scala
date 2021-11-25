@@ -47,7 +47,7 @@ class VocabularyTest extends FunSuite {
     val unknownId = uri("unknown")
     assertEquals(
       Vocabulary.dialect(Map(unknownId -> true)),
-      Left(SchemaProblems(Seq(WithPointer(UnknownRequiredVocabulary(unknownId)))))
+      Left(SchemaProblems(UnknownRequiredVocabulary(unknownId)))
     )
   }
 
