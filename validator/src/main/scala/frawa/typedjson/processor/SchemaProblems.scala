@@ -18,6 +18,8 @@ package frawa.typedjson.processor
 
 import frawa.typedjson.parser.Value
 
+import java.net.URI
+
 case class SchemaProblems(
     errors: Seq[SchemaProblems.SchemaError]
 ) {
@@ -35,6 +37,7 @@ object SchemaProblems {
   case class InvalidSchemaValue(schema: Value)    extends Error
   case class MissingReference(ref: String)        extends Error
   case class MissingDynamicReference(ref: String) extends Error
+  case class UnknownRequiredVocabulary(id: URI)   extends Error
 
   type SchemaError = WithPointer[Error]
 }

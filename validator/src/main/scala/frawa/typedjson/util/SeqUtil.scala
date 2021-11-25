@@ -31,6 +31,15 @@ object SeqUtil {
     }
   }
 
+  def sequenceAllLefts2[E, V](as: Seq[Either[E, V]]): Either[Seq[E], Seq[V]] = {
+    as.foldLeft[Either[Seq[E], Seq[V]]](Right(Seq.empty[V])) {
+      case (Right(acc), Right(v))   => Right(acc :+ v)
+      case (Right(_), Left(error))  => Left(Seq(error))
+      case (Left(acc), Left(error)) => Left(acc :+ error)
+      case (Left(acc), _)           => Left(acc)
+    }
+  }
+
   def debugTraceValue[T](title: String): T => T = { v =>
     println(title, v)
     v

@@ -2,9 +2,10 @@
 
 ## Doing
 - support $schema?
+- support $vocabulary?
 
 ## TODO
-- support $vocabulary?
+- validating lazy loader, which validates against meta schema on the fly
 - better artifact names
 - review and refactor: implicits
 - crystallize API with an example
