@@ -1,8 +1,8 @@
 # Backlog
 
 ## Doing
-- support $schema?
-- support $vocabulary?
+- support $schema
+- support $vocabulary
 
 ## TODO
 - validating lazy loader, which validates against meta schema on the fly
