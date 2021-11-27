@@ -62,22 +62,22 @@ case class IfThenElseKeyword(
     thenKeywords: Option[Keywords] = None,
     elseKeywords: Option[Keywords] = None
 ) extends NestingKeyword
-case class PatternKeyword(pattern: String)                                                    extends SimpleKeyword
-case class FormatKeyword(format: String)                                                      extends SimpleKeyword
-case class MinimumKeyword(min: BigDecimal, exclude: Boolean = false)                          extends SimpleKeyword
-case class UniqueItemsKeyword(unique: Boolean)                                                extends SimpleKeyword
-case class PropertyNamesKeyword(keywords: Keywords)                                           extends NestingKeyword
-case class LazyResolveKeyword(resolved: URI, resolve: () => Either[SchemaProblems, Keywords]) extends NestingKeyword
-case class MultipleOfKeyword(n: BigDecimal)                                                   extends SimpleKeyword
-case class MaximumKeyword(max: BigDecimal, exclude: Boolean = false)                          extends SimpleKeyword
-case class MaxLengthKeyword(max: BigDecimal)                                                  extends SimpleKeyword
-case class MinLengthKeyword(min: BigDecimal)                                                  extends SimpleKeyword
-case class MaxItemsKeyword(max: BigDecimal)                                                   extends SimpleKeyword
-case class MinItemsKeyword(min: BigDecimal)                                                   extends SimpleKeyword
-case class MaxPropertiesKeyword(max: BigDecimal)                                              extends SimpleKeyword
-case class MinPropertiesKeyword(min: BigDecimal)                                              extends SimpleKeyword
-case class DependentRequiredKeyword(required: Map[String, Seq[String]])                       extends SimpleKeyword
-case class DependentSchemasKeyword(keywords: Map[String, Keywords])                           extends NestingKeyword
+case class PatternKeyword(pattern: String)                                                 extends SimpleKeyword
+case class FormatKeyword(format: String)                                                   extends SimpleKeyword
+case class MinimumKeyword(min: BigDecimal, exclude: Boolean = false)                       extends SimpleKeyword
+case class UniqueItemsKeyword(unique: Boolean)                                             extends SimpleKeyword
+case class PropertyNamesKeyword(keywords: Keywords)                                        extends NestingKeyword
+case class LazyParseKeywords(resolved: URI, parse: () => Either[SchemaProblems, Keywords]) extends NestingKeyword
+case class MultipleOfKeyword(n: BigDecimal)                                                extends SimpleKeyword
+case class MaximumKeyword(max: BigDecimal, exclude: Boolean = false)                       extends SimpleKeyword
+case class MaxLengthKeyword(max: BigDecimal)                                               extends SimpleKeyword
+case class MinLengthKeyword(min: BigDecimal)                                               extends SimpleKeyword
+case class MaxItemsKeyword(max: BigDecimal)                                                extends SimpleKeyword
+case class MinItemsKeyword(min: BigDecimal)                                                extends SimpleKeyword
+case class MaxPropertiesKeyword(max: BigDecimal)                                           extends SimpleKeyword
+case class MinPropertiesKeyword(min: BigDecimal)                                           extends SimpleKeyword
+case class DependentRequiredKeyword(required: Map[String, Seq[String]])                    extends SimpleKeyword
+case class DependentSchemasKeyword(keywords: Map[String, Keywords])                        extends NestingKeyword
 case class ContainsKeyword(schema: Option[Keywords] = None, min: Option[Int] = None, max: Option[Int] = None)
     extends NestingKeyword
 case class UnevaluatedItemsKeyword(pushed: Keywords, unevaluated: Keywords)      extends NestingKeyword
@@ -401,12 +401,12 @@ case class Keywords(
     }
   }
 
-  private def lazyResolve(resolution: SchemaResolver.Resolution, scope: DynamicScope): LazyResolveKeyword = {
+  private def lazyResolve(resolution: SchemaResolver.Resolution, scope: DynamicScope): LazyParseKeywords = {
     val resolveLater = { () =>
       Keywords.parseKeywords(resolution, scope)
     }
     val resolved = resolution._2.base
-    LazyResolveKeyword(resolved, resolveLater)
+    LazyParseKeywords(resolved, resolveLater)
   }
 
   private def mapKeywordsFor(

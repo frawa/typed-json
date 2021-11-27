@@ -132,7 +132,7 @@ object Processor {
       case c: UnionTypeKeyword             => checkUnionType(eval, c)(eval.nested(keyword))
       case c: IfThenElseKeyword            => checkIfThenElse(eval, c)
       case c: PropertyNamesKeyword         => checkPropertyNames(eval, c)
-      case c: LazyResolveKeyword           => checkLazyResolve(eval, c)
+      case c: LazyParseKeywords            => checkLazyParseKeywords(eval, c)
       case c: DependentSchemasKeyword      => checkDependentSchemas(eval, c)
       case c: ContainsKeyword              => checkContains(eval, c)
       case c: UnevaluatedItemsKeyword      => checkUnevaluated(eval, c)
@@ -220,8 +220,8 @@ object Processor {
     }
   }
 
-  private def checkLazyResolve[R](eval: Eval[R], keyword: LazyResolveKeyword): ProcessFun[R] = {
-    keyword.resolve() match {
+  private def checkLazyParseKeywords[R](eval: Eval[R], keyword: LazyParseKeywords): ProcessFun[R] = {
+    keyword.parse() match {
       case Right(keywords) => all(eval, keywords)
       case Left(problems)  => _ => Result.invalid.add(problems)
     }

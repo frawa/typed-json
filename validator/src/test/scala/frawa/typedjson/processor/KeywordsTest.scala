@@ -73,8 +73,8 @@ class KeywordsTest extends FunSuite {
         items.map(assertable),
         prefixItems.map(assertable)
       )
-    case LazyResolveKeyword(resolved, _) => LazyResolveKeyword(resolved, noResolve)
-    case _                               => keyword
+    case LazyParseKeywords(resolved, _) => LazyParseKeywords(resolved, noResolve)
+    case _                              => keyword
   }
 
   test("null") {
@@ -519,7 +519,7 @@ class KeywordsTest extends FunSuite {
                     keywords = List(
                       WithLocation(
                         uri("https://example.net/root.json#/items/$ref"),
-                        new LazyResolveKeyword(uri("https://example.net/root.json#item"), noResolve)
+                        LazyParseKeywords(uri("https://example.net/root.json#item"), noResolve)
                       )
                     ),
                     ignored = Set()

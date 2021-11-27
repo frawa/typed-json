@@ -116,7 +116,7 @@ object ValidationEval {
       case ArrayItemsKeyword(_, _)          => calc.allOf(results, value.pointer)
       case IfThenElseKeyword(_, _, _)       => calc.ifThenElse(results, value.pointer)
       case PropertyNamesKeyword(_)          => calc.allOf(results, value.pointer)
-      case c: LazyResolveKeyword            => calc.allOf(results, value.pointer)
+      case c: LazyParseKeywords             => calc.allOf(results, value.pointer)
       case DependentSchemasKeyword(_)       => calc.allOf(results, value.pointer)
       case ContainsKeyword(_, min, max)     => calc.contains(results, value.pointer, min, max)
       case c: UnevaluatedItemsKeyword       => calc.allOf(results, value.pointer)
