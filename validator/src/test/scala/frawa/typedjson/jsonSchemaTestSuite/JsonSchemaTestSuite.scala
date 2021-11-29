@@ -17,10 +17,10 @@
 package frawa.typedjson.jsonSchemaTestSuite
 
 import frawa.typedjson.meta.MetaSchemas
-import frawa.typedjson.parser.{BoolValue, ObjectValue, StringValue, _}
-import frawa.typedjson.testutil.TestUtil._
+import frawa.typedjson.parser._
 import frawa.typedjson.processor._
 import frawa.typedjson.testutil.TestUtil
+import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.validation.{ValidationEval, ValidationResult}
 import munit.{FunSuite, TestOptions}
 
@@ -53,6 +53,22 @@ class JsonSchemaTestSuite extends FunSuite {
       case _                 => fail("invalid test json suite")
     }
   }
+
+  private val vocabularyForTest = Vocabulary
+    .dialect(
+      Map(
+        Vocabulary.coreId             -> true,
+        Vocabulary.validationId       -> true,
+        Vocabulary.applicatorId       -> true,
+        Vocabulary.formatAnnotationId -> true,
+        Vocabulary.unevaluatedId      -> true,
+        Vocabulary.metaDataId         -> true
+      )
+    )
+    .swap
+    .map(problems => throw new IllegalStateException(problems.dump()))
+    .swap
+    .toOption
 
   private def checkTest(file: String)(testValue: Value): Unit = {
     testValue match {
@@ -88,7 +104,7 @@ class JsonSchemaTestSuite extends FunSuite {
 
         val hasIgnoredFailMessage = ignoreFailMessageByDescription.contains(testId)
         if (oneTestPerData || hasIgnoredFailMessage) {
-          withProcessor(ValidationEval())(schemaValue) { processor =>
+          withProcessor(ValidationEval())(schemaValue, vocabulary = vocabularyForTest, strict = true) { processor =>
             tests.foreach { value =>
               val data     = testData(value)
               val testName = s"${file} | ${data.failMessage} | ${description}"
@@ -106,7 +122,7 @@ class JsonSchemaTestSuite extends FunSuite {
           }
         } else {
           test(suiteOptions) {
-            withProcessor(ValidationEval())(schemaValue) { processor =>
+            withProcessor(ValidationEval())(schemaValue, vocabulary = vocabularyForTest) { processor =>
               tests
                 .map(testData)
                 .foreach {

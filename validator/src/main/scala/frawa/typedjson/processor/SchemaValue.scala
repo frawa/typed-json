@@ -21,12 +21,12 @@ import frawa.typedjson.util.UriUtil.uri
 
 import java.net.URI
 
-trait SchemaValue {
+sealed trait SchemaValue {
   val value: Value
 }
 case class SchemaValue1(value: Value)                       extends SchemaValue
 case class RootSchemaValue(value: Value, meta: Option[URI]) extends SchemaValue
-case class MetaSchemaValue(value: Value)                    extends SchemaValue
+//case class MetaSchemaValue(value: Value)                    extends SchemaValue
 
 object SchemaValue {
 
@@ -42,14 +42,26 @@ object SchemaValue {
     (Pointer.empty / property)(value).flatMap(Value.asString)
   }
 
-  def vocabulary(schema: SchemaValue, parentVocabulary: Vocabulary): Either[SchemaProblems, Vocabulary] =
-    (Pointer.empty / "$vocabulary")(schema.value)
-      .flatMap {
-        case ObjectValue(properties) =>
-          Some(properties.view.flatMap { case (k, v) => Value.asBool(v).map(v => (uri(k), v)) }.toMap)
-        case _ => None
-      }
-      .map(Vocabulary.dialect)
-      .getOrElse(Right(parentVocabulary))
+  def vocabulary(schema: SchemaValue, parentVocabulary: Vocabulary)(implicit
+      resolver: SchemaResolver
+  ): Either[SchemaProblems, Vocabulary] = {
+    schema match {
+      case RootSchemaValue(value, meta) =>
+        val valueWithVocabulary = meta
+          .flatMap(resolver.resolveRef)
+          .map(_._1.value)
+          .getOrElse(value)
+        vocabulary(SchemaValue(valueWithVocabulary), parentVocabulary)
+      case SchemaValue1(value) =>
+        (Pointer.empty / "$vocabulary")(value)
+          .flatMap {
+            case ObjectValue(properties) =>
+              Some(properties.view.flatMap { case (k, v) => Value.asBool(v).map(v => (uri(k), v)) }.toMap)
+            case _ => None
+          }
+          .map(Vocabulary.dialect)
+          .getOrElse(Right(parentVocabulary))
+    }
+  }
 
 }

@@ -98,24 +98,25 @@ object Vocabulary {
 
   private val validationKeywords: Map[String, NestedSchemaType] = Map(
     "type"              -> NestedSelfSchema,
-    "enum"              -> NoNestedSchema,
     "const"             -> NoNestedSchema,
-    "pattern"           -> NoNestedSchema,
-    "minimum"           -> NoNestedSchema,
-    "exclusiveMinimum"  -> NoNestedSchema,
-    "minItems"          -> NoNestedSchema,
-    "uniqueItems"       -> NoNestedSchema,
+    "enum"              -> NoNestedSchema,
     "multipleOf"        -> NoNestedSchema,
     "maximum"           -> NoNestedSchema,
     "exclusiveMaximum"  -> NoNestedSchema,
+    "minimum"           -> NoNestedSchema,
+    "exclusiveMinimum"  -> NoNestedSchema,
     "maxLength"         -> NoNestedSchema,
     "minLength"         -> NoNestedSchema,
+    "pattern"           -> NoNestedSchema,
     "maxItems"          -> NoNestedSchema,
+    "minItems"          -> NoNestedSchema,
+    "uniqueItems"       -> NoNestedSchema,
+    "maxContains"       -> NoNestedSchema,
+    "minContains"       -> NoNestedSchema,
     "maxProperties"     -> NoNestedSchema,
     "minProperties"     -> NoNestedSchema,
-    "dependentRequired" -> NoNestedSchema,
-    "minContains"       -> NoNestedSchema,
-    "maxContains"       -> NoNestedSchema
+    "required"          -> NoNestedSchema,
+    "dependentRequired" -> NoNestedSchema
   )
 
   val coreId: URI             = uri("https://json-schema.org/draft/2020-12/vocab/core")

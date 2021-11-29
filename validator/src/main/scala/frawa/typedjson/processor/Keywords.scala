@@ -22,7 +22,12 @@ import frawa.typedjson.parser.NumberValue
 import frawa.typedjson.parser.ObjectValue
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.Value
-import frawa.typedjson.processor.SchemaProblems.{InvalidSchemaValue, MissingDynamicReference, MissingReference}
+import frawa.typedjson.processor.SchemaProblems.{
+  InvalidSchemaValue,
+  MissingDynamicReference,
+  MissingReference,
+  UnsupportedKeyword
+}
 import frawa.typedjson.util.UriUtil
 
 import java.net.URI
@@ -112,8 +117,8 @@ case class Keywords(
       resolver: SchemaResolver
   ): Either[SchemaProblems, Keywords] = {
     implicit val scope1: DynamicScope = scope.push(keyword)
+
     (keyword, value) match {
-      // TODO validation vocabulary
       case ("type", StringValue(typeName)) =>
         Right(
           getTypeCheck(typeName)
@@ -121,10 +126,8 @@ case class Keywords(
             .getOrElse(withIgnored(s"$keyword-$typeName"))
         )
 
-      // TODO validation vocabulary
       case ("type", ArrayValue(values)) =>
         def typeNames = Value.asStrings(values)
-
         def keywords = typeNames
           .flatMap(getTypeCheck)
           .map(localized(_, scope1))
@@ -213,11 +216,9 @@ case class Keywords(
           keyword.copy(elseKeywords = Some(keywords))
         }
 
-      // TODO validation vocabulary
       case ("enum", ArrayValue(values)) =>
         Right(add(EnumKeyword(values)))
 
-      // TODO validation vocabulary
       case ("const", value) =>
         Right(add(EnumKeyword(Seq(value))))
 
@@ -242,7 +243,6 @@ case class Keywords(
           resolution <- resolver
             .resolveRef(ref)
             .map(Right(_))
-            // .getOrElse(throw new IllegalStateException(s"$ref not found"))
             .getOrElse(Left(SchemaProblems(MissingReference(ref))))
           vocabulary1 <- SchemaValue.vocabulary(resolution._1, vocabulary)
           keyword = lazyResolve(vocabulary1, resolution, scope1)
@@ -278,27 +278,21 @@ case class Keywords(
         // ignore annotations
         Right(this)
 
-      // TODO validation vocabulary
       case ("pattern", StringValue(pattern)) =>
         Right(add(PatternKeyword(pattern)))
 
-      // TODO validation vocabulary
       case ("format", StringValue(format)) =>
         Right(add(FormatKeyword(format)))
 
-      // TODO validation vocabulary
       case ("minimum", NumberValue(v)) =>
         Right(add(MinimumKeyword(v)))
 
-      // TODO validation vocabulary
       case ("exclusiveMinimum", NumberValue(v)) =>
         Right(add(MinimumKeyword(v, exclude = true)))
 
-      // TODO validation vocabulary
       case ("minItems", NumberValue(v)) if v >= 0 =>
         Right(add(MinItemsKeyword(v)))
 
-      // TODO validation vocabulary
       case ("uniqueItems", BoolValue(v)) =>
         Right(add(UniqueItemsKeyword(v)))
 
@@ -309,39 +303,30 @@ case class Keywords(
           add(PropertyNamesKeyword(keywords))
         }
 
-      // TODO validation vocabulary
       case ("multipleOf", NumberValue(v)) if v > 0 =>
         Right(add(MultipleOfKeyword(v)))
 
-      // TODO validation vocabulary
       case ("maximum", NumberValue(v)) =>
         Right(add(MaximumKeyword(v)))
 
-      // TODO validation vocabulary
       case ("exclusiveMaximum", NumberValue(v)) =>
         Right(add(MaximumKeyword(v, exclude = true)))
 
-      // TODO validation vocabulary
       case ("maxLength", NumberValue(v)) if v >= 0 =>
         Right(add(MaxLengthKeyword(v)))
 
-      // TODO validation vocabulary
       case ("minLength", NumberValue(v)) if v >= 0 =>
         Right(add(MinLengthKeyword(v)))
 
-      // TODO validation vocabulary
       case ("maxItems", NumberValue(v)) if v >= 0 =>
         Right(add(MaxItemsKeyword(v)))
 
-      // TODO validation vocabulary
       case ("maxProperties", NumberValue(v)) if v >= 0 =>
         Right(add(MaxPropertiesKeyword(v)))
 
-      // TODO validation vocabulary
       case ("minProperties", NumberValue(v)) if v >= 0 =>
         Right(add(MinPropertiesKeyword(v)))
 
-      // TODO validation vocabulary
       case ("dependentRequired", ObjectValue(v)) =>
         val vv = v.view.flatMap {
           case (p, ArrayValue(vs)) =>
@@ -377,11 +362,9 @@ case class Keywords(
           updateKeyword(ContainsKeyword())(check => check.copy(schema = Some(keywords)))
         }
 
-      // TODO validation vocabulary
       case ("minContains", NumberValue(v)) if v >= 0 =>
         Right(updateKeyword(ContainsKeyword())(keyword => keyword.copy(min = Some(v.toInt))))
 
-      // TODO validation vocabulary
       case ("maxContains", NumberValue(v)) if v >= 0 =>
         Right(updateKeyword(ContainsKeyword())(keyword => keyword.copy(max = Some(v.toInt))))
 
@@ -398,7 +381,7 @@ case class Keywords(
       //   Right(this)
       // }
 
-      case _ => Right(withIgnored(keyword))
+      case _ => Left(SchemaProblems(UnsupportedKeyword(keyword)))
     }
   }
 
@@ -513,12 +496,6 @@ object Keywords {
       .map(id => scope.push(resolver1.absolute(id)))
       .getOrElse(scope)
 
-// TODO
-// - create meta schema
-// - parse keywords in meta schema
-// - propagate parsed meta keywords
-// - validate current schema against meta keywords
-
     schema.value match {
       case BoolValue(v) => Right(Keywords(vocabulary, schema).add(TrivialKeyword(v)))
       case ObjectValue(properties) =>
@@ -532,11 +509,17 @@ object Keywords {
               accumulate(
                 keywords,
                 keywords
-                  .flatMap(
-                    _.withKeyword(keyword, value, scope1)(resolver1).swap
-                      .map(_.prefix(prefix))
-                      .swap
-                  )
+                  .flatMap { keywords =>
+                    if (vocabulary.defines(keyword)) {
+                      keywords
+                        .withKeyword(keyword, value, scope1)(resolver1)
+                        .swap
+                        .map(_.prefix(prefix))
+                        .swap
+                    } else {
+                      Right(keywords.withIgnored(keyword))
+                    }
+                  }
               )
             }
         }

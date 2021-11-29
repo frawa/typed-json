@@ -27,18 +27,27 @@ class KeywordsTest extends FunSuite {
 
   implicit val zioParser: ZioParser = new ZioParser()
 
+  private val vocabularyForTest = Vocabulary
+    .dialect(Map(Vocabulary.coreId -> true, Vocabulary.validationId -> true, Vocabulary.applicatorId -> true))
+    .swap
+    .map(problems => throw new IllegalStateException(problems.dump()))
+    .swap
+    .toOption
+    .get
+
   private def assertKeywords(schema: SchemaValue, allowIgnored: Boolean = false)(
       f: Keywords => Unit
   ) = {
     implicit val resolver = LoadedSchemasResolver(schema)
     val scope             = DynamicScope.empty
     val withParsed = for {
-      keywords <- Keywords.parseKeywords(Vocabulary.coreVocabulary, schema, scope)
+      keywords <- Keywords.parseKeywords(vocabularyForTest, schema, scope)
     } yield {
       if (!allowIgnored) {
-        assert(
-          keywords.ignored.isEmpty,
-          clue(s"""unexpected ignored keywords: ${keywords.ignored.mkString(",")}""")
+        assertEquals(
+          keywords.ignored,
+          Set.empty[String],
+          clue("unexpected ignored keywords")
         )
       }
       f(keywords)
@@ -55,7 +64,7 @@ class KeywordsTest extends FunSuite {
   ) = {
     implicit val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema)
     val scope                                    = DynamicScope.empty
-    Keywords.parseKeywords(Vocabulary.coreVocabulary, schema, scope) match {
+    Keywords.parseKeywords(vocabularyForTest, schema, scope) match {
       case Right(_)     => fail("parsing keywords expected to fail")
       case Left(errors) => f(errors)
     }
@@ -127,7 +136,7 @@ class KeywordsTest extends FunSuite {
               uri("#/not"),
               NotKeyword(
                 Keywords(
-                  Vocabulary.coreVocabulary,
+                  vocabularyForTest,
                   SchemaValue(
                     value = BoolValue(
                       value = false
@@ -206,7 +215,7 @@ class KeywordsTest extends FunSuite {
               ArrayItemsKeyword(
                 Some(
                   Keywords(
-                    Vocabulary.coreVocabulary,
+                    vocabularyForTest,
                     numberSchemaValue,
                     Seq(WithLocation(uri("#/items/type"), NumberTypeKeyword))
                   )
@@ -227,7 +236,7 @@ class KeywordsTest extends FunSuite {
               ArrayItemsKeyword(
                 Some(
                   Keywords(
-                    Vocabulary.coreVocabulary,
+                    vocabularyForTest,
                     numberSchemaValue,
                     Seq(WithLocation(uri("#/items/type"), NumberTypeKeyword))
                   )
@@ -253,7 +262,7 @@ class KeywordsTest extends FunSuite {
               ObjectPropertiesKeyword(
                 Map(
                   "toto" -> Keywords(
-                    Vocabulary.coreVocabulary,
+                    vocabularyForTest,
                     numberSchemaValue,
                     keywords = List(
                       WithLocation(uri("#/properties/toto/type"), NumberTypeKeyword)
@@ -261,7 +270,7 @@ class KeywordsTest extends FunSuite {
                     ignored = Set()
                   ),
                   "titi" -> Keywords(
-                    Vocabulary.coreVocabulary,
+                    vocabularyForTest,
                     stringSchemaValue,
                     keywords = List(
                       WithLocation(uri("#/properties/titi/type"), StringTypeKeyword)
@@ -313,7 +322,7 @@ class KeywordsTest extends FunSuite {
               AllOfKeyword(
                 Seq(
                   Keywords(
-                    Vocabulary.coreVocabulary,
+                    vocabularyForTest,
                     numberSchemaValue,
                     keywords = List(
                       WithLocation(uri("#/allOf/0/type"), NumberTypeKeyword)
@@ -340,7 +349,7 @@ class KeywordsTest extends FunSuite {
               AnyOfKeyword(
                 Seq(
                   Keywords(
-                    Vocabulary.coreVocabulary,
+                    vocabularyForTest,
                     schema = SchemaValue(
                       value = ObjectValue(
                         properties = Map(
@@ -356,7 +365,7 @@ class KeywordsTest extends FunSuite {
                     ignored = Set()
                   ),
                   Keywords(
-                    Vocabulary.coreVocabulary,
+                    vocabularyForTest,
                     schema = SchemaValue(
                       value = ObjectValue(
                         properties = Map(
@@ -391,7 +400,7 @@ class KeywordsTest extends FunSuite {
               OneOfKeyword(
                 Seq(
                   Keywords(
-                    Vocabulary.coreVocabulary,
+                    vocabularyForTest,
                     numberSchemaValue,
                     keywords = List(
                       WithLocation(uri("#/oneOf/0/type"), NumberTypeKeyword)
@@ -399,7 +408,7 @@ class KeywordsTest extends FunSuite {
                     ignored = Set()
                   ),
                   Keywords(
-                    Vocabulary.coreVocabulary,
+                    vocabularyForTest,
                     stringSchemaValue,
                     keywords = List(
                       WithLocation(uri("#/oneOf/1/type"), StringTypeKeyword)
@@ -426,7 +435,7 @@ class KeywordsTest extends FunSuite {
               IfThenElseKeyword(
                 Some(
                   Keywords(
-                    Vocabulary.coreVocabulary,
+                    vocabularyForTest,
                     numberSchemaValue,
                     Seq(WithLocation(uri("#/if/type"), NumberTypeKeyword)),
                     Set()
@@ -434,7 +443,7 @@ class KeywordsTest extends FunSuite {
                 ),
                 Some(
                   Keywords(
-                    Vocabulary.coreVocabulary,
+                    vocabularyForTest,
                     numberSchemaValue,
                     Seq(WithLocation(uri("#/then/type"), NumberTypeKeyword)),
                     Set()
@@ -442,7 +451,7 @@ class KeywordsTest extends FunSuite {
                 ),
                 Some(
                   Keywords(
-                    Vocabulary.coreVocabulary,
+                    vocabularyForTest,
                     stringSchemaValue,
                     Seq(WithLocation(uri("#/else/type"), StringTypeKeyword)),
                     Set()
@@ -538,7 +547,7 @@ class KeywordsTest extends FunSuite {
               ArrayItemsKeyword(
                 items = Some(
                   value = Keywords(
-                    Vocabulary.coreVocabulary,
+                    vocabularyForTest,
                     schema = SchemaValue(
                       value = ObjectValue(
                         properties = Map(

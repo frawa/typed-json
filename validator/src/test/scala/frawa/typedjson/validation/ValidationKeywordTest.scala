@@ -26,10 +26,17 @@ import munit.FunSuite
 class ValidationKeywordTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()
 
+  private val vocabularyForTest = Vocabulary
+    .dialect(Map(Vocabulary.coreId -> true, Vocabulary.validationId -> true, Vocabulary.applicatorId -> true))
+    .swap
+    .map(problems => throw new IllegalStateException(problems.dump()))
+    .swap
+    .toOption
+
   def validateJson(
       schema: SchemaValue
   )(jsonText: String)(f: Result[ValidationResult] => Unit): Either[Nothing, Unit] = {
-    assertResult(ValidationEval())(schema, jsonText)(f)
+    assertResult(ValidationEval())(schema, jsonText, vocabulary = vocabularyForTest)(f)
   }
 
   test("multipleOf") {

@@ -19,17 +19,24 @@ package frawa.typedjson.suggestion
 import frawa.typedjson.parser._
 import frawa.typedjson.testutil.TestSchemas.{numberArraySchema, totoObjectSchema, totoRequiredObjectSchema}
 import frawa.typedjson.testutil.TestUtil.{assertResult, withSchema}
-import frawa.typedjson.processor.{LoadedSchemasResolver, Pointer, SchemaValue}
+import frawa.typedjson.processor.{LoadedSchemasResolver, Pointer, SchemaValue, Vocabulary}
 import munit.FunSuite
 
 class SuggestEvalTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()
 
+  private val vocabularyForTest = Vocabulary
+    .dialect(Map(Vocabulary.coreId -> true, Vocabulary.validationId -> true, Vocabulary.applicatorId -> true))
+    .swap
+    .map(problems => throw new IllegalStateException(problems.dump()))
+    .swap
+    .toOption
+
   private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
       f: Seq[Value] => Unit
   ) = {
     implicit val l: Option[LoadedSchemasResolver.LazyResolver] = None
-    assertResult(SuggestionEval(at))(schema, text) { result =>
+    assertResult(SuggestionEval(at))(schema, text, vocabulary = vocabularyForTest) { result =>
       f(result.results.flatMap(_.suggestions).distinct)
     }
   }

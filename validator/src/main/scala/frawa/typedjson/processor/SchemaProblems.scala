@@ -23,6 +23,7 @@ import java.net.URI
 case class SchemaProblems(
     errors: Seq[SchemaProblems.SchemaError]
 ) {
+
   def addErrors(errors: Seq[SchemaProblems.SchemaError]): SchemaProblems =
     copy(errors = this.errors ++ errors)
 
@@ -31,6 +32,9 @@ case class SchemaProblems(
 
   def combine(other: SchemaProblems): SchemaProblems =
     copy(errors = this.errors ++ other.errors)
+
+  def dump(): String = errors.map(_.toString).mkString("\n")
+
 }
 
 object SchemaProblems {
@@ -43,6 +47,7 @@ object SchemaProblems {
   case class MissingReference(ref: String)        extends Error
   case class MissingDynamicReference(ref: String) extends Error
   case class UnknownRequiredVocabulary(id: URI)   extends Error
+  case class UnsupportedKeyword(keyword: String)  extends Error
 
   type SchemaError = WithPointer[Error]
 

@@ -48,10 +48,15 @@ class MetaSchemaTest extends FunSuite {
   test("validate core against core") {
     validateSpec("meta/core", "meta/core") { result =>
       assertEquals(result.results, Seq())
-      assertEquals(result.count, 54)
+//      assertEquals(result.count, 54)
+      assertEquals(result.count, 42)
       assertEquals(
         result.ignoredKeywords(),
-        Set.empty[String]
+        Set(
+          "properties",
+          "title",
+          "type"
+        )
       )
     }
   }
@@ -70,10 +75,15 @@ class MetaSchemaTest extends FunSuite {
   test("validate core against applicator") {
     validateSpec("meta/core", "meta/applicator") { result =>
       assertEquals(result.results, Seq())
-      assertEquals(result.count, 84)
+//      assertEquals(result.count, 84)
+      assertEquals(result.count, 48)
       assertEquals(
         result.ignoredKeywords(),
-        Set.empty[String]
+        Set(
+          "type",
+          "default",
+          "title"
+        )
       )
     }
   }
@@ -81,10 +91,15 @@ class MetaSchemaTest extends FunSuite {
   test("validate validation against core") {
     validateSpec("meta/validation", "meta/core") { result =>
       assertEquals(result.results, Seq())
-      assertEquals(result.count, 65)
+//      assertEquals(result.count, 65)
+      assertEquals(result.count, 44)
       assertEquals(
         result.ignoredKeywords(),
-        Set.empty[String]
+        Set(
+          "properties",
+          "title",
+          "type"
+        )
       )
     }
   }
@@ -103,10 +118,16 @@ class MetaSchemaTest extends FunSuite {
   test("validate validation against applicator") {
     validateSpec("meta/validation", "meta/applicator") { result =>
       assertEquals(result.results, Seq())
-      assertEquals(result.count, 168)
+//      assertEquals(result.count, 168)
+      assertEquals(result.count, 91)
       assertEquals(
         result.ignoredKeywords(),
-        Set.empty[String]
+        Set(
+          "type",
+          "default",
+          "title",
+          "minItems"
+        )
       )
     }
   }

@@ -45,10 +45,10 @@ object TestUtil {
 
   def assertResult[R](
       eval: Eval[R]
-  )(schema: SchemaValue, valueText: String, strict: Boolean = true)(
+  )(schema: SchemaValue, valueText: String, strict: Boolean = true, vocabulary: Option[Vocabulary] = None)(
       f: Result[R] => Unit
   )(implicit parser: Parser, lazyResolver: Option[LoadedSchemasResolver.LazyResolver]): Either[Nothing, Unit] = {
-    withProcessor(eval)(schema, strict) { processor =>
+    withProcessor(eval)(schema, strict, vocabulary) { processor =>
       val value  = parseJsonValue(valueText)
       val result = processor(InnerValue(value))
       f(result)
@@ -57,11 +57,11 @@ object TestUtil {
 
   def withProcessor[R](
       eval: Eval[R]
-  )(schema: SchemaValue, strict: Boolean = false)(
+  )(schema: SchemaValue, strict: Boolean = false, vocabulary: Option[Vocabulary] = None)(
       f: Processor[R] => Unit
   )(implicit lazyResolver: Option[LoadedSchemasResolver.LazyResolver]): Either[Nothing, Unit] = {
     val result = for {
-      processor0 <- Processor(schema, lazyResolver)(eval)
+      processor0 <- Processor(schema, lazyResolver, vocabulary)(eval)
       processor =
         if (strict) {
           processor0.andThen { result =>
@@ -81,10 +81,10 @@ object TestUtil {
 
   def withStrictProcessor[R](
       eval: Eval[R]
-  )(schema: SchemaValue)(
+  )(schema: SchemaValue, vocabulary: Option[Vocabulary])(
       f: Processor[R] => Unit
   )(implicit lazyResolver: Option[LoadedSchemasResolver.LazyResolver]): Either[Nothing, Unit] = {
-    withProcessor(eval)(schema, strict = true)(f)
+    withProcessor(eval)(schema, strict = true, vocabulary)(f)
   }
 
 }

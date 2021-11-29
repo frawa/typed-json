@@ -33,14 +33,19 @@ object Processor {
   type ProcessFun[R] = InnerValue => Result[R]
   type MergeFun[R]   = Seq[Result[R]] => ProcessFun[R]
 
-  def apply[R](schema: SchemaValue, lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None)(
+  def apply[R](
+      schema: SchemaValue,
+      lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None,
+      vocabulary: Option[Vocabulary] = None
+  )(
       eval: Eval[R]
   ): Either[SchemaProblems, Processor[R]] = {
     implicit val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema, lazyResolver)
 
-    val scope = DynamicScope.empty.push(resolver.base)
+    val scope            = DynamicScope.empty.push(resolver.base)
+    val parentVocabulary = vocabulary.getOrElse(Vocabulary.coreVocabulary)
     for {
-      vocabulary <- SchemaValue.vocabulary(schema, Vocabulary.coreVocabulary)
+      vocabulary <- SchemaValue.vocabulary(schema, parentVocabulary)
       keywords   <- Keywords.parseKeywords(vocabulary, schema, scope)
       processor = Processor(all(eval, keywords).andThen(_.addIgnoredKeywords(keywords.ignored, Pointer.empty)))
     } yield processor

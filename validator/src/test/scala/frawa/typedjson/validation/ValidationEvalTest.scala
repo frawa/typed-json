@@ -20,13 +20,20 @@ import frawa.typedjson
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser._
 import frawa.typedjson.processor.LoadedSchemasResolver.LazyResolver
+import frawa.typedjson.processor._
 import frawa.typedjson.testutil.TestSchemas._
 import frawa.typedjson.testutil.TestUtil.{assertResult, withSchema}
-import frawa.typedjson.processor._
 import munit.FunSuite
 
 class ValidationEvalTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()
+
+  private val vocabularyForTest = Vocabulary
+    .dialect(Map(Vocabulary.coreId -> true, Vocabulary.validationId -> true, Vocabulary.applicatorId -> true))
+    .swap
+    .map(problems => throw new IllegalStateException(problems.dump()))
+    .swap
+    .toOption
 
   private def assertValidate(text: String)(
       schema: SchemaValue,
@@ -36,7 +43,7 @@ class ValidationEvalTest extends FunSuite {
       f: Result[ValidationResult] => Unit
   ) = {
     implicit val lr: Option[LazyResolver] = lazyResolver
-    assertResult(ValidationEval())(schema, text, strict)(f)
+    assertResult(ValidationEval())(schema, text, strict, vocabularyForTest)(f)
   }
 
   private def assertErrors(result: Result[ValidationResult], expected: Seq[WithPointer[Observation]]): Unit = {

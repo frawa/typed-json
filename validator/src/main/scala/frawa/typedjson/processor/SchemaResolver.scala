@@ -78,7 +78,7 @@ trait SchemaResolver {
     }
   }
 
-  private def resolveRef(uri: URI): Option[Resolution] = {
+  def resolveRef(uri: URI): Option[Resolution] = {
     if (uri.getFragment != null && uri.getFragment.startsWith("/")) {
       val pointer = Pointer.parse(uri.getFragment)
       resolve(UriUtil.withoutFragement(uri))
