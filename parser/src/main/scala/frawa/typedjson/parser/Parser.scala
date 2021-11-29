@@ -40,5 +40,10 @@ object Value {
     case _              => None
   }
 
+  def asBool(value: Value): Option[Boolean] = value match {
+    case BoolValue(v) => Some(v)
+    case _            => None
+  }
+
   def asStrings(values: Seq[Value]): Seq[String] = values.flatMap(asString)
 }

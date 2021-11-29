@@ -16,7 +16,7 @@
 
 package frawa.typedjson.processor
 
-import frawa.typedjson.parser.{StringValue, Value}
+import frawa.typedjson.parser.{ObjectValue, Value}
 import frawa.typedjson.util.UriUtil.uri
 
 import java.net.URI
@@ -29,6 +29,7 @@ case class RootSchemaValue(value: Value, meta: Option[URI]) extends SchemaValue
 case class MetaSchemaValue(value: Value)                    extends SchemaValue
 
 object SchemaValue {
+
   def apply(value: Value): SchemaValue = SchemaValue1(value)
 
   def root(value: Value): RootSchemaValue = RootSchemaValue(value, get("$schema", value).map(uri))
@@ -38,9 +39,17 @@ object SchemaValue {
   }
 
   private def get(property: String, value: Value): Option[String] = {
-    (Pointer.empty / property)(value).flatMap {
-      case StringValue(id) => Some(id)
-      case _               => None
-    }
+    (Pointer.empty / property)(value).flatMap(Value.asString)
   }
+
+  def vocabulary(schema: SchemaValue, parentVocabulary: Vocabulary): Either[SchemaProblems, Vocabulary] =
+    (Pointer.empty / "$vocabulary")(schema.value)
+      .flatMap {
+        case ObjectValue(properties) =>
+          Some(properties.view.flatMap { case (k, v) => Value.asBool(v).map(v => (uri(k), v)) }.toMap)
+        case _ => None
+      }
+      .map(Vocabulary.dialect)
+      .getOrElse(Right(parentVocabulary))
+
 }

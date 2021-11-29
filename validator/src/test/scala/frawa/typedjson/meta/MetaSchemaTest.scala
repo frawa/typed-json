@@ -51,7 +51,7 @@ class MetaSchemaTest extends FunSuite {
       assertEquals(result.count, 54)
       assertEquals(
         result.ignoredKeywords(),
-        Set("$vocabulary", "$schema")
+        Set.empty[String]
       )
     }
   }
@@ -62,7 +62,7 @@ class MetaSchemaTest extends FunSuite {
       assertEquals(result.count, 22)
       assertEquals(
         result.ignoredKeywords(),
-        Set("$vocabulary", "$schema")
+        Set.empty[String]
       )
     }
   }
@@ -73,7 +73,7 @@ class MetaSchemaTest extends FunSuite {
       assertEquals(result.count, 84)
       assertEquals(
         result.ignoredKeywords(),
-        Set("$vocabulary", "$schema")
+        Set.empty[String]
       )
     }
   }
@@ -84,7 +84,7 @@ class MetaSchemaTest extends FunSuite {
       assertEquals(result.count, 65)
       assertEquals(
         result.ignoredKeywords(),
-        Set("$vocabulary", "$schema")
+        Set.empty[String]
       )
     }
   }
@@ -95,7 +95,7 @@ class MetaSchemaTest extends FunSuite {
       assertEquals(result.count, 22)
       assertEquals(
         result.ignoredKeywords(),
-        Set("$vocabulary", "$schema")
+        Set.empty[String]
       )
     }
   }
@@ -106,7 +106,7 @@ class MetaSchemaTest extends FunSuite {
       assertEquals(result.count, 168)
       assertEquals(
         result.ignoredKeywords(),
-        Set("$vocabulary", "$schema")
+        Set.empty[String]
       )
     }
   }

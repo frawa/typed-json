@@ -33,7 +33,7 @@ class KeywordsTest extends FunSuite {
     implicit val resolver = LoadedSchemasResolver(schema)
     val scope             = DynamicScope.empty
     val withParsed = for {
-      keywords <- Keywords.parseKeywords(schema, scope)
+      keywords <- Keywords.parseKeywords(Vocabulary.coreVocabulary, schema, scope)
     } yield {
       if (!allowIgnored) {
         assert(
@@ -53,9 +53,9 @@ class KeywordsTest extends FunSuite {
   private def assertSchemaProblems(schema: SchemaValue)(
       f: SchemaProblems => Unit
   ) = {
-    implicit val resolver = LoadedSchemasResolver(schema)
-    val scope             = DynamicScope.empty
-    Keywords.parseKeywords(schema, scope) match {
+    implicit val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema)
+    val scope                                    = DynamicScope.empty
+    Keywords.parseKeywords(Vocabulary.coreVocabulary, schema, scope) match {
       case Right(_)     => fail("parsing keywords expected to fail")
       case Left(errors) => f(errors)
     }
@@ -127,6 +127,7 @@ class KeywordsTest extends FunSuite {
               uri("#/not"),
               NotKeyword(
                 Keywords(
+                  Vocabulary.coreVocabulary,
                   SchemaValue(
                     value = BoolValue(
                       value = false
@@ -205,6 +206,7 @@ class KeywordsTest extends FunSuite {
               ArrayItemsKeyword(
                 Some(
                   Keywords(
+                    Vocabulary.coreVocabulary,
                     numberSchemaValue,
                     Seq(WithLocation(uri("#/items/type"), NumberTypeKeyword))
                   )
@@ -225,6 +227,7 @@ class KeywordsTest extends FunSuite {
               ArrayItemsKeyword(
                 Some(
                   Keywords(
+                    Vocabulary.coreVocabulary,
                     numberSchemaValue,
                     Seq(WithLocation(uri("#/items/type"), NumberTypeKeyword))
                   )
@@ -250,6 +253,7 @@ class KeywordsTest extends FunSuite {
               ObjectPropertiesKeyword(
                 Map(
                   "toto" -> Keywords(
+                    Vocabulary.coreVocabulary,
                     numberSchemaValue,
                     keywords = List(
                       WithLocation(uri("#/properties/toto/type"), NumberTypeKeyword)
@@ -257,6 +261,7 @@ class KeywordsTest extends FunSuite {
                     ignored = Set()
                   ),
                   "titi" -> Keywords(
+                    Vocabulary.coreVocabulary,
                     stringSchemaValue,
                     keywords = List(
                       WithLocation(uri("#/properties/titi/type"), StringTypeKeyword)
@@ -308,6 +313,7 @@ class KeywordsTest extends FunSuite {
               AllOfKeyword(
                 Seq(
                   Keywords(
+                    Vocabulary.coreVocabulary,
                     numberSchemaValue,
                     keywords = List(
                       WithLocation(uri("#/allOf/0/type"), NumberTypeKeyword)
@@ -334,6 +340,7 @@ class KeywordsTest extends FunSuite {
               AnyOfKeyword(
                 Seq(
                   Keywords(
+                    Vocabulary.coreVocabulary,
                     schema = SchemaValue(
                       value = ObjectValue(
                         properties = Map(
@@ -349,6 +356,7 @@ class KeywordsTest extends FunSuite {
                     ignored = Set()
                   ),
                   Keywords(
+                    Vocabulary.coreVocabulary,
                     schema = SchemaValue(
                       value = ObjectValue(
                         properties = Map(
@@ -383,6 +391,7 @@ class KeywordsTest extends FunSuite {
               OneOfKeyword(
                 Seq(
                   Keywords(
+                    Vocabulary.coreVocabulary,
                     numberSchemaValue,
                     keywords = List(
                       WithLocation(uri("#/oneOf/0/type"), NumberTypeKeyword)
@@ -390,6 +399,7 @@ class KeywordsTest extends FunSuite {
                     ignored = Set()
                   ),
                   Keywords(
+                    Vocabulary.coreVocabulary,
                     stringSchemaValue,
                     keywords = List(
                       WithLocation(uri("#/oneOf/1/type"), StringTypeKeyword)
@@ -414,9 +424,30 @@ class KeywordsTest extends FunSuite {
             WithLocation(
               uri("#/if"),
               IfThenElseKeyword(
-                Some(Keywords(numberSchemaValue, Seq(WithLocation(uri("#/if/type"), NumberTypeKeyword)), Set())),
-                Some(Keywords(numberSchemaValue, Seq(WithLocation(uri("#/then/type"), NumberTypeKeyword)), Set())),
-                Some(Keywords(stringSchemaValue, Seq(WithLocation(uri("#/else/type"), StringTypeKeyword)), Set()))
+                Some(
+                  Keywords(
+                    Vocabulary.coreVocabulary,
+                    numberSchemaValue,
+                    Seq(WithLocation(uri("#/if/type"), NumberTypeKeyword)),
+                    Set()
+                  )
+                ),
+                Some(
+                  Keywords(
+                    Vocabulary.coreVocabulary,
+                    numberSchemaValue,
+                    Seq(WithLocation(uri("#/then/type"), NumberTypeKeyword)),
+                    Set()
+                  )
+                ),
+                Some(
+                  Keywords(
+                    Vocabulary.coreVocabulary,
+                    stringSchemaValue,
+                    Seq(WithLocation(uri("#/else/type"), StringTypeKeyword)),
+                    Set()
+                  )
+                )
               )
             )
           )
@@ -507,6 +538,7 @@ class KeywordsTest extends FunSuite {
               ArrayItemsKeyword(
                 items = Some(
                   value = Keywords(
+                    Vocabulary.coreVocabulary,
                     schema = SchemaValue(
                       value = ObjectValue(
                         properties = Map(

@@ -40,7 +40,8 @@ object Processor {
 
     val scope = DynamicScope.empty.push(resolver.base)
     for {
-      keywords <- Keywords.parseKeywords(schema, scope)
+      vocabulary <- SchemaValue.vocabulary(schema, Vocabulary.coreVocabulary)
+      keywords   <- Keywords.parseKeywords(vocabulary, schema, scope)
       processor = Processor(all(eval, keywords).andThen(_.addIgnoredKeywords(keywords.ignored, Pointer.empty)))
     } yield processor
   }

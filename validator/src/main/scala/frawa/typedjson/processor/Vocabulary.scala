@@ -41,40 +41,59 @@ object Vocabulary {
   }
 
   private val coreKeywords: Map[String, NestedSchemaType] = Map(
-    "not"                   -> NestedSelfSchema,
-    "items"                 -> NestedSelfSchema,
-    "prefixItems"           -> NestedObjectSchemas,
+    "$id"            -> NoNestedSchema,
+    "$schema"        -> NoNestedSchema,
+    "$ref"           -> NoNestedSchema,
+    "$anchor"        -> NoNestedSchema,
+    "$dynamicRef"    -> NoNestedSchema,
+    "$dynamicAnchor" -> NoNestedSchema,
+    "$vocabulary"    -> NoNestedSchema,
+    "$comment"       -> NoNestedSchema,
+    "$defs"          -> NoNestedSchema
+  )
+
+  private val applicatorKeywords: Map[String, NestedSchemaType] = Map(
+    "prefixItems"          -> NestedObjectSchemas,
+    "items"                -> NestedSelfSchema,
+    "contains"             -> NoNestedSchema,
+    "additionalProperties" -> NestedSelfSchema,
+    "properties"           -> NestedObjectSchemas,
+    "patternProperties"    -> NestedObjectSchemas,
+    "dependentSchemas"     -> NestedObjectSchemas,
+    "propertyNames"        -> NestedSelfSchema,
+    "if"                   -> NestedSelfSchema,
+    "then"                 -> NestedSelfSchema,
+    "else"                 -> NestedSelfSchema,
+    "allOf"                -> NestedObjectSchemas,
+    "anyOf"                -> NestedObjectSchemas,
+    "oneOf"                -> NestedObjectSchemas,
+    "not"                  -> NestedSelfSchema
+  )
+
+  private val contentKeywords: Map[String, NestedSchemaType] = Map(
+    "contentEncoding"  -> NoNestedSchema,
+    "contentMediaType" -> NoNestedSchema,
+    "contentSchema"    -> NoNestedSchema
+  )
+
+  private val formatAnnotationKeywords: Map[String, NestedSchemaType] = Map(
+    "format" -> NoNestedSchema
+  )
+
+  private val metaDataKeywords: Map[String, NestedSchemaType] = Map(
+    "title"       -> NoNestedSchema,
+    "description" -> NoNestedSchema,
+    "default"     -> NoNestedSchema
+    // TODO
+//    "deprecated"  -> NoNestedSchema,
+//    "readOnly"    -> NoNestedSchema,
+//    "writeOnly"   -> NoNestedSchema,
+//    "examples"    -> NoNestedSchema
+  )
+
+  private val unevaluatedKeywords: Map[String, NestedSchemaType] = Map(
     "unevaluatedItems"      -> NestedSelfSchema,
-    "properties"            -> NestedObjectSchemas,
-    "patternProperties"     -> NestedObjectSchemas,
-    "additionalProperties"  -> NestedSelfSchema,
-    "unevaluatedProperties" -> NestedSelfSchema,
-    "allOf"                 -> NestedObjectSchemas,
-    "anyOf"                 -> NestedObjectSchemas,
-    "oneOf"                 -> NestedObjectSchemas,
-    "if"                    -> NestedSelfSchema,
-    "then"                  -> NestedSelfSchema,
-    "else"                  -> NestedSelfSchema,
-    "$defs"                 -> NestedObjectSchemas,
-    "propertyNames"         -> NestedSelfSchema,
-    "dependentSchemas"      -> NestedObjectSchemas,
-    "contains"              -> NestedSelfSchema,
-    "required"              -> NoNestedSchema,
-    "$id"                   -> NoNestedSchema,
-    "$anchor"               -> NoNestedSchema,
-    "$dynamicAnchor"        -> NoNestedSchema,
-    "$defs"                 -> NoNestedSchema,
-    "$ref"                  -> NoNestedSchema,
-    "$dynamicRef"           -> NoNestedSchema,
-    "$comment"              -> NoNestedSchema,
-    "title"                 -> NoNestedSchema,
-    "default"               -> NoNestedSchema,
-    "description"           -> NoNestedSchema,
-    "propertyNames"         -> NoNestedSchema,
-    "dependentSchemas"      -> NoNestedSchema,
-    "contains"              -> NoNestedSchema,
-    "$schema"               -> NoNestedSchema
-    //    "$vocabulary"               -> NoNestedSchema,
+    "unevaluatedProperties" -> NestedSelfSchema
   )
 
   private val validationKeywords: Map[String, NestedSchemaType] = Map(
@@ -82,7 +101,6 @@ object Vocabulary {
     "enum"              -> NoNestedSchema,
     "const"             -> NoNestedSchema,
     "pattern"           -> NoNestedSchema,
-    "format"            -> NoNestedSchema,
     "minimum"           -> NoNestedSchema,
     "exclusiveMinimum"  -> NoNestedSchema,
     "minItems"          -> NoNestedSchema,
@@ -100,13 +118,25 @@ object Vocabulary {
     "maxContains"       -> NoNestedSchema
   )
 
-  val coreId       = uri("https://json-schema.org/draft/2020-12/vocab/core")
-  val validationId = uri("https://json-schema.org/draft/2020-12/vocab/validation")
+  val coreId: URI             = uri("https://json-schema.org/draft/2020-12/vocab/core")
+  val applicatorId: URI       = uri("https://json-schema.org/draft/2020-12/vocab/applicator")
+  val contentId: URI          = uri("https://json-schema.org/draft/2020-12/vocab/content")
+  val formatAnnotationId: URI = uri("https://json-schema.org/draft/2020-12/vocab/format-annotation")
+  val metaDataId: URI         = uri("https://json-schema.org/draft/2020-12/vocab/meta-data")
+  val unevaluatedId: URI      = uri("https://json-schema.org/draft/2020-12/vocab/unevaluated")
+  val validationId: URI       = uri("https://json-schema.org/draft/2020-12/vocab/validation")
 
   val specVocabularies: Map[URI, Vocabulary] = Map(
-    coreId       -> Vocabulary(coreKeywords),
-    validationId -> Vocabulary(validationKeywords)
+    coreId             -> Vocabulary(coreKeywords),
+    applicatorId       -> Vocabulary(applicatorKeywords),
+    contentId          -> Vocabulary(contentKeywords),
+    formatAnnotationId -> Vocabulary(formatAnnotationKeywords),
+    metaDataId         -> Vocabulary(metaDataKeywords),
+    unevaluatedId      -> Vocabulary(unevaluatedKeywords),
+    validationId       -> Vocabulary(validationKeywords)
   )
+
+  val coreVocabulary: Vocabulary = specVocabularies(coreId)
 
   def dialect(vocabularyIds: Map[URI, Boolean]): Either[SchemaProblems, Vocabulary] = {
     val vocabularies = vocabularyIds
