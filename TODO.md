@@ -1,15 +1,15 @@
 # Backlog
 
 ## Doing
-- support $schema
-- support $vocabulary
+- review and cleanup
 
 ## TODO
-- validating lazy loader, which validates against meta schema on the fly
-- better artifact names
 - review and refactor: implicits
 - crystallize API with an example
+- better artifact names
 - produce output schema from annotations/errors
+- validating lazy loader, which validates against meta schema on the fly
+- improve suggestions
 - post process annotations?
 - isolate dependency on zio-json
 - latest dependencies
@@ -25,6 +25,8 @@
 - CI on GH Actions?
 
 ## Done
+- support $schema
+- support $vocabulary
 - handle ingoredKeywords with annotations
 - better package name
 - better names, eg. Checks -> Keywords
