@@ -11,7 +11,6 @@
 - validating lazy loader, which validates against meta schema on the fly
 - improve suggestions
 - post process annotations?
-- isolate dependency on zio-json, and use with tests and examples only
 - latest dependencies
 - publish released versions
 - do not prefix results, but push value pointer into checker?
@@ -25,6 +24,7 @@
 - CI on GH Actions?
 
 ## Done
+- isolate dependency on zio-json, and use with tests and examples only
 - fix some ignored suites in JsonSchemaTestTestSuite
 - support $schema
 - support $vocabulary
