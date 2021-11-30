@@ -41,7 +41,10 @@ object Remotes {
         case "baseUriChangeFolder" => baseUriChangeFolderFiles.get(segments(1)).flatMap(toSchemaValue)
         case "baseUriChangeFolderInSubschema" =>
           baseUriChangeFolderInSubschemaFiles.get(segments(1)).flatMap(toSchemaValue)
-        case _ => None
+        case "draft2020-12" => draft202012Files.get(segments(1)).flatMap(toSchemaValue)
+        case _ =>
+          println("MISSING in Remotes", segments(0))
+          None
       }
     } else {
       remotesFiles.get(name).flatMap(toSchemaValue)
@@ -76,4 +79,6 @@ object Remotes {
   private val baseUriChangeFolderInSubschemaFiles: Map[String, String] =
     folderContents("./JSON-Schema-Test-Suite/remotes/baseUriChangeFolderInSubschema", ".json")
 
+  private val draft202012Files: Map[String, String] =
+    folderContents("./JSON-Schema-Test-Suite/remotes/draft2020-12", ".json")
 }

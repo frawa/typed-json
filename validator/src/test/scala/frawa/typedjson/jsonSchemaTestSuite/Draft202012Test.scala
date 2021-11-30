@@ -29,14 +29,10 @@ class Draft202012Test extends JsonSchemaTestSuite {
 
   // TODO un-ignore 'em
   override val ignoreDescriptionByFile: Map[String, Set[String]] = Map(
-    "vocabulary.json" -> Set(
-      "schema that uses custom metaschema with with no validation vocabulary" // TODO support $schema
-    ),
     "id.json" -> Set(
       "Invalid use of fragments in location-independent $id" // TODO format "uri-reference"
     )
   )
 
   checkFiles(draft202012Files)
-
 }

@@ -90,7 +90,8 @@ class JsonSchemaTestSuite extends FunSuite {
         val schema            = properties("schema")
         val ArrayValue(tests) = properties("tests")
 
-        val id = SchemaValue.id(SchemaValue(schema))
+        val schemaValue = SchemaValue.root(schema)
+        val id          = SchemaValue.id(schemaValue)
         val includedOnlyId = onlyId
           .flatMap { onlyId =>
             id.map(_ == onlyId)
@@ -99,7 +100,6 @@ class JsonSchemaTestSuite extends FunSuite {
 
         val lazyResolver             = (uri: URI) => MetaSchemas.lazyResolver(uri).orElse(Remotes.lazyResolver(uri))
         implicit val useLazyResolver = Some(lazyResolver)
-        val schemaValue              = SchemaValue(schema)
         val testId                   = (file, description)
 
         val hasIgnoredFailMessage = ignoreFailMessageByDescription.contains(testId)
