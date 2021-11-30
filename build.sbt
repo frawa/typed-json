@@ -58,6 +58,18 @@ lazy val parser =
     .settings(
       name := "scala-json-schema-parser"
     )
+
+lazy val parserZio =
+  crossProject(JVMPlatform, JSPlatform)
+    .withoutSuffixFor(JVMPlatform)
+    .crossType(CrossType.Pure)
+    .in(file("parser-zio"))
+    .settings(sharedSettings)
+    .settings(sharedScalacSettings)
+    .settings(strictScalacSettings)
+    .settings(
+      name := "scala-json-schema-parser-zio"
+    )
     .jvmSettings(
       libraryDependencies += "dev.zio"       %% "zio-json" % zioJsonVersion,
       libraryDependencies += "org.scalameta" %% "munit"    % munitVersion % Test
@@ -66,6 +78,7 @@ lazy val parser =
       libraryDependencies += "dev.zio"       %%% "zio-json" % zioJsonVersion,
       libraryDependencies += "org.scalameta" %%% "munit"    % munitVersion % Test
     )
+    .dependsOn(parser)
 
 lazy val macros = crossProject(JVMPlatform, JSPlatform)
   .withoutSuffixFor(JVMPlatform)
@@ -77,7 +90,7 @@ lazy val macros = crossProject(JVMPlatform, JSPlatform)
     name                                   := "scala-json-schema-macros",
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value
   )
-  .dependsOn(parser)
+  .dependsOn(parser, parserZio)
 
 lazy val validator =
   crossProject(JSPlatform, JVMPlatform)
@@ -100,5 +113,6 @@ lazy val validator =
       libraryDependencies += "org.scalameta" %%% "munit" % munitVersion % Test
     )
     .dependsOn(parser, macros)
+    .dependsOn(parserZio % "test")
 
 lazy val validatorJS = validator.js
