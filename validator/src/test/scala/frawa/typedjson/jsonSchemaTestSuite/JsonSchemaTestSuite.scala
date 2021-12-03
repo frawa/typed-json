@@ -98,13 +98,18 @@ class JsonSchemaTestSuite extends FunSuite {
           }
         assume(includedOnlyId.getOrElse(true), s"excluded by onlyId=${onlyId}")
 
-        val lazyResolver             = (uri: URI) => MetaSchemas.lazyResolver(uri).orElse(Remotes.lazyResolver(uri))
-        implicit val useLazyResolver = Some(lazyResolver)
-        val testId                   = (file, description)
+        val lazyResolver = (uri: URI) => MetaSchemas.lazyResolver(uri).orElse(Remotes.lazyResolver(uri))
+        val testId       = (file, description)
+
+        val toProcessor1: ProcessorConversion[SchemaValue, ValidationResult] =
+          ProcessorConversion.toProcessor(ValidationEval(), vocabularyForTest, lazyResolver = Some(lazyResolver))
+        val toProcessor2: ProcessorConversion[SchemaValue, ValidationResult] =
+          toProcessor1.mapResult(assertNoIgnoredKeywords)
 
         val hasIgnoredFailMessage = ignoreFailMessageByDescription.contains(testId)
         if (oneTestPerData || hasIgnoredFailMessage) {
-          withProcessor(ValidationEval())(schemaValue, vocabulary = vocabularyForTest, strict = true) { processor =>
+          implicit val c = toProcessor2
+          withProcessor[ValidationResult](schemaValue) { processor =>
             tests.foreach { value =>
               val data     = testData(value)
               val testName = s"${file} | ${data.failMessage} | ${description}"
@@ -121,8 +126,9 @@ class JsonSchemaTestSuite extends FunSuite {
             }
           }
         } else {
+          implicit val c = toProcessor1
           test(suiteOptions) {
-            withProcessor(ValidationEval())(schemaValue, vocabulary = vocabularyForTest, strict = false) { processor =>
+            withProcessor[ValidationResult](schemaValue) { processor =>
               tests
                 .map(testData)
                 .foreach {

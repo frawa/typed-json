@@ -21,7 +21,7 @@ import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser._
 import frawa.typedjson.processor._
 import frawa.typedjson.testutil.TestSchemas._
-import frawa.typedjson.testutil.TestUtil.{assertNoIgnoredKeywords, assertResult2, withSchema}
+import frawa.typedjson.testutil.TestUtil.{assertNoIgnoredKeywords, assertResult, withSchema}
 import munit.FunSuite
 
 object ValidationEvalTest {
@@ -46,7 +46,7 @@ class ValidationEvalTest extends FunSuite {
   )(
       f: Result[ValidationResult] => Unit
   ): Either[Nothing, Unit] = {
-    assertResult2(text)(schema)(f)
+    assertResult(text)(schema)(f)
   }
 
   def assertValidate2(text: String)(
@@ -55,7 +55,7 @@ class ValidationEvalTest extends FunSuite {
   )(
       f: Result[ValidationResult] => Unit
   ): Either[Nothing, Unit] = {
-    assertResult2(text)(schema)(f)(c, implicitly[Parser])
+    assertResult(text)(schema)(f)(c, implicitly[Parser])
   }
 
   private def assertErrors(result: Result[ValidationResult], expected: Seq[WithPointer[Observation]]): Unit = {

@@ -48,67 +48,23 @@ object TestUtil {
     result
   }
 
-  def assertResult[R](
-      eval: Eval[R]
-  )(schema: SchemaValue, valueText: String, strict: Boolean = true, vocabulary: Option[Vocabulary] = None)(
-      f: Result[R] => Unit
-  )(implicit parser: Parser, lazyResolver: Option[LoadedSchemasResolver.LazyResolver]): Either[Nothing, Unit] = {
-    withProcessor(eval)(schema, strict, vocabulary) { processor =>
-      val value  = parseJsonValue(valueText)
-      val result = processor(InnerValue(value))
-      f(result)
-    }
-  }
-
-  def assertResult2[R](valueText: String)(schema: SchemaValue)(
+  def assertResult[R](valueText: String)(schema: SchemaValue)(
       f: Result[R] => Unit
   )(implicit c: ProcessorConversion[SchemaValue, R], parser: Parser): Either[Nothing, Unit] = {
-    withProcessor2[R](schema) { processor =>
+    withProcessor[R](schema) { processor =>
       val value  = parseJsonValue(valueText)
       val result = processor(InnerValue(value))
       f(result)
     }
   }
 
-  def withProcessor2[R](schema: SchemaValue)(
+  def withProcessor[R](schema: SchemaValue)(
       f: Processor[R] => Unit
   )(implicit c: ProcessorConversion[SchemaValue, R]): Either[Nothing, Unit] = {
     val result = c(schema).map(f)
     result.swap
       .map(message => fail("creating processor failed", clues(clue(message))))
       .swap
-  }
-
-  def withProcessor[R](
-      eval: Eval[R]
-  )(schema: SchemaValue, strict: Boolean = false, vocabulary: Option[Vocabulary] = None)(
-      f: Processor[R] => Unit
-  )(implicit lazyResolver: Option[LoadedSchemasResolver.LazyResolver]): Either[Nothing, Unit] = {
-    val result = for {
-      processor0 <- Processor(schema, lazyResolver, vocabulary)(eval)
-      processor =
-        if (strict) {
-          processor0.andThen { result =>
-            assertEquals(result.ignoredKeywords(), Set.empty[String], "ignored keywords")
-            result
-          }
-        } else {
-          processor0
-        }
-    } yield {
-      f(processor)
-    }
-    result.swap
-      .map(message => fail("creating processor failed", clues(clue(message))))
-      .swap
-  }
-
-  def withStrictProcessor[R](
-      eval: Eval[R]
-  )(schema: SchemaValue, vocabulary: Option[Vocabulary])(
-      f: Processor[R] => Unit
-  )(implicit lazyResolver: Option[LoadedSchemasResolver.LazyResolver]): Either[Nothing, Unit] = {
-    withProcessor(eval)(schema, strict = true, vocabulary)(f)
   }
 
 }

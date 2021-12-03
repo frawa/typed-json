@@ -19,8 +19,8 @@ package frawa.typedjson.validation
 import frawa.typedjson
 import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.processor.SchemaProblems.MissingReference
-import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.processor._
+import frawa.typedjson.testutil.TestUtil._
 import munit.FunSuite
 
 class ValidationKeywordTest extends FunSuite {
@@ -33,10 +33,13 @@ class ValidationKeywordTest extends FunSuite {
     .swap
     .toOption
 
+  private implicit val toProcessor1: ProcessorConversion[SchemaValue, ValidationResult] =
+    ProcessorConversion.toProcessor(ValidationEval(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
+
   def validateJson(
       schema: SchemaValue
   )(jsonText: String)(f: Result[ValidationResult] => Unit): Either[Nothing, Unit] = {
-    assertResult(ValidationEval())(schema, jsonText, vocabulary = vocabularyForTest)(f)
+    assertResult(jsonText)(schema)(f)
   }
 
   test("multipleOf") {
