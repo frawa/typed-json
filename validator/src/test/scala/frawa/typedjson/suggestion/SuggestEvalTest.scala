@@ -17,7 +17,8 @@
 package frawa.typedjson.suggestion
 
 import frawa.typedjson.parser._
-import frawa.typedjson.processor.{Pointer, ProcessorConversion, SchemaValue, Vocabulary}
+import frawa.typedjson.processor.{Pointer, SchemaValue, Vocabulary}
+import frawa.typedjson.testutil.ProcessorConversion
 import frawa.typedjson.testutil.TestSchemas.{numberArraySchema, totoObjectSchema, totoRequiredObjectSchema}
 import frawa.typedjson.testutil.TestUtil.{assertNoIgnoredKeywords, assertResult, withSchema}
 import munit.FunSuite

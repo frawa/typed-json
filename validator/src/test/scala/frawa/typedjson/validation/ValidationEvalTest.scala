@@ -20,6 +20,7 @@ import frawa.typedjson
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser._
 import frawa.typedjson.processor._
+import frawa.typedjson.testutil.ProcessorConversion
 import frawa.typedjson.testutil.TestSchemas._
 import frawa.typedjson.testutil.TestUtil.{assertNoIgnoredKeywords, assertResult, withSchema}
 import munit.FunSuite

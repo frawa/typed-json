@@ -18,6 +18,7 @@ package frawa.typedjson.meta
 
 import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.processor._
+import frawa.typedjson.testutil.ProcessorConversion
 import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.validation.{ValidationEval, ValidationResult}
 import munit.FunSuite

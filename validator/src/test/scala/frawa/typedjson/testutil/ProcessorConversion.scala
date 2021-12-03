@@ -1,4 +1,7 @@
-package frawa.typedjson.processor
+package frawa.typedjson.testutil
+
+import frawa.typedjson.processor._
+import frawa.typedjson.testutil
 
 case class ProcessorConversion[V, R](convert: ProcessorConversion.ConvertFun[V, R]) {
 
@@ -18,7 +21,7 @@ object ProcessorConversion {
       eval: Eval[R],
       vocabulary: Option[Vocabulary] = None,
       lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
-  ): ProcessorConversion[SchemaValue, R] = ProcessorConversion({ schema =>
+  ): ProcessorConversion[SchemaValue, R] = testutil.ProcessorConversion({ schema =>
     Keywords(schema, vocabulary, lazyResolver).map(Processor(_, eval))
   })
 
