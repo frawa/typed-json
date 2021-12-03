@@ -20,7 +20,7 @@ import frawa.typedjson
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser._
 import frawa.typedjson.processor._
-import frawa.typedjson.testutil.ProcessorConversion
+import frawa.typedjson.testutil.ProcessorFactory
 import frawa.typedjson.testutil.TestSchemas._
 import frawa.typedjson.testutil.TestUtil.{assertNoIgnoredKeywords, assertResult, withSchema}
 import munit.FunSuite
@@ -35,8 +35,8 @@ object ValidationEvalTest {
     .swap
     .toOption
 
-  implicit val toProcessor1: ProcessorConversion[SchemaValue, ValidationResult] =
-    ProcessorConversion.toProcessor(ValidationEval(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
+  implicit val factory: ProcessorFactory[SchemaValue, ValidationResult] =
+    ProcessorFactory.make(ValidationEval(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
 }
 
 class ValidationEvalTest extends FunSuite {
@@ -52,7 +52,7 @@ class ValidationEvalTest extends FunSuite {
 
   def assertValidate2(text: String)(
       schema: SchemaValue,
-      c: ProcessorConversion[SchemaValue, ValidationResult]
+      c: ProcessorFactory[SchemaValue, ValidationResult]
   )(
       f: Result[ValidationResult] => Unit
   ): Either[Nothing, Unit] = {
@@ -774,13 +774,13 @@ class ValidationEvalTest extends FunSuite {
 
   test("$ref to validation spec, with two '$ref's") {
     val lazyResolver = Some(MetaSchemas.lazyResolver)
-    val toProcessor2: ProcessorConversion[SchemaValue, ValidationResult] =
-      ProcessorConversion.toProcessor(ValidationEval(), vocabularyForTest, lazyResolver)
+    val factory: ProcessorFactory[SchemaValue, ValidationResult] =
+      ProcessorFactory.make(ValidationEval(), vocabularyForTest, lazyResolver)
 
     withSchema(refToValidationSpec) { schema =>
       assertValidate2("""{ "$defs": { "foo": { "type": "boolean" } } }""".stripMargin)(
         schema,
-        toProcessor2
+        factory
       ) { result =>
         assertErrors(result, Seq())
         assertEquals(result.problems.errors, Seq())
@@ -788,13 +788,13 @@ class ValidationEvalTest extends FunSuite {
       }
       assertValidate2("""{ "$defs": { "foo": { "type": ["boolean"] } } }""".stripMargin)(
         schema,
-        toProcessor2
+        factory
       ) { result =>
         assertErrors(result, Seq())
         assertEquals(result.problems.errors, Seq())
         assertEquals(result.valid, true)
       }
-      assertValidate2("""{ "$defs": { "foo": { "type": 13 } } }""".stripMargin)(schema, toProcessor2) { result =>
+      assertValidate2("""{ "$defs": { "foo": { "type": 13 } } }""".stripMargin)(schema, factory) { result =>
         assertErrors(
           result,
           Seq(

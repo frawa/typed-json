@@ -18,7 +18,7 @@ package frawa.typedjson.suggestion
 
 import frawa.typedjson.parser._
 import frawa.typedjson.processor.{Pointer, SchemaValue, Vocabulary}
-import frawa.typedjson.testutil.ProcessorConversion
+import frawa.typedjson.testutil.ProcessorFactory
 import frawa.typedjson.testutil.TestSchemas.{numberArraySchema, totoObjectSchema, totoRequiredObjectSchema}
 import frawa.typedjson.testutil.TestUtil.{assertNoIgnoredKeywords, assertResult, withSchema}
 import munit.FunSuite
@@ -33,13 +33,13 @@ class SuggestEvalTest extends FunSuite {
     .swap
     .toOption
 
-  private def toProcessor(at: Pointer): ProcessorConversion[SchemaValue, SuggestionResult] =
-    ProcessorConversion.toProcessor(SuggestionEval(at), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
+  private def factory(at: Pointer): ProcessorFactory[SchemaValue, SuggestionResult] =
+    ProcessorFactory.make(SuggestionEval(at), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
 
   private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
       f: Seq[Value] => Unit
   ) = {
-    implicit val toProcessor1: ProcessorConversion[SchemaValue, SuggestionResult] = toProcessor(at)
+    implicit val toProcessor1: ProcessorFactory[SchemaValue, SuggestionResult] = factory(at)
     assertResult[SuggestionResult](text)(schema) { result =>
       f(result.results.flatMap(_.suggestions).distinct)
     }

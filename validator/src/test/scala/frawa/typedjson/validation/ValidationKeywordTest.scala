@@ -20,7 +20,7 @@ import frawa.typedjson
 import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.processor.SchemaProblems.MissingReference
 import frawa.typedjson.processor._
-import frawa.typedjson.testutil.ProcessorConversion
+import frawa.typedjson.testutil.ProcessorFactory
 import frawa.typedjson.testutil.TestUtil._
 import munit.FunSuite
 
@@ -34,8 +34,8 @@ class ValidationKeywordTest extends FunSuite {
     .swap
     .toOption
 
-  private implicit val toProcessor1: ProcessorConversion[SchemaValue, ValidationResult] =
-    ProcessorConversion.toProcessor(ValidationEval(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
+  private implicit val factory1: ProcessorFactory[SchemaValue, ValidationResult] =
+    ProcessorFactory.make(ValidationEval(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
 
   def validateJson(
       schema: SchemaValue

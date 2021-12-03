@@ -50,7 +50,7 @@ object TestUtil {
 
   def assertResult[R](valueText: String)(schema: SchemaValue)(
       f: Result[R] => Unit
-  )(implicit c: ProcessorConversion[SchemaValue, R], parser: Parser): Either[Nothing, Unit] = {
+  )(implicit c: ProcessorFactory[SchemaValue, R], parser: Parser): Either[Nothing, Unit] = {
     withProcessor[R](schema) { processor =>
       val value  = parseJsonValue(valueText)
       val result = processor(InnerValue(value))
@@ -60,7 +60,7 @@ object TestUtil {
 
   def withProcessor[R](schema: SchemaValue)(
       f: Processor[R] => Unit
-  )(implicit c: ProcessorConversion[SchemaValue, R]): Either[Nothing, Unit] = {
+  )(implicit c: ProcessorFactory[SchemaValue, R]): Either[Nothing, Unit] = {
     val result = c(schema).map(f)
     result.swap
       .map(message => fail("creating processor failed", clues(clue(message))))

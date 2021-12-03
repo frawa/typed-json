@@ -18,7 +18,7 @@ package frawa.typedjson.meta
 
 import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.processor._
-import frawa.typedjson.testutil.ProcessorConversion
+import frawa.typedjson.testutil.ProcessorFactory
 import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.validation.{ValidationEval, ValidationResult}
 import munit.FunSuite
@@ -30,8 +30,8 @@ class MetaSchemaTest extends FunSuite {
   private val base                                                   = MetaSchemas.draft202012
   private val lazyResolver: Some[LoadedSchemasResolver.LazyResolver] = Some(MetaSchemas.lazyResolver)
 
-  implicit val toProcessor1: ProcessorConversion[SchemaValue, ValidationResult] =
-    ProcessorConversion.toProcessor(ValidationEval(), lazyResolver = lazyResolver)
+  implicit val factory: ProcessorFactory[SchemaValue, ValidationResult] =
+    ProcessorFactory.make(ValidationEval(), lazyResolver = lazyResolver)
 
   def withSchemaSpec(name: String)(f: SchemaValue => Unit): Unit = {
     val Some(schema) = resolver(base.resolve(name))

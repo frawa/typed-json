@@ -19,7 +19,7 @@ package frawa.typedjson.jsonSchemaTestSuite
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser._
 import frawa.typedjson.processor._
-import frawa.typedjson.testutil.{ProcessorConversion, TestUtil}
+import frawa.typedjson.testutil.{ProcessorFactory, TestUtil}
 import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.validation.{ValidationEval, ValidationResult}
 import munit.{FunSuite, TestOptions}
@@ -101,14 +101,14 @@ class JsonSchemaTestSuite extends FunSuite {
         val lazyResolver = (uri: URI) => MetaSchemas.lazyResolver(uri).orElse(Remotes.lazyResolver(uri))
         val testId       = (file, description)
 
-        val toProcessor1: ProcessorConversion[SchemaValue, ValidationResult] =
-          ProcessorConversion.toProcessor(ValidationEval(), vocabularyForTest, lazyResolver = Some(lazyResolver))
-        val toProcessor2: ProcessorConversion[SchemaValue, ValidationResult] =
-          toProcessor1.mapResult(assertNoIgnoredKeywords)
+        val factory: ProcessorFactory[SchemaValue, ValidationResult] =
+          ProcessorFactory.make(ValidationEval(), vocabularyForTest, lazyResolver = Some(lazyResolver))
+        val strictFactory: ProcessorFactory[SchemaValue, ValidationResult] =
+          factory.mapResult(assertNoIgnoredKeywords)
 
         val hasIgnoredFailMessage = ignoreFailMessageByDescription.contains(testId)
         if (oneTestPerData || hasIgnoredFailMessage) {
-          implicit val c = toProcessor2
+          implicit val c = strictFactory
           withProcessor[ValidationResult](schemaValue) { processor =>
             tests.foreach { value =>
               val data     = testData(value)
@@ -126,7 +126,7 @@ class JsonSchemaTestSuite extends FunSuite {
             }
           }
         } else {
-          implicit val c = toProcessor1
+          implicit val c = factory
           test(suiteOptions) {
             withProcessor[ValidationResult](schemaValue) { processor =>
               tests
