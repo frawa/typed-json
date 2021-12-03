@@ -16,9 +16,15 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-class Draft202012Test extends JsonSchemaTestSuite {
+import frawa.typedjson.testutil.TestUtil
 
+class Draft202012Test extends JsonSchemaTestSuite {
+//  import frawa.typedjson.parser._
   import frawa.typedjson.macros.Macros._
+
+  // WONTWORK: Method too large: frawa/typedjson/jsonSchemaTestSuite/Draft202012Test.<init> ()V
+//  private val draft202012Files: Map[String, Value] =
+//    folderJsonContents("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
   private val draft202012Files: Map[String, String] =
     folderContents("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
 
@@ -34,5 +40,5 @@ class Draft202012Test extends JsonSchemaTestSuite {
     )
   )
 
-  checkFiles(draft202012Files)
+  checkFiles(draft202012Files)(TestUtil.parseJsonValue)
 }

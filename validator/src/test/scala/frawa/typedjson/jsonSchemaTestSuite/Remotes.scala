@@ -16,13 +16,13 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import java.net.URI
 import frawa.typedjson.processor.{LoadedSchemasResolver, RootSchemaValue, SchemaValue}
-import frawa.typedjson.parser.Parser
-import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.util.UriUtil
 
+import java.net.URI
+
 object Remotes {
+  import frawa.typedjson.parser._
 
   val remotesUri: URI = UriUtil.uri("http://localhost:1234")
 
@@ -37,48 +37,34 @@ object Remotes {
     val segments = name.split('/').toArray
     if (segments.length == 2) {
       segments(0) match {
-        case "baseUriChange"       => baseUriChangeFiles.get(segments(1)).flatMap(toSchemaValue)
-        case "baseUriChangeFolder" => baseUriChangeFolderFiles.get(segments(1)).flatMap(toSchemaValue)
+        case "baseUriChange"       => baseUriChangeFiles.get(segments(1)).map(SchemaValue.root)
+        case "baseUriChangeFolder" => baseUriChangeFolderFiles.get(segments(1)).map(SchemaValue.root)
         case "baseUriChangeFolderInSubschema" =>
-          baseUriChangeFolderInSubschemaFiles.get(segments(1)).flatMap(toSchemaValue)
-        case "draft2020-12" => draft202012Files.get(segments(1)).flatMap(toSchemaValue)
+          baseUriChangeFolderInSubschemaFiles.get(segments(1)).map(SchemaValue.root)
+        case "draft2020-12" => draft202012Files.get(segments(1)).map(SchemaValue.root)
         case _ =>
           println("MISSING in Remotes", segments(0))
           None
       }
     } else {
-      remotesFiles.get(name).flatMap(toSchemaValue)
+      remotesFiles.get(name).map(SchemaValue.root)
     }
-  }
-
-  private val parser: Parser = new ZioParser()
-
-  private def toSchemaValue(text: String): Option[RootSchemaValue] = {
-    parser
-      .parse(text)
-      .swap
-      .map { e =>
-        throw new IllegalArgumentException(e)
-      }
-      .swap
-      .map(SchemaValue.root)
-      .toOption
   }
 
   import frawa.typedjson.macros.Macros._
 
-  private val remotesFiles: Map[String, String] =
-    folderContents("./JSON-Schema-Test-Suite/remotes", ".json")
+  private val remotesFiles: Map[String, Value] =
+    folderJsonContents("./JSON-Schema-Test-Suite/remotes", ".json")
 
-  private val baseUriChangeFiles: Map[String, String] =
-    folderContents("./JSON-Schema-Test-Suite/remotes/baseUriChange", ".json")
+  private val baseUriChangeFiles: Map[String, Value] =
+    folderJsonContents("./JSON-Schema-Test-Suite/remotes/baseUriChange", ".json")
 
-  private val baseUriChangeFolderFiles: Map[String, String] =
-    folderContents("./JSON-Schema-Test-Suite/remotes/baseUriChangeFolder", ".json")
+  private val baseUriChangeFolderFiles: Map[String, Value] =
+    folderJsonContents("./JSON-Schema-Test-Suite/remotes/baseUriChangeFolder", ".json")
 
-  private val baseUriChangeFolderInSubschemaFiles: Map[String, String] =
-    folderContents("./JSON-Schema-Test-Suite/remotes/baseUriChangeFolderInSubschema", ".json")
+  private val baseUriChangeFolderInSubschemaFiles: Map[String, Value] =
+    folderJsonContents("./JSON-Schema-Test-Suite/remotes/baseUriChangeFolderInSubschema", ".json")
 
-  private val draft202012Files: Map[String, String] =
-    folderContents("./JSON-Schema-Test-Suite/remotes/draft2020-12", ".json")
+  private val draft202012Files: Map[String, Value] =
+    folderJsonContents("./JSON-Schema-Test-Suite/remotes/draft2020-12", ".json")
 }

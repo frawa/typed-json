@@ -19,7 +19,7 @@ package frawa.typedjson.jsonSchemaTestSuite
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser._
 import frawa.typedjson.processor._
-import frawa.typedjson.testutil.{ProcessorFactory, TestUtil}
+import frawa.typedjson.testutil.ProcessorFactory
 import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.validation.{ValidationEval, ValidationResult}
 import munit.{FunSuite, TestOptions}
@@ -42,9 +42,9 @@ class JsonSchemaTestSuite extends FunSuite {
 
   private case class TestData(data: Value, failMessage: String, expectedValid: Boolean)
 
-  private def check(fileAndContent: (String, String)): Unit = {
+  private def check(fileAndContent: (String, Value)): Unit = {
     val (file, content) = fileAndContent
-    checkSuite(file)(TestUtil.parseJsonValue(content))
+    checkSuite(file)(content)
   }
 
   private def checkSuite(file: String)(testSuiteValue: Value): Unit = {
@@ -156,7 +156,7 @@ class JsonSchemaTestSuite extends FunSuite {
     }
   }
 
-  protected def checkFiles(files: Map[String, String]): Unit = {
+  protected def checkFiles[T](files: Map[String, T])(f: T => Value): Unit = {
     files
       .filterNot { case (file, _) =>
         ignore
@@ -165,8 +165,11 @@ class JsonSchemaTestSuite extends FunSuite {
       .filter { case (file, _) =>
         only.forall(_ == file)
       }
+      .map(t => (t._1, f(t._2)))
       .foreach(check)
   }
+
+  protected def checkFiles(files: Map[String, Value]): Unit = checkFiles[Value](files)(identity)
 
   private def testData(value: Value): TestData = {
     val ObjectValue(properties)  = value
