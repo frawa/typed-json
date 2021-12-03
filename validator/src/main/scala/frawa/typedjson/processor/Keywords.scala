@@ -473,6 +473,20 @@ case class Keywords(
 object Keywords {
   type KeywordWithLocation = UriUtil.WithLocation[Keyword]
 
+  def apply(
+      schema: SchemaValue,
+      vocabulary: Option[Vocabulary],
+      lazyResolver: Option[LoadedSchemasResolver.LazyResolver]
+  ): Either[SchemaProblems, Keywords] = {
+    implicit val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema, lazyResolver)
+    val scope                                    = DynamicScope.empty.push(resolver.base)
+    val parentVocabulary                         = vocabulary.getOrElse(Vocabulary.coreVocabulary)
+    for {
+      vocabulary <- SchemaValue.vocabulary(schema, parentVocabulary)
+      keywords   <- Keywords.parseKeywords(vocabulary, schema, scope)
+    } yield keywords
+  }
+
   def parseKeywords(vocabulary: Vocabulary, schema: SchemaValue, scope: DynamicScope)(implicit
       resolver: SchemaResolver
   ): Either[SchemaProblems, Keywords] = {

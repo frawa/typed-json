@@ -19,13 +19,12 @@ package frawa.typedjson.validation
 import frawa.typedjson
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser._
-import frawa.typedjson.processor.LoadedSchemasResolver.LazyResolver
 import frawa.typedjson.processor._
 import frawa.typedjson.testutil.TestSchemas._
-import frawa.typedjson.testutil.TestUtil.{assertResult, withSchema}
+import frawa.typedjson.testutil.TestUtil.{assertNoIgnoredKeywords, assertResult2, withSchema}
 import munit.FunSuite
 
-class ValidationEvalTest extends FunSuite {
+object ValidationEvalTest {
   implicit val zioParser: ZioParser = new ZioParser()
 
   private val vocabularyForTest = Vocabulary
@@ -35,15 +34,28 @@ class ValidationEvalTest extends FunSuite {
     .swap
     .toOption
 
+  implicit val toProcessor1: ProcessorConversion[SchemaValue, ValidationResult] =
+    ProcessorConversion.toProcessor(ValidationEval(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
+}
+
+class ValidationEvalTest extends FunSuite {
+  import ValidationEvalTest._
+
   private def assertValidate(text: String)(
-      schema: SchemaValue,
-      lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None,
-      strict: Boolean = true
+      schema: SchemaValue
   )(
       f: Result[ValidationResult] => Unit
-  ) = {
-    implicit val lr: Option[LazyResolver] = lazyResolver
-    assertResult(ValidationEval())(schema, text, strict, vocabularyForTest)(f)
+  ): Either[Nothing, Unit] = {
+    assertResult2(text)(schema)(f)
+  }
+
+  def assertValidate2(text: String)(
+      schema: SchemaValue,
+      c: ProcessorConversion[SchemaValue, ValidationResult]
+  )(
+      f: Result[ValidationResult] => Unit
+  ): Either[Nothing, Unit] = {
+    assertResult2(text)(schema)(f)(c, implicitly[Parser])
   }
 
   private def assertErrors(result: Result[ValidationResult], expected: Seq[WithPointer[Observation]]): Unit = {
@@ -761,46 +773,45 @@ class ValidationEvalTest extends FunSuite {
 
   test("$ref to validation spec, with two '$ref's") {
     val lazyResolver = Some(MetaSchemas.lazyResolver)
+    val toProcessor2: ProcessorConversion[SchemaValue, ValidationResult] =
+      ProcessorConversion.toProcessor(ValidationEval(), vocabularyForTest, lazyResolver)
 
     withSchema(refToValidationSpec) { schema =>
-      assertValidate("""{ "$defs": { "foo": { "type": "boolean" } } }""".stripMargin)(
+      assertValidate2("""{ "$defs": { "foo": { "type": "boolean" } } }""".stripMargin)(
         schema,
-        lazyResolver,
-        strict = false
+        toProcessor2
       ) { result =>
         assertErrors(result, Seq())
         assertEquals(result.problems.errors, Seq())
         assertEquals(result.valid, true)
       }
-      assertValidate("""{ "$defs": { "foo": { "type": ["boolean"] } } }""".stripMargin)(
+      assertValidate2("""{ "$defs": { "foo": { "type": ["boolean"] } } }""".stripMargin)(
         schema,
-        lazyResolver,
-        strict = false
+        toProcessor2
       ) { result =>
         assertErrors(result, Seq())
         assertEquals(result.problems.errors, Seq())
         assertEquals(result.valid, true)
       }
-      assertValidate("""{ "$defs": { "foo": { "type": 13 } } }""".stripMargin)(schema, lazyResolver, strict = false) {
-        result =>
-          assertErrors(
-            result,
-            Seq(
-              typedjson.processor.WithPointer(
-                result = NotInEnum(
-                  values = Seq("array", "boolean", "integer", "null", "number", "object", "string").map(StringValue)
-                ),
-                pointer = Pointer.parse("/$defs/foo/type")
+      assertValidate2("""{ "$defs": { "foo": { "type": 13 } } }""".stripMargin)(schema, toProcessor2) { result =>
+        assertErrors(
+          result,
+          Seq(
+            typedjson.processor.WithPointer(
+              result = NotInEnum(
+                values = Seq("array", "boolean", "integer", "null", "number", "object", "string").map(StringValue)
               ),
-              typedjson.processor.WithPointer(
-                result = TypeMismatch(
-                  expected = "array"
-                ),
-                pointer = Pointer.parse("/$defs/foo/type")
-              )
+              pointer = Pointer.parse("/$defs/foo/type")
+            ),
+            typedjson.processor.WithPointer(
+              result = TypeMismatch(
+                expected = "array"
+              ),
+              pointer = Pointer.parse("/$defs/foo/type")
             )
           )
-          assertEquals(result.valid, false)
+        )
+        assertEquals(result.valid, false)
       }
     }
   }

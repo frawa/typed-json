@@ -122,7 +122,7 @@ class JsonSchemaTestSuite extends FunSuite {
           }
         } else {
           test(suiteOptions) {
-            withProcessor(ValidationEval())(schemaValue, vocabulary = vocabularyForTest) { processor =>
+            withProcessor(ValidationEval())(schemaValue, vocabulary = vocabularyForTest, strict = false) { processor =>
               tests
                 .map(testData)
                 .foreach {

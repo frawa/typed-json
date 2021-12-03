@@ -36,7 +36,7 @@ class SuggestEvalTest extends FunSuite {
       f: Seq[Value] => Unit
   ) = {
     implicit val l: Option[LoadedSchemasResolver.LazyResolver] = None
-    assertResult(SuggestionEval(at))(schema, text, vocabulary = vocabularyForTest) { result =>
+    assertResult(SuggestionEval(at))(schema, text, vocabulary = vocabularyForTest, strict = true) { result =>
       f(result.results.flatMap(_.suggestions).distinct)
     }
   }

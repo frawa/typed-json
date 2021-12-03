@@ -17,7 +17,7 @@
 package frawa.typedjson.testutil
 
 import frawa.typedjson.parser.{Parser, Value}
-import frawa.typedjson.processor._
+import frawa.typedjson.processor.{SchemaValue, _}
 import munit.Assertions.{assertEquals, clue, clues, fail}
 
 object TestUtil {
@@ -43,6 +43,11 @@ object TestUtil {
     f(resolver)
   }
 
+  def assertNoIgnoredKeywords[R]: Result[R] => Result[R] = { result =>
+    assertEquals(result.ignoredKeywords(), Set.empty[String], "ignored keywords")
+    result
+  }
+
   def assertResult[R](
       eval: Eval[R]
   )(schema: SchemaValue, valueText: String, strict: Boolean = true, vocabulary: Option[Vocabulary] = None)(
@@ -53,6 +58,25 @@ object TestUtil {
       val result = processor(InnerValue(value))
       f(result)
     }
+  }
+
+  def assertResult2[R](valueText: String)(schema: SchemaValue)(
+      f: Result[R] => Unit
+  )(implicit c: ProcessorConversion[SchemaValue, R], parser: Parser): Either[Nothing, Unit] = {
+    withProcessor2[R](schema) { processor =>
+      val value  = parseJsonValue(valueText)
+      val result = processor(InnerValue(value))
+      f(result)
+    }
+  }
+
+  def withProcessor2[R](schema: SchemaValue)(
+      f: Processor[R] => Unit
+  )(implicit c: ProcessorConversion[SchemaValue, R]): Either[Nothing, Unit] = {
+    val result = c(schema).map(f)
+    result.swap
+      .map(message => fail("creating processor failed", clues(clue(message))))
+      .swap
   }
 
   def withProcessor[R](

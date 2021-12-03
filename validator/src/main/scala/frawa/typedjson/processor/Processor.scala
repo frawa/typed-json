@@ -17,9 +17,7 @@
 package frawa.typedjson.processor
 
 import frawa.typedjson
-import frawa.typedjson.parser.ArrayValue
-import frawa.typedjson.parser.ObjectValue
-import frawa.typedjson.parser.StringValue
+import frawa.typedjson.parser.{ArrayValue, ObjectValue, StringValue}
 import frawa.typedjson.processor
 
 case class Processor[R] private[processor] (private val process: Processor.ProcessFun[R]) {
@@ -40,15 +38,11 @@ object Processor {
   )(
       eval: Eval[R]
   ): Either[SchemaProblems, Processor[R]] = {
-    implicit val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema, lazyResolver)
+    Keywords(schema, vocabulary, lazyResolver).map(apply(_, eval))
+  }
 
-    val scope            = DynamicScope.empty.push(resolver.base)
-    val parentVocabulary = vocabulary.getOrElse(Vocabulary.coreVocabulary)
-    for {
-      vocabulary <- SchemaValue.vocabulary(schema, parentVocabulary)
-      keywords   <- Keywords.parseKeywords(vocabulary, schema, scope)
-      processor = Processor(all(eval, keywords).andThen(_.addIgnoredKeywords(keywords.ignored, Pointer.empty)))
-    } yield processor
+  def apply[R](keywords: Keywords, eval: Eval[R]): Processor[R] = {
+    Processor(all(eval, keywords).andThen(_.addIgnoredKeywords(keywords.ignored, Pointer.empty)))
   }
 
   private def all[R](eval: Eval[R], keywords: Keywords): ProcessFun[R] = { value =>

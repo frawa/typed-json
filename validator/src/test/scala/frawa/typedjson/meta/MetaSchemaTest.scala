@@ -37,7 +37,7 @@ class MetaSchemaTest extends FunSuite {
   def validateSpec(valueName: String, schemaName: String)(f: Result[ValidationResult] => Unit): Unit = {
     withSchemaSpec(schemaName) { schema =>
       withSchemaSpec(valueName) { value =>
-        withProcessor(ValidationEval())(schema) { processor =>
+        withProcessor(ValidationEval())(schema, strict = false) { processor =>
           val result = processor(InnerValue(value.value))
           f(result)
         }
