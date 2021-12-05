@@ -10,6 +10,9 @@
 - produce output schema from annotations/errors
 - validating lazy loader, which validates against meta schema on the fly
 - improve suggestions
+- integrate with an interactive tool (to improve suggestions)
+  - code mirror next? 
+  - vs code?
 - post process annotations?
 - latest dependencies
 - publish released versions
@@ -17,8 +20,10 @@
 - support earlier version of spec, via JsonSchemaTestTestSuite
 - support missing formats (all those RFCs ..)
 - fix ignored suites in JsonSchemaTestTestSuite
+- compile time json parsing vs runtime?
 - latest dependencies
 - support deprecated?
+- Scala 3?!
 - benching
 - support ScalaNative? Or GraalVM?
 - CI on GH Actions?
