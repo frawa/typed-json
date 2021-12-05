@@ -8,7 +8,7 @@ addCommandAlias("fixCheck", "scalafixAll --check")
 addCommandAlias("fixFix", "scalafixAll")
 
 val sharedSettings = Seq(
-  scalaVersion     := "2.13.6",
+  scalaVersion     := "2.13.7",
   organization     := "frawa.typedjson",
   organizationName := "Frank Wagner",
   startYear        := Some(2021),
