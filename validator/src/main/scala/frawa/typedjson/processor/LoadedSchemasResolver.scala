@@ -149,8 +149,8 @@ case class LoadedSchemasResolver(
     this.copy(schemas = schemas + ((uri, schema)))
 
   private def addAll(other: LoadedSchemasResolver): LoadedSchemasResolver = this.copy(
-    schemas = schemas.concat(other.schemas.toIterable),
-    dynamicSchemas = dynamicSchemas.concat(other.dynamicSchemas.toIterable)
+    schemas = schemas.concat(other.schemas.toSeq),
+    dynamicSchemas = dynamicSchemas.concat(other.dynamicSchemas.toSeq)
   )
 
   private def addDynamic(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
