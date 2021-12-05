@@ -7,3 +7,5 @@ addSbtPlugin("org.scala-js"       % "sbt-scalajs"                   % "1.7.1")
 
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.3")
 addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.32")
+
+addSbtPlugin("org.jmotor.sbt" % "sbt-dependency-updates" % "1.2.2")
