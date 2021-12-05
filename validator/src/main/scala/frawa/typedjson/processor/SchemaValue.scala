@@ -42,6 +42,7 @@ object SchemaValue {
     (Pointer.empty / property)(value).flatMap(Value.asString)
   }
 
+  // TODO avoid implicit?
   def vocabulary(schema: SchemaValue, parentVocabulary: Vocabulary)(implicit
       resolver: SchemaResolver
   ): Either[SchemaProblems, Vocabulary] = {

@@ -97,9 +97,11 @@ case class Keywords(
   import frawa.typedjson.util.SeqUtil._
   import Keywords._
 
+  // TODO avoid implicit?
   private def add(keyword: Keyword)(implicit scope: DynamicScope): Keywords =
     this.copy(keywords = keywords :+ localized(keyword, scope))
 
+  // TODO avoid implicit?
   private def addAll(
       schemas: Seq[SchemaValue]
   )(
@@ -113,6 +115,7 @@ case class Keywords(
     }
   }
 
+  // TODO avoid implicit?
   private def withKeyword(keyword: String, value: Value, scope: DynamicScope)(implicit
       resolver: SchemaResolver
   ): Either[SchemaProblems, Keywords] = {
@@ -397,6 +400,7 @@ case class Keywords(
     LazyParseKeywords(resolved, resolveLater)
   }
 
+  // TODO avoid implicit?
   private def mapKeywordsFor(
       props: Map[String, Value],
       scope: DynamicScope
@@ -419,6 +423,7 @@ case class Keywords(
     }
   }
 
+  // TODO avoid implicit?
   private def updateKeyword[K <: Keyword: ClassTag](
       newKeyword: => K
   )(f: K => K)(implicit scope: DynamicScope): Keywords = {
@@ -487,6 +492,7 @@ object Keywords {
     } yield keywords
   }
 
+  // TODO avoid implicit?
   def parseKeywords(vocabulary: Vocabulary, schema: SchemaValue, scope: DynamicScope)(implicit
       resolver: SchemaResolver
   ): Either[SchemaProblems, Keywords] = {
