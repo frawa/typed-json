@@ -16,29 +16,29 @@
 
 package frawa.typedjson.testutil
 
-import frawa.typedjson.processor._
+import frawa.typedjson.keywords._
 import frawa.typedjson.testutil
 
-case class ProcessorFactory[V, R](create: ProcessorFactory.CreateFun[V, R]) {
+case class EvaluatorFactory[V, R](create: EvaluatorFactory.CreateFun[V, R]) {
 
-  def apply(v: V): Either[SchemaProblems, Processor[R]] = create(v)
+  def apply(v: V): Either[SchemaProblems, Evaluator[R]] = create(v)
 
-  def mapResult(f: Result[R] => Result[R]): ProcessorFactory[V, R] = {
-    ProcessorFactory(create.andThen(_.map { processor =>
-      processor.andThen(f)
+  def mapResult(f: Result[R] => Result[R]): EvaluatorFactory[V, R] = {
+    EvaluatorFactory(create.andThen(_.map { evaluator =>
+      evaluator.andThen(f)
     }))
   }
 }
 
-object ProcessorFactory {
-  type CreateFun[V, R] = V => Either[SchemaProblems, Processor[R]]
+object EvaluatorFactory {
+  type CreateFun[V, R] = V => Either[SchemaProblems, Evaluator[R]]
 
   def make[R](
       processing: Processing[R],
       vocabulary: Option[Vocabulary] = None,
       lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
-  ): ProcessorFactory[SchemaValue, R] = testutil.ProcessorFactory({ schema =>
-    Keywords(schema, vocabulary, lazyResolver).map(Processor(_, processing))
+  ): EvaluatorFactory[SchemaValue, R] = testutil.EvaluatorFactory({ schema =>
+    Keywords(schema, vocabulary, lazyResolver).map(Evaluator(_, processing))
   })
 
 }

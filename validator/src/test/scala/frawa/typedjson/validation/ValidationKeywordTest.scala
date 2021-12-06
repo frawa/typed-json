@@ -18,9 +18,9 @@ package frawa.typedjson.validation
 
 import frawa.typedjson
 import frawa.typedjson.parser.ZioParser
-import frawa.typedjson.processor.SchemaProblems.MissingReference
-import frawa.typedjson.processor._
-import frawa.typedjson.testutil.ProcessorFactory
+import frawa.typedjson.keywords.SchemaProblems.MissingReference
+import frawa.typedjson.keywords._
+import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestUtil._
 import munit.FunSuite
 
@@ -29,8 +29,8 @@ class ValidationKeywordTest extends FunSuite {
 
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
-  private implicit val factory1: ProcessorFactory[SchemaValue, ValidationResult] =
-    ProcessorFactory.make(ValidationProcessing(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
+  private implicit val factory1: EvaluatorFactory[SchemaValue, ValidationResult] =
+    EvaluatorFactory.make(ValidationProcessing(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
 
   def validateJson(
       schema: SchemaValue
@@ -382,7 +382,7 @@ class ValidationKeywordTest extends FunSuite {
           Seq(
             ValidationResult(
               Seq(
-                typedjson.processor.WithPointer(TypeMismatch("number"), Pointer.empty / 0)
+                typedjson.keywords.WithPointer(TypeMismatch("number"), Pointer.empty / 0)
               )
             )
           )
@@ -393,7 +393,7 @@ class ValidationKeywordTest extends FunSuite {
         assertEquals(
           result.annotations,
           Seq(
-            typedjson.processor.WithPointer(EvaluatedIndices(Seq(0, 1)), Pointer.empty)
+            typedjson.keywords.WithPointer(EvaluatedIndices(Seq(0, 1)), Pointer.empty)
           )
         )
       }
@@ -412,7 +412,7 @@ class ValidationKeywordTest extends FunSuite {
           Seq(
             ValidationResult(
               Seq(
-                typedjson.processor.WithPointer(TypeMismatch("boolean"), Pointer.empty / 2)
+                typedjson.keywords.WithPointer(TypeMismatch("boolean"), Pointer.empty / 2)
               )
             )
           )
@@ -423,7 +423,7 @@ class ValidationKeywordTest extends FunSuite {
         assertEquals(
           result.annotations,
           Seq(
-            typedjson.processor.WithPointer(EvaluatedIndices(Seq(0, 1, 2)), Pointer.empty)
+            typedjson.keywords.WithPointer(EvaluatedIndices(Seq(0, 1, 2)), Pointer.empty)
           )
         )
       }
@@ -446,14 +446,14 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""[13, "foo", true]""") { result =>
         assert(result.valid)
-        assertEquals(result.annotations, Seq(typedjson.processor.WithPointer(EvaluatedIndices(Seq(0)), Pointer.empty)))
+        assertEquals(result.annotations, Seq(typedjson.keywords.WithPointer(EvaluatedIndices(Seq(0)), Pointer.empty)))
       }
       validateJson(schema)("""[13, 14, "foo", true]""") { result =>
         assert(result.valid)
         assertEquals(
           result.annotations,
           Seq(
-            typedjson.processor.WithPointer(EvaluatedIndices(Seq(0, 1)), Pointer.empty)
+            typedjson.keywords.WithPointer(EvaluatedIndices(Seq(0, 1)), Pointer.empty)
           )
         )
       }
@@ -482,7 +482,7 @@ class ValidationKeywordTest extends FunSuite {
         assert(result.valid)
         assertEquals(
           result.annotations,
-          Seq(typedjson.processor.WithPointer(EvaluatedIndices(Seq(0, 1)), Pointer.empty))
+          Seq(typedjson.keywords.WithPointer(EvaluatedIndices(Seq(0, 1)), Pointer.empty))
         )
       }
     }
@@ -522,7 +522,7 @@ class ValidationKeywordTest extends FunSuite {
         assert(result.valid)
         assertEquals(
           result.annotations,
-          Seq(typedjson.processor.WithPointer(EvaluatedIndices(Seq(0, 1)), Pointer.empty))
+          Seq(typedjson.keywords.WithPointer(EvaluatedIndices(Seq(0, 1)), Pointer.empty))
         )
       }
     }
@@ -566,8 +566,8 @@ class ValidationKeywordTest extends FunSuite {
           Seq(
             ValidationResult(
               Seq(
-                typedjson.processor.WithPointer(FalseSchemaReason(), Pointer.empty / "gnu"),
-                typedjson.processor.WithPointer(FalseSchemaReason(), Pointer.empty / "bar")
+                typedjson.keywords.WithPointer(FalseSchemaReason(), Pointer.empty / "gnu"),
+                typedjson.keywords.WithPointer(FalseSchemaReason(), Pointer.empty / "bar")
               )
             )
           )
@@ -578,7 +578,7 @@ class ValidationKeywordTest extends FunSuite {
         assert(result.valid)
         assertEquals(
           result.annotations,
-          Seq(typedjson.processor.WithPointer(EvaluatedProperties(Set("foo")), Pointer.empty))
+          Seq(typedjson.keywords.WithPointer(EvaluatedProperties(Set("foo")), Pointer.empty))
         )
       }
     }

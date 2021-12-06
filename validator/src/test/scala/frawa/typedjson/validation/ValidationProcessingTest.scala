@@ -19,8 +19,8 @@ package frawa.typedjson.validation
 import frawa.typedjson
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser._
-import frawa.typedjson.processor._
-import frawa.typedjson.testutil.ProcessorFactory
+import frawa.typedjson.keywords._
+import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestSchemas._
 import frawa.typedjson.testutil.TestUtil.{assertNoIgnoredKeywords, assertResult, withSchema, dialect}
 import munit.FunSuite
@@ -30,8 +30,8 @@ object ValidationProcessingTest {
 
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
-  implicit val factory: ProcessorFactory[SchemaValue, ValidationResult] =
-    ProcessorFactory.make(ValidationProcessing(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
+  implicit val factory: EvaluatorFactory[SchemaValue, ValidationResult] =
+    EvaluatorFactory.make(ValidationProcessing(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
 }
 
 class ValidationProcessingTest extends FunSuite {
@@ -47,7 +47,7 @@ class ValidationProcessingTest extends FunSuite {
 
   def assertValidate2(text: String)(
       schema: SchemaValue,
-      c: ProcessorFactory[SchemaValue, ValidationResult]
+      c: EvaluatorFactory[SchemaValue, ValidationResult]
   )(
       f: Result[ValidationResult] => Unit
   ): Either[Nothing, Unit] = {
@@ -107,7 +107,7 @@ class ValidationProcessingTest extends FunSuite {
         assertErrors(
           result,
           Seq(
-            typedjson.processor.WithPointer(
+            typedjson.keywords.WithPointer(
               result = FalseSchemaReason(),
               pointer = Pointer(
                 segments = Nil
@@ -121,7 +121,7 @@ class ValidationProcessingTest extends FunSuite {
         assertErrors(
           result,
           Seq(
-            typedjson.processor.WithPointer(
+            typedjson.keywords.WithPointer(
               result = FalseSchemaReason(),
               pointer = Pointer(
                 segments = Nil
@@ -135,7 +135,7 @@ class ValidationProcessingTest extends FunSuite {
         assertErrors(
           result,
           Seq(
-            typedjson.processor.WithPointer(
+            typedjson.keywords.WithPointer(
               result = FalseSchemaReason(),
               pointer = Pointer(
                 segments = Nil
@@ -188,7 +188,7 @@ class ValidationProcessingTest extends FunSuite {
         assertErrors(
           result,
           Seq(
-            typedjson.processor.WithPointer(
+            typedjson.keywords.WithPointer(
               result = NotInvalid(),
               pointer = Pointer(
                 segments = Nil
@@ -202,7 +202,7 @@ class ValidationProcessingTest extends FunSuite {
         assertErrors(
           result,
           Seq(
-            typedjson.processor.WithPointer(
+            typedjson.keywords.WithPointer(
               result = NotInvalid(),
               pointer = Pointer(
                 segments = Nil
@@ -216,7 +216,7 @@ class ValidationProcessingTest extends FunSuite {
         assertErrors(
           result,
           Seq(
-            typedjson.processor.WithPointer(
+            typedjson.keywords.WithPointer(
               result = NotInvalid(),
               pointer = Pointer(
                 segments = Nil
@@ -271,7 +271,7 @@ class ValidationProcessingTest extends FunSuite {
   test("array item") {
     withSchema(numberArraySchema) { schema =>
       assertValidate("""[true]""")(schema) { result =>
-        assertErrors(result, Seq(typedjson.processor.WithPointer(TypeMismatch("number"), Pointer(0))))
+        assertErrors(result, Seq(typedjson.keywords.WithPointer(TypeMismatch("number"), Pointer(0))))
         assertEquals(result.valid, false)
       }
       assertValidate("""[13]""")(schema) { result =>
@@ -308,7 +308,7 @@ class ValidationProcessingTest extends FunSuite {
   test("object property type") {
     withSchema(totoObjectSchema) { schema =>
       assertValidate("""{"toto": 13,"titi": true}""")(schema) { result =>
-        assertErrors(result, Seq(typedjson.processor.WithPointer(TypeMismatch("string"), Pointer.empty / "titi")))
+        assertErrors(result, Seq(typedjson.keywords.WithPointer(TypeMismatch("string"), Pointer.empty / "titi")))
         assertEquals(result.valid, false)
       }
     }
@@ -623,7 +623,7 @@ class ValidationProcessingTest extends FunSuite {
         assertErrors(
           result,
           Seq(
-            typedjson.processor.WithPointer(
+            typedjson.keywords.WithPointer(
               result = TypeMismatch(
                 expected = "string"
               ),
@@ -631,7 +631,7 @@ class ValidationProcessingTest extends FunSuite {
                 segments = Nil
               )
             ),
-            typedjson.processor.WithPointer(
+            typedjson.keywords.WithPointer(
               result = NotInEnum(
                 values = List(
                   StringValue(
@@ -650,7 +650,7 @@ class ValidationProcessingTest extends FunSuite {
         assertErrors(
           result,
           Seq(
-            typedjson.processor.WithPointer(
+            typedjson.keywords.WithPointer(
               result = NotInEnum(
                 values = List(
                   StringValue(
@@ -678,7 +678,7 @@ class ValidationProcessingTest extends FunSuite {
         assertErrors(
           result,
           Seq(
-            typedjson.processor.WithPointer(
+            typedjson.keywords.WithPointer(
               result = TypeMismatch(
                 expected = "array"
               ),
@@ -703,7 +703,7 @@ class ValidationProcessingTest extends FunSuite {
         assertErrors(
           result,
           Seq(
-            typedjson.processor.WithPointer(
+            typedjson.keywords.WithPointer(
               result = TypeMismatch(
                 expected = "number"
               ),
@@ -732,13 +732,13 @@ class ValidationProcessingTest extends FunSuite {
         assertErrors(
           result,
           Seq(
-            typedjson.processor.WithPointer(
+            typedjson.keywords.WithPointer(
               result = TypeMismatch(
                 expected = "number"
               ),
               pointer = Pointer.parse("/foo")
             ),
-            typedjson.processor.WithPointer(
+            typedjson.keywords.WithPointer(
               result = TypeMismatch(
                 expected = "array"
               ),
@@ -753,8 +753,8 @@ class ValidationProcessingTest extends FunSuite {
 
   test("$ref to validation spec, with two '$ref's") {
     val lazyResolver = Some(MetaSchemas.lazyResolver)
-    val factory: ProcessorFactory[SchemaValue, ValidationResult] =
-      ProcessorFactory.make(ValidationProcessing(), vocabularyForTest, lazyResolver)
+    val factory: EvaluatorFactory[SchemaValue, ValidationResult] =
+      EvaluatorFactory.make(ValidationProcessing(), vocabularyForTest, lazyResolver)
 
     withSchema(refToValidationSpec) { schema =>
       assertValidate2("""{ "$defs": { "foo": { "type": "boolean" } } }""")(
@@ -777,13 +777,13 @@ class ValidationProcessingTest extends FunSuite {
         assertErrors(
           result,
           Seq(
-            typedjson.processor.WithPointer(
+            typedjson.keywords.WithPointer(
               result = NotInEnum(
                 values = Seq("array", "boolean", "integer", "null", "number", "object", "string").map(StringValue)
               ),
               pointer = Pointer.parse("/$defs/foo/type")
             ),
-            typedjson.processor.WithPointer(
+            typedjson.keywords.WithPointer(
               result = TypeMismatch(
                 expected = "array"
               ),

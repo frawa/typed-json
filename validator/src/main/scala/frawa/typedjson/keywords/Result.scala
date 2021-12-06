@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.processor
+package frawa.typedjson.keywords
 
 sealed trait Evaluated
 case class EvaluatedIndices(indices: Seq[Int])          extends Evaluated
@@ -30,7 +30,7 @@ object Result {
   def invalid[R]: Result[R]                          = Result[R](valid = false)
   def invalid[R](result: R): Result[R]               = Result[R](valid = false, Seq(result))
 
-  def merge[R](allResults: Seq[Result[R]]): Result[R] = {
+  def combine[R](allResults: Seq[Result[R]]): Result[R] = {
     val valid       = allResults.forall(_.valid)
     val results     = allResults.flatMap(_.results)
     val problems    = allResults.map(_.problems).reduceOption(_.combine(_)).getOrElse(SchemaProblems.empty)

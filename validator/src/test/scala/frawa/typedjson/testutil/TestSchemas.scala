@@ -17,7 +17,7 @@
 package frawa.typedjson.testutil
 
 import frawa.typedjson.parser.{ObjectValue, StringValue}
-import frawa.typedjson.processor.SchemaValue
+import frawa.typedjson.keywords.SchemaValue
 
 object TestSchemas {
   val nullSchema        = """{"type": "null"}"""

@@ -16,7 +16,7 @@
 
 package frawa.typedjson.validation
 
-import frawa.typedjson.processor.{Result, Pointer}
+import frawa.typedjson.keywords.{Result, Pointer}
 
 class ValidationCalculator extends Calculator[ValidationResult] {
   override def allOf(results: Seq[Result[ValidationResult]], pointer: Pointer): Result[ValidationResult] = {

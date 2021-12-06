@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.processor
+package frawa.typedjson.keywords
 
-import frawa.typedjson.parser.Value
-
-case class InnerValue(value: Value, pointer: Pointer = Pointer.empty)
+case class WithPointer[+R](result: R, pointer: Pointer = Pointer.empty) {
+  def prefix(prefix: Pointer): WithPointer[R] = this.copy(pointer = prefix / this.pointer)
+}

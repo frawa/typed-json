@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.processor
+package frawa.typedjson.keywords
 
-// TODO Eval -> Processing, Processor -> Evaluating
-case class Processing[R](
-    simple: AssertionKeyword => Processor.ProcessFun[R],
-    nested: ApplicatorKeyword => Processor.MergeFun[R]
-)
+import frawa.typedjson.parser.Value
+
+case class InnerValue(value: Value, pointer: Pointer = Pointer.empty)

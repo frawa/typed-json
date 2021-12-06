@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.processor
+package frawa.typedjson.keywords
 
-import frawa.typedjson.processor.SchemaProblems.UnknownRequiredVocabulary
+import frawa.typedjson.keywords.SchemaProblems.UnknownRequiredVocabulary
 import frawa.typedjson.util.UriUtil.uri
 import munit.FunSuite
 

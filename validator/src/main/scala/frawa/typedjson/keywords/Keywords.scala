@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.processor
+package frawa.typedjson.keywords
 
 import frawa.typedjson.parser.ArrayValue
 import frawa.typedjson.parser.BoolValue
@@ -22,7 +22,7 @@ import frawa.typedjson.parser.NumberValue
 import frawa.typedjson.parser.ObjectValue
 import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.Value
-import frawa.typedjson.processor.SchemaProblems.{
+import frawa.typedjson.keywords.SchemaProblems.{
   InvalidSchemaValue,
   MissingDynamicReference,
   MissingReference,

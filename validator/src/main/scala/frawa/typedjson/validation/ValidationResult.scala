@@ -16,7 +16,7 @@
 
 package frawa.typedjson.validation
 
-import frawa.typedjson.processor.{Pointer, WithPointer}
+import frawa.typedjson.keywords.{Pointer, WithPointer}
 
 case class ValidationResult(
     errors: Seq[ValidationResult.Error]

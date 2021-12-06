@@ -16,7 +16,7 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import frawa.typedjson.processor.{LoadedSchemasResolver, RootSchemaValue, SchemaValue}
+import frawa.typedjson.keywords.{LoadedSchemasResolver, RootSchemaValue, SchemaValue}
 import frawa.typedjson.util.UriUtil
 
 import java.net.URI

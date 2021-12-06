@@ -17,7 +17,7 @@
 package frawa.typedjson.testutil
 
 import frawa.typedjson.parser.{Parser, Value}
-import frawa.typedjson.processor.{SchemaValue, _}
+import frawa.typedjson.keywords.{SchemaValue, _}
 import munit.Assertions.{assertEquals, clue, clues, fail}
 import java.net.URI
 
@@ -51,20 +51,20 @@ object TestUtil {
 
   def assertResult[R](valueText: String)(schema: SchemaValue)(
       f: Result[R] => Unit
-  )(implicit factory: ProcessorFactory[SchemaValue, R], parser: Parser): Either[Nothing, Unit] = {
-    withProcessor[R](schema) { processor =>
+  )(implicit factory: EvaluatorFactory[SchemaValue, R], parser: Parser): Either[Nothing, Unit] = {
+    withProcessor[R](schema) { evaluator =>
       val value  = parseJsonValue(valueText)
-      val result = processor(InnerValue(value))
+      val result = evaluator(InnerValue(value))
       f(result)
     }
   }
 
   def withProcessor[R](schema: SchemaValue)(
-      f: Processor[R] => Unit
-  )(implicit factory: ProcessorFactory[SchemaValue, R]): Either[Nothing, Unit] = {
+      f: Evaluator[R] => Unit
+  )(implicit factory: EvaluatorFactory[SchemaValue, R]): Either[Nothing, Unit] = {
     val result = factory(schema).map(f)
     result.swap
-      .map(message => fail("creating processor failed", clues(clue(message))))
+      .map(message => fail("creating keywords failed", clues(clue(message))))
       .swap
   }
 

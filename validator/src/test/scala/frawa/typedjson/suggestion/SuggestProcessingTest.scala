@@ -17,8 +17,8 @@
 package frawa.typedjson.suggestion
 
 import frawa.typedjson.parser._
-import frawa.typedjson.processor.{Pointer, SchemaValue, Vocabulary}
-import frawa.typedjson.testutil.ProcessorFactory
+import frawa.typedjson.keywords.{Pointer, SchemaValue, Vocabulary}
+import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestSchemas.{numberArraySchema, totoObjectSchema, totoRequiredObjectSchema}
 import frawa.typedjson.testutil.TestUtil._
 import munit.FunSuite
@@ -28,13 +28,13 @@ class SuggestProcessingTest extends FunSuite {
 
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
-  private def factory(at: Pointer): ProcessorFactory[SchemaValue, SuggestionResult] =
-    ProcessorFactory.make(SuggestionProcessing(at), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
+  private def factory(at: Pointer): EvaluatorFactory[SchemaValue, SuggestionResult] =
+    EvaluatorFactory.make(SuggestionProcessing(at), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
 
   private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
       f: Seq[Value] => Unit
   ) = {
-    implicit val toProcessor1: ProcessorFactory[SchemaValue, SuggestionResult] = factory(at)
+    implicit val toProcessor1: EvaluatorFactory[SchemaValue, SuggestionResult] = factory(at)
     assertResult[SuggestionResult](text)(schema) { result =>
       f(result.results.flatMap(_.suggestions).distinct)
     }

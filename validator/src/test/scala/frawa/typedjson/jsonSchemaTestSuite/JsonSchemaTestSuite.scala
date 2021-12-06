@@ -18,8 +18,8 @@ package frawa.typedjson.jsonSchemaTestSuite
 
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser._
-import frawa.typedjson.processor._
-import frawa.typedjson.testutil.ProcessorFactory
+import frawa.typedjson.keywords._
+import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.validation.{ValidationProcessing, ValidationResult}
 import munit.{FunSuite, Location, TestOptions}
@@ -96,15 +96,15 @@ class JsonSchemaTestSuite extends FunSuite {
         val lazyResolver = (uri: URI) => MetaSchemas.lazyResolver(uri).orElse(Remotes.lazyResolver(uri))
         val testId       = (file, description)
 
-        val factory: ProcessorFactory[SchemaValue, ValidationResult] =
-          ProcessorFactory.make(ValidationProcessing(), vocabularyForTest, lazyResolver = Some(lazyResolver))
-        val strictFactory: ProcessorFactory[SchemaValue, ValidationResult] =
+        val factory: EvaluatorFactory[SchemaValue, ValidationResult] =
+          EvaluatorFactory.make(ValidationProcessing(), vocabularyForTest, lazyResolver = Some(lazyResolver))
+        val strictFactory: EvaluatorFactory[SchemaValue, ValidationResult] =
           factory.mapResult(assertNoIgnoredKeywords)
 
         val hasIgnoredFailMessage = ignoreFailMessageByDescription.contains(testId)
         if (oneTestPerData || hasIgnoredFailMessage) {
-          implicit val factory1: ProcessorFactory[SchemaValue, ValidationResult] = strictFactory
-          withProcessor[ValidationResult](schemaValue) { processor =>
+          implicit val factory1: EvaluatorFactory[SchemaValue, ValidationResult] = strictFactory
+          withProcessor[ValidationResult](schemaValue) { evaluator =>
             tests.foreach { value =>
               val data     = testData(value)
               val testName = s"$file | ${data.failMessage} | $description"
@@ -116,18 +116,18 @@ class JsonSchemaTestSuite extends FunSuite {
                 .getOrElse(new TestOptions(testName))
 
               test(testOptions) {
-                assertOne(processor)(data)
+                assertOne(evaluator)(data)
               }
             }
           }
         } else {
-          implicit val factorry1: ProcessorFactory[SchemaValue, ValidationResult] = factory
+          implicit val factorry1: EvaluatorFactory[SchemaValue, ValidationResult] = factory
           test(suiteOptions) {
-            withProcessor[ValidationResult](schemaValue) { processor =>
+            withProcessor[ValidationResult](schemaValue) { evaluator =>
               tests
                 .map(testData)
                 .foreach {
-                  assertOne(processor)
+                  assertOne(evaluator)
                 }
             }
           }
@@ -136,8 +136,8 @@ class JsonSchemaTestSuite extends FunSuite {
     }
   }
 
-  private def assertOne(processor: Processor[ValidationResult]): TestData => Unit = { data =>
-    val result = processor(InnerValue(data.data))
+  private def assertOne(evaluator: Evaluator[ValidationResult]): TestData => Unit = { data =>
+    val result = evaluator(InnerValue(data.data))
 
     if (result.valid != data.expectedValid) {
       implicit val loc: Location = munit.Location.empty

@@ -17,7 +17,7 @@
 package frawa.typedjson.validation
 
 import frawa.typedjson.parser._
-import frawa.typedjson.processor._
+import frawa.typedjson.keywords._
 
 import java.net.URI
 //import java.time.OffsetTime
@@ -40,7 +40,7 @@ case class FormatMismatch(format: String)                              extends O
 case class MinimumMismatch(min: BigDecimal, exclude: Boolean)          extends Observation
 case class ItemsNotUnique()                                            extends Observation
 case class UnsupportedFormat(format: String)                           extends Observation
-case class UnsupportedCheck(check: Keyword)                            extends Observation
+case class UnsupportedCheck(validate: Keyword)                         extends Observation
 case class NotMultipleOf(n: BigDecimal)                                extends Observation
 case class MaximumMismatch(max: BigDecimal, exclude: Boolean)          extends Observation
 case class MaxLengthMismatch(max: BigDecimal)                          extends Observation
@@ -62,6 +62,7 @@ trait Calculator[R] {
   def not(results: Seq[Result[R]], pointer: Pointer): Result[R]
   def ifThenElse(results: Seq[Result[R]], pointer: Pointer): Result[R]
 }
+
 object ValidationProcessing {
 
   def apply(): Processing[ValidationResult] = Processing(simple, nested)
@@ -75,38 +76,38 @@ object ValidationProcessing {
   private val arrayTypeMismatch   = TypeMismatch[ArrayValue]("array")
   private val objectTypeMismatch  = TypeMismatch[ObjectValue]("object")
 
-  private type ProcessFun = Processor.ProcessFun[ValidationResult]
+  private type EvalFun = Evaluator.EvalFun[ValidationResult]
 
-  private def simple(keyword: AssertionKeyword): ProcessFun = {
+  private def simple(keyword: AssertionKeyword): EvalFun = {
     keyword match {
-      case NullTypeKeyword                 => checkType(nullTypeMismatch)
-      case BooleanTypeKeyword              => checkType(booleanTypeMismatch)
-      case StringTypeKeyword               => checkType(stringTypeMismatch)
-      case NumberTypeKeyword               => checkType(numberTypeMismatch)
-      case IntegerTypeKeyword              => checkInteger()
-      case ArrayTypeKeyword                => checkType(arrayTypeMismatch)
-      case ObjectTypeKeyword               => checkType(objectTypeMismatch)
-      case ObjectRequiredKeyword(required) => checkObjectRequired(required)
-      case TrivialKeyword(valid)           => checkTrivial(valid)
-      case EnumKeyword(values)             => checkEnum(values)
-      case PatternKeyword(pattern)         => checkPattern(pattern)
-      case FormatKeyword(format)           => checkFormat(format)
-      case MinimumKeyword(v, exclude)      => checkMinimum(v, exclude)
-      case UniqueItemsKeyword(v)           => checkUniqueItems(v)
-      case MultipleOfKeyword(n)            => checkMultipleOf(n)
-      case MaximumKeyword(v, exclude)      => checkMaximum(v, exclude)
-      case MaxLengthKeyword(v)             => checkMaxLength(v)
-      case MinLengthKeyword(v)             => checkMinLength(v)
-      case MaxItemsKeyword(v)              => checkMaxItems(v)
-      case MinItemsKeyword(v)              => checkMinItems(v)
-      case MaxPropertiesKeyword(v)         => checkMaxProperties(v)
-      case MinPropertiesKeyword(v)         => checkMinProperties(v)
-      case DependentRequiredKeyword(v)     => checkDependentRequired(v)
+      case NullTypeKeyword                 => validateType(nullTypeMismatch)
+      case BooleanTypeKeyword              => validateType(booleanTypeMismatch)
+      case StringTypeKeyword               => validateType(stringTypeMismatch)
+      case NumberTypeKeyword               => validateType(numberTypeMismatch)
+      case IntegerTypeKeyword              => validateInteger()
+      case ArrayTypeKeyword                => validateType(arrayTypeMismatch)
+      case ObjectTypeKeyword               => validateType(objectTypeMismatch)
+      case ObjectRequiredKeyword(required) => validateObjectRequired(required)
+      case TrivialKeyword(valid)           => validateTrivial(valid)
+      case EnumKeyword(values)             => validateEnum(values)
+      case PatternKeyword(pattern)         => validatePattern(pattern)
+      case FormatKeyword(format)           => validateFormat(format)
+      case MinimumKeyword(v, exclude)      => validateMinimum(v, exclude)
+      case UniqueItemsKeyword(v)           => validateUniqueItems(v)
+      case MultipleOfKeyword(n)            => validateMultipleOf(n)
+      case MaximumKeyword(v, exclude)      => validateMaximum(v, exclude)
+      case MaxLengthKeyword(v)             => validateMaxLength(v)
+      case MinLengthKeyword(v)             => validateMinLength(v)
+      case MaxItemsKeyword(v)              => validateMaxItems(v)
+      case MinItemsKeyword(v)              => validateMinItems(v)
+      case MaxPropertiesKeyword(v)         => validateMaxProperties(v)
+      case MinPropertiesKeyword(v)         => validateMinProperties(v)
+      case DependentRequiredKeyword(v)     => validateDependentRequired(v)
       case _                               => _ => Result.invalid(ValidationResult.invalid(UnsupportedCheck(keyword)))
     }
   }
 
-  private def nested(keyword: ApplicatorKeyword)(results: Seq[Result[ValidationResult]]): ProcessFun = { value =>
+  private def nested(keyword: ApplicatorKeyword)(results: Seq[Result[ValidationResult]]): EvalFun = { value =>
     keyword match {
       case AllOfKeyword(_)                  => calc.allOf(results, value.pointer)
       case AnyOfKeyword(_)                  => calc.anyOf(results, value.pointer)
@@ -125,13 +126,13 @@ object ValidationProcessing {
     }
   }
 
-  private def checkType[T <: Value: ClassTag](observation: TypeMismatch[T]): ProcessFun = value =>
+  private def validateType[T <: Value: ClassTag](observation: TypeMismatch[T]): EvalFun = value =>
     value.value match {
       case _: T => Result.valid
       case _    => calc.invalid(observation, value.pointer)
     }
 
-  private def checkInteger(): ProcessFun = value =>
+  private def validateInteger(): EvalFun = value =>
     value.value match {
       case NumberValue(v) =>
         if (v.isValidLong)
@@ -141,7 +142,7 @@ object ValidationProcessing {
       case _ => calc.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
     }
 
-  private def checkTrivial(valid: Boolean): ProcessFun = { value =>
+  private def validateTrivial(valid: Boolean): EvalFun = { value =>
     if (valid) {
       Result.valid
     } else {
@@ -149,7 +150,7 @@ object ValidationProcessing {
     }
   }
 
-  private def checkObjectRequired(required: Seq[String]): ProcessFun = { value =>
+  private def validateObjectRequired(required: Seq[String]): EvalFun = { value =>
     value.value match {
       case ObjectValue(propertiesValues) =>
         val missingNames = required.filter(!propertiesValues.contains(_))
@@ -162,7 +163,7 @@ object ValidationProcessing {
     }
   }
 
-  private def checkEnum(values: Seq[Value]): ProcessFun = { value =>
+  private def validateEnum(values: Seq[Value]): EvalFun = { value =>
     if (values.contains(value.value)) {
       Result.valid
     } else {
@@ -170,7 +171,7 @@ object ValidationProcessing {
     }
   }
 
-  private def checkPattern(pattern: String): ProcessFun = {
+  private def validatePattern(pattern: String): EvalFun = {
     val r = pattern.r
     value =>
       value.value match {
@@ -183,14 +184,14 @@ object ValidationProcessing {
       }
   }
 
-  private def checkFormat(format: String): ProcessFun = {
+  private def validateFormat(format: String): EvalFun = {
     format match {
       case "regex" =>
-        checkStringValue(FormatMismatch(format)) { v =>
+        validateStringValue(FormatMismatch(format)) { v =>
           Try(Pattern.compile(v)).isSuccess
         }
       case "email" =>
-        checkStringValue(FormatMismatch(format)) { v =>
+        validateStringValue(FormatMismatch(format)) { v =>
           // see https://emailregex.com/
           val regex = {
             """(?:[a-z\\d!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z\\d!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z\\d](?:[a-z\\d-]*[a-z\\d])?\.)+[a-z\\d](?:[a-z\\d-]*[a-z\\d])?|\[(?:(?:25[0-5]|2[0-4][\\d]|[01]?[\\d][\\d]?)\.){3}(?:25[0-5]|2[0-4][\\d]|[01]?[\\d][\\d]?|[a-z\\d-]*[a-z\\d]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])""".r
@@ -198,7 +199,7 @@ object ValidationProcessing {
           regex.matches(v)
         }
       case "idn-email" =>
-        checkStringValue(FormatMismatch(format)) { v =>
+        validateStringValue(FormatMismatch(format)) { v =>
           // see https://stackoverflow.com/questions/13992403/regex-validation-of-email-addresses-according-to-rfc5321-rfc5322
           val regex = {
             """([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|"([ ]!#-[^-~ \t]|(\\[\t -~]))+")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])""".r
@@ -206,7 +207,7 @@ object ValidationProcessing {
           regex.matches(v)
         }
       case "hostname" =>
-        checkStringValue(FormatMismatch(format)) { v =>
+        validateStringValue(FormatMismatch(format)) { v =>
           // see https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
           val regex = {
             """^(([a-zA-Z\\d]|[a-zA-Z\\d][a-zA-Z\\d\-]*[a-zA-Z\\d])\.)*([A-Za-z\\d]|[A-Za-z\\d][A-Za-z\\d\-]*[A-Za-z\\d])$""".r
@@ -214,7 +215,7 @@ object ValidationProcessing {
           regex.matches(v)
         }
       case "idn-hostname" =>
-        checkStringValue(FormatMismatch(format)) { v =>
+        validateStringValue(FormatMismatch(format)) { v =>
           // see https://stackoverflow.com/questions/11809631/fully-qualified-domain-name-validation/26618995
           val regex = {
             """(?=^.{4,253}$)(^((?!-)[a-zA-Z\\d-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)""".r
@@ -223,7 +224,7 @@ object ValidationProcessing {
         }
       case "ipv4" =>
         // see https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
-        checkStringValue(FormatMismatch(format)) { v =>
+        validateStringValue(FormatMismatch(format)) { v =>
           val regex = {
             """^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$""".r
           }
@@ -231,57 +232,57 @@ object ValidationProcessing {
         }
       case "ipv6" =>
         // see https://stackoverflow.com/questions/53497/regular-expression-that-matches-valid-ipv6-addresses
-        checkStringValue(FormatMismatch(format)) { v =>
+        validateStringValue(FormatMismatch(format)) { v =>
           val regex = {
             """(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))""".r
           }
           regex.matches(v)
         }
       case "uri" =>
-        checkStringValue(FormatMismatch(format)) { v =>
+        validateStringValue(FormatMismatch(format)) { v =>
           Try(new URI(v)).map(_.isAbsolute).getOrElse(false)
         }
       case "uri-reference" =>
         // TODO reference?
-        checkStringValue(FormatMismatch(format)) { v =>
+        validateStringValue(FormatMismatch(format)) { v =>
           Try(new URI(v)).isSuccess
         }
       case "uri-template" =>
         // see https://datatracker.ietf.org/doc/html/rfc6570
         // TODO template?
         // TODO may use for iri?
-        checkStringValue(FormatMismatch(format)) { v =>
+        validateStringValue(FormatMismatch(format)) { v =>
           Try(new URI(v)).isSuccess
         }
       case "iri" =>
         // see https://datatracker.ietf.org/doc/html/rfc3987
         // TODO iri
-        checkStringValue(FormatMismatch(format)) { v =>
+        validateStringValue(FormatMismatch(format)) { v =>
           Try(new URI(v)).map(_.isAbsolute).getOrElse(false)
         }
       case "iri-reference" =>
         // see https://datatracker.ietf.org/doc/html/rfc3987
         // TODO iri
         // TODO reference?
-        checkStringValue(FormatMismatch(format)) { v =>
+        validateStringValue(FormatMismatch(format)) { v =>
           Try(new URI(v)).isSuccess
         }
       case "uuid" =>
         // see https://datatracker.ietf.org/doc/html/rfc4122
-        checkStringValue(FormatMismatch(format)) { v =>
+        validateStringValue(FormatMismatch(format)) { v =>
           Try(UUID.fromString(v)).isSuccess
         }
       case "json-pointer" =>
-        checkStringValue(FormatMismatch(format)) { v =>
+        validateStringValue(FormatMismatch(format)) { v =>
           Pointer.parse(v).toString().equals(v)
         }
       case "relative-json-pointer" =>
-        checkStringValue(FormatMismatch(format)) { v =>
+        validateStringValue(FormatMismatch(format)) { v =>
           !v.startsWith("/") && Pointer.parse("/" + v).toString().equals("/" + v)
         }
       case "date-time" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
-        checkStringValue(FormatMismatch(format)) { v =>
+        validateStringValue(FormatMismatch(format)) { v =>
           val regex_date = "\\d{4}-\\d{2}-\\d{2}"
           val regex_time = "\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|([+\\-])\\d{2}:\\d{2})"
           val date_time  = s"${regex_date}T$regex_time"
@@ -289,7 +290,7 @@ object ValidationProcessing {
         }
       case "date" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
-        checkStringValue(FormatMismatch(format)) { v =>
+        validateStringValue(FormatMismatch(format)) { v =>
           val `regex-date` = {
             "\\d{4}-\\d{2}-\\d{2}".r
           }
@@ -297,7 +298,7 @@ object ValidationProcessing {
         }
       case "time" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
-        checkStringValue(FormatMismatch(format)) { v =>
+        validateStringValue(FormatMismatch(format)) { v =>
           val `regex-time` = {
             "(\\d{2}):(\\d{2}):(\\d{2})(\\.\\d+)?(Z|([+\\-]\\d{2}:\\d{2}))".r
           }
@@ -325,7 +326,7 @@ object ValidationProcessing {
       case "duration" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
         // TODO test me
-        checkStringValue(FormatMismatch(format)) { v =>
+        validateStringValue(FormatMismatch(format)) { v =>
           val `dur-second` = "\\d+S"
           val `dur-minute` = s"\\d+M(${`dur-second`})?"
           val `dur-hour`   = s"\\d+H(${`dur-minute`})?"
@@ -342,10 +343,10 @@ object ValidationProcessing {
     }
   }
 
-  private def checkStringValue(observation: => Observation)(check: String => Boolean): ProcessFun = { value =>
+  private def validateStringValue(observation: => Observation)(validate: String => Boolean): EvalFun = { value =>
     value.value match {
       case StringValue(v) =>
-        if (check(v))
+        if (validate(v))
           Result.valid
         else
           calc.invalid(observation, value.pointer)
@@ -353,16 +354,16 @@ object ValidationProcessing {
     }
   }
 
-  private def checkMinimum(min: BigDecimal, exclude: Boolean): ProcessFun = {
-    checkNumberValue(MinimumMismatch(min, exclude)) { v =>
+  private def validateMinimum(min: BigDecimal, exclude: Boolean): EvalFun = {
+    validateNumberValue(MinimumMismatch(min, exclude)) { v =>
       if (exclude) min < v else min <= v
     }
   }
 
-  private def checkNumberValue(observation: => Observation)(check: BigDecimal => Boolean): ProcessFun = { value =>
+  private def validateNumberValue(observation: => Observation)(validate: BigDecimal => Boolean): EvalFun = { value =>
     value.value match {
       case NumberValue(v) =>
-        if (check(v))
+        if (validate(v))
           Result.valid
         else
           calc.invalid(observation, value.pointer)
@@ -370,10 +371,10 @@ object ValidationProcessing {
     }
   }
 
-  private def checkArrayValue(observation: => Observation)(check: Seq[Value] => Boolean): ProcessFun = { value =>
+  private def validateArrayValue(observation: => Observation)(validate: Seq[Value] => Boolean): EvalFun = { value =>
     value.value match {
       case ArrayValue(v) =>
-        if (check(v))
+        if (validate(v))
           Result.valid
         else
           calc.invalid(observation, value.pointer)
@@ -381,32 +382,32 @@ object ValidationProcessing {
     }
   }
 
-  private def checkUniqueItems(unique: Boolean): ProcessFun = {
-    checkArrayValue(ItemsNotUnique()) { v =>
+  private def validateUniqueItems(unique: Boolean): EvalFun = {
+    validateArrayValue(ItemsNotUnique()) { v =>
       !unique || v.distinct.length == v.length
     }
   }
 
-  private def checkMultipleOf(n: BigDecimal): ProcessFun = {
-    checkNumberValue(NotMultipleOf(n)) { v =>
+  private def validateMultipleOf(n: BigDecimal): EvalFun = {
+    validateNumberValue(NotMultipleOf(n)) { v =>
       (v / n).isValidInt
     }
   }
 
-  private def checkMaximum(max: BigDecimal, exclude: Boolean): ProcessFun = {
-    checkNumberValue(MaximumMismatch(max, exclude)) { v =>
+  private def validateMaximum(max: BigDecimal, exclude: Boolean): EvalFun = {
+    validateNumberValue(MaximumMismatch(max, exclude)) { v =>
       if (exclude) max > v else max >= v
     }
   }
 
-  private def checkMaxLength(max: BigDecimal): ProcessFun = {
-    checkStringValue(MaxLengthMismatch(max)) { v =>
+  private def validateMaxLength(max: BigDecimal): EvalFun = {
+    validateStringValue(MaxLengthMismatch(max)) { v =>
       countCharPoints(v) <= max
     }
   }
 
-  private def checkMinLength(min: BigDecimal): ProcessFun = {
-    checkStringValue(MinLengthMismatch(min)) { v =>
+  private def validateMinLength(min: BigDecimal): EvalFun = {
+    validateStringValue(MinLengthMismatch(min)) { v =>
       countCharPoints(v) >= min
     }
   }
@@ -421,23 +422,23 @@ object ValidationProcessing {
     count
   }
 
-  private def checkMaxItems(max: BigDecimal): ProcessFun = {
-    checkArrayValue(MaxItemsMismatch(max)) { v =>
+  private def validateMaxItems(max: BigDecimal): EvalFun = {
+    validateArrayValue(MaxItemsMismatch(max)) { v =>
       max >= v.length
     }
   }
 
-  private def checkMinItems(min: BigDecimal): ProcessFun = {
-    checkArrayValue(MinItemsMismatch(min)) { v =>
+  private def validateMinItems(min: BigDecimal): EvalFun = {
+    validateArrayValue(MinItemsMismatch(min)) { v =>
       min <= v.length
     }
   }
 
-  private def checkObjectValue(observation: => Observation)(check: Map[String, Value] => Boolean): ProcessFun = {
+  private def validateObjectValue(observation: => Observation)(validate: Map[String, Value] => Boolean): EvalFun = {
     value =>
       value.value match {
         case ObjectValue(v) =>
-          if (check(v))
+          if (validate(v))
             Result.valid
           else
             calc.invalid(observation, value.pointer)
@@ -445,19 +446,19 @@ object ValidationProcessing {
       }
   }
 
-  private def checkMaxProperties(max: BigDecimal): ProcessFun = {
-    checkObjectValue(MaxPropertiesMismatch(max)) { v =>
+  private def validateMaxProperties(max: BigDecimal): EvalFun = {
+    validateObjectValue(MaxPropertiesMismatch(max)) { v =>
       max >= v.keySet.size
     }
   }
 
-  private def checkMinProperties(min: BigDecimal): ProcessFun = {
-    checkObjectValue(MinPropertiesMismatch(min)) { v =>
+  private def validateMinProperties(min: BigDecimal): EvalFun = {
+    validateObjectValue(MinPropertiesMismatch(min)) { v =>
       min <= v.keySet.size
     }
   }
 
-  private def checkDependentRequired(required: Map[String, Seq[String]]): ProcessFun = { value =>
+  private def validateDependentRequired(required: Map[String, Seq[String]]): EvalFun = { value =>
     value.value match {
       case ObjectValue(v) =>
         val missing = required
