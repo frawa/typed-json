@@ -30,9 +30,9 @@ class KeywordsTest extends FunSuite {
 
   private def assertKeywords(schema: SchemaValue, allowIgnored: Boolean = false)(
       f: Keywords => Unit
-  ) = {
-    implicit val resolver = LoadedSchemasResolver(schema)
-    val scope             = DynamicScope.empty
+  ): Either[Nothing, Unit] = {
+    implicit val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema)
+    val scope                                    = DynamicScope.empty
     val withParsed = for {
       keywords <- Keywords.parseKeywords(vocabularyForTest, schema, scope)
     } yield {
@@ -50,33 +50,17 @@ class KeywordsTest extends FunSuite {
       .swap
   }
 
-  private def assertKeywordsWithIgnored(schema: SchemaValue) = assertKeywords(schema, true) _
+  private def assertKeywordsWithIgnored(schema: SchemaValue) = assertKeywords(schema, allowIgnored = true) _
 
   private def assertSchemaProblems(schema: SchemaValue)(
       f: SchemaProblems => Unit
-  ) = {
+  ): Unit = {
     implicit val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema)
     val scope                                    = DynamicScope.empty
     Keywords.parseKeywords(vocabularyForTest, schema, scope) match {
       case Right(_)     => fail("parsing keywords expected to fail")
       case Left(errors) => f(errors)
     }
-  }
-
-  private val noResolve: () => Either[SchemaProblems, Keywords] = () => Left(SchemaProblems.empty)
-
-  // TODO use implicits?
-  private def assertable(keywords: Keywords): Keywords = keywords.copy(keywords = keywords.keywords.map(assertable))
-  private def assertable(keyword: Keywords.KeywordWithLocation): Keywords.KeywordWithLocation =
-    keyword.copy(value = assertable(keyword.value))
-  private def assertable(keyword: Keyword): Keyword = keyword match {
-    case ArrayItemsKeyword(items, prefixItems) =>
-      ArrayItemsKeyword(
-        items.map(assertable),
-        prefixItems.map(assertable)
-      )
-    case LazyParseKeywords(resolved, _) => LazyParseKeywords(resolved, noResolve)
-    case _                              => keyword
   }
 
   test("null") {
@@ -553,7 +537,7 @@ class KeywordsTest extends FunSuite {
                     keywords = List(
                       WithLocation(
                         uri("https://example.net/root.json#/items/$ref"),
-                        LazyParseKeywords(uri("https://example.net/root.json#item"), noResolve)
+                        LazyParseKeywords(uri("https://example.net/root.json#item"), assertableResolve)
                       )
                     ),
                     ignored = Set()

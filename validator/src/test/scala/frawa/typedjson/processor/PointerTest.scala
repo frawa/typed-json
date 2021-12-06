@@ -27,15 +27,15 @@ class PointerTest extends FunSuite {
   import Pointer._
 
   test("empty") {
-    assertEquals(empty.toString, "")
+    assertEquals(empty.toString(), "")
   }
 
   test("array") {
-    assertEquals((empty / 13).toString, "/13")
+    assertEquals((empty / 13).toString(), "/13")
   }
 
   test("field") {
-    assertEquals((empty / "toto").toString, "/toto")
+    assertEquals((empty / "toto").toString(), "/toto")
   }
 
   test("deep field") {

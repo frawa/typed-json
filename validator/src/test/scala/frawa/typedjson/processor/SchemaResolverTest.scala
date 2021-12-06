@@ -62,7 +62,8 @@ class SchemaResolverTest extends FunSuite {
 
   case object MySchemaResolver extends SchemaResolver {
 
-    override val base = fooUri
+    override val base: URI = fooUri
+
     override def resolve(uri: URI): Option[Resolution] = uri match {
       case `fooUri` => Some((fooSchema, this))
       case `gnuUri` => Some((gnuSchema, this))

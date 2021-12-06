@@ -34,7 +34,7 @@ object Remotes {
 
   private def resolveRemotes(relative: URI): Option[RootSchemaValue] = {
     val name     = relative.getSchemeSpecificPart
-    val segments = name.split('/').toArray
+    val segments = name.split('/')
     if (segments.length == 2) {
       segments(0) match {
         case "baseUriChange"       => baseUriChangeFiles.get(segments(1)).map(SchemaValue.root)

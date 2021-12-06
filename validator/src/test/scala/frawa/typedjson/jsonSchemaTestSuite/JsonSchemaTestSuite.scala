@@ -22,7 +22,7 @@ import frawa.typedjson.processor._
 import frawa.typedjson.testutil.ProcessorFactory
 import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.validation.{ValidationEval, ValidationResult}
-import munit.{FunSuite, TestOptions}
+import munit.{FunSuite, Location, TestOptions}
 
 import java.net.URI
 
@@ -68,8 +68,8 @@ class JsonSchemaTestSuite extends FunSuite {
   private def checkTest(file: String)(testValue: Value): Unit = {
     testValue match {
       case ObjectValue(properties) =>
-        val StringValue(description) = properties("description")
-        val suiteName                = s"${file} - ${description}"
+        val StringValue(description: String) = properties("description")
+        val suiteName                        = s"$file - $description"
 
         val suiteOptions = onlyDescription
           .filter(description.startsWith)
@@ -91,7 +91,7 @@ class JsonSchemaTestSuite extends FunSuite {
           .flatMap { onlyId =>
             id.map(_ == onlyId)
           }
-        assume(includedOnlyId.getOrElse(true), s"excluded by onlyId=${onlyId}")
+        assume(includedOnlyId.getOrElse(true), s"excluded by onlyId=$onlyId")
 
         val lazyResolver = (uri: URI) => MetaSchemas.lazyResolver(uri).orElse(Remotes.lazyResolver(uri))
         val testId       = (file, description)
@@ -103,11 +103,11 @@ class JsonSchemaTestSuite extends FunSuite {
 
         val hasIgnoredFailMessage = ignoreFailMessageByDescription.contains(testId)
         if (oneTestPerData || hasIgnoredFailMessage) {
-          implicit val c = strictFactory
+          implicit val factory1: ProcessorFactory[SchemaValue, ValidationResult] = strictFactory
           withProcessor[ValidationResult](schemaValue) { processor =>
             tests.foreach { value =>
               val data     = testData(value)
-              val testName = s"${file} | ${data.failMessage} | ${description}"
+              val testName = s"$file | ${data.failMessage} | $description"
 
               val testOptions = ignoreFailMessageByDescription
                 .get(testId)
@@ -121,7 +121,7 @@ class JsonSchemaTestSuite extends FunSuite {
             }
           }
         } else {
-          implicit val c = factory
+          implicit val factorry1: ProcessorFactory[SchemaValue, ValidationResult] = factory
           test(suiteOptions) {
             withProcessor[ValidationResult](schemaValue) { processor =>
               tests
@@ -140,7 +140,7 @@ class JsonSchemaTestSuite extends FunSuite {
     val result = processor(InnerValue(data.data))
 
     if (result.valid != data.expectedValid) {
-      implicit val loc = munit.Location.empty
+      implicit val loc: Location = munit.Location.empty
       if (!result.valid) {
         assertEquals(result.problems.errors, Seq(), data.failMessage)
         assertEquals(result.ignoredKeywords(), Set.empty[String], data.failMessage)
