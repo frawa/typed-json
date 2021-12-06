@@ -20,18 +20,13 @@ import frawa.typedjson.parser._
 import frawa.typedjson.processor.{Pointer, SchemaValue, Vocabulary}
 import frawa.typedjson.testutil.ProcessorFactory
 import frawa.typedjson.testutil.TestSchemas.{numberArraySchema, totoObjectSchema, totoRequiredObjectSchema}
-import frawa.typedjson.testutil.TestUtil.{assertNoIgnoredKeywords, assertResult, withSchema}
+import frawa.typedjson.testutil.TestUtil._
 import munit.FunSuite
 
 class SuggestEvalTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()
 
-  private val vocabularyForTest = Vocabulary
-    .dialect(Map(Vocabulary.coreId -> true, Vocabulary.validationId -> true, Vocabulary.applicatorId -> true))
-    .swap
-    .map(problems => throw new IllegalStateException(problems.dump()))
-    .swap
-    .toOption
+  private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
   private def factory(at: Pointer): ProcessorFactory[SchemaValue, SuggestionResult] =
     ProcessorFactory.make(SuggestionEval(at), vocabularyForTest).mapResult(assertNoIgnoredKeywords)

@@ -19,6 +19,7 @@ package frawa.typedjson.testutil
 import frawa.typedjson.parser.{Parser, Value}
 import frawa.typedjson.processor.{SchemaValue, _}
 import munit.Assertions.{assertEquals, clue, clues, fail}
+import java.net.URI
 
 object TestUtil {
   implicit val lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
@@ -50,7 +51,7 @@ object TestUtil {
 
   def assertResult[R](valueText: String)(schema: SchemaValue)(
       f: Result[R] => Unit
-  )(implicit c: ProcessorFactory[SchemaValue, R], parser: Parser): Either[Nothing, Unit] = {
+  )(implicit factory: ProcessorFactory[SchemaValue, R], parser: Parser): Either[Nothing, Unit] = {
     withProcessor[R](schema) { processor =>
       val value  = parseJsonValue(valueText)
       val result = processor(InnerValue(value))
@@ -60,11 +61,20 @@ object TestUtil {
 
   def withProcessor[R](schema: SchemaValue)(
       f: Processor[R] => Unit
-  )(implicit c: ProcessorFactory[SchemaValue, R]): Either[Nothing, Unit] = {
-    val result = c(schema).map(f)
+  )(implicit factory: ProcessorFactory[SchemaValue, R]): Either[Nothing, Unit] = {
+    val result = factory(schema).map(f)
     result.swap
       .map(message => fail("creating processor failed", clues(clue(message))))
       .swap
+  }
+
+  def dialect(vocabularyIds: Seq[URI]): Option[Vocabulary] = {
+    Vocabulary
+      .dialect(vocabularyIds.map((_, true)).toMap)
+      .swap
+      .map(problems => throw new IllegalStateException(problems.dump()))
+      .swap
+      .toOption
   }
 
 }

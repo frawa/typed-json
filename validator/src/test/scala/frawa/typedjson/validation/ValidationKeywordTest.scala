@@ -27,12 +27,7 @@ import munit.FunSuite
 class ValidationKeywordTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()
 
-  private val vocabularyForTest = Vocabulary
-    .dialect(Map(Vocabulary.coreId -> true, Vocabulary.validationId -> true, Vocabulary.applicatorId -> true))
-    .swap
-    .map(problems => throw new IllegalStateException(problems.dump()))
-    .swap
-    .toOption
+  private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
   private implicit val factory1: ProcessorFactory[SchemaValue, ValidationResult] =
     ProcessorFactory.make(ValidationEval(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)

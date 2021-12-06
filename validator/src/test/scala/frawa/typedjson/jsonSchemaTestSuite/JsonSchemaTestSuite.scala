@@ -54,21 +54,16 @@ class JsonSchemaTestSuite extends FunSuite {
     }
   }
 
-  private val vocabularyForTest = Vocabulary
-    .dialect(
-      Map(
-        Vocabulary.coreId             -> true,
-        Vocabulary.validationId       -> true,
-        Vocabulary.applicatorId       -> true,
-        Vocabulary.formatAnnotationId -> true,
-        Vocabulary.unevaluatedId      -> true,
-        Vocabulary.metaDataId         -> true
-      )
+  private val vocabularyForTest = dialect(
+    Seq(
+      Vocabulary.coreId,
+      Vocabulary.validationId,
+      Vocabulary.applicatorId,
+      Vocabulary.formatAnnotationId,
+      Vocabulary.unevaluatedId,
+      Vocabulary.metaDataId
     )
-    .swap
-    .map(problems => throw new IllegalStateException(problems.dump()))
-    .swap
-    .toOption
+  )
 
   private def checkTest(file: String)(testValue: Value): Unit = {
     testValue match {

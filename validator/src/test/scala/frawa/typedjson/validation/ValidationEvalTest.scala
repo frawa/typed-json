@@ -22,18 +22,13 @@ import frawa.typedjson.parser._
 import frawa.typedjson.processor._
 import frawa.typedjson.testutil.ProcessorFactory
 import frawa.typedjson.testutil.TestSchemas._
-import frawa.typedjson.testutil.TestUtil.{assertNoIgnoredKeywords, assertResult, withSchema}
+import frawa.typedjson.testutil.TestUtil.{assertNoIgnoredKeywords, assertResult, withSchema, dialect}
 import munit.FunSuite
 
 object ValidationEvalTest {
   implicit val zioParser: ZioParser = new ZioParser()
 
-  private val vocabularyForTest = Vocabulary
-    .dialect(Map(Vocabulary.coreId -> true, Vocabulary.validationId -> true, Vocabulary.applicatorId -> true))
-    .swap
-    .map(problems => throw new IllegalStateException(problems.dump()))
-    .swap
-    .toOption
+  private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
   implicit val factory: ProcessorFactory[SchemaValue, ValidationResult] =
     ProcessorFactory.make(ValidationEval(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
