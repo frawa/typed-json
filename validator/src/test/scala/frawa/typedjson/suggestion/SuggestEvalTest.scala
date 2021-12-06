@@ -42,12 +42,7 @@ class SuggestEvalTest extends FunSuite {
 
   test("suggest property") {
     withSchema(totoObjectSchema) { schema =>
-      assertSuggest(
-        """{
-          |"toto": 13
-          |}
-          |""".stripMargin
-      )(
+      assertSuggest("""{"toto": 13}""")(
         schema
       ) { result =>
         assertEquals(
@@ -76,12 +71,7 @@ class SuggestEvalTest extends FunSuite {
                  |} 
                  |}
                  |""".stripMargin) { schema =>
-      assertSuggest(
-        """{
-          |"foo": {}
-          |}
-          |""".stripMargin
-      )(
+      assertSuggest("""{"foo": {}}""")(
         schema
       ) { result =>
         assertEquals(
@@ -122,12 +112,7 @@ class SuggestEvalTest extends FunSuite {
                  |} 
                  |}
                  |""".stripMargin) { schema =>
-      assertSuggest(
-        """{
-          |"foo": {}
-          |}
-          |""".stripMargin
-      )(
+      assertSuggest("""{"foo": {}}""")(
         schema
       ) { result =>
         assertEquals(
@@ -189,12 +174,7 @@ class SuggestEvalTest extends FunSuite {
                  |} 
                  |}
                  |""".stripMargin) { schema =>
-      assertSuggest(
-        """{
-          |"foo": {}
-          |}
-          |""".stripMargin
-      )(
+      assertSuggest("""{"foo": {}}""")(
         schema
       ) { result =>
         assertEquals(
@@ -329,7 +309,7 @@ class SuggestEvalTest extends FunSuite {
                  |  }
                  |}]
                  |}""".stripMargin) { schema =>
-      assertSuggest("""{}""".stripMargin)(schema) { result =>
+      assertSuggest("""{}""")(schema) { result =>
         assertEquals(
           result,
           Seq(
@@ -437,12 +417,7 @@ class SuggestEvalTest extends FunSuite {
                  |} 
                  |}
                  |""".stripMargin) { schema =>
-      assertSuggest(
-        """{
-          |"foo": {}
-          |}
-          |""".stripMargin
-      )(
+      assertSuggest("""{"foo": {}}""")(
         schema
       ) { result =>
         assertEquals(
@@ -466,12 +441,7 @@ class SuggestEvalTest extends FunSuite {
 
   test("suggest required property") {
     withSchema(totoRequiredObjectSchema) { schema =>
-      assertSuggest(
-        """{
-          |"toto": 13
-          |}
-          |""".stripMargin
-      )(
+      assertSuggest("""{"toto": 13}""")(
         schema
       ) { result =>
         assertEquals(
@@ -495,9 +465,7 @@ class SuggestEvalTest extends FunSuite {
 
   test("suggest array") {
     withSchema(numberArraySchema) { schema =>
-      assertSuggest(
-        """[]""".stripMargin
-      )(
+      assertSuggest("""[]""")(
         schema
       ) { result =>
         assertEquals(
@@ -513,10 +481,7 @@ class SuggestEvalTest extends FunSuite {
   test("suggest at inside object") {
     withSchema(totoObjectSchema) { schema =>
       assertSuggest(
-        """{
-          |"toto": 13
-          |}
-          |""".stripMargin,
+        """{"toto": 13}""",
         Pointer.empty / "toto"
       )(
         schema
@@ -534,7 +499,7 @@ class SuggestEvalTest extends FunSuite {
   test("suggest item inside array") {
     withSchema(numberArraySchema) { schema =>
       assertSuggest(
-        """[ 13, 14 ]""".stripMargin,
+        """[ 13, 14 ]""",
         Pointer.empty / 1
       )(
         schema

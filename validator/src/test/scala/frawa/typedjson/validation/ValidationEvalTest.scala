@@ -307,11 +307,7 @@ class ValidationEvalTest extends FunSuite {
 
   test("object property type") {
     withSchema(totoObjectSchema) { schema =>
-      assertValidate("""{
-                       |"toto": 13,
-                       |"titi": true
-                       |}
-                       |""".stripMargin)(schema) { result =>
+      assertValidate("""{"toto": 13,"titi": true}""")(schema) { result =>
         assertErrors(result, Seq(typedjson.processor.WithPointer(TypeMismatch("string"), Pointer.empty / "titi")))
         assertEquals(result.valid, false)
       }
@@ -320,10 +316,7 @@ class ValidationEvalTest extends FunSuite {
 
   test("object missing property") {
     withSchema(totoObjectSchema) { schema =>
-      assertValidate("""{
-                       |"toto": 13
-                       |}
-                       |""".stripMargin)(schema) { result =>
+      assertValidate("""{"toto": 13}""")(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.valid, true)
       }
@@ -340,10 +333,7 @@ class ValidationEvalTest extends FunSuite {
                  |"required": ["titi"]
                  |}
                  |""".stripMargin) { schema =>
-      assertValidate("""{
-                       |"toto": 13
-                       |}
-                       |""".stripMargin)(schema) { result =>
+      assertValidate("""{"toto": 13}""")(schema) { result =>
         assertErrors(
           result,
           Seq(
@@ -358,7 +348,7 @@ class ValidationEvalTest extends FunSuite {
 
   test("allOf") {
     withSchema(allOfSchema) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { result =>
+      assertValidate("""1313""")(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.valid, true)
       }
@@ -373,7 +363,7 @@ class ValidationEvalTest extends FunSuite {
                  |]
                  |}
                  |""".stripMargin) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { result =>
+      assertValidate("""1313""")(schema) { result =>
         assertErrors(result, Seq(WithPointer(TypeMismatch("string"))))
         assertEquals(result.valid, false)
       }
@@ -382,7 +372,7 @@ class ValidationEvalTest extends FunSuite {
 
   test("anyOf") {
     withSchema(anyOfSchema) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { result =>
+      assertValidate("""1313""")(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.valid, true)
       }
@@ -391,7 +381,7 @@ class ValidationEvalTest extends FunSuite {
 
   test("failed anyOf") {
     withSchema(anyOfSchema) { schema =>
-      assertValidate("""true""".stripMargin)(schema) { result =>
+      assertValidate("""true""")(schema) { result =>
         assertErrors(
           result,
           Seq(
@@ -406,7 +396,7 @@ class ValidationEvalTest extends FunSuite {
 
   test("oneOf") {
     withSchema(oneOfSchema) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { result =>
+      assertValidate("""1313""")(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.valid, true)
       }
@@ -421,7 +411,7 @@ class ValidationEvalTest extends FunSuite {
                  |]
                  |}
                  |""".stripMargin) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { result =>
+      assertValidate("""1313""")(schema) { result =>
         assertErrors(
           result,
           Seq(
@@ -442,7 +432,7 @@ class ValidationEvalTest extends FunSuite {
                  |]
                  |}
                  |""".stripMargin) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { result =>
+      assertValidate("""1313""")(schema) { result =>
         assertErrors(
           result,
           Seq(
@@ -456,11 +446,8 @@ class ValidationEvalTest extends FunSuite {
   }
 
   test("not") {
-    withSchema("""{
-                 |"not": { "type": "number" }
-                 |}
-                 |""".stripMargin) { schema =>
-      assertValidate("""true""".stripMargin)(schema) { result =>
+    withSchema("""{"not": { "type": "number" }}""") { schema =>
+      assertValidate("""true""")(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.valid, true)
       }
@@ -468,11 +455,8 @@ class ValidationEvalTest extends FunSuite {
   }
 
   test("failed not") {
-    withSchema("""{
-                 |"not": { "type": "number" }
-                 |}
-                 |""".stripMargin) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { result =>
+    withSchema("""{"not": { "type": "number" }}""") { schema =>
+      assertValidate("""1313""")(schema) { result =>
         assertErrors(result, Seq(WithPointer(NotInvalid())))
         assertEquals(result.valid, false)
       }
@@ -481,15 +465,15 @@ class ValidationEvalTest extends FunSuite {
 
   test("if/then/else") {
     withSchema(ifThenElseSchema) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { result =>
+      assertValidate("""1313""")(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.valid, true)
       }
-      assertValidate(""""string"""".stripMargin)(schema) { result =>
+      assertValidate(""""string"""")(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.valid, true)
       }
-      assertValidate("""null""".stripMargin)(schema) { result =>
+      assertValidate("""null""")(schema) { result =>
         assertErrors(result, Seq(WithPointer(TypeMismatch("string"))))
         assertEquals(result.valid, false)
       }
@@ -503,15 +487,15 @@ class ValidationEvalTest extends FunSuite {
                  |"else": { "type": "string" }
                  |}
                  |""".stripMargin) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { result =>
+      assertValidate("""1313""")(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.valid, true)
       }
-      assertValidate(""""string"""".stripMargin)(schema) { result =>
+      assertValidate(""""string"""")(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.valid, true)
       }
-      assertValidate("""null""".stripMargin)(schema) { result =>
+      assertValidate("""null""")(schema) { result =>
         assertErrors(result, Seq(WithPointer(TypeMismatch("string"))))
         assertEquals(result.valid, false)
       }
@@ -524,15 +508,15 @@ class ValidationEvalTest extends FunSuite {
                  |"else": { "type": "string" }
                  |}
                  |""".stripMargin) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { result =>
+      assertValidate("""1313""")(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.valid, true)
       }
-      assertValidate(""""string"""".stripMargin)(schema) { result =>
+      assertValidate(""""string"""")(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.valid, true)
       }
-      assertValidate("""null""".stripMargin)(schema) { result =>
+      assertValidate("""null""")(schema) { result =>
         assertErrors(result, Seq(WithPointer(TypeMismatch("string"))))
         assertEquals(result.valid, false)
       }
@@ -545,11 +529,11 @@ class ValidationEvalTest extends FunSuite {
                  |"then": { "type": "number" }
                  |}
                  |""".stripMargin) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { result =>
+      assertValidate("""1313""")(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.valid, true)
       }
-      assertValidate(""""string"""".stripMargin)(schema) { result =>
+      assertValidate(""""string"""")(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.valid, true)
       }
@@ -562,15 +546,15 @@ class ValidationEvalTest extends FunSuite {
                  |"else": { "type": "string" }
                  |}
                  |""".stripMargin) { schema =>
-      assertValidate("""1313""".stripMargin)(schema) { result =>
+      assertValidate("""1313""")(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.valid, true)
       }
-      assertValidate(""""string"""".stripMargin)(schema) { result =>
+      assertValidate(""""string"""")(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.valid, true)
       }
-      assertValidate("""null""".stripMargin)(schema) { result =>
+      assertValidate("""null""")(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.valid, true)
       }
@@ -635,7 +619,7 @@ class ValidationEvalTest extends FunSuite {
         assertErrors(result, Seq())
         assertEquals(result.valid, true)
       }
-      assertValidate("""{}""".stripMargin)(schema) { result =>
+      assertValidate("""{}""")(schema) { result =>
         assertErrors(
           result,
           Seq(
@@ -686,11 +670,11 @@ class ValidationEvalTest extends FunSuite {
 
   test("$id/$ref/$def") {
     withSchema(idRefDefsSchema) { schema =>
-      assertValidate("""[1313]""".stripMargin)(schema) { result =>
+      assertValidate("""[1313]""")(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.valid, true)
       }
-      assertValidate(""""string"""".stripMargin)(schema) { result =>
+      assertValidate(""""string"""")(schema) { result =>
         assertErrors(
           result,
           Seq(
@@ -711,11 +695,11 @@ class ValidationEvalTest extends FunSuite {
 
   test("$ref in properties") {
     withSchema(refInPropertiesSchema) { schema =>
-      assertValidate("""{ "foo": 13 }""".stripMargin)(schema) { result =>
+      assertValidate("""{ "foo": 13 }""")(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.valid, true)
       }
-      assertValidate("""{ "foo": true }""".stripMargin)(schema) { result =>
+      assertValidate("""{ "foo": true }""")(schema) { result =>
         assertErrors(
           result,
           Seq(
@@ -734,17 +718,17 @@ class ValidationEvalTest extends FunSuite {
 
   test("$ref at root") {
     withSchema(refAtRootSchema) { schema =>
-      assertValidate("""{ "foo": 13 }""".stripMargin)(schema) { result =>
+      assertValidate("""{ "foo": 13 }""")(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.problems.errors, Seq())
         assertEquals(result.valid, true)
       }
-      assertValidate("""{ "foo": [13] }""".stripMargin)(schema) { result =>
+      assertValidate("""{ "foo": [13] }""")(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.problems.errors, Seq())
         assertEquals(result.valid, true)
       }
-      assertValidate("""{ "foo": true }""".stripMargin)(schema) { result =>
+      assertValidate("""{ "foo": true }""")(schema) { result =>
         assertErrors(
           result,
           Seq(
@@ -773,7 +757,7 @@ class ValidationEvalTest extends FunSuite {
       ProcessorFactory.make(ValidationEval(), vocabularyForTest, lazyResolver)
 
     withSchema(refToValidationSpec) { schema =>
-      assertValidate2("""{ "$defs": { "foo": { "type": "boolean" } } }""".stripMargin)(
+      assertValidate2("""{ "$defs": { "foo": { "type": "boolean" } } }""")(
         schema,
         factory
       ) { result =>
@@ -781,7 +765,7 @@ class ValidationEvalTest extends FunSuite {
         assertEquals(result.problems.errors, Seq())
         assertEquals(result.valid, true)
       }
-      assertValidate2("""{ "$defs": { "foo": { "type": ["boolean"] } } }""".stripMargin)(
+      assertValidate2("""{ "$defs": { "foo": { "type": ["boolean"] } } }""")(
         schema,
         factory
       ) { result =>
@@ -789,7 +773,7 @@ class ValidationEvalTest extends FunSuite {
         assertEquals(result.problems.errors, Seq())
         assertEquals(result.valid, true)
       }
-      assertValidate2("""{ "$defs": { "foo": { "type": 13 } } }""".stripMargin)(schema, factory) { result =>
+      assertValidate2("""{ "$defs": { "foo": { "type": 13 } } }""")(schema, factory) { result =>
         assertErrors(
           result,
           Seq(
