@@ -25,17 +25,17 @@ import frawa.typedjson.testutil.TestSchemas._
 import frawa.typedjson.testutil.TestUtil.{assertNoIgnoredKeywords, assertResult, withSchema, dialect}
 import munit.FunSuite
 
-object ValidationEvalTest {
+object ValidationProcessingTest {
   implicit val zioParser: ZioParser = new ZioParser()
 
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
   implicit val factory: ProcessorFactory[SchemaValue, ValidationResult] =
-    ProcessorFactory.make(ValidationEval(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
+    ProcessorFactory.make(ValidationProcessing(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
 }
 
-class ValidationEvalTest extends FunSuite {
-  import ValidationEvalTest._
+class ValidationProcessingTest extends FunSuite {
+  import ValidationProcessingTest._
 
   private def assertValidate(text: String)(
       schema: SchemaValue
@@ -754,7 +754,7 @@ class ValidationEvalTest extends FunSuite {
   test("$ref to validation spec, with two '$ref's") {
     val lazyResolver = Some(MetaSchemas.lazyResolver)
     val factory: ProcessorFactory[SchemaValue, ValidationResult] =
-      ProcessorFactory.make(ValidationEval(), vocabularyForTest, lazyResolver)
+      ProcessorFactory.make(ValidationProcessing(), vocabularyForTest, lazyResolver)
 
     withSchema(refToValidationSpec) { schema =>
       assertValidate2("""{ "$defs": { "foo": { "type": "boolean" } } }""")(

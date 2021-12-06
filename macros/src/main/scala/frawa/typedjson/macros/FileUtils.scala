@@ -26,7 +26,7 @@ object FileUtils {
   def fromExpr(c: Context)(expr: c.Expr[String]): String = {
     import c.universe._
     // WONTWORK, pulls closure into scope
-    // val value = c.eval(c.Expr[String](c.untypecheck(expr.tree)))
+    // val value = c.processing(c.Expr[String](c.untypecheck(expr.tree)))
     val Literal(Constant(value: String)) = expr.tree
     value
   }

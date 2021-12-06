@@ -34,11 +34,11 @@ object ProcessorFactory {
   type CreateFun[V, R] = V => Either[SchemaProblems, Processor[R]]
 
   def make[R](
-      eval: Eval[R],
+      processing: Processing[R],
       vocabulary: Option[Vocabulary] = None,
       lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
   ): ProcessorFactory[SchemaValue, R] = testutil.ProcessorFactory({ schema =>
-    Keywords(schema, vocabulary, lazyResolver).map(Processor(_, eval))
+    Keywords(schema, vocabulary, lazyResolver).map(Processor(_, processing))
   })
 
 }

@@ -21,7 +21,7 @@ import frawa.typedjson.parser._
 import frawa.typedjson.processor._
 import frawa.typedjson.testutil.ProcessorFactory
 import frawa.typedjson.testutil.TestUtil._
-import frawa.typedjson.validation.{ValidationEval, ValidationResult}
+import frawa.typedjson.validation.{ValidationProcessing, ValidationResult}
 import munit.{FunSuite, Location, TestOptions}
 
 import java.net.URI
@@ -97,7 +97,7 @@ class JsonSchemaTestSuite extends FunSuite {
         val testId       = (file, description)
 
         val factory: ProcessorFactory[SchemaValue, ValidationResult] =
-          ProcessorFactory.make(ValidationEval(), vocabularyForTest, lazyResolver = Some(lazyResolver))
+          ProcessorFactory.make(ValidationProcessing(), vocabularyForTest, lazyResolver = Some(lazyResolver))
         val strictFactory: ProcessorFactory[SchemaValue, ValidationResult] =
           factory.mapResult(assertNoIgnoredKeywords)
 

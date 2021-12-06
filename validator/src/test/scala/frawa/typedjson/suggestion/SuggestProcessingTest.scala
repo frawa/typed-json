@@ -23,13 +23,13 @@ import frawa.typedjson.testutil.TestSchemas.{numberArraySchema, totoObjectSchema
 import frawa.typedjson.testutil.TestUtil._
 import munit.FunSuite
 
-class SuggestEvalTest extends FunSuite {
+class SuggestProcessingTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()
 
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
   private def factory(at: Pointer): ProcessorFactory[SchemaValue, SuggestionResult] =
-    ProcessorFactory.make(SuggestionEval(at), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
+    ProcessorFactory.make(SuggestionProcessing(at), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
 
   private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
       f: Seq[Value] => Unit

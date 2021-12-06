@@ -52,6 +52,7 @@ case class MinPropertiesMismatch(min: BigDecimal)                      extends O
 case class DependentRequiredMissing(missing: Map[String, Seq[String]]) extends Observation
 case class NotContains(valid: Int)                                     extends Observation
 
+// TODO Calculator -> Combiner
 trait Calculator[R] {
   def invalid(observation: Observation, pointer: Pointer): Result[R]
   def allOf(results: Seq[Result[R]], pointer: Pointer): Result[R]
@@ -61,9 +62,9 @@ trait Calculator[R] {
   def not(results: Seq[Result[R]], pointer: Pointer): Result[R]
   def ifThenElse(results: Seq[Result[R]], pointer: Pointer): Result[R]
 }
-object ValidationEval {
+object ValidationProcessing {
 
-  def apply(): Eval[ValidationResult] = Eval(simple, nested)
+  def apply(): Processing[ValidationResult] = Processing(simple, nested)
 
   private val calc: Calculator[ValidationResult] = new ValidationCalculator()
 

@@ -18,20 +18,20 @@ package frawa.typedjson.suggestion
 
 import frawa.typedjson.parser._
 import frawa.typedjson.processor._
-import frawa.typedjson.validation.{ValidationEval, ValidationResult}
+import frawa.typedjson.validation.{ValidationProcessing, ValidationResult}
 
 case class SuggestionResult(suggestions: Seq[Value], validated: Result[ValidationResult])
 
-object SuggestionEval {
+object SuggestionProcessing {
 
-  def apply(at: Pointer): Eval[SuggestionResult] = Eval(simple(at), nested(at))
+  def apply(at: Pointer): Processing[SuggestionResult] = Processing(simple(at), nested(at))
 
   private def simple(at: Pointer)(check: AssertionKeyword)(value: InnerValue): Result[SuggestionResult] = {
     if (at == value.pointer) {
       val suggestions = suggestFor(check)(Seq(Result.valid))
       Result.valid(SuggestionResult(suggestions, Result.valid))
     } else {
-      val result = ValidationEval().simple(check)(value)
+      val result = ValidationProcessing().simple(check)(value)
       Result(result.valid, SuggestionResult(Seq(), result))
     }
   }
@@ -45,7 +45,7 @@ object SuggestionEval {
     } else {
       val suggestions = result.flatMap(_.results).flatMap(_.suggestions)
       val validated   = result.flatMap(_.results).map(_.validated)
-      val nested      = ValidationEval().nested(check)(validated)(value)
+      val nested      = ValidationProcessing().nested(check)(validated)(value)
       Result.valid(SuggestionResult(suggestions, nested))
     }
   }

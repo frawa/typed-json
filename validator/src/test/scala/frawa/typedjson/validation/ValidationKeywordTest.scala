@@ -30,7 +30,7 @@ class ValidationKeywordTest extends FunSuite {
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
   private implicit val factory1: ProcessorFactory[SchemaValue, ValidationResult] =
-    ProcessorFactory.make(ValidationEval(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
+    ProcessorFactory.make(ValidationProcessing(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
 
   def validateJson(
       schema: SchemaValue
