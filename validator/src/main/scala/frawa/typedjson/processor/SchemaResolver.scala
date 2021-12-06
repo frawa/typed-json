@@ -70,8 +70,8 @@ trait SchemaResolver {
   }
 
   private def withoutEmptyFragment(uri: URI): URI = {
-    val fragment = uri.getFragment()
-    if (fragment != null && fragment.isEmpty()) {
+    val fragment = uri.getFragment
+    if (fragment != null && fragment.isEmpty) {
       UriUtil.withoutFragement(uri)
     } else {
       uri

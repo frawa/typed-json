@@ -26,13 +26,13 @@ object UriUtil {
     URI.create(escape(value))
   }
 
-  def withoutFragement(uri: URI): URI = new URI(uri.getScheme(), uri.getSchemeSpecificPart(), null)
+  def withoutFragement(uri: URI): URI = new URI(uri.getScheme, uri.getSchemeSpecificPart, null)
 
   def withFragment(uri: URI, pointer: Pointer): URI =
-    new URI(uri.getScheme(), uri.getSchemeSpecificPart(), escape(pointer.toString))
+    new URI(uri.getScheme, uri.getSchemeSpecificPart, escape(pointer.toString))
 
   def withFragment(uri: URI, fragment: String): URI =
-    new URI(uri.getScheme(), uri.getSchemeSpecificPart(), fragment)
+    new URI(uri.getScheme, uri.getSchemeSpecificPart, fragment)
 
   case class WithLocation[+T](uri: URI, value: T)
 

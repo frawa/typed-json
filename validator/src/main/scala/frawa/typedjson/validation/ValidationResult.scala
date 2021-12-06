@@ -18,7 +18,6 @@ package frawa.typedjson.validation
 
 import frawa.typedjson.processor.{Pointer, WithPointer}
 
-// TODO no defaults?
 case class ValidationResult(
     errors: Seq[ValidationResult.Error]
 )

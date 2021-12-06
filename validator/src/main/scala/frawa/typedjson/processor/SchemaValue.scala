@@ -20,6 +20,7 @@ import frawa.typedjson.parser.{ObjectValue, Value}
 import frawa.typedjson.util.UriUtil.uri
 
 import java.net.URI
+import scala.annotation.tailrec
 
 sealed trait SchemaValue {
   val value: Value
@@ -43,6 +44,7 @@ object SchemaValue {
   }
 
   // TODO avoid implicit?
+  @tailrec
   def vocabulary(schema: SchemaValue, parentVocabulary: Vocabulary)(implicit
       resolver: SchemaResolver
   ): Either[SchemaProblems, Vocabulary] = {

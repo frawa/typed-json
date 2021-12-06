@@ -62,7 +62,7 @@ object LoadedSchemasResolver {
         properties
           .foldLeft(loaded1) { case (loaded, (property, propertyValue)) =>
             (property, propertyValue) match {
-              case ("$id", StringValue(id)) =>
+              case ("$id", StringValue(_)) =>
                 // already handled with loaded1
                 loaded
               case ("$anchor", StringValue(anchor)) =>

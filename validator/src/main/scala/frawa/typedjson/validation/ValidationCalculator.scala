@@ -74,7 +74,7 @@ class ValidationCalculator extends Calculator[ValidationResult] {
   }
 
   override def not(results: Seq[Result[ValidationResult]], pointer: Pointer): Result[ValidationResult] = {
-    if (results.length == 1 && !results(0).valid) {
+    if (results.length == 1 && !results.head.valid) {
       Result.valid
     } else {
       invalid(NotInvalid(), pointer)

@@ -42,7 +42,7 @@ object Pointer {
 }
 
 case class Pointer(segments: Seq[Token]) {
-  override def toString(): String = {
+  override def toString: String = {
     if (this.segments.isEmpty) {
       ""
     } else {
@@ -70,7 +70,7 @@ trait Token {
 }
 
 case class ArrayIndexToken(index: Int) extends Token {
-  override def toString(): String = { index.toString }
+  override def toString: String = { index.toString }
   override def apply(value: Value): Option[Value] = value match {
     case ArrayValue(values) =>
       if (values.isDefinedAt(index)) {
@@ -83,7 +83,7 @@ case class ArrayIndexToken(index: Int) extends Token {
   }
 }
 case class FieldToken(field: String) extends Token {
-  override def toString(): String = {
+  override def toString: String = {
     field
       .replace("~", "~0")
       .replace("/", "~1")

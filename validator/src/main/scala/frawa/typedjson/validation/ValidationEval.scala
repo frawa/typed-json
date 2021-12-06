@@ -116,17 +116,17 @@ object ValidationEval {
       case ArrayItemsKeyword(_, _)          => calc.allOf(results, value.pointer)
       case IfThenElseKeyword(_, _, _)       => calc.ifThenElse(results, value.pointer)
       case PropertyNamesKeyword(_)          => calc.allOf(results, value.pointer)
-      case c: LazyParseKeywords             => calc.allOf(results, value.pointer)
+      case _: LazyParseKeywords             => calc.allOf(results, value.pointer)
       case DependentSchemasKeyword(_)       => calc.allOf(results, value.pointer)
       case ContainsKeyword(_, min, max)     => calc.contains(results, value.pointer, min, max)
-      case c: UnevaluatedItemsKeyword       => calc.allOf(results, value.pointer)
-      case c: UnevaluatedPropertiesKeyword  => calc.allOf(results, value.pointer)
+      case _: UnevaluatedItemsKeyword       => calc.allOf(results, value.pointer)
+      case _: UnevaluatedPropertiesKeyword  => calc.allOf(results, value.pointer)
     }
   }
 
   private def checkType[T <: Value: ClassTag](observation: TypeMismatch[T]): ProcessFun = value =>
     value.value match {
-      case v: T => Result.valid
+      case _: T => Result.valid
       case _    => calc.invalid(observation, value.pointer)
     }
 
@@ -141,22 +141,22 @@ object ValidationEval {
     }
 
   private def checkTrivial(valid: Boolean): ProcessFun = { value =>
-    if (valid)
+    if (valid) {
       Result.valid
-    else
+    } else {
       calc.invalid(FalseSchemaReason(), value.pointer)
+    }
   }
 
   private def checkObjectRequired(required: Seq[String]): ProcessFun = { value =>
     value.value match {
-      case ObjectValue(propertiesValues) => {
+      case ObjectValue(propertiesValues) =>
         val missingNames = required.filter(!propertiesValues.contains(_))
         if (missingNames.isEmpty) {
           Result.valid
         } else {
           calc.invalid(MissingRequiredProperties(missingNames), value.pointer)
         }
-      }
       case _ => Result.valid
     }
   }
@@ -171,7 +171,7 @@ object ValidationEval {
 
   private def checkPattern(pattern: String): ProcessFun = {
     val r = pattern.r
-    return { value =>
+    value =>
       value.value match {
         case StringValue(v) =>
           if (r.findFirstIn(v).isDefined)
@@ -180,7 +180,6 @@ object ValidationEval {
             calc.invalid(PatternMismatch(pattern), value.pointer)
         case _ => Result.valid
       }
-    }
   }
 
   private def checkFormat(format: String): ProcessFun = {
@@ -284,7 +283,7 @@ object ValidationEval {
         checkStringValue(FormatMismatch(format)) { v =>
           val regex_date = "\\d{4}-\\d{2}-\\d{2}"
           val regex_time = "\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|([+\\-])\\d{2}:\\d{2})"
-          val date_time  = s"${regex_date}T${regex_time}"
+          val date_time  = s"${regex_date}T$regex_time"
           date_time.r.matches(v)
         }
       case "date" =>
@@ -338,9 +337,7 @@ object ValidationEval {
           val duration     = s"P(${`dur-date`}|${`dur-time`}|${`dur-week`})"
           duration.r.matches(v)
         }
-      case _ => { value =>
-        calc.invalid(UnsupportedFormat(format), value.pointer)
-      }
+      case _ => value => calc.invalid(UnsupportedFormat(format), value.pointer)
     }
   }
 

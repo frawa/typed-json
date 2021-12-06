@@ -19,11 +19,12 @@ package frawa.typedjson.meta
 import frawa.typedjson.macros.Macros
 import frawa.typedjson.util.UriUtil.uri
 import frawa.typedjson.processor.{LoadedSchemasResolver, RootSchemaValue, SchemaValue}
-import frawa.typedjson.parser._
 
 import java.net.URI
 
 object MetaSchemas {
+  // not unused, used by macro
+  import frawa.typedjson.parser._
 
   val draft202012: URI = uri("https://json-schema.org/draft/2020-12/")
 

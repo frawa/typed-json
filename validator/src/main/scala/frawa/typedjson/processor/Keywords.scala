@@ -375,11 +375,11 @@ case class Keywords(
         // meta schema handled during load
         Right(this)
 
-      case ("$vocabulary", v) =>
+      case ("$vocabulary", _) =>
         // vocabulary handled earlier
         Right(this)
 
-      // // TODO
+      // TODO
       // case ("deprecated", v) => {
       //   Right(this)
       // }
