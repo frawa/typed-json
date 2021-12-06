@@ -1,10 +1,12 @@
 # Backlog
 
 ## Doing
+- review naming schema, ubiquitous language from spec
 - review and refactor: implicits
 
 ## TODO
 - crystallize API with an example
+- DX: improve discoverability
 - better artifact names
 - produce output schema from annotations/errors
 - validating lazy loader, which validates against meta schema on the fly
@@ -13,6 +15,7 @@
   - code mirror next? 
   - vs code?
 - post process annotations?
+- cache keywords for schema values for reuse
 - latest dependencies
 - publish released versions
 - do not prefix results, but push value pointer into checker?
