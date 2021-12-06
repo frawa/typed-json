@@ -18,7 +18,7 @@ package frawa.typedjson.validation
 
 import frawa.typedjson.keywords.{Result, Pointer}
 
-class ValidationCalculator extends Calculator[ValidationResult] {
+class ValidationCombiner extends Combiner[ValidationResult] {
   override def allOf(results: Seq[Result[ValidationResult]], pointer: Pointer): Result[ValidationResult] = {
     if (results.isEmpty || results.forall(_.valid)) {
       Result.valid

@@ -52,8 +52,7 @@ case class MinPropertiesMismatch(min: BigDecimal)                      extends O
 case class DependentRequiredMissing(missing: Map[String, Seq[String]]) extends Observation
 case class NotContains(valid: Int)                                     extends Observation
 
-// TODO Calculator -> Combiner
-trait Calculator[R] {
+trait Combiner[R] {
   def invalid(observation: Observation, pointer: Pointer): Result[R]
   def allOf(results: Seq[Result[R]], pointer: Pointer): Result[R]
   def anyOf(results: Seq[Result[R]], pointer: Pointer): Result[R]
@@ -67,7 +66,7 @@ object ValidationProcessing {
 
   def apply(): Processing[ValidationResult] = Processing(simple, nested)
 
-  private val calc: Calculator[ValidationResult] = new ValidationCalculator()
+  private val combiner: Combiner[ValidationResult] = new ValidationCombiner()
 
   private val nullTypeMismatch    = TypeMismatch[NullValue.type]("null")
   private val booleanTypeMismatch = TypeMismatch[BoolValue]("boolean")
@@ -109,27 +108,27 @@ object ValidationProcessing {
 
   private def nested(keyword: ApplicatorKeyword)(results: Seq[Result[ValidationResult]]): EvalFun = { value =>
     keyword match {
-      case AllOfKeyword(_)                  => calc.allOf(results, value.pointer)
-      case AnyOfKeyword(_)                  => calc.anyOf(results, value.pointer)
-      case OneOfKeyword(_)                  => calc.oneOf(results, value.pointer)
-      case NotKeyword(_)                    => calc.not(results, value.pointer)
-      case UnionTypeKeyword(_)              => calc.oneOf(results, value.pointer)
-      case ObjectPropertiesKeyword(_, _, _) => calc.allOf(results, value.pointer)
-      case ArrayItemsKeyword(_, _)          => calc.allOf(results, value.pointer)
-      case IfThenElseKeyword(_, _, _)       => calc.ifThenElse(results, value.pointer)
-      case PropertyNamesKeyword(_)          => calc.allOf(results, value.pointer)
-      case _: LazyParseKeywords             => calc.allOf(results, value.pointer)
-      case DependentSchemasKeyword(_)       => calc.allOf(results, value.pointer)
-      case ContainsKeyword(_, min, max)     => calc.contains(results, value.pointer, min, max)
-      case _: UnevaluatedItemsKeyword       => calc.allOf(results, value.pointer)
-      case _: UnevaluatedPropertiesKeyword  => calc.allOf(results, value.pointer)
+      case AllOfKeyword(_)                  => combiner.allOf(results, value.pointer)
+      case AnyOfKeyword(_)                  => combiner.anyOf(results, value.pointer)
+      case OneOfKeyword(_)                  => combiner.oneOf(results, value.pointer)
+      case NotKeyword(_)                    => combiner.not(results, value.pointer)
+      case UnionTypeKeyword(_)              => combiner.oneOf(results, value.pointer)
+      case ObjectPropertiesKeyword(_, _, _) => combiner.allOf(results, value.pointer)
+      case ArrayItemsKeyword(_, _)          => combiner.allOf(results, value.pointer)
+      case IfThenElseKeyword(_, _, _)       => combiner.ifThenElse(results, value.pointer)
+      case PropertyNamesKeyword(_)          => combiner.allOf(results, value.pointer)
+      case _: LazyParseKeywords             => combiner.allOf(results, value.pointer)
+      case DependentSchemasKeyword(_)       => combiner.allOf(results, value.pointer)
+      case ContainsKeyword(_, min, max)     => combiner.contains(results, value.pointer, min, max)
+      case _: UnevaluatedItemsKeyword       => combiner.allOf(results, value.pointer)
+      case _: UnevaluatedPropertiesKeyword  => combiner.allOf(results, value.pointer)
     }
   }
 
   private def validateType[T <: Value: ClassTag](observation: TypeMismatch[T]): EvalFun = value =>
     value.value match {
       case _: T => Result.valid
-      case _    => calc.invalid(observation, value.pointer)
+      case _    => combiner.invalid(observation, value.pointer)
     }
 
   private def validateInteger(): EvalFun = value =>
@@ -138,15 +137,15 @@ object ValidationProcessing {
         if (v.isValidLong)
           Result.valid
         else
-          calc.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
-      case _ => calc.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
+          combiner.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
+      case _ => combiner.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
     }
 
   private def validateTrivial(valid: Boolean): EvalFun = { value =>
     if (valid) {
       Result.valid
     } else {
-      calc.invalid(FalseSchemaReason(), value.pointer)
+      combiner.invalid(FalseSchemaReason(), value.pointer)
     }
   }
 
@@ -157,7 +156,7 @@ object ValidationProcessing {
         if (missingNames.isEmpty) {
           Result.valid
         } else {
-          calc.invalid(MissingRequiredProperties(missingNames), value.pointer)
+          combiner.invalid(MissingRequiredProperties(missingNames), value.pointer)
         }
       case _ => Result.valid
     }
@@ -167,7 +166,7 @@ object ValidationProcessing {
     if (values.contains(value.value)) {
       Result.valid
     } else {
-      calc.invalid(NotInEnum(values), value.pointer)
+      combiner.invalid(NotInEnum(values), value.pointer)
     }
   }
 
@@ -179,7 +178,7 @@ object ValidationProcessing {
           if (r.findFirstIn(v).isDefined)
             Result.valid
           else
-            calc.invalid(PatternMismatch(pattern), value.pointer)
+            combiner.invalid(PatternMismatch(pattern), value.pointer)
         case _ => Result.valid
       }
   }
@@ -339,7 +338,7 @@ object ValidationProcessing {
           val duration     = s"P(${`dur-date`}|${`dur-time`}|${`dur-week`})"
           duration.r.matches(v)
         }
-      case _ => value => calc.invalid(UnsupportedFormat(format), value.pointer)
+      case _ => value => combiner.invalid(UnsupportedFormat(format), value.pointer)
     }
   }
 
@@ -349,7 +348,7 @@ object ValidationProcessing {
         if (validate(v))
           Result.valid
         else
-          calc.invalid(observation, value.pointer)
+          combiner.invalid(observation, value.pointer)
       case _ => Result.valid
     }
   }
@@ -366,7 +365,7 @@ object ValidationProcessing {
         if (validate(v))
           Result.valid
         else
-          calc.invalid(observation, value.pointer)
+          combiner.invalid(observation, value.pointer)
       case _ => Result.valid
     }
   }
@@ -377,7 +376,7 @@ object ValidationProcessing {
         if (validate(v))
           Result.valid
         else
-          calc.invalid(observation, value.pointer)
+          combiner.invalid(observation, value.pointer)
       case _ => Result.valid
     }
   }
@@ -441,7 +440,7 @@ object ValidationProcessing {
           if (validate(v))
             Result.valid
           else
-            calc.invalid(observation, value.pointer)
+            combiner.invalid(observation, value.pointer)
         case _ => Result.valid
       }
   }
@@ -472,7 +471,7 @@ object ValidationProcessing {
         if (missing.isEmpty)
           Result.valid
         else
-          calc.invalid(DependentRequiredMissing(missing), value.pointer)
+          combiner.invalid(DependentRequiredMissing(missing), value.pointer)
       case _ => Result.valid
     }
   }
