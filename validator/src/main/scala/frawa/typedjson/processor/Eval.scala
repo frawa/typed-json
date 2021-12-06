@@ -16,7 +16,8 @@
 
 package frawa.typedjson.processor
 
+// TODO Eval -> Processing, Processor -> Evaluating
 case class Eval[R](
-    simple: SimpleKeyword => Processor.ProcessFun[R],
-    nested: NestingKeyword => Processor.MergeFun[R]
+    simple: AssertionKeyword => Processor.ProcessFun[R],
+    nested: ApplicatorKeyword => Processor.MergeFun[R]
 )

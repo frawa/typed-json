@@ -28,18 +28,10 @@ case class Processor[R] private[processor] (private val process: Processor.Proce
 object Processor {
   import Keywords.KeywordWithLocation
 
+  // TODO ProcessFun -> EvalFun
   type ProcessFun[R] = InnerValue => Result[R]
-  type MergeFun[R]   = Seq[Result[R]] => ProcessFun[R]
-
-  def apply[R](
-      schema: SchemaValue,
-      lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None,
-      vocabulary: Option[Vocabulary] = None
-  )(
-      eval: Eval[R]
-  ): Either[SchemaProblems, Processor[R]] = {
-    Keywords(schema, vocabulary, lazyResolver).map(apply(_, eval))
-  }
+  // TODO MergeFun -> CombineFun
+  type MergeFun[R] = Seq[Result[R]] => ProcessFun[R]
 
   def apply[R](keywords: Keywords, eval: Eval[R]): Processor[R] = {
     Processor(all(eval, keywords).andThen(_.addIgnoredKeywords(keywords.ignored, Pointer.empty)))
@@ -50,9 +42,9 @@ object Processor {
       .andThen(_.addIgnoredKeywords(keywords.ignored, value.pointer))(value)
   }
 
-  private def noop[R]: ProcessFun[R]                                          = _ => Result.valid[R]
-  private def simple[R](eval: Eval[R], keyword: SimpleKeyword): ProcessFun[R] = eval.simple(keyword)
-  private def seq[R](ps: Seq[ProcessFun[R]]): ProcessFun[R]                   = value => Result.merge(ps.map(_(value)))
+  private def noop[R]: ProcessFun[R]                                             = _ => Result.valid[R]
+  private def simple[R](eval: Eval[R], keyword: AssertionKeyword): ProcessFun[R] = eval.simple(keyword)
+  private def seq[R](ps: Seq[ProcessFun[R]]): ProcessFun[R] = value => Result.merge(ps.map(_(value)))
   private def option[R](p: Option[ProcessFun[R]]): ProcessFun[R] = {
     p.getOrElse(noop)
   }
@@ -116,12 +108,12 @@ object Processor {
 
   private def one[R](eval: Eval[R], keyword: KeywordWithLocation): ProcessFun[R] = {
     keyword.value match {
-      case c: SimpleKeyword  => value => simple(eval, c)(value)
-      case c: NestingKeyword => value => nesting(eval, c)(value)
+      case c: AssertionKeyword  => value => simple(eval, c)(value)
+      case c: ApplicatorKeyword => value => nesting(eval, c)(value)
     }
   }
 
-  private def nesting[R](eval: Eval[R], keyword: NestingKeyword): ProcessFun[R] =
+  private def nesting[R](eval: Eval[R], keyword: ApplicatorKeyword): ProcessFun[R] =
     keyword match {
       case c: ArrayItemsKeyword            => checkArrayItems(eval, c)
       case c: ObjectPropertiesKeyword      => checkObjectProperties(eval, c)

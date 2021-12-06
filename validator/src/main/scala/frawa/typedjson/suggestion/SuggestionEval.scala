@@ -26,7 +26,7 @@ object SuggestionEval {
 
   def apply(at: Pointer): Eval[SuggestionResult] = Eval(simple(at), nested(at))
 
-  private def simple(at: Pointer)(check: SimpleKeyword)(value: InnerValue): Result[SuggestionResult] = {
+  private def simple(at: Pointer)(check: AssertionKeyword)(value: InnerValue): Result[SuggestionResult] = {
     if (at == value.pointer) {
       val suggestions = suggestFor(check)(Seq(Result.valid))
       Result.valid(SuggestionResult(suggestions, Result.valid))
@@ -38,7 +38,7 @@ object SuggestionEval {
 
   private def nested(
       at: Pointer
-  )(check: NestingKeyword)(result: Seq[Result[SuggestionResult]])(value: InnerValue): Result[SuggestionResult] = {
+  )(check: ApplicatorKeyword)(result: Seq[Result[SuggestionResult]])(value: InnerValue): Result[SuggestionResult] = {
     if (at == value.pointer) {
       val suggestions = suggestFor(check)(result)
       Result.valid(SuggestionResult(suggestions, Result.valid))

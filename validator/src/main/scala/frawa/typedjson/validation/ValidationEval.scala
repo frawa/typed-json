@@ -76,7 +76,7 @@ object ValidationEval {
 
   private type ProcessFun = Processor.ProcessFun[ValidationResult]
 
-  private def simple(keyword: SimpleKeyword): ProcessFun = {
+  private def simple(keyword: AssertionKeyword): ProcessFun = {
     keyword match {
       case NullTypeKeyword                 => checkType(nullTypeMismatch)
       case BooleanTypeKeyword              => checkType(booleanTypeMismatch)
@@ -105,7 +105,7 @@ object ValidationEval {
     }
   }
 
-  private def nested(keyword: NestingKeyword)(results: Seq[Result[ValidationResult]]): ProcessFun = { value =>
+  private def nested(keyword: ApplicatorKeyword)(results: Seq[Result[ValidationResult]]): ProcessFun = { value =>
     keyword match {
       case AllOfKeyword(_)                  => calc.allOf(results, value.pointer)
       case AnyOfKeyword(_)                  => calc.anyOf(results, value.pointer)
