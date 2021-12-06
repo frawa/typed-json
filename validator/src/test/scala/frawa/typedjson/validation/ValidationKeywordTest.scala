@@ -39,10 +39,7 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("multipleOf") {
-    withSchema(
-      """|{"multipleOf": 2
-         |}""".stripMargin
-    ) { schema =>
+    withSchema("""{"multipleOf": 2}""") { schema =>
       validateJson(schema)("""13""") { result =>
         assertEquals(
           result.results,
@@ -63,17 +60,14 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("maximum") {
-    withSchema(
-      """|{"maximum": 13
-         |}""".stripMargin
-    ) { schema =>
+    withSchema("""{"maximum": 13}""") { schema =>
       validateJson(schema)("""1313""") { result =>
         assertEquals(
           result.results,
           Seq(
             ValidationResult(
               Seq(
-                WithPointer(MaximumMismatch(13, false))
+                WithPointer(MaximumMismatch(13, exclude = false))
               )
             )
           )
@@ -87,17 +81,14 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("exclusiveMaximum") {
-    withSchema(
-      """|{"exclusiveMaximum": 13
-         |}""".stripMargin
-    ) { schema =>
+    withSchema("""{"exclusiveMaximum": 13}""") { schema =>
       validateJson(schema)("""13""") { result =>
         assertEquals(
           result.results,
           Seq(
             ValidationResult(
               Seq(
-                WithPointer(MaximumMismatch(13, true))
+                WithPointer(MaximumMismatch(13, exclude = true))
               )
             )
           )
@@ -111,17 +102,14 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("minimum") {
-    withSchema(
-      """|{"minimum": 13
-         |}""".stripMargin
-    ) { schema =>
+    withSchema("""{"minimum": 13}""") { schema =>
       validateJson(schema)("""12""") { result =>
         assertEquals(
           result.results,
           Seq(
             ValidationResult(
               Seq(
-                WithPointer(MinimumMismatch(13, false))
+                WithPointer(MinimumMismatch(13, exclude = false))
               )
             )
           )
@@ -135,17 +123,14 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("exclusiveMinimum") {
-    withSchema(
-      """|{"exclusiveMinimum": 13
-         |}""".stripMargin
-    ) { schema =>
+    withSchema("""{"exclusiveMinimum": 13}""") { schema =>
       validateJson(schema)("""13""") { result =>
         assertEquals(
           result.results,
           Seq(
             ValidationResult(
               Seq(
-                WithPointer(MinimumMismatch(13, true))
+                WithPointer(MinimumMismatch(13, exclude = true))
               )
             )
           )
@@ -159,10 +144,7 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("maxLength") {
-    withSchema(
-      """|{"maxLength": 3
-         |}""".stripMargin
-    ) { schema =>
+    withSchema("""{"maxLength": 3}""") { schema =>
       validateJson(schema)(""""toto"""") { result =>
         assertEquals(
           result.results,
@@ -183,10 +165,7 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("minLength") {
-    withSchema(
-      """|{"minLength": 4
-         |}""".stripMargin
-    ) { schema =>
+    withSchema("""{"minLength": 4}""") { schema =>
       validateJson(schema)(""""bar"""") { result =>
         assertEquals(
           result.results,
@@ -207,10 +186,7 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("pattern") {
-    withSchema(
-      """|{"pattern": "foo\\d\\d"
-         |}""".stripMargin
-    ) { schema =>
+    withSchema("""{"pattern": "foo\\d\\d"}""") { schema =>
       validateJson(schema)(""""foo"""") { result =>
         assertEquals(
           result.results,
@@ -231,10 +207,7 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("minItems") {
-    withSchema(
-      """|{"minItems": 3
-         |}""".stripMargin
-    ) { schema =>
+    withSchema("""{"minItems": 3}""") { schema =>
       validateJson(schema)("""[1,2]""") { result =>
         assertEquals(
           result.results,
@@ -255,10 +228,7 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("maxItems") {
-    withSchema(
-      """|{"maxItems": 2
-         |}""".stripMargin
-    ) { schema =>
+    withSchema("""{"maxItems": 2}""") { schema =>
       validateJson(schema)("""[1,2,3]""") { result =>
         assertEquals(
           result.results,
@@ -279,10 +249,7 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("uniqueItems") {
-    withSchema(
-      """|{"uniqueItems": true
-         |}""".stripMargin
-    ) { schema =>
+    withSchema("""{"uniqueItems": true}""") { schema =>
       validateJson(schema)("""[1,1]""") { result =>
         assertEquals(
           result.results,
@@ -303,10 +270,7 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("maxProperties") {
-    withSchema(
-      """|{"maxProperties": 2
-         |}""".stripMargin
-    ) { schema =>
+    withSchema("""{"maxProperties": 2}""") { schema =>
       validateJson(schema)("""{"gnu": 1, "bar": 2, "foo": 3}""") { result =>
         assertEquals(
           result.results,
@@ -327,10 +291,7 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("minProperties") {
-    withSchema(
-      """|{"minProperties": 3
-         |}""".stripMargin
-    ) { schema =>
+    withSchema("""{"minProperties": 3}""") { schema =>
       validateJson(schema)("""{"bar": 2, "foo": 3}""") { result =>
         assertEquals(
           result.results,
@@ -351,10 +312,7 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("required") {
-    withSchema(
-      """|{"required": ["bar", "foo"]
-         |}""".stripMargin
-    ) { schema =>
+    withSchema("""{"required": ["bar", "foo"]}""") { schema =>
       validateJson(schema)("""{"gnu": 1, "bar": 2}""") { result =>
         assertEquals(
           result.results,
@@ -375,10 +333,7 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("dependentRequired") {
-    withSchema(
-      """|{"dependentRequired": {"foo": ["bar", "gnu"]}
-         |}""".stripMargin
-    ) { schema =>
+    withSchema("""{"dependentRequired": {"foo": ["bar", "gnu"]}}""") { schema =>
       validateJson(schema)("""{"foo": 1, "bar": 2}""") { result =>
         assertEquals(
           result.results,
@@ -399,10 +354,7 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("dependentSchemas") {
-    withSchema(
-      """|{"dependentSchemas": {"foo": true, "gnu": false}}
-         |}""".stripMargin
-    ) { schema =>
+    withSchema("""{"dependentSchemas": {"foo": true, "gnu": false}}}""") { schema =>
       validateJson(schema)("""{"gnu": 1}""") { result =>
         assertEquals(
           result.results,
@@ -423,10 +375,7 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("prefixItems") {
-    withSchema(
-      """|{"prefixItems": [{"type": "number"}, {"type": "string"}]
-         |}""".stripMargin
-    ) { schema =>
+    withSchema("""{"prefixItems": [{"type": "number"}, {"type": "string"}]}""") { schema =>
       validateJson(schema)("""["gnu"]""") { result =>
         assertEquals(
           result.results,
@@ -482,10 +431,7 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("contains") {
-    withSchema(
-      """|{"contains": {"type": "number"}
-         |}""".stripMargin
-    ) { schema =>
+    withSchema("""{"contains": {"type": "number"}}""") { schema =>
       validateJson(schema)("""["gnu", true]""") { result =>
         assertEquals(
           result.results,
@@ -583,10 +529,7 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("minContains without contains") {
-    withSchema(
-      """|{"minContains": 2
-         |}""".stripMargin
-    ) { schema =>
+    withSchema("""{"minContains": 2}""") { schema =>
       validateJson(schema)("""[13, "gnu", true]""") { result =>
         assert(result.valid)
         assertEquals(result.annotations, Seq())
@@ -599,10 +542,7 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("maxContains without contains") {
-    withSchema(
-      """|{"maxContains": 2
-         |}""".stripMargin
-    ) { schema =>
+    withSchema("""{"maxContains": 2}""") { schema =>
       validateJson(schema)("""[13, "gnu", true]""") { result =>
         assert(result.valid)
         assertEquals(result.annotations, Seq())
