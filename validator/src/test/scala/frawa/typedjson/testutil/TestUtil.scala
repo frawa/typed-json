@@ -77,4 +77,21 @@ object TestUtil {
       .toOption
   }
 
+  def assertable(keywords: Keywords): Keywords = keywords.copy(keywords = keywords.keywords.map(assertable))
+
+  val assertableResolve: () => Either[SchemaProblems, Keywords] = () => Left(SchemaProblems.empty)
+
+  private def assertable(keyword: Keywords.KeywordWithLocation): Keywords.KeywordWithLocation =
+    keyword.copy(value = assertable(keyword.value))
+
+  private def assertable(keyword: Keyword): Keyword = keyword match {
+    case ArrayItemsKeyword(items, prefixItems) =>
+      ArrayItemsKeyword(
+        items.map(assertable),
+        prefixItems.map(assertable)
+      )
+    case LazyParseKeywords(resolved, _) => LazyParseKeywords(resolved, assertableResolve)
+    case _                              => keyword
+  }
+
 }
