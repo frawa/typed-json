@@ -27,33 +27,32 @@ import java.util.regex.Pattern
 import scala.reflect.ClassTag
 import scala.util.Try
 
-// TODO rename to something like "Error"
-sealed trait Observation
-case class FalseSchemaReason()                                         extends Observation
-case class TypeMismatch[T <: Value](expected: String)                  extends Observation
-case class NotOneOf(valid: Int)                                        extends Observation
-case class NotInvalid()                                                extends Observation
-case class NotInEnum(values: Seq[Value])                               extends Observation
-case class MissingRequiredProperties(properties: Seq[String])          extends Observation
-case class PatternMismatch(pattern: String)                            extends Observation
-case class FormatMismatch(format: String)                              extends Observation
-case class MinimumMismatch(min: BigDecimal, exclude: Boolean)          extends Observation
-case class ItemsNotUnique()                                            extends Observation
-case class UnsupportedFormat(format: String)                           extends Observation
-case class UnsupportedCheck(validate: Keyword)                         extends Observation
-case class NotMultipleOf(n: BigDecimal)                                extends Observation
-case class MaximumMismatch(max: BigDecimal, exclude: Boolean)          extends Observation
-case class MaxLengthMismatch(max: BigDecimal)                          extends Observation
-case class MinLengthMismatch(min: BigDecimal)                          extends Observation
-case class MaxItemsMismatch(max: BigDecimal)                           extends Observation
-case class MinItemsMismatch(min: BigDecimal)                           extends Observation
-case class MaxPropertiesMismatch(max: BigDecimal)                      extends Observation
-case class MinPropertiesMismatch(min: BigDecimal)                      extends Observation
-case class DependentRequiredMissing(missing: Map[String, Seq[String]]) extends Observation
-case class NotContains(valid: Int)                                     extends Observation
+sealed trait ValidationError
+case class FalseSchemaReason()                                         extends ValidationError
+case class TypeMismatch[T <: Value](expected: String)                  extends ValidationError
+case class NotOneOf(valid: Int)                                        extends ValidationError
+case class NotInvalid()                                                extends ValidationError
+case class NotInEnum(values: Seq[Value])                               extends ValidationError
+case class MissingRequiredProperties(properties: Seq[String])          extends ValidationError
+case class PatternMismatch(pattern: String)                            extends ValidationError
+case class FormatMismatch(format: String)                              extends ValidationError
+case class MinimumMismatch(min: BigDecimal, exclude: Boolean)          extends ValidationError
+case class ItemsNotUnique()                                            extends ValidationError
+case class UnsupportedFormat(format: String)                           extends ValidationError
+case class UnsupportedCheck(validate: Keyword)                         extends ValidationError
+case class NotMultipleOf(n: BigDecimal)                                extends ValidationError
+case class MaximumMismatch(max: BigDecimal, exclude: Boolean)          extends ValidationError
+case class MaxLengthMismatch(max: BigDecimal)                          extends ValidationError
+case class MinLengthMismatch(min: BigDecimal)                          extends ValidationError
+case class MaxItemsMismatch(max: BigDecimal)                           extends ValidationError
+case class MinItemsMismatch(min: BigDecimal)                           extends ValidationError
+case class MaxPropertiesMismatch(max: BigDecimal)                      extends ValidationError
+case class MinPropertiesMismatch(min: BigDecimal)                      extends ValidationError
+case class DependentRequiredMissing(missing: Map[String, Seq[String]]) extends ValidationError
+case class NotContains(valid: Int)                                     extends ValidationError
 
 trait Combiner[R] {
-  def invalid(observation: Observation, pointer: Pointer): Result[R]
+  def invalid(error: ValidationError, pointer: Pointer): Result[R]
   def allOf(results: Seq[Result[R]], pointer: Pointer): Result[R]
   def anyOf(results: Seq[Result[R]], pointer: Pointer): Result[R]
   def oneOf(results: Seq[Result[R]], pointer: Pointer): Result[R]
@@ -125,10 +124,10 @@ object ValidationProcessing {
     }
   }
 
-  private def validateType[T <: Value: ClassTag](observation: TypeMismatch[T]): EvalFun = value =>
+  private def validateType[T <: Value: ClassTag](error: TypeMismatch[T]): EvalFun = value =>
     value.value match {
       case _: T => Result.valid
-      case _    => combiner.invalid(observation, value.pointer)
+      case _    => combiner.invalid(error, value.pointer)
     }
 
   private def validateInteger(): EvalFun = value =>
@@ -342,13 +341,13 @@ object ValidationProcessing {
     }
   }
 
-  private def validateStringValue(observation: => Observation)(validate: String => Boolean): EvalFun = { value =>
+  private def validateStringValue(error: => ValidationError)(validate: String => Boolean): EvalFun = { value =>
     value.value match {
       case StringValue(v) =>
         if (validate(v))
           Result.valid
         else
-          combiner.invalid(observation, value.pointer)
+          combiner.invalid(error, value.pointer)
       case _ => Result.valid
     }
   }
@@ -359,24 +358,24 @@ object ValidationProcessing {
     }
   }
 
-  private def validateNumberValue(observation: => Observation)(validate: BigDecimal => Boolean): EvalFun = { value =>
+  private def validateNumberValue(error: => ValidationError)(validate: BigDecimal => Boolean): EvalFun = { value =>
     value.value match {
       case NumberValue(v) =>
         if (validate(v))
           Result.valid
         else
-          combiner.invalid(observation, value.pointer)
+          combiner.invalid(error, value.pointer)
       case _ => Result.valid
     }
   }
 
-  private def validateArrayValue(observation: => Observation)(validate: Seq[Value] => Boolean): EvalFun = { value =>
+  private def validateArrayValue(error: => ValidationError)(validate: Seq[Value] => Boolean): EvalFun = { value =>
     value.value match {
       case ArrayValue(v) =>
         if (validate(v))
           Result.valid
         else
-          combiner.invalid(observation, value.pointer)
+          combiner.invalid(error, value.pointer)
       case _ => Result.valid
     }
   }
@@ -433,14 +432,14 @@ object ValidationProcessing {
     }
   }
 
-  private def validateObjectValue(observation: => Observation)(validate: Map[String, Value] => Boolean): EvalFun = {
+  private def validateObjectValue(error: => ValidationError)(validate: Map[String, Value] => Boolean): EvalFun = {
     value =>
       value.value match {
         case ObjectValue(v) =>
           if (validate(v))
             Result.valid
           else
-            combiner.invalid(observation, value.pointer)
+            combiner.invalid(error, value.pointer)
         case _ => Result.valid
       }
   }

@@ -33,7 +33,6 @@ import frawa.typedjson.util.UriUtil
 import java.net.URI
 import scala.reflect.ClassTag
 
-// TODO SimpleKeyword -> AssertionKeyword, NestingKeyword -> ApplicatorKeyword, ... -> AnnotationKeyword
 sealed trait Keyword
 sealed trait AssertionKeyword  extends Keyword
 sealed trait TypeKeyword       extends AssertionKeyword

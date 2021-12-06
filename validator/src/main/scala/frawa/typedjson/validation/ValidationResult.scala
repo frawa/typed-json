@@ -23,12 +23,12 @@ case class ValidationResult(
 )
 
 object ValidationResult {
-  type Error = WithPointer[Observation]
+  type Error = WithPointer[ValidationError]
 
   def invalid(errors: Seq[Error]): ValidationResult = ValidationResult(errors)
 
-  def invalid(observation: Observation, pointer: Pointer = Pointer.empty): ValidationResult = invalid(
-    Seq(WithPointer(observation, pointer))
+  def invalid(error: ValidationError, pointer: Pointer = Pointer.empty): ValidationResult = invalid(
+    Seq(WithPointer(error, pointer))
   )
 
 }

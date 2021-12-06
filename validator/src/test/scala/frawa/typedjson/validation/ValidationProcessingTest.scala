@@ -54,7 +54,7 @@ class ValidationProcessingTest extends FunSuite {
     assertResult(text)(schema)(f)(c, implicitly[Parser])
   }
 
-  private def assertErrors(result: Result[ValidationResult], expected: Seq[WithPointer[Observation]]): Unit = {
+  private def assertErrors(result: Result[ValidationResult], expected: Seq[WithPointer[ValidationError]]): Unit = {
     assertEquals(result.results.flatMap(_.errors), expected)
   }
 

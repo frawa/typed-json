@@ -36,8 +36,8 @@ class ValidationCombiner extends Combiner[ValidationResult] {
     }
   }
 
-  override def invalid(observation: Observation, pointer: Pointer): Result[ValidationResult] = Result.invalid(
-    ValidationResult.invalid(observation, pointer)
+  override def invalid(error: ValidationError, pointer: Pointer): Result[ValidationResult] = Result.invalid(
+    ValidationResult.invalid(error, pointer)
   )
 
   override def anyOf(results: Seq[Result[ValidationResult]], pointer: Pointer): Result[ValidationResult] = {
