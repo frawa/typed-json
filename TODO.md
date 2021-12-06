@@ -1,10 +1,9 @@
 # Backlog
 
 ## Doing
-- review and cleanup, tests
+- review and refactor: implicits
 
 ## TODO
-- review and refactor: implicits
 - crystallize API with an example
 - better artifact names
 - produce output schema from annotations/errors
@@ -29,6 +28,7 @@
 - CI on GH Actions?
 
 ## Done
+- review and cleanup, tests
 - isolate dependency on zio-json, and use with tests and examples only
 - fix some ignored suites in JsonSchemaTestTestSuite
 - support $schema
