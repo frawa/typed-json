@@ -23,6 +23,7 @@ import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.validation.{ValidationEval, ValidationResult}
 import munit.FunSuite
 
+// TODO still needed?
 class MetaSchemaTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()
 
