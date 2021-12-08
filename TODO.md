@@ -1,7 +1,6 @@
 # Backlog
 
 ## Doing
-- review naming schema, ubiquitous language from spec
 - review and refactor: implicits
 
 ## TODO
@@ -31,6 +30,7 @@
 - CI on GH Actions?
 
 ## Done
+- review naming schema, ubiquitous language from spec
 - review and cleanup, tests
 - isolate dependency on zio-json, and use with tests and examples only
 - fix some ignored suites in JsonSchemaTestTestSuite
