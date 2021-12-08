@@ -21,27 +21,24 @@ import frawa.typedjson.util.UriUtil._
 
 import java.net.URI
 
-object SchemaResolver {
-  type Resolution = (SchemaValue, SchemaResolver)
-}
+case class SchemaResolution(schema: SchemaValue, resolver: SchemaResolver)
 
 trait SchemaResolver {
-  type Resolution = SchemaResolver.Resolution
 
   val base: URI
 
-  protected def resolve(uri: URI): Option[Resolution] = None
-  protected def isDynamic(uri: URI): Boolean          = false
+  protected def resolve(uri: URI): Option[SchemaResolution] = None
+  protected def isDynamic(uri: URI): Boolean                = false
 
   def withBase(uri: URI): SchemaResolver = this
 
   // TODO test me
-  def push(schema: SchemaValue): Resolution = {
+  def push(schema: SchemaValue): SchemaResolution = {
     val resolver = SchemaValue
       .id(schema)
       .map(id => this.withBase(this.absolute(id)))
       .getOrElse(this)
-    (schema, resolver)
+    SchemaResolution(schema, resolver)
   }
 
   def absolute(ref: String): URI = {
@@ -53,15 +50,15 @@ trait SchemaResolver {
     )
   }
 
-  def resolveDynamicRef(ref: String, scope: DynamicScope): Option[Resolution] = {
+  def resolveDynamicRef(ref: String, scope: DynamicScope): Option[SchemaResolution] = {
     resolveDynamicRef(absolute(ref), scope)
   }
 
-  def resolveRef(ref: String): Option[Resolution] = {
+  def resolveRef(ref: String): Option[SchemaResolution] = {
     resolveRef(absolute(ref))
   }
 
-  private def resolveDynamicRef(uri: URI, scope: DynamicScope): Option[Resolution] = {
+  private def resolveDynamicRef(uri: URI, scope: DynamicScope): Option[SchemaResolution] = {
     val resolved = resolveRef(uri)
 
     val fragment = uri.getFragment
@@ -87,7 +84,7 @@ trait SchemaResolver {
     }
   }
 
-  def resolveRef(uri: URI): Option[Resolution] = {
+  def resolveRef(uri: URI): Option[SchemaResolution] = {
     if (uri.getFragment != null && uri.getFragment.startsWith("/")) {
       val pointer = Pointer.parse(uri.getFragment)
       resolve(UriUtil.withoutFragement(uri))
@@ -97,8 +94,8 @@ trait SchemaResolver {
     }
   }
 
-  private def resolvePointer(resolution: Resolution, pointer: Pointer): Option[Resolution] = {
-    val (schema, resolver) = resolution
-    pointer(schema.value).map(SchemaValue(_)).map((_, resolver))
+  private def resolvePointer(resolution: SchemaResolution, pointer: Pointer): Option[SchemaResolution] = {
+    val SchemaResolution(schema, resolver) = resolution
+    pointer(schema.value).map(SchemaValue(_)).map(SchemaResolution(_, resolver))
   }
 }

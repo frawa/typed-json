@@ -36,7 +36,7 @@ class LoadedSchemasResolverTest extends FunSuite {
       val resolver = LoadedSchemasResolver(schema)
       val uri1     = uri(id)
       assertEquals(resolver.base, uri1)
-      assertEquals(resolver.resolveRef(id).map(_._1).map(_.value), Some(schema.value))
+      assertEquals(resolver.resolveRef(id).map(_.schema.value), Some(schema.value))
     }
   }
 
@@ -64,7 +64,7 @@ class LoadedSchemasResolverTest extends FunSuite {
       )
 
       assertEquals(
-        resolver.resolveRef("#/$defs/foo").map(_._1),
+        resolver.resolveRef("#/$defs/foo").map(_.schema),
         Some(expected)
       )
     }
@@ -86,7 +86,7 @@ class LoadedSchemasResolverTest extends FunSuite {
       val uri1     = uri(id)
       assertEquals(resolver.base, uri1)
       assertEquals(resolver.schemas.size, 2)
-      assertEquals(resolver.resolveRef(id).map(_._1).map(_.value), Some(schema.value))
+      assertEquals(resolver.resolveRef(id).map(_.schema.value), Some(schema.value))
 
       val expected = SchemaValue(
         value = ObjectValue(
@@ -102,12 +102,12 @@ class LoadedSchemasResolverTest extends FunSuite {
       )
 
       assertEquals(
-        resolver.resolveRef("https://example.net/root.json#/$defs/foo").map(_._1),
+        resolver.resolveRef("https://example.net/root.json#/$defs/foo").map(_.schema),
         Some(expected)
       )
 
       assertEquals(
-        resolver.resolveRef("https://example.net/foo.json").map(_._1),
+        resolver.resolveRef("https://example.net/foo.json").map(_.schema),
         Some(expected)
       )
     }
@@ -128,7 +128,7 @@ class LoadedSchemasResolverTest extends FunSuite {
       val resolver = LoadedSchemasResolver(schema)
       val uri1     = uri(id)
       assertEquals(resolver.base, uri1)
-      assertEquals(resolver.resolveRef(id).map(_._1).map(_.value), Some(schema.value))
+      assertEquals(resolver.resolveRef(id).map(_.schema.value), Some(schema.value))
       val expected = SchemaValue(
         value = ObjectValue(
           properties = Map(
@@ -143,7 +143,7 @@ class LoadedSchemasResolverTest extends FunSuite {
       )
 
       assertEquals(
-        resolver.resolveRef(s"$id#foo").map(_._1),
+        resolver.resolveRef(s"$id#foo").map(_.schema),
         Some(expected)
       )
     }
@@ -174,10 +174,10 @@ class LoadedSchemasResolverTest extends FunSuite {
       val resolver1 = resolver.withBase(uriRoot1)
 
       val Some((idA, idB)) = for {
-        (schemaA, _) <- resolver1.resolveDynamicRef("#anchor1", scope2)
-        (schemaB, _) <- resolver1.resolveDynamicRef("#anchor1", scope1)
-        idA          <- SchemaValue.id(schemaA)
-        idB          <- SchemaValue.id(schemaB)
+        SchemaResolution(schemaA, _) <- resolver1.resolveDynamicRef("#anchor1", scope2)
+        SchemaResolution(schemaB, _) <- resolver1.resolveDynamicRef("#anchor1", scope1)
+        idA                          <- SchemaValue.id(schemaA)
+        idB                          <- SchemaValue.id(schemaB)
       } yield (idA, idB)
       assertEquals(idA, id2)
       assertEquals(idB, id1)
@@ -227,10 +227,10 @@ class LoadedSchemasResolverTest extends FunSuite {
 
       val scope = DynamicScope.empty.push(uriRoot)
       val ok = for {
-        (schema1, resolver1) <- resolver.resolveRef(id)
-        id1                  <- SchemaValue.id(schema1)
-        (schema2, _)         <- resolver1.resolveDynamicRef("#items", scope)
-        StringValue(anchor2) <- getAnchor(schema2.value)
+        SchemaResolution(schema1, resolver1) <- resolver.resolveRef(id)
+        id1                                  <- SchemaValue.id(schema1)
+        SchemaResolution(schema2, _)         <- resolver1.resolveDynamicRef("#items", scope)
+        StringValue(anchor2)                 <- getAnchor(schema2.value)
       } yield {
         assertEquals(id1, id)
         assertEquals(anchor2, "items")
@@ -290,11 +290,11 @@ class LoadedSchemasResolverTest extends FunSuite {
 
       val scope = DynamicScope.empty.push(uriRoot)
       val ok = for {
-        (schema1, resolver1)        <- resolver.resolveRef(id)
-        id1                         <- SchemaValue.id(schema1)
-        (schema2, _)                <- resolver1.resolveDynamicRef("#items", scope)
-        StringValue(dynamicAnchor2) <- getDynamicAnchor(schema2.value)
-        StringValue(type2)          <- getType(schema2.value)
+        SchemaResolution(schema1, resolver1) <- resolver.resolveRef(id)
+        id1                                  <- SchemaValue.id(schema1)
+        SchemaResolution(schema2, _)         <- resolver1.resolveDynamicRef("#items", scope)
+        StringValue(dynamicAnchor2)          <- getDynamicAnchor(schema2.value)
+        StringValue(type2)                   <- getType(schema2.value)
       } yield {
         assertEquals(id1, id)
         assertEquals(dynamicAnchor2, "items")
@@ -314,7 +314,7 @@ class LoadedSchemasResolverTest extends FunSuite {
 
       val resolver1 = resolver.withLazyResolver(_ => Some(SchemaValue.root(NullValue)))
 
-      val Some((schema, resolver2)) = resolver1.resolveRef("cache-me")
+      val Some(SchemaResolution(schema, resolver2)) = resolver1.resolveRef("cache-me")
       assertEquals(schema, SchemaValue.root(NullValue))
       assertEquals(resolver2.isInstanceOf[LoadedSchemasResolver], true)
       assertEquals(resolver2.asInstanceOf[LoadedSchemasResolver].schemas.keySet, Set(uri("cache-me")))

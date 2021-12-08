@@ -392,13 +392,13 @@ case class Keywords(
 
   private def lazyResolve(
       vocabulary: Vocabulary,
-      resolution: SchemaResolver.Resolution,
+      resolution: SchemaResolution,
       scope: DynamicScope
   ): LazyParseKeywords = {
     val resolveLater = { () =>
       Keywords.parseKeywords(vocabulary, resolution, scope)
     }
-    val resolved = resolution._2.base
+    val resolved = resolution.resolver.base
     LazyParseKeywords(resolved, resolveLater)
   }
 
@@ -447,7 +447,7 @@ case class Keywords(
   }
 
   private def updateKeywordsInside[K <: Keyword: ClassTag](
-      resolution: SchemaResolver.Resolution
+      resolution: SchemaResolution
   )(
       newKeyword: => K
   )(f: (Keywords, K) => K)(implicit scope: DynamicScope): Either[SchemaProblems, Keywords] = {
@@ -503,14 +503,13 @@ object Keywords {
 
   def parseKeywords(
       vocabulary: Vocabulary,
-      resolution: SchemaResolver.Resolution,
+      resolution: SchemaResolution,
       scope: DynamicScope
   ): Either[SchemaProblems, Keywords] = {
-    val schema    = resolution._1
-    val resolver1 = resolution._2
+    val SchemaResolution(schema, resolver) = resolution
     implicit val scope1: DynamicScope = SchemaValue
       .id(schema)
-      .map(id => scope.push(resolver1.absolute(id)))
+      .map(id => scope.push(resolver.absolute(id)))
       .getOrElse(scope)
 
     schema.value match {
@@ -529,7 +528,7 @@ object Keywords {
                   .flatMap { keywords =>
                     if (vocabulary.defines(keyword)) {
                       keywords
-                        .withKeyword(keyword, value, scope1)(resolver1)
+                        .withKeyword(keyword, value, scope1)(resolver)
                         .swap
                         .map(_.prefix(prefix))
                         .swap

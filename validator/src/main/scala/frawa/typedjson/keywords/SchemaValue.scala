@@ -45,16 +45,15 @@ object SchemaValue {
 
   @tailrec
   def vocabulary(
-      resolution: SchemaResolver.Resolution,
+      resolution: SchemaResolution,
       parentVocabulary: Vocabulary
   ): Either[SchemaProblems, Vocabulary] = {
-    val schema = resolution._1
+    val SchemaResolution(schema, resolver) = resolution
     schema match {
       case RootSchemaValue(value, meta) =>
-        val resolver = resolution._2
         val valueWithVocabulary = meta
           .flatMap(resolver.resolveRef)
-          .map(_._1.value)
+          .map(_.schema.value)
           .getOrElse(value)
         vocabulary(resolver.push(SchemaValue(valueWithVocabulary)), parentVocabulary)
       case SchemaValue1(value) =>

@@ -64,31 +64,31 @@ class SchemaResolverTest extends FunSuite {
 
     override val base: URI = fooUri
 
-    override def resolve(uri: URI): Option[Resolution] = uri match {
-      case `fooUri` => Some((fooSchema, this))
-      case `gnuUri` => Some((gnuSchema, this))
+    override def resolve(uri: URI): Option[SchemaResolution] = uri match {
+      case `fooUri` => Some(SchemaResolution(fooSchema, this))
+      case `gnuUri` => Some(SchemaResolution(gnuSchema, this))
       case _        => None
     }
 
   }
 
   test("absolute ref") {
-    val resolved = MySchemaResolver.resolveRef(fooId).map(_._1)
+    val resolved = MySchemaResolver.resolveRef(fooId).map(_.schema)
     assertEquals(resolved, Some(fooSchema))
   }
 
   test("anchor ref") {
-    val resolved = MySchemaResolver.resolveRef("#gnu").map(_._1)
+    val resolved = MySchemaResolver.resolveRef("#gnu").map(_.schema)
     assertEquals(resolved, Some(gnuSchema))
   }
 
   test("path ref") {
-    val resolved = MySchemaResolver.resolveRef("#/$defs/gnu").map(_._1)
+    val resolved = MySchemaResolver.resolveRef("#/$defs/gnu").map(_.schema)
     assertEquals(resolved, Some(gnuSchema))
   }
 
   test("root ref") {
-    val resolved = MySchemaResolver.resolveRef("#").map(_._1)
+    val resolved = MySchemaResolver.resolveRef("#").map(_.schema)
     assertEquals(resolved, Some(fooSchema))
   }
 

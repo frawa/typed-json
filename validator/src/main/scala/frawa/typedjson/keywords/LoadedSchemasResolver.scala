@@ -127,16 +127,16 @@ case class LoadedSchemasResolver(
 
   override def withBase(uri: URI): LoadedSchemasResolver = this.copy(base = uri)
 
-  override protected def resolve(uri: URI): Option[Resolution] = schemas
+  override protected def resolve(uri: URI): Option[SchemaResolution] = schemas
     .get(uri)
-    .map((_, this.withBase(uri)))
+    .map(SchemaResolution(_, this.withBase(uri)))
     .orElse(
       lazyResolver
         .flatMap(_(uri))
         .map { schema =>
           val loaded1 = this.add(uri, schema).withBase(uri)
           val loaded2 = LoadedSchemasResolver.loadSchemas(schema.value, loaded1)
-          (schema, loaded2)
+          SchemaResolution(schema, loaded2)
         }
     )
 
