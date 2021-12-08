@@ -35,10 +35,10 @@ import scala.reflect.ClassTag
 
 sealed trait Keyword
 sealed trait AssertionKeyword  extends Keyword
-sealed trait TypeKeyword       extends AssertionKeyword
 sealed trait ApplicatorKeyword extends Keyword
 
 case class TrivialKeyword(v: Boolean)                                    extends AssertionKeyword
+sealed trait TypeKeyword                                                 extends AssertionKeyword
 case object NullTypeKeyword                                              extends TypeKeyword
 case object BooleanTypeKeyword                                           extends TypeKeyword
 case object StringTypeKeyword                                            extends TypeKeyword
@@ -99,7 +99,7 @@ case class Keywords(
 
   // TODO avoid implicit?
   private def add(keyword: Keyword)(implicit scope: DynamicScope): Keywords =
-    this.copy(keywords = keywords :+ localized(keyword, scope))
+    this.copy(keywords = keywords :+ withLocation(keyword, scope))
 
   // TODO avoid implicit?
   private def addAll(
@@ -133,7 +133,7 @@ case class Keywords(
         def typeNames = Value.asStrings(values)
         def keywords = typeNames
           .flatMap(getTypeCheck)
-          .map(localized(_, scope1))
+          .map(withLocation(_, scope1))
 
         Right(add(UnionTypeKeyword(keywords)))
 
@@ -436,7 +436,7 @@ case class Keywords(
       ) {
         keywords
       } else {
-        keywords :+ localized(newKeyword, scope)
+        keywords :+ withLocation(newKeyword, scope)
       }
     this.copy(keywords = keywords0.map {
       case UriUtil.WithLocation(uri, keyword: K) => UriUtil.WithLocation(uri, f(keyword))
@@ -557,7 +557,7 @@ object Keywords {
     case (Left(previous), _)              => Left(previous)
   }
 
-  def localized(keyword: Keyword, scope: DynamicScope): KeywordWithLocation = {
+  def withLocation(keyword: Keyword, scope: DynamicScope): KeywordWithLocation = {
     import frawa.typedjson.util.UriUtil._
     scope.uris.lastOption.map(WithLocation(_, keyword)).getOrElse(WithLocation(uri("#"), keyword))
   }
