@@ -31,10 +31,10 @@ class KeywordsTest extends FunSuite {
   private def assertKeywords(schema: SchemaValue, allowIgnored: Boolean = false)(
       f: Keywords => Unit
   ): Either[Nothing, Unit] = {
-    implicit val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema)
-    val scope                                    = DynamicScope.empty
+    val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema)
+    val scope                           = DynamicScope.empty
     val withParsed = for {
-      keywords <- Keywords.parseKeywords(vocabularyForTest, schema, scope)
+      keywords <- Keywords.parseKeywords(vocabularyForTest, resolver.push(schema), scope)
     } yield {
       if (!allowIgnored) {
         assertEquals(
@@ -55,9 +55,9 @@ class KeywordsTest extends FunSuite {
   private def assertSchemaProblems(schema: SchemaValue)(
       f: SchemaProblems => Unit
   ): Unit = {
-    implicit val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema)
-    val scope                                    = DynamicScope.empty
-    Keywords.parseKeywords(vocabularyForTest, schema, scope) match {
+    val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema)
+    val scope                           = DynamicScope.empty
+    Keywords.parseKeywords(vocabularyForTest, resolver.push(schema), scope) match {
       case Right(_)     => fail("parsing keywords expected to fail")
       case Left(errors) => f(errors)
     }

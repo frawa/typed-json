@@ -35,6 +35,15 @@ trait SchemaResolver {
 
   def withBase(uri: URI): SchemaResolver = this
 
+  // TODO test me
+  def push(schema: SchemaValue): Resolution = {
+    val resolver = SchemaValue
+      .id(schema)
+      .map(id => this.withBase(this.absolute(id)))
+      .getOrElse(this)
+    (schema, resolver)
+  }
+
   def absolute(ref: String): URI = {
     val uri1 = uri(ref)
     withoutEmptyFragment(
