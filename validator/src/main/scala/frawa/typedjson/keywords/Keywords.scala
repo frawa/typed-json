@@ -249,7 +249,7 @@ case class Keywords(
             .resolveRef(ref)
             .map(Right(_))
             .getOrElse(Left(SchemaProblems(MissingReference(ref))))
-          vocabulary1 <- SchemaValue.vocabulary(resolution._1, vocabulary)
+          vocabulary1 <- SchemaValue.vocabulary(resolution, vocabulary)
           keyword = lazyResolve(vocabulary1, resolution, scope1)
         } yield {
           add(keyword)
@@ -261,7 +261,7 @@ case class Keywords(
             .resolveDynamicRef(ref, scope)
             .map(Right(_))
             .getOrElse(Left(SchemaProblems(MissingDynamicReference(ref))))
-          vocabulary1 <- SchemaValue.vocabulary(resolution._1, vocabulary)
+          vocabulary1 <- SchemaValue.vocabulary(resolution, vocabulary)
           keyword = lazyResolve(vocabulary1, resolution, scope1)
         } yield {
           add(keyword)
@@ -492,11 +492,11 @@ object Keywords {
       vocabulary: Option[Vocabulary],
       lazyResolver: Option[LoadedSchemasResolver.LazyResolver]
   ): Either[SchemaProblems, Keywords] = {
-    implicit val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema, lazyResolver)
-    val scope                                    = DynamicScope.empty.push(resolver.base)
-    val parentVocabulary                         = vocabulary.getOrElse(Vocabulary.coreVocabulary)
+    val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema, lazyResolver)
+    val scope                           = DynamicScope.empty.push(resolver.base)
+    val parentVocabulary                = vocabulary.getOrElse(Vocabulary.coreVocabulary)
     for {
-      vocabulary <- SchemaValue.vocabulary(schema, parentVocabulary)
+      vocabulary <- SchemaValue.vocabulary(resolver.push(schema), parentVocabulary)
       keywords   <- Keywords.parseKeywords(vocabulary, resolver.push(schema), scope)
     } yield keywords
   }

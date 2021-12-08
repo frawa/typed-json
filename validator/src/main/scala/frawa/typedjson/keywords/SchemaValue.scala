@@ -43,18 +43,20 @@ object SchemaValue {
     (Pointer.empty / property)(value).flatMap(Value.asString)
   }
 
-  // TODO avoid implicit?
   @tailrec
-  def vocabulary(schema: SchemaValue, parentVocabulary: Vocabulary)(implicit
-      resolver: SchemaResolver
+  def vocabulary(
+      resolution: SchemaResolver.Resolution,
+      parentVocabulary: Vocabulary
   ): Either[SchemaProblems, Vocabulary] = {
+    val schema = resolution._1
     schema match {
       case RootSchemaValue(value, meta) =>
+        val resolver = resolution._2
         val valueWithVocabulary = meta
           .flatMap(resolver.resolveRef)
           .map(_._1.value)
           .getOrElse(value)
-        vocabulary(SchemaValue(valueWithVocabulary), parentVocabulary)
+        vocabulary(resolver.push(SchemaValue(valueWithVocabulary)), parentVocabulary)
       case SchemaValue1(value) =>
         (Pointer.empty / "$vocabulary")(value)
           .flatMap {
