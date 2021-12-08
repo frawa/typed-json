@@ -32,7 +32,6 @@ trait SchemaResolver {
 
   def withBase(uri: URI): SchemaResolver = this
 
-  // TODO test me
   def push(schema: SchemaValue): SchemaResolution = {
     val resolver = SchemaValue
       .id(schema)

@@ -100,13 +100,9 @@ case class Keywords(
   private def add(keyword: KeywordWithLocation): Keywords =
     this.copy(keywords = keywords :+ keyword)
 
-  // TODO avoid implicit?
-  private def addAll(
-      schemas: Seq[SchemaValue],
-      scope: DynamicScope
-  )(
+  private def addAll(schemas: Seq[SchemaValue], resolver: SchemaResolver, scope: DynamicScope)(
       f: Seq[Keywords] => Keyword
-  )(implicit resolver: SchemaResolver): Either[SchemaProblems, Keywords] = {
+  ): Either[SchemaProblems, Keywords] = {
     val keywords0 = schemas.zipWithIndex.map { case (v, i) =>
       Keywords.parseKeywords(vocabulary, resolver.push(v), scope.push(i))
     }
@@ -117,9 +113,11 @@ case class Keywords(
     }
   }
 
-  // TODO avoid implicit?
-  private def withKeyword(keyword: String, value: Value, scope: DynamicScope)(implicit
-      resolver: SchemaResolver
+  private def withKeyword(
+      keyword: String,
+      value: Value,
+      resolver: SchemaResolver,
+      scope: DynamicScope
   ): Either[SchemaProblems, Keywords] = {
     implicit val scope1: DynamicScope = scope.push(keyword)
 
@@ -169,12 +167,12 @@ case class Keywords(
         }
 
       case ("properties", ObjectValue(properties)) =>
-        mapKeywordsFor(properties, scope1) { keywords =>
+        mapKeywordsFor(properties, resolver, scope1) { keywords =>
           updateKeyword(ObjectPropertiesKeyword())(keyword => keyword.copy(properties = keyword.properties ++ keywords))
         }
 
       case ("patternProperties", ObjectValue(properties)) =>
-        mapKeywordsFor(properties, scope1) { keywords =>
+        mapKeywordsFor(properties, resolver, scope1) { keywords =>
           updateKeyword(ObjectPropertiesKeyword())(keyword => keyword.copy(patternProperties = keywords))
         }
 
@@ -198,13 +196,13 @@ case class Keywords(
         Right(add(ObjectRequiredKeyword(names)))
 
       case ("allOf", ArrayValue(values)) =>
-        addAll(values.map(SchemaValue(_)), scope1)(AllOfKeyword)
+        addAll(values.map(SchemaValue(_)), resolver, scope1)(AllOfKeyword)
 
       case ("anyOf", ArrayValue(values)) =>
-        addAll(values.map(SchemaValue(_)), scope1)(AnyOfKeyword)
+        addAll(values.map(SchemaValue(_)), resolver, scope1)(AnyOfKeyword)
 
       case ("oneOf", ArrayValue(values)) =>
-        addAll(values.map(SchemaValue(_)), scope1)(OneOfKeyword)
+        addAll(values.map(SchemaValue(_)), resolver, scope1)(OneOfKeyword)
 
       case ("if", value) =>
         updateKeywordsInside(resolver.push(SchemaValue(value)))(IfThenElseKeyword()) { (keywords, keyword) =>
@@ -402,11 +400,9 @@ case class Keywords(
     LazyParseKeywords(resolved, resolveLater)
   }
 
-  // TODO avoid implicit?
-  private def mapKeywordsFor(
-      props: Map[String, Value],
-      scope: DynamicScope
-  )(f: Map[String, Keywords] => Keywords)(implicit resolver: SchemaResolver): Either[SchemaProblems, Keywords] = {
+  private def mapKeywordsFor(props: Map[String, Value], resolver: SchemaResolver, scope: DynamicScope)(
+      f: Map[String, Keywords] => Keywords
+  ): Either[SchemaProblems, Keywords] = {
     val propKeywords0 = props.view
       .map { case (prop, v) =>
         (prop, Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(v)), scope.push(prop)))
@@ -507,6 +503,7 @@ object Keywords {
       scope: DynamicScope
   ): Either[SchemaProblems, Keywords] = {
     val SchemaResolution(schema, resolver) = resolution
+    // TODO avoid implicit scope
     implicit val scope1: DynamicScope = SchemaValue
       .id(schema)
       .map(id => scope.push(resolver.absolute(id)))
@@ -528,7 +525,7 @@ object Keywords {
                   .flatMap { keywords =>
                     if (vocabulary.defines(keyword)) {
                       keywords
-                        .withKeyword(keyword, value, scope1)(resolver)
+                        .withKeyword(keyword, value, resolver, scope1)
                         .swap
                         .map(_.prefix(prefix))
                         .swap
