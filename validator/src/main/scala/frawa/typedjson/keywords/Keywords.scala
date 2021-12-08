@@ -16,19 +16,15 @@
 
 package frawa.typedjson.keywords
 
-import frawa.typedjson.parser.ArrayValue
-import frawa.typedjson.parser.BoolValue
-import frawa.typedjson.parser.NumberValue
-import frawa.typedjson.parser.ObjectValue
-import frawa.typedjson.parser.StringValue
-import frawa.typedjson.parser.Value
 import frawa.typedjson.keywords.SchemaProblems.{
   InvalidSchemaValue,
   MissingDynamicReference,
   MissingReference,
   UnsupportedKeyword
 }
+import frawa.typedjson.parser._
 import frawa.typedjson.util.UriUtil
+import frawa.typedjson.util.UriUtil.CurrentLocation
 
 import java.net.URI
 import scala.reflect.ClassTag
@@ -94,11 +90,11 @@ case class Keywords(
     keywords: Seq[Keywords.KeywordWithLocation] = Seq.empty[Keywords.KeywordWithLocation],
     ignored: Set[String] = Set.empty
 ) {
-  import frawa.typedjson.util.SeqUtil._
   import Keywords._
+  import frawa.typedjson.util.SeqUtil._
 
-  private def add(keyword: KeywordWithLocation): Keywords =
-    this.copy(keywords = keywords :+ keyword)
+  private def add(keyword: Keyword)(implicit location: CurrentLocation): Keywords =
+    this.copy(keywords = keywords :+ location(keyword))
 
   private def addAll(schemas: Seq[SchemaValue], resolver: SchemaResolver, scope: DynamicScope)(
       f: Seq[Keywords] => Keyword
@@ -106,10 +102,11 @@ case class Keywords(
     val keywords0 = schemas.zipWithIndex.map { case (v, i) =>
       Keywords.parseKeywords(vocabulary, resolver.push(v), scope.push(i))
     }
+    implicit val location = scope.currentLocation
     for {
       keywords <- combineAllLefts(keywords0)(SchemaProblems.combine)
     } yield {
-      add(withLocation(f(keywords))(scope)).withIgnored(keywords.flatMap(_.ignored).toSet)
+      add(f(keywords)).withIgnored(keywords.flatMap(_.ignored).toSet)
     }
   }
 
@@ -119,7 +116,8 @@ case class Keywords(
       resolver: SchemaResolver,
       scope: DynamicScope
   ): Either[SchemaProblems, Keywords] = {
-    implicit val scope1: DynamicScope = scope.push(keyword)
+    val scope1: DynamicScope = scope.push(keyword)
+    implicit val location    = scope1.currentLocation
 
     (keyword, value) match {
       case ("type", StringValue(typeName)) =>
@@ -133,7 +131,7 @@ case class Keywords(
         def typeNames = Value.asStrings(values)
         def keywords = typeNames
           .flatMap(getTypeCheck)
-          .map(withLocation(_))
+          .map(location(_))
 
         Right(add(UnionTypeKeyword(keywords)))
 
@@ -192,7 +190,6 @@ case class Keywords(
 
       case ("required", ArrayValue(values)) =>
         def names = Value.asStrings(values)
-
         Right(add(ObjectRequiredKeyword(names)))
 
       case ("allOf", ArrayValue(values)) =>
@@ -205,17 +202,17 @@ case class Keywords(
         addAll(values.map(SchemaValue(_)), resolver, scope1)(OneOfKeyword)
 
       case ("if", value) =>
-        updateKeywordsInside(resolver.push(SchemaValue(value)))(IfThenElseKeyword()) { (keywords, keyword) =>
+        updateKeywordsInside(resolver.push(SchemaValue(value)), scope1)(IfThenElseKeyword()) { (keywords, keyword) =>
           keyword.copy(ifKeywords = Some(keywords))
         }
 
       case ("then", value) =>
-        updateKeywordsInside(resolver.push(SchemaValue(value)))(IfThenElseKeyword()) { (keywords, keyword) =>
+        updateKeywordsInside(resolver.push(SchemaValue(value)), scope1)(IfThenElseKeyword()) { (keywords, keyword) =>
           keyword.copy(thenKeywords = Some(keywords))
         }
 
       case ("else", value) =>
-        updateKeywordsInside(resolver.push(SchemaValue(value)))(IfThenElseKeyword()) { (keywords, keyword) =>
+        updateKeywordsInside(resolver.push(SchemaValue(value)), scope1)(IfThenElseKeyword()) { (keywords, keyword) =>
           keyword.copy(elseKeywords = Some(keywords))
         }
 
@@ -421,10 +418,9 @@ case class Keywords(
     }
   }
 
-  // TODO avoid implicit?
   private def updateKeyword[K <: Keyword: ClassTag](
       newKeyword: => K
-  )(f: K => K)(implicit scope: DynamicScope): Keywords = {
+  )(f: K => K)(implicit location: CurrentLocation): Keywords = {
     val keywords0: Seq[KeywordWithLocation] =
       if (
         keywords.exists {
@@ -434,7 +430,7 @@ case class Keywords(
       ) {
         keywords
       } else {
-        keywords :+ withLocation(newKeyword)
+        keywords :+ location(newKeyword)
       }
     this.copy(keywords = keywords0.map {
       case UriUtil.WithLocation(uri, keyword: K) => UriUtil.WithLocation(uri, f(keyword))
@@ -443,10 +439,11 @@ case class Keywords(
   }
 
   private def updateKeywordsInside[K <: Keyword: ClassTag](
-      resolution: SchemaResolution
+      resolution: SchemaResolution,
+      scope: DynamicScope
   )(
       newKeyword: => K
-  )(f: (Keywords, K) => K)(implicit scope: DynamicScope): Either[SchemaProblems, Keywords] = {
+  )(f: (Keywords, K) => K)(implicit location: CurrentLocation): Either[SchemaProblems, Keywords] = {
     for {
       keywords <- Keywords.parseKeywords(vocabulary, resolution, scope)
     } yield {
@@ -476,13 +473,6 @@ case class Keywords(
 object Keywords {
   type KeywordWithLocation = UriUtil.WithLocation[Keyword]
 
-  import scala.language.implicitConversions
-
-  private implicit def withLocation(keyword: Keyword)(implicit scope: DynamicScope): KeywordWithLocation = {
-    import frawa.typedjson.util.UriUtil._
-    scope.uris.lastOption.map(WithLocation(_, keyword)).getOrElse(WithLocation(uri("#"), keyword))
-  }
-
   def apply(
       schema: SchemaValue,
       vocabulary: Option[Vocabulary],
@@ -503,11 +493,11 @@ object Keywords {
       scope: DynamicScope
   ): Either[SchemaProblems, Keywords] = {
     val SchemaResolution(schema, resolver) = resolution
-    // TODO avoid implicit scope
-    implicit val scope1: DynamicScope = SchemaValue
+    val scope1: DynamicScope = SchemaValue
       .id(schema)
       .map(id => scope.push(resolver.absolute(id)))
       .getOrElse(scope)
+    implicit val location = scope1.currentLocation
 
     schema.value match {
       case BoolValue(v) => Right(Keywords(vocabulary, schema).add(TrivialKeyword(v)))

@@ -36,6 +36,10 @@ object UriUtil {
 
   case class WithLocation[+T](uri: URI, value: T)
 
+  case class CurrentLocation(uri: URI) {
+    def apply[T](value: T): WithLocation[T] = WithLocation(uri, value)
+  }
+
   private def escape(value: String): String = {
     // this is because the ScalaJS implementation of URI might fail
     value.replace("\\", "_")

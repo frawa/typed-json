@@ -49,6 +49,9 @@ case class DynamicScope(uris: Seq[URI]) {
     DynamicScope(uris :+ next)
   }
 
+  def currentLocation: CurrentLocation = {
+    CurrentLocation(uris.lastOption.getOrElse(uri("#")))
+  }
 }
 
 object DynamicScope {
