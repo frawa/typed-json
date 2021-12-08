@@ -19,6 +19,7 @@ val sharedScalacSettings = Seq(
   scalacOptions ++= Seq(
     "-Wunused:imports",
     "-Xfatal-warnings",
+    "-feature",
     "-deprecation",
     "-unchecked"
   ),
