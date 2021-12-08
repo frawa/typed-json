@@ -1,18 +1,17 @@
 # Backlog
 
 ## Doing
-- review and refactor: implicits
 
 ## TODO
+- integrate with an interactive tool (to improve suggestions)
+  - code mirror next?
+  - vs code?
 - crystallize API with an example
 - DX: improve discoverability
 - better artifact names
 - produce output schema from annotations/errors
 - validating lazy loader, which validates against meta schema on the fly
 - improve suggestions
-- integrate with an interactive tool (to improve suggestions)
-  - code mirror next? 
-  - vs code?
 - post process annotations?
 - cache keywords for schema values for reuse
 - latest dependencies
@@ -30,6 +29,7 @@
 - CI on GH Actions?
 
 ## Done
+- review and refactor: implicits
 - review naming schema, ubiquitous language from spec
 - review and cleanup, tests
 - isolate dependency on zio-json, and use with tests and examples only
