@@ -46,7 +46,17 @@ lazy val root = (project in file("."))
     name    := "scala-json-schema-validator-root",
     publish := false
   )
-  .aggregate(parser.jvm, parser.js, macros.jvm, validator.jvm, validator.js)
+  .aggregate(
+    parser.jvm,
+    parser.js,
+    parserZio.jvm,
+    parserZio.js,
+    parserJawn.jvm,
+    parserJawn.js,
+    macros.jvm,
+    validator.jvm,
+    validator.js
+  )
 
 lazy val parser =
   crossProject(JVMPlatform, JSPlatform)
@@ -78,6 +88,29 @@ lazy val parserZio =
     .jsSettings(
       libraryDependencies += "dev.zio"       %%% "zio-json" % zioJsonVersion,
       libraryDependencies += "org.scalameta" %%% "munit"    % munitVersion % Test
+    )
+    .dependsOn(parser)
+
+lazy val parserJawn =
+  crossProject(JVMPlatform, JSPlatform)
+    .withoutSuffixFor(JVMPlatform)
+    .crossType(CrossType.Pure)
+    .in(file("parser-jawn"))
+    .settings(sharedSettings)
+    .settings(sharedScalacSettings)
+    .settings(strictScalacSettings)
+    .settings(
+      name := "scala-json-schema-parser-jawn"
+    )
+    .jvmSettings(
+      libraryDependencies += "org.typelevel" %% "jawn-parser" % jawnVersion,
+//      libraryDependencies += "org.typelevel" %% "jawn-ast"    % jawnVersion,
+      libraryDependencies += "org.scalameta" %% "munit" % munitVersion % Test
+    )
+    .jsSettings(
+      libraryDependencies += "org.typelevel" %%% "jawn-parser" % jawnVersion,
+//      libraryDependencies += "org.typelevel" %%% "jawn-ast"    % jawnVersion,
+      libraryDependencies += "org.scalameta" %%% "munit" % munitVersion % Test
     )
     .dependsOn(parser)
 

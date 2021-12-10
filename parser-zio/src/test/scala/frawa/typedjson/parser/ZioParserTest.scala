@@ -18,8 +18,8 @@ package frawa.typedjson.parser
 
 import munit._
 
-class ParserTest extends FunSuite {
-  implicit val zioParser: ZioParser = new ZioParser()
+class ZioParserTest extends FunSuite {
+  implicit val parser: Parser = new ZioParser()
 
   test("basic types") {
     assertEquals(Parser("""13"""), Right(NumberValue(13)))
@@ -34,5 +34,13 @@ class ParserTest extends FunSuite {
 
   test("object") {
     assertEquals(Parser("""{"toto":"titi"}"""), Right(ObjectValue(Map("toto" -> StringValue("titi")))))
+  }
+
+  test("big number") {
+    assertEquals(
+      Parser("98249283749234923498293171823948729348710298301928331"),
+//      Right(NumberValue(BigDecimal("98249283749234923498293171823948729348710298301928331")))
+      Left("(expected a 128 BigDecimal)")
+    )
   }
 }
