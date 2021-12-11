@@ -19,6 +19,7 @@ package frawa.typedjson.keywords
 import frawa.typedjson
 import frawa.typedjson.parser.{ArrayValue, ObjectValue, StringValue}
 import frawa.typedjson.keywords
+import frawa.typedjson.pointer.Pointer
 
 case class Evaluator[R] private[keywords] (private val eval: Evaluator.EvalFun[R]) {
   def apply(value: InnerValue): Result[R]              = eval(value)

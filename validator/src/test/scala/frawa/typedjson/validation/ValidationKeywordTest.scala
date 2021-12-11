@@ -20,6 +20,7 @@ import frawa.typedjson
 import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.keywords.SchemaProblems.MissingReference
 import frawa.typedjson.keywords._
+import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestUtil._
 import munit.FunSuite

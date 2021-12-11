@@ -23,6 +23,7 @@ import frawa.typedjson.parser.ObjectValue
 import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.util.UriUtil._
 import frawa.typedjson.parser.ZioParser
+import frawa.typedjson.pointer.Pointer
 
 class LoadedSchemasResolverTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()

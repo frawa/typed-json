@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.keywords
+package frawa.typedjson.pointer
 
-import munit._
-import frawa.typedjson.parser.ArrayValue
-import frawa.typedjson.parser.ObjectValue
-import frawa.typedjson.parser.NumberValue
+import frawa.typedjson.parser.{ArrayValue, NumberValue, ObjectValue}
+import munit.FunSuite
 
 // see https://datatracker.ietf.org/doc/html/rfc6901
 

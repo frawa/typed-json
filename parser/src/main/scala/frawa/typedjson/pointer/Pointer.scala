@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.keywords
+package frawa.typedjson.pointer
 
-import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.ArrayValue
-import frawa.typedjson.parser.ObjectValue
+import frawa.typedjson.parser.{ArrayValue, ObjectValue, Value}
 
 object Pointer {
   def empty = new Pointer(Nil)

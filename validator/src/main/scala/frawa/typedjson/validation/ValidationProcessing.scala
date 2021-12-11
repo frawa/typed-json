@@ -18,6 +18,7 @@ package frawa.typedjson.validation
 
 import frawa.typedjson.parser._
 import frawa.typedjson.keywords._
+import frawa.typedjson.pointer.Pointer
 
 import java.net.URI
 //import java.time.OffsetTime

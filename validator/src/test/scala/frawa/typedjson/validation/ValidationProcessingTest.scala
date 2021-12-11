@@ -20,9 +20,10 @@ import frawa.typedjson
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser._
 import frawa.typedjson.keywords._
+import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestSchemas._
-import frawa.typedjson.testutil.TestUtil.{assertNoIgnoredKeywords, assertResult, withSchema, dialect}
+import frawa.typedjson.testutil.TestUtil.{assertNoIgnoredKeywords, assertResult, dialect, withSchema}
 import munit.FunSuite
 
 object ValidationProcessingTest {

@@ -69,6 +69,12 @@ lazy val parser =
     .settings(
       name := "scala-json-schema-parser"
     )
+    .jvmSettings(
+      libraryDependencies += "org.scalameta" %% "munit" % munitVersion % Test
+    )
+    .jsSettings(
+      libraryDependencies += "org.scalameta" %%% "munit" % munitVersion % Test
+    )
 
 lazy val parserZio =
   crossProject(JVMPlatform, JSPlatform)
@@ -104,13 +110,11 @@ lazy val parserJawn =
     )
     .jvmSettings(
       libraryDependencies += "org.typelevel" %% "jawn-parser" % jawnVersion,
-//      libraryDependencies += "org.typelevel" %% "jawn-ast"    % jawnVersion,
-      libraryDependencies += "org.scalameta" %% "munit" % munitVersion % Test
+      libraryDependencies += "org.scalameta" %% "munit"       % munitVersion % Test
     )
     .jsSettings(
       libraryDependencies += "org.typelevel" %%% "jawn-parser" % jawnVersion,
-//      libraryDependencies += "org.typelevel" %%% "jawn-ast"    % jawnVersion,
-      libraryDependencies += "org.scalameta" %%% "munit" % munitVersion % Test
+      libraryDependencies += "org.scalameta" %%% "munit"       % munitVersion % Test
     )
     .dependsOn(parser)
 
