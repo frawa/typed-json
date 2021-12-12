@@ -101,9 +101,15 @@ object LoadedSchemasResolver {
 
   private type NestedSchemaGetter = Value => Seq[Value]
 
-  private def selfSchema: NestedSchemaGetter    = v => Seq(v)
-  private def arraySchemas: NestedSchemaGetter  = { case ArrayValue(vs) => vs }
-  private def objectSchemas: NestedSchemaGetter = { case ObjectValue(ps) => ps.values.toSeq }
+  private def selfSchema: NestedSchemaGetter = v => Seq(v)
+  private def arraySchemas: NestedSchemaGetter = {
+    case ArrayValue(vs) => vs
+    case _              => Seq.empty
+  }
+  private def objectSchemas: NestedSchemaGetter = {
+    case ObjectValue(ps) => ps.values.toSeq
+    case _               => Seq.empty
+  }
 
   private def loadNestedSchemaValues(
       property: String,

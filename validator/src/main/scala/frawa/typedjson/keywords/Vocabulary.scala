@@ -45,9 +45,15 @@ object Vocabulary {
 
   private type NestedSchemaGetter = Value => Seq[Value]
 
-  private def objectSchemas: NestedSchemaGetter = { case ObjectValue(ps) => ps.values.toSeq }
-  private def arraySchemas: NestedSchemaGetter  = { case ArrayValue(vs) => vs }
-  private def selfSchema: NestedSchemaGetter    = v => Seq(v)
+  private def objectSchemas: NestedSchemaGetter = {
+    case ObjectValue(ps) => ps.values.toSeq
+    case _               => Seq.empty
+  }
+  private def arraySchemas: NestedSchemaGetter = {
+    case ArrayValue(vs) => vs
+    case _              => Seq.empty
+  }
+  private def selfSchema: NestedSchemaGetter = v => Seq(v)
 
   def nestedSchemasGetter(t: NestedSchemaType): Option[NestedSchemaGetter] = t match {
     case NestedObjectSchemas => Some(objectSchemas)
