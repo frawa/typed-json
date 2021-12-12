@@ -16,7 +16,7 @@
 
 package frawa.typedjson.parser
 
-trait Value
+sealed trait Value
 case class NumberValue(value: BigDecimal)              extends Value
 case class BoolValue(value: Boolean)                   extends Value
 case object NullValue                                  extends Value
