@@ -17,8 +17,10 @@
 package frawa.typedjson.jsonSchemaTestSuite
 
 class Draft202012OptionalFormatTest extends JsonSchemaTestSuite {
-  import frawa.typedjson.parser._
   import frawa.typedjson.macros.Macros._
+  import frawa.typedjson.parser._
+  // not unused, used by macro
+  import frawa.typedjson.parser.Value._
 
   private val draft202012OptionalFormatFiles: Map[String, Value] =
     folderJsonContents("./JSON-Schema-Test-Suite/tests/draft2020-12/optional/format", ".json")

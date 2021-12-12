@@ -17,9 +17,9 @@
 package frawa.typedjson.validation
 
 import frawa.typedjson
-import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.keywords.SchemaProblems.MissingReference
 import frawa.typedjson.keywords._
+import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestUtil._

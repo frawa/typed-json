@@ -16,8 +16,9 @@
 
 package frawa.typedjson.suggestion
 
-import frawa.typedjson.parser._
 import frawa.typedjson.keywords._
+import frawa.typedjson.parser.Value._
+import frawa.typedjson.parser._
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.validation.{ValidationProcessing, ValidationResult}
 

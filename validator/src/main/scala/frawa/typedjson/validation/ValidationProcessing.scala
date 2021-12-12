@@ -16,8 +16,9 @@
 
 package frawa.typedjson.validation
 
-import frawa.typedjson.parser._
 import frawa.typedjson.keywords._
+import frawa.typedjson.parser.Value._
+import frawa.typedjson.parser._
 import frawa.typedjson.pointer.Pointer
 
 import java.net.URI

@@ -16,12 +16,13 @@
 
 package frawa.typedjson.keywords
 
-import frawa.typedjson.parser._
 import frawa.typedjson.keywords.SchemaProblems.InvalidSchemaValue
+import frawa.typedjson.parser.Value._
+import frawa.typedjson.parser._
 import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.util.UriUtil.{WithLocation, uri}
 import frawa.typedjson.testutil.TestSchemas._
 import frawa.typedjson.testutil.TestUtil._
+import frawa.typedjson.util.UriUtil.{WithLocation, uri}
 import munit.FunSuite
 
 class KeywordsTest extends FunSuite {

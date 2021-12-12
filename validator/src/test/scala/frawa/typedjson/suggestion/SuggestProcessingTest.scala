@@ -16,8 +16,9 @@
 
 package frawa.typedjson.suggestion
 
-import frawa.typedjson.parser._
 import frawa.typedjson.keywords.{SchemaValue, Vocabulary}
+import frawa.typedjson.parser.Value._
+import frawa.typedjson.parser._
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestSchemas.{numberArraySchema, totoObjectSchema, totoRequiredObjectSchema}

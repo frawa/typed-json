@@ -16,14 +16,12 @@
 
 package frawa.typedjson.keywords
 
-import munit.FunSuite
-import frawa.typedjson.parser.NullValue
-import frawa.typedjson.parser.StringValue
-import frawa.typedjson.parser.ObjectValue
-import frawa.typedjson.testutil.TestUtil._
-import frawa.typedjson.util.UriUtil._
+import frawa.typedjson.parser.Value._
 import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.pointer.Pointer
+import frawa.typedjson.testutil.TestUtil._
+import frawa.typedjson.util.UriUtil._
+import munit.FunSuite
 
 class LoadedSchemasResolverTest extends FunSuite {
   implicit val zioParser: ZioParser = new ZioParser()

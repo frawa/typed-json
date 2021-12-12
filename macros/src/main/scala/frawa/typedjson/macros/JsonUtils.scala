@@ -16,6 +16,7 @@
 
 package frawa.typedjson.macros
 
+import frawa.typedjson.parser.Value._
 import frawa.typedjson.parser._
 
 import scala.reflect.macros.blackbox

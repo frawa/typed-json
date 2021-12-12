@@ -16,10 +16,8 @@
 
 package frawa.typedjson.keywords
 
-import frawa.typedjson.parser.ArrayValue
-import frawa.typedjson.parser.ObjectValue
-import frawa.typedjson.parser.StringValue
 import frawa.typedjson.parser.Value
+import frawa.typedjson.parser.Value._
 import frawa.typedjson.util.UriUtil
 import frawa.typedjson.util.UriUtil._
 

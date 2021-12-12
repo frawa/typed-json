@@ -23,6 +23,8 @@ import java.net.URI
 
 object Remotes {
   import frawa.typedjson.parser._
+  // not unused, used by macro
+  import frawa.typedjson.parser.Value._
 
   val remotesUri: URI = UriUtil.uri("http://localhost:1234")
 

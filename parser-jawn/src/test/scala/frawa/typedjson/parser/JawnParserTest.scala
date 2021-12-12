@@ -16,6 +16,7 @@
 
 package frawa.typedjson.parser
 
+import frawa.typedjson.parser.Value._
 import munit._
 
 class JawnParserTest extends FunSuite {

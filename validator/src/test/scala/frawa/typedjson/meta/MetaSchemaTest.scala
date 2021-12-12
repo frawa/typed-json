@@ -16,8 +16,8 @@
 
 package frawa.typedjson.meta
 
-import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.keywords._
+import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.validation.{ValidationProcessing, ValidationResult}

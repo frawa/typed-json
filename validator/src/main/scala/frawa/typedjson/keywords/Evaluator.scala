@@ -17,8 +17,8 @@
 package frawa.typedjson.keywords
 
 import frawa.typedjson
-import frawa.typedjson.parser.{ArrayValue, ObjectValue, StringValue}
 import frawa.typedjson.keywords
+import frawa.typedjson.parser.Value._
 import frawa.typedjson.pointer.Pointer
 
 case class Evaluator[R] private[keywords] (private val eval: Evaluator.EvalFun[R]) {

@@ -16,7 +16,8 @@
 
 package frawa.typedjson.keywords
 
-import frawa.typedjson.parser.{ArrayValue, ObjectValue, Value}
+import frawa.typedjson.parser.Value
+import frawa.typedjson.parser.Value._
 import frawa.typedjson.util.SeqUtil
 import frawa.typedjson.util.UriUtil.uri
 

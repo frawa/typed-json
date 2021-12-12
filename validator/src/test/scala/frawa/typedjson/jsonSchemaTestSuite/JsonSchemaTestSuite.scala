@@ -16,9 +16,10 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import frawa.typedjson.meta.MetaSchemas
-import frawa.typedjson.parser._
 import frawa.typedjson.keywords._
+import frawa.typedjson.meta.MetaSchemas
+import frawa.typedjson.parser.Value._
+import frawa.typedjson.parser._
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.validation.{ValidationProcessing, ValidationResult}

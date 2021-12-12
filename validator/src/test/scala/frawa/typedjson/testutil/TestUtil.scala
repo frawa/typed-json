@@ -16,9 +16,10 @@
 
 package frawa.typedjson.testutil
 
+import frawa.typedjson.keywords._
 import frawa.typedjson.parser.{Parser, Value}
-import frawa.typedjson.keywords.{SchemaValue, _}
 import munit.Assertions.{assertEquals, clue, clues, fail}
+
 import java.net.URI
 
 object TestUtil {
