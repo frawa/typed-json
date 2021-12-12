@@ -16,7 +16,7 @@
 
 package frawa.typedjson.parser
 
-import frawa.typedjson.pointer.{Offset, OffsetParser, Pointer}
+import frawa.typedjson.pointer.Pointer
 import org.typelevel.jawn
 import org.typelevel.jawn.FContext
 

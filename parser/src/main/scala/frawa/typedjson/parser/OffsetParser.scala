@@ -1,6 +1,6 @@
-package frawa.typedjson.pointer
+package frawa.typedjson.parser
 
-import frawa.typedjson.parser.Value
+import frawa.typedjson.pointer.Pointer
 
 trait OffsetParser {
   import Offset._
@@ -12,7 +12,6 @@ trait OffsetParser {
 
 case class Offset(start: Int, end: Int)
 object Offset {
-  import frawa.typedjson.parser._
 
   sealed trait WithOffset[+V] {
     val offset: Offset
