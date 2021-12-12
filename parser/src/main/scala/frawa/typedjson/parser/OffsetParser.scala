@@ -4,38 +4,23 @@ import frawa.typedjson.pointer.Pointer
 
 trait OffsetParser {
   import Offset._
-  def parseWithOffset(json: String): Either[String, WithOffset[Value]]
+  def parseWithOffset(json: String): Either[String, Value]
 
-  def pointerAt(value: WithOffset[Value])(offset: Int): Pointer
-  def offsetAt(value: WithOffset[Value])(pointer: Pointer): Offset
+  def pointerAt(value: Value)(offset: Int): Pointer
+  def offsetAt(value: Value)(pointer: Pointer): Offset
 }
 
 case class Offset(start: Int, end: Int)
 object Offset {
 
-  sealed trait WithOffset[+V] {
+  sealed trait Value {
     val offset: Offset
-    val value: V
   }
 
-  sealed trait ValueWithOffset[+T <: Value] extends WithOffset[T]
-
-  case class NumberValueWithOffset(offset: Offset, value: NumberValue) extends ValueWithOffset[NumberValue]
-
-  case class BoolValueWithOffset(offset: Offset, value: BoolValue) extends ValueWithOffset[BoolValue]
-
-  case class NullValueWithOffset(offset: Offset) extends ValueWithOffset[NullValue.type] {
-    val value = NullValue
-  }
-
-  case class StringValueWithOffset(offset: Offset, value: StringValue) extends ValueWithOffset[StringValue]
-
-  case class ArrayValueWithOffset(offset: Offset, vs: Seq[ValueWithOffset[Value]]) extends ValueWithOffset[ArrayValue] {
-    val value = ArrayValue(vs.map(_.value))
-  }
-
-  case class ObjectValueWithOffset(offset: Offset, properties: Map[String, ValueWithOffset[Value]])
-      extends ValueWithOffset[ObjectValue] {
-    val value = ObjectValue(properties.view.mapValues(_.value).toMap)
-  }
+  case class NumberValue(offset: Offset, value: BigDecimal)              extends Value
+  case class BoolValue(offset: Offset, value: Boolean)                   extends Value
+  case class NullValue(offset: Offset)                                   extends Value
+  case class StringValue(offset: Offset, value: CharSequence)            extends Value
+  case class ArrayValue(offset: Offset, vs: Seq[Value])                  extends Value
+  case class ObjectValue(offset: Offset, properties: Map[String, Value]) extends Value
 }

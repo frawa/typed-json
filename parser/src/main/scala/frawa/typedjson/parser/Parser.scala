@@ -46,4 +46,15 @@ object Value {
   }
 
   def asStrings(values: Seq[Value]): Seq[String] = values.flatMap(asString)
+
+  def withoutOffset(value: Offset.Value): Value = {
+    value match {
+      case Offset.NumberValue(_, value)      => NumberValue(value)
+      case Offset.BoolValue(_, value)        => BoolValue(value)
+      case Offset.NullValue(_)               => NullValue
+      case Offset.StringValue(_, value)      => StringValue(value.toString)
+      case Offset.ArrayValue(_, vs)          => ArrayValue(vs.map(withoutOffset))
+      case Offset.ObjectValue(_, properties) => ObjectValue(properties.view.mapValues(withoutOffset).toMap)
+    }
+  }
 }

@@ -24,28 +24,28 @@ class JawnOffsetParserTest extends FunSuite {
   import Offset._
 
   test("basic types") {
-    assertEquals(parser.parseWithOffset("""13"""), Right(NumberValueWithOffset(Offset(0, 2), NumberValue(13))))
-    assertEquals(parser.parseWithOffset("""true"""), Right(BoolValueWithOffset(Offset(0, 4), BoolValue(true))))
-    assertEquals(parser.parseWithOffset("""null"""), Right(NullValueWithOffset(Offset(0, 4))))
+    assertEquals(parser.parseWithOffset("""13"""), Right(NumberValue(Offset(0, 2), 13)))
+    assertEquals(parser.parseWithOffset("""true"""), Right(BoolValue(Offset(0, 4), value = true)))
+    assertEquals(parser.parseWithOffset("""null"""), Right(NullValue(Offset(0, 4))))
     assertEquals(
       parser.parseWithOffset(""""string""""),
-      Right(StringValueWithOffset(Offset(0, 8), StringValue("string")))
+      Right(StringValue(Offset(0, 8), "string"))
     )
   }
 
   test("array") {
     assertEquals(
       parser.parseWithOffset("""[13]"""),
-      Right(ArrayValueWithOffset(Offset(1, 3), Seq(NumberValueWithOffset(Offset(1, 3), NumberValue(13)))))
+      Right(ArrayValue(Offset(0, 3), Seq(NumberValue(Offset(1, 3), 13))))
     )
     assertEquals(
       parser.parseWithOffset("""[ 13 , 14 ]"""),
       Right(
-        ArrayValueWithOffset(
-          Offset(2, 10),
+        ArrayValue(
+          Offset(0, 10),
           Seq(
-            NumberValueWithOffset(Offset(2, 4), NumberValue(13)),
-            NumberValueWithOffset(Offset(7, 9), NumberValue(14))
+            NumberValue(Offset(2, 4), 13),
+            NumberValue(Offset(7, 9), 14)
           )
         )
       )
@@ -56,20 +56,20 @@ class JawnOffsetParserTest extends FunSuite {
     assertEquals(
       parser.parseWithOffset("""{"toto":"titi"}"""),
       Right(
-        ObjectValueWithOffset(
-          Offset(8, 14),
-          Map("toto" -> StringValueWithOffset(Offset(8, 12), StringValue("titi")))
+        ObjectValue(
+          Offset(0, 14),
+          Map("toto" -> StringValue(Offset(8, 14), "titi"))
         )
       )
     )
     assertEquals(
       parser.parseWithOffset("""{"toto":"titi", "foo": 13 }"""),
       Right(
-        ObjectValueWithOffset(
-          Offset(8, 26),
+        ObjectValue(
+          Offset(0, 26),
           Map(
-            "toto" -> StringValueWithOffset(Offset(8, 12), StringValue("titi")),
-            "foo"  -> NumberValueWithOffset(Offset(23, 25), NumberValue(13))
+            "toto" -> StringValue(Offset(8, 14), "titi"),
+            "foo"  -> NumberValue(Offset(23, 25), 13)
           )
         )
       )

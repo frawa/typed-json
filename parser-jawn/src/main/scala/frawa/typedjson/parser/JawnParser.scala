@@ -21,28 +21,16 @@ import org.typelevel.jawn
 import org.typelevel.jawn.FContext
 
 class JawnParser extends Parser with OffsetParser {
-  import Offset._
-
   override def parse(json: String): Either[String, Value] = {
     jawn.Parser.parseFromString(json)(valueFacade).toEither.swap.map(_.getMessage).swap
   }
 
-  override def parseWithOffset(json: String): Either[String, WithOffset[Value]] = {
-    jawn.Parser.parseFromString(json)(valueWithOffsetFacade).toEither.swap.map(_.getMessage).swap
+  override def parseWithOffset(json: String): Either[String, Offset.Value] = {
+    jawn.Parser.parseFromString(json)(offsetValueFacade).toEither.swap.map(_.getMessage).swap
   }
 
-  override def pointerAt(value: WithOffset[Value])(offset: Int): Pointer    = ???
-  override def offsetAt(value: WithOffset[Value])(pointer: Pointer): Offset = ???
-
-  //  override def pointerAt(json: String)(offset: Int): Either[String, Pointer] = {
-//    jawn.Parser
-//      .parseFromString(json)(pointerFacade(offset))
-//      .toEither
-//      .swap
-//      .map(_.getMessage)
-//      .swap
-//      .map(_.getOrElse(Pointer.empty))
-//  }
+  override def pointerAt(value: Offset.Value)(offset: Int): Pointer    = ???
+  override def offsetAt(value: Offset.Value)(pointer: Pointer): Offset = ???
 
   private val valueFacade: jawn.Facade[Value] = new jawn.Facade.SimpleFacade[Value] {
     override def jarray(vs: List[Value]): Value                             = ArrayValue(vs)
@@ -54,45 +42,41 @@ class JawnParser extends Parser with OffsetParser {
     override def jstring(s: CharSequence): Value                            = StringValue(s.toString)
   }
 
-  private def valueWithOffsetFacade: jawn.Facade[ValueWithOffset[Value]] = new jawn.Facade[ValueWithOffset[Value]] {
+  private def offsetValueFacade: jawn.Facade[Offset.Value] = new jawn.Facade[Offset.Value] {
 
-    override def singleContext(index: Int): FContext[ValueWithOffset[Value]] = new FContext[ValueWithOffset[Value]] {
-      private var current: Option[ValueWithOffset[Value]] = None
+    private def string(s: CharSequence, index: Int): Offset.StringValue =
+      Offset.StringValue(Offset(index, index + s.length() + 2), s)
+
+    override def singleContext(index: Int): FContext[Offset.Value] = new FContext[Offset.Value] {
+      private var current: Option[Offset.Value] = None
       override def add(s: CharSequence, index: Int): Unit = {
-        current = Some(StringValueWithOffset(Offset(index, index + s.length()), StringValue(s.toString)))
+        current = Some(string(s, index))
       }
-      override def add(s: CharSequence, start: Int, limit: Int): Unit = {
-        current = Some(StringValueWithOffset(Offset(index, limit), StringValue(s.toString)))
-      }
-      override def add(v: ValueWithOffset[Value], index: Int): Unit = { current = Some(v) }
-      override def finish(index: Int): ValueWithOffset[Value] =
+      override def add(v: Offset.Value, index: Int): Unit = { current = Some(v) }
+      override def finish(index: Int): Offset.Value =
         current.getOrElse(throw new IllegalStateException("missing single value"))
       override def isObj: Boolean = false
     }
 
-    override def arrayContext(index0: Int): FContext[ValueWithOffset[Value]] = new FContext[ValueWithOffset[Value]] {
-      private var vs: Seq[ValueWithOffset[Value]] = Seq.empty
+    override def arrayContext(startIndex: Int): FContext[Offset.Value] = new FContext[Offset.Value] {
+      private var vs: Seq[Offset.Value] = Seq.empty
 
       override def add(s: CharSequence, index: Int): Unit = {
-        vs = vs :+ StringValueWithOffset(Offset(index, index + s.length()), StringValue(s.toString))
+        vs = vs :+ string(s, index)
       }
-      override def add(s: CharSequence, index: Int, limit: Int): Unit = {
-        vs = vs :+ StringValueWithOffset(Offset(index, limit), StringValue(s.toString))
-      }
-      override def add(v: ValueWithOffset[Value], index: Int): Unit = {
+      override def add(v: Offset.Value, index: Int): Unit = {
         vs = vs :+ v
       }
-      override def finish(index: Int): ValueWithOffset[Value] = {
-        val start = vs.headOption.map(_.offset.start).getOrElse(index - 1)
-        ArrayValueWithOffset(Offset(start, index), vs)
+      override def finish(index: Int): Offset.Value = {
+        Offset.ArrayValue(Offset(startIndex, index), vs)
       }
 
       override def isObj: Boolean = false
     }
 
-    override def objectContext(index: Int): FContext[ValueWithOffset[Value]] = new FContext[ValueWithOffset[Value]] {
-      private var currentKey: Option[String]                      = None
-      private var properties: Map[String, ValueWithOffset[Value]] = Map.empty
+    override def objectContext(startIndex: Int): FContext[Offset.Value] = new FContext[Offset.Value] {
+      private var currentKey: Option[String]            = None
+      private var properties: Map[String, Offset.Value] = Map.empty
       override def add(s: CharSequence, index: Int): Unit = {
         if (currentKey.isEmpty) {
           currentKey = Some(s.toString)
@@ -100,99 +84,35 @@ class JawnParser extends Parser with OffsetParser {
           properties = properties + (
             (
               currentKey.get,
-              StringValueWithOffset(
-                Offset(index, index + s.length()),
-                StringValue(s.toString)
-              )
+              string(s, index)
             )
           )
           currentKey = None
         }
       }
-      override def add(v: ValueWithOffset[Value], index: Int): Unit = {
+      override def add(v: Offset.Value, index: Int): Unit = {
         properties = properties + ((currentKey.get, v))
         currentKey = null
       }
-      override def finish(index: Int): ValueWithOffset[Value] = {
-        val start = properties.values.headOption.map(_.offset.start).getOrElse(index - 1)
-        ObjectValueWithOffset(Offset(start, index), properties)
+      override def finish(index: Int): Offset.Value = {
+        Offset.ObjectValue(Offset(startIndex, index), properties)
       }
       override def isObj: Boolean = true
     }
 
-    override def jnull(index: Int): ValueWithOffset[Value] = NullValueWithOffset(Offset(index, index + 4))
+    override def jnull(index: Int): Offset.Value = Offset.NullValue(Offset(index, index + 4))
 
-    override def jfalse(index: Int): ValueWithOffset[Value] =
-      BoolValueWithOffset(Offset(index, index + 5), BoolValue(false))
+    override def jfalse(index: Int): Offset.Value =
+      Offset.BoolValue(Offset(index, index + 5), value = false)
 
-    override def jtrue(index: Int): ValueWithOffset[Value] =
-      BoolValueWithOffset(Offset(index, index + 4), BoolValue(true))
+    override def jtrue(index: Int): Offset.Value =
+      Offset.BoolValue(Offset(index, index + 4), value = true)
 
-    override def jnum(s: CharSequence, decIndex: Int, expIndex: Int, index: Int): ValueWithOffset[Value] =
-      NumberValueWithOffset(Offset(index, index + s.length()), NumberValue(BigDecimal.exact(s.toString)))
+    override def jnum(s: CharSequence, decIndex: Int, expIndex: Int, index: Int): Offset.Value =
+      Offset.NumberValue(Offset(index, index + s.length()), BigDecimal.exact(s.toString))
 
-    override def jstring(s: CharSequence, index: Int): ValueWithOffset[Value] =
-      StringValueWithOffset(Offset(index, index + s.length()), StringValue(s.toString))
+    override def jstring(s: CharSequence, index: Int): Offset.Value =
+      string(s, index)
   }
-
-  //  private def pointerFacade(atOffset: Int): jawn.Facade[Option[Pointer]] = new jawn.Facade[Option[Pointer]] {
-//
-//    override def singleContext(index: Int): FContext[Option[Pointer]] = new FContext[Option[Pointer]] {
-//      private var current: Option[Pointer]                   = None
-//      override def add(s: CharSequence, index: Int): Unit    = {}
-//      override def add(v: Option[Pointer], index: Int): Unit = { current = v }
-//      override def finish(index: Int): Option[Pointer] = current.orElse(
-//        Option(Pointer.empty)
-//          .filter(_ => index <= atOffset)
-//      )
-//      override def isObj: Boolean = false
-//    }
-//
-//    override def arrayContext(index0: Int): FContext[Option[Pointer]] = new FContext[Option[Pointer]] {
-//      private var current: Option[(Int, Pointer)] = None
-//
-//      override def add(s: CharSequence, index: Int): Unit = {
-//        if (index <= atOffset) {
-//          current = Option((current.map(_._1).map(_ + 1).getOrElse(0), Pointer.empty))
-//        }
-//      }
-//      override def add(v: Option[Pointer], index: Int): Unit = {
-//        lazy val i = current.map(_._1).map(_ + 1).getOrElse(0)
-//        current = v.map(p => if (index < atOffset) (i, Pointer.empty) else (i, p)).orElse(current)
-//      }
-//      override def finish(index: Int): Option[Pointer] = {
-//        current.map { case (i, v) => (Pointer.empty / i) / v }
-//      }
-//
-//      override def isObj: Boolean = false
-//    }
-//
-//    override def objectContext(index: Int): FContext[Option[Pointer]] = new FContext[Option[Pointer]] {
-//      private var current: Option[(String, Pointer)] = None
-//      override def add(s: CharSequence, index: Int): Unit = {
-//        val currentKey = current.map(_._1)
-//        if (currentKey.isDefined) {
-//          if (index <= atOffset) {
-//            current = None
-//          }
-//        }
-//      }
-//      override def add(v: Option[Pointer], index: Int): Unit = None
-//      override def finish(index: Int): Option[Pointer]       = None
-//      override def isObj: Boolean                            = true
-//    }
-//
-//    override def jnull(index: Int): Option[Pointer] = Option(Pointer.empty).filter(_ => index <= atOffset)
-//
-//    override def jfalse(index: Int): Option[Pointer] = Option(Pointer.empty).filter(_ => index <= atOffset)
-//
-//    override def jtrue(index: Int): Option[Pointer] = Option(Pointer.empty).filter(_ => index <= atOffset)
-//
-//    override def jnum(s: CharSequence, decIndex: Int, expIndex: Int, index: Int): Option[Pointer] =
-//      Option(Pointer.empty).filter(_ => index <= atOffset)
-//
-//    override def jstring(s: CharSequence, index: Int): Option[Pointer] =
-//      Option(Pointer.empty).filter(_ => index <= atOffset)
-//  }
 
 }
