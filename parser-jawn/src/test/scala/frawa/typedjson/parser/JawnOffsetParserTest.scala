@@ -16,12 +16,68 @@
 
 package frawa.typedjson.parser
 
-import frawa.typedjson.pointer.{OffsetParser, Pointer}
+import frawa.typedjson.pointer.{Offset, OffsetParser}
 import munit._
 
 class JawnOffsetParserTest extends FunSuite {
   implicit val parser: OffsetParser = new JawnParser()
 
+  import frawa.typedjson.pointer.Offset._
+
+  test("basic types") {
+    assertEquals(parser.parseWithOffset("""13"""), Right(NumberValueWithOffset(Offset(0, 2), NumberValue(13))))
+    assertEquals(parser.parseWithOffset("""true"""), Right(BoolValueWithOffset(Offset(0, 4), BoolValue(true))))
+    assertEquals(parser.parseWithOffset("""null"""), Right(NullValueWithOffset(Offset(0, 4))))
+    assertEquals(
+      parser.parseWithOffset(""""string""""),
+      Right(StringValueWithOffset(Offset(0, 8), StringValue("string")))
+    )
+  }
+
+  test("array") {
+    assertEquals(
+      parser.parseWithOffset("""[13]"""),
+      Right(ArrayValueWithOffset(Offset(1, 3), Seq(NumberValueWithOffset(Offset(1, 3), NumberValue(13)))))
+    )
+    assertEquals(
+      parser.parseWithOffset("""[ 13 , 14 ]"""),
+      Right(
+        ArrayValueWithOffset(
+          Offset(2, 10),
+          Seq(
+            NumberValueWithOffset(Offset(2, 4), NumberValue(13)),
+            NumberValueWithOffset(Offset(7, 9), NumberValue(14))
+          )
+        )
+      )
+    )
+  }
+
+  test("object") {
+    assertEquals(
+      parser.parseWithOffset("""{"toto":"titi"}"""),
+      Right(
+        ObjectValueWithOffset(
+          Offset(8, 14),
+          Map("toto" -> StringValueWithOffset(Offset(8, 12), StringValue("titi")))
+        )
+      )
+    )
+    assertEquals(
+      parser.parseWithOffset("""{"toto":"titi", "foo": 13 }"""),
+      Right(
+        ObjectValueWithOffset(
+          Offset(8, 26),
+          Map(
+            "toto" -> StringValueWithOffset(Offset(8, 12), StringValue("titi")),
+            "foo"  -> NumberValueWithOffset(Offset(23, 25), NumberValue(13))
+          )
+        )
+      )
+    )
+  }
+
+  /*
   test("empty on basic types") {
     assertEquals(parser.pointerAt("""13""")(0), Right(Pointer.empty))
     assertEquals(parser.pointerAt("""13""")(1), Right(Pointer.empty))
@@ -95,15 +151,10 @@ class JawnOffsetParserTest extends FunSuite {
     assertEquals(parser.pointerAt("""[1,[2,]]""")(6), Right(Pointer.empty / 1 / 1))
   }
 
-  //  test("object") {
-//    assertEquals(Parser("""{"toto":"titi"}"""), Right(ObjectValue(Map("toto" -> StringValue("titi")))))
-//  }
-//
-//  test("big number") {
-//    assertEquals(
-//      Parser("98249283749234923498293171823948729348710298301928331"),
-//      Right(NumberValue(BigDecimal("98249283749234923498293171823948729348710298301928331")))
-//    )
-//  }
-
+  test("object") {
+    assertEquals(parser.pointerAt("""{"a":"b"}""")(0), Right(Pointer.empty))
+    assertEquals(parser.pointerAt("""{"a":"b"}""")(3), Right(Pointer.empty / "a"))
+    assertEquals(parser.pointerAt("""{"a":"b"}""")(6), Right(Pointer.empty / "a"))
+  }
+   */
 }
