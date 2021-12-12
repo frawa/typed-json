@@ -19,6 +19,8 @@ package frawa.typedjson.parser
 import munit._
 
 class ZioParserTest extends FunSuite {
+  import Value._
+
   implicit val parser: Parser = new ZioParser()
 
   test("basic types") {

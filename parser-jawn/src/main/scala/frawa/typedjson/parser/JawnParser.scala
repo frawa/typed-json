@@ -33,13 +33,14 @@ class JawnParser extends Parser with OffsetParser {
   override def offsetAt(value: Offset.Value)(pointer: Pointer): Offset = ???
 
   private val valueFacade: jawn.Facade[Value] = new jawn.Facade.SimpleFacade[Value] {
-    override def jarray(vs: List[Value]): Value                             = ArrayValue(vs)
-    override def jobject(vs: Map[String, Value]): Value                     = ObjectValue(vs)
-    override def jnull: Value                                               = NullValue
-    override def jfalse: Value                                              = BoolValue(false)
-    override def jtrue: Value                                               = BoolValue(true)
-    override def jnum(s: CharSequence, decIndex: Int, expIndex: Int): Value = NumberValue(BigDecimal.exact(s.toString))
-    override def jstring(s: CharSequence): Value                            = StringValue(s.toString)
+    override def jarray(vs: List[Value]): Value         = Value.ArrayValue(vs)
+    override def jobject(vs: Map[String, Value]): Value = Value.ObjectValue(vs)
+    override def jnull: Value                           = Value.NullValue
+    override def jfalse: Value                          = Value.BoolValue(false)
+    override def jtrue: Value                           = Value.BoolValue(true)
+    override def jnum(s: CharSequence, decIndex: Int, expIndex: Int): Value =
+      Value.NumberValue(BigDecimal.exact(s.toString))
+    override def jstring(s: CharSequence): Value = Value.StringValue(s.toString)
   }
 
   private def offsetValueFacade: jawn.Facade[Offset.Value] = new jawn.Facade[Offset.Value] {
@@ -75,11 +76,11 @@ class JawnParser extends Parser with OffsetParser {
     }
 
     override def objectContext(startIndex: Int): FContext[Offset.Value] = new FContext[Offset.Value] {
-      private var currentKey: Option[String]            = None
-      private var properties: Map[String, Offset.Value] = Map.empty
+      private var currentKey: Option[Offset.StringValue]            = None
+      private var properties: Map[Offset.StringValue, Offset.Value] = Map.empty
       override def add(s: CharSequence, index: Int): Unit = {
         if (currentKey.isEmpty) {
-          currentKey = Some(s.toString)
+          currentKey = Some(string(s, index))
         } else {
           properties = properties + (
             (

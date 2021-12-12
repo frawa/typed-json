@@ -22,6 +22,7 @@ import zio.json.ast.Json.Arr
 import zio.json.ast.Json.Obj
 
 class ZioParser extends Parser {
+  import Value._
 
   override def parse(json: String): Either[String, Value] = {
     val result = json.fromJson[Json]
