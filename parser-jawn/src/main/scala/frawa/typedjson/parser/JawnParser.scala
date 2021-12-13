@@ -20,13 +20,23 @@ import frawa.typedjson.pointer.Pointer
 import org.typelevel.jawn
 import org.typelevel.jawn.FContext
 
+//import scala.collection.mutable
+
 class JawnParser extends Parser with OffsetParser {
   override def parse(json: String): Either[String, Value] = {
     jawn.Parser.parseFromString(json)(valueFacade).toEither.swap.map(_.toString).swap
   }
 
   override def parseWithOffset(json: String): Either[String, Offset.Value] = {
-    jawn.Parser.parseFromString(json)(offsetValueFacade).toEither.swap.map(_.toString).swap
+    jawn.Parser
+      .parseFromString(json)(offsetValueFacade)
+      .toEither
+      .swap
+      .map { ex =>
+//        ex.printStackTrace()
+        ex.toString
+      }
+      .swap
   }
 
   override def pointerAt(value: Offset.Value)(at: Int): Pointer = {
@@ -154,4 +164,27 @@ class JawnParser extends Parser with OffsetParser {
       string(s, index)
   }
 
+//  private def recoveringFacade[T](facade: jawn.Facade[T]): jawn.Facade[T] = new jawn.Facade[T] {
+//
+//    private val stack: mutable.ArrayDeque[FContext[T]] = mutable.ArrayDeque.empty[T]
+//
+//    private def delegatingContext(delegate: jawn.FContext[T]): jawn.FContext[T] = new FContext[T] {
+//      stack.append(delegate)
+//      override def add(s: CharSequence, index: Int): Unit = delegate.add(s, index)
+//      override def add(v: T, index: Int): Unit            = delegate.add(v, index)
+//      override def finish(index: Int): T                  = delegate.finish(index)
+//      override def isObj: Boolean                         = delegate.isObj
+//    }
+//
+//    override def singleContext(index: Int): FContext[T] = delegatingContext(facade.singleContext(index))
+//    override def arrayContext(index: Int): FContext[T]  = delegatingContext(facade.singleContext(index))
+//    override def objectContext(index: Int): FContext[T] = delegatingContext(facade.singleContext(index))
+//
+//    override def jnull(index: Int): T  = facade.jnull(index)
+//    override def jfalse(index: Int): T = facade.jfalse(index)
+//    override def jtrue(index: Int): T  = facade.jtrue(index)
+//    override def jnum(s: CharSequence, decIndex: Int, expIndex: Int, index: Int): T =
+//      facade.jnum(s, decIndex, expIndex, index)
+//    override def jstring(s: CharSequence, index: Int): T = facade.jstring(s, index)
+//  }
 }

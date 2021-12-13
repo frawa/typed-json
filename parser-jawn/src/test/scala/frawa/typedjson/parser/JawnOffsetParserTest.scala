@@ -251,17 +251,10 @@ class JawnOffsetParserTest extends FunSuite {
     assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(39), Right(Pointer.empty))
   }
 
-  /*
   test("incomplete array".ignore) {
     // TODO recover from broken Json?
     assertEquals(pointerAt("""[1,]""")(3), Right(Pointer.empty / 1))
     assertEquals(pointerAt("""[1,[2,]]""")(6), Right(Pointer.empty / 1 / 1))
   }
 
-  test("object") {
-    assertEquals(pointerAt("""{"a":"b"}""")(0), Right(Pointer.empty))
-    assertEquals(pointerAt("""{"a":"b"}""")(3), Right(Pointer.empty / "a"))
-    assertEquals(pointerAt("""{"a":"b"}""")(6), Right(Pointer.empty / "a"))
-  }
-   */
 }
