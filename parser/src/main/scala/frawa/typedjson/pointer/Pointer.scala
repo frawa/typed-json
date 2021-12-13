@@ -60,7 +60,22 @@ case class Pointer(segments: Seq[Token]) {
   }
 
   def apply(value: Value): Option[Value] = segments.foldLeft(Option(value)) { case (v, segment) =>
-    v.flatMap(segment(_))
+    v.flatMap(v =>
+      segment match {
+        case ArrayIndexToken(index) =>
+          v match {
+            case ArrayValue(vs)          => vs.lift(index)
+            case ObjectValue(properties) => properties.get(index.toString)
+            case _                       => None
+          }
+        case FieldToken(field) =>
+          v match {
+            case ObjectValue(properties) => properties.get(field)
+            case _                       => None
+          }
+        case _ => None
+      }
+    )
   }
 
   // TODO dedup wrt apply(value: Value)
@@ -69,12 +84,7 @@ case class Pointer(segments: Seq[Token]) {
       segment match {
         case ArrayIndexToken(index) =>
           v match {
-            case Offset.ArrayValue(_, vs) =>
-              if (vs.isDefinedAt(index)) {
-                Some(vs.apply(index))
-              } else {
-                None
-              }
+            case Offset.ArrayValue(_, vs)          => vs.lift(index)
             case Offset.ObjectValue(_, properties) => properties.find(_._1.value == index.toString).map(_._2)
             case _                                 => None
           }
@@ -89,23 +99,10 @@ case class Pointer(segments: Seq[Token]) {
   }
 }
 
-trait Token {
-  def apply(value: Value): Option[Value]
-}
+trait Token
 
 case class ArrayIndexToken(index: Int) extends Token {
   override def toString: String = { index.toString }
-
-  override def apply(value: Value): Option[Value] = value match {
-    case ArrayValue(values) =>
-      if (values.isDefinedAt(index)) {
-        Some(values.apply(index))
-      } else {
-        None
-      }
-    case ObjectValue(properties) => properties.get(index.toString)
-    case _                       => None
-  }
 }
 
 case class FieldToken(field: String) extends Token {
@@ -113,10 +110,5 @@ case class FieldToken(field: String) extends Token {
     field
       .replace("~", "~0")
       .replace("/", "~1")
-  }
-
-  override def apply(value: Value): Option[Value] = value match {
-    case ObjectValue(properties) => properties.get(field)
-    case _                       => None
   }
 }
