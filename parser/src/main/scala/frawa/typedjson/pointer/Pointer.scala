@@ -16,7 +16,7 @@
 
 package frawa.typedjson.pointer
 
-import frawa.typedjson.parser.Value
+import frawa.typedjson.parser.{Offset, Value}
 import frawa.typedjson.parser.Value._
 
 object Pointer {
@@ -62,6 +62,31 @@ case class Pointer(segments: Seq[Token]) {
   def apply(value: Value): Option[Value] = segments.foldLeft(Option(value)) { case (v, segment) =>
     v.flatMap(segment(_))
   }
+
+  // TODO dedup wrt apply(value: Value)
+  def apply(value: Offset.Value): Option[Offset.Value] = segments.foldLeft(Option(value)) { case (v, segment) =>
+    v.flatMap(v =>
+      segment match {
+        case ArrayIndexToken(index) =>
+          v match {
+            case Offset.ArrayValue(_, vs) =>
+              if (vs.isDefinedAt(index)) {
+                Some(vs.apply(index))
+              } else {
+                None
+              }
+            case Offset.ObjectValue(_, properties) => properties.find(_._1.value == index.toString).map(_._2)
+            case _                                 => None
+          }
+        case FieldToken(field) =>
+          v match {
+            case Offset.ObjectValue(_, properties) => properties.find(_._1.value == field).map(_._2)
+            case _                                 => None
+          }
+        case _ => None
+      }
+    )
+  }
 }
 
 trait Token {
@@ -70,6 +95,7 @@ trait Token {
 
 case class ArrayIndexToken(index: Int) extends Token {
   override def toString: String = { index.toString }
+
   override def apply(value: Value): Option[Value] = value match {
     case ArrayValue(values) =>
       if (values.isDefinedAt(index)) {
@@ -81,12 +107,14 @@ case class ArrayIndexToken(index: Int) extends Token {
     case _                       => None
   }
 }
+
 case class FieldToken(field: String) extends Token {
   override def toString: String = {
     field
       .replace("~", "~0")
       .replace("/", "~1")
   }
+
   override def apply(value: Value): Option[Value] = value match {
     case ObjectValue(properties) => properties.get(field)
     case _                       => None

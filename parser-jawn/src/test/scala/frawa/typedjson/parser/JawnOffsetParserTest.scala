@@ -257,4 +257,47 @@ class JawnOffsetParserTest extends FunSuite {
     assertEquals(pointerAt("""[1,[2,]]""")(6), Right(Pointer.empty / 1 / 1))
   }
 
+  private def offsetAt(json: String)(at: Pointer): Either[String, Option[Offset]] = {
+    parser.parseWithOffset(json).map(parser.offsetAt(_)(at))
+  }
+
+  test("offsetAt is empty on basic types") {
+    assertEquals(offsetAt("""13""")(Pointer.empty), Right(Some(Offset(0, 2))))
+    assertEquals(offsetAt("""true""")(Pointer.empty), Right(Some(Offset(0, 4))))
+    assertEquals(offsetAt("""null""")(Pointer.empty), Right(Some(Offset(0, 4))))
+    assertEquals(offsetAt(""""foo"""")(Pointer.empty), Right(Some(Offset(0, 5))))
+  }
+
+  test("offsetAt array") {
+    assertEquals(offsetAt("""[13]""")(Pointer.empty), Right(Some(Offset(0, 4))))
+    assertEquals(offsetAt("""[13]""")(Pointer.empty / 0), Right(Some(Offset(1, 3))))
+    assertEquals(offsetAt("""[true]""")(Pointer.empty / 1), Right(None))
+    assertEquals(offsetAt("""[1,2]""")(Pointer.empty / 1), Right(Some(Offset(3, 4))))
+  }
+
+  test("offsetAt object") {
+    assertEquals(offsetAt("""{}""")(Pointer.empty), Right(Some(Offset(0, 1))))
+    assertEquals(offsetAt("""{"toto":13}""")(Pointer.empty), Right(Some(Offset(0, 10))))
+    assertEquals(offsetAt("""{"toto":13}""")(Pointer.empty / "toto"), Right(Some(Offset(8, 10))))
+    assertEquals(offsetAt("""{"toto":13}""")(Pointer.empty / "missing"), Right(None))
+    assertEquals(offsetAt("""{"toto":13}""")(Pointer.empty / 13), Right(None))
+    assertEquals(offsetAt("""{"foo": [13,14], "bar": {"gnu": 13}}""")(Pointer.empty), Right(Some(Offset(0, 35))))
+    assertEquals(
+      offsetAt("""{"foo": [13,14], "bar": {"gnu": 13}}""")(Pointer.empty / "foo"),
+      Right(Some(Offset(8, 15)))
+    )
+    assertEquals(
+      offsetAt("""{"foo": [13,14], "bar": {"gnu": 13}}""")(Pointer.empty / "foo" / 1),
+      Right(Some(Offset(12, 14)))
+    )
+    assertEquals(
+      offsetAt("""{"foo": [13,14], "bar": {"gnu": 13}}""")(Pointer.empty / "bar"),
+      Right(Some(Offset(24, 34)))
+    )
+    assertEquals(
+      offsetAt("""{"foo": [13,14], "bar": {"gnu": 13}}""")(Pointer.empty / "bar" / "gnu"),
+      Right(Some(Offset(32, 34)))
+    )
+  }
+
 }

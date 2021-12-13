@@ -7,7 +7,7 @@ trait OffsetParser {
   def parseWithOffset(json: String): Either[String, Value]
 
   def pointerAt(value: Value)(offset: Int): Pointer
-  def offsetAt(value: Value)(pointer: Pointer): Offset
+  def offsetAt(value: Value)(pointer: Pointer): Option[Offset]
 }
 
 case class Offset(start: Int, end: Int) {

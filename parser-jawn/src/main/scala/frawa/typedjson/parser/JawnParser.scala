@@ -76,7 +76,9 @@ class JawnParser extends Parser with OffsetParser {
     go(value).getOrElse(Pointer.empty)
   }
 
-  override def offsetAt(value: Offset.Value)(pointer: Pointer): Offset = ???
+  override def offsetAt(value: Offset.Value)(pointer: Pointer): Option[Offset] = {
+    pointer(value).map(_.offset)
+  }
 
   private val valueFacade: jawn.Facade[Value] = new jawn.Facade.SimpleFacade[Value] {
     override def jarray(vs: List[Value]): Value         = Value.ArrayValue(vs)
