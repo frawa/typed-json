@@ -22,11 +22,11 @@ import org.typelevel.jawn.FContext
 
 class JawnParser extends Parser with OffsetParser {
   override def parse(json: String): Either[String, Value] = {
-    jawn.Parser.parseFromString(json)(valueFacade).toEither.swap.map(_.getMessage).swap
+    jawn.Parser.parseFromString(json)(valueFacade).toEither.swap.map(_.toString).swap
   }
 
   override def parseWithOffset(json: String): Either[String, Offset.Value] = {
-    jawn.Parser.parseFromString(json)(offsetValueFacade).toEither.swap.map(_.getMessage).swap
+    jawn.Parser.parseFromString(json)(offsetValueFacade).toEither.swap.map(_.toString).swap
   }
 
   override def pointerAt(value: Offset.Value)(at: Int): Pointer = {
@@ -45,20 +45,25 @@ class JawnParser extends Parser with OffsetParser {
           }
         case Offset.ObjectValue(offset, properties) =>
           if (offset.contains(at)) {
-            properties.find(_._2.offset.contains(at)).flatMap { case (k, v) =>
-              go(v).map(Pointer.empty / k.value.toString / _)
-            }
+            properties
+              .find(_._2.offset.contains(at))
+              .flatMap { case (k, v) =>
+                val prefix = Pointer.empty / k.value.toString
+                go(v).map(prefix / _).orElse(Some(prefix))
+              }
+              .orElse(
+                properties.keys
+                  .find(_.offset.contains(at))
+                  .map(_ => Pointer.empty)
+              )
+              .orElse(Some(Pointer.empty))
           } else {
             None
           }
         case _ => Some(Pointer.empty)
       }
     }
-    Some(value)
-//      .filter(_.offset.contains(at))
-      .filter(_ => true)
-      .flatMap(go)
-      .getOrElse(Pointer.empty)
+    go(value).getOrElse(Pointer.empty)
   }
 
   override def offsetAt(value: Offset.Value)(pointer: Pointer): Offset = ???
@@ -126,7 +131,7 @@ class JawnParser extends Parser with OffsetParser {
       }
       override def add(v: Offset.Value, index: Int): Unit = {
         properties = properties + ((currentKey.get, v))
-        currentKey = null
+        currentKey = None
       }
       override def finish(index: Int): Offset.Value = {
         Offset.ObjectValue(Offset(startIndex, index), properties)

@@ -167,7 +167,7 @@ class JawnOffsetParserTest extends FunSuite {
     assertEquals(pointerAt("""[1,[2,[3]]]""")(12), Right(Pointer.empty))
   }
 
-  test("array with strings") {
+  test("pointerAt array with strings") {
     assertEquals(pointerAt("""["a",["b"]]""")(0), Right(Pointer.empty))
     assertEquals(pointerAt("""["a",["b"]]""")(1), Right(Pointer.empty / 0))
     assertEquals(pointerAt("""["a",["b"]]""")(2), Right(Pointer.empty / 0))
@@ -183,23 +183,85 @@ class JawnOffsetParserTest extends FunSuite {
     assertEquals(pointerAt("""["a",["b"]]""")(12), Right(Pointer.empty))
   }
 
-  test("at array end") {
+  test("pointerAt at array end") {
     assertEquals(pointerAt("""[1]""")(2), Right(Pointer.empty / 0))
     assertEquals(pointerAt("""[1,[2]]""")(5), Right(Pointer.empty / 1 / 0))
     assertEquals(pointerAt("""[1,[2]]""")(6), Right(Pointer.empty / 1))
   }
 
-  /*
-test("incomplete array".ignore) {
-  // TODO recover from broken Json?
-  assertEquals(pointerAt("""[1,]""")(3), Right(Pointer.empty / 1))
-  assertEquals(pointerAt("""[1,[2,]]""")(6), Right(Pointer.empty / 1 / 1))
-}
+  test("pointerAt object") {
+    assertEquals(pointerAt("""{"toto": 13}""")(0), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": 13}""")(1), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": 13}""")(2), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": 13}""")(3), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": 13}""")(3), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": 13}""")(4), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": 13}""")(5), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": 13}""")(6), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": 13}""")(7), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": 13}""")(8), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": 13}""")(9), Right(Pointer.empty / "toto"))
+    assertEquals(pointerAt("""{"toto": 13}""")(10), Right(Pointer.empty / "toto"))
+    assertEquals(pointerAt("""{"toto": 13}""")(11), Right(Pointer.empty / "toto"))
+    assertEquals(pointerAt("""{"toto": 13}""")(12), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": 13}""")(13), Right(Pointer.empty))
+  }
 
-test("object") {
-  assertEquals(pointerAt("""{"a":"b"}""")(0), Right(Pointer.empty))
-  assertEquals(pointerAt("""{"a":"b"}""")(3), Right(Pointer.empty / "a"))
-  assertEquals(pointerAt("""{"a":"b"}""")(6), Right(Pointer.empty / "a"))
-}
+  test("pointerAt nested object") {
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(0), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(1), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(2), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(3), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(4), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(5), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(6), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(7), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(8), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(9), Right(Pointer.empty / "toto"))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(10), Right(Pointer.empty / "toto" / 0))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(11), Right(Pointer.empty / "toto" / 0))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(12), Right(Pointer.empty / "toto" / 1))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(13), Right(Pointer.empty / "toto" / 1))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(14), Right(Pointer.empty / "toto"))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(14), Right(Pointer.empty / "toto"))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(15), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(16), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(17), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(18), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(19), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(20), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(21), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(22), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(23), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(24), Right(Pointer.empty / "titi"))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(25), Right(Pointer.empty / "titi"))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(26), Right(Pointer.empty / "titi"))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(27), Right(Pointer.empty / "titi"))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(28), Right(Pointer.empty / "titi"))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(29), Right(Pointer.empty / "titi"))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(30), Right(Pointer.empty / "titi"))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(31), Right(Pointer.empty / "titi"))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(32), Right(Pointer.empty / "titi" / "foo"))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(33), Right(Pointer.empty / "titi" / "foo"))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(34), Right(Pointer.empty / "titi" / "foo"))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(35), Right(Pointer.empty / "titi" / "foo"))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(36), Right(Pointer.empty / "titi" / "foo"))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(37), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(38), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": [1,2], "titi": {"foo": true}}""")(39), Right(Pointer.empty))
+  }
+
+  /*
+  test("incomplete array".ignore) {
+    // TODO recover from broken Json?
+    assertEquals(pointerAt("""[1,]""")(3), Right(Pointer.empty / 1))
+    assertEquals(pointerAt("""[1,[2,]]""")(6), Right(Pointer.empty / 1 / 1))
+  }
+
+  test("object") {
+    assertEquals(pointerAt("""{"a":"b"}""")(0), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"a":"b"}""")(3), Right(Pointer.empty / "a"))
+    assertEquals(pointerAt("""{"a":"b"}""")(6), Right(Pointer.empty / "a"))
+  }
    */
 }
