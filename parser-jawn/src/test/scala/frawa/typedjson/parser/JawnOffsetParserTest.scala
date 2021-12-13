@@ -16,6 +16,7 @@
 
 package frawa.typedjson.parser
 
+import frawa.typedjson.pointer.Pointer
 import munit._
 
 class JawnOffsetParserTest extends FunSuite {
@@ -36,16 +37,58 @@ class JawnOffsetParserTest extends FunSuite {
   test("array") {
     assertEquals(
       parser.parseWithOffset("""[13]"""),
-      Right(ArrayValue(Offset(0, 3), Seq(NumberValue(Offset(1, 3), 13))))
+      Right(ArrayValue(Offset(0, 4), Seq(NumberValue(Offset(1, 3), 13))))
+    )
+    assertEquals(
+      parser.parseWithOffset("""[13,14]"""),
+      Right(
+        ArrayValue(
+          Offset(0, 7),
+          Seq(
+            NumberValue(Offset(1, 3), 13),
+            NumberValue(Offset(4, 6), 14)
+          )
+        )
+      )
     )
     assertEquals(
       parser.parseWithOffset("""[ 13 , 14 ]"""),
       Right(
         ArrayValue(
-          Offset(0, 10),
+          Offset(0, 11),
           Seq(
             NumberValue(Offset(2, 4), 13),
             NumberValue(Offset(7, 9), 14)
+          )
+        )
+      )
+    )
+  }
+
+  test("nested array") {
+    assertEquals(
+      parser.parseWithOffset("""[13,[true]]"""),
+      Right(
+        ArrayValue(
+          Offset(0, 11),
+          Seq(NumberValue(Offset(1, 3), 13), ArrayValue(Offset(4, 10), Seq(BoolValue(Offset(5, 9), value = true))))
+        )
+      )
+    )
+    assertEquals(
+      parser.parseWithOffset("""[13,[true,["toto"]]]"""),
+      Right(
+        ArrayValue(
+          Offset(0, 20),
+          Seq(
+            NumberValue(Offset(1, 3), 13),
+            ArrayValue(
+              Offset(4, 19),
+              Seq(
+                BoolValue(Offset(5, 9), value = true),
+                ArrayValue(Offset(10, 18), Seq(StringValue(Offset(11, 17), "toto")))
+              )
+            )
           )
         )
       )
@@ -76,84 +119,87 @@ class JawnOffsetParserTest extends FunSuite {
     )
   }
 
-  /*
-  test("empty on basic types") {
-    assertEquals(parser.pointerAt("""13""")(0), Right(Pointer.empty))
-    assertEquals(parser.pointerAt("""13""")(1), Right(Pointer.empty))
-    assertEquals(parser.pointerAt("""13""")(13), Right(Pointer.empty))
-    assertEquals(parser.pointerAt("""true""")(0), Right(Pointer.empty))
-    assertEquals(parser.pointerAt("""false""")(1), Right(Pointer.empty))
-    assertEquals(parser.pointerAt("""null""")(13), Right(Pointer.empty))
-    assertEquals(parser.pointerAt(""""foo"""")(0), Right(Pointer.empty))
-    assertEquals(parser.pointerAt(""""foo"""")(1), Right(Pointer.empty))
-    assertEquals(parser.pointerAt(""""foo"""")(13), Right(Pointer.empty))
+  private def pointerAt(json: String)(at: Int): Either[String, Pointer] = {
+    parser.parseWithOffset(json).map(parser.pointerAt(_)(at))
   }
 
-  test("array") {
-    assertEquals(parser.pointerAt("""[13]""")(0), Right(Pointer.empty))
-    assertEquals(parser.pointerAt("""[13]""")(1), Right(Pointer.empty / 0))
-    assertEquals(parser.pointerAt("""[13]""")(2), Right(Pointer.empty / 0))
-    assertEquals(parser.pointerAt("""[13]""")(3), Right(Pointer.empty / 0))
-    assertEquals(parser.pointerAt("""[13]""")(4), Right(Pointer.empty / 0))
-    assertEquals(parser.pointerAt("""[13]""")(5), Right(Pointer.empty / 0))
-
-    assertEquals(parser.pointerAt("""[13,14,15]""")(3), Right(Pointer.empty / 0))
-    assertEquals(parser.pointerAt("""[13,14,15]""")(4), Right(Pointer.empty / 1))
-    assertEquals(parser.pointerAt("""[13,14,15]""")(5), Right(Pointer.empty / 1))
-    assertEquals(parser.pointerAt("""[13,14,15]""")(6), Right(Pointer.empty / 1))
-    assertEquals(parser.pointerAt("""[13,14,15]""")(7), Right(Pointer.empty / 2))
-    assertEquals(parser.pointerAt("""[13,14,15]""")(8), Right(Pointer.empty / 2))
-    assertEquals(parser.pointerAt("""[13,14,15]""")(9), Right(Pointer.empty / 2))
-    assertEquals(parser.pointerAt("""[13,14,15]""")(10), Right(Pointer.empty / 2))
-    assertEquals(parser.pointerAt("""[13,14,15]""")(11), Right(Pointer.empty / 2))
+  test("pointerAt is empty on basic types") {
+    assertEquals(pointerAt("""13""")(0), Right(Pointer.empty))
+    assertEquals(pointerAt("""13""")(1), Right(Pointer.empty))
+    assertEquals(pointerAt("""13""")(13), Right(Pointer.empty))
+    assertEquals(pointerAt("""true""")(0), Right(Pointer.empty))
+    assertEquals(pointerAt("""true""")(2), Right(Pointer.empty))
+    assertEquals(pointerAt("""null""")(3), Right(Pointer.empty))
+    assertEquals(pointerAt(""""foo"""")(4), Right(Pointer.empty))
   }
 
-  test("nested array") {
-    assertEquals(parser.pointerAt("""[1,[2,[3]]]""")(0), Right(Pointer.empty))
-    assertEquals(parser.pointerAt("""[1,[2,[3]]]""")(1), Right(Pointer.empty / 0))
-    assertEquals(parser.pointerAt("""[1,[2,[3]]]""")(2), Right(Pointer.empty / 0))
-    assertEquals(parser.pointerAt("""[1,[2,[3]]]""")(3), Right(Pointer.empty / 0))
-    assertEquals(parser.pointerAt("""[1,[2,[3]]]""")(4), Right(Pointer.empty / 1 / 0))
-    assertEquals(parser.pointerAt("""[1,[2,[3]]]""")(5), Right(Pointer.empty / 1 / 0))
-    assertEquals(parser.pointerAt("""[1,[2,[3]]]""")(6), Right(Pointer.empty / 1 / 0))
-    assertEquals(parser.pointerAt("""[1,[2,[3]]]""")(7), Right(Pointer.empty / 1 / 1 / 0))
-    assertEquals(parser.pointerAt("""[1,[2,[3]]]""")(8), Right(Pointer.empty / 1 / 1 / 0))
-    assertEquals(parser.pointerAt("""[1,[2,[3]]]""")(9), Right(Pointer.empty / 1 / 1))
-    assertEquals(parser.pointerAt("""[1,[2,[3]]]""")(10), Right(Pointer.empty / 1))
-    assertEquals(parser.pointerAt("""[1,[2,[3]]]""")(11), Right(Pointer.empty / 1))
+  test("pointerAt array") {
+    assertEquals(pointerAt("""[13]""")(0), Right(Pointer.empty))
+    assertEquals(pointerAt("""[13]""")(1), Right(Pointer.empty / 0))
+    assertEquals(pointerAt("""[13]""")(2), Right(Pointer.empty / 0))
+    assertEquals(pointerAt("""[13]""")(3), Right(Pointer.empty / 0))
+    assertEquals(pointerAt("""[13]""")(4), Right(Pointer.empty))
+
+    assertEquals(pointerAt("""[13,14,15]""")(3), Right(Pointer.empty / 0))
+    assertEquals(pointerAt("""[13,14,15]""")(4), Right(Pointer.empty / 1))
+    assertEquals(pointerAt("""[13,14,15]""")(5), Right(Pointer.empty / 1))
+    assertEquals(pointerAt("""[13,14,15]""")(6), Right(Pointer.empty / 1))
+    assertEquals(pointerAt("""[13,14,15]""")(7), Right(Pointer.empty / 2))
+    assertEquals(pointerAt("""[13,14,15]""")(8), Right(Pointer.empty / 2))
+    assertEquals(pointerAt("""[13,14,15]""")(9), Right(Pointer.empty / 2))
+    assertEquals(pointerAt("""[13,14,15]""")(10), Right(Pointer.empty))
+    assertEquals(pointerAt("""[13,14,15]""")(11), Right(Pointer.empty))
+  }
+
+  test("pointerAt nested array") {
+    assertEquals(pointerAt("""[1,[2,[3]]]""")(0), Right(Pointer.empty))
+    assertEquals(pointerAt("""[1,[2,[3]]]""")(1), Right(Pointer.empty / 0))
+    assertEquals(pointerAt("""[1,[2,[3]]]""")(2), Right(Pointer.empty / 0))
+    assertEquals(pointerAt("""[1,[2,[3]]]""")(3), Right(Pointer.empty / 1))
+    assertEquals(pointerAt("""[1,[2,[3]]]""")(4), Right(Pointer.empty / 1 / 0))
+    assertEquals(pointerAt("""[1,[2,[3]]]""")(5), Right(Pointer.empty / 1 / 0))
+    assertEquals(pointerAt("""[1,[2,[3]]]""")(6), Right(Pointer.empty / 1 / 1))
+    assertEquals(pointerAt("""[1,[2,[3]]]""")(7), Right(Pointer.empty / 1 / 1 / 0))
+    assertEquals(pointerAt("""[1,[2,[3]]]""")(8), Right(Pointer.empty / 1 / 1 / 0))
+    assertEquals(pointerAt("""[1,[2,[3]]]""")(9), Right(Pointer.empty / 1 / 1))
+    assertEquals(pointerAt("""[1,[2,[3]]]""")(10), Right(Pointer.empty / 1))
+    assertEquals(pointerAt("""[1,[2,[3]]]""")(11), Right(Pointer.empty))
+    assertEquals(pointerAt("""[1,[2,[3]]]""")(12), Right(Pointer.empty))
   }
 
   test("array with strings") {
-    assertEquals(parser.pointerAt("""["a",["b"]]""")(0), Right(Pointer.empty))
-    assertEquals(parser.pointerAt("""["a",["b"]]""")(1), Right(Pointer.empty / 0))
-    assertEquals(parser.pointerAt("""["a",["b"]]""")(2), Right(Pointer.empty / 0))
-    assertEquals(parser.pointerAt("""["a",["b"]]""")(3), Right(Pointer.empty / 0))
-    assertEquals(parser.pointerAt("""["a",["b"]]""")(4), Right(Pointer.empty / 0))
-    assertEquals(parser.pointerAt("""["a",["b"]]""")(5), Right(Pointer.empty / 0))
-    assertEquals(parser.pointerAt("""["a",["b"]]""")(6), Right(Pointer.empty / 1 / 0))
-    assertEquals(parser.pointerAt("""["a",["b"]]""")(7), Right(Pointer.empty / 1 / 0))
-    assertEquals(parser.pointerAt("""["a",["b"]]""")(8), Right(Pointer.empty / 1 / 0))
-    assertEquals(parser.pointerAt("""["a",["b"]]""")(9), Right(Pointer.empty / 1 / 0))
-    assertEquals(parser.pointerAt("""["a",["b"]]""")(10), Right(Pointer.empty / 1))
-    assertEquals(parser.pointerAt("""["a",["b"]]""")(11), Right(Pointer.empty / 1))
+    assertEquals(pointerAt("""["a",["b"]]""")(0), Right(Pointer.empty))
+    assertEquals(pointerAt("""["a",["b"]]""")(1), Right(Pointer.empty / 0))
+    assertEquals(pointerAt("""["a",["b"]]""")(2), Right(Pointer.empty / 0))
+    assertEquals(pointerAt("""["a",["b"]]""")(3), Right(Pointer.empty / 0))
+    assertEquals(pointerAt("""["a",["b"]]""")(4), Right(Pointer.empty / 0))
+    assertEquals(pointerAt("""["a",["b"]]""")(5), Right(Pointer.empty / 1))
+    assertEquals(pointerAt("""["a",["b"]]""")(6), Right(Pointer.empty / 1 / 0))
+    assertEquals(pointerAt("""["a",["b"]]""")(7), Right(Pointer.empty / 1 / 0))
+    assertEquals(pointerAt("""["a",["b"]]""")(8), Right(Pointer.empty / 1 / 0))
+    assertEquals(pointerAt("""["a",["b"]]""")(9), Right(Pointer.empty / 1 / 0))
+    assertEquals(pointerAt("""["a",["b"]]""")(10), Right(Pointer.empty / 1))
+    assertEquals(pointerAt("""["a",["b"]]""")(11), Right(Pointer.empty))
+    assertEquals(pointerAt("""["a",["b"]]""")(12), Right(Pointer.empty))
   }
 
   test("at array end") {
-    assertEquals(parser.pointerAt("""[1]""")(2), Right(Pointer.empty / 0))
-    assertEquals(parser.pointerAt("""[1,[2]]""")(5), Right(Pointer.empty / 1 / 0))
-    assertEquals(parser.pointerAt("""[1,[2]]""")(6), Right(Pointer.empty / 1))
+    assertEquals(pointerAt("""[1]""")(2), Right(Pointer.empty / 0))
+    assertEquals(pointerAt("""[1,[2]]""")(5), Right(Pointer.empty / 1 / 0))
+    assertEquals(pointerAt("""[1,[2]]""")(6), Right(Pointer.empty / 1))
   }
 
-  test("incomplete array".ignore) {
-    // TODO recover from broken Json?
-    assertEquals(parser.pointerAt("""[1,]""")(3), Right(Pointer.empty / 1))
-    assertEquals(parser.pointerAt("""[1,[2,]]""")(6), Right(Pointer.empty / 1 / 1))
-  }
+  /*
+test("incomplete array".ignore) {
+  // TODO recover from broken Json?
+  assertEquals(pointerAt("""[1,]""")(3), Right(Pointer.empty / 1))
+  assertEquals(pointerAt("""[1,[2,]]""")(6), Right(Pointer.empty / 1 / 1))
+}
 
-  test("object") {
-    assertEquals(parser.pointerAt("""{"a":"b"}""")(0), Right(Pointer.empty))
-    assertEquals(parser.pointerAt("""{"a":"b"}""")(3), Right(Pointer.empty / "a"))
-    assertEquals(parser.pointerAt("""{"a":"b"}""")(6), Right(Pointer.empty / "a"))
-  }
+test("object") {
+  assertEquals(pointerAt("""{"a":"b"}""")(0), Right(Pointer.empty))
+  assertEquals(pointerAt("""{"a":"b"}""")(3), Right(Pointer.empty / "a"))
+  assertEquals(pointerAt("""{"a":"b"}""")(6), Right(Pointer.empty / "a"))
+}
    */
 }

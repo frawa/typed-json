@@ -10,7 +10,11 @@ trait OffsetParser {
   def offsetAt(value: Value)(pointer: Pointer): Offset
 }
 
-case class Offset(start: Int, end: Int)
+case class Offset(start: Int, end: Int) {
+  // TODO end is exclusive, why is it inclusive here?
+  def contains(at: Int): Boolean = start <= at && at <= end
+}
+
 object Offset {
   import frawa.typedjson.parser.{Value => ValueWO}
   sealed trait Value {

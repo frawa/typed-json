@@ -29,7 +29,38 @@ class JawnParser extends Parser with OffsetParser {
     jawn.Parser.parseFromString(json)(offsetValueFacade).toEither.swap.map(_.getMessage).swap
   }
 
-  override def pointerAt(value: Offset.Value)(offset: Int): Pointer    = ???
+  override def pointerAt(value: Offset.Value)(at: Int): Pointer = {
+    def go(value: Offset.Value): Option[Pointer] = {
+      value match {
+        case Offset.ArrayValue(offset, vs) =>
+          if (offset.contains(at)) {
+            vs.zipWithIndex
+              .find(_._1.offset.contains(at))
+              .flatMap { case (v, i) =>
+                go(v).map(Pointer.empty / i / _)
+              }
+              .orElse(Some(Pointer.empty))
+          } else {
+            None
+          }
+        case Offset.ObjectValue(offset, properties) =>
+          if (offset.contains(at)) {
+            properties.find(_._2.offset.contains(at)).flatMap { case (k, v) =>
+              go(v).map(Pointer.empty / k.value.toString / _)
+            }
+          } else {
+            None
+          }
+        case _ => Some(Pointer.empty)
+      }
+    }
+    Some(value)
+//      .filter(_.offset.contains(at))
+      .filter(_ => true)
+      .flatMap(go)
+      .getOrElse(Pointer.empty)
+  }
+
   override def offsetAt(value: Offset.Value)(pointer: Pointer): Offset = ???
 
   private val valueFacade: jawn.Facade[Value] = new jawn.Facade.SimpleFacade[Value] {
@@ -53,7 +84,9 @@ class JawnParser extends Parser with OffsetParser {
       override def add(s: CharSequence, index: Int): Unit = {
         current = Some(string(s, index))
       }
-      override def add(v: Offset.Value, index: Int): Unit = { current = Some(v) }
+      override def add(v: Offset.Value, index: Int): Unit = {
+        current = Some(v)
+      }
       override def finish(index: Int): Offset.Value =
         current.getOrElse(throw new IllegalStateException("missing single value"))
       override def isObj: Boolean = false
@@ -69,7 +102,7 @@ class JawnParser extends Parser with OffsetParser {
         vs = vs :+ v
       }
       override def finish(index: Int): Offset.Value = {
-        Offset.ArrayValue(Offset(startIndex, index), vs)
+        Offset.ArrayValue(Offset(startIndex, index + 1), vs)
       }
 
       override def isObj: Boolean = false
