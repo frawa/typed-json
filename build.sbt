@@ -128,7 +128,7 @@ lazy val macros = crossProject(JVMPlatform, JSPlatform)
     name                                   := "scala-json-schema-macros",
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value
   )
-  .dependsOn(parser, parserZio)
+  .dependsOn(parser, parserJawn)
 
 lazy val validator =
   crossProject(JSPlatform, JVMPlatform)
