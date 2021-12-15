@@ -16,7 +16,7 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import frawa.typedjson.testutil.TestUtil
+import frawa.typedjson.testutil.TestUtil._
 
 class Draft202012Test extends JsonSchemaTestSuite {
 //  import frawa.typedjson.parser._
@@ -40,5 +40,5 @@ class Draft202012Test extends JsonSchemaTestSuite {
     )
   )
 
-  checkFiles(draft202012Files)(TestUtil.parseJsonValue)
+  checkFiles(draft202012Files)(parseJsonValue)
 }

@@ -19,14 +19,12 @@ package frawa.typedjson.validation
 import frawa.typedjson
 import frawa.typedjson.keywords.SchemaProblems.MissingReference
 import frawa.typedjson.keywords._
-import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestUtil._
 import munit.FunSuite
 
 class ValidationKeywordTest extends FunSuite {
-  implicit val zioParser: ZioParser = new ZioParser()
 
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
@@ -355,7 +353,7 @@ class ValidationKeywordTest extends FunSuite {
   }
 
   test("dependentSchemas") {
-    withSchema("""{"dependentSchemas": {"foo": true, "gnu": false}}}""") { schema =>
+    withSchema("""{"dependentSchemas": {"foo": true, "gnu": false}}""") { schema =>
       validateJson(schema)("""{"gnu": 1}""") { result =>
         assertEquals(
           result.results,
@@ -574,7 +572,7 @@ class ValidationKeywordTest extends FunSuite {
           )
         )
       }
-      validateJson(schema)("""{"foo": "ok"}]""") { result =>
+      validateJson(schema)("""{"foo": "ok"}""") { result =>
         assertEquals(result.results, Seq())
         assert(result.valid)
         assertEquals(

@@ -28,8 +28,6 @@ import munit.{FunSuite, Location, TestOptions}
 import java.net.URI
 
 class JsonSchemaTestSuite extends FunSuite {
-  implicit val zioParser: ZioParser = new ZioParser()
-
   protected val oneTestPerData      = false
   protected val ignore: Set[String] = Set()
 

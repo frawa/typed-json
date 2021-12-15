@@ -18,7 +18,6 @@ package frawa.typedjson.keywords
 
 import frawa.typedjson.keywords.SchemaProblems.InvalidSchemaValue
 import frawa.typedjson.parser.Value._
-import frawa.typedjson.parser._
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.TestSchemas._
 import frawa.typedjson.testutil.TestUtil._
@@ -26,8 +25,6 @@ import frawa.typedjson.util.UriUtil.{WithLocation, uri}
 import munit.FunSuite
 
 class KeywordsTest extends FunSuite {
-  implicit val zioParser: ZioParser = new ZioParser()
-
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId)).get
 
   private def assertKeywords(schema: SchemaValue, allowIgnored: Boolean = false)(

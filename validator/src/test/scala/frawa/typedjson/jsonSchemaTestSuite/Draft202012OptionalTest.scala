@@ -16,10 +16,9 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import frawa.typedjson.testutil.TestUtil
+import frawa.typedjson.testutil.TestUtil._
 
 class Draft202012OptionalTest extends JsonSchemaTestSuite {
-//  import frawa.typedjson.parser._
   import frawa.typedjson.macros.Macros._
 
 //  private val draft202012OptionalFiles: Map[String, Value] =
@@ -36,5 +35,5 @@ class Draft202012OptionalTest extends JsonSchemaTestSuite {
     "refOfUnknownKeyword.json"
   )
 
-  checkFiles(draft202012OptionalFiles)(TestUtil.parseJsonValue)
+  checkFiles(draft202012OptionalFiles)(parseJsonValue)
 }

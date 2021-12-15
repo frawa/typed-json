@@ -156,6 +156,6 @@ lazy val validator =
       libraryDependencies += "org.scalameta" %%% "munit" % munitVersion % Test
     )
     .dependsOn(parser, macros)
-    .dependsOn(parserZio % "test")
+    .dependsOn(parserJawn % "test")
 
 lazy val validatorJS = validator.js

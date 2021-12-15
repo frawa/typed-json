@@ -26,7 +26,6 @@ import frawa.typedjson.testutil.TestUtil._
 import munit.FunSuite
 
 class SuggestProcessingTest extends FunSuite {
-  implicit val zioParser: ZioParser = new ZioParser()
 
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
