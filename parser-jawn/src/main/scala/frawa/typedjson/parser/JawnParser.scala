@@ -42,38 +42,33 @@ class JawnParser extends Parser with OffsetParser {
   override def pointerAt(value: Offset.Value)(at: Int): Pointer = {
     def go(value: Offset.Value): Option[Pointer] = {
       value match {
-        case Offset.ArrayValue(offset, vs) =>
-          if (offset.contains(at)) {
-            vs.zipWithIndex
-              .find(_._1.offset.contains(at))
-              .flatMap { case (v, i) =>
-                go(v).map(Pointer.empty / i / _)
-              }
-              .orElse(Some(Pointer.empty))
-          } else {
-            None
-          }
-        case Offset.ObjectValue(offset, properties) =>
-          if (offset.contains(at)) {
-            properties
-              .find(_._2.offset.contains(at))
-              .flatMap { case (k, v) =>
-                val prefix = Pointer.empty / k.value.toString
-                go(v).map(prefix / _).orElse(Some(prefix))
-              }
-              .orElse(
-                properties.keys
-                  .find(_.offset.contains(at))
-                  .map(_ => Pointer.empty)
-              )
-              .orElse(Some(Pointer.empty))
-          } else {
-            None
-          }
+        case Offset.ArrayValue(_, vs) =>
+          vs.zipWithIndex
+            .find(_._1.offset.contains(at))
+            .flatMap { case (v, i) =>
+              go(v).map(Pointer.empty / i / _)
+            }
+            .orElse(Some(Pointer.empty))
+        case Offset.ObjectValue(_, properties) =>
+          properties
+            .find(_._2.offset.contains(at))
+            .flatMap { case (k, v) =>
+              val prefix = Pointer.empty / k.value.toString
+              go(v).map(prefix / _).orElse(Some(prefix))
+            }
+            .orElse(
+              properties.keys
+                .find(_.offset.contains(at))
+                .map(_ => Pointer.empty)
+            )
+            .orElse(Some(Pointer.empty))
         case _ => Some(Pointer.empty)
       }
     }
-    go(value).getOrElse(Pointer.empty)
+    Some(value)
+      .filter(_.offset.contains(at))
+      .flatMap(go)
+      .getOrElse(Pointer.empty)
   }
 
   override def offsetAt(value: Offset.Value)(pointer: Pointer): Option[Offset] = {
