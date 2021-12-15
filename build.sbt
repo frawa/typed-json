@@ -40,6 +40,10 @@ val strictScalacSettings = Seq(
   )
 )
 
+val sharedTestSettings = Seq(
+  Test / testOptions += Tests.Argument("+l", "-q", "--summary=0")
+)
+
 lazy val root = (project in file("."))
   .settings(sharedSettings)
   .settings(
@@ -69,6 +73,7 @@ lazy val parser =
     .settings(
       name := "scala-json-schema-parser"
     )
+    .settings(sharedTestSettings)
     .jvmSettings(
       libraryDependencies += "org.scalameta" %% "munit" % munitVersion % Test
     )
@@ -87,6 +92,7 @@ lazy val parserZio =
     .settings(
       name := "scala-json-schema-parser-zio"
     )
+    .settings(sharedTestSettings)
     .jvmSettings(
       libraryDependencies += "dev.zio"       %% "zio-json" % zioJsonVersion,
       libraryDependencies += "org.scalameta" %% "munit"    % munitVersion % Test
@@ -108,6 +114,7 @@ lazy val parserJawn =
     .settings(
       name := "scala-json-schema-parser-jawn"
     )
+    .settings(sharedTestSettings)
     .jvmSettings(
       libraryDependencies += "org.typelevel" %% "jawn-parser" % jawnVersion,
       libraryDependencies += "org.scalameta" %% "munit"       % munitVersion % Test
@@ -141,9 +148,7 @@ lazy val validator =
     .settings(
       name := "scala-json-schema-validator"
     )
-    .settings(
-      Test / testOptions += Tests.Argument("+l", "-q", "--summary=0")
-    )
+    .settings(sharedTestSettings)
     .jvmSettings(
       libraryDependencies += "org.scalameta" %% "munit" % munitVersion % Test
     )
