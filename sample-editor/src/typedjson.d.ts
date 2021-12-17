@@ -1,7 +1,4 @@
 declare module "typedjson" {
-    export class TmpMain {
-        static hello(): void
-    }
 
     export class SuggestFactory {
         static withMetaSchema(): Suggest

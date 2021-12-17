@@ -3,8 +3,7 @@ import { json } from "@codemirror/next/lang-json"
 import { autocompletion } from "@codemirror/next/autocomplete"
 
 /// <reference path="./typedjson.d.ts"/>
-import { SuggestFactory, TmpMain } from "typedjson"
-TmpMain.hello()
+import { SuggestFactory } from "typedjson"
 
 // see https://codemirror.net/6/docs/ref/
 
@@ -21,9 +20,10 @@ const state = EditorState.create({
             activateOnTyping: false,
             defaultKeymap: true,
             override: [context => {
+                // TODO update only on doc change
                 suggest = suggest.forValue(context.state.doc.sliceString(0))
+
                 const suggestions = suggest.at(context.pos)
-                console.log("FW", suggestions)
                 const options = suggestions.map(item => ({
                     label: item
                 }))
