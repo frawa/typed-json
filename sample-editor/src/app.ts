@@ -3,11 +3,12 @@ import { json } from "@codemirror/next/lang-json"
 import { autocompletion } from "@codemirror/next/autocomplete"
 
 /// <reference path="./typedjson.d.ts"/>
-import { TmpMain } from "typedjson"
+import { SuggestFactory, TmpMain } from "typedjson"
 TmpMain.hello()
 
 // see https://codemirror.net/6/docs/ref/
 
+let suggest = SuggestFactory.withMetaSchema()
 
 const state = EditorState.create({
     doc: `{
@@ -20,11 +21,15 @@ const state = EditorState.create({
             activateOnTyping: false,
             defaultKeymap: true,
             override: [context => {
+                suggest = suggest.forValue(context.state.doc.sliceString(0))
+                const suggestions = suggest.at(context.pos)
+                console.log("FW", suggestions)
+                const options = suggestions.map(item => ({
+                    label: item
+                }))
                 return {
                     from: context.pos,
-                    options: [{
-                        label: "a suggestion"
-                    }]
+                    options
                 }
             }]
         }),
