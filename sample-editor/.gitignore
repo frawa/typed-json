@@ -1,3 +1,4 @@
 dist/
+public/bundle*
+
 node_modules/
-.parcel-cache/

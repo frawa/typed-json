@@ -2,7 +2,12 @@ import { EditorState, EditorView, basicSetup } from "@codemirror/next/basic-setu
 import { json } from "@codemirror/next/lang-json"
 import { autocompletion } from "@codemirror/next/autocomplete"
 
+/// <reference path="./typedjson.d.ts"/>
+import { TmpMain } from "typedjson"
+TmpMain.hello()
+
 // see https://codemirror.net/6/docs/ref/
+
 
 const state = EditorState.create({
     doc: `{
