@@ -17,7 +17,7 @@
 package frawa.typedjson.pointer
 
 import frawa.typedjson.parser.{Offset, Value}
-import frawa.typedjson.parser.Value._
+import frawa.typedjson.parser.Value.{ArrayValue, ObjectValue}
 
 object Pointer {
   def empty = new Pointer(Nil)
