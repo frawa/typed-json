@@ -1,6 +1,8 @@
 import { EditorState, EditorView, basicSetup } from "@codemirror/next/basic-setup"
 import { json } from "@codemirror/next/lang-json"
 import { autocompletion } from "@codemirror/next/autocomplete"
+import { bracketMatching } from "@codemirror/next/matchbrackets"
+import { closeBrackets } from "@codemirror/next/closebrackets"
 
 /// <reference path="./typedjson.d.ts"/>
 import { SuggestFactory } from "typedjson"
@@ -16,6 +18,8 @@ const state = EditorState.create({
     extensions: [
         basicSetup,
         json(),
+        bracketMatching(),
+        closeBrackets(),
         autocompletion({
             activateOnTyping: false,
             defaultKeymap: true,
