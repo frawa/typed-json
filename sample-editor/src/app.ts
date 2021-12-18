@@ -1,15 +1,17 @@
-import { EditorState, EditorView, basicSetup } from "@codemirror/next/basic-setup"
-import { json } from "@codemirror/next/lang-json"
 import { autocompletion } from "@codemirror/next/autocomplete"
-import { bracketMatching } from "@codemirror/next/matchbrackets"
+import { basicSetup, EditorState, EditorView } from "@codemirror/next/basic-setup"
 import { closeBrackets } from "@codemirror/next/closebrackets"
+import { json } from "@codemirror/next/lang-json"
+import { Diagnostic, linter } from "@codemirror/next/lint"
+import { bracketMatching } from "@codemirror/next/matchbrackets"
+import { darkTheme } from "@codemirror/next/view/src/theme"
 
 /// <reference path="./typedjson.d.ts"/>
-import { SuggestFactory } from "typedjson"
+import { TypedJsonFactory } from "typedjson"
 
 // see https://codemirror.net/6/docs/ref/
 
-let suggest = SuggestFactory.withMetaSchema()
+let typedJson = TypedJsonFactory.withMetaSchema()
 
 const state = EditorState.create({
     doc: `{
@@ -24,10 +26,7 @@ const state = EditorState.create({
             activateOnTyping: false,
             defaultKeymap: true,
             override: [context => {
-                // TODO update only on doc change
-                suggest = suggest.forValue(context.state.doc.sliceString(0))
-
-                const suggestions = suggest.at(context.pos)
+                const suggestions = typedJson.suggestAt(context.pos)
                 const options = suggestions.map(item => ({
                     label: item
                 }))
@@ -37,6 +36,22 @@ const state = EditorState.create({
                 }
             }]
         }),
+        linter(view => {
+            // TODO update only on doc change
+            typedJson = typedJson.forValue(view.state.doc.sliceString(0))
+
+            const markers = typedJson.markers()
+            const diagnostics: Diagnostic[] = markers.map(marker => ({
+                from: marker.start,
+                to: marker.end - 1,
+                message: marker.message,
+                severity: "error", // TODO from marker.severity,
+                source: marker.pointer
+            }));
+            return diagnostics;
+        }),
+        // lintGutter(), // TODO
+        // keymap.of(lintKeymap)
         // keymap.of(completionKeymap)
     ],
 });
@@ -48,3 +63,7 @@ const state = EditorState.create({
         state,
         parent: document.querySelector("#editor") || undefined
     })
+function lintGutter(): import("@codemirror/next/state").Extension {
+    throw new Error("Function not implemented.")
+}
+
