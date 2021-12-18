@@ -119,7 +119,7 @@ class JawnOffsetParserTest extends FunSuite {
     )
   }
 
-  private def pointerAt(json: String)(at: Int): Either[String, Pointer] = {
+  private def pointerAt(json: String)(at: Int): Either[OffsetParser.ParseError, Pointer] = {
     parser.parseWithOffset(json).map(parser.pointerAt(_)(at))
   }
 
@@ -257,7 +257,7 @@ class JawnOffsetParserTest extends FunSuite {
     assertEquals(pointerAt("""[1,[2,]]""")(6), Right(Pointer.empty / 1 / 1))
   }
 
-  private def offsetAt(json: String)(at: Pointer): Either[String, Option[Offset]] = {
+  private def offsetAt(json: String)(at: Pointer): Either[OffsetParser.ParseError, Option[Offset]] = {
     parser.parseWithOffset(json).map(parser.offsetAt(_)(at))
   }
 

@@ -2,7 +2,7 @@ package frawa.typedjson.js
 
 import frawa.typedjson.keywords.{Evaluator, InnerValue, Keywords, Result, SchemaProblems, SchemaValue}
 import frawa.typedjson.meta.MetaSchemas
-import frawa.typedjson.parser.{JawnParser, Offset, Value}
+import frawa.typedjson.parser.{JawnParser, Offset, OffsetParser, Value}
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.validation.{ValidationProcessing, ValidationResult}
 
@@ -42,7 +42,7 @@ object TypedJsonFactory {
     parser.parse(json)
   }
 
-  def parseJsonOffsetValue(json: String): Either[String, Offset.Value] = {
+  def parseJsonOffsetValue(json: String): Either[OffsetParser.ParseError, Offset.Value] = {
     parser.parseWithOffset(json)
   }
 
@@ -59,7 +59,7 @@ object TypedJsonFactory {
 case class TypedJson(
     keywords: Either[SchemaProblems, Keywords],
     value: Option[Offset.Value] = None,
-    result: Option[Either[String, Result[ValidationResult]]] = None
+    result: Option[Either[OffsetParser.ParseError, Result[ValidationResult]]] = None
 ) {
 
   @JSExport
@@ -127,8 +127,7 @@ object Marker {
     Marker(start, end, error.pointer.toString, message, "error")
   }
 
-  def fromParsingError(message: String): Marker = {
-    // TODO capture offset details
-    Marker(0, 0, "", message, "error")
+  def fromParsingError(error: OffsetParser.ParseError): Marker = {
+    Marker(error.offset, error.offset, "", error.message, "error")
   }
 }

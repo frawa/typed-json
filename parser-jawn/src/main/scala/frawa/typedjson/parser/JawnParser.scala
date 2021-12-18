@@ -18,25 +18,25 @@ package frawa.typedjson.parser
 
 import frawa.typedjson.pointer.Pointer
 import org.typelevel.jawn
-import org.typelevel.jawn.FContext
-
-//import scala.collection.mutable
+import org.typelevel.jawn.{FContext, ParseException}
 
 class JawnParser extends Parser with OffsetParser {
+  import OffsetParser.ParseError
+
   override def parse(json: String): Either[String, Value] = {
     jawn.Parser.parseFromString(json)(valueFacade).toEither.swap.map(_.toString).swap
   }
 
-  override def parseWithOffset(json: String): Either[String, Offset.Value] = {
+  override def parseWithOffset(json: String): Either[ParseError, Offset.Value] = {
     jawn.Parser
       .parseFromString(json)(offsetValueFacade)
-      .toEither
-      .swap
-      .map { ex =>
-//        ex.printStackTrace()
-        ex.toString
-      }
-      .swap
+      .fold(
+        {
+          case ParseException(message, offset, _, _) => Left(ParseError(offset, message))
+          case ex: Throwable                         => Left(ParseError(0, "internal parsing error: " + ex.getMessage))
+        },
+        Right(_)
+      )
   }
 
   override def pointerAt(value: Offset.Value)(at: Int): Pointer = {

@@ -4,10 +4,16 @@ import frawa.typedjson.pointer.Pointer
 
 trait OffsetParser {
   import Offset._
-  def parseWithOffset(json: String): Either[String, Value]
+  import OffsetParser.ParseError
+
+  def parseWithOffset(json: String): Either[ParseError, Value]
 
   def pointerAt(value: Value)(offset: Int): Pointer
   def offsetAt(value: Value)(pointer: Pointer): Option[Offset]
+}
+
+object OffsetParser {
+  case class ParseError(offset: Int, message: String)
 }
 
 case class Offset(start: Int, end: Int) {
@@ -17,6 +23,7 @@ case class Offset(start: Int, end: Int) {
 
 object Offset {
   import frawa.typedjson.parser.{Value => ValueWO}
+
   sealed trait Value {
     val offset: Offset
   }
@@ -46,5 +53,4 @@ object Offset {
         )
     }
   }
-
 }
