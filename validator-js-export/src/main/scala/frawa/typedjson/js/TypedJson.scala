@@ -1,8 +1,8 @@
 package frawa.typedjson.js
 
-import frawa.typedjson.keywords.{Evaluator, InnerValue, Keywords, Result, SchemaProblems, SchemaValue}
+import frawa.typedjson.keywords._
 import frawa.typedjson.meta.MetaSchemas
-import frawa.typedjson.parser.{JawnParser, Offset, OffsetParser, Value}
+import frawa.typedjson.parser.{JawnParser, Offset, OffsetParser}
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.validation.{ValidationProcessing, ValidationResult}
 
@@ -14,19 +14,8 @@ object TypedJsonFactory {
   private val parser = new JawnParser
 
   @JSExport
-  def withSchema(json: String): TypedJson = {
-    val suggest = for {
-      value <- parseJsonValue(json)
-      schema   = SchemaValue.root(value)
-      keywords = Keywords(schema, None, None)
-    } yield {
-      TypedJson(keywords)
-    }
-    suggest.swap
-      .map(error => throw new IllegalArgumentException("broken schema: " + error))
-      .swap
-      .toOption
-      .get
+  def create(): TypedJson = {
+    TypedJson(None)
   }
 
   @JSExport
@@ -34,12 +23,9 @@ object TypedJsonFactory {
     val resolver     = MetaSchemas.lazyResolver
     val base         = MetaSchemas.draft202012
     val Some(schema) = resolver(base.resolve("schema"))
-    val keywords     = Keywords(schema, None, Some(resolver))
-    TypedJson(keywords)
-  }
-
-  private def parseJsonValue(json: String): Either[String, Value] = {
-    parser.parse(json)
+    val vocabulary   = Vocabulary.specDialect()
+    val keywords     = Keywords(schema, Some(vocabulary), Some(resolver))
+    TypedJson(Some(keywords))
   }
 
   def parseJsonOffsetValue(json: String): Either[OffsetParser.ParseError, Offset.Value] = {
@@ -57,24 +43,40 @@ object TypedJsonFactory {
 
 @JSExportTopLevel("TypedJson")
 case class TypedJson(
-    keywords: Either[SchemaProblems, Keywords],
+    keywords: Option[Either[SchemaProblems, Keywords]],
     value: Option[Offset.Value] = None,
     result: Option[Either[OffsetParser.ParseError, Result[ValidationResult]]] = None
 ) {
+  @JSExport
+  def withSchema(schema: TypedJson): TypedJson = {
+    val resolver    = MetaSchemas.lazyResolver
+    val schemaValue = schema.value.map(Offset.withoutOffset).map(SchemaValue.root)
+    val vocabulary  = Vocabulary.specDialect()
+    val keywords    = schemaValue.map(Keywords(_, Some(vocabulary), Some(resolver)))
+    this.copy(keywords = keywords).validate()
+  }
 
   @JSExport
   def forValue(json: String): TypedJson = {
+    val parsed = TypedJsonFactory.parseJsonOffsetValue(json)
+    parsed match {
+      case Right(value) =>
+        this.copy(value = Some(value), result = None).validate()
+      case Left(error) =>
+        this.copy(value = None, result = Some(Left(error)))
+    }
+  }
+
+  private def validate(): TypedJson = {
     keywords match {
-      case Right(keywords) =>
-        val parsed = TypedJsonFactory
-          .parseJsonOffsetValue(json)
-        parsed match {
-          case Right(value) =>
+      case Some(Right(keywords)) =>
+        value match {
+          case Some(value) =>
             val evaluator = Evaluator(keywords, ValidationProcessing())
             val result    = evaluator(InnerValue(Offset.withoutOffset(value)))
-            this.copy(value = Some(value), result = Some(Right(result)))
-          case Left(error) =>
-            this.copy(value = None, result = Some(Left(error)))
+            this.copy(result = Some(Right(result)))
+          case None =>
+            this
         }
       case _ => this
     }
@@ -83,14 +85,15 @@ case class TypedJson(
   @JSExport
   def markers(): js.Array[Marker] = {
     val markers = (keywords, value, result) match {
-      case (Right(_), Some(value), Some(Right(result))) if !result.valid =>
+      case (Some(Right(_)), Some(value), Some(Right(result))) if !result.valid =>
         val offsetAt = pointer => TypedJsonFactory.offsetAt(pointer, value)
         result.results
           .flatMap(_.errors)
           .map(Marker.fromError(offsetAt))
-      case (Left(problems), _, _)    => problems.errors.map(Marker.fromSchemaError) // TODO not needed?
-      case (_, _, Some(Left(error))) => Seq(Marker.fromParsingError(error))
-      case _                         => Seq.empty
+      case (Some(Left(problems)), _, _) => problems.errors.map(Marker.fromSchemaError) // TODO not needed?
+      case (_, _, Some(Left(error))) =>
+        Seq(Marker.fromParsingError(error))
+      case _ => Seq.empty
     }
     js.Array(markers: _*)
   }

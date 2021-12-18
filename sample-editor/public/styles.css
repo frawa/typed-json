@@ -2,3 +2,11 @@ h1 {
   color: darkgray;
   font-family: sans-serif;
 }
+
+.page {
+  display: flex;
+}
+
+.column {
+  flex: 50%;
+}

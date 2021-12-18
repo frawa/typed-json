@@ -181,4 +181,7 @@ object Vocabulary {
       .swap
   }
 
+  def specDialect(): Vocabulary =
+    specVocabularies.values.reduce(_.combine(_))
+
 }
