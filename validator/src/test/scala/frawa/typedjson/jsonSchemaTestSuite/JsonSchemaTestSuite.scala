@@ -120,7 +120,7 @@ class JsonSchemaTestSuite extends FunSuite {
             }
           }
         } else {
-          implicit val factorry1: EvaluatorFactory[SchemaValue, ValidationResult] = factory
+          implicit val factory1: EvaluatorFactory[SchemaValue, ValidationResult] = factory
           test(suiteOptions) {
             withProcessor[ValidationResult](schemaValue) { evaluator =>
               tests
