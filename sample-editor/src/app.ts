@@ -21,11 +21,11 @@ const initialSchema = `{
 
 let typedJsonSchema = TypedJsonFactory
     .withMetaSchema()
-// .forValue(initialJson)
+    .forValue(initialSchema)
 let typedJson = TypedJsonFactory
     .create()
-// .withSchema(typedJsonSchema)
-// .forValue(initialJson)
+    .withSchema(typedJsonSchema)
+    .forValue(initialJson)
 
 const state = EditorState.create({
     doc: initialJson,
