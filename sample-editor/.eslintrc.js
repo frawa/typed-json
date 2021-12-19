@@ -12,8 +12,13 @@ module.exports = {
         "ecmaVersion": 13
     },
     "plugins": [
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "header"
     ],
     "rules": {
-    }
+        "header/header": [2, "config/header.js"]
+    },
+    "ignorePatterns": [
+        "*.js"
+    ],
 };
