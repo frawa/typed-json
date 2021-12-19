@@ -1,11 +1,16 @@
 import Dependencies._
+import org.scalajs.ir.Trees.JSUnaryOp.!
 
-addCommandAlias("lint", "headerCheckAll;fmtCheck;fixCheck")
+addCommandAlias("lint", "headerCheckAll;fmtCheck;fixCheck;npmAll")
 addCommandAlias("lintFix", "headerCreateAll;fixFix;fmtFix")
 addCommandAlias("fmtCheck", "all scalafmtCheck scalafmtSbtCheck")
 addCommandAlias("fmtFix", "all scalafmt scalafmtSbt")
 addCommandAlias("fixCheck", "scalafixAll --check")
 addCommandAlias("fixFix", "scalafixAll")
+addCommandAlias("npmAll", "npmCI;npmRunCI")
+
+lazy val npmCI    = taskKey[Unit]("npm ci")
+lazy val npmRunCI = taskKey[Unit]("npm run ci")
 
 val sharedSettings = Seq(
   scalaVersion     := "2.13.7",
@@ -174,3 +179,16 @@ lazy val validatorJsExport = (project in file("validator-js-export"))
   )
   .dependsOn(parserJawn.js)
   .dependsOn(validator.js)
+
+// sample-editor
+npmCI := {
+  import scala.sys.process._
+  val log = streams.value.log
+  Process("npm" :: "ci" :: Nil, file("./sample-editor")) ! log
+}
+
+npmRunCI := {
+  import scala.sys.process._
+  val log = streams.value.log
+  Process("npm" :: "run" :: "ci" :: Nil, file("./sample-editor")) ! log
+}
