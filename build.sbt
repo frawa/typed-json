@@ -64,7 +64,8 @@ lazy val root = (project in file("."))
     parserJawn.js,
     macros.jvm,
     validator.jvm,
-    validator.js
+    validator.js,
+    validatorJsExport
   )
 
 lazy val parser =
@@ -188,6 +189,8 @@ npmCI := {
 }
 
 npmRunCI := {
+  (validatorJsExport / Compile / fastLinkJS).value
+
   import scala.sys.process._
   val log = streams.value.log
   Process("npm" :: "run" :: "ci" :: Nil, file("./sample-editor")) ! log
