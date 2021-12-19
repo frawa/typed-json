@@ -1,5 +1,4 @@
 import Dependencies._
-import org.scalajs.ir.Trees.JSUnaryOp.!
 
 addCommandAlias("lint", "headerCheckAll;fmtCheck;fixCheck;npmAll")
 addCommandAlias("lintFix", "headerCreateAll;fixFix;fmtFix")
@@ -203,3 +202,5 @@ publishToDocs := {
   IO.delete(file("./docs"))
   IO.copyDirectory(file("./sample-editor/public"), file("./docs"))
 }
+
+(Compile / packageBin) := ((Compile / packageBin) dependsOn publishToDocs).value
