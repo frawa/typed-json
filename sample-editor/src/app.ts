@@ -103,14 +103,33 @@ function autocompleteConfig(getTypedJson: () => TypedJson): CompletionConfig {
         activateOnTyping: false,
         defaultKeymap: true,
         override: [context => {
-            const suggestions = getTypedJson().suggestAt(context.pos)
-            const options = suggestions.map(item => ({
-                label: item
-            }))
-            return {
-                from: context.pos,
-                options
-            }
+            return new Promise(resolve => {
+                const suggestions = getTypedJson().suggestAt(context.pos)
+                if (suggestions.length === 0) {
+                    return resolve(null)
+                }
+                const theSuggestion = suggestions[0]
+                const from = theSuggestion.start
+                const to = theSuggestion.end - 1
+                const options = theSuggestion.suggestions.map(suggestion => {
+                    const value = suggestion.value
+                    const label = JSON.stringify(value).slice(0, 21)
+                    const pretty = JSON.stringify(value, null, 2)
+                    return ({
+                        label,
+                        info: pretty,
+                        apply: pretty
+                    });
+                });
+                // console.log("FW", theSuggestion.suggestions.length, options.length)
+                console.log("FW", context.pos, from, to)
+                return resolve({
+                    from: context.pos,
+                    // from,
+                    // to,
+                    options
+                });
+            });
         }]
     }
 }

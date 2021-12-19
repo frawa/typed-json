@@ -18,8 +18,9 @@ package frawa.typedjson.js
 
 import frawa.typedjson.keywords._
 import frawa.typedjson.meta.MetaSchemas
-import frawa.typedjson.parser.{JawnParser, Offset, OffsetParser}
+import frawa.typedjson.parser.{JawnParser, Offset, OffsetParser, Value}
 import frawa.typedjson.pointer.Pointer
+import frawa.typedjson.suggestion.{SuggestionProcessing, SuggestionResult}
 import frawa.typedjson.validation.{ValidationProcessing, ValidationResult}
 
 import scala.scalajs.js
@@ -115,9 +116,22 @@ case class TypedJson(
   }
 
   @JSExport
-  def suggestAt(offset: Int): js.Array[String] = {
-    val pointer = value.map(TypedJsonFactory.pointerAt(_, offset))
-    js.Array(Seq("hello", "world"): _*)
+  def suggestAt(offset: Int): js.Array[Suggestions] = {
+    val suggestions = keywords match {
+      case Some(Right(keywords)) =>
+        value match {
+          case Some(value) =>
+            val pointer   = TypedJsonFactory.pointerAt(value, offset)
+            val evaluator = Evaluator(keywords, SuggestionProcessing(pointer))
+            val result    = evaluator(InnerValue(Offset.withoutOffset(value)))
+            val offsetAt  = pointer => TypedJsonFactory.offsetAt(pointer, value)
+            Seq(Suggestions(offsetAt)(pointer, result))
+          case None =>
+            Seq.empty
+        }
+      case _ => Seq.empty
+    }
+    js.Array(suggestions: _*)
   }
 }
 
@@ -148,5 +162,46 @@ object Marker {
 
   def fromParsingError(error: OffsetParser.ParseError): Marker = {
     Marker(error.offset, error.offset, "", error.message, "error")
+  }
+}
+
+@JSExportTopLevel("Suggestions")
+@JSExportAll
+case class Suggestions(
+    start: Int,
+    end: Int,
+    pointer: String,
+    suggestions: js.Array[Suggestion]
+)
+
+@JSExportTopLevel("Suggestion")
+@JSExportAll
+case class Suggestion(
+    value: js.Any
+)
+
+object Suggestions {
+  def apply(offsetAt: Pointer => Option[Offset])(pointer: Pointer, result: Result[SuggestionResult]): Suggestions = {
+    val offset       = offsetAt(pointer)
+    val (start, end) = offset.map(o => (o.start, o.end)).getOrElse((0, 0))
+    val suggestions  = result.results.flatMap(_.suggestions).map(toSuggestion)
+    Suggestions(start, end, pointer.toString, js.Array(suggestions: _*))
+  }
+
+  private def toSuggestion(value: Value): Suggestion = {
+    Suggestion(toAny(value))
+  }
+
+  private def toAny(value: Value): js.Any = {
+    value match {
+      case Value.NumberValue(value) => value.toDouble
+      case Value.BoolValue(value)   => value
+      case Value.NullValue          => null
+      case Value.StringValue(value) => value
+      case Value.ArrayValue(items)  => js.Array(items.map(toAny): _*)
+      case Value.ObjectValue(properties) =>
+        val pairs = properties.map(t => (t._1, toAny(t._2))).toSeq
+        js.Dictionary(pairs: _*)
+    }
   }
 }

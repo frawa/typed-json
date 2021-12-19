@@ -25,7 +25,7 @@ declare module "typedjson" {
         withSchema(typedJson: TypedJson): TypedJson
         forValue(json: string): TypedJson
         markers(): Marker[]
-        suggestAt(offset: number): string[]
+        suggestAt(offset: number): Suggestions[]
     }
 
     export interface Marker {
@@ -36,4 +36,14 @@ declare module "typedjson" {
         severity: string
     }
 
+    export interface Suggestions {
+        start: number,
+        end: number,
+        pointer: string,
+        suggestions: Suggestion[]
+    }
+
+    export interface Suggestion {
+        value: unknown
+    }
 }
