@@ -23,7 +23,7 @@ import munit.Assertions.{assertEquals, clue, clues, fail}
 import java.net.URI
 
 object TestUtil {
-  implicit val parser                                                   = new JawnParser
+  implicit val parser: JawnParser                                                   = new JawnParser
   implicit val lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
 
   def parseJsonValue(text: String)(implicit parser: Parser): Value = {
