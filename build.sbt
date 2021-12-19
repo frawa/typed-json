@@ -12,6 +12,8 @@ addCommandAlias("npmAll", "npmCI;npmRunCI")
 lazy val npmCI    = taskKey[Unit]("npm ci")
 lazy val npmRunCI = taskKey[Unit]("npm run ci")
 
+lazy val publishToDocs = taskKey[Unit]("publish to docs/, aka GitHub Pages")
+
 val sharedSettings = Seq(
   scalaVersion     := "2.13.7",
   organization     := "frawa.typedjson",
@@ -194,4 +196,10 @@ npmRunCI := {
   import scala.sys.process._
   val log = streams.value.log
   Process("npm" :: "run" :: "ci" :: Nil, file("./sample-editor")) ! log
+}
+
+publishToDocs := {
+  npmRunCI.value
+  IO.delete(file("./docs"))
+  IO.copyDirectory(file("./sample-editor/public"), file("./docs"))
 }
