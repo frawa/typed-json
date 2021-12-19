@@ -170,14 +170,7 @@ lazy val validatorJsExport = (project in file("validator-js-export"))
     name := "scala-json-schema-validator-js-export"
   )
   .settings(
-    // This is an application with a main method
-//    Compile / mainClass := Some("frawa.typedjson.TmpMain"),
-//    scalaJSMainModuleInitializer    := Some("frawa.typedjson.TmpMain"),
-//    scalaJSUseMainModuleInitializer := true
-    // ECMAScript
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }
-    // CommonJS
-//    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) }
   )
   .dependsOn(parserJawn.js)
   .dependsOn(validator.js)
