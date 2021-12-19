@@ -179,6 +179,10 @@ lazy val validatorJsExport = (project in file("validator-js-export"))
   .settings(
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }
   )
+  .settings(
+    // TODO testing
+    Test / test := {}
+  )
   .dependsOn(parserJawn.js)
   .dependsOn(validator.js)
 
