@@ -22,9 +22,11 @@ import { json } from "@codemirror/next/lang-json"
 import { Diagnostic, linter, lintKeymap } from "@codemirror/next/lint"
 import { bracketMatching } from "@codemirror/next/matchbrackets"
 import { keymap } from "@codemirror/next/view"
+import { Text } from "@codemirror/next/text"
 
 /// <reference path="./typedjson.d.ts"/>
 import { TypedJson, TypedJsonFactory } from "typedjson"
+import { EditorSelection } from "@codemirror/next/state"
 
 // see https://codemirror.net/6/docs/ref/
 
@@ -110,7 +112,7 @@ function autocompleteConfig(getTypedJson: () => TypedJson): CompletionConfig {
                 }
                 const theSuggestion = suggestions[0]
                 const from = theSuggestion.start
-                const to = theSuggestion.end - 1
+                const to = theSuggestion.end
                 const options = theSuggestion.suggestions.map(suggestion => {
                     const value = suggestion.value
                     const label = JSON.stringify(value).slice(0, 21)
@@ -118,15 +120,24 @@ function autocompleteConfig(getTypedJson: () => TypedJson): CompletionConfig {
                     return ({
                         label,
                         info: pretty,
-                        apply: pretty
+                        // apply: pretty
+                        apply: (view: EditorView) => {
+                            const replace = view.state.update({
+                                changes: [
+                                    { from, to, insert: pretty }
+                                ],
+                                selection: EditorSelection.cursor(from + pretty.length)
+                            });
+                            view.update([replace])
+                        }
                     });
                 });
                 // console.log("FW", theSuggestion.suggestions.length, options.length)
                 console.log("FW", context.pos, from, to)
                 return resolve({
-                    from: context.pos,
-                    // from,
-                    // to,
+                    // from: context.pos,
+                    from,
+                    to: context.pos,
                     options
                 });
             });
