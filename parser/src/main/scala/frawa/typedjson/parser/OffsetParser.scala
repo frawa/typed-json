@@ -16,7 +16,8 @@
 
 package frawa.typedjson.parser
 
-import frawa.typedjson.pointer.Pointer
+import frawa.typedjson.parser.Offset.ObjectValue
+import frawa.typedjson.pointer.{FieldToken, Pointer}
 
 trait OffsetParser {
   import Offset._
@@ -60,7 +61,16 @@ object OffsetParser {
   }
 
   def offsetAt(value: Offset.Value)(pointer: Pointer): Option[Offset] = {
-    pointer(value).map(_.offset)
+    if (pointer.isInsideKey) {
+      // TODO move into Pointer
+      val FieldToken(key) = pointer.segments.last
+      pointer.outer(value) match {
+        case Some(ObjectValue(_, properties)) => properties.find(_._1.value == key).map(_._1.offset)
+        case _                                => None
+      }
+    } else {
+      pointer(value).map(_.offset)
+    }
   }
 }
 
