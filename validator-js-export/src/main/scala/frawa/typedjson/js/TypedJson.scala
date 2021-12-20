@@ -50,11 +50,11 @@ object TypedJsonFactory {
   }
 
   def pointerAt(value: Offset.Value, at: Int): Pointer = {
-    parser.pointerAt(value)(at)
+    OffsetParser.pointerAt(value)(at)
   }
 
   def offsetAt(pointer: Pointer, value: Offset.Value): Option[Offset] = {
-    parser.offsetAt(value)(pointer)
+    OffsetParser.offsetAt(value)(pointer)
   }
 }
 

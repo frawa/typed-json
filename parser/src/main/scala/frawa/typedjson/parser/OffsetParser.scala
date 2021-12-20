@@ -21,15 +21,47 @@ import frawa.typedjson.pointer.Pointer
 trait OffsetParser {
   import Offset._
   import OffsetParser.ParseError
-
   def parseWithOffset(json: String): Either[ParseError, Value]
-
-  def pointerAt(value: Value)(offset: Int): Pointer
-  def offsetAt(value: Value)(pointer: Pointer): Option[Offset]
 }
 
 object OffsetParser {
   case class ParseError(offset: Int, message: String)
+
+  def pointerAt(value: Offset.Value)(at: Int): Pointer = {
+    def go(value: Offset.Value): Option[Pointer] = {
+      value match {
+        case Offset.ArrayValue(_, vs) =>
+          vs.zipWithIndex
+            .find(_._1.offset.contains(at))
+            .flatMap { case (v, i) =>
+              go(v).map(Pointer.empty / i / _)
+            }
+            .orElse(Some(Pointer.empty))
+        case Offset.ObjectValue(_, properties) =>
+          properties
+            .find(_._2.offset.contains(at))
+            .flatMap { case (k, v) =>
+              val prefix = Pointer.empty / k.value.toString
+              go(v).map(prefix / _).orElse(Some(prefix))
+            }
+            .orElse(
+              properties.keys
+                .find(_.offset.contains(at))
+                .map(_ => Pointer.empty)
+            )
+            .orElse(Some(Pointer.empty))
+        case _ => Some(Pointer.empty)
+      }
+    }
+    Some(value)
+      .filter(_.offset.contains(at))
+      .flatMap(go)
+      .getOrElse(Pointer.empty)
+  }
+
+  def offsetAt(value: Offset.Value)(pointer: Pointer): Option[Offset] = {
+    pointer(value).map(_.offset)
+  }
 }
 
 case class Offset(start: Int, end: Int) {

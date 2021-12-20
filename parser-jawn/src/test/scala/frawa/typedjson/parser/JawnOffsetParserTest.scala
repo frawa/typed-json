@@ -120,7 +120,7 @@ class JawnOffsetParserTest extends FunSuite {
   }
 
   private def pointerAt(json: String)(at: Int): Either[OffsetParser.ParseError, Pointer] = {
-    parser.parseWithOffset(json).map(parser.pointerAt(_)(at))
+    parser.parseWithOffset(json).map(OffsetParser.pointerAt(_)(at))
   }
 
   test("pointerAt is empty on basic types") {
@@ -258,7 +258,7 @@ class JawnOffsetParserTest extends FunSuite {
   }
 
   private def offsetAt(json: String)(at: Pointer): Either[OffsetParser.ParseError, Option[Offset]] = {
-    parser.parseWithOffset(json).map(parser.offsetAt(_)(at))
+    parser.parseWithOffset(json).map(OffsetParser.offsetAt(_)(at))
   }
 
   test("offsetAt is empty on basic types") {
