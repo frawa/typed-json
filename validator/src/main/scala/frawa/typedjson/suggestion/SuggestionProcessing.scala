@@ -29,7 +29,10 @@ object SuggestionProcessing {
   def apply(at: Pointer): Processing[SuggestionResult] = Processing(simple(at), nested(at))
 
   private def simple(at: Pointer)(check: AssertionKeyword)(value: InnerValue): Result[SuggestionResult] = {
-    if (at == value.pointer) {
+    if (at.isInsideKey && at.outer == value.pointer) {
+      val suggestions = suggestForKey(check)(Seq(Result.valid))
+      Result.valid(SuggestionResult(suggestions, Result.valid))
+    } else if (at == value.pointer) {
       val suggestions = suggestFor(check)(Seq(Result.valid))
       Result.valid(SuggestionResult(suggestions, Result.valid))
     } else {
@@ -41,7 +44,10 @@ object SuggestionProcessing {
   private def nested(
       at: Pointer
   )(check: ApplicatorKeyword)(result: Seq[Result[SuggestionResult]])(value: InnerValue): Result[SuggestionResult] = {
-    if (at == value.pointer) {
+    if (at.isInsideKey && at.outer == value.pointer) {
+      val suggestions = suggestForKey(check)(Seq(Result.valid))
+      Result.valid(SuggestionResult(suggestions, Result.valid))
+    } else if (at == value.pointer) {
       val suggestions = suggestFor(check)(result)
       Result.valid(SuggestionResult(suggestions, Result.valid))
     } else {
@@ -75,6 +81,16 @@ object SuggestionProcessing {
           .flatMap(check => suggestFor(check.value)(results))
       case EnumKeyword(values) => values
       case _                   => results.flatMap(_.results).flatMap(_.suggestions)
+    }
+  }
+
+  private def suggestForKey(keyword: Keyword)(results: Seq[Result[SuggestionResult]]): Seq[StringValue] = {
+    keyword match {
+      case ObjectPropertiesKeyword(properties, _, _) =>
+        // TODO
+        properties.keys.map(StringValue).toSeq
+      case ObjectRequiredKeyword(required) => required.map(StringValue)
+      case _                               => Seq()
     }
   }
 }

@@ -63,6 +63,10 @@ case class Pointer(segments: Seq[Token], isInsideKey: Boolean = false) {
     copy(isInsideKey = true)
   }
 
+  def outer: Pointer = {
+    new Pointer(segments.dropRight(1))
+  }
+
   def apply(value: Value): Option[Value] = segments.foldLeft(Option(value)) { case (v, segment) =>
     v.flatMap(v =>
       segment match {

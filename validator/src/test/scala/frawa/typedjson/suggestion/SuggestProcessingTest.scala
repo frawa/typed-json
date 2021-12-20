@@ -41,7 +41,7 @@ class SuggestProcessingTest extends FunSuite {
     }
   }
 
-  test("suggest property") {
+  test("suggest one object per property") {
     withSchema(totoObjectSchema) { schema =>
       assertSuggest("""{"toto": 13}""")(
         schema
@@ -52,6 +52,22 @@ class SuggestProcessingTest extends FunSuite {
             ObjectValue(Map()),
             ObjectValue(Map("toto" -> NumberValue(0))),
             ObjectValue(Map("titi" -> StringValue("")))
+          )
+        )
+      }
+    }
+  }
+
+  test("suggest property names inside key") {
+    withSchema(totoObjectSchema) { schema =>
+      assertSuggest("""{"toto": 13}""", (Pointer.empty / "toto").insideKey)(
+        schema
+      ) { result =>
+        assertEquals(
+          result,
+          Seq(
+            StringValue("toto"),
+            StringValue("titi")
           )
         )
       }
