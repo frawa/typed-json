@@ -74,6 +74,7 @@ class OffsetParserTest extends FunSuite {
     // {"toto": 13}
     val v = ObjectValue(Offset(0, 13), Map(StringValue(Offset(1, 8), "toto") -> NumberValue(Offset(9, 11), 13)))
     assertEquals(pointerAt(v)(0), Pointer.empty)
+    assertEquals(pointerAt(v)(1), (Pointer.empty / "toto").insideKey)
     assertEquals(pointerAt(v)(9), Pointer.empty / "toto")
     assertEquals(pointerAt(v)(12), Pointer.empty)
   }
@@ -93,8 +94,11 @@ class OffsetParserTest extends FunSuite {
       )
     )
     assertEquals(pointerAt(v)(0), Pointer.empty)
+    assertEquals(pointerAt(v)(1), (Pointer.empty / "toto").insideKey)
     assertEquals(pointerAt(v)(9), Pointer.empty / "toto")
+    assertEquals(pointerAt(v)(12), (Pointer.empty / "titi").insideKey)
     assertEquals(pointerAt(v)(20), Pointer.empty / "titi")
+    assertEquals(pointerAt(v)(21), (Pointer.empty / "titi" / "foo").insideKey)
     assertEquals(pointerAt(v)(29), Pointer.empty / "titi" / "foo")
     assertEquals(pointerAt(v)(33), Pointer.empty / "titi")
     assertEquals(pointerAt(v)(34), Pointer.empty)

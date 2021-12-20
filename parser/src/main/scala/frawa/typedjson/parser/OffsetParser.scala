@@ -47,7 +47,7 @@ object OffsetParser {
             .orElse(
               properties.keys
                 .find(_.offset.contains(at))
-                .map(_ => Pointer.empty)
+                .map(k => (Pointer.empty / k.value.toString).insideKey)
             )
             .orElse(Some(Pointer.empty))
         case _ => Some(Pointer.empty)

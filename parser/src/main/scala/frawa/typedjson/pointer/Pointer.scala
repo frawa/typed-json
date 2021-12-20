@@ -40,7 +40,7 @@ object Pointer {
 
 }
 
-case class Pointer(segments: Seq[Token]) {
+case class Pointer(segments: Seq[Token], isInsideKey: Boolean = false) {
   override def toString: String = {
     if (this.segments.isEmpty) {
       ""
@@ -56,7 +56,11 @@ case class Pointer(segments: Seq[Token]) {
     new Pointer(segments :+ FieldToken(field))
   }
   def /(pointer: Pointer): Pointer = {
-    new Pointer(segments ++ pointer.segments)
+    new Pointer(segments ++ pointer.segments, isInsideKey = pointer.isInsideKey)
+  }
+
+  def insideKey: Pointer = {
+    copy(isInsideKey = true)
   }
 
   def apply(value: Value): Option[Value] = segments.foldLeft(Option(value)) { case (v, segment) =>
