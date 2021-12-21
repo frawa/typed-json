@@ -16,15 +16,16 @@
 
 package frawa.typedjson.suggestion
 
+import frawa.typedjson.keywords.{SchemaValue, Vocabulary}
+import frawa.typedjson.parser.Value._
 import frawa.typedjson.parser._
-import frawa.typedjson.keywords.{Pointer, SchemaValue, Vocabulary}
+import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestSchemas.{numberArraySchema, totoObjectSchema, totoRequiredObjectSchema}
 import frawa.typedjson.testutil.TestUtil._
 import munit.FunSuite
 
 class SuggestProcessingTest extends FunSuite {
-  implicit val zioParser: ZioParser = new ZioParser()
 
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
@@ -40,7 +41,7 @@ class SuggestProcessingTest extends FunSuite {
     }
   }
 
-  test("suggest property") {
+  test("suggest one object per property") {
     withSchema(totoObjectSchema) { schema =>
       assertSuggest("""{"toto": 13}""")(
         schema
@@ -51,6 +52,22 @@ class SuggestProcessingTest extends FunSuite {
             ObjectValue(Map()),
             ObjectValue(Map("toto" -> NumberValue(0))),
             ObjectValue(Map("titi" -> StringValue("")))
+          )
+        )
+      }
+    }
+  }
+
+  test("suggest property names inside key") {
+    withSchema(totoObjectSchema) { schema =>
+      assertSuggest("""{"toto": 13}""", (Pointer.empty / "toto").insideKey)(
+        schema
+      ) { result =>
+        assertEquals(
+          result,
+          Seq(
+            StringValue("toto"),
+            StringValue("titi")
           )
         )
       }

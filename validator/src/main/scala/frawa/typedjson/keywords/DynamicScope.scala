@@ -16,6 +16,8 @@
 
 package frawa.typedjson.keywords
 
+import frawa.typedjson.pointer.Pointer
+
 import java.net.URI
 
 case class DynamicScope(uris: Seq[URI]) {

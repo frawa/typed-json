@@ -16,7 +16,6 @@
 
 package frawa.typedjson.meta
 
-import frawa.typedjson.parser.ZioParser
 import frawa.typedjson.keywords._
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestUtil._
@@ -25,7 +24,6 @@ import munit.FunSuite
 
 // TODO still needed?
 class MetaSchemaTest extends FunSuite {
-  implicit val zioParser: ZioParser = new ZioParser()
 
   private val resolver                                               = MetaSchemas.lazyResolver
   private val base                                                   = MetaSchemas.draft202012

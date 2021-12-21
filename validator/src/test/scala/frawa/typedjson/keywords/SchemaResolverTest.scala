@@ -16,11 +16,11 @@
 
 package frawa.typedjson.keywords
 
-import munit.FunSuite
-import frawa.typedjson.parser.ObjectValue
-import java.net.URI
+import frawa.typedjson.parser.Value._
 import frawa.typedjson.util.UriUtil._
-import frawa.typedjson.parser.StringValue
+import munit.FunSuite
+
+import java.net.URI
 
 class SchemaResolverTest extends FunSuite {
   val fooId       = "https://example.net/foo.json"

@@ -16,15 +16,13 @@
 
 package frawa.typedjson.keywords
 
-import munit.FunSuite
-import frawa.typedjson.util.UriUtil._
 import frawa.typedjson.meta.MetaSchemas
-import frawa.typedjson.parser.ZioParser
+import frawa.typedjson.util.UriUtil._
+import munit.FunSuite
 
 import java.net.URI
 
 class SpecMetaSchemasTest extends FunSuite {
-  implicit val zioParser: ZioParser = new ZioParser()
 
   val schemaId       = "https://json-schema.org/draft/2020-12/schema"
   val schemaUri: URI = uri(schemaId)

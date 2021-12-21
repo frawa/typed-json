@@ -16,9 +16,10 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import frawa.typedjson.meta.MetaSchemas
-import frawa.typedjson.parser._
 import frawa.typedjson.keywords._
+import frawa.typedjson.meta.MetaSchemas
+import frawa.typedjson.parser.Value._
+import frawa.typedjson.parser._
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.validation.{ValidationProcessing, ValidationResult}
@@ -27,8 +28,6 @@ import munit.{FunSuite, Location, TestOptions}
 import java.net.URI
 
 class JsonSchemaTestSuite extends FunSuite {
-  implicit val zioParser: ZioParser = new ZioParser()
-
   protected val oneTestPerData      = false
   protected val ignore: Set[String] = Set()
 
@@ -121,7 +120,7 @@ class JsonSchemaTestSuite extends FunSuite {
             }
           }
         } else {
-          implicit val factorry1: EvaluatorFactory[SchemaValue, ValidationResult] = factory
+          implicit val factory1: EvaluatorFactory[SchemaValue, ValidationResult] = factory
           test(suiteOptions) {
             withProcessor[ValidationResult](schemaValue) { evaluator =>
               tests

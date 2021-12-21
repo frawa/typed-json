@@ -1,11 +1,17 @@
 import Dependencies._
 
-addCommandAlias("lint", "headerCheckAll;fmtCheck;fixCheck")
+addCommandAlias("lint", "headerCheckAll;fmtCheck;fixCheck;npmAll")
 addCommandAlias("lintFix", "headerCreateAll;fixFix;fmtFix")
 addCommandAlias("fmtCheck", "all scalafmtCheck scalafmtSbtCheck")
 addCommandAlias("fmtFix", "all scalafmt scalafmtSbt")
 addCommandAlias("fixCheck", "scalafixAll --check")
 addCommandAlias("fixFix", "scalafixAll")
+addCommandAlias("npmAll", "npmCI;npmRunCI")
+
+lazy val npmCI    = taskKey[Unit]("npm ci")
+lazy val npmRunCI = taskKey[Unit]("npm run ci")
+
+lazy val publishToDocs = taskKey[Unit]("publish to docs/, aka GitHub Pages")
 
 val sharedSettings = Seq(
   scalaVersion     := "2.13.7",
@@ -40,13 +46,28 @@ val strictScalacSettings = Seq(
   )
 )
 
+val sharedTestSettings = Seq(
+  Test / testOptions += Tests.Argument("+l", "-q", "--summary=0")
+)
+
 lazy val root = (project in file("."))
   .settings(sharedSettings)
   .settings(
     name    := "scala-json-schema-validator-root",
     publish := false
   )
-  .aggregate(parser.jvm, parser.js, macros.jvm, validator.jvm, validator.js)
+  .aggregate(
+    parser.jvm,
+    parser.js,
+    parserZio.jvm,
+    parserZio.js,
+    parserJawn.jvm,
+    parserJawn.js,
+    macros.jvm,
+    validator.jvm,
+    validator.js,
+    validatorJsExport
+  )
 
 lazy val parser =
   crossProject(JVMPlatform, JSPlatform)
@@ -58,6 +79,13 @@ lazy val parser =
     .settings(strictScalacSettings)
     .settings(
       name := "scala-json-schema-parser"
+    )
+    .settings(sharedTestSettings)
+    .jvmSettings(
+      libraryDependencies += "org.scalameta" %% "munit" % munitVersion % Test
+    )
+    .jsSettings(
+      libraryDependencies += "org.scalameta" %%% "munit" % munitVersion % Test
     )
 
 lazy val parserZio =
@@ -71,6 +99,7 @@ lazy val parserZio =
     .settings(
       name := "scala-json-schema-parser-zio"
     )
+    .settings(sharedTestSettings)
     .jvmSettings(
       libraryDependencies += "dev.zio"       %% "zio-json" % zioJsonVersion,
       libraryDependencies += "org.scalameta" %% "munit"    % munitVersion % Test
@@ -78,6 +107,28 @@ lazy val parserZio =
     .jsSettings(
       libraryDependencies += "dev.zio"       %%% "zio-json" % zioJsonVersion,
       libraryDependencies += "org.scalameta" %%% "munit"    % munitVersion % Test
+    )
+    .dependsOn(parser)
+
+lazy val parserJawn =
+  crossProject(JVMPlatform, JSPlatform)
+    .withoutSuffixFor(JVMPlatform)
+    .crossType(CrossType.Pure)
+    .in(file("parser-jawn"))
+    .settings(sharedSettings)
+    .settings(sharedScalacSettings)
+    .settings(strictScalacSettings)
+    .settings(
+      name := "scala-json-schema-parser-jawn"
+    )
+    .settings(sharedTestSettings)
+    .jvmSettings(
+      libraryDependencies += "org.typelevel" %% "jawn-parser" % jawnVersion,
+      libraryDependencies += "org.scalameta" %% "munit"       % munitVersion % Test
+    )
+    .jsSettings(
+      libraryDependencies += "org.typelevel" %%% "jawn-parser" % jawnVersion,
+      libraryDependencies += "org.scalameta" %%% "munit"       % munitVersion % Test
     )
     .dependsOn(parser)
 
@@ -91,7 +142,7 @@ lazy val macros = crossProject(JVMPlatform, JSPlatform)
     name                                   := "scala-json-schema-macros",
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value
   )
-  .dependsOn(parser, parserZio)
+  .dependsOn(parser, parserJawn)
 
 lazy val validator =
   crossProject(JSPlatform, JVMPlatform)
@@ -104,16 +155,56 @@ lazy val validator =
     .settings(
       name := "scala-json-schema-validator"
     )
-    .settings(
-      Test / testOptions += Tests.Argument("+l", "-q", "--summary=0")
-    )
+    .settings(sharedTestSettings)
     .jvmSettings(
       libraryDependencies += "org.scalameta" %% "munit" % munitVersion % Test
     )
     .jsSettings(
       libraryDependencies += "org.scalameta" %%% "munit" % munitVersion % Test
     )
-    .dependsOn(parser, macros)
-    .dependsOn(parserZio % "test")
+    .dependsOn(macros)
+    .dependsOn(parser)
+    .dependsOn(parserJawn % "test")
 
 lazy val validatorJS = validator.js
+
+lazy val validatorJsExport = (project in file("validator-js-export"))
+  .enablePlugins(ScalaJSPlugin)
+  .settings(sharedSettings)
+  .settings(sharedScalacSettings)
+  .settings(strictScalacSettings)
+  .settings(
+    name := "scala-json-schema-validator-js-export"
+  )
+  .settings(
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }
+  )
+  .settings(
+    // TODO testing
+    Test / test := {}
+  )
+  .dependsOn(parserJawn.js)
+  .dependsOn(validator.js)
+
+// sample-editor
+npmCI := {
+  import scala.sys.process._
+  val log = streams.value.log
+  Process("npm" :: "ci" :: Nil, file("./sample-editor")) ! log
+}
+
+npmRunCI := {
+  (validatorJsExport / Compile / fastLinkJS).value
+
+  import scala.sys.process._
+  val log = streams.value.log
+  Process("npm" :: "run" :: "ci" :: Nil, file("./sample-editor")) ! log
+}
+
+publishToDocs := {
+  npmRunCI.value
+  IO.delete(file("./docs"))
+  IO.copyDirectory(file("./sample-editor/public"), file("./docs"))
+}
+
+(Compile / packageBin) := ((Compile / packageBin) dependsOn publishToDocs).value

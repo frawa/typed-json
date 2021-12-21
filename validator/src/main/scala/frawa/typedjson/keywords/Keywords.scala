@@ -22,7 +22,9 @@ import frawa.typedjson.keywords.SchemaProblems.{
   MissingReference,
   UnsupportedKeyword
 }
+import frawa.typedjson.parser.Value._
 import frawa.typedjson.parser._
+import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.util.UriUtil
 import frawa.typedjson.util.UriUtil.CurrentLocation
 

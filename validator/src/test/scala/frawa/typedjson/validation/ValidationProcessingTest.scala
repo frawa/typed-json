@@ -17,16 +17,17 @@
 package frawa.typedjson.validation
 
 import frawa.typedjson
-import frawa.typedjson.meta.MetaSchemas
-import frawa.typedjson.parser._
 import frawa.typedjson.keywords._
+import frawa.typedjson.meta.MetaSchemas
+import frawa.typedjson.parser.Value._
+import frawa.typedjson.parser._
+import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestSchemas._
-import frawa.typedjson.testutil.TestUtil.{assertNoIgnoredKeywords, assertResult, withSchema, dialect}
+import frawa.typedjson.testutil.TestUtil._
 import munit.FunSuite
 
 object ValidationProcessingTest {
-  implicit val zioParser: ZioParser = new ZioParser()
 
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
@@ -287,7 +288,7 @@ class ValidationProcessingTest extends FunSuite {
                        |"toto": 13,
                        |"titi": "hello"
                        |}
-                       |"""".stripMargin)(schema) { result =>
+                       |""".stripMargin)(schema) { result =>
         assertErrors(result, Seq())
         assertEquals(result.valid, true)
       }

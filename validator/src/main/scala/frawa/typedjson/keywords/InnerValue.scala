@@ -17,5 +17,6 @@
 package frawa.typedjson.keywords
 
 import frawa.typedjson.parser.Value
+import frawa.typedjson.pointer.Pointer
 
 case class InnerValue(value: Value, pointer: Pointer = Pointer.empty)

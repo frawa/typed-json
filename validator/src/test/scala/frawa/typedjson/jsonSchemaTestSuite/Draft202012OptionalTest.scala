@@ -16,10 +16,9 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import frawa.typedjson.testutil.TestUtil
+import frawa.typedjson.testutil.TestUtil._
 
 class Draft202012OptionalTest extends JsonSchemaTestSuite {
-//  import frawa.typedjson.parser._
   import frawa.typedjson.macros.Macros._
 
 //  private val draft202012OptionalFiles: Map[String, Value] =
@@ -29,12 +28,12 @@ class Draft202012OptionalTest extends JsonSchemaTestSuite {
 
   // TODO un-ignore 'em
   override val ignore: Set[String] = Set(
-    "bignum.json", // TODO bug/limitation (128bit big decimal?) in Zio parser?, refusing BigDecimal("12345678910111213141516171819202122232425262728293031")
+//    "bignum.json", // TODO bug/limitation (128bit big decimal?) in Zio parser?, refusing BigDecimal("12345678910111213141516171819202122232425262728293031")
     "ecmascript-regex.json",
     "float-overflow.json",
     "format-assertion.json",
     "refOfUnknownKeyword.json"
   )
 
-  checkFiles(draft202012OptionalFiles)(TestUtil.parseJsonValue)
+  checkFiles(draft202012OptionalFiles)(parseJsonValue)
 }

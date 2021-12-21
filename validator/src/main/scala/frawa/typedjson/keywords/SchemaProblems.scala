@@ -17,6 +17,7 @@
 package frawa.typedjson.keywords
 
 import frawa.typedjson.parser.Value
+import frawa.typedjson.pointer.Pointer
 
 import java.net.URI
 

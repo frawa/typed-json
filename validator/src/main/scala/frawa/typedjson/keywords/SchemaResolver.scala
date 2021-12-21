@@ -16,6 +16,7 @@
 
 package frawa.typedjson.keywords
 
+import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.util.UriUtil
 import frawa.typedjson.util.UriUtil._
 

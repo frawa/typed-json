@@ -16,7 +16,8 @@
 
 package frawa.typedjson.validation
 
-import frawa.typedjson.keywords.{Result, Pointer}
+import frawa.typedjson.keywords.Result
+import frawa.typedjson.pointer.Pointer
 
 class ValidationCombiner extends Combiner[ValidationResult] {
   override def allOf(results: Seq[Result[ValidationResult]], pointer: Pointer): Result[ValidationResult] = {

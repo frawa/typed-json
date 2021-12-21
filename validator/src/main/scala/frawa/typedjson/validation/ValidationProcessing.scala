@@ -16,8 +16,10 @@
 
 package frawa.typedjson.validation
 
-import frawa.typedjson.parser._
 import frawa.typedjson.keywords._
+import frawa.typedjson.parser.Value._
+import frawa.typedjson.parser._
+import frawa.typedjson.pointer.Pointer
 
 import java.net.URI
 //import java.time.OffsetTime
@@ -133,10 +135,11 @@ object ValidationProcessing {
   private def validateInteger(): EvalFun = value =>
     value.value match {
       case NumberValue(v) =>
-        if (v.isValidLong)
+        if (v.isWhole) {
           Result.valid
-        else
+        } else {
           combiner.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
+        }
       case _ => combiner.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
     }
 

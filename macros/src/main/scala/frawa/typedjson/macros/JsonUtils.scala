@@ -16,13 +16,14 @@
 
 package frawa.typedjson.macros
 
+import frawa.typedjson.parser.Value._
 import frawa.typedjson.parser._
 
 import scala.reflect.macros.blackbox
 import scala.reflect.macros.blackbox.Context
 
 object JsonUtils {
-  private val parser = new ZioParser
+  private val parser = new JawnParser
 
   def toJsonValueExpr(c: Context)(value: Value): c.Expr[Value] = {
     import c.universe._

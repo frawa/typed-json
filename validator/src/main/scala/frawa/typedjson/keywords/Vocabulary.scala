@@ -16,7 +16,8 @@
 
 package frawa.typedjson.keywords
 
-import frawa.typedjson.parser.{ArrayValue, ObjectValue, Value}
+import frawa.typedjson.parser.Value
+import frawa.typedjson.parser.Value._
 import frawa.typedjson.util.SeqUtil
 import frawa.typedjson.util.UriUtil.uri
 
@@ -45,9 +46,15 @@ object Vocabulary {
 
   private type NestedSchemaGetter = Value => Seq[Value]
 
-  private def objectSchemas: NestedSchemaGetter = { case ObjectValue(ps) => ps.values.toSeq }
-  private def arraySchemas: NestedSchemaGetter  = { case ArrayValue(vs) => vs }
-  private def selfSchema: NestedSchemaGetter    = v => Seq(v)
+  private def objectSchemas: NestedSchemaGetter = {
+    case ObjectValue(ps) => ps.values.toSeq
+    case _               => Seq.empty
+  }
+  private def arraySchemas: NestedSchemaGetter = {
+    case ArrayValue(vs) => vs
+    case _              => Seq.empty
+  }
+  private def selfSchema: NestedSchemaGetter = v => Seq(v)
 
   def nestedSchemasGetter(t: NestedSchemaType): Option[NestedSchemaGetter] = t match {
     case NestedObjectSchemas => Some(objectSchemas)
@@ -173,5 +180,8 @@ object Vocabulary {
       .map(_.reduce(_.combine(_)))
       .swap
   }
+
+  def specDialect(): Vocabulary =
+    specVocabularies.values.reduce(_.combine(_))
 
 }
