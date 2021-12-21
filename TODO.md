@@ -1,11 +1,10 @@
 # Backlog
 
 ## Doing
-- latest dependencies
-
-## TODO
 - improve lazy loading of keywords
 - cache keywords for schema values for reuse
+
+## TODO
 - improve suggestions
 - crystallize API with an example
 - DX: improve discoverability
@@ -29,6 +28,7 @@
 - integrate with VS Code?
 
 ## Done
+- latest dependencies
 - integrate with an interactive tool (to improve suggestions): code mirror next
 - review and refactor: implicits
 - review naming schema, ubiquitous language from spec
