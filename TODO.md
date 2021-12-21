@@ -1,19 +1,18 @@
 # Backlog
 
 ## Doing
+- latest dependencies
 
 ## TODO
-- integrate with an interactive tool (to improve suggestions)
-  - code mirror next?
-  - vs code?
+- improve lazy loading of keywords
+- cache keywords for schema values for reuse
+- improve suggestions
 - crystallize API with an example
 - DX: improve discoverability
 - better artifact names
 - produce output schema from annotations/errors
 - validating lazy loader, which validates against meta schema on the fly
-- improve suggestions
 - post process annotations?
-- cache keywords for schema values for reuse
 - latest dependencies
 - publish released versions
 - do not prefix results, but push value pointer into checker?
@@ -27,8 +26,10 @@
 - benching
 - support ScalaNative? Or GraalVM?
 - CI on GH Actions?
+- integrate with VS Code?
 
 ## Done
+- integrate with an interactive tool (to improve suggestions): code mirror next
 - review and refactor: implicits
 - review naming schema, ubiquitous language from spec
 - review and cleanup, tests
