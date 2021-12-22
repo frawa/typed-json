@@ -15,7 +15,7 @@ lazy val publishToDocs = taskKey[Unit]("publish to docs/, aka GitHub Pages")
 
 val sharedSettings = Seq(
   scalaVersion     := "2.13.7",
-  organization     := "frawa.typedjson",
+  organization     := "frawa",
   organizationName := "Frank Wagner",
   startYear        := Some(2021),
   licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt"))
@@ -53,7 +53,7 @@ val sharedTestSettings = Seq(
 lazy val root = (project in file("."))
   .settings(sharedSettings)
   .settings(
-    name    := "scala-json-schema-validator-root",
+    name    := "typedJson-root",
     publish := false
   )
   .aggregate(
@@ -78,7 +78,7 @@ lazy val parser =
     .settings(sharedScalacSettings)
     .settings(strictScalacSettings)
     .settings(
-      name := "scala-json-schema-parser"
+      name := "typedJson-parser"
     )
     .settings(sharedTestSettings)
     .jvmSettings(
@@ -97,7 +97,7 @@ lazy val parserZio =
     .settings(sharedScalacSettings)
     .settings(strictScalacSettings)
     .settings(
-      name := "scala-json-schema-parser-zio"
+      name := "typedJson-parser-zio"
     )
     .settings(sharedTestSettings)
     .jvmSettings(
@@ -119,7 +119,7 @@ lazy val parserJawn =
     .settings(sharedScalacSettings)
     .settings(strictScalacSettings)
     .settings(
-      name := "scala-json-schema-parser-jawn"
+      name := "typedJson-parser-jawn"
     )
     .settings(sharedTestSettings)
     .jvmSettings(
@@ -139,7 +139,7 @@ lazy val macros = crossProject(JVMPlatform, JSPlatform)
   .settings(sharedSettings)
   .settings(sharedScalacSettings)
   .settings(
-    name                                   := "scala-json-schema-macros",
+    name                                   := "typedJson-macros",
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value
   )
   .dependsOn(parser, parserJawn)
@@ -153,7 +153,7 @@ lazy val typedJson =
     .settings(sharedScalacSettings)
     .settings(strictScalacSettings)
     .settings(
-      name := "scala-json-schema-validator"
+      name := "typedJson"
     )
     .settings(sharedTestSettings)
     .jvmSettings(
@@ -174,7 +174,7 @@ lazy val typedJsonJsExport = (project in file("typedJson-js-export"))
   .settings(sharedScalacSettings)
   .settings(strictScalacSettings)
   .settings(
-    name := "scala-json-schema-validator-js-export"
+    name := "typedJson-js-export"
   )
   .settings(
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }
