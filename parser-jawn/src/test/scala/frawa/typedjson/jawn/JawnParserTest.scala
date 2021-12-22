@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.parser
+package frawa.typedjson.jawn
 
+import frawa.typedjson.parser.Parser
 import frawa.typedjson.parser.Value._
 import munit._
 

@@ -16,14 +16,15 @@
 
 package frawa.typedjson.testutil
 
+import frawa.typedjson.jawn.JawnParser
 import frawa.typedjson.keywords._
-import frawa.typedjson.parser.{JawnParser, Parser, Value}
+import frawa.typedjson.parser.{Parser, Value}
 import munit.Assertions.{assertEquals, clue, clues, fail}
 
 import java.net.URI
 
 object TestUtil {
-  implicit val parser: JawnParser                                                   = new JawnParser
+  implicit val parser: JawnParser                                       = new JawnParser
   implicit val lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
 
   def parseJsonValue(text: String)(implicit parser: Parser): Value = {

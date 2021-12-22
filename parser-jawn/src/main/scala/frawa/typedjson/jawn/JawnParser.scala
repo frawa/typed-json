@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.parser
+package frawa.typedjson.jawn
 
 import frawa.typedjson.parser.Offset.NullValue
+import frawa.typedjson.parser.{Offset, OffsetParser, Parser, Value}
 import org.typelevel.jawn
 import org.typelevel.jawn.{FContext, ParseException}
 

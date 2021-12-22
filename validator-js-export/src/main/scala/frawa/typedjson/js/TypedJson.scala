@@ -16,9 +16,10 @@
 
 package frawa.typedjson.js
 
+import frawa.typedjson.jawn.JawnParser
 import frawa.typedjson.keywords._
 import frawa.typedjson.meta.MetaSchemas
-import frawa.typedjson.parser.{JawnParser, Offset, OffsetParser, Value}
+import frawa.typedjson.parser.{Offset, OffsetParser, Value}
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.suggestion.{SuggestionProcessing, SuggestionResult}
 import frawa.typedjson.validation.{ValidationProcessing, ValidationResult}
