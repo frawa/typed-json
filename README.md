@@ -1,9 +1,11 @@
 # Json Schema Validator
+[![CircleCI](https://circleci.com/gh/frawa/scala-json-schema-validator/tree/develop.svg?style=svg)](https://circleci.com/gh/frawa/scala-json-schema-validator/tree/develop)
 
 Validating Json with Json Schema in Scala.
 
-# The Test Suite
+Try the sample editor: https://frawa.github.io/scala-json-schema-validator/ 
 
+# The Test Suite
 ```
 git clone https://github.com/json-schema-org/JSON-Schema-Test-Suite
 ```
