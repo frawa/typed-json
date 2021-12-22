@@ -1,13 +1,13 @@
 # Backlog
 
 ## Doing
-- improve validation errors reported into sample error
+- better package names
+- better module names
+- better artifact names
 
 ## TODO
+- improve validation errors reported into sample error
 - crystallize API with an example
-- better artifact names
-- better module names
-- better package names
 - publish released versions
 - update JSON-Schema-Test-Suite
 - improve lazy loading of keywords
