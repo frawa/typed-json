@@ -64,9 +64,9 @@ lazy val root = (project in file("."))
     parserJawn.jvm,
     parserJawn.js,
     macros.jvm,
-    validator.jvm,
-    validator.js,
-    validatorJsExport
+    typedJson.jvm,
+    typedJson.js,
+    typedJsonJsExport
   )
 
 lazy val parser =
@@ -144,11 +144,11 @@ lazy val macros = crossProject(JVMPlatform, JSPlatform)
   )
   .dependsOn(parser, parserJawn)
 
-lazy val validator =
+lazy val typedJson =
   crossProject(JSPlatform, JVMPlatform)
     .withoutSuffixFor(JVMPlatform)
     .crossType(CrossType.Pure)
-    .in(file("validator"))
+    .in(file("typedJson"))
     .settings(sharedSettings)
     .settings(sharedScalacSettings)
     .settings(strictScalacSettings)
@@ -166,9 +166,9 @@ lazy val validator =
     .dependsOn(parser)
     .dependsOn(parserJawn % "test")
 
-lazy val validatorJS = validator.js
+lazy val typedJsonJS = typedJson.js
 
-lazy val validatorJsExport = (project in file("validator-js-export"))
+lazy val typedJsonJsExport = (project in file("typedJson-js-export"))
   .enablePlugins(ScalaJSPlugin)
   .settings(sharedSettings)
   .settings(sharedScalacSettings)
@@ -184,7 +184,7 @@ lazy val validatorJsExport = (project in file("validator-js-export"))
     Test / test := {}
   )
   .dependsOn(parserJawn.js)
-  .dependsOn(validator.js)
+  .dependsOn(typedJson.js)
 
 // sample-editor
 npmCI := {
@@ -194,7 +194,7 @@ npmCI := {
 }
 
 npmRunCI := {
-  (validatorJsExport / Compile / fastLinkJS).value
+  (typedJsonJsExport / Compile / fastLinkJS).value
 
   import scala.sys.process._
   val log = streams.value.log
