@@ -16,8 +16,11 @@
 
 package frawa.typedjson.parser
 
+import frawa.typedjson.parser.Offset.NullValue
 import org.typelevel.jawn
 import org.typelevel.jawn.{FContext, ParseException}
+
+import scala.collection.mutable
 
 class JawnParser extends Parser with OffsetParser {
   import OffsetParser.ParseError
@@ -27,12 +30,16 @@ class JawnParser extends Parser with OffsetParser {
   }
 
   override def parseWithOffset(json: String): Either[ParseError, Offset.Value] = {
+    val recoveringFacade = new RecoveringFacade(offsetValueFacade)
     jawn.Parser
-      .parseFromString(json)(offsetValueFacade)
+      .parseFromString(json)(recoveringFacade)
       .fold(
         {
-          case ParseException(message, offset, _, _) => Left(ParseError(offset, message))
-          case ex: Throwable                         => Left(ParseError(0, "internal parsing error: " + ex.getMessage))
+          case ParseException(message, offset, _, _) =>
+            val recovered = recoveringFacade.recover(offset, NullValue(Offset(offset, offset)))
+            Left(ParseError(offset, message, Some(recovered)))
+          case ex: Throwable =>
+            Left(ParseError(0, "internal parsing error: " + ex.getMessage, None))
         },
         Right(_)
       )
@@ -100,8 +107,10 @@ class JawnParser extends Parser with OffsetParser {
         }
       }
       override def add(v: Offset.Value, index: Int): Unit = {
-        properties = properties + ((currentKey.get, v))
-        currentKey = None
+        if (currentKey.isDefined) {
+          properties = properties + ((currentKey.get, v))
+          currentKey = None
+        }
       }
       override def finish(index: Int): Offset.Value = {
         Offset.ObjectValue(Offset(startIndex, index), properties)
@@ -124,27 +133,43 @@ class JawnParser extends Parser with OffsetParser {
       string(s, index)
   }
 
-//  private def recoveringFacade[T](facade: jawn.Facade[T]): jawn.Facade[T] = new jawn.Facade[T] {
-//
-//    private val stack: mutable.ArrayDeque[FContext[T]] = mutable.ArrayDeque.empty[T]
-//
-//    private def delegatingContext(delegate: jawn.FContext[T]): jawn.FContext[T] = new FContext[T] {
-//      stack.append(delegate)
-//      override def add(s: CharSequence, index: Int): Unit = delegate.add(s, index)
-//      override def add(v: T, index: Int): Unit            = delegate.add(v, index)
-//      override def finish(index: Int): T                  = delegate.finish(index)
-//      override def isObj: Boolean                         = delegate.isObj
-//    }
-//
-//    override def singleContext(index: Int): FContext[T] = delegatingContext(facade.singleContext(index))
-//    override def arrayContext(index: Int): FContext[T]  = delegatingContext(facade.singleContext(index))
-//    override def objectContext(index: Int): FContext[T] = delegatingContext(facade.singleContext(index))
-//
-//    override def jnull(index: Int): T  = facade.jnull(index)
-//    override def jfalse(index: Int): T = facade.jfalse(index)
-//    override def jtrue(index: Int): T  = facade.jtrue(index)
-//    override def jnum(s: CharSequence, decIndex: Int, expIndex: Int, index: Int): T =
-//      facade.jnum(s, decIndex, expIndex, index)
-//    override def jstring(s: CharSequence, index: Int): T = facade.jstring(s, index)
-//  }
+  private class RecoveringFacade[T](private val facade: jawn.Facade[T]) extends jawn.Facade[T] {
+
+    private val stack: mutable.Stack[FContext[T]] = mutable.Stack.empty[FContext[T]]
+
+    def recover(index: Int, dummy: T): T = {
+      def go(v0: T): T = {
+        if (stack.isEmpty) {
+          v0
+        } else {
+          val c = stack.pop()
+          c.add(v0, index)
+          go(c.finish(index))
+        }
+      }
+      go(dummy)
+    }
+
+    private def delegatingContext(delegate: jawn.FContext[T]): jawn.FContext[T] = new FContext[T] {
+      stack.push(delegate)
+      override def add(s: CharSequence, index: Int): Unit = delegate.add(s, index)
+      override def add(v: T, index: Int): Unit            = delegate.add(v, index)
+      override def finish(index: Int): T = {
+        stack.pop()
+        delegate.finish(index)
+      }
+      override def isObj: Boolean = delegate.isObj
+    }
+
+    override def singleContext(index: Int): FContext[T] = delegatingContext(facade.singleContext(index))
+    override def arrayContext(index: Int): FContext[T]  = delegatingContext(facade.arrayContext(index))
+    override def objectContext(index: Int): FContext[T] = delegatingContext(facade.objectContext(index))
+
+    override def jnull(index: Int): T  = facade.jnull(index)
+    override def jfalse(index: Int): T = facade.jfalse(index)
+    override def jtrue(index: Int): T  = facade.jtrue(index)
+    override def jnum(s: CharSequence, decIndex: Int, expIndex: Int, index: Int): T =
+      facade.jnum(s, decIndex, expIndex, index)
+    override def jstring(s: CharSequence, index: Int): T = facade.jstring(s, index)
+  }
 }

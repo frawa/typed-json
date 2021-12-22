@@ -80,7 +80,7 @@ case class TypedJson(
       case Right(value) =>
         this.copy(value = Some(value), result = None).validate()
       case Left(error) =>
-        this.copy(value = None, result = Some(Left(error)))
+        this.copy(value = error.recoveredValue, result = Some(Left(error)))
     }
   }
 

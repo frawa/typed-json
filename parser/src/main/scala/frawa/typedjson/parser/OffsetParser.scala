@@ -26,7 +26,7 @@ trait OffsetParser {
 }
 
 object OffsetParser {
-  case class ParseError(offset: Int, message: String)
+  case class ParseError(offset: Int, message: String, recoveredValue: Option[Offset.Value])
 
   def pointerAt(value: Offset.Value)(at: Int): Pointer = {
     def go(value: Offset.Value): Option[Pointer] = {

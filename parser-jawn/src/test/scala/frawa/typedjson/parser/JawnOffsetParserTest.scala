@@ -251,10 +251,91 @@ class JawnOffsetParserTest extends FunSuite {
     assertEquals(pointerAt(value)(39), Right(Pointer.empty))
   }
 
-  test("incomplete array".ignore) {
-    // TODO recover from broken Json?
-    assertEquals(pointerAt("""[1,]""")(3), Right(Pointer.empty / 1))
-    assertEquals(pointerAt("""[1,[2,]]""")(6), Right(Pointer.empty / 1 / 1))
+  private def recoveredValue(json: String): Option[Value] = {
+    parser
+      .parseWithOffset(json)
+      .fold(
+        _.recoveredValue,
+        { _ =>
+          fail("parsing error expected")
+          None
+        }
+      )
+  }
+
+  test("recover from broken array") {
+    assertEquals(
+      recoveredValue("""[1,]"""),
+      Some(
+        ArrayValue(
+          Offset(0, 4),
+          Seq(
+            NumberValue(Offset(1, 2), 1),
+            NullValue(Offset(3, 3))
+          )
+        )
+      )
+    )
+  }
+
+  test("recover from broken nested array") {
+    assertEquals(
+      recoveredValue("""[1,[2,]]"""),
+      Some(
+        ArrayValue(
+          Offset(0, 7),
+          Seq(
+            NumberValue(Offset(1, 2), 1),
+            ArrayValue(
+              Offset(3, 7),
+              Seq(
+                NumberValue(Offset(4, 5), 2),
+                NullValue(Offset(6, 6))
+              )
+            )
+          )
+        )
+      )
+    )
+  }
+
+  test("recover from broken object") {
+    assertEquals(
+      recoveredValue("""{"a":"b",}"""),
+      Some(
+        ObjectValue(
+          Offset(0, 9),
+          Map(
+            StringValue(Offset(1, 4), "a") -> StringValue(Offset(5, 8), "b")
+          )
+        )
+      )
+    )
+  }
+
+  test("recover from broken object key") {
+    assertEquals(
+      recoveredValue("""{"a"}"""),
+      Some(
+        ObjectValue(
+          Offset(0, 4),
+          Map(
+            StringValue(Offset(1, 4), "a") -> NullValue(Offset(4, 4))
+          )
+        )
+      )
+    )
+    assertEquals(
+      recoveredValue("""{"a":}"""),
+      Some(
+        ObjectValue(
+          Offset(0, 5),
+          Map(
+            StringValue(Offset(1, 4), "a") -> NullValue(Offset(5, 5))
+          )
+        )
+      )
+    )
   }
 
   private def offsetAt(json: String)(at: Pointer): Either[OffsetParser.ParseError, Option[Offset]] = {
