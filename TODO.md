@@ -1,8 +1,7 @@
 # Backlog
 
 ## Doing
-- recovering json parser for editing
-- improve errors reported into sample error
+- improve validation errors reported into sample error
 
 ## TODO
 - crystallize API with an example
@@ -34,6 +33,7 @@
 - integrate with VS Code?
 
 ## Done
+- recovering json parser for editing
 - improve suggestions
 - latest dependencies
 - integrate with an interactive tool (to improve suggestions): code mirror next
