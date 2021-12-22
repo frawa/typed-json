@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.parser
+package frawa.typedjson.zio
 
+import frawa.typedjson.parser.Parser
 import munit._
 
 class ZioParserTest extends FunSuite {
-  import Value._
+  import frawa.typedjson.parser.Value._
 
   implicit val parser: Parser = new ZioParser()
 
