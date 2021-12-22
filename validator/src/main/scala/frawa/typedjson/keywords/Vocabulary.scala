@@ -143,7 +143,7 @@ object Vocabulary {
   )
 
   // in schema.json
-  val deprecatedKeywords = Set(
+  val deprecatedKeywords: Set[String] = Set(
     "definitions",
     "dependencies",
     "$recursiveAnchor",
