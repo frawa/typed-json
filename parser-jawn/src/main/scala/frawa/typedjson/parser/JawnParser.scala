@@ -20,6 +20,7 @@ import frawa.typedjson.parser.Offset.NullValue
 import org.typelevel.jawn
 import org.typelevel.jawn.{FContext, ParseException}
 
+import scala.annotation.tailrec
 import scala.collection.mutable
 
 class JawnParser extends Parser with OffsetParser {
@@ -138,6 +139,7 @@ class JawnParser extends Parser with OffsetParser {
     private val stack: mutable.Stack[FContext[T]] = mutable.Stack.empty[FContext[T]]
 
     def recover(index: Int, dummy: T): T = {
+      @tailrec
       def go(v0: T): T = {
         if (stack.isEmpty) {
           v0
