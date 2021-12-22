@@ -1,19 +1,19 @@
 # Backlog
 
 ## Doing
-- improve lazy loading of keywords
-- cache keywords for schema values for reuse
+- crystallize API with an example
+- better artifact names
 
 ## TODO
-- improve suggestions
-- crystallize API with an example
+- publish released versions
+- improve lazy loading of keywords
+- cache keywords for schema values for reuse
+- support meta keywords, deprecated, etc.
 - DX: improve discoverability
-- better artifact names
 - produce output schema from annotations/errors
 - validating lazy loader, which validates against meta schema on the fly
 - post process annotations?
 - latest dependencies
-- publish released versions
 - do not prefix results, but push value pointer into checker?
 - support earlier version of spec, via JsonSchemaTestTestSuite
 - support missing formats (all those RFCs ..)
@@ -28,6 +28,7 @@
 - integrate with VS Code?
 
 ## Done
+- improve suggestions
 - latest dependencies
 - integrate with an interactive tool (to improve suggestions): code mirror next
 - review and refactor: implicits
