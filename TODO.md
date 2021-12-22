@@ -1,11 +1,16 @@
 # Backlog
 
 ## Doing
-- crystallize API with an example
-- better artifact names
+- recovering json parser for editing
+- improve errors reported into sample error
 
 ## TODO
+- crystallize API with an example
+- better artifact names
+- better module names
+- better package names
 - publish released versions
+- update JSON-Schema-Test-Suite
 - improve lazy loading of keywords
 - cache keywords for schema values for reuse
 - support meta keywords, deprecated, etc.
@@ -14,6 +19,7 @@
 - validating lazy loader, which validates against meta schema on the fly
 - post process annotations?
 - latest dependencies
+- update JSON-Schema-Test-Suite
 - do not prefix results, but push value pointer into checker?
 - support earlier version of spec, via JsonSchemaTestTestSuite
 - support missing formats (all those RFCs ..)
