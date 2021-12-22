@@ -45,5 +45,10 @@ object Value {
     case _            => None
   }
 
+  def asObject(value: Value): Option[Map[String, Value]] = value match {
+    case ObjectValue(v) => Some(v)
+    case _              => None
+  }
+
   def asStrings(values: Seq[Value]): Seq[String] = values.flatMap(asString)
 }

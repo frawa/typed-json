@@ -24,6 +24,7 @@ import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestSchemas.{numberArraySchema, totoObjectSchema, totoRequiredObjectSchema}
 import frawa.typedjson.testutil.TestUtil._
 import munit.FunSuite
+import frawa.typedjson.meta.MetaSchemas
 
 class SuggestProcessingTest extends FunSuite {
 
@@ -488,7 +489,8 @@ class SuggestProcessingTest extends FunSuite {
         assertEquals(
           result,
           Seq(
-            ArrayValue(Seq())
+            ArrayValue(Seq()),
+            ArrayValue(Seq(NumberValue(0)))
           )
         )
       }
@@ -528,6 +530,46 @@ class SuggestProcessingTest extends FunSuite {
           )
         )
       }
+    }
+  }
+
+  test("suggest keys for schema writing") {
+    assertSuggestForSchema(
+      """{}""",
+      Pointer.empty.insideKey
+    ) { suggestions =>
+      val suggestedKeys  = suggestions.flatMap(Value.asString).toSet
+      val deprecatedKeys = Vocabulary.deprecatedKeywords
+      val actual         = suggestedKeys -- deprecatedKeys
+
+      val availableKeys = Vocabulary.specDialect().keywords.keys.toSet
+      // see frawa.typedjson.keywords.Vocabulary.metaDataKeywords
+      val todoKeywords = Set(
+        "deprecated",
+        "readOnly",
+        "writeOnly",
+        "examples"
+      )
+
+      val notSuggested = availableKeys -- actual
+      assertEquals(notSuggested, Set.empty[String], "not suggested known keywords")
+
+      val unknown = actual -- (availableKeys ++ todoKeywords)
+      assertEquals(unknown, Set.empty[String], "suggested unknown keywords")
+    }
+  }
+
+  private def assertSuggestForSchema(json: String, at: Pointer)(f: Seq[Value] => Unit): Unit = {
+    val resolver     = MetaSchemas.lazyResolver
+    val base         = MetaSchemas.draft202012
+    val Some(schema) = resolver(base.resolve("schema"))
+
+    def factory(at: Pointer): EvaluatorFactory[SchemaValue, SuggestionResult] =
+      EvaluatorFactory.make(SuggestionProcessing(at), None, Some(resolver)).mapResult(assertNoIgnoredKeywords)
+
+    implicit val factory1 = factory(at)
+    assertResult[SuggestionResult](json)(schema) { result =>
+      f(result.results.flatMap(_.suggestions).distinct)
     }
   }
 }

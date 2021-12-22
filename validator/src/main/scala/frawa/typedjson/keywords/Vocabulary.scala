@@ -142,6 +142,14 @@ object Vocabulary {
     "dependentRequired" -> NoNestedSchema
   )
 
+  // in schema.json
+  val deprecatedKeywords = Set(
+    "definitions",
+    "dependencies",
+    "$recursiveAnchor",
+    "$recursiveRef"
+  )
+
   val coreId: URI             = uri("https://json-schema.org/draft/2020-12/vocab/core")
   val applicatorId: URI       = uri("https://json-schema.org/draft/2020-12/vocab/applicator")
   val contentId: URI          = uri("https://json-schema.org/draft/2020-12/vocab/content")
