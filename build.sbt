@@ -53,7 +53,7 @@ val sharedTestSettings = Seq(
 lazy val root = (project in file("."))
   .settings(sharedSettings)
   .settings(
-    name    := "typedJson-root",
+    name    := "typed-json-root",
     publish := false
   )
   .aggregate(
@@ -78,7 +78,7 @@ lazy val parser =
     .settings(sharedScalacSettings)
     .settings(strictScalacSettings)
     .settings(
-      name := "typedJson-parser"
+      name := "typed-json-parser"
     )
     .settings(sharedTestSettings)
     .jvmSettings(
@@ -97,7 +97,7 @@ lazy val parserZio =
     .settings(sharedScalacSettings)
     .settings(strictScalacSettings)
     .settings(
-      name := "typedJson-parser-zio"
+      name := "typed-json-parser-zio"
     )
     .settings(sharedTestSettings)
     .jvmSettings(
@@ -119,7 +119,7 @@ lazy val parserJawn =
     .settings(sharedScalacSettings)
     .settings(strictScalacSettings)
     .settings(
-      name := "typedJson-parser-jawn"
+      name := "typed-json-parser-jawn"
     )
     .settings(sharedTestSettings)
     .jvmSettings(
@@ -139,7 +139,7 @@ lazy val macros = crossProject(JVMPlatform, JSPlatform)
   .settings(sharedSettings)
   .settings(sharedScalacSettings)
   .settings(
-    name                                   := "typedJson-macros",
+    name                                   := "typed-json-macros",
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value
   )
   .dependsOn(parser, parserJawn)
@@ -148,12 +148,12 @@ lazy val typedJson =
   crossProject(JSPlatform, JVMPlatform)
     .withoutSuffixFor(JVMPlatform)
     .crossType(CrossType.Pure)
-    .in(file("typedJson"))
+    .in(file("typed-json"))
     .settings(sharedSettings)
     .settings(sharedScalacSettings)
     .settings(strictScalacSettings)
     .settings(
-      name := "typedJson"
+      name := "typed-json"
     )
     .settings(sharedTestSettings)
     .jvmSettings(
@@ -168,13 +168,13 @@ lazy val typedJson =
 
 lazy val typedJsonJS = typedJson.js
 
-lazy val typedJsonJsExport = (project in file("typedJson-js-export"))
+lazy val typedJsonJsExport = (project in file("typed-json-js-export"))
   .enablePlugins(ScalaJSPlugin)
   .settings(sharedSettings)
   .settings(sharedScalacSettings)
   .settings(strictScalacSettings)
   .settings(
-    name := "typedJson-js-export"
+    name := "typed-json-js-export"
   )
   .settings(
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }
