@@ -1,14 +1,13 @@
 # Backlog
 
 ## Doing
-- better package names
-- better module names
-- better artifact names
+- improve validation errors reported into sample error
+- add hot fixes, for sample editor
 
 ## TODO
-- improve validation errors reported into sample error
 - crystallize API with an example
 - publish released versions
+  - https://docs.scala-lang.org/overviews/contributors/index.html
 - update JSON-Schema-Test-Suite
 - improve lazy loading of keywords
 - cache keywords for schema values for reuse
@@ -33,6 +32,10 @@
 - integrate with VS Code?
 
 ## Done
+- better package names
+- better module names
+- better artifact names
+- better repo name
 - recovering json parser for editing
 - improve suggestions
 - latest dependencies
