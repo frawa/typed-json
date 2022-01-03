@@ -145,7 +145,7 @@ lazy val macros = crossProject(JVMPlatform, JSPlatform)
   .dependsOn(parser, parserJawn)
 
 lazy val typedJson =
-  crossProject(JSPlatform, JVMPlatform)
+  crossProject(JVMPlatform, JSPlatform)
     .withoutSuffixFor(JVMPlatform)
     .crossType(CrossType.Pure)
     .in(file("typed-json"))
