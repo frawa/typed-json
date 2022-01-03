@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.zio
+package frawa.typedjson.parser.zio
 
 import frawa.typedjson.parser.{Parser, Value}
 import zio.json._

@@ -16,7 +16,7 @@
 
 package frawa.typedjson.js
 
-import frawa.typedjson.jawn.JawnParser
+import frawa.typedjson.parser.jawn.JawnParser
 import frawa.typedjson.keywords._
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser.{Offset, OffsetParser, Value}

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.jawn
+package frawa.typedjson.parser.jawn
 
 import frawa.typedjson.parser.{Offset, OffsetParser}
 import frawa.typedjson.pointer.Pointer
