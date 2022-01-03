@@ -8,6 +8,7 @@
 - crystallize API with an example
 - publish released versions
   - https://docs.scala-lang.org/overviews/contributors/index.html
+- review readme. Add docs?
 - update JSON-Schema-Test-Suite
 - improve lazy loading of keywords
 - cache keywords for schema values for reuse
