@@ -64,6 +64,7 @@ lazy val root = (project in file("."))
     parserJawn.jvm,
     parserJawn.js,
     macros.jvm,
+    macros.js,
     typedJson.jvm,
     typedJson.js,
     typedJsonJsExport
@@ -138,9 +139,16 @@ lazy val macros = crossProject(JVMPlatform, JSPlatform)
   .in(file("macros"))
   .settings(sharedSettings)
   .settings(sharedScalacSettings)
+  .settings(sharedTestSettings)
   .settings(
     name                                   := "typed-json-macros",
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value
+  )
+  .jvmSettings(
+    libraryDependencies += "org.scalameta" %% "munit" % munitVersion % Test
+  )
+  .jsSettings(
+    libraryDependencies += "org.scalameta" %%% "munit" % munitVersion % Test
   )
   .dependsOn(parser, parserJawn)
 
@@ -165,8 +173,6 @@ lazy val typedJson =
     .dependsOn(macros)
     .dependsOn(parser)
     .dependsOn(parserJawn % "test")
-
-lazy val typedJsonJS = typedJson.js
 
 lazy val typedJsonJsExport = (project in file("typed-json-js-export"))
   .enablePlugins(ScalaJSPlugin)
