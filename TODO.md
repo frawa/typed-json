@@ -1,11 +1,14 @@
 # Backlog
 
 ## Doing
-- improve validation errors reported into sample error
-- add hot fixes, for sample editor
+
+- crystallize API with an example
 
 ## TODO
-- crystallize API with an example
+
+- try https://github.com/sbt/sbt-projectmatrix instead, to improve Metals in VS Code
+- improve validation errors reported into sample error
+- add hot fixes, for sample editor
 - publish released versions
   - https://docs.scala-lang.org/overviews/contributors/index.html
 - review readme. Add docs?
