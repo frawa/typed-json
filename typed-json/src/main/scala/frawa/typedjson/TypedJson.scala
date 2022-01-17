@@ -26,6 +26,8 @@ import frawa.typedjson.keywords.Evaluator
 import frawa.typedjson.validation.ValidationProcessing
 import frawa.typedjson.validation.ValidationResult
 import frawa.typedjson.keywords.InnerValue
+import frawa.typedjson.parser.Value
+import frawa.typedjson.parser.Offset
 
 object TypedJson {
   case class Validation(valid: Boolean)
@@ -35,14 +37,22 @@ object TypedJson {
   case class SchemaErrors(problems: SchemaProblems) extends Error
 
   def create(): TypedJson = new TypedJson(None)
+
   def create(schemaJson: String)(implicit parser: Parser): Either[Error, TypedJson] = {
     parser
       .parse(schemaJson)
       .swap
       .map(JsonError(_))
       .swap
-      .map(SchemaValue.root)
-      .flatMap(withSchema)
+      .flatMap(create(_))
+  }
+
+  def create(schema: Value): Either[Error, TypedJson] = {
+    withSchema(SchemaValue.root(schema))
+  }
+
+  def create(schema: Offset.Value): Either[Error, TypedJson] = {
+    withSchema(SchemaValue.root(Offset.withoutOffset(schema)))
   }
 
   private def withSchema(schema: SchemaValue): Either[Error, TypedJson] = {
@@ -61,21 +71,28 @@ class TypedJson(private val keywords: Option[Keywords]) {
   import TypedJson._
 
   def validate(json: String)(implicit parser: Parser): Either[Error, Validation] = {
+    parser
+      .parse(json)
+      .swap
+      .map(JsonError(_))
+      .swap
+      .map { value =>
+        validate(value).getOrElse(Validation(true))
+      }
+  }
+
+  def validate(value: Value): Option[Validation] = {
     keywords
       .map(validator)
-      .map { validator =>
-        parser
-          .parse(json)
-          .swap
-          .map(JsonError(_))
-          .swap
-          .map(InnerValue(_))
-          .map { value => validator(value) }
-          .map { result => Validation(result.valid) }
-      }
-      .getOrElse {
-        Right(Validation(true))
-      }
+      .map { validator => validator(InnerValue(value)) }
+      .map { result => Validation(result.valid) }
+  }
+
+  def validate(value: Offset.Value): Option[Validation] = {
+    keywords
+      .map(validator)
+      .map { validator => validator(InnerValue(Offset.withoutOffset(value))) }
+      .map { result => Validation(result.valid) }
   }
 
   def validator(keywords: Keywords): Evaluator[ValidationResult] = {
