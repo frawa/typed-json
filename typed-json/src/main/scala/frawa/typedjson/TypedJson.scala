@@ -1,0 +1,85 @@
+/*
+ * Copyright 2021 Frank Wagner
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package frawa.typedjson
+
+import frawa.typedjson.parser.Parser
+import frawa.typedjson.keywords.SchemaValue
+import frawa.typedjson.meta.MetaSchemas
+import frawa.typedjson.keywords.Vocabulary
+import frawa.typedjson.keywords.Keywords
+import frawa.typedjson.keywords.SchemaProblems
+import frawa.typedjson.keywords.Evaluator
+import frawa.typedjson.validation.ValidationProcessing
+import frawa.typedjson.validation.ValidationResult
+import frawa.typedjson.keywords.InnerValue
+
+object TypedJson {
+  case class Validation(valid: Boolean)
+
+  trait Error
+  case class JsonError(error: String)               extends Error
+  case class SchemaErrors(problems: SchemaProblems) extends Error
+
+  def create(): TypedJson = new TypedJson(None)
+  def create(schemaJson: String)(implicit parser: Parser): Either[Error, TypedJson] = {
+    parser
+      .parse(schemaJson)
+      .swap
+      .map(JsonError(_))
+      .swap
+      .map(SchemaValue.root)
+      .flatMap(withSchema)
+  }
+
+  private def withSchema(schema: SchemaValue): Either[Error, TypedJson] = {
+    val resolver   = MetaSchemas.lazyResolver
+    val vocabulary = Vocabulary.specDialect()
+    val keywords   = Keywords(schema, Some(vocabulary), Some(resolver))
+    keywords.swap
+      .map(SchemaErrors(_))
+      .swap
+      .map(keywords => new TypedJson(Some(keywords)))
+  }
+
+}
+
+class TypedJson(private val keywords: Option[Keywords]) {
+  import TypedJson._
+
+  def validate(json: String)(implicit parser: Parser): Either[Error, Validation] = {
+    keywords
+      .map(validator)
+      .map { validator =>
+        parser
+          .parse(json)
+          .swap
+          .map(JsonError(_))
+          .swap
+          .map(InnerValue(_))
+          .map { value => validator(value) }
+          .map { result => Validation(result.valid) }
+      }
+      .getOrElse {
+        Right(Validation(true))
+      }
+  }
+
+  def validator(keywords: Keywords): Evaluator[ValidationResult] = {
+    Evaluator(keywords, ValidationProcessing())
+  }
+
+}
