@@ -2,12 +2,13 @@
 
 ## Doing
 
-- crystallize API with an example
+- try https://github.com/sbt/sbt-projectmatrix instead, to improve Metals in VS Code
 
 ## TODO
 
-- try https://github.com/sbt/sbt-projectmatrix instead, to improve Metals in VS Code
 - improve validation errors reported into sample error
+- continue to crystallize API with an example, validation output
+- continue to crystallize API with an example, suggestions
 - add hot fixes, for sample editor
 - publish released versions
   - https://docs.scala-lang.org/overviews/contributors/index.html
@@ -36,6 +37,8 @@
 - integrate with VS Code?
 
 ## Done
+
+- crystallize API with an example
 - better package names
 - better module names
 - better artifact names
