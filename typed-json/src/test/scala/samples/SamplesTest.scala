@@ -4,6 +4,8 @@ import munit.FunSuite
 
 import frawa.typedjson.TypedJson
 import frawa.typedjson.parser.jawn.JawnParser
+import frawa.typedjson.validation.TypeMismatch
+import frawa.typedjson.pointer.Pointer
 
 class SamplesTest extends FunSuite {
 
@@ -26,6 +28,18 @@ class SamplesTest extends FunSuite {
     assertEquals(typedJson.validate(validJson).map(_.valid), Right(true))
     val invalidJson = """13"""
     assertEquals(typedJson.validate(invalidJson).map(_.valid), Right(false))
+  }
+
+  test("obtain validation errors") {
+    implicit val p = new JawnParser()
+
+    val schemaJson = """{"type": "string"}"""
+    val typedJson  = TypedJson.create(schemaJson).toOption.get
+
+    val invalidJson = """true"""
+    val validation  = typedJson.validate(invalidJson)
+    assertEquals(validation.map(_.valid), Right(false))
+    assertEquals(validation.map(_.output.errors), Right(Seq(TypedJson.Error(Pointer.empty, TypeMismatch("string")))))
   }
 
 }
