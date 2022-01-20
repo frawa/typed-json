@@ -75,6 +75,9 @@ lazy val allJvm = projectMatrix
     typedJson
   )
   .settings(sharedSettings)
+  .settings(
+    publish / skip := true
+  )
   .jvmPlatform(sharedPlatformSettings)
 
 lazy val allJs = projectMatrix
@@ -86,7 +89,7 @@ lazy val allJs = projectMatrix
   )
   .settings(sharedSettings)
   .settings(
-    publish := false
+    publish / skip := true
   )
   .jsPlatform(sharedPlatformSettings)
 
@@ -94,8 +97,8 @@ lazy val root = project
   .in(file("."))
   .settings(sharedSettings)
   .settings(
-    name    := "typed-json-root",
-    publish := false
+    name           := "typed-json-root",
+    publish / skip := true
   )
   .aggregate(allJvm.projectRefs: _*)
   .aggregate(allJs.projectRefs: _*)
