@@ -29,6 +29,7 @@ lazy val sharedSettings = Seq(
 
 lazy val sharedPlatformSettings = Seq(
   scalaVersion213
+  // "2.12.10"
 )
 
 lazy val sharedScalacSettings = Seq(
