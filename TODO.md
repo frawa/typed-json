@@ -2,7 +2,9 @@
 
 ## Doing
 
-- try https://github.com/sbt/sbt-projectmatrix instead, to improve Metals in VS Code
+- publish released versions
+  - https://docs.scala-lang.org/overviews/contributors/index.html
+
 
 ## TODO
 
@@ -10,8 +12,6 @@
 - continue to crystallize API with an example, validation output
 - continue to crystallize API with an example, suggestions
 - add hot fixes, for sample editor
-- publish released versions
-  - https://docs.scala-lang.org/overviews/contributors/index.html
 - review readme. Add docs?
 - update JSON-Schema-Test-Suite
 - improve lazy loading of keywords
@@ -38,6 +38,7 @@
 
 ## Done
 
+- try https://github.com/sbt/sbt-projectmatrix instead, to improve Metals in VS Code
 - crystallize API with an example
 - better package names
 - better module names
