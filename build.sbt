@@ -19,12 +19,18 @@ lazy val publishToDocs = taskKey[Unit]("publish to docs/, aka GitHub Pages")
 
 lazy val scalaVersion213 = "2.13.7"
 
+import xerial.sbt.Sonatype._
+
 lazy val sharedSettings = Seq(
   scalaVersion     := scalaVersion213,
-  organization     := "frawa",
+  organization     := "io.github.frawa",
   organizationName := "Frank Wagner",
   startYear        := Some(2021),
-  licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt"))
+  licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")),
+  description            := "A library helping type Json data with Json Schema.",
+  sonatypeProjectHosting := Some(GitHubHosting("frawa", "typed-json", "agilecoderfrank@gmail.com")),
+  publishTo              := sonatypePublishToBundle.value,
+  versionScheme          := Some("semver-spec")
 )
 
 lazy val sharedPlatformSettings = Seq(
@@ -79,6 +85,9 @@ lazy val allJs = projectMatrix
     typedJson
   )
   .settings(sharedSettings)
+  .settings(
+    publish := false
+  )
   .jsPlatform(sharedPlatformSettings)
 
 lazy val root = project
