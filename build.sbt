@@ -67,6 +67,7 @@ lazy val allJvm = projectMatrix
     macros,
     typedJson
   )
+  .settings(sharedSettings)
   .jvmPlatform(sharedPlatformSettings)
 
 lazy val allJs = projectMatrix
@@ -76,6 +77,7 @@ lazy val allJs = projectMatrix
     macros,
     typedJson
   )
+  .settings(sharedSettings)
   .jsPlatform(sharedPlatformSettings)
 
 lazy val root = project
