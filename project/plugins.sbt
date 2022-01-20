@@ -1,5 +1,5 @@
 // TODO needed?
-addSbtPlugin("ch.epfl.scala" % "sbt-bloop" % "1.4.11-17-f4ef8273")
+// addSbtPlugin("ch.epfl.scala" % "sbt-bloop" % "1.4.11-17-f4ef8273")
 
 addSbtPlugin("de.heikoseeberger" % "sbt-header" % "5.6.0")
 
