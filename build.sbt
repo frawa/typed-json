@@ -29,6 +29,7 @@ lazy val sharedSettings = Seq(
   licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")),
   description            := "A library helping type Json data with Json Schema.",
   sonatypeProjectHosting := Some(GitHubHosting("frawa", "typed-json", "agilecoderfrank@gmail.com")),
+  sonatypeCredentialHost := "s01.oss.sonatype.org",
   publishTo              := sonatypePublishToBundle.value,
   versionScheme          := Some("semver-spec")
 )

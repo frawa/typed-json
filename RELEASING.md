@@ -7,7 +7,8 @@ Choose version:
 
 ```bash
 git describe
-git tag -am releasing v0.0.1
+VERSION=0.0.1
+git tag -am releasing v$VERSION
 ```
 
 And publish:
@@ -15,7 +16,11 @@ And publish:
 ```bash
 sbt publishSigned
 sbt sonatypeRelease
+git push origin v$VERSION
 ```
 
 ## Reminder to upgrade dependencies
 
+```bash
+sbt dependencyUpdates
+```
