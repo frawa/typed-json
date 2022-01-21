@@ -15,7 +15,8 @@ And publish:
 
 ```bash
 sbt publishSigned
-sbt sonatypeRelease
+sbt sonatypeOpen
+sbt sonatypeBundleRelease
 git push origin v$VERSION
 ```
 
