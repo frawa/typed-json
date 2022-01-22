@@ -2,20 +2,21 @@
 
 ## Doing
 
-- publish released versions
-  - https://docs.scala-lang.org/overviews/contributors/index.html
 
 
 ## TODO
 
+- review readme, add more docs
+- register with JSON-Schema-Test-Suite
+- update JSON-Schema-Test-Suite
+- smarter suggestions, leverage keywords, formats (and annotations?)
+- benching
+- improve lazy loading of keywords
+- cache keywords for schema values for reuse
 - improve validation errors reported into sample error
 - continue to crystallize API with an example, validation output
 - continue to crystallize API with an example, suggestions
 - add hot fixes, for sample editor
-- review readme. Add docs?
-- update JSON-Schema-Test-Suite
-- improve lazy loading of keywords
-- cache keywords for schema values for reuse
 - support meta keywords, deprecated, etc.
 - DX: improve discoverability
 - produce output schema from annotations/errors
@@ -28,16 +29,17 @@
 - support missing formats (all those RFCs ..)
 - fix ignored suites in JsonSchemaTestTestSuite
 - compile time json parsing vs runtime?
+- add scala docs
 - latest dependencies
-- support deprecated?
 - Scala 3?!
-- benching
 - support ScalaNative? Or GraalVM?
 - CI on GH Actions?
 - integrate with VS Code?
 
 ## Done
 
+- publish released versions
+  - https://docs.scala-lang.org/overviews/contributors/index.html
 - try https://github.com/sbt/sbt-projectmatrix instead, to improve Metals in VS Code
 - crystallize API with an example
 - better package names
