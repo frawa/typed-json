@@ -2,20 +2,20 @@
 
 ## Doing
 
-
+- review readme, add more docs
+- register with JSON-Schema-Test-Suite
 
 ## TODO
 
-- review readme, add more docs
-- register with JSON-Schema-Test-Suite
-- update JSON-Schema-Test-Suite
 - smarter suggestions, leverage keywords, formats (and annotations?)
+- update JSON-Schema-Test-Suite
 - benching
 - improve lazy loading of keywords
 - cache keywords for schema values for reuse
 - improve validation errors reported into sample error
 - continue to crystallize API with an example, validation output
 - continue to crystallize API with an example, suggestions
+- move backlog into issues
 - add hot fixes, for sample editor
 - support meta keywords, deprecated, etc.
 - DX: improve discoverability
