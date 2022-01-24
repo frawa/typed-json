@@ -2,8 +2,6 @@
 
 ## Doing
 
-- review readme, add more docs
-- register with JSON-Schema-Test-Suite
 
 ## TODO
 
@@ -38,6 +36,8 @@
 
 ## Done
 
+- review readme, add more docs
+- register with JSON-Schema-Test-Suite
 - publish released versions
   - https://docs.scala-lang.org/overviews/contributors/index.html
 - try https://github.com/sbt/sbt-projectmatrix instead, to improve Metals in VS Code
