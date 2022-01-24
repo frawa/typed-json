@@ -6,33 +6,36 @@
 ## TODO
 
 - smarter suggestions, leverage keywords, formats (and annotations?)
+- continue to crystallize API with an example, validation output
+- continue to crystallize API with an example, suggestions
 - update JSON-Schema-Test-Suite
+- support missing formats (all those RFCs ..)
+- produce output schema from annotations/errors
+- validate output against schema, for JsonSchemaTestTestSuite
+- move backlog into issues
+- create GitHub releases
 - benching
 - improve lazy loading of keywords
 - cache keywords for schema values for reuse
 - improve validation errors reported into sample error
-- continue to crystallize API with an example, validation output
-- continue to crystallize API with an example, suggestions
-- move backlog into issues
 - add hot fixes, for sample editor
 - support meta keywords, deprecated, etc.
 - DX: improve discoverability
-- produce output schema from annotations/errors
+- sandalone samples
 - validating lazy loader, which validates against meta schema on the fly
 - post process annotations?
 - latest dependencies
 - update JSON-Schema-Test-Suite
 - do not prefix results, but push value pointer into checker?
 - support earlier version of spec, via JsonSchemaTestTestSuite
-- support missing formats (all those RFCs ..)
 - fix ignored suites in JsonSchemaTestTestSuite
 - compile time json parsing vs runtime?
 - add scala docs
 - latest dependencies
 - Scala 3?!
-- support ScalaNative? Or GraalVM?
 - CI on GH Actions?
 - integrate with VS Code?
+- support ScalaNative? Or GraalVM?
 
 ## Done
 
