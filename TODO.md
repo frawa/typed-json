@@ -2,7 +2,7 @@
 
 ## Doing
 
-- update JSON-Schema-Test-Suite
+- produce output schema from annotations/errors
 
 ## TODO
 
@@ -11,7 +11,6 @@
 - continue to crystallize API with an example, validation output
 - continue to crystallize API with an example, suggestions
 - support missing formats (all those RFCs ..)
-- produce output schema from annotations/errors
 - validate output against schema, for JsonSchemaTestTestSuite
 - move backlog into issues
 - create GitHub releases
@@ -39,6 +38,7 @@
 
 ## Done
 
+- update JSON-Schema-Test-Suite
 - review readme, add more docs
 - register with JSON-Schema-Test-Suite
 - publish released versions
