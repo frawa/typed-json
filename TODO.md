@@ -2,13 +2,14 @@
 
 ## Doing
 
+- update JSON-Schema-Test-Suite
 
 ## TODO
 
+- Scala 3?!
 - smarter suggestions, leverage keywords, formats (and annotations?)
 - continue to crystallize API with an example, validation output
 - continue to crystallize API with an example, suggestions
-- update JSON-Schema-Test-Suite
 - support missing formats (all those RFCs ..)
 - produce output schema from annotations/errors
 - validate output against schema, for JsonSchemaTestTestSuite
@@ -21,7 +22,7 @@
 - add hot fixes, for sample editor
 - support meta keywords, deprecated, etc.
 - DX: improve discoverability
-- sandalone samples
+- standalone samples
 - validating lazy loader, which validates against meta schema on the fly
 - post process annotations?
 - latest dependencies
@@ -32,7 +33,6 @@
 - compile time json parsing vs runtime?
 - add scala docs
 - latest dependencies
-- Scala 3?!
 - CI on GH Actions?
 - integrate with VS Code?
 - support ScalaNative? Or GraalVM?
