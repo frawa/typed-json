@@ -36,6 +36,8 @@ class ValidationCombiner extends Combiner[ValidationResult] {
       Result.invalid(ValidationResult.invalid(errors))
     }
   }
+  override def valid(annotation: ValidationAnnotation, pointer: Pointer): Result[ValidationResult] =
+    Result.valid(ValidationResult.valid(annotation, pointer))
 
   override def invalid(error: ValidationError, pointer: Pointer): Result[ValidationResult] = Result.invalid(
     ValidationResult.invalid(error, pointer)

@@ -40,7 +40,6 @@ case class PatternMismatch(pattern: String)                            extends V
 case class FormatMismatch(format: String)                              extends ValidationError
 case class MinimumMismatch(min: BigDecimal, exclude: Boolean)          extends ValidationError
 case class ItemsNotUnique()                                            extends ValidationError
-case class UnsupportedFormat(format: String)                           extends ValidationError
 case class UnsupportedCheck(validate: Keyword)                         extends ValidationError
 case class NotMultipleOf(n: BigDecimal)                                extends ValidationError
 case class MaximumMismatch(max: BigDecimal, exclude: Boolean)          extends ValidationError
@@ -53,8 +52,12 @@ case class MinPropertiesMismatch(min: BigDecimal)                      extends V
 case class DependentRequiredMissing(missing: Map[String, Seq[String]]) extends ValidationError
 case class NotContains(valid: Int)                                     extends ValidationError
 
+sealed trait ValidationAnnotation
+case class UnknownFormat(format: String) extends ValidationAnnotation
+
 trait Combiner[R] {
   def invalid(error: ValidationError, pointer: Pointer): Result[R]
+  def valid(annotation: ValidationAnnotation, pointer: Pointer): Result[R]
   def allOf(results: Seq[Result[R]], pointer: Pointer): Result[R]
   def anyOf(results: Seq[Result[R]], pointer: Pointer): Result[R]
   def oneOf(results: Seq[Result[R]], pointer: Pointer): Result[R]
@@ -340,7 +343,7 @@ object ValidationProcessing {
           val duration     = s"P(${`dur-date`}|${`dur-time`}|${`dur-week`})"
           duration.r.matches(v)
         }
-      case _ => value => combiner.invalid(UnsupportedFormat(format), value.pointer)
+      case _ => value => combiner.valid(UnknownFormat(format), value.pointer)
     }
   }
 
