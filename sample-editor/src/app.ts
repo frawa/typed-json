@@ -22,11 +22,10 @@ import { json } from "@codemirror/next/lang-json"
 import { Diagnostic, linter, lintKeymap } from "@codemirror/next/lint"
 import { bracketMatching } from "@codemirror/next/matchbrackets"
 import { keymap } from "@codemirror/next/view"
-import { Text } from "@codemirror/next/text"
 
 /// <reference path="./typedjson.d.ts"/>
 import { TypedJson, TypedJsonFactory } from "typedjson"
-import { EditorSelection } from "@codemirror/next/state"
+import { EditorSelection, StateEffect, StateEffectType, StateField } from "@codemirror/next/state"
 
 // see https://codemirror.net/6/docs/ref/
 
@@ -37,13 +36,39 @@ const initialSchema = `{
   "type": "boolean"
 }`
 
-let typedJsonSchema = TypedJsonFactory
-    .withMetaSchema()
-    .forValue(initialSchema)
-let typedJson = TypedJsonFactory
-    .create()
-    .withSchema(typedJsonSchema)
-    .forValue(initialJson)
+const schemaUpdate: StateEffectType<TypedJson> = StateEffect.define()
+
+const typedJsonSchemaField: StateField<TypedJson> = StateField.define({
+    create(state) {
+        return TypedJsonFactory
+            .withMetaSchema()
+            .forValue(state.doc.sliceString(0))
+    },
+    update(value, tr) {
+        if (tr.docChanged) {
+            value = value.forValue(tr.state.doc.sliceString(0))
+        }
+        return value
+    }
+})
+
+const typedJsonField: StateField<TypedJson> = StateField.define({
+    create(state) {
+        return TypedJsonFactory
+            .create()
+            .forValue(state.doc.sliceString(0))
+    },
+    update(value, tr) {
+        const schema = tr.effects.find(e => e.is(schemaUpdate))?.value
+        if (schema) {
+            value = value.withSchema(schema)
+        }
+        if (tr.docChanged) {
+            value = value.forValue(tr.state.doc.sliceString(0))
+        }
+        return value
+    }
+})
 
 const state = EditorState.create({
     doc: initialJson,
@@ -52,13 +77,9 @@ const state = EditorState.create({
         json(),
         bracketMatching(),
         closeBrackets(),
-        EditorView.updateListener.of(update => {
-            if (update.docChanged) {
-                typedJson = typedJson.forValue(update.state.doc.sliceString(0))
-            }
-        }),
-        autocompletion(autocompleteConfig(() => typedJson)),
-        linter(linterFun(() => typedJson)),
+        typedJsonField,
+        autocompletion(autocompleteConfig(typedJsonField)),
+        linter(linterFun(typedJsonField)),
         // lintGutter(),
         keymap.of(lintKeymap)
         // keymap.of(completionKeymap)
@@ -72,41 +93,33 @@ const stateSchema = EditorState.create({
         json(),
         bracketMatching(),
         closeBrackets(),
+        typedJsonSchemaField,
         EditorView.updateListener.of(update => {
             if (update.docChanged) {
-                typedJsonSchema = typedJsonSchema.forValue(update.state.doc.sliceString(0))
-                typedJson = typedJson.withSchema(typedJsonSchema)
+                // view.dispatch({
+                //     effects: [schemaUpdate.of(update.state.field(typedJsonSchemaField))]
+                // })
+                view.setState(view.state.update({
+                    effects: [schemaUpdate.of(update.state.field(typedJsonSchemaField))]
+                }).state)
             }
         }),
-        autocompletion(autocompleteConfig(() => typedJsonSchema)),
-        linter(linterFun(() => typedJsonSchema)),
+        autocompletion(autocompleteConfig(typedJsonSchemaField)),
+        linter(linterFun(typedJsonSchemaField)),
         // lintGutter(),
         keymap.of(lintKeymap)
         // keymap.of(completionKeymap)
     ],
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-(window as any).view =
-    new EditorView({
-        state,
-        parent: document.querySelector("#editor") || undefined
-    });
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-(window as any).viewSchema =
-    new EditorView({
-        state: stateSchema,
-        parent: document.querySelector("#editorSchema") || undefined
-    })
-
-function autocompleteConfig(getTypedJson: () => TypedJson): CompletionConfig {
+function autocompleteConfig(field: StateField<TypedJson>): CompletionConfig {
     return {
         activateOnTyping: false,
         defaultKeymap: true,
         override: [context => {
             return new Promise(resolve => {
-                const suggestions = getTypedJson().suggestAt(context.pos)
+                const typedJson = context.state.field(field)
+                const suggestions = typedJson.suggestAt(context.pos)
                 if (suggestions.length === 0) {
                     return resolve(null)
                 }
@@ -132,8 +145,6 @@ function autocompleteConfig(getTypedJson: () => TypedJson): CompletionConfig {
                         }
                     });
                 });
-                // console.log("FW", theSuggestion.suggestions.length, options.length)
-                console.log("FW", context.pos, from, to)
                 return resolve({
                     // from: context.pos,
                     from,
@@ -145,9 +156,10 @@ function autocompleteConfig(getTypedJson: () => TypedJson): CompletionConfig {
     }
 }
 
-function linterFun(getTypedJson: () => TypedJson) {
+function linterFun(field: StateField<TypedJson>) {
     return (view: EditorView) => {
-        const markers = getTypedJson().markers()
+        const typedJson = view.state.field(field)
+        const markers = typedJson.markers()
         const diagnostics: Diagnostic[] = markers.map(marker => ({
             from: marker.start,
             to: marker.end - 1,
@@ -158,3 +170,23 @@ function linterFun(getTypedJson: () => TypedJson) {
         return diagnostics;
     }
 }
+
+const view = new EditorView({
+    state,
+    parent: document.querySelector("#editor") || undefined
+});
+
+const viewSchema = new EditorView({
+    state: stateSchema,
+    parent: document.querySelector("#editorSchema") || undefined
+});
+
+view.setState(view.state.update({
+    effects: [schemaUpdate.of(viewSchema.state.field(typedJsonSchemaField))]
+}).state);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(window as any).view = view;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(window as any).viewSchema = viewSchema
