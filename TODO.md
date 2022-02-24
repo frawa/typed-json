@@ -7,7 +7,6 @@
 ## TODO
 
 - Scala 3?!
-- smarter suggestions, leverage keywords, formats (and annotations?)
 - continue to crystallize API with an example, validation output
 - continue to crystallize API with an example, suggestions
 - support missing formats (all those RFCs ..)
@@ -38,6 +37,8 @@
 
 ## Done
 
+- fix propagation of schema changes in sample editor
+- smarter suggestions, leverage keywords, formats (and annotations?)
 - update JSON-Schema-Test-Suite
 - review readme, add more docs
 - register with JSON-Schema-Test-Suite
