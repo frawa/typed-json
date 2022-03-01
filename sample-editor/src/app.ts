@@ -159,7 +159,7 @@ function autocompleteConfig(field: StateField<TypedJson>): CompletionConfig {
 function linterFun(field: StateField<TypedJson>) {
     return (view: EditorView) => {
         const typedJson = view.state.field(field)
-        const markers = typedJson.markers()
+        const markers = typedJson.markers().sort((a, b) => a.start - b.start)
         const diagnostics: Diagnostic[] = markers.map(marker => ({
             from: marker.start,
             to: marker.end - 1,
