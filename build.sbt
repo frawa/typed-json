@@ -65,7 +65,9 @@ lazy val strictScalacSettings = Seq(
 )
 
 lazy val sharedTestSettings = Seq(
-  Test / testOptions += Tests.Argument("+l", "-q", "--summary=0")
+  // Test / testOptions += Tests.Argument("+l", "-q", "--summary=0")
+  // perferred to copy&paste expectations into tests:
+  Test / testOptions += Tests.Argument("-q", "--summary=0")
 )
 
 lazy val allJvm = projectMatrix
