@@ -22,8 +22,6 @@ import frawa.typedjson.parser._
 import frawa.typedjson.pointer.Pointer
 
 import java.net.URI
-//import java.time.OffsetTime
-//import java.time.format.{DateTimeFormatter, ResolverStyle}
 import java.util.UUID
 import java.util.regex.Pattern
 import scala.reflect.ClassTag
@@ -54,17 +52,6 @@ case class NotContains(valid: Int)                                     extends V
 
 sealed trait ValidationAnnotation
 case class UnknownFormat(format: String) extends ValidationAnnotation
-
-trait Combiner[R] {
-  def invalid(error: ValidationError, pointer: Pointer): Result[R]
-  def valid(annotation: ValidationAnnotation, pointer: Pointer): Result[R]
-  def allOf(results: Seq[Result[R]], pointer: Pointer): Result[R]
-  def anyOf(results: Seq[Result[R]], pointer: Pointer): Result[R]
-  def oneOf(results: Seq[Result[R]], pointer: Pointer): Result[R]
-  def contains(results: Seq[Result[R]], pointer: Pointer, min: Option[Int], max: Option[Int]): Result[R]
-  def not(results: Seq[Result[R]], pointer: Pointer): Result[R]
-  def ifThenElse(results: Seq[Result[R]], pointer: Pointer): Result[R]
-}
 
 object ValidationProcessing {
 
