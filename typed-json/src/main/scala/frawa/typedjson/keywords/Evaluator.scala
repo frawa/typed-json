@@ -262,7 +262,7 @@ object Evaluator {
     val result = p(value)
     value.value match {
       case ArrayValue(vs) =>
-        val evaluated = result.annotations
+        val evaluated = result.evaluations
           .filter(_.pointer == Pointer.empty)
           .flatMap {
             case WithPointer(EvaluatedIndices(indices), _) => indices
@@ -292,7 +292,7 @@ object Evaluator {
       val result = p(value)
       value.value match {
         case ObjectValue(vs) =>
-          val evaluated = result.annotations
+          val evaluated = result.evaluations
             .filter(_.pointer == value.pointer)
             .flatMap {
               case WithPointer(EvaluatedProperties(properties), _) => properties

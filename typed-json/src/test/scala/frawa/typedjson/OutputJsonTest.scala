@@ -62,7 +62,7 @@ class OutputJsonTest extends FunSuite {
     val basic      = validation.map(OutputJson.basic).toOption
 
     val expected = p.parse(Sample.expectedBasic).toOption
-    // assertEquals(validation, null)
+    assertEquals(validation, null)
     assertEquals(basic, expected)
   }
 

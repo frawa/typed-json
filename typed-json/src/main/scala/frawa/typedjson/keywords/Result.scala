@@ -24,7 +24,7 @@ case class EvaluatedProperties(properties: Set[String]) extends Evaluated
 case class Ignored(keywords: Set[String])               extends Evaluated
 
 object Result {
-  type Annotation = WithPointer[Evaluated]
+  type Evalutation = WithPointer[Evaluated]
 
   def apply[R](valid: Boolean, result: R): Result[R] = Result[R](valid, Seq(result))
   def valid[R]: Result[R]                            = Result[R](valid = true)
@@ -33,11 +33,11 @@ object Result {
   def invalid[R](result: R): Result[R]               = Result[R](valid = false, Seq(result))
 
   def combine[R](allResults: Seq[Result[R]]): Result[R] = {
-    val valid       = allResults.forall(_.valid)
-    val results     = allResults.flatMap(_.results)
-    val problems    = allResults.map(_.problems).reduceOption(_.combine(_)).getOrElse(SchemaProblems.empty)
-    val annotations = allResults.filter(_.valid).flatMap(_.annotations)
-    Result(valid, results, annotations, problems, 1 + count(allResults))
+    val valid        = allResults.forall(_.valid)
+    val results      = allResults.flatMap(_.results)
+    val problems     = allResults.map(_.problems).reduceOption(_.combine(_)).getOrElse(SchemaProblems.empty)
+    val evalutations = allResults.filter(_.valid).flatMap(_.evaluations)
+    Result(valid, results, evalutations, problems, 1 + count(allResults))
   }
 
   def count[R](results: Seq[Result[R]]): Int = results.map(_.count).sum
@@ -46,14 +46,14 @@ object Result {
 case class Result[R](
     valid: Boolean,
     results: Seq[R] = Seq.empty,
-    annotations: Seq[Result.Annotation] = Seq.empty,
+    evaluations: Seq[Result.Evalutation] = Seq.empty,
     problems: SchemaProblems = SchemaProblems.empty,
     count: Int = 1
 ) {
   def add(others: Seq[Result[R]]): Result[R] =
     this
       .copy(count = this.count + Result.count(others))
-      .addAnnotations(others.flatMap(_.annotations))
+      .addEvaluations(others.flatMap(_.evaluations))
       .addProblems(others.map(_.problems))
 
   def add(problem: SchemaProblems): Result[R] = this.copy(problems = this.problems.combine(problem))
@@ -61,10 +61,10 @@ case class Result[R](
   private def addProblems(problems: Seq[SchemaProblems]): Result[R] =
     this.copy(problems = problems.foldLeft(this.problems)(_.combine(_)))
 
-  def add(annotation: Result.Annotation): Result[R] = this.copy(annotations = this.annotations :+ annotation)
+  def add(evaluation: Result.Evalutation): Result[R] = this.copy(evaluations = this.evaluations :+ evaluation)
 
-  private def addAnnotations(annotations: Seq[Result.Annotation]): Result[R] =
-    this.copy(annotations = this.annotations ++ annotations)
+  private def addEvaluations(evaluations: Seq[Result.Evalutation]): Result[R] =
+    this.copy(evaluations = this.evaluations ++ evaluations)
 
   def addIgnoredKeywords(ignored: Set[String], pointer: Pointer): Result[R] =
     if (ignored.isEmpty) {
@@ -74,7 +74,7 @@ case class Result[R](
     }
 
   def ignoredKeywords(): Set[String] = {
-    annotations
+    evaluations
       .flatMap {
         case WithPointer(Ignored(ignored), _) => Some(ignored)
         case _                                => None
@@ -82,5 +82,4 @@ case class Result[R](
       .reduceOption(_ ++ _)
       .getOrElse(Set.empty)
   }
-
 }
