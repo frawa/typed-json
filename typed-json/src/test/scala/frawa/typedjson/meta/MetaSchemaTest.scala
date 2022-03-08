@@ -51,8 +51,9 @@ class MetaSchemaTest extends FunSuite {
   test("validate core against core") {
     validateSpec("meta/core", "meta/core") { result =>
       assertEquals(result.output, None)
-//      assertEquals(result.count, 54)
-      assertEquals(result.count, 42)
+      // assertEquals(result.count, 54)
+      // assertEquals(result.count, 42)
+      assertEquals(result.count, 22)
       assertEquals(
         result.ignoredKeywords(),
         Set(
@@ -67,7 +68,8 @@ class MetaSchemaTest extends FunSuite {
   test("validate core against validation") {
     validateSpec("meta/core", "meta/validation") { result =>
       assertEquals(result.output, None)
-      assertEquals(result.count, 22)
+      // assertEquals(result.count, 22)
+      assertEquals(result.count, 12)
       assertEquals(
         result.ignoredKeywords(),
         Set.empty[String]
@@ -78,8 +80,9 @@ class MetaSchemaTest extends FunSuite {
   test("validate core against applicator") {
     validateSpec("meta/core", "meta/applicator") { result =>
       assertEquals(result.output, None)
-//      assertEquals(result.count, 84)
-      assertEquals(result.count, 48)
+      // assertEquals(result.count, 84)
+      // assertEquals(result.count, 48)
+      assertEquals(result.count, 18)
       assertEquals(
         result.ignoredKeywords(),
         Set(
@@ -94,8 +97,9 @@ class MetaSchemaTest extends FunSuite {
   test("validate validation against core") {
     validateSpec("meta/validation", "meta/core") { result =>
       assertEquals(result.output, None)
-//      assertEquals(result.count, 65)
-      assertEquals(result.count, 44)
+      // assertEquals(result.count, 65)
+      // assertEquals(result.count, 44)
+      assertEquals(result.count, 23)
       assertEquals(
         result.ignoredKeywords(),
         Set(
@@ -110,7 +114,8 @@ class MetaSchemaTest extends FunSuite {
   test("validate validation against validation") {
     validateSpec("meta/validation", "meta/validation") { result =>
       assertEquals(result.output, None)
-      assertEquals(result.count, 22)
+      // assertEquals(result.count, 22)
+      assertEquals(result.count, 12)
       assertEquals(
         result.ignoredKeywords(),
         Set.empty[String]
@@ -121,8 +126,9 @@ class MetaSchemaTest extends FunSuite {
   test("validate validation against applicator") {
     validateSpec("meta/validation", "meta/applicator") { result =>
       assertEquals(result.output, None)
-//      assertEquals(result.count, 168)
-      assertEquals(result.count, 91)
+      // assertEquals(result.count, 168)
+      // assertEquals(result.count, 91)
+      assertEquals(result.count, 32)
       assertEquals(
         result.ignoredKeywords(),
         Set(
