@@ -603,7 +603,7 @@ class ValidationKeywordTest extends FunSuite {
           result.problems.errors,
           Seq(WithPointer(MissingReference("missing.json"), Pointer.parse("/items/$ref")))
         )
-        assertEquals(result.evaluations, Seq())
+        assertEquals(result.evaluations, Seq(WithPointer(EvaluatedIndices(Seq(0)))))
       }
     }
   }

@@ -63,7 +63,7 @@ case class Result[O](
     this
       .copy(count = this.count + Result.count(others))
       .addEvaluations(others.flatMap(_.evaluations))
-      .add(others.map(_.problems).reduce(_.combine(_)))
+      .add(others.map(_.problems).reduceOption(_.combine(_)).getOrElse(SchemaProblems.empty))
 
   def add(other: Result[O]): Result[O] = {
     val combine = this.combineOutput.orElse(other.combineOutput)
