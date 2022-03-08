@@ -21,11 +21,12 @@ import frawa.typedjson.keywords._
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser.{Offset, OffsetParser, Value}
 import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.suggestion.{SuggestionProcessing, SuggestionResult}
-import frawa.typedjson.validation.{ValidationProcessing, ValidationResult}
+import frawa.typedjson.suggestion.{SuggestionProcessing}
+import frawa.typedjson.validation.{ValidationProcessing, ValidationOutput}
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSExport, JSExportAll, JSExportTopLevel}
+import frawa.typedjson.suggestion.SuggestionOutput
 
 @JSExportTopLevel("TypedJsonFactory")
 object TypedJsonFactory {
@@ -63,7 +64,7 @@ object TypedJsonFactory {
 case class TypedJson(
     keywords: Option[Either[SchemaProblems, Keywords]],
     value: Option[Offset.Value] = None,
-    result: Option[Either[OffsetParser.ParseError, Result[ValidationResult]]] = None
+    result: Option[Either[OffsetParser.ParseError, Result[ValidationOutput]]] = None
 ) {
   @JSExport
   def withSchema(schema: TypedJson): TypedJson = {
@@ -105,8 +106,9 @@ case class TypedJson(
     val markers = (keywords, value, result) match {
       case (Some(Right(_)), Some(value), Some(Right(result))) if !result.valid =>
         val offsetAt = pointer => TypedJsonFactory.offsetAt(pointer, value)
-        result.results
-          .flatMap(_.errors)
+        result.output
+          .map(_.errors)
+          .getOrElse(Seq())
           .map(Marker.fromError(offsetAt))
       case (Some(Left(problems)), _, _) => problems.errors.map(Marker.fromSchemaError) // TODO not needed?
       case (_, _, Some(Left(error))) =>
@@ -153,7 +155,7 @@ object Marker {
     Marker(0, 0, error.pointer.toString, message, "error")
   }
 
-  def fromError(offsetAt: Pointer => Option[Offset])(error: ValidationResult.Error): Marker = {
+  def fromError(offsetAt: Pointer => Option[Offset])(error: ValidationOutput.Error): Marker = {
     val offset       = offsetAt(error.pointer)
     val (start, end) = offset.map(o => (o.start, o.end)).getOrElse((0, 0))
     // TODO localized messages
@@ -182,10 +184,10 @@ case class Suggestion(
 )
 
 object Suggestions {
-  def apply(offsetAt: Pointer => Option[Offset])(pointer: Pointer, result: Result[SuggestionResult]): Suggestions = {
+  def apply(offsetAt: Pointer => Option[Offset])(pointer: Pointer, result: Result[SuggestionOutput]): Suggestions = {
     val offset       = offsetAt(pointer)
     val (start, end) = offset.map(o => (o.start, o.end)).getOrElse((0, 0))
-    val suggestions  = result.results.flatMap(_.suggestions).map(toSuggestion)
+    val suggestions  = result.output.map(_.suggestions).getOrElse(Seq()).map(toSuggestion)
     Suggestions(start, end, pointer.toString, js.Array(suggestions: _*))
   }
 

@@ -55,9 +55,10 @@ case class UnknownFormat(format: String) extends ValidationAnnotation
 
 object ValidationProcessing {
 
-  def apply(): Processing[ValidationResult] = Processing(simple, nested)
+  def apply(): Processing[ValidationOutput] = Processing(simple, nested)
 
-  private val combiner: Combiner[ValidationResult] = new ValidationCombiner()
+  private val combiner: Combiner[ValidationOutput]                = new ValidationCombiner()
+  private implicit val f: Result.OutputCombiner[ValidationOutput] = ValidationOutput.add
 
   private val nullTypeMismatch    = TypeMismatch[NullValue.type]("null")
   private val booleanTypeMismatch = TypeMismatch[BoolValue]("boolean")
@@ -66,7 +67,7 @@ object ValidationProcessing {
   private val arrayTypeMismatch   = TypeMismatch[ArrayValue]("array")
   private val objectTypeMismatch  = TypeMismatch[ObjectValue]("object")
 
-  private type EvalFun = Evaluator.EvalFun[ValidationResult]
+  private type EvalFun = Evaluator.EvalFun[ValidationOutput]
 
   private def simple(keyword: AssertionKeyword): EvalFun = {
     keyword match {
@@ -93,11 +94,11 @@ object ValidationProcessing {
       case MaxPropertiesKeyword(v)         => validateMaxProperties(v)
       case MinPropertiesKeyword(v)         => validateMinProperties(v)
       case DependentRequiredKeyword(v)     => validateDependentRequired(v)
-      case _                               => _ => Result.invalid(ValidationResult.invalid(UnsupportedCheck(keyword)))
+      case _                               => _ => Result.invalid(ValidationOutput.invalid(UnsupportedCheck(keyword)))
     }
   }
 
-  private def nested(keyword: ApplicatorKeyword)(results: Seq[Result[ValidationResult]]): EvalFun = { value =>
+  private def nested(keyword: ApplicatorKeyword)(results: Seq[Result[ValidationOutput]]): EvalFun = { value =>
     keyword match {
       case AllOfKeyword(_)                  => combiner.allOf(results, value.pointer)
       case AnyOfKeyword(_)                  => combiner.anyOf(results, value.pointer)

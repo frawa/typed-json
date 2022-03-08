@@ -24,7 +24,7 @@ import frawa.typedjson.keywords.Keywords
 import frawa.typedjson.keywords.SchemaProblems
 import frawa.typedjson.keywords.Evaluator
 import frawa.typedjson.validation.ValidationProcessing
-import frawa.typedjson.validation.ValidationResult
+import frawa.typedjson.validation.ValidationOutput
 import frawa.typedjson.keywords.InnerValue
 import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.Offset
@@ -73,9 +73,12 @@ object TypedJson {
   object Output {
     val empty: Output = Output(Seq.empty)
 
-    def apply(result: Result[ValidationResult]): Output = {
-      val errors = result.results.flatMap(_.errors.map(error => Error(error.pointer, error.result)))
-      Output(errors)
+    def apply(result: Result[ValidationOutput]): Output = {
+      val errors =
+        result.output
+      // .flatMap(x => x.errors).map(error => Error(error.pointer, error.result)) // .getOrElse(Seq())
+      // Output(errors)
+      Output(List.empty)
     }
 
   }
@@ -110,7 +113,7 @@ class TypedJson(private val keywords: Option[Keywords]) {
       .map { result => Validation(result.valid, Output(result)) }
   }
 
-  def validator(keywords: Keywords): Evaluator[ValidationResult] = {
+  def validator(keywords: Keywords): Evaluator[ValidationOutput] = {
     Evaluator(keywords, ValidationProcessing())
   }
 

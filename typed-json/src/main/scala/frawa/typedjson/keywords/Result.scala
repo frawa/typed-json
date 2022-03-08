@@ -24,49 +24,53 @@ case class EvaluatedProperties(properties: Set[String]) extends Evaluated
 case class Ignored(keywords: Set[String])               extends Evaluated
 
 object Result {
-  type Evalutation = WithPointer[Evaluated]
+  type Evalutation       = WithPointer[Evaluated]
+  type OutputCombiner[O] = (O, O) => O
 
-  def apply[R](valid: Boolean, result: R): Result[R] = Result[R](valid, Seq(result))
-  def valid[R]: Result[R]                            = Result[R](valid = true)
-  def valid[R](result: R): Result[R]                 = Result[R](valid = true, Seq(result))
-  def invalid[R]: Result[R]                          = Result[R](valid = false)
-  def invalid[R](result: R): Result[R]               = Result[R](valid = false, Seq(result))
-
-  def combine[R](allResults: Seq[Result[R]]): Result[R] = {
-    val valid        = allResults.forall(_.valid)
-    val results      = allResults.flatMap(_.results)
-    val problems     = allResults.map(_.problems).reduceOption(_.combine(_)).getOrElse(SchemaProblems.empty)
-    val evalutations = allResults.filter(_.valid).flatMap(_.evaluations)
-    Result(valid, results, evalutations, problems, 1 + count(allResults))
-  }
-
-  def count[R](results: Seq[Result[R]]): Int = results.map(_.count).sum
+  def apply[O](valid: Boolean, output: O): Result[O] = Result[O](valid, output)
+  def valid[O]: Result[O]                            = Result[O](valid = true, None, None)
+  def valid[O](output: O)(implicit c: OutputCombiner[O]): Result[O] =
+    Result[O](valid = true, Some(output), Some(c))
+  def invalid[O]: Result[O] = Result[O](valid = false, None, None)
+  def invalid[O](output: O)(implicit c: OutputCombiner[O]): Result[O] =
+    Result[O](valid = false, Some(output), Some(c))
 }
 
-case class Result[R](
+// trait Output
+
+case class Result[O](
     valid: Boolean,
-    results: Seq[R] = Seq.empty,
+    output: Option[O],
+    combineOutput: Option[(O, O) => O] = None,
     evaluations: Seq[Result.Evalutation] = Seq.empty,
     problems: SchemaProblems = SchemaProblems.empty,
     count: Int = 1
 ) {
-  def add(others: Seq[Result[R]]): Result[R] =
+
+  def add(other: Result[O]): Result[O] = {
+    val combine = this.combineOutput.orElse(other.combineOutput)
+    val os = combine.flatMap(c =>
+      Seq(this.output, other.output).flatten
+        .reduceOption(c)
+    )
     this
-      .copy(count = this.count + Result.count(others))
-      .addEvaluations(others.flatMap(_.evaluations))
-      .addProblems(others.map(_.problems))
+      .copy(count = this.count + 1)
+      .copy(output = os)
+      .addEvaluations(other.evaluations)
+      .add(other.problems)
+  }
 
-  def add(problem: SchemaProblems): Result[R] = this.copy(problems = this.problems.combine(problem))
+  def addAll(others: Seq[Result[O]]): Result[O] =
+    others.fold(this)(_.add(_))
 
-  private def addProblems(problems: Seq[SchemaProblems]): Result[R] =
-    this.copy(problems = problems.foldLeft(this.problems)(_.combine(_)))
+  def add(p: SchemaProblems): Result[O] = this.copy(problems = this.problems.combine(p))
 
-  def add(evaluation: Result.Evalutation): Result[R] = this.copy(evaluations = this.evaluations :+ evaluation)
+  def add(e: Result.Evalutation): Result[O] = this.copy(evaluations = this.evaluations :+ e)
 
-  private def addEvaluations(evaluations: Seq[Result.Evalutation]): Result[R] =
-    this.copy(evaluations = this.evaluations ++ evaluations)
+  private def addEvaluations(es: Seq[Result.Evalutation]): Result[O] =
+    this.copy(evaluations = this.evaluations ++ es)
 
-  def addIgnoredKeywords(ignored: Set[String], pointer: Pointer): Result[R] =
+  def addIgnoredKeywords(ignored: Set[String], pointer: Pointer): Result[O] =
     if (ignored.isEmpty) {
       this
     } else {

@@ -28,12 +28,12 @@ class ValidationKeywordTest extends FunSuite {
 
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
-  private implicit val factory: EvaluatorFactory[SchemaValue, ValidationResult] =
+  private implicit val factory: EvaluatorFactory[SchemaValue, ValidationOutput] =
     EvaluatorFactory.make(ValidationProcessing(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
 
   def validateJson(
       schema: SchemaValue
-  )(jsonText: String)(f: Result[ValidationResult] => Unit): Either[Nothing, Unit] = {
+  )(jsonText: String)(f: Result[ValidationOutput] => Unit): Either[Nothing, Unit] = {
     assertResult(jsonText)(schema)(f)
   }
 
@@ -41,9 +41,9 @@ class ValidationKeywordTest extends FunSuite {
     withSchema("""{"multipleOf": 2}""") { schema =>
       validateJson(schema)("""13""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 WithPointer(NotMultipleOf(2))
               )
@@ -62,9 +62,9 @@ class ValidationKeywordTest extends FunSuite {
     withSchema("""{"maximum": 13}""") { schema =>
       validateJson(schema)("""1313""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 WithPointer(MaximumMismatch(13, exclude = false))
               )
@@ -83,9 +83,9 @@ class ValidationKeywordTest extends FunSuite {
     withSchema("""{"exclusiveMaximum": 13}""") { schema =>
       validateJson(schema)("""13""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 WithPointer(MaximumMismatch(13, exclude = true))
               )
@@ -104,9 +104,9 @@ class ValidationKeywordTest extends FunSuite {
     withSchema("""{"minimum": 13}""") { schema =>
       validateJson(schema)("""12""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 WithPointer(MinimumMismatch(13, exclude = false))
               )
@@ -125,9 +125,9 @@ class ValidationKeywordTest extends FunSuite {
     withSchema("""{"exclusiveMinimum": 13}""") { schema =>
       validateJson(schema)("""13""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 WithPointer(MinimumMismatch(13, exclude = true))
               )
@@ -146,9 +146,9 @@ class ValidationKeywordTest extends FunSuite {
     withSchema("""{"maxLength": 3}""") { schema =>
       validateJson(schema)(""""toto"""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 WithPointer(MaxLengthMismatch(3))
               )
@@ -167,9 +167,9 @@ class ValidationKeywordTest extends FunSuite {
     withSchema("""{"minLength": 4}""") { schema =>
       validateJson(schema)(""""bar"""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 WithPointer(MinLengthMismatch(4))
               )
@@ -188,9 +188,9 @@ class ValidationKeywordTest extends FunSuite {
     withSchema("""{"pattern": "foo\\d\\d"}""") { schema =>
       validateJson(schema)(""""foo"""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 WithPointer(PatternMismatch("foo\\d\\d"))
               )
@@ -209,9 +209,9 @@ class ValidationKeywordTest extends FunSuite {
     withSchema("""{"minItems": 3}""") { schema =>
       validateJson(schema)("""[1,2]""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 WithPointer(MinItemsMismatch(3))
               )
@@ -230,9 +230,9 @@ class ValidationKeywordTest extends FunSuite {
     withSchema("""{"maxItems": 2}""") { schema =>
       validateJson(schema)("""[1,2,3]""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 WithPointer(MaxItemsMismatch(2))
               )
@@ -251,9 +251,9 @@ class ValidationKeywordTest extends FunSuite {
     withSchema("""{"uniqueItems": true}""") { schema =>
       validateJson(schema)("""[1,1]""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 WithPointer(ItemsNotUnique())
               )
@@ -272,9 +272,9 @@ class ValidationKeywordTest extends FunSuite {
     withSchema("""{"maxProperties": 2}""") { schema =>
       validateJson(schema)("""{"gnu": 1, "bar": 2, "foo": 3}""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 WithPointer(MaxPropertiesMismatch(2))
               )
@@ -293,9 +293,9 @@ class ValidationKeywordTest extends FunSuite {
     withSchema("""{"minProperties": 3}""") { schema =>
       validateJson(schema)("""{"bar": 2, "foo": 3}""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 WithPointer(MinPropertiesMismatch(3))
               )
@@ -314,9 +314,9 @@ class ValidationKeywordTest extends FunSuite {
     withSchema("""{"required": ["bar", "foo"]}""") { schema =>
       validateJson(schema)("""{"gnu": 1, "bar": 2}""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 WithPointer(MissingRequiredProperties(Seq("foo")))
               )
@@ -335,9 +335,9 @@ class ValidationKeywordTest extends FunSuite {
     withSchema("""{"dependentRequired": {"foo": ["bar", "gnu"]}}""") { schema =>
       validateJson(schema)("""{"foo": 1, "bar": 2}""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 WithPointer(DependentRequiredMissing(Map("foo" -> Seq("gnu"))))
               )
@@ -356,9 +356,9 @@ class ValidationKeywordTest extends FunSuite {
     withSchema("""{"dependentSchemas": {"foo": true, "gnu": false}}""") { schema =>
       validateJson(schema)("""{"gnu": 1}""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 WithPointer(FalseSchemaReason())
               )
@@ -377,9 +377,9 @@ class ValidationKeywordTest extends FunSuite {
     withSchema("""{"prefixItems": [{"type": "number"}, {"type": "string"}]}""") { schema =>
       validateJson(schema)("""["gnu"]""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 typedjson.keywords.WithPointer(TypeMismatch("number"), Pointer.empty / 0)
               )
@@ -407,9 +407,9 @@ class ValidationKeywordTest extends FunSuite {
     ) { schema =>
       validateJson(schema)("""[13, "gnu", "boom"]""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 typedjson.keywords.WithPointer(TypeMismatch("boolean"), Pointer.empty / 2)
               )
@@ -433,9 +433,9 @@ class ValidationKeywordTest extends FunSuite {
     withSchema("""{"contains": {"type": "number"}}""") { schema =>
       validateJson(schema)("""["gnu", true]""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 WithPointer(NotContains(0))
               )
@@ -467,9 +467,9 @@ class ValidationKeywordTest extends FunSuite {
     ) { schema =>
       validateJson(schema)("""[13, "gnu", true]""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 WithPointer(NotContains(1))
               )
@@ -495,9 +495,9 @@ class ValidationKeywordTest extends FunSuite {
     ) { schema =>
       validateJson(schema)("""[13, 14, 15, "gnu", true]""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 WithPointer(NotContains(3))
               )
@@ -507,9 +507,9 @@ class ValidationKeywordTest extends FunSuite {
       }
       validateJson(schema)("""[]""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 WithPointer(NotContains(0))
               )
@@ -561,9 +561,9 @@ class ValidationKeywordTest extends FunSuite {
     ) { schema =>
       validateJson(schema)("""{"gnu": 13, "bar": true}""") { result =>
         assertEquals(
-          result.results,
-          Seq(
-            ValidationResult(
+          result.output,
+          Some(
+            ValidationOutput(
               Seq(
                 typedjson.keywords.WithPointer(FalseSchemaReason(), Pointer.empty / "gnu"),
                 typedjson.keywords.WithPointer(FalseSchemaReason(), Pointer.empty / "bar")
@@ -573,7 +573,7 @@ class ValidationKeywordTest extends FunSuite {
         )
       }
       validateJson(schema)("""{"foo": "ok"}""") { result =>
-        assertEquals(result.results, Seq())
+        assertEquals(result.output, None)
         assert(result.valid)
         assertEquals(
           result.evaluations,

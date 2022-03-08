@@ -21,37 +21,38 @@ import frawa.typedjson.keywords
 import frawa.typedjson.parser.Value._
 import frawa.typedjson.pointer.Pointer
 
-case class Evaluator[R] private[keywords] (private val eval: Evaluator.EvalFun[R]) {
-  def apply(value: InnerValue): Result[R]              = eval(value)
-  def andThen(f: Result[R] => Result[R]): Evaluator[R] = this.copy(eval = eval.andThen(f))
+case class Evaluator[O] private[keywords] (private val eval: Evaluator.EvalFun[O]) {
+  def apply(value: InnerValue): Result[O]              = eval(value)
+  def andThen(f: Result[O] => Result[O]): Evaluator[O] = this.copy(eval = eval.andThen(f))
 }
 
 object Evaluator {
   import Keywords.KeywordWithLocation
 
-  type EvalFun[R]    = InnerValue => Result[R]
-  type CombineFun[R] = Seq[Result[R]] => EvalFun[R]
+  type EvalFun[O]    = InnerValue => Result[O]
+  type CombineFun[O] = Seq[Result[O]] => EvalFun[O]
 
-  def apply[R](keywords: Keywords, processing: Processing[R]): Evaluator[R] = {
+  def apply[O](keywords: Keywords, processing: Processing[O]): Evaluator[O] = {
     Evaluator(all(processing, keywords).andThen(_.addIgnoredKeywords(keywords.ignored, Pointer.empty)))
   }
 
-  private def all[R](processing: Processing[R], keywords: Keywords): EvalFun[R] = { value =>
+  private def all[O](processing: Processing[O], keywords: Keywords): EvalFun[O] = { value =>
     seq(keywords.keywords.map(one(processing, _)))
       .andThen(_.addIgnoredKeywords(keywords.ignored, value.pointer))(value)
   }
 
-  private def noop[R]: EvalFun[R] = _ => Result.valid[R]
-  private def simple[R](processing: Processing[R], keyword: AssertionKeyword): EvalFun[R] =
+  private def noop[O]: EvalFun[O] = _ => Result.valid[O]
+  private def simple[O](processing: Processing[O], keyword: AssertionKeyword): EvalFun[O] =
     processing.simple(keyword)
-  private def seq[R](ps: Seq[EvalFun[R]]): EvalFun[R] = value => Result.combine(ps.map(_(value)))
-  private def option[R](p: Option[EvalFun[R]]): EvalFun[R] = {
+  private def seq[O](ps: Seq[EvalFun[O]]): EvalFun[O] = value =>
+    ps.map(_(value)).reduceOption(_.add(_)).getOrElse(Result.valid[O])
+  private def option[O](p: Option[EvalFun[O]]): EvalFun[O] = {
     p.getOrElse(noop)
   }
 
-  private def applyToArray[R](pPrefix: Seq[EvalFun[R]], pItems: Option[EvalFun[R]])(
-      combine: CombineFun[R]
-  ): EvalFun[R] = { value: InnerValue =>
+  private def applyToArray[O](pPrefix: Seq[EvalFun[O]], pItems: Option[EvalFun[O]])(
+      combine: CombineFun[O]
+  ): EvalFun[O] = { value: InnerValue =>
     value.value match {
       case ArrayValue(vs) =>
         val indexed = vs.zipWithIndex
@@ -66,14 +67,14 @@ object Evaluator {
     }
   }
 
-  // TODO return a EvalFun[R]?
-  private def combineAll[R](combine: CombineFun[R], cs: Seq[Result[R]], value: InnerValue): Result[R] = {
-    combine(cs)(value).add(cs)
+  // TODO return a EvalFun[O]?
+  private def combineAll[O](combine: CombineFun[O], cs: Seq[Result[O]], value: InnerValue): Result[O] = {
+    combine(cs)(value).addAll(cs)
   }
 
-  private def applyToObject[R](
-      ps: => PartialFunction[String, () => EvalFun[R]]
-  )(combine: CombineFun[R]): EvalFun[R] = { value =>
+  private def applyToObject[O](
+      ps: => PartialFunction[String, () => EvalFun[O]]
+  )(combine: CombineFun[O]): EvalFun[O] = { value =>
     value.value match {
       case ObjectValue(vs) =>
         val evaluated = vs.view
@@ -93,27 +94,27 @@ object Evaluator {
     }
   }
 
-  private def applyToValue[R](ps: Seq[EvalFun[R]])(combine: CombineFun[R]): EvalFun[R] = { value =>
+  private def applyToValue[O](ps: Seq[EvalFun[O]])(combine: CombineFun[O]): EvalFun[O] = { value =>
     val result = ps.map(_(value))
     combineAll(combine, result, value)
   }
 
-  private def applyCondition[R](pIf: EvalFun[R], pThen: EvalFun[R], pElse: EvalFun[R])(
-      combine: CombineFun[R]
-  ): EvalFun[R] = { value =>
+  private def applyCondition[O](pIf: EvalFun[O], pThen: EvalFun[O], pElse: EvalFun[O])(
+      combine: CombineFun[O]
+  ): EvalFun[O] = { value =>
     val ifResult = pIf(value)
     val result   = if (ifResult.valid) Seq(ifResult, pThen(value)) else Seq(pElse(value))
     combineAll(combine, result, value)
   }
 
-  private def one[R](processing: Processing[R], keyword: KeywordWithLocation): EvalFun[R] = {
+  private def one[O](processing: Processing[O], keyword: KeywordWithLocation): EvalFun[O] = {
     keyword.value match {
       case c: AssertionKeyword  => value => simple(processing, c)(value)
       case c: ApplicatorKeyword => value => nesting(processing, c)(value)
     }
   }
 
-  private def nesting[R](processing: Processing[R], keyword: ApplicatorKeyword): EvalFun[R] =
+  private def nesting[O](processing: Processing[O], keyword: ApplicatorKeyword): EvalFun[O] =
     keyword match {
       case c: ArrayItemsKeyword            => evalArrayItems(processing, c)
       case c: ObjectPropertiesKeyword      => evalObjectProperties(processing, c)
@@ -131,16 +132,19 @@ object Evaluator {
       case c: UnevaluatedPropertiesKeyword => evalUnevaluated(processing, c)
     }
 
-  private def evalArrayItems[R](processing: Processing[R], keyword: ArrayItemsKeyword): EvalFun[R] = {
+  private def evalArrayItems[O](processing: Processing[O], keyword: ArrayItemsKeyword): EvalFun[O] = {
     val pPrefix = keyword.prefixItems.map(all(processing, _))
     val pItems  = keyword.items.map(all(processing, _))
     val combine = processing.nested(keyword)
     applyToArray(pPrefix, pItems)(combine)
   }
 
-  private def evalObjectProperties[R](processing: Processing[R], keyword: ObjectPropertiesKeyword): EvalFun[R] = {
+  private def evalObjectProperties[O](
+      processing: Processing[O],
+      keyword: ObjectPropertiesKeyword
+  ): EvalFun[O] = {
     val psProperties = keyword.properties.map { case (key, keywords) =>
-      val partial: PartialFunction[String, () => EvalFun[R]] = {
+      val partial: PartialFunction[String, () => EvalFun[O]] = {
         case k if k == key =>
           () => all(processing, keywords)
       }
@@ -149,7 +153,7 @@ object Evaluator {
 
     val psPatterns = keyword.patternProperties.map { case (regex, keywords) =>
       val r = regex.r
-      val partial: PartialFunction[String, () => EvalFun[R]] = {
+      val partial: PartialFunction[String, () => EvalFun[O]] = {
         case k if r.findFirstIn(k).isDefined => () => all(processing, keywords)
       }
       partial
@@ -157,13 +161,13 @@ object Evaluator {
 
     val psBoth = psProperties ++ psPatterns
 
-    val psAll: PartialFunction[String, () => EvalFun[R]] = {
+    val psAll: PartialFunction[String, () => EvalFun[O]] = {
       case k if psBoth.exists(_.isDefinedAt(k)) =>
         () => seq(psBoth.map(_.lift).flatMap { p => p(k).map(_()) })
     }
 
     val psAdditional = keyword.additionalProperties.map { keywords =>
-      val partial: PartialFunction[String, () => EvalFun[R]] = { _ => () => all(processing, keywords) }
+      val partial: PartialFunction[String, () => EvalFun[O]] = { _ => () => all(processing, keywords) }
       partial
     }
 
@@ -174,21 +178,21 @@ object Evaluator {
     }
   }
 
-  private def evalApplicator[R](processing: Processing[R], keywords: Seq[Keywords])(
-      combine: CombineFun[R]
-  ): EvalFun[R] = {
+  private def evalApplicator[O](processing: Processing[O], keywords: Seq[Keywords])(
+      combine: CombineFun[O]
+  ): EvalFun[O] = {
     val p = keywords.map(all(processing, _))
     applyToValue(p)(combine)
   }
 
-  private def evalUnionType[R](processing: Processing[R], keyword: UnionTypeKeyword)(
-      combine: CombineFun[R]
-  ): EvalFun[R] = {
+  private def evalUnionType[O](processing: Processing[O], keyword: UnionTypeKeyword)(
+      combine: CombineFun[O]
+  ): EvalFun[O] = {
     val p = keyword.keywords.map(one(processing, _))
     applyToValue(p)(combine)
   }
 
-  private def evalIfThenElse[R](processing: Processing[R], keyword: IfThenElseKeyword): EvalFun[R] = {
+  private def evalIfThenElse[O](processing: Processing[O], keyword: IfThenElseKeyword): EvalFun[O] = {
     keyword.ifKeywords
       .map(ifChecks =>
         applyCondition(
@@ -200,7 +204,10 @@ object Evaluator {
       .getOrElse(noop)
   }
 
-  private def evalPropertyNames[R](processing: Processing[R], keyword: PropertyNamesKeyword): EvalFun[R] = { value =>
+  private def evalPropertyNames[O](
+      processing: Processing[O],
+      keyword: PropertyNamesKeyword
+  ): EvalFun[O] = { value =>
     value.value match {
       case ObjectValue(vs) =>
         val p       = all(processing, keyword.keywords)
@@ -216,26 +223,31 @@ object Evaluator {
     }
   }
 
-  private def evalLazyParseKeywords[R](processing: Processing[R], keyword: LazyParseKeywords): EvalFun[R] = {
+  private def evalLazyParseKeywords[O](
+      processing: Processing[O],
+      keyword: LazyParseKeywords
+  ): EvalFun[O] = {
     keyword.parse() match {
       case Right(keywords) => all(processing, keywords)
       case Left(problems)  => _ => Result.invalid.add(problems)
     }
   }
 
-  private def evalDependentSchemas[R](processing: Processing[R], keyword: DependentSchemasKeyword): EvalFun[R] = {
-    value =>
-      value.value match {
-        case ObjectValue(v) =>
-          val ps      = v.keySet.flatMap(keyword.keywords.get).map(all(processing, _)).toSeq
-          val combine = processing.nested(keyword)
-          val result  = ps.map(_(value))
-          combineAll(combine, result, value)
-        case _ => Result.valid
-      }
+  private def evalDependentSchemas[O](
+      processing: Processing[O],
+      keyword: DependentSchemasKeyword
+  ): EvalFun[O] = { value =>
+    value.value match {
+      case ObjectValue(v) =>
+        val ps      = v.keySet.flatMap(keyword.keywords.get).map(all(processing, _)).toSeq
+        val combine = processing.nested(keyword)
+        val result  = ps.map(_(value))
+        combineAll(combine, result, value)
+      case _ => Result.valid
+    }
   }
 
-  private def evalContains[R](processing: Processing[R], keyword: ContainsKeyword): EvalFun[R] = { value =>
+  private def evalContains[O](processing: Processing[O], keyword: ContainsKeyword): EvalFun[O] = { value =>
     value.value match {
       case ArrayValue(vs) =>
         keyword.schema
@@ -257,7 +269,10 @@ object Evaluator {
     }
   }
 
-  private def evalUnevaluated[R](processing: Processing[R], keyword: UnevaluatedItemsKeyword): EvalFun[R] = { value =>
+  private def evalUnevaluated[O](
+      processing: Processing[O],
+      keyword: UnevaluatedItemsKeyword
+  ): EvalFun[O] = { value =>
     val p      = all(processing, keyword.pushed)
     val result = p(value)
     value.value match {
@@ -286,31 +301,33 @@ object Evaluator {
     }
   }
 
-  private def evalUnevaluated[R](processing: Processing[R], keyword: UnevaluatedPropertiesKeyword): EvalFun[R] = {
-    value =>
-      val p      = all(processing, keyword.pushed)
-      val result = p(value)
-      value.value match {
-        case ObjectValue(vs) =>
-          val evaluated = result.evaluations
-            .filter(_.pointer == value.pointer)
-            .flatMap {
-              case WithPointer(EvaluatedProperties(properties), _) => properties
-              case _                                               => Seq()
-            }
-            .toSet
-          val pUnevaluated = all(processing, keyword.unevaluated)
-          val resultUnevaluated = vs
-            .filterNot { case (prop, _) => evaluated.contains(prop) }
-            .map { case (prop, v) =>
-              pUnevaluated(InnerValue(v, value.pointer / prop))
-            }
-            .toSeq
-          val combine       = processing.nested(keyword)
-          val allProperties = vs.keySet
-          combineAll(combine, Seq(result) ++ resultUnevaluated, value)
-            .add(keywords.WithPointer(EvaluatedProperties(allProperties), value.pointer))
-        case _ => result
-      }
+  private def evalUnevaluated[O](
+      processing: Processing[O],
+      keyword: UnevaluatedPropertiesKeyword
+  ): EvalFun[O] = { value =>
+    val p      = all(processing, keyword.pushed)
+    val result = p(value)
+    value.value match {
+      case ObjectValue(vs) =>
+        val evaluated = result.evaluations
+          .filter(_.pointer == value.pointer)
+          .flatMap {
+            case WithPointer(EvaluatedProperties(properties), _) => properties
+            case _                                               => Seq()
+          }
+          .toSet
+        val pUnevaluated = all(processing, keyword.unevaluated)
+        val resultUnevaluated = vs
+          .filterNot { case (prop, _) => evaluated.contains(prop) }
+          .map { case (prop, v) =>
+            pUnevaluated(InnerValue(v, value.pointer / prop))
+          }
+          .toSeq
+        val combine       = processing.nested(keyword)
+        val allProperties = vs.keySet
+        combineAll(combine, Seq(result) ++ resultUnevaluated, value)
+          .add(keywords.WithPointer(EvaluatedProperties(allProperties), value.pointer))
+      case _ => result
+    }
   }
 }

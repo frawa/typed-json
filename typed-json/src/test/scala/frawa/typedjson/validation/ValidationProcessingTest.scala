@@ -31,7 +31,7 @@ object ValidationProcessingTest {
 
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
-  implicit val factory: EvaluatorFactory[SchemaValue, ValidationResult] =
+  implicit val factory: EvaluatorFactory[SchemaValue, ValidationOutput] =
     EvaluatorFactory.make(ValidationProcessing(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
 }
 
@@ -41,22 +41,22 @@ class ValidationProcessingTest extends FunSuite {
   private def assertValidate(text: String)(
       schema: SchemaValue
   )(
-      f: Result[ValidationResult] => Unit
+      f: Result[ValidationOutput] => Unit
   ): Either[Nothing, Unit] = {
     assertResult(text)(schema)(f)
   }
 
   def assertValidate2(text: String)(
       schema: SchemaValue,
-      c: EvaluatorFactory[SchemaValue, ValidationResult]
+      c: EvaluatorFactory[SchemaValue, ValidationOutput]
   )(
-      f: Result[ValidationResult] => Unit
+      f: Result[ValidationOutput] => Unit
   ): Either[Nothing, Unit] = {
     assertResult(text)(schema)(f)(c, implicitly[Parser])
   }
 
-  private def assertErrors(result: Result[ValidationResult], expected: Seq[WithPointer[ValidationError]]): Unit = {
-    assertEquals(result.results.flatMap(_.errors), expected)
+  private def assertErrors(result: Result[ValidationOutput], expected: Seq[WithPointer[ValidationError]]): Unit = {
+    assertEquals(result.output.map(_.errors).getOrElse(Seq()), expected)
   }
 
   test("null") {
@@ -754,7 +754,7 @@ class ValidationProcessingTest extends FunSuite {
 
   test("$ref to validation spec, with two '$ref's") {
     val lazyResolver = Some(MetaSchemas.lazyResolver)
-    val factory: EvaluatorFactory[SchemaValue, ValidationResult] =
+    val factory: EvaluatorFactory[SchemaValue, ValidationOutput] =
       EvaluatorFactory.make(ValidationProcessing(), vocabularyForTest, lazyResolver)
 
     withSchema(refToValidationSpec) { schema =>

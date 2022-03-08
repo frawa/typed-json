@@ -19,7 +19,7 @@ package frawa.typedjson.meta
 import frawa.typedjson.keywords._
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestUtil._
-import frawa.typedjson.validation.{ValidationProcessing, ValidationResult}
+import frawa.typedjson.validation.{ValidationProcessing, ValidationOutput}
 import munit.FunSuite
 
 // TODO still needed?
@@ -29,7 +29,7 @@ class MetaSchemaTest extends FunSuite {
   private val base                                                   = MetaSchemas.draft202012
   private val lazyResolver: Some[LoadedSchemasResolver.LazyResolver] = Some(MetaSchemas.lazyResolver)
 
-  implicit val factory: EvaluatorFactory[SchemaValue, ValidationResult] =
+  implicit val factory: EvaluatorFactory[SchemaValue, ValidationOutput] =
     EvaluatorFactory.make(ValidationProcessing(), lazyResolver = lazyResolver)
 
   def withSchemaSpec(name: String)(f: SchemaValue => Unit): Unit = {
@@ -37,10 +37,10 @@ class MetaSchemaTest extends FunSuite {
     f(schema)
   }
 
-  def validateSpec(valueName: String, schemaName: String)(f: Result[ValidationResult] => Unit): Unit = {
+  def validateSpec(valueName: String, schemaName: String)(f: Result[ValidationOutput] => Unit): Unit = {
     withSchemaSpec(schemaName) { schema =>
       withSchemaSpec(valueName) { value =>
-        withProcessor[ValidationResult](schema) { evaluator =>
+        withProcessor[ValidationOutput](schema) { evaluator =>
           val result = evaluator(InnerValue(value.value))
           f(result)
         }
@@ -50,7 +50,7 @@ class MetaSchemaTest extends FunSuite {
 
   test("validate core against core") {
     validateSpec("meta/core", "meta/core") { result =>
-      assertEquals(result.results, Seq())
+      assertEquals(result.output, None)
 //      assertEquals(result.count, 54)
       assertEquals(result.count, 42)
       assertEquals(
@@ -66,7 +66,7 @@ class MetaSchemaTest extends FunSuite {
 
   test("validate core against validation") {
     validateSpec("meta/core", "meta/validation") { result =>
-      assertEquals(result.results, Seq())
+      assertEquals(result.output, None)
       assertEquals(result.count, 22)
       assertEquals(
         result.ignoredKeywords(),
@@ -77,7 +77,7 @@ class MetaSchemaTest extends FunSuite {
 
   test("validate core against applicator") {
     validateSpec("meta/core", "meta/applicator") { result =>
-      assertEquals(result.results, Seq())
+      assertEquals(result.output, None)
 //      assertEquals(result.count, 84)
       assertEquals(result.count, 48)
       assertEquals(
@@ -93,7 +93,7 @@ class MetaSchemaTest extends FunSuite {
 
   test("validate validation against core") {
     validateSpec("meta/validation", "meta/core") { result =>
-      assertEquals(result.results, Seq())
+      assertEquals(result.output, None)
 //      assertEquals(result.count, 65)
       assertEquals(result.count, 44)
       assertEquals(
@@ -109,7 +109,7 @@ class MetaSchemaTest extends FunSuite {
 
   test("validate validation against validation") {
     validateSpec("meta/validation", "meta/validation") { result =>
-      assertEquals(result.results, Seq())
+      assertEquals(result.output, None)
       assertEquals(result.count, 22)
       assertEquals(
         result.ignoredKeywords(),
@@ -120,7 +120,7 @@ class MetaSchemaTest extends FunSuite {
 
   test("validate validation against applicator") {
     validateSpec("meta/validation", "meta/applicator") { result =>
-      assertEquals(result.results, Seq())
+      assertEquals(result.output, None)
 //      assertEquals(result.count, 168)
       assertEquals(result.count, 91)
       assertEquals(

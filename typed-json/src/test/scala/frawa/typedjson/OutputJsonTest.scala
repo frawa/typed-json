@@ -3,7 +3,7 @@ package frawa.typedjson
 import munit.FunSuite
 
 import frawa.typedjson.parser.Value._
-import frawa.typedjson.validation.ValidationResult
+import frawa.typedjson.validation.ValidationOutput
 import frawa.typedjson.keywords.Result
 import frawa.typedjson.validation.FalseSchemaReason
 import frawa.typedjson.parser.jawn.JawnParser
@@ -34,7 +34,10 @@ class OutputJsonTest extends FunSuite {
   test("basic errors") {
     assertEquals(
       OutputJson.basic(
-        TypedJson.Validation(false, TypedJson.Output(Result.valid(ValidationResult.invalid(FalseSchemaReason()))))
+        TypedJson.Validation(
+          false,
+          TypedJson.Output(Result.valid(ValidationOutput.invalid(FalseSchemaReason()))(ValidationOutput.add))
+        )
       ),
       ObjectValue(
         Map(

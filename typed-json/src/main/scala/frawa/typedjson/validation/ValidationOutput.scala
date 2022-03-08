@@ -19,21 +19,24 @@ package frawa.typedjson.validation
 import frawa.typedjson.keywords.WithPointer
 import frawa.typedjson.pointer.Pointer
 
-case class ValidationResult(
-    errors: Seq[ValidationResult.Error],
-    annotations: Seq[ValidationResult.Annotation] = Seq.empty
+case class ValidationOutput(
+    errors: Seq[ValidationOutput.Error],
+    annotations: Seq[ValidationOutput.Annotation] = Seq.empty
 )
 
-object ValidationResult {
+object ValidationOutput {
   type Error      = WithPointer[ValidationError]
   type Annotation = WithPointer[ValidationAnnotation]
 
-  def invalid(errors: Seq[Error]): ValidationResult = ValidationResult(errors)
+  def invalid(errors: Seq[Error]): ValidationOutput = ValidationOutput(errors)
 
-  def valid(annotation: ValidationAnnotation, pointer: Pointer = Pointer.empty): ValidationResult =
-    ValidationResult(Seq(), Seq(WithPointer(annotation, pointer)))
+  def valid(annotation: ValidationAnnotation, pointer: Pointer = Pointer.empty): ValidationOutput =
+    ValidationOutput(Seq(), Seq(WithPointer(annotation, pointer)))
 
-  def invalid(error: ValidationError, pointer: Pointer = Pointer.empty): ValidationResult = invalid(
+  def invalid(error: ValidationError, pointer: Pointer = Pointer.empty): ValidationOutput = invalid(
     Seq(WithPointer(error, pointer))
   )
+
+  def add(o1: ValidationOutput, o2: ValidationOutput): ValidationOutput =
+    ValidationOutput(o1.errors ++ o2.errors, o1.annotations ++ o2.annotations)
 }

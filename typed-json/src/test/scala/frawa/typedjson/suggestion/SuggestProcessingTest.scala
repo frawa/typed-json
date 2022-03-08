@@ -30,15 +30,15 @@ class SuggestProcessingTest extends FunSuite {
 
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
-  private def factory(at: Pointer): EvaluatorFactory[SchemaValue, SuggestionResult] =
+  private def factory(at: Pointer): EvaluatorFactory[SchemaValue, SuggestionOutput] =
     EvaluatorFactory.make(SuggestionProcessing(at), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
 
   private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
       f: Seq[Value] => Unit
   ) = {
-    implicit val toProcessor1: EvaluatorFactory[SchemaValue, SuggestionResult] = factory(at)
-    assertResult[SuggestionResult](text)(schema) { result =>
-      f(result.results.flatMap(_.suggestions).distinct)
+    implicit val toProcessor1: EvaluatorFactory[SchemaValue, SuggestionOutput] = factory(at)
+    assertResult[SuggestionOutput](text)(schema) { result =>
+      f(result.output.map(_.suggestions).getOrElse(Seq()).distinct)
     }
   }
 
@@ -564,12 +564,12 @@ class SuggestProcessingTest extends FunSuite {
     val base         = MetaSchemas.draft202012
     val Some(schema) = resolver(base.resolve("schema"))
 
-    def factory(at: Pointer): EvaluatorFactory[SchemaValue, SuggestionResult] =
+    def factory(at: Pointer): EvaluatorFactory[SchemaValue, SuggestionOutput] =
       EvaluatorFactory.make(SuggestionProcessing(at), None, Some(resolver)).mapResult(assertNoIgnoredKeywords)
 
     implicit val factory1 = factory(at)
-    assertResult[SuggestionResult](json)(schema) { result =>
-      f(result.results.flatMap(_.suggestions).distinct)
+    assertResult[SuggestionOutput](json)(schema) { result =>
+      f(result.output.map(_.suggestions).getOrElse(Seq()).distinct)
     }
   }
 }
