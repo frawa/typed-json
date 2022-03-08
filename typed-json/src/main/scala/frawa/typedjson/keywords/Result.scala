@@ -1,4 +1,16 @@
-/*
+/*dd(other: Result[O]): Result[O] = {
+ *     val combine = this.combineOutput.orElse(other.combineOutput)
+ *         val os = combine.flatMap(c =>
+ *               Seq(this.output, other.output).flatten
+ *                       .reduceOption(c)
+ *                           )
+ *                               this
+ *                                     .copy(count = this.count + 1)
+ *                                           .copy(output = os)
+ *                                                 .addEvaluations(other.evaluations)
+ *                                                       .add(other.problems)
+ *                                                         }
+ *
  * Copyright 2021 Frank Wagner
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,9 +46,9 @@ object Result {
   def invalid[O]: Result[O] = Result[O](valid = false, None, None)
   def invalid[O](output: O)(implicit c: OutputCombiner[O]): Result[O] =
     Result[O](valid = false, Some(output), Some(c))
-}
 
-// trait Output
+  def count[R](results: Seq[Result[R]]): Int = results.map(_.count).sum
+}
 
 case class Result[O](
     valid: Boolean,
@@ -46,6 +58,12 @@ case class Result[O](
     problems: SchemaProblems = SchemaProblems.empty,
     count: Int = 1
 ) {
+
+  def addWithoutOutput(others: Seq[Result[O]]): Result[O] =
+    this
+      .copy(count = this.count + Result.count(others))
+      .addEvaluations(others.flatMap(_.evaluations))
+      .add(others.map(_.problems).reduce(_.combine(_)))
 
   def add(other: Result[O]): Result[O] = {
     val combine = this.combineOutput.orElse(other.combineOutput)
@@ -59,9 +77,6 @@ case class Result[O](
       .addEvaluations(other.evaluations)
       .add(other.problems)
   }
-
-  def addAll(others: Seq[Result[O]]): Result[O] =
-    others.fold(this)(_.add(_))
 
   def add(p: SchemaProblems): Result[O] = this.copy(problems = this.problems.combine(p))
 

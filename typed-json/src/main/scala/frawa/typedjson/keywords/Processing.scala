@@ -18,5 +18,5 @@ package frawa.typedjson.keywords
 
 case class Processing[R](
     simple: AssertionKeyword => Evaluator.EvalFun[R],
-    nested: ApplicatorKeyword => Evaluator.CombineFun[R]
+    nested: ApplicatorKeyword => Evaluator.AggregateFun[R]
 )
