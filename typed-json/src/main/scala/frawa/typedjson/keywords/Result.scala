@@ -47,7 +47,7 @@ object Result {
   def invalid[O](output: O)(implicit c: OutputCombiner[O]): Result[O] =
     Result[O](valid = false, Some(output), Some(c))
 
-  def count[R](results: Seq[Result[R]]): Int = results.map(_.count).sum
+  private def count[R](results: Seq[Result[R]]): Int = results.map(_.count).sum
 }
 
 case class Result[O](
@@ -73,7 +73,7 @@ case class Result[O](
     )
     this
       .copy(valid = this.valid && other.valid)
-      .copy(count = this.count + 1)
+      .copy(count = this.count + other.count)
       .copy(output = os)
       .addEvaluations(other.evaluations)
       .add(other.problems)
