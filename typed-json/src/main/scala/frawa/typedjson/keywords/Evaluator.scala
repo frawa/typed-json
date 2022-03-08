@@ -179,10 +179,10 @@ object Evaluator {
   }
 
   private def evalApplicator[R](processing: Processing[R], keywords: Seq[Keywords])(
-      combine: AggregateFun[R]
+      aggregate: AggregateFun[R]
   ): EvalFun[R] = {
     val p = keywords.map(all(processing, _))
-    applyToValue(p)(combine)
+    applyToValue(p)(aggregate)
   }
 
   private def evalUnionType[R](processing: Processing[R], keyword: UnionTypeKeyword)(
