@@ -72,6 +72,7 @@ case class Result[O](
         .reduceOption(c)
     )
     this
+      .copy(valid = this.valid && other.valid)
       .copy(count = this.count + 1)
       .copy(output = os)
       .addEvaluations(other.evaluations)
