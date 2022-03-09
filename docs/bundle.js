@@ -19986,25 +19986,30 @@
     function $as_Lfrawa_typedjson_pointer_Token(obj) {
       return (($is_Lfrawa_typedjson_pointer_Token(obj) || (obj === null)) ? obj : $throwClassCastException(obj, "frawa.typedjson.pointer.Token"))
     }
+    function $p_Lfrawa_typedjson_suggestion_SuggestionProcessing$__add__Lfrawa_typedjson_suggestion_SuggestionOutput__Lfrawa_typedjson_suggestion_SuggestionOutput__Lfrawa_typedjson_suggestion_SuggestionOutput($thiz, o1, o2) {
+      var this$1 = o1.Lfrawa_typedjson_suggestion_SuggestionOutput__f_suggestions;
+      var suffix = o2.Lfrawa_typedjson_suggestion_SuggestionOutput__f_suggestions;
+      return new $c_Lfrawa_typedjson_suggestion_SuggestionOutput($as_sci_Seq(this$1.appendedAll__sc_IterableOnce__O(suffix)), o1.Lfrawa_typedjson_suggestion_SuggestionOutput__f_validated.add__Lfrawa_typedjson_keywords_Result__Lfrawa_typedjson_keywords_Result(o2.Lfrawa_typedjson_suggestion_SuggestionOutput__f_validated))
+    }
     function $p_Lfrawa_typedjson_suggestion_SuggestionProcessing$__simple__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_AssertionKeyword__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($thiz, at, keyword, value) {
       var x$2 = value.Lfrawa_typedjson_keywords_InnerValue__f_pointer;
       if (((at === null) ? (x$2 === null) : at.equals__O__Z(x$2))) {
         var $$x1 = $m_s_package$().s_package$__f_Seq;
-        var array = [new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)];
+        var array = [new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)];
         var suggestions = $p_Lfrawa_typedjson_suggestion_SuggestionProcessing$__suggestFor__Lfrawa_typedjson_keywords_Keyword__sci_Seq__sci_Seq($thiz, keyword, $as_sci_Seq($$x1.apply__sci_Seq__sc_SeqOps($ct_sjsr_WrappedVarArgs__sjs_js_Array__(new $c_sjsr_WrappedVarArgs(), array))));
-        return $m_Lfrawa_typedjson_keywords_Result$().valid__O__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_suggestion_SuggestionResult(suggestions, new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)))
+        return $m_Lfrawa_typedjson_keywords_Result$().valid__O__F2__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_suggestion_SuggestionOutput(suggestions, new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)), $thiz.Lfrawa_typedjson_suggestion_SuggestionProcessing$__f_combine)
       } else {
         var result = $as_Lfrawa_typedjson_keywords_Result($as_F1($m_Lfrawa_typedjson_validation_ValidationProcessing$().apply__Lfrawa_typedjson_keywords_Processing().Lfrawa_typedjson_keywords_Processing__f_simple.apply__O__O(keyword)).apply__O__O(value));
-        return $m_Lfrawa_typedjson_keywords_Result$().apply__Z__O__Lfrawa_typedjson_keywords_Result(result.Lfrawa_typedjson_keywords_Result__f_valid, new $c_Lfrawa_typedjson_suggestion_SuggestionResult($as_sci_Seq($m_s_package$().s_package$__f_Seq.apply__sci_Seq__sc_SeqOps($m_sci_Nil$())), result))
+        return new $c_Lfrawa_typedjson_keywords_Result(result.Lfrawa_typedjson_keywords_Result__f_valid, new $c_s_Some(new $c_Lfrawa_typedjson_suggestion_SuggestionOutput($as_sci_Seq($m_s_package$().s_package$__f_Seq.apply__sci_Seq__sc_SeqOps($m_sci_Nil$())), result)), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
       }
     }
     function $p_Lfrawa_typedjson_suggestion_SuggestionProcessing$__nested__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_ApplicatorKeyword__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($thiz, at, keyword, results, value) {
       var current = $as_sci_Seq($as_sc_IterableOps(results.flatMap__F1__O(new $c_sjsr_AnonFunction1(((this$1) => ((x$1$2) => {
         var x$1 = $as_Lfrawa_typedjson_keywords_Result(x$1$2);
-        return x$1.Lfrawa_typedjson_keywords_Result__f_results
+        return x$1.Lfrawa_typedjson_keywords_Result__f_output
       }))()))).flatMap__F1__O(new $c_sjsr_AnonFunction1(((this$2) => ((x$2$2) => {
-        var x$2 = $as_Lfrawa_typedjson_suggestion_SuggestionResult(x$2$2);
-        return x$2.Lfrawa_typedjson_suggestion_SuggestionResult__f_suggestions
+        var x$2 = $as_Lfrawa_typedjson_suggestion_SuggestionOutput(x$2$2);
+        return x$2.Lfrawa_typedjson_suggestion_SuggestionOutput__f_suggestions
       }))())));
       if (at.Lfrawa_typedjson_pointer_Pointer__f_isInsideKey) {
         var x = at.outer__Lfrawa_typedjson_pointer_Pointer();
@@ -20014,24 +20019,24 @@
         var $$x1 = false;
       }  if ($$x1) {
         var $$x2 = $m_s_package$().s_package$__f_Seq;
-        var array = [new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)];
+        var array = [new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)];
         var suggestions = $p_Lfrawa_typedjson_suggestion_SuggestionProcessing$__onlyKeys__sci_Seq__sci_Seq($thiz, $p_Lfrawa_typedjson_suggestion_SuggestionProcessing$__suggestFor__Lfrawa_typedjson_keywords_Keyword__sci_Seq__sci_Seq($thiz, keyword, $as_sci_Seq($$x2.apply__sci_Seq__sc_SeqOps($ct_sjsr_WrappedVarArgs__sjs_js_Array__(new $c_sjsr_WrappedVarArgs(), array)))));
-        return $m_Lfrawa_typedjson_keywords_Result$().valid__O__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_suggestion_SuggestionResult($as_sci_Seq(current.appendedAll__sc_IterableOnce__O(suggestions)), new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)))
+        return $m_Lfrawa_typedjson_keywords_Result$().valid__O__F2__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_suggestion_SuggestionOutput($as_sci_Seq(current.appendedAll__sc_IterableOnce__O(suggestions)), new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)), $thiz.Lfrawa_typedjson_suggestion_SuggestionProcessing$__f_combine)
       } else {
         var x$5 = value.Lfrawa_typedjson_keywords_InnerValue__f_pointer;
         if (((at === null) ? (x$5 === null) : at.equals__O__Z(x$5))) {
           var suggestions$2 = $p_Lfrawa_typedjson_suggestion_SuggestionProcessing$__suggestFor__Lfrawa_typedjson_keywords_Keyword__sci_Seq__sci_Seq($thiz, keyword);
-          return $m_Lfrawa_typedjson_keywords_Result$().valid__O__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_suggestion_SuggestionResult($as_sci_Seq(current.appendedAll__sc_IterableOnce__O(suggestions$2)), new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)))
+          return $m_Lfrawa_typedjson_keywords_Result$().valid__O__F2__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_suggestion_SuggestionOutput($as_sci_Seq(current.appendedAll__sc_IterableOnce__O(suggestions$2)), new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)), $thiz.Lfrawa_typedjson_suggestion_SuggestionProcessing$__f_combine)
         } else {
           var validated = $as_sci_Seq($as_sc_IterableOps(results.flatMap__F1__O(new $c_sjsr_AnonFunction1(((this$3$1) => ((x$3$2$2) => {
             var x$3$2 = $as_Lfrawa_typedjson_keywords_Result(x$3$2$2);
-            return x$3$2.Lfrawa_typedjson_keywords_Result__f_results
+            return x$3$2.Lfrawa_typedjson_keywords_Result__f_output
           }))()))).map__F1__O(new $c_sjsr_AnonFunction1(((this$4$1) => ((x$4$2$2) => {
-            var x$4$2 = $as_Lfrawa_typedjson_suggestion_SuggestionResult(x$4$2$2);
-            return x$4$2.Lfrawa_typedjson_suggestion_SuggestionResult__f_validated
+            var x$4$2 = $as_Lfrawa_typedjson_suggestion_SuggestionOutput(x$4$2$2);
+            return x$4$2.Lfrawa_typedjson_suggestion_SuggestionOutput__f_validated
           }))())));
           var nested = $as_Lfrawa_typedjson_keywords_Result($as_F1($as_F1($m_Lfrawa_typedjson_validation_ValidationProcessing$().apply__Lfrawa_typedjson_keywords_Processing().Lfrawa_typedjson_keywords_Processing__f_nested.apply__O__O(keyword)).apply__O__O(validated)).apply__O__O(value));
-          return $m_Lfrawa_typedjson_keywords_Result$().valid__O__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_suggestion_SuggestionResult(current, nested))
+          return $m_Lfrawa_typedjson_keywords_Result$().valid__O__F2__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_suggestion_SuggestionOutput(current, nested), $thiz.Lfrawa_typedjson_suggestion_SuggestionProcessing$__f_combine)
         }
       }
     }
@@ -20224,7 +20229,13 @@
     }
     /** @constructor */
     function $c_Lfrawa_typedjson_suggestion_SuggestionProcessing$() {
-      /*<skip>*/
+      this.Lfrawa_typedjson_suggestion_SuggestionProcessing$__f_combine = null;
+      $n_Lfrawa_typedjson_suggestion_SuggestionProcessing$ = this;
+      this.Lfrawa_typedjson_suggestion_SuggestionProcessing$__f_combine = new $c_sjsr_AnonFunction2(((this$1) => ((o1$2, o2$2) => {
+        var o1 = $as_Lfrawa_typedjson_suggestion_SuggestionOutput(o1$2);
+        var o2 = $as_Lfrawa_typedjson_suggestion_SuggestionOutput(o2$2);
+        return $p_Lfrawa_typedjson_suggestion_SuggestionProcessing$__add__Lfrawa_typedjson_suggestion_SuggestionOutput__Lfrawa_typedjson_suggestion_SuggestionOutput__Lfrawa_typedjson_suggestion_SuggestionOutput($m_Lfrawa_typedjson_suggestion_SuggestionProcessing$(), o1, o2)
+      }))());
     }
     $c_Lfrawa_typedjson_suggestion_SuggestionProcessing$.prototype = new $h_O();
     $c_Lfrawa_typedjson_suggestion_SuggestionProcessing$.prototype.constructor = $c_Lfrawa_typedjson_suggestion_SuggestionProcessing$;
@@ -20471,7 +20482,7 @@
                   } else {
                     return new $c_sjsr_AnonFunction1(((this$7, keyword$1) => ((x$1$2) => {
                       $as_Lfrawa_typedjson_keywords_InnerValue(x$1$2);
-                      return $m_Lfrawa_typedjson_keywords_Result$().invalid__O__Lfrawa_typedjson_keywords_Result($m_Lfrawa_typedjson_validation_ValidationResult$().invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_validation_ValidationResult(new $c_Lfrawa_typedjson_validation_UnsupportedCheck(keyword$1), new $c_Lfrawa_typedjson_pointer_Pointer($m_s_package$().s_package$__f_Nil, false)))
+                      return $m_Lfrawa_typedjson_keywords_Result$().invalid__O__F2__Lfrawa_typedjson_keywords_Result($m_Lfrawa_typedjson_validation_ValidationOutput$().invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_validation_ValidationOutput(new $c_Lfrawa_typedjson_validation_UnsupportedCheck(keyword$1), new $c_Lfrawa_typedjson_pointer_Pointer($m_s_package$().s_package$__f_Nil, false)), $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_f)
                     }))($thiz, keyword))
                   }
                 }
@@ -20529,7 +20540,7 @@
         if ((x1 !== null)) {
           var o9 = evidence$1$1.unapply__O__s_Option(x1);
           if (((!o9.isEmpty__Z()) && (o9.get__O() !== null))) {
-            return new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
+            return new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
           }
         }    return $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result(error$1, value.Lfrawa_typedjson_keywords_InnerValue__f_pointer)
       }))($thiz, evidence$1, error))
@@ -20541,7 +20552,7 @@
         if ((x1 instanceof $c_Lfrawa_typedjson_parser_Value$NumberValue)) {
           var x2 = $as_Lfrawa_typedjson_parser_Value$NumberValue(x1);
           var v = x2.Lfrawa_typedjson_parser_Value$NumberValue__f_value;
-          return (v.isWhole__Z() ? new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_TypeMismatch("integer"), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
+          return (v.isWhole__Z() ? new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_TypeMismatch("integer"), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
         } else {
           return $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_TypeMismatch("integer"), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer)
         }
@@ -20550,7 +20561,7 @@
     function $p_Lfrawa_typedjson_validation_ValidationProcessing$__validateTrivial__Z__F1($thiz, valid) {
       return new $c_sjsr_AnonFunction1(((this$1, valid$1) => ((value$2) => {
         var value = $as_Lfrawa_typedjson_keywords_InnerValue(value$2);
-        return (valid$1 ? new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_FalseSchemaReason(), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
+        return (valid$1 ? new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_FalseSchemaReason(), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
       }))($thiz, valid))
     }
     function $p_Lfrawa_typedjson_validation_ValidationProcessing$__validateObjectRequired__sci_Seq__F1($thiz, required) {
@@ -20564,16 +20575,16 @@
             var x$2 = $as_T(x$2$2);
             return (!propertiesValues$1.contains__O__Z(x$2))
           }))(this$1, propertiesValues))));
-          return (missingNames.isEmpty__Z() ? new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_MissingRequiredProperties(missingNames), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
+          return (missingNames.isEmpty__Z() ? new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_MissingRequiredProperties(missingNames), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
         } else {
-          return new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
+          return new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
         }
       }))($thiz, required))
     }
     function $p_Lfrawa_typedjson_validation_ValidationProcessing$__validateEnum__sci_Seq__F1($thiz, values) {
       return new $c_sjsr_AnonFunction1(((this$1, values$1) => ((value$2) => {
         var value = $as_Lfrawa_typedjson_keywords_InnerValue(value$2);
-        return (values$1.contains__O__Z(value.Lfrawa_typedjson_keywords_InnerValue__f_value) ? new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_NotInEnum(values$1), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
+        return (values$1.contains__O__Z(value.Lfrawa_typedjson_keywords_InnerValue__f_value) ? new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_NotInEnum(values$1), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
       }))($thiz, values))
     }
     function $p_Lfrawa_typedjson_validation_ValidationProcessing$__validatePattern__T__F1($thiz, pattern) {
@@ -20587,12 +20598,12 @@
           var v = x2.Lfrawa_typedjson_parser_Value$StringValue__f_value;
           var this$5 = r$1.findFirstIn__jl_CharSequence__s_Option(v);
           if ((!this$5.isEmpty__Z())) {
-            return new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
+            return new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
           } else {
             return $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_PatternMismatch(pattern$1), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer)
           }
         } else {
-          return new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
+          return new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
         }
       }))($thiz, r, pattern))
     }
@@ -20760,7 +20771,7 @@
         default: {
           return new $c_sjsr_AnonFunction1(((this$39$1, format$20) => ((value$2) => {
             var value = $as_Lfrawa_typedjson_keywords_InnerValue(value$2);
-            return $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_UnsupportedFormat(format$20), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer)
+            return $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.valid__Lfrawa_typedjson_validation_ValidationAnnotation__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_UnknownFormat(format$20), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer)
           }))($thiz, format))
         }
       }
@@ -20772,9 +20783,9 @@
         if ((x1 instanceof $c_Lfrawa_typedjson_parser_Value$StringValue)) {
           var x2 = $as_Lfrawa_typedjson_parser_Value$StringValue(x1);
           var v = x2.Lfrawa_typedjson_parser_Value$StringValue__f_value;
-          return ($uZ(validate$1.apply__O__O(v)) ? new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result($as_Lfrawa_typedjson_validation_ValidationError(error$1.apply__O()), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
+          return ($uZ(validate$1.apply__O__O(v)) ? new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result($as_Lfrawa_typedjson_validation_ValidationError(error$1.apply__O()), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
         } else {
-          return new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
+          return new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
         }
       }))($thiz, validate, error))
     }
@@ -20791,9 +20802,9 @@
         if ((x1 instanceof $c_Lfrawa_typedjson_parser_Value$NumberValue)) {
           var x2 = $as_Lfrawa_typedjson_parser_Value$NumberValue(x1);
           var v = x2.Lfrawa_typedjson_parser_Value$NumberValue__f_value;
-          return ($uZ(validate$1.apply__O__O(v)) ? new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result($as_Lfrawa_typedjson_validation_ValidationError(error$1.apply__O()), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
+          return ($uZ(validate$1.apply__O__O(v)) ? new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result($as_Lfrawa_typedjson_validation_ValidationError(error$1.apply__O()), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
         } else {
-          return new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
+          return new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
         }
       }))($thiz, validate, error))
     }
@@ -20804,9 +20815,9 @@
         if ((x1 instanceof $c_Lfrawa_typedjson_parser_Value$ArrayValue)) {
           var x2 = $as_Lfrawa_typedjson_parser_Value$ArrayValue(x1);
           var v = x2.Lfrawa_typedjson_parser_Value$ArrayValue__f_items;
-          return ($uZ(validate$1.apply__O__O(v)) ? new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result($as_Lfrawa_typedjson_validation_ValidationError(error$1.apply__O()), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
+          return ($uZ(validate$1.apply__O__O(v)) ? new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result($as_Lfrawa_typedjson_validation_ValidationError(error$1.apply__O()), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
         } else {
-          return new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
+          return new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
         }
       }))($thiz, validate, error))
     }
@@ -20881,9 +20892,9 @@
         if ((x1 instanceof $c_Lfrawa_typedjson_parser_Value$ObjectValue)) {
           var x2 = $as_Lfrawa_typedjson_parser_Value$ObjectValue(x1);
           var v = x2.Lfrawa_typedjson_parser_Value$ObjectValue__f_properties;
-          return ($uZ(validate$1.apply__O__O(v)) ? new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result($as_Lfrawa_typedjson_validation_ValidationError(error$1.apply__O()), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
+          return ($uZ(validate$1.apply__O__O(v)) ? new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result($as_Lfrawa_typedjson_validation_ValidationError(error$1.apply__O()), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
         } else {
-          return new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
+          return new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
         }
       }))($thiz, validate, error))
     }
@@ -20948,15 +20959,16 @@
               throw new $c_s_MatchError(x0$1)
             }
           }))(this$1, v))));
-          return (missing.isEmpty__Z() ? new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_DependentRequiredMissing(missing), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
+          return (missing.isEmpty__Z() ? new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $m_Lfrawa_typedjson_validation_ValidationProcessing$().Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_DependentRequiredMissing(missing), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
         } else {
-          return new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
+          return new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
         }
       }))($thiz, required))
     }
     /** @constructor */
     function $c_Lfrawa_typedjson_validation_ValidationProcessing$() {
       this.Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner = null;
+      this.Lfrawa_typedjson_validation_ValidationProcessing$__f_f = null;
       this.Lfrawa_typedjson_validation_ValidationProcessing$__f_nullTypeMismatch = null;
       this.Lfrawa_typedjson_validation_ValidationProcessing$__f_booleanTypeMismatch = null;
       this.Lfrawa_typedjson_validation_ValidationProcessing$__f_stringTypeMismatch = null;
@@ -20965,6 +20977,11 @@
       this.Lfrawa_typedjson_validation_ValidationProcessing$__f_objectTypeMismatch = null;
       $n_Lfrawa_typedjson_validation_ValidationProcessing$ = this;
       this.Lfrawa_typedjson_validation_ValidationProcessing$__f_combiner = new $c_Lfrawa_typedjson_validation_ValidationCombiner();
+      this.Lfrawa_typedjson_validation_ValidationProcessing$__f_f = new $c_sjsr_AnonFunction2(((this$1) => ((o1$2, o2$2) => {
+        var o1 = $as_Lfrawa_typedjson_validation_ValidationOutput(o1$2);
+        var o2 = $as_Lfrawa_typedjson_validation_ValidationOutput(o2$2);
+        return $m_Lfrawa_typedjson_validation_ValidationOutput$().add__Lfrawa_typedjson_validation_ValidationOutput__Lfrawa_typedjson_validation_ValidationOutput__Lfrawa_typedjson_validation_ValidationOutput(o1, o2)
+      }))());
       this.Lfrawa_typedjson_validation_ValidationProcessing$__f_nullTypeMismatch = new $c_Lfrawa_typedjson_validation_TypeMismatch("null");
       this.Lfrawa_typedjson_validation_ValidationProcessing$__f_booleanTypeMismatch = new $c_Lfrawa_typedjson_validation_TypeMismatch("boolean");
       this.Lfrawa_typedjson_validation_ValidationProcessing$__f_stringTypeMismatch = new $c_Lfrawa_typedjson_validation_TypeMismatch("string");
@@ -26817,6 +26834,12 @@
     function $as_F1(obj) {
       return (($is_F1(obj) || (obj === null)) ? obj : $throwClassCastException(obj, "scala.Function1"))
     }
+    function $is_F2(obj) {
+      return (!(!((obj && obj.$classData) && obj.$classData.ancestors.F2)))
+    }
+    function $as_F2(obj) {
+      return (($is_F2(obj) || (obj === null)) ? obj : $throwClassCastException(obj, "scala.Function2"))
+    }
     /** @constructor */
     function $c_s_LowPriorityImplicits2() {
       /*<skip>*/
@@ -29659,14 +29682,14 @@
     function $p_Lfrawa_typedjson_keywords_Evaluator$__noop__F1($thiz) {
       return new $c_sjsr_AnonFunction1(((this$1) => ((x$4$2) => {
         $as_Lfrawa_typedjson_keywords_InnerValue(x$4$2);
-        return new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
+        return new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
       }))())
     }
     function $p_Lfrawa_typedjson_keywords_Evaluator$__option__s_Option__F1($thiz, p) {
       return $as_F1((p.isEmpty__Z() ? $p_Lfrawa_typedjson_keywords_Evaluator$__noop__F1($m_Lfrawa_typedjson_keywords_Evaluator$()) : p.get__O()))
     }
-    function $p_Lfrawa_typedjson_keywords_Evaluator$__applyToArray__sci_Seq__s_Option__F1__F1($thiz, pPrefix, pItems, combine) {
-      return new $c_sjsr_AnonFunction1(((this$1, pPrefix$1, pItems$1, combine$1) => ((value$2) => {
+    function $p_Lfrawa_typedjson_keywords_Evaluator$__applyToArray__sci_Seq__s_Option__F1__F1($thiz, pPrefix, pItems, aggregate) {
+      return new $c_sjsr_AnonFunction1(((this$1, pPrefix$1, pItems$1, aggregate$1) => ((value$2) => {
         var value = $as_Lfrawa_typedjson_keywords_InnerValue(value$2);
         var x1 = value.Lfrawa_typedjson_keywords_InnerValue__f_value;
         if ((x1 instanceof $c_Lfrawa_typedjson_parser_Value$ArrayValue)) {
@@ -29703,17 +29726,17 @@
           var end = ((resultPrefix.length__I() + result.length__I()) | 0);
           var evidence$3 = $m_s_math_Numeric$IntIsIntegral$();
           var indices = $as_sci_Seq($f_sc_IterableFactory__range__O__O__s_math_Integral__O(this$4, 0, end, evidence$3));
-          return $p_Lfrawa_typedjson_keywords_Evaluator$__combineAll__F1__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($m_Lfrawa_typedjson_keywords_Evaluator$(), combine$1, $as_sci_Seq(resultPrefix.appendedAll__sc_IterableOnce__O(result)), value).add__Lfrawa_typedjson_keywords_WithPointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_keywords_WithPointer(new $c_Lfrawa_typedjson_keywords_EvaluatedIndices(indices), new $c_Lfrawa_typedjson_pointer_Pointer($m_s_package$().s_package$__f_Nil, false)))
+          return $p_Lfrawa_typedjson_keywords_Evaluator$__aggregateAll__F1__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($m_Lfrawa_typedjson_keywords_Evaluator$(), aggregate$1, $as_sci_Seq(resultPrefix.appendedAll__sc_IterableOnce__O(result)), value).add__Lfrawa_typedjson_keywords_WithPointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_keywords_WithPointer(new $c_Lfrawa_typedjson_keywords_EvaluatedIndices(indices), new $c_Lfrawa_typedjson_pointer_Pointer($m_s_package$().s_package$__f_Nil, false)))
         } else {
-          return new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
+          return new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
         }
-      }))($thiz, pPrefix, pItems, combine))
+      }))($thiz, pPrefix, pItems, aggregate))
     }
-    function $p_Lfrawa_typedjson_keywords_Evaluator$__combineAll__F1__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($thiz, combine, cs, value) {
-      return $as_Lfrawa_typedjson_keywords_Result($as_F1(combine.apply__O__O(cs)).apply__O__O(value)).add__sci_Seq__Lfrawa_typedjson_keywords_Result(cs)
+    function $p_Lfrawa_typedjson_keywords_Evaluator$__aggregateAll__F1__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($thiz, aggregate, cs, value) {
+      return $as_Lfrawa_typedjson_keywords_Result($as_F1(aggregate.apply__O__O(cs)).apply__O__O(value)).addWithoutOutput__sci_Seq__Lfrawa_typedjson_keywords_Result(cs)
     }
-    function $p_Lfrawa_typedjson_keywords_Evaluator$__applyToObject__F0__F1__F1($thiz, ps, combine) {
-      return new $c_sjsr_AnonFunction1(((this$1, ps$1, combine$1) => ((value$2) => {
+    function $p_Lfrawa_typedjson_keywords_Evaluator$__applyToObject__F0__F1__F1($thiz, ps, aggregate) {
+      return new $c_sjsr_AnonFunction1(((this$1, ps$1, aggregate$1) => ((value$2) => {
         var value = $as_Lfrawa_typedjson_keywords_InnerValue(value$2);
         var x1 = value.Lfrawa_typedjson_keywords_InnerValue__f_value;
         if ((x1 instanceof $c_Lfrawa_typedjson_parser_Value$ObjectValue)) {
@@ -29747,37 +29770,37 @@
               throw new $c_s_MatchError(x0$2)
             }
           }))(this$1, ps$1)))).toSeq__sci_Seq();
-          var result = $as_sci_Seq(evaluated.map__F1__O(new $c_sjsr_AnonFunction1(((this$3$1) => ((x$6$2) => {
-            var x$6 = $as_T2(x$6$2);
-            return $as_Lfrawa_typedjson_keywords_Result(x$6._2__O())
-          }))())));
-          var this$6 = $as_sc_IterableOnceOps($as_sc_IterableOps(evaluated.filter__F1__O(new $c_sjsr_AnonFunction1(((this$4) => ((x$7$2) => {
-            var x$7 = $as_T2(x$7$2);
-            return $as_Lfrawa_typedjson_keywords_Result(x$7._2__O()).Lfrawa_typedjson_keywords_Result__f_valid
-          }))()))).map__F1__O(new $c_sjsr_AnonFunction1(((this$5) => ((x$8$2) => {
+          var result = $as_sci_Seq(evaluated.map__F1__O(new $c_sjsr_AnonFunction1(((this$3$1) => ((x$8$2) => {
             var x$8 = $as_T2(x$8$2);
-            return $as_T(x$8._1__O())
+            return $as_Lfrawa_typedjson_keywords_Result(x$8._2__O())
+          }))())));
+          var this$6 = $as_sc_IterableOnceOps($as_sc_IterableOps(evaluated.filter__F1__O(new $c_sjsr_AnonFunction1(((this$4) => ((x$9$2) => {
+            var x$9 = $as_T2(x$9$2);
+            return $as_Lfrawa_typedjson_keywords_Result(x$9._2__O()).Lfrawa_typedjson_keywords_Result__f_valid
+          }))()))).map__F1__O(new $c_sjsr_AnonFunction1(((this$5) => ((x$10$2) => {
+            var x$10 = $as_T2(x$10$2);
+            return $as_T(x$10._1__O())
           }))())));
           var evaluatedKeys = new $c_Lfrawa_typedjson_keywords_EvaluatedProperties($m_sci_Set$().from__sc_IterableOnce__sci_Set($as_sc_IterableOnce(this$6)));
           var annotation = new $c_Lfrawa_typedjson_keywords_WithPointer(evaluatedKeys, value.Lfrawa_typedjson_keywords_InnerValue__f_pointer);
-          return $p_Lfrawa_typedjson_keywords_Evaluator$__combineAll__F1__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($m_Lfrawa_typedjson_keywords_Evaluator$(), combine$1, result, value).add__Lfrawa_typedjson_keywords_WithPointer__Lfrawa_typedjson_keywords_Result(annotation)
+          return $p_Lfrawa_typedjson_keywords_Evaluator$__aggregateAll__F1__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($m_Lfrawa_typedjson_keywords_Evaluator$(), aggregate$1, result, value).add__Lfrawa_typedjson_keywords_WithPointer__Lfrawa_typedjson_keywords_Result(annotation)
         } else {
-          return new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
+          return new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
         }
-      }))($thiz, ps, combine))
+      }))($thiz, ps, aggregate))
     }
-    function $p_Lfrawa_typedjson_keywords_Evaluator$__applyToValue__sci_Seq__F1__F1($thiz, ps, combine) {
-      return new $c_sjsr_AnonFunction1(((this$1, ps$1, combine$1) => ((value$2) => {
+    function $p_Lfrawa_typedjson_keywords_Evaluator$__applyToValue__sci_Seq__F1__F1($thiz, ps, aggregate) {
+      return new $c_sjsr_AnonFunction1(((this$1, ps$1, aggregate$1) => ((value$2) => {
         var value = $as_Lfrawa_typedjson_keywords_InnerValue(value$2);
-        var result = $as_sci_Seq(ps$1.map__F1__O(new $c_sjsr_AnonFunction1(((this$2, value$1) => ((x$9$2) => {
-          var x$9 = $as_F1(x$9$2);
-          return $as_Lfrawa_typedjson_keywords_Result(x$9.apply__O__O(value$1))
+        var result = $as_sci_Seq(ps$1.map__F1__O(new $c_sjsr_AnonFunction1(((this$2, value$1) => ((x$11$2) => {
+          var x$11 = $as_F1(x$11$2);
+          return $as_Lfrawa_typedjson_keywords_Result(x$11.apply__O__O(value$1))
         }))(this$1, value))));
-        return $p_Lfrawa_typedjson_keywords_Evaluator$__combineAll__F1__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($m_Lfrawa_typedjson_keywords_Evaluator$(), combine$1, result, value)
-      }))($thiz, ps, combine))
+        return $p_Lfrawa_typedjson_keywords_Evaluator$__aggregateAll__F1__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($m_Lfrawa_typedjson_keywords_Evaluator$(), aggregate$1, result, value)
+      }))($thiz, ps, aggregate))
     }
-    function $p_Lfrawa_typedjson_keywords_Evaluator$__applyCondition__F1__F1__F1__F1__F1($thiz, pIf, pThen, pElse, combine) {
-      return new $c_sjsr_AnonFunction1(((this$1, pIf$1, pThen$1, pElse$1, combine$1) => ((value$2) => {
+    function $p_Lfrawa_typedjson_keywords_Evaluator$__applyCondition__F1__F1__F1__F1__F1($thiz, pIf, pThen, pElse, aggregate) {
+      return new $c_sjsr_AnonFunction1(((this$1, pIf$1, pThen$1, pElse$1, aggregate$1) => ((value$2) => {
         var value = $as_Lfrawa_typedjson_keywords_InnerValue(value$2);
         var ifResult = $as_Lfrawa_typedjson_keywords_Result(pIf$1.apply__O__O(value));
         if (ifResult.Lfrawa_typedjson_keywords_Result__f_valid) {
@@ -29788,8 +29811,8 @@
           var $$x2 = $m_s_package$().s_package$__f_Seq;
           var array$1 = [$as_Lfrawa_typedjson_keywords_Result(pElse$1.apply__O__O(value))];
           var result = $as_sci_Seq($$x2.apply__sci_Seq__sc_SeqOps($ct_sjsr_WrappedVarArgs__sjs_js_Array__(new $c_sjsr_WrappedVarArgs(), array$1)));
-        }    return $p_Lfrawa_typedjson_keywords_Evaluator$__combineAll__F1__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($m_Lfrawa_typedjson_keywords_Evaluator$(), combine$1, result, value)
-      }))($thiz, pIf, pThen, pElse, combine))
+        }    return $p_Lfrawa_typedjson_keywords_Evaluator$__aggregateAll__F1__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($m_Lfrawa_typedjson_keywords_Evaluator$(), aggregate$1, result, value)
+      }))($thiz, pIf, pThen, pElse, aggregate))
     }
     function $p_Lfrawa_typedjson_keywords_Evaluator$__one__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_util_UriUtil$WithLocation__F1($thiz, processing, keyword) {
       var x1 = $as_Lfrawa_typedjson_keywords_Keyword(keyword.Lfrawa_typedjson_util_UriUtil$WithLocation__f_value);
@@ -29859,19 +29882,19 @@
       }
     }
     function $p_Lfrawa_typedjson_keywords_Evaluator$__evalArrayItems__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_keywords_ArrayItemsKeyword__F1($thiz, processing, keyword) {
-      var pPrefix = $as_sci_Seq(keyword.Lfrawa_typedjson_keywords_ArrayItemsKeyword__f_prefixItems.map__F1__O(new $c_sjsr_AnonFunction1(((this$1, processing$1) => ((x$10$2) => {
-        var x$10 = $as_Lfrawa_typedjson_keywords_Keywords(x$10$2);
-        return $m_Lfrawa_typedjson_keywords_Evaluator$().frawa$typedjson$keywords$Evaluator$$all__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_keywords_Keywords__F1(processing$1, x$10)
+      var pPrefix = $as_sci_Seq(keyword.Lfrawa_typedjson_keywords_ArrayItemsKeyword__f_prefixItems.map__F1__O(new $c_sjsr_AnonFunction1(((this$1, processing$1) => ((x$12$2) => {
+        var x$12 = $as_Lfrawa_typedjson_keywords_Keywords(x$12$2);
+        return $m_Lfrawa_typedjson_keywords_Evaluator$().frawa$typedjson$keywords$Evaluator$$all__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_keywords_Keywords__F1(processing$1, x$12)
       }))($thiz, processing))));
       var this$2 = keyword.Lfrawa_typedjson_keywords_ArrayItemsKeyword__f_items;
       if (this$2.isEmpty__Z()) {
         var pItems = $m_s_None$();
       } else {
         var arg1 = this$2.get__O();
-        var x$11 = $as_Lfrawa_typedjson_keywords_Keywords(arg1);
-        var pItems = new $c_s_Some($m_Lfrawa_typedjson_keywords_Evaluator$().frawa$typedjson$keywords$Evaluator$$all__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_keywords_Keywords__F1(processing, x$11));
-      }  var combine = $as_F1(processing.Lfrawa_typedjson_keywords_Processing__f_nested.apply__O__O(keyword));
-      return $p_Lfrawa_typedjson_keywords_Evaluator$__applyToArray__sci_Seq__s_Option__F1__F1($thiz, pPrefix, pItems, combine)
+        var x$13 = $as_Lfrawa_typedjson_keywords_Keywords(arg1);
+        var pItems = new $c_s_Some($m_Lfrawa_typedjson_keywords_Evaluator$().frawa$typedjson$keywords$Evaluator$$all__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_keywords_Keywords__F1(processing, x$13));
+      }  var aggregate = $as_F1(processing.Lfrawa_typedjson_keywords_Processing__f_nested.apply__O__O(keyword));
+      return $p_Lfrawa_typedjson_keywords_Evaluator$__applyToArray__sci_Seq__s_Option__F1__F1($thiz, pPrefix, pItems, aggregate)
     }
     function $p_Lfrawa_typedjson_keywords_Evaluator$__evalObjectProperties__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_keywords_ObjectPropertiesKeyword__F1($thiz, processing, keyword) {
       var psProperties = $as_sc_IterableOnceOps(keyword.Lfrawa_typedjson_keywords_ObjectPropertiesKeyword__f_properties.map__F1__O(new $c_sjsr_AnonFunction1(((this$1, processing$1) => ((x0$1$2) => {
@@ -29912,28 +29935,28 @@
         var this$7 = $m_s_None$();
       } else {
         var arg1$1 = psAdditional.get__O();
-        var x$16 = $as_s_PartialFunction(arg1$1);
-        var this$7 = new $c_s_Some(new $c_s_PartialFunction$OrElse(psAll, x$16));
+        var x$18 = $as_s_PartialFunction(arg1$1);
+        var this$7 = new $c_s_Some(new $c_s_PartialFunction$OrElse(psAll, x$18));
       }  var ps = $as_s_PartialFunction((this$7.isEmpty__Z() ? psAll : this$7.get__O()));
-      var combine = $as_F1(processing.Lfrawa_typedjson_keywords_Processing__f_nested.apply__O__O(keyword));
-      return new $c_sjsr_AnonFunction1(((this$6$1, ps$1, combine$1) => ((value$2) => {
+      var aggregate = $as_F1(processing.Lfrawa_typedjson_keywords_Processing__f_nested.apply__O__O(keyword));
+      return new $c_sjsr_AnonFunction1(((this$6$1, ps$1, aggregate$1) => ((value$2) => {
         var value = $as_Lfrawa_typedjson_keywords_InnerValue(value$2);
-        return $as_Lfrawa_typedjson_keywords_Result($p_Lfrawa_typedjson_keywords_Evaluator$__applyToObject__F0__F1__F1($m_Lfrawa_typedjson_keywords_Evaluator$(), new $c_sjsr_AnonFunction0(((this$8, ps$4) => (() => ps$4))(this$6$1, ps$1)), combine$1).apply__O__O(value))
-      }))($thiz, ps, combine))
+        return $as_Lfrawa_typedjson_keywords_Result($p_Lfrawa_typedjson_keywords_Evaluator$__applyToObject__F0__F1__F1($m_Lfrawa_typedjson_keywords_Evaluator$(), new $c_sjsr_AnonFunction0(((this$8, ps$4) => (() => ps$4))(this$6$1, ps$1)), aggregate$1).apply__O__O(value))
+      }))($thiz, ps, aggregate))
     }
-    function $p_Lfrawa_typedjson_keywords_Evaluator$__evalApplicator__Lfrawa_typedjson_keywords_Processing__sci_Seq__F1__F1($thiz, processing, keywords, combine) {
-      var p = $as_sci_Seq(keywords.map__F1__O(new $c_sjsr_AnonFunction1(((this$1, processing$1) => ((x$17$2) => {
-        var x$17 = $as_Lfrawa_typedjson_keywords_Keywords(x$17$2);
-        return $m_Lfrawa_typedjson_keywords_Evaluator$().frawa$typedjson$keywords$Evaluator$$all__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_keywords_Keywords__F1(processing$1, x$17)
+    function $p_Lfrawa_typedjson_keywords_Evaluator$__evalApplicator__Lfrawa_typedjson_keywords_Processing__sci_Seq__F1__F1($thiz, processing, keywords, aggregate) {
+      var p = $as_sci_Seq(keywords.map__F1__O(new $c_sjsr_AnonFunction1(((this$1, processing$1) => ((x$19$2) => {
+        var x$19 = $as_Lfrawa_typedjson_keywords_Keywords(x$19$2);
+        return $m_Lfrawa_typedjson_keywords_Evaluator$().frawa$typedjson$keywords$Evaluator$$all__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_keywords_Keywords__F1(processing$1, x$19)
       }))($thiz, processing))));
-      return $p_Lfrawa_typedjson_keywords_Evaluator$__applyToValue__sci_Seq__F1__F1($thiz, p, combine)
+      return $p_Lfrawa_typedjson_keywords_Evaluator$__applyToValue__sci_Seq__F1__F1($thiz, p, aggregate)
     }
-    function $p_Lfrawa_typedjson_keywords_Evaluator$__evalUnionType__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_keywords_UnionTypeKeyword__F1__F1($thiz, processing, keyword, combine) {
-      var p = $as_sci_Seq(keyword.Lfrawa_typedjson_keywords_UnionTypeKeyword__f_keywords.map__F1__O(new $c_sjsr_AnonFunction1(((this$1, processing$1) => ((x$18$2) => {
-        var x$18 = $as_Lfrawa_typedjson_util_UriUtil$WithLocation(x$18$2);
-        return $p_Lfrawa_typedjson_keywords_Evaluator$__one__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_util_UriUtil$WithLocation__F1($m_Lfrawa_typedjson_keywords_Evaluator$(), processing$1, x$18)
+    function $p_Lfrawa_typedjson_keywords_Evaluator$__evalUnionType__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_keywords_UnionTypeKeyword__F1__F1($thiz, processing, keyword, aggregate) {
+      var p = $as_sci_Seq(keyword.Lfrawa_typedjson_keywords_UnionTypeKeyword__f_keywords.map__F1__O(new $c_sjsr_AnonFunction1(((this$1, processing$1) => ((x$20$2) => {
+        var x$20 = $as_Lfrawa_typedjson_util_UriUtil$WithLocation(x$20$2);
+        return $p_Lfrawa_typedjson_keywords_Evaluator$__one__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_util_UriUtil$WithLocation__F1($m_Lfrawa_typedjson_keywords_Evaluator$(), processing$1, x$20)
       }))($thiz, processing))));
-      return $p_Lfrawa_typedjson_keywords_Evaluator$__applyToValue__sci_Seq__F1__F1($thiz, p, combine)
+      return $p_Lfrawa_typedjson_keywords_Evaluator$__applyToValue__sci_Seq__F1__F1($thiz, p, aggregate)
     }
     function $p_Lfrawa_typedjson_keywords_Evaluator$__evalIfThenElse__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_keywords_IfThenElseKeyword__F1($thiz, processing, keyword) {
       var this$1 = keyword.Lfrawa_typedjson_keywords_IfThenElseKeyword__f_ifKeywords;
@@ -29950,8 +29973,8 @@
           var $$x4 = $m_s_None$();
         } else {
           var arg1$1 = this$2.get__O();
-          var x$19 = $as_Lfrawa_typedjson_keywords_Keywords(arg1$1);
-          var $$x4 = new $c_s_Some($m_Lfrawa_typedjson_keywords_Evaluator$().frawa$typedjson$keywords$Evaluator$$all__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_keywords_Keywords__F1(processing, x$19));
+          var x$21 = $as_Lfrawa_typedjson_keywords_Keywords(arg1$1);
+          var $$x4 = new $c_s_Some($m_Lfrawa_typedjson_keywords_Evaluator$().frawa$typedjson$keywords$Evaluator$$all__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_keywords_Keywords__F1(processing, x$21));
         }    var $$x3 = $p_Lfrawa_typedjson_keywords_Evaluator$__option__s_Option__F1($$x5, $$x4);
         var $$x2 = $m_Lfrawa_typedjson_keywords_Evaluator$();
         var this$3 = keyword.Lfrawa_typedjson_keywords_IfThenElseKeyword__f_elseKeywords;
@@ -29959,8 +29982,8 @@
           var $$x1 = $m_s_None$();
         } else {
           var arg1$2 = this$3.get__O();
-          var x$20 = $as_Lfrawa_typedjson_keywords_Keywords(arg1$2);
-          var $$x1 = new $c_s_Some($m_Lfrawa_typedjson_keywords_Evaluator$().frawa$typedjson$keywords$Evaluator$$all__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_keywords_Keywords__F1(processing, x$20));
+          var x$22 = $as_Lfrawa_typedjson_keywords_Keywords(arg1$2);
+          var $$x1 = new $c_s_Some($m_Lfrawa_typedjson_keywords_Evaluator$().frawa$typedjson$keywords$Evaluator$$all__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_keywords_Keywords__F1(processing, x$22));
         }    var this$4 = new $c_s_Some($p_Lfrawa_typedjson_keywords_Evaluator$__applyCondition__F1__F1__F1__F1__F1($$x7, $$x6, $$x3, $p_Lfrawa_typedjson_keywords_Evaluator$__option__s_Option__F1($$x2, $$x1), $as_F1(processing.Lfrawa_typedjson_keywords_Processing__f_nested.apply__O__O(keyword))));
       }  return $as_F1((this$4.isEmpty__Z() ? $p_Lfrawa_typedjson_keywords_Evaluator$__noop__F1($m_Lfrawa_typedjson_keywords_Evaluator$()) : this$4.get__O()))
     }
@@ -29972,27 +29995,27 @@
           var x2 = $as_Lfrawa_typedjson_parser_Value$ObjectValue(x1);
           var vs = x2.Lfrawa_typedjson_parser_Value$ObjectValue__f_properties;
           var p = $m_Lfrawa_typedjson_keywords_Evaluator$().frawa$typedjson$keywords$Evaluator$$all__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_keywords_Keywords__F1(processing$1, keyword$1.Lfrawa_typedjson_keywords_PropertyNamesKeyword__f_keywords);
-          var combine = $as_F1(processing$1.Lfrawa_typedjson_keywords_Processing__f_nested.apply__O__O(keyword$1));
+          var aggregate = $as_F1(processing$1.Lfrawa_typedjson_keywords_Processing__f_nested.apply__O__O(keyword$1));
           var names = vs.keySet__sci_Set();
           var result = $as_sc_IterableOnceOps(names.map__F1__O(new $c_sjsr_AnonFunction1(((this$2, p$1, value$1) => ((name$2) => {
             var name = $as_T(name$2);
             return $ct_T2__O__O__(new $c_T2(), name, p$1.apply__O__O(new $c_Lfrawa_typedjson_keywords_InnerValue(new $c_Lfrawa_typedjson_parser_Value$StringValue(name), value$1.Lfrawa_typedjson_keywords_InnerValue__f_pointer.$div__T__Lfrawa_typedjson_pointer_Pointer(name))))
           }))(this$1, p, value)))).toSeq__sci_Seq();
-          var this$4 = $as_sc_IterableOnceOps($as_sc_IterableOps(result.filter__F1__O(new $c_sjsr_AnonFunction1(((this$2$1) => ((x$21$2) => {
-            var x$21 = $as_T2(x$21$2);
-            return $as_Lfrawa_typedjson_keywords_Result(x$21._2__O()).Lfrawa_typedjson_keywords_Result__f_valid
-          }))()))).map__F1__O(new $c_sjsr_AnonFunction1(((this$3) => ((x$22$2) => {
-            var x$22 = $as_T2(x$22$2);
-            return $as_T(x$22._1__O())
+          var this$4 = $as_sc_IterableOnceOps($as_sc_IterableOps(result.filter__F1__O(new $c_sjsr_AnonFunction1(((this$2$1) => ((x$23$2) => {
+            var x$23 = $as_T2(x$23$2);
+            return $as_Lfrawa_typedjson_keywords_Result(x$23._2__O()).Lfrawa_typedjson_keywords_Result__f_valid
+          }))()))).map__F1__O(new $c_sjsr_AnonFunction1(((this$3) => ((x$24$2) => {
+            var x$24 = $as_T2(x$24$2);
+            return $as_T(x$24._1__O())
           }))())));
           var validNames = $m_sci_Set$().from__sc_IterableOnce__sci_Set($as_sc_IterableOnce(this$4));
           var annotation = new $c_Lfrawa_typedjson_keywords_WithPointer(new $c_Lfrawa_typedjson_keywords_EvaluatedProperties(validNames), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer);
-          return $p_Lfrawa_typedjson_keywords_Evaluator$__combineAll__F1__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($m_Lfrawa_typedjson_keywords_Evaluator$(), combine, $as_sci_Seq(result.map__F1__O(new $c_sjsr_AnonFunction1(((this$4$1) => ((x$23$2) => {
-            var x$23 = $as_T2(x$23$2);
-            return $as_Lfrawa_typedjson_keywords_Result(x$23._2__O())
+          return $p_Lfrawa_typedjson_keywords_Evaluator$__aggregateAll__F1__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($m_Lfrawa_typedjson_keywords_Evaluator$(), aggregate, $as_sci_Seq(result.map__F1__O(new $c_sjsr_AnonFunction1(((this$4$1) => ((x$25$2) => {
+            var x$25 = $as_T2(x$25$2);
+            return $as_Lfrawa_typedjson_keywords_Result(x$25._2__O())
           }))()))), value).add__Lfrawa_typedjson_keywords_WithPointer__Lfrawa_typedjson_keywords_Result(annotation)
         } else {
-          return new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
+          return new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
         }
       }))($thiz, processing, keyword))
     }
@@ -30005,9 +30028,9 @@
       } else if ((x1 instanceof $c_s_util_Left)) {
         var x3 = $as_s_util_Left(x1);
         var problems = $as_Lfrawa_typedjson_keywords_SchemaProblems(x3.s_util_Left__f_value);
-        return new $c_sjsr_AnonFunction1(((this$1, problems$1) => ((x$24$2) => {
-          $as_Lfrawa_typedjson_keywords_InnerValue(x$24$2);
-          return new $c_Lfrawa_typedjson_keywords_Result(false, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1).add__Lfrawa_typedjson_keywords_SchemaProblems__Lfrawa_typedjson_keywords_Result(problems$1)
+        return new $c_sjsr_AnonFunction1(((this$1, problems$1) => ((x$26$2) => {
+          $as_Lfrawa_typedjson_keywords_InnerValue(x$26$2);
+          return new $c_Lfrawa_typedjson_keywords_Result(false, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1).add__Lfrawa_typedjson_keywords_SchemaProblems__Lfrawa_typedjson_keywords_Result(problems$1)
         }))($thiz, problems))
       } else {
         throw new $c_s_MatchError(x1)
@@ -30023,18 +30046,18 @@
           var ps = $as_sc_IterableOnceOps($as_sc_IterableOps(v.keySet__sci_Set().flatMap__F1__O(new $c_sjsr_AnonFunction1(((this$2, keyword$3) => ((key$2) => {
             var key = $as_T(key$2);
             return keyword$3.Lfrawa_typedjson_keywords_DependentSchemasKeyword__f_keywords.get__O__s_Option(key)
-          }))(this$1, keyword$1)))).map__F1__O(new $c_sjsr_AnonFunction1(((this$2$1, processing$9) => ((x$25$2) => {
-            var x$25 = $as_Lfrawa_typedjson_keywords_Keywords(x$25$2);
-            return $m_Lfrawa_typedjson_keywords_Evaluator$().frawa$typedjson$keywords$Evaluator$$all__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_keywords_Keywords__F1(processing$9, x$25)
+          }))(this$1, keyword$1)))).map__F1__O(new $c_sjsr_AnonFunction1(((this$2$1, processing$9) => ((x$27$2) => {
+            var x$27 = $as_Lfrawa_typedjson_keywords_Keywords(x$27$2);
+            return $m_Lfrawa_typedjson_keywords_Evaluator$().frawa$typedjson$keywords$Evaluator$$all__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_keywords_Keywords__F1(processing$9, x$27)
           }))(this$1, processing$1)))).toSeq__sci_Seq();
-          var combine = $as_F1(processing$1.Lfrawa_typedjson_keywords_Processing__f_nested.apply__O__O(keyword$1));
-          var result = $as_sci_Seq(ps.map__F1__O(new $c_sjsr_AnonFunction1(((this$3, value$1) => ((x$26$2) => {
-            var x$26 = $as_F1(x$26$2);
-            return $as_Lfrawa_typedjson_keywords_Result(x$26.apply__O__O(value$1))
+          var aggregate = $as_F1(processing$1.Lfrawa_typedjson_keywords_Processing__f_nested.apply__O__O(keyword$1));
+          var result = $as_sci_Seq(ps.map__F1__O(new $c_sjsr_AnonFunction1(((this$3, value$1) => ((x$28$2) => {
+            var x$28 = $as_F1(x$28$2);
+            return $as_Lfrawa_typedjson_keywords_Result(x$28.apply__O__O(value$1))
           }))(this$1, value))));
-          return $p_Lfrawa_typedjson_keywords_Evaluator$__combineAll__F1__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($m_Lfrawa_typedjson_keywords_Evaluator$(), combine, result, value)
+          return $p_Lfrawa_typedjson_keywords_Evaluator$__aggregateAll__F1__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($m_Lfrawa_typedjson_keywords_Evaluator$(), aggregate, result, value)
         } else {
-          return new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
+          return new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
         }
       }))($thiz, keyword, processing))
     }
@@ -30052,7 +30075,7 @@
             var arg1 = this$2.get__O();
             var schema = $as_Lfrawa_typedjson_keywords_Keywords(arg1);
             var p = $m_Lfrawa_typedjson_keywords_Evaluator$().frawa$typedjson$keywords$Evaluator$$all__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_keywords_Keywords__F1(processing$1, schema);
-            var combine = $as_F1(processing$1.Lfrawa_typedjson_keywords_Processing__f_nested.apply__O__O(keyword$1));
+            var aggregate = $as_F1(processing$1.Lfrawa_typedjson_keywords_Processing__f_nested.apply__O__O(keyword$1));
             var indexed = $as_sci_Seq($as_sc_IterableOps(vs.zipWithIndex__O()).map__F1__O(new $c_sjsr_AnonFunction1(((this$3, value$8) => ((x0$1$2) => {
               var x0$1 = $as_T2(x0$1$2);
               if ((x0$1 !== null)) {
@@ -30063,21 +30086,21 @@
                 throw new $c_s_MatchError(x0$1)
               }
             }))(this$1, value))));
-            var result = $as_sci_Seq(indexed.map__F1__O(new $c_sjsr_AnonFunction1(((this$2$1, p$1) => ((x$27$2) => {
-              var x$27 = $as_Lfrawa_typedjson_keywords_InnerValue(x$27$2);
-              return $as_Lfrawa_typedjson_keywords_Result(p$1.apply__O__O(x$27))
+            var result = $as_sci_Seq(indexed.map__F1__O(new $c_sjsr_AnonFunction1(((this$2$1, p$1) => ((x$29$2) => {
+              var x$29 = $as_Lfrawa_typedjson_keywords_InnerValue(x$29$2);
+              return $as_Lfrawa_typedjson_keywords_Result(p$1.apply__O__O(x$29))
             }))(this$1, p))));
-            var validIndices = $as_sci_Seq($as_sc_IterableOps($as_sc_IterableOps(result.zipWithIndex__O()).filter__F1__O(new $c_sjsr_AnonFunction1(((this$3$1) => ((x$28$2) => {
-              var x$28 = $as_T2(x$28$2);
-              return $as_Lfrawa_typedjson_keywords_Result(x$28._1__O()).Lfrawa_typedjson_keywords_Result__f_valid
-            }))()))).map__F1__O(new $c_sjsr_AnonFunction1(((this$4) => ((x$29$2) => {
-              var x$29 = $as_T2(x$29$2);
-              return x$29._2$mcI$sp__I()
+            var validIndices = $as_sci_Seq($as_sc_IterableOps($as_sc_IterableOps(result.zipWithIndex__O()).filter__F1__O(new $c_sjsr_AnonFunction1(((this$3$1) => ((x$30$2) => {
+              var x$30 = $as_T2(x$30$2);
+              return $as_Lfrawa_typedjson_keywords_Result(x$30._1__O()).Lfrawa_typedjson_keywords_Result__f_valid
+            }))()))).map__F1__O(new $c_sjsr_AnonFunction1(((this$4) => ((x$31$2) => {
+              var x$31 = $as_T2(x$31$2);
+              return x$31._2$mcI$sp__I()
             }))())));
-            var this$5 = new $c_s_Some($p_Lfrawa_typedjson_keywords_Evaluator$__combineAll__F1__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($m_Lfrawa_typedjson_keywords_Evaluator$(), combine, result, value).add__Lfrawa_typedjson_keywords_WithPointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_keywords_WithPointer(new $c_Lfrawa_typedjson_keywords_EvaluatedIndices(validIndices), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer)));
-          }      return $as_Lfrawa_typedjson_keywords_Result((this$5.isEmpty__Z() ? new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : this$5.get__O()))
+            var this$5 = new $c_s_Some($p_Lfrawa_typedjson_keywords_Evaluator$__aggregateAll__F1__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($m_Lfrawa_typedjson_keywords_Evaluator$(), aggregate, result, value).add__Lfrawa_typedjson_keywords_WithPointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_keywords_WithPointer(new $c_Lfrawa_typedjson_keywords_EvaluatedIndices(validIndices), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer)));
+          }      return $as_Lfrawa_typedjson_keywords_Result((this$5.isEmpty__Z() ? new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : this$5.get__O()))
         } else {
-          return new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
+          return new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
         }
       }))($thiz, keyword, processing))
     }
@@ -30090,9 +30113,9 @@
         if ((x1 instanceof $c_Lfrawa_typedjson_parser_Value$ArrayValue)) {
           var x2 = $as_Lfrawa_typedjson_parser_Value$ArrayValue(x1);
           var vs = x2.Lfrawa_typedjson_parser_Value$ArrayValue__f_items;
-          var this$4 = $as_sc_IterableOnceOps($as_sc_IterableOps(result.Lfrawa_typedjson_keywords_Result__f_annotations.filter__F1__O(new $c_sjsr_AnonFunction1(((this$2) => ((x$30$2) => {
-            var x$30 = $as_Lfrawa_typedjson_keywords_WithPointer(x$30$2);
-            var x = x$30.Lfrawa_typedjson_keywords_WithPointer__f_pointer;
+          var this$4 = $as_sc_IterableOnceOps($as_sc_IterableOps(result.Lfrawa_typedjson_keywords_Result__f_evaluations.filter__F1__O(new $c_sjsr_AnonFunction1(((this$2) => ((x$32$2) => {
+            var x$32 = $as_Lfrawa_typedjson_keywords_WithPointer(x$32$2);
+            var x = x$32.Lfrawa_typedjson_keywords_WithPointer__f_pointer;
             var x$2 = new $c_Lfrawa_typedjson_pointer_Pointer($m_s_package$().s_package$__f_Nil, false);
             return ((x !== null) && x.equals__O__Z(x$2))
           }))()))).flatMap__F1__O(new $c_sjsr_AnonFunction1(((this$2$1) => ((x0$1$2) => {
@@ -30126,9 +30149,9 @@
             } else {
               throw new $c_s_MatchError(x0$3)
             }
-          }))(this$1, evaluated)))).map__F1__O(new $c_sjsr_AnonFunction1(((this$5) => ((x$31$2) => {
-            var x$31 = $as_T2(x$31$2);
-            return $as_Lfrawa_typedjson_keywords_InnerValue(x$31._2__O())
+          }))(this$1, evaluated)))).map__F1__O(new $c_sjsr_AnonFunction1(((this$5) => ((x$33$2) => {
+            var x$33 = $as_T2(x$33$2);
+            return $as_Lfrawa_typedjson_keywords_InnerValue(x$33._2__O())
           }))()))).map__F1__O(pUnevaluated));
           var combine = $as_F1(processing$1.Lfrawa_typedjson_keywords_Processing__f_nested.apply__O__O(keyword$1));
           var this$6 = $m_s_package$().s_package$__f_Seq;
@@ -30139,7 +30162,7 @@
           var $$x1 = $m_s_package$().s_package$__f_Seq;
           var array = [result];
           var this$10 = $$x1.apply__sci_Seq__sc_SeqOps($ct_sjsr_WrappedVarArgs__sjs_js_Array__(new $c_sjsr_WrappedVarArgs(), array));
-          return $p_Lfrawa_typedjson_keywords_Evaluator$__combineAll__F1__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($$x2, combine, $as_sci_Seq(this$10.appendedAll__sc_IterableOnce__O(resultUnevaluated)), value).add__Lfrawa_typedjson_keywords_WithPointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_keywords_WithPointer(new $c_Lfrawa_typedjson_keywords_EvaluatedIndices(allIndices), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
+          return $p_Lfrawa_typedjson_keywords_Evaluator$__aggregateAll__F1__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($$x2, combine, $as_sci_Seq(this$10.appendedAll__sc_IterableOnce__O(resultUnevaluated)), value).add__Lfrawa_typedjson_keywords_WithPointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_keywords_WithPointer(new $c_Lfrawa_typedjson_keywords_EvaluatedIndices(allIndices), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
         } else {
           return result
         }
@@ -30154,9 +30177,9 @@
         if ((x1 instanceof $c_Lfrawa_typedjson_parser_Value$ObjectValue)) {
           var x2 = $as_Lfrawa_typedjson_parser_Value$ObjectValue(x1);
           var vs = x2.Lfrawa_typedjson_parser_Value$ObjectValue__f_properties;
-          var this$3 = $as_sc_IterableOnceOps($as_sc_IterableOps(result.Lfrawa_typedjson_keywords_Result__f_annotations.filter__F1__O(new $c_sjsr_AnonFunction1(((this$2, value$1) => ((x$32$2) => {
-            var x$32 = $as_Lfrawa_typedjson_keywords_WithPointer(x$32$2);
-            var x = x$32.Lfrawa_typedjson_keywords_WithPointer__f_pointer;
+          var this$3 = $as_sc_IterableOnceOps($as_sc_IterableOps(result.Lfrawa_typedjson_keywords_Result__f_evaluations.filter__F1__O(new $c_sjsr_AnonFunction1(((this$2, value$1) => ((x$34$2) => {
+            var x$34 = $as_Lfrawa_typedjson_keywords_WithPointer(x$34$2);
+            var x = x$34.Lfrawa_typedjson_keywords_WithPointer__f_pointer;
             var x$2 = value$1.Lfrawa_typedjson_keywords_InnerValue__f_pointer;
             return ((x === null) ? (x$2 === null) : x.equals__O__Z(x$2))
           }))(this$1, value)))).flatMap__F1__O(new $c_sjsr_AnonFunction1(((this$2$1) => ((x0$1$2) => {
@@ -30196,7 +30219,7 @@
           var $$x1 = $m_s_package$().s_package$__f_Seq;
           var array = [result];
           var this$8 = $$x1.apply__sci_Seq__sc_SeqOps($ct_sjsr_WrappedVarArgs__sjs_js_Array__(new $c_sjsr_WrappedVarArgs(), array));
-          return $p_Lfrawa_typedjson_keywords_Evaluator$__combineAll__F1__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($$x2, combine, $as_sci_Seq(this$8.appendedAll__sc_IterableOnce__O(resultUnevaluated)), value).add__Lfrawa_typedjson_keywords_WithPointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_keywords_WithPointer(new $c_Lfrawa_typedjson_keywords_EvaluatedProperties(allProperties), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
+          return $p_Lfrawa_typedjson_keywords_Evaluator$__aggregateAll__F1__sci_Seq__Lfrawa_typedjson_keywords_InnerValue__Lfrawa_typedjson_keywords_Result($$x2, combine, $as_sci_Seq(this$8.appendedAll__sc_IterableOnce__O(resultUnevaluated)), value).add__Lfrawa_typedjson_keywords_WithPointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_keywords_WithPointer(new $c_Lfrawa_typedjson_keywords_EvaluatedProperties(allProperties), value.Lfrawa_typedjson_keywords_InnerValue__f_pointer))
         } else {
           return result
         }
@@ -30230,10 +30253,17 @@
     $c_Lfrawa_typedjson_keywords_Evaluator$.prototype.frawa$typedjson$keywords$Evaluator$$seq__sci_Seq__F1 = (function(ps) {
       return new $c_sjsr_AnonFunction1(((this$1, ps$1) => ((value$2) => {
         var value = $as_Lfrawa_typedjson_keywords_InnerValue(value$2);
-        return $m_Lfrawa_typedjson_keywords_Result$().combine__sci_Seq__Lfrawa_typedjson_keywords_Result($as_sci_Seq(ps$1.map__F1__O(new $c_sjsr_AnonFunction1(((this$2, value$1) => ((x$5$2) => {
+        var this$3 = $as_sc_IterableOnceOps(ps$1.map__F1__O(new $c_sjsr_AnonFunction1(((this$2, value$1) => ((x$5$2) => {
           var x$5 = $as_F1(x$5$2);
           return $as_Lfrawa_typedjson_keywords_Result(x$5.apply__O__O(value$1))
-        }))(this$1, value)))))
+        }))(this$1, value))));
+        var op = new $c_sjsr_AnonFunction2(((this$2$1) => ((x$6$2, x$7$2) => {
+          var x$6 = $as_Lfrawa_typedjson_keywords_Result(x$6$2);
+          var x$7 = $as_Lfrawa_typedjson_keywords_Result(x$7$2);
+          return x$6.add__Lfrawa_typedjson_keywords_Result__Lfrawa_typedjson_keywords_Result(x$7)
+        }))());
+        var this$4 = $f_sc_IterableOnceOps__reduceLeftOption__F2__s_Option(this$3, op);
+        return $as_Lfrawa_typedjson_keywords_Result((this$4.isEmpty__Z() ? new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : this$4.get__O()))
       }))(this, ps))
     });
     var $d_Lfrawa_typedjson_keywords_Evaluator$ = new $TypeData().initClass({
@@ -30624,54 +30654,16 @@
     }
     $c_Lfrawa_typedjson_keywords_Result$.prototype = new $h_O();
     $c_Lfrawa_typedjson_keywords_Result$.prototype.constructor = $c_Lfrawa_typedjson_keywords_Result$;
-    $c_Lfrawa_typedjson_keywords_Result$.prototype.apply__Z__O__Lfrawa_typedjson_keywords_Result = (function(valid, result) {
-      var $$x1 = $m_s_package$().s_package$__f_Seq;
-      var array = [result];
-      return new $c_Lfrawa_typedjson_keywords_Result(valid, $as_sci_Seq($$x1.apply__sci_Seq__sc_SeqOps($ct_sjsr_WrappedVarArgs__sjs_js_Array__(new $c_sjsr_WrappedVarArgs(), array))), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
+    $c_Lfrawa_typedjson_keywords_Result$.prototype.valid__O__F2__Lfrawa_typedjson_keywords_Result = (function(output, c) {
+      return new $c_Lfrawa_typedjson_keywords_Result(true, new $c_s_Some(output), new $c_s_Some(c), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
     });
-    $c_Lfrawa_typedjson_keywords_Result$.prototype.valid__O__Lfrawa_typedjson_keywords_Result = (function(result) {
-      var $$x1 = $m_s_package$().s_package$__f_Seq;
-      var array = [result];
-      return new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($$x1.apply__sci_Seq__sc_SeqOps($ct_sjsr_WrappedVarArgs__sjs_js_Array__(new $c_sjsr_WrappedVarArgs(), array))), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
+    $c_Lfrawa_typedjson_keywords_Result$.prototype.invalid__O__F2__Lfrawa_typedjson_keywords_Result = (function(output, c) {
+      return new $c_Lfrawa_typedjson_keywords_Result(false, new $c_s_Some(output), new $c_s_Some(c), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
     });
-    $c_Lfrawa_typedjson_keywords_Result$.prototype.invalid__O__Lfrawa_typedjson_keywords_Result = (function(result) {
-      var $$x1 = $m_s_package$().s_package$__f_Seq;
-      var array = [result];
-      return new $c_Lfrawa_typedjson_keywords_Result(false, $as_sci_Seq($$x1.apply__sci_Seq__sc_SeqOps($ct_sjsr_WrappedVarArgs__sjs_js_Array__(new $c_sjsr_WrappedVarArgs(), array))), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
-    });
-    $c_Lfrawa_typedjson_keywords_Result$.prototype.combine__sci_Seq__Lfrawa_typedjson_keywords_Result = (function(allResults) {
-      var valid = allResults.forall__F1__Z(new $c_sjsr_AnonFunction1(((this$1) => ((x$1$2) => {
+    $c_Lfrawa_typedjson_keywords_Result$.prototype.frawa$typedjson$keywords$Result$$count__sci_Seq__I = (function(results) {
+      return $uI($as_sc_IterableOnceOps(results.map__F1__O(new $c_sjsr_AnonFunction1(((this$1) => ((x$1$2) => {
         var x$1 = $as_Lfrawa_typedjson_keywords_Result(x$1$2);
-        return x$1.Lfrawa_typedjson_keywords_Result__f_valid
-      }))()));
-      var results = $as_sci_Seq(allResults.flatMap__F1__O(new $c_sjsr_AnonFunction1(((this$2) => ((x$2$2) => {
-        var x$2 = $as_Lfrawa_typedjson_keywords_Result(x$2$2);
-        return x$2.Lfrawa_typedjson_keywords_Result__f_results
-      }))())));
-      var this$5 = $as_sc_IterableOnceOps(allResults.map__F1__O(new $c_sjsr_AnonFunction1(((this$3) => ((x$3$2) => {
-        var x$3 = $as_Lfrawa_typedjson_keywords_Result(x$3$2);
-        return x$3.Lfrawa_typedjson_keywords_Result__f_problems
-      }))())));
-      var op = new $c_sjsr_AnonFunction2(((this$4) => ((x$4$2, x$5$2) => {
-        var x$4 = $as_Lfrawa_typedjson_keywords_SchemaProblems(x$4$2);
-        var x$5 = $as_Lfrawa_typedjson_keywords_SchemaProblems(x$5$2);
-        return x$4.combine__Lfrawa_typedjson_keywords_SchemaProblems__Lfrawa_typedjson_keywords_SchemaProblems(x$5)
-      }))());
-      var this$6 = $f_sc_IterableOnceOps__reduceLeftOption__F2__s_Option(this$5, op);
-      var problems = $as_Lfrawa_typedjson_keywords_SchemaProblems((this$6.isEmpty__Z() ? $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty : this$6.get__O()));
-      var annotations = $as_sci_Seq($as_sc_IterableOps(allResults.filter__F1__O(new $c_sjsr_AnonFunction1(((this$6$1) => ((x$6$2) => {
-        var x$6 = $as_Lfrawa_typedjson_keywords_Result(x$6$2);
-        return x$6.Lfrawa_typedjson_keywords_Result__f_valid
-      }))()))).flatMap__F1__O(new $c_sjsr_AnonFunction1(((this$7) => ((x$7$2) => {
-        var x$7 = $as_Lfrawa_typedjson_keywords_Result(x$7$2);
-        return x$7.Lfrawa_typedjson_keywords_Result__f_annotations
-      }))())));
-      return new $c_Lfrawa_typedjson_keywords_Result(valid, results, annotations, problems, ((1 + this.count__sci_Seq__I(allResults)) | 0))
-    });
-    $c_Lfrawa_typedjson_keywords_Result$.prototype.count__sci_Seq__I = (function(results) {
-      return $uI($as_sc_IterableOnceOps(results.map__F1__O(new $c_sjsr_AnonFunction1(((this$1) => ((x$8$2) => {
-        var x$8 = $as_Lfrawa_typedjson_keywords_Result(x$8$2);
-        return x$8.Lfrawa_typedjson_keywords_Result__f_count
+        return x$1.Lfrawa_typedjson_keywords_Result__f_count
       }))()))).sum__s_math_Numeric__O($m_s_math_Numeric$IntIsIntegral$()))
     });
     var $d_Lfrawa_typedjson_keywords_Result$ = new $TypeData().initClass({
@@ -31379,18 +31371,23 @@
       }  return $n_Lfrawa_typedjson_pointer_Pointer$
     }
     function $p_Lfrawa_typedjson_validation_ValidationCombiner__invalid__sci_Seq__Lfrawa_typedjson_keywords_Result($thiz, results) {
-      var errors = $as_sci_Seq(results.flatMap__F1__O(new $c_sjsr_AnonFunction1(((this$1) => ((x$2$2) => {
+      var errors = $as_sci_Seq($as_sc_IterableOps(results.flatMap__F1__O(new $c_sjsr_AnonFunction1(((this$1) => ((x$2$2) => {
         var x$2 = $as_Lfrawa_typedjson_keywords_Result(x$2$2);
-        return $as_sci_Seq(x$2.Lfrawa_typedjson_keywords_Result__f_results.flatMap__F1__O(new $c_sjsr_AnonFunction1(((this$2) => ((x$3$2) => {
-          var x$3 = $as_Lfrawa_typedjson_validation_ValidationResult(x$3$2);
-          return x$3.Lfrawa_typedjson_validation_ValidationResult__f_errors
-        }))())))
+        return x$2.Lfrawa_typedjson_keywords_Result__f_output
+      }))()))).flatMap__F1__O(new $c_sjsr_AnonFunction1(((this$2) => ((x$3$2) => {
+        var x$3 = $as_Lfrawa_typedjson_validation_ValidationOutput(x$3$2);
+        return x$3.Lfrawa_typedjson_validation_ValidationOutput__f_errors
       }))())));
-      return (errors.isEmpty__Z() ? new $c_Lfrawa_typedjson_keywords_Result(false, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $m_Lfrawa_typedjson_keywords_Result$().invalid__O__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_ValidationResult(errors)))
+      return (errors.isEmpty__Z() ? new $c_Lfrawa_typedjson_keywords_Result(false, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $m_Lfrawa_typedjson_keywords_Result$().invalid__O__F2__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_ValidationOutput(errors, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps())), $thiz.Lfrawa_typedjson_validation_ValidationCombiner__f_f))
     }
     /** @constructor */
     function $c_Lfrawa_typedjson_validation_ValidationCombiner() {
-      /*<skip>*/
+      this.Lfrawa_typedjson_validation_ValidationCombiner__f_f = null;
+      this.Lfrawa_typedjson_validation_ValidationCombiner__f_f = new $c_sjsr_AnonFunction2(((this$1) => ((o1$2, o2$2) => {
+        var o1 = $as_Lfrawa_typedjson_validation_ValidationOutput(o1$2);
+        var o2 = $as_Lfrawa_typedjson_validation_ValidationOutput(o2$2);
+        return $m_Lfrawa_typedjson_validation_ValidationOutput$().add__Lfrawa_typedjson_validation_ValidationOutput__Lfrawa_typedjson_validation_ValidationOutput__Lfrawa_typedjson_validation_ValidationOutput(o1, o2)
+      }))());
     }
     $c_Lfrawa_typedjson_validation_ValidationCombiner.prototype = new $h_O();
     $c_Lfrawa_typedjson_validation_ValidationCombiner.prototype.constructor = $c_Lfrawa_typedjson_validation_ValidationCombiner;
@@ -31398,23 +31395,26 @@
       return ((results.isEmpty__Z() || results.forall__F1__Z(new $c_sjsr_AnonFunction1(((this$1) => ((x$1$2) => {
         var x$1 = $as_Lfrawa_typedjson_keywords_Result(x$1$2);
         return x$1.Lfrawa_typedjson_keywords_Result__f_valid
-      }))()))) ? new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $p_Lfrawa_typedjson_validation_ValidationCombiner__invalid__sci_Seq__Lfrawa_typedjson_keywords_Result(this, results))
+      }))()))) ? new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $p_Lfrawa_typedjson_validation_ValidationCombiner__invalid__sci_Seq__Lfrawa_typedjson_keywords_Result(this, results))
+    });
+    $c_Lfrawa_typedjson_validation_ValidationCombiner.prototype.valid__Lfrawa_typedjson_validation_ValidationAnnotation__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result = (function(annotation, pointer) {
+      return $m_Lfrawa_typedjson_keywords_Result$().valid__O__F2__Lfrawa_typedjson_keywords_Result($m_Lfrawa_typedjson_validation_ValidationOutput$().valid__Lfrawa_typedjson_validation_ValidationAnnotation__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_validation_ValidationOutput(annotation, pointer), this.Lfrawa_typedjson_validation_ValidationCombiner__f_f)
     });
     $c_Lfrawa_typedjson_validation_ValidationCombiner.prototype.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result = (function(error, pointer) {
-      return $m_Lfrawa_typedjson_keywords_Result$().invalid__O__Lfrawa_typedjson_keywords_Result($m_Lfrawa_typedjson_validation_ValidationResult$().invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_validation_ValidationResult(error, pointer))
+      return $m_Lfrawa_typedjson_keywords_Result$().invalid__O__F2__Lfrawa_typedjson_keywords_Result($m_Lfrawa_typedjson_validation_ValidationOutput$().invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_validation_ValidationOutput(error, pointer), this.Lfrawa_typedjson_validation_ValidationCombiner__f_f)
     });
     $c_Lfrawa_typedjson_validation_ValidationCombiner.prototype.anyOf__sci_Seq__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result = (function(results, pointer) {
       return ((results.isEmpty__Z() || results.exists__F1__Z(new $c_sjsr_AnonFunction1(((this$1) => ((x$4$2) => {
         var x$4 = $as_Lfrawa_typedjson_keywords_Result(x$4$2);
         return x$4.Lfrawa_typedjson_keywords_Result__f_valid
-      }))()))) ? new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $p_Lfrawa_typedjson_validation_ValidationCombiner__invalid__sci_Seq__Lfrawa_typedjson_keywords_Result(this, results))
+      }))()))) ? new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : $p_Lfrawa_typedjson_validation_ValidationCombiner__invalid__sci_Seq__Lfrawa_typedjson_keywords_Result(this, results))
     });
     $c_Lfrawa_typedjson_validation_ValidationCombiner.prototype.oneOf__sci_Seq__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result = (function(results, pointer) {
       var valids = $as_sci_Seq(results.filter__F1__O(new $c_sjsr_AnonFunction1(((this$1) => ((x$5$2) => {
         var x$5 = $as_Lfrawa_typedjson_keywords_Result(x$5$2);
         return x$5.Lfrawa_typedjson_keywords_Result__f_valid
       }))())));
-      return ((valids.length__I() === 1) ? new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : (valids.isEmpty__Z() ? $p_Lfrawa_typedjson_validation_ValidationCombiner__invalid__sci_Seq__Lfrawa_typedjson_keywords_Result(this, results) : this.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_NotOneOf(valids.length__I()), pointer)))
+      return ((valids.length__I() === 1) ? new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : (valids.isEmpty__Z() ? $p_Lfrawa_typedjson_validation_ValidationCombiner__invalid__sci_Seq__Lfrawa_typedjson_keywords_Result(this, results) : this.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_NotOneOf(valids.length__I()), pointer)))
     });
     $c_Lfrawa_typedjson_validation_ValidationCombiner.prototype.contains__sci_Seq__Lfrawa_typedjson_pointer_Pointer__s_Option__s_Option__Lfrawa_typedjson_keywords_Result = (function(results, pointer, min, max) {
       var res = 0;
@@ -31437,13 +31437,13 @@
       } else {
         var $$x1 = false;
       }  if ($$x1) {
-        return new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
+        return new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1)
       } else {
         return this.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_NotContains(count), pointer)
       }
     });
     $c_Lfrawa_typedjson_validation_ValidationCombiner.prototype.not__sci_Seq__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result = (function(results, pointer) {
-      return (((results.length__I() === 1) && (!$as_Lfrawa_typedjson_keywords_Result(results.head__O()).Lfrawa_typedjson_keywords_Result__f_valid)) ? new $c_Lfrawa_typedjson_keywords_Result(true, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : this.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_NotInvalid(), pointer))
+      return (((results.length__I() === 1) && (!$as_Lfrawa_typedjson_keywords_Result(results.head__O()).Lfrawa_typedjson_keywords_Result__f_valid)) ? new $c_Lfrawa_typedjson_keywords_Result(true, $m_s_None$(), $m_s_None$(), $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()), $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty, 1) : this.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_validation_NotInvalid(), pointer))
     });
     var $d_Lfrawa_typedjson_validation_ValidationCombiner = new $TypeData().initClass({
       Lfrawa_typedjson_validation_ValidationCombiner: 0
@@ -31454,30 +31454,44 @@
     });
     $c_Lfrawa_typedjson_validation_ValidationCombiner.prototype.$classData = $d_Lfrawa_typedjson_validation_ValidationCombiner;
     /** @constructor */
-    function $c_Lfrawa_typedjson_validation_ValidationResult$() {
+    function $c_Lfrawa_typedjson_validation_ValidationOutput$() {
       /*<skip>*/
     }
-    $c_Lfrawa_typedjson_validation_ValidationResult$.prototype = new $h_O();
-    $c_Lfrawa_typedjson_validation_ValidationResult$.prototype.constructor = $c_Lfrawa_typedjson_validation_ValidationResult$;
-    $c_Lfrawa_typedjson_validation_ValidationResult$.prototype.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_validation_ValidationResult = (function(error, pointer) {
+    $c_Lfrawa_typedjson_validation_ValidationOutput$.prototype = new $h_O();
+    $c_Lfrawa_typedjson_validation_ValidationOutput$.prototype.constructor = $c_Lfrawa_typedjson_validation_ValidationOutput$;
+    $c_Lfrawa_typedjson_validation_ValidationOutput$.prototype.valid__Lfrawa_typedjson_validation_ValidationAnnotation__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_validation_ValidationOutput = (function(annotation, pointer) {
+      var $$x2 = $as_sci_Seq($m_s_package$().s_package$__f_Seq.apply__sci_Seq__sc_SeqOps($m_sci_Nil$()));
+      var $$x1 = $m_s_package$().s_package$__f_Seq;
+      var array = [new $c_Lfrawa_typedjson_keywords_WithPointer(annotation, pointer)];
+      return new $c_Lfrawa_typedjson_validation_ValidationOutput($$x2, $as_sci_Seq($$x1.apply__sci_Seq__sc_SeqOps($ct_sjsr_WrappedVarArgs__sjs_js_Array__(new $c_sjsr_WrappedVarArgs(), array))))
+    });
+    $c_Lfrawa_typedjson_validation_ValidationOutput$.prototype.invalid__Lfrawa_typedjson_validation_ValidationError__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_validation_ValidationOutput = (function(error, pointer) {
       var $$x1 = $m_s_package$().s_package$__f_Seq;
       var array = [new $c_Lfrawa_typedjson_keywords_WithPointer(error, pointer)];
       var errors = $as_sci_Seq($$x1.apply__sci_Seq__sc_SeqOps($ct_sjsr_WrappedVarArgs__sjs_js_Array__(new $c_sjsr_WrappedVarArgs(), array)));
-      return new $c_Lfrawa_typedjson_validation_ValidationResult(errors)
+      return new $c_Lfrawa_typedjson_validation_ValidationOutput(errors, $as_sci_Seq($m_s_package$().s_package$__f_Seq.empty__sc_SeqOps()))
     });
-    var $d_Lfrawa_typedjson_validation_ValidationResult$ = new $TypeData().initClass({
-      Lfrawa_typedjson_validation_ValidationResult$: 0
-    }, false, "frawa.typedjson.validation.ValidationResult$", {
-      Lfrawa_typedjson_validation_ValidationResult$: 1,
+    $c_Lfrawa_typedjson_validation_ValidationOutput$.prototype.add__Lfrawa_typedjson_validation_ValidationOutput__Lfrawa_typedjson_validation_ValidationOutput__Lfrawa_typedjson_validation_ValidationOutput = (function(o1, o2) {
+      var this$1 = o1.Lfrawa_typedjson_validation_ValidationOutput__f_errors;
+      var suffix = o2.Lfrawa_typedjson_validation_ValidationOutput__f_errors;
+      var $$x1 = $as_sci_Seq(this$1.appendedAll__sc_IterableOnce__O(suffix));
+      var this$2 = o1.Lfrawa_typedjson_validation_ValidationOutput__f_annotations;
+      var suffix$1 = o2.Lfrawa_typedjson_validation_ValidationOutput__f_annotations;
+      return new $c_Lfrawa_typedjson_validation_ValidationOutput($$x1, $as_sci_Seq(this$2.appendedAll__sc_IterableOnce__O(suffix$1)))
+    });
+    var $d_Lfrawa_typedjson_validation_ValidationOutput$ = new $TypeData().initClass({
+      Lfrawa_typedjson_validation_ValidationOutput$: 0
+    }, false, "frawa.typedjson.validation.ValidationOutput$", {
+      Lfrawa_typedjson_validation_ValidationOutput$: 1,
       O: 1,
       Ljava_io_Serializable: 1
     });
-    $c_Lfrawa_typedjson_validation_ValidationResult$.prototype.$classData = $d_Lfrawa_typedjson_validation_ValidationResult$;
-    var $n_Lfrawa_typedjson_validation_ValidationResult$;
-    function $m_Lfrawa_typedjson_validation_ValidationResult$() {
-      if ((!$n_Lfrawa_typedjson_validation_ValidationResult$)) {
-        $n_Lfrawa_typedjson_validation_ValidationResult$ = new $c_Lfrawa_typedjson_validation_ValidationResult$();
-      }  return $n_Lfrawa_typedjson_validation_ValidationResult$
+    $c_Lfrawa_typedjson_validation_ValidationOutput$.prototype.$classData = $d_Lfrawa_typedjson_validation_ValidationOutput$;
+    var $n_Lfrawa_typedjson_validation_ValidationOutput$;
+    function $m_Lfrawa_typedjson_validation_ValidationOutput$() {
+      if ((!$n_Lfrawa_typedjson_validation_ValidationOutput$)) {
+        $n_Lfrawa_typedjson_validation_ValidationOutput$ = new $c_Lfrawa_typedjson_validation_ValidationOutput$();
+      }  return $n_Lfrawa_typedjson_validation_ValidationOutput$
     }
     function $p_jl_Character$__nonASCIIZeroDigitCodePoints$lzycompute__AI($thiz) {
       if (((((32 & $thiz.jl_Character$__f_bitmap$0) << 24) >> 24) === 0)) {
@@ -40006,10 +40020,14 @@
                     $m_Lfrawa_typedjson_js_TypedJsonFactory$();
                     return $m_Lfrawa_typedjson_parser_OffsetParser$().offsetAt__Lfrawa_typedjson_parser_Offset$Value__Lfrawa_typedjson_pointer_Pointer__s_Option(value$1, pointer)
                   }))(this, value));
-                  var markers = $as_sci_Seq($as_sc_IterableOps(result.Lfrawa_typedjson_keywords_Result__f_results.flatMap__F1__O(new $c_sjsr_AnonFunction1(((this$2$1) => ((x$2$2) => {
-                    var x$2 = $as_Lfrawa_typedjson_validation_ValidationResult(x$2$2);
-                    return x$2.Lfrawa_typedjson_validation_ValidationResult__f_errors
-                  }))()))).map__F1__O(new $c_sjsr_AnonFunction1(((this$3, offsetAt$1) => ((error$2) => {
+                  var this$3 = result.Lfrawa_typedjson_keywords_Result__f_output;
+                  if (this$3.isEmpty__Z()) {
+                    var this$4 = $m_s_None$();
+                  } else {
+                    var arg1 = this$3.get__O();
+                    var x$2 = $as_Lfrawa_typedjson_validation_ValidationOutput(arg1);
+                    var this$4 = new $c_s_Some(x$2.Lfrawa_typedjson_validation_ValidationOutput__f_errors);
+                  }              var markers = $as_sci_Seq($as_sc_IterableOps((this$4.isEmpty__Z() ? $as_sci_Seq($m_s_package$().s_package$__f_Seq.apply__sci_Seq__sc_SeqOps($m_sci_Nil$())) : this$4.get__O())).map__F1__O(new $c_sjsr_AnonFunction1(((this$4$1, offsetAt$1) => ((error$2) => {
                     var error = $as_Lfrawa_typedjson_keywords_WithPointer(error$2);
                     return $m_Lfrawa_typedjson_js_Marker$().fromError__F1__Lfrawa_typedjson_keywords_WithPointer__Lfrawa_typedjson_js_Marker(offsetAt$1, error)
                   }))(this, offsetAt))));
@@ -40024,7 +40042,7 @@
           if ((p17 instanceof $c_s_util_Left)) {
             var x18 = $as_s_util_Left(p17);
             var problems = $as_Lfrawa_typedjson_keywords_SchemaProblems(x18.s_util_Left__f_value);
-            var markers = $as_sci_Seq(problems.Lfrawa_typedjson_keywords_SchemaProblems__f_errors.map__F1__O(new $c_sjsr_AnonFunction1(((this$4) => ((error$3$2) => {
+            var markers = $as_sci_Seq(problems.Lfrawa_typedjson_keywords_SchemaProblems__f_errors.map__F1__O(new $c_sjsr_AnonFunction1(((this$5) => ((error$3$2) => {
               var error$3 = $as_Lfrawa_typedjson_keywords_WithPointer(error$3$2);
               return $m_Lfrawa_typedjson_js_Marker$().fromSchemaError__Lfrawa_typedjson_keywords_WithPointer__Lfrawa_typedjson_js_Marker(error$3)
             }))())));
@@ -40078,10 +40096,14 @@
                 throw new $c_s_MatchError(x1$1)
               }          var start = x1$1._1$mcI$sp__I();
               var end = x1$1._2$mcI$sp__I();
-              var suggestions = $as_sci_Seq($as_sc_IterableOps(result.Lfrawa_typedjson_keywords_Result__f_results.flatMap__F1__O(new $c_sjsr_AnonFunction1(((this$3$1) => ((x$5$2) => {
-                var x$5 = $as_Lfrawa_typedjson_suggestion_SuggestionResult(x$5$2);
-                return x$5.Lfrawa_typedjson_suggestion_SuggestionResult__f_suggestions
-              }))()))).map__F1__O(new $c_sjsr_AnonFunction1(((this$4$1) => ((value$2) => {
+              var this$7 = result.Lfrawa_typedjson_keywords_Result__f_output;
+              if (this$7.isEmpty__Z()) {
+                var this$8 = $m_s_None$();
+              } else {
+                var arg1$1 = this$7.get__O();
+                var x$5 = $as_Lfrawa_typedjson_suggestion_SuggestionOutput(arg1$1);
+                var this$8 = new $c_s_Some(x$5.Lfrawa_typedjson_suggestion_SuggestionOutput__f_suggestions);
+              }          var suggestions = $as_sci_Seq($as_sc_IterableOps((this$8.isEmpty__Z() ? $as_sci_Seq($m_s_package$().s_package$__f_Seq.apply__sci_Seq__sc_SeqOps($m_sci_Nil$())) : this$8.get__O())).map__F1__O(new $c_sjsr_AnonFunction1(((this$5$1) => ((value$2) => {
                 var value$3 = $as_Lfrawa_typedjson_parser_Value(value$2);
                 return $p_Lfrawa_typedjson_js_Suggestions$__toSuggestion__Lfrawa_typedjson_parser_Value__Lfrawa_typedjson_js_Suggestion($m_Lfrawa_typedjson_js_Suggestions$(), value$3)
               }))())));
@@ -41591,72 +41613,112 @@
       Ljava_io_Serializable: 1
     });
     $c_Lfrawa_typedjson_keywords_Processing.prototype.$classData = $d_Lfrawa_typedjson_keywords_Processing;
-    function $p_Lfrawa_typedjson_keywords_Result__addProblems__sci_Seq__Lfrawa_typedjson_keywords_Result($thiz, problems) {
-      var x$1 = $as_Lfrawa_typedjson_keywords_SchemaProblems(problems.foldLeft__O__F2__O($thiz.Lfrawa_typedjson_keywords_Result__f_problems, new $c_sjsr_AnonFunction2(((this$1) => ((x$11$2, x$12$2) => {
-        var x$11 = $as_Lfrawa_typedjson_keywords_SchemaProblems(x$11$2);
-        var x$12 = $as_Lfrawa_typedjson_keywords_SchemaProblems(x$12$2);
-        return x$11.combine__Lfrawa_typedjson_keywords_SchemaProblems__Lfrawa_typedjson_keywords_SchemaProblems(x$12)
-      }))())));
+    function $p_Lfrawa_typedjson_keywords_Result__addEvaluations__sci_Seq__Lfrawa_typedjson_keywords_Result($thiz, es) {
+      var this$1 = $thiz.Lfrawa_typedjson_keywords_Result__f_evaluations;
+      var x$1 = $as_sci_Seq(this$1.appendedAll__sc_IterableOnce__O(es));
       var x$2 = $thiz.Lfrawa_typedjson_keywords_Result__f_valid;
-      var x$3 = $thiz.Lfrawa_typedjson_keywords_Result__f_results;
-      var x$4 = $thiz.Lfrawa_typedjson_keywords_Result__f_annotations;
-      var x$5 = $thiz.Lfrawa_typedjson_keywords_Result__f_count;
-      return new $c_Lfrawa_typedjson_keywords_Result(x$2, x$3, x$4, x$1, x$5)
-    }
-    function $p_Lfrawa_typedjson_keywords_Result__addAnnotations__sci_Seq__Lfrawa_typedjson_keywords_Result($thiz, annotations) {
-      var this$1 = $thiz.Lfrawa_typedjson_keywords_Result__f_annotations;
-      var x$1 = $as_sci_Seq(this$1.appendedAll__sc_IterableOnce__O(annotations));
-      var x$2 = $thiz.Lfrawa_typedjson_keywords_Result__f_valid;
-      var x$3 = $thiz.Lfrawa_typedjson_keywords_Result__f_results;
-      var x$4 = $thiz.Lfrawa_typedjson_keywords_Result__f_problems;
-      var x$5 = $thiz.Lfrawa_typedjson_keywords_Result__f_count;
-      return new $c_Lfrawa_typedjson_keywords_Result(x$2, x$3, x$1, x$4, x$5)
+      var x$3 = $thiz.Lfrawa_typedjson_keywords_Result__f_output;
+      var x$4 = $thiz.Lfrawa_typedjson_keywords_Result__f_combineOutput;
+      var x$5 = $thiz.Lfrawa_typedjson_keywords_Result__f_problems;
+      var x$6 = $thiz.Lfrawa_typedjson_keywords_Result__f_count;
+      return new $c_Lfrawa_typedjson_keywords_Result(x$2, x$3, x$4, x$1, x$5, x$6)
     }
     /** @constructor */
-    function $c_Lfrawa_typedjson_keywords_Result(valid, results, annotations, problems, count) {
+    function $c_Lfrawa_typedjson_keywords_Result(valid, output, combineOutput, evaluations, problems, count) {
       this.Lfrawa_typedjson_keywords_Result__f_valid = false;
-      this.Lfrawa_typedjson_keywords_Result__f_results = null;
-      this.Lfrawa_typedjson_keywords_Result__f_annotations = null;
+      this.Lfrawa_typedjson_keywords_Result__f_output = null;
+      this.Lfrawa_typedjson_keywords_Result__f_combineOutput = null;
+      this.Lfrawa_typedjson_keywords_Result__f_evaluations = null;
       this.Lfrawa_typedjson_keywords_Result__f_problems = null;
       this.Lfrawa_typedjson_keywords_Result__f_count = 0;
       this.Lfrawa_typedjson_keywords_Result__f_valid = valid;
-      this.Lfrawa_typedjson_keywords_Result__f_results = results;
-      this.Lfrawa_typedjson_keywords_Result__f_annotations = annotations;
+      this.Lfrawa_typedjson_keywords_Result__f_output = output;
+      this.Lfrawa_typedjson_keywords_Result__f_combineOutput = combineOutput;
+      this.Lfrawa_typedjson_keywords_Result__f_evaluations = evaluations;
       this.Lfrawa_typedjson_keywords_Result__f_problems = problems;
       this.Lfrawa_typedjson_keywords_Result__f_count = count;
     }
     $c_Lfrawa_typedjson_keywords_Result.prototype = new $h_O();
     $c_Lfrawa_typedjson_keywords_Result.prototype.constructor = $c_Lfrawa_typedjson_keywords_Result;
-    $c_Lfrawa_typedjson_keywords_Result.prototype.add__sci_Seq__Lfrawa_typedjson_keywords_Result = (function(others) {
-      var x$1 = ((this.Lfrawa_typedjson_keywords_Result__f_count + $m_Lfrawa_typedjson_keywords_Result$().count__sci_Seq__I(others)) | 0);
+    $c_Lfrawa_typedjson_keywords_Result.prototype.addWithoutOutput__sci_Seq__Lfrawa_typedjson_keywords_Result = (function(others) {
+      var x$1 = ((this.Lfrawa_typedjson_keywords_Result__f_count + $m_Lfrawa_typedjson_keywords_Result$().frawa$typedjson$keywords$Result$$count__sci_Seq__I(others)) | 0);
       var x$2 = this.Lfrawa_typedjson_keywords_Result__f_valid;
-      var x$3 = this.Lfrawa_typedjson_keywords_Result__f_results;
-      var x$4 = this.Lfrawa_typedjson_keywords_Result__f_annotations;
+      var x$3 = this.Lfrawa_typedjson_keywords_Result__f_output;
+      var x$4 = this.Lfrawa_typedjson_keywords_Result__f_combineOutput;
+      var x$5 = this.Lfrawa_typedjson_keywords_Result__f_evaluations;
+      var x$6 = this.Lfrawa_typedjson_keywords_Result__f_problems;
+      var $$x1 = $p_Lfrawa_typedjson_keywords_Result__addEvaluations__sci_Seq__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_keywords_Result(x$2, x$3, x$4, x$5, x$6, x$1), $as_sci_Seq($as_sc_IterableOps(others.filter__F1__O(new $c_sjsr_AnonFunction1(((this$1) => ((x$2$2$2) => {
+        var x$2$2 = $as_Lfrawa_typedjson_keywords_Result(x$2$2$2);
+        return x$2$2.Lfrawa_typedjson_keywords_Result__f_valid
+      }))()))).flatMap__F1__O(new $c_sjsr_AnonFunction1(((this$2) => ((x$3$2$2) => {
+        var x$3$2 = $as_Lfrawa_typedjson_keywords_Result(x$3$2$2);
+        return x$3$2.Lfrawa_typedjson_keywords_Result__f_evaluations
+      }))()))));
+      var this$5 = $as_sc_IterableOnceOps(others.map__F1__O(new $c_sjsr_AnonFunction1(((this$3) => ((x$4$2$2) => {
+        var x$4$2 = $as_Lfrawa_typedjson_keywords_Result(x$4$2$2);
+        return x$4$2.Lfrawa_typedjson_keywords_Result__f_problems
+      }))())));
+      var op = new $c_sjsr_AnonFunction2(((this$4) => ((x$5$2$2, x$6$2$2) => {
+        var x$5$2 = $as_Lfrawa_typedjson_keywords_SchemaProblems(x$5$2$2);
+        var x$6$2 = $as_Lfrawa_typedjson_keywords_SchemaProblems(x$6$2$2);
+        return x$5$2.combine__Lfrawa_typedjson_keywords_SchemaProblems__Lfrawa_typedjson_keywords_SchemaProblems(x$6$2)
+      }))());
+      var this$6 = $f_sc_IterableOnceOps__reduceLeftOption__F2__s_Option(this$5, op);
+      return $$x1.add__Lfrawa_typedjson_keywords_SchemaProblems__Lfrawa_typedjson_keywords_Result($as_Lfrawa_typedjson_keywords_SchemaProblems((this$6.isEmpty__Z() ? $m_Lfrawa_typedjson_keywords_SchemaProblems$().Lfrawa_typedjson_keywords_SchemaProblems$__f_empty : this$6.get__O())))
+    });
+    $c_Lfrawa_typedjson_keywords_Result.prototype.add__Lfrawa_typedjson_keywords_Result__Lfrawa_typedjson_keywords_Result = (function(other) {
+      var this$1$1 = this.Lfrawa_typedjson_keywords_Result__f_combineOutput;
+      var combine = (this$1$1.isEmpty__Z() ? other.Lfrawa_typedjson_keywords_Result__f_combineOutput : this$1$1);
+      if (combine.isEmpty__Z()) {
+        var os = $m_s_None$();
+      } else {
+        var arg1 = combine.get__O();
+        var c = $as_F2(arg1);
+        var $$x2 = $m_s_package$().s_package$__f_Seq;
+        var array = [this.Lfrawa_typedjson_keywords_Result__f_output, other.Lfrawa_typedjson_keywords_Result__f_output];
+        var $$x1 = $$x2.apply__sci_Seq__sc_SeqOps($ct_sjsr_WrappedVarArgs__sjs_js_Array__(new $c_sjsr_WrappedVarArgs(), array));
+        var this$6 = $m_s_$less$colon$less$();
+        var this$7 = $as_sc_IterableOnceOps($$x1.flatten__F1__O(this$6.s_$less$colon$less$__f_singleton));
+        var os = $f_sc_IterableOnceOps__reduceLeftOption__F2__s_Option(this$7, c);
+      }  var valid = (this.Lfrawa_typedjson_keywords_Result__f_valid && other.Lfrawa_typedjson_keywords_Result__f_valid);
+      var output = this.Lfrawa_typedjson_keywords_Result__f_output;
+      var combineOutput = this.Lfrawa_typedjson_keywords_Result__f_combineOutput;
+      var evaluations = this.Lfrawa_typedjson_keywords_Result__f_evaluations;
+      var problems = this.Lfrawa_typedjson_keywords_Result__f_problems;
+      var count = this.Lfrawa_typedjson_keywords_Result__f_count;
+      var qual$1 = new $c_Lfrawa_typedjson_keywords_Result(valid, output, combineOutput, evaluations, problems, count);
+      var x$1 = ((this.Lfrawa_typedjson_keywords_Result__f_count + other.Lfrawa_typedjson_keywords_Result__f_count) | 0);
+      var x$2 = qual$1.Lfrawa_typedjson_keywords_Result__f_valid;
+      var x$3 = qual$1.Lfrawa_typedjson_keywords_Result__f_output;
+      var x$4 = qual$1.Lfrawa_typedjson_keywords_Result__f_combineOutput;
+      var x$5 = qual$1.Lfrawa_typedjson_keywords_Result__f_evaluations;
+      var x$6 = qual$1.Lfrawa_typedjson_keywords_Result__f_problems;
+      var qual$2 = new $c_Lfrawa_typedjson_keywords_Result(x$2, x$3, x$4, x$5, x$6, x$1);
+      var x$8 = qual$2.Lfrawa_typedjson_keywords_Result__f_valid;
+      var x$9 = qual$2.Lfrawa_typedjson_keywords_Result__f_combineOutput;
+      var x$10 = qual$2.Lfrawa_typedjson_keywords_Result__f_evaluations;
+      var x$11 = qual$2.Lfrawa_typedjson_keywords_Result__f_problems;
+      var x$12 = qual$2.Lfrawa_typedjson_keywords_Result__f_count;
+      return $p_Lfrawa_typedjson_keywords_Result__addEvaluations__sci_Seq__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_keywords_Result(x$8, os, x$9, x$10, x$11, x$12), other.Lfrawa_typedjson_keywords_Result__f_evaluations).add__Lfrawa_typedjson_keywords_SchemaProblems__Lfrawa_typedjson_keywords_Result(other.Lfrawa_typedjson_keywords_Result__f_problems)
+    });
+    $c_Lfrawa_typedjson_keywords_Result.prototype.add__Lfrawa_typedjson_keywords_SchemaProblems__Lfrawa_typedjson_keywords_Result = (function(p) {
+      var x$1 = this.Lfrawa_typedjson_keywords_Result__f_problems.combine__Lfrawa_typedjson_keywords_SchemaProblems__Lfrawa_typedjson_keywords_SchemaProblems(p);
+      var x$2 = this.Lfrawa_typedjson_keywords_Result__f_valid;
+      var x$3 = this.Lfrawa_typedjson_keywords_Result__f_output;
+      var x$4 = this.Lfrawa_typedjson_keywords_Result__f_combineOutput;
+      var x$5 = this.Lfrawa_typedjson_keywords_Result__f_evaluations;
+      var x$6 = this.Lfrawa_typedjson_keywords_Result__f_count;
+      return new $c_Lfrawa_typedjson_keywords_Result(x$2, x$3, x$4, x$5, x$1, x$6)
+    });
+    $c_Lfrawa_typedjson_keywords_Result.prototype.add__Lfrawa_typedjson_keywords_WithPointer__Lfrawa_typedjson_keywords_Result = (function(e) {
+      var this$1$1 = this.Lfrawa_typedjson_keywords_Result__f_evaluations;
+      var x$1 = $as_sci_Seq(this$1$1.appended__O__O(e));
+      var x$2 = this.Lfrawa_typedjson_keywords_Result__f_valid;
+      var x$3 = this.Lfrawa_typedjson_keywords_Result__f_output;
+      var x$4 = this.Lfrawa_typedjson_keywords_Result__f_combineOutput;
       var x$5 = this.Lfrawa_typedjson_keywords_Result__f_problems;
-      return $p_Lfrawa_typedjson_keywords_Result__addProblems__sci_Seq__Lfrawa_typedjson_keywords_Result($p_Lfrawa_typedjson_keywords_Result__addAnnotations__sci_Seq__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_keywords_Result(x$2, x$3, x$4, x$5, x$1), $as_sci_Seq(others.flatMap__F1__O(new $c_sjsr_AnonFunction1(((this$1) => ((x$9$2) => {
-        var x$9 = $as_Lfrawa_typedjson_keywords_Result(x$9$2);
-        return x$9.Lfrawa_typedjson_keywords_Result__f_annotations
-      }))())))), $as_sci_Seq(others.map__F1__O(new $c_sjsr_AnonFunction1(((this$2) => ((x$10$2) => {
-        var x$10 = $as_Lfrawa_typedjson_keywords_Result(x$10$2);
-        return x$10.Lfrawa_typedjson_keywords_Result__f_problems
-      }))()))))
-    });
-    $c_Lfrawa_typedjson_keywords_Result.prototype.add__Lfrawa_typedjson_keywords_SchemaProblems__Lfrawa_typedjson_keywords_Result = (function(problem) {
-      var x$1 = this.Lfrawa_typedjson_keywords_Result__f_problems.combine__Lfrawa_typedjson_keywords_SchemaProblems__Lfrawa_typedjson_keywords_SchemaProblems(problem);
-      var x$2 = this.Lfrawa_typedjson_keywords_Result__f_valid;
-      var x$3 = this.Lfrawa_typedjson_keywords_Result__f_results;
-      var x$4 = this.Lfrawa_typedjson_keywords_Result__f_annotations;
-      var x$5 = this.Lfrawa_typedjson_keywords_Result__f_count;
-      return new $c_Lfrawa_typedjson_keywords_Result(x$2, x$3, x$4, x$1, x$5)
-    });
-    $c_Lfrawa_typedjson_keywords_Result.prototype.add__Lfrawa_typedjson_keywords_WithPointer__Lfrawa_typedjson_keywords_Result = (function(annotation) {
-      var this$1$1 = this.Lfrawa_typedjson_keywords_Result__f_annotations;
-      var x$1 = $as_sci_Seq(this$1$1.appended__O__O(annotation));
-      var x$2 = this.Lfrawa_typedjson_keywords_Result__f_valid;
-      var x$3 = this.Lfrawa_typedjson_keywords_Result__f_results;
-      var x$4 = this.Lfrawa_typedjson_keywords_Result__f_problems;
-      var x$5 = this.Lfrawa_typedjson_keywords_Result__f_count;
-      return new $c_Lfrawa_typedjson_keywords_Result(x$2, x$3, x$1, x$4, x$5)
+      var x$6 = this.Lfrawa_typedjson_keywords_Result__f_count;
+      return new $c_Lfrawa_typedjson_keywords_Result(x$2, x$3, x$4, x$1, x$5, x$6)
     });
     $c_Lfrawa_typedjson_keywords_Result.prototype.addIgnoredKeywords__sci_Set__Lfrawa_typedjson_pointer_Pointer__Lfrawa_typedjson_keywords_Result = (function(ignored, pointer) {
       return (ignored.isEmpty__Z() ? this : this.add__Lfrawa_typedjson_keywords_WithPointer__Lfrawa_typedjson_keywords_Result(new $c_Lfrawa_typedjson_keywords_WithPointer(new $c_Lfrawa_typedjson_keywords_Ignored(ignored), pointer)))
@@ -41665,7 +41727,7 @@
       return "Result"
     });
     $c_Lfrawa_typedjson_keywords_Result.prototype.productArity__I = (function() {
-      return 5
+      return 6
     });
     $c_Lfrawa_typedjson_keywords_Result.prototype.productElement__I__O = (function(x$1) {
       switch (x$1) {
@@ -41673,15 +41735,18 @@
           return this.Lfrawa_typedjson_keywords_Result__f_valid;
         }
         case 1: {
-          return this.Lfrawa_typedjson_keywords_Result__f_results;
+          return this.Lfrawa_typedjson_keywords_Result__f_output;
         }
         case 2: {
-          return this.Lfrawa_typedjson_keywords_Result__f_annotations;
+          return this.Lfrawa_typedjson_keywords_Result__f_combineOutput;
         }
         case 3: {
-          return this.Lfrawa_typedjson_keywords_Result__f_problems;
+          return this.Lfrawa_typedjson_keywords_Result__f_evaluations;
         }
         case 4: {
+          return this.Lfrawa_typedjson_keywords_Result__f_problems;
+        }
+        case 5: {
           return this.Lfrawa_typedjson_keywords_Result__f_count;
         }
         default: {
@@ -41701,22 +41766,26 @@
       var data$1 = (this.Lfrawa_typedjson_keywords_Result__f_valid ? 1231 : 1237);
       acc = $m_sr_Statics$().mix__I__I__I(hash$1, data$1);
       var hash$2 = acc;
-      var x = this.Lfrawa_typedjson_keywords_Result__f_results;
+      var x = this.Lfrawa_typedjson_keywords_Result__f_output;
       var data$2 = $m_sr_Statics$().anyHash__O__I(x);
       acc = $m_sr_Statics$().mix__I__I__I(hash$2, data$2);
       var hash$3 = acc;
-      var x$1 = this.Lfrawa_typedjson_keywords_Result__f_annotations;
+      var x$1 = this.Lfrawa_typedjson_keywords_Result__f_combineOutput;
       var data$3 = $m_sr_Statics$().anyHash__O__I(x$1);
       acc = $m_sr_Statics$().mix__I__I__I(hash$3, data$3);
       var hash$4 = acc;
-      var x$2 = this.Lfrawa_typedjson_keywords_Result__f_problems;
+      var x$2 = this.Lfrawa_typedjson_keywords_Result__f_evaluations;
       var data$4 = $m_sr_Statics$().anyHash__O__I(x$2);
       acc = $m_sr_Statics$().mix__I__I__I(hash$4, data$4);
       var hash$5 = acc;
-      var data$5 = this.Lfrawa_typedjson_keywords_Result__f_count;
+      var x$3 = this.Lfrawa_typedjson_keywords_Result__f_problems;
+      var data$5 = $m_sr_Statics$().anyHash__O__I(x$3);
       acc = $m_sr_Statics$().mix__I__I__I(hash$5, data$5);
       var hash$6 = acc;
-      return $m_sr_Statics$().finalizeHash__I__I__I(hash$6, 5)
+      var data$6 = this.Lfrawa_typedjson_keywords_Result__f_count;
+      acc = $m_sr_Statics$().mix__I__I__I(hash$6, data$6);
+      var hash$7 = acc;
+      return $m_sr_Statics$().finalizeHash__I__I__I(hash$7, 6)
     });
     $c_Lfrawa_typedjson_keywords_Result.prototype.toString__T = (function() {
       return $m_sr_ScalaRunTime$()._toString__s_Product__T(this)
@@ -41728,8 +41797,8 @@
         var Result$1 = $as_Lfrawa_typedjson_keywords_Result(x$1);
         if ((this.Lfrawa_typedjson_keywords_Result__f_valid === Result$1.Lfrawa_typedjson_keywords_Result__f_valid)) {
           if ((this.Lfrawa_typedjson_keywords_Result__f_count === Result$1.Lfrawa_typedjson_keywords_Result__f_count)) {
-            var x = this.Lfrawa_typedjson_keywords_Result__f_results;
-            var x$2 = Result$1.Lfrawa_typedjson_keywords_Result__f_results;
+            var x = this.Lfrawa_typedjson_keywords_Result__f_output;
+            var x$2 = Result$1.Lfrawa_typedjson_keywords_Result__f_output;
             var $$x1 = ((x === null) ? (x$2 === null) : x.equals__O__Z(x$2));
           } else {
             var $$x1 = false;
@@ -41737,12 +41806,18 @@
         } else {
           var $$x1 = false;
         }    if ($$x1) {
-          var x$3 = this.Lfrawa_typedjson_keywords_Result__f_annotations;
-          var x$4 = Result$1.Lfrawa_typedjson_keywords_Result__f_annotations;
+          var x$3 = this.Lfrawa_typedjson_keywords_Result__f_combineOutput;
+          var x$4 = Result$1.Lfrawa_typedjson_keywords_Result__f_combineOutput;
           if (((x$3 === null) ? (x$4 === null) : x$3.equals__O__Z(x$4))) {
-            var x$5 = this.Lfrawa_typedjson_keywords_Result__f_problems;
-            var x$6 = Result$1.Lfrawa_typedjson_keywords_Result__f_problems;
-            return ((x$5 === null) ? (x$6 === null) : x$5.equals__O__Z(x$6))
+            var x$5 = this.Lfrawa_typedjson_keywords_Result__f_evaluations;
+            var x$6 = Result$1.Lfrawa_typedjson_keywords_Result__f_evaluations;
+            var $$x2 = ((x$5 === null) ? (x$6 === null) : x$5.equals__O__Z(x$6));
+          } else {
+            var $$x2 = false;
+          }      if ($$x2) {
+            var x$7 = this.Lfrawa_typedjson_keywords_Result__f_problems;
+            var x$8 = Result$1.Lfrawa_typedjson_keywords_Result__f_problems;
+            return ((x$7 === null) ? (x$8 === null) : x$7.equals__O__Z(x$8))
           } else {
             return false
           }
@@ -42488,53 +42563,53 @@
     });
     $c_Lfrawa_typedjson_pointer_Pointer.prototype.$classData = $d_Lfrawa_typedjson_pointer_Pointer;
     /** @constructor */
-    function $c_Lfrawa_typedjson_suggestion_SuggestionResult(suggestions, validated) {
-      this.Lfrawa_typedjson_suggestion_SuggestionResult__f_suggestions = null;
-      this.Lfrawa_typedjson_suggestion_SuggestionResult__f_validated = null;
-      this.Lfrawa_typedjson_suggestion_SuggestionResult__f_suggestions = suggestions;
-      this.Lfrawa_typedjson_suggestion_SuggestionResult__f_validated = validated;
+    function $c_Lfrawa_typedjson_suggestion_SuggestionOutput(suggestions, validated) {
+      this.Lfrawa_typedjson_suggestion_SuggestionOutput__f_suggestions = null;
+      this.Lfrawa_typedjson_suggestion_SuggestionOutput__f_validated = null;
+      this.Lfrawa_typedjson_suggestion_SuggestionOutput__f_suggestions = suggestions;
+      this.Lfrawa_typedjson_suggestion_SuggestionOutput__f_validated = validated;
     }
-    $c_Lfrawa_typedjson_suggestion_SuggestionResult.prototype = new $h_O();
-    $c_Lfrawa_typedjson_suggestion_SuggestionResult.prototype.constructor = $c_Lfrawa_typedjson_suggestion_SuggestionResult;
-    $c_Lfrawa_typedjson_suggestion_SuggestionResult.prototype.productPrefix__T = (function() {
-      return "SuggestionResult"
+    $c_Lfrawa_typedjson_suggestion_SuggestionOutput.prototype = new $h_O();
+    $c_Lfrawa_typedjson_suggestion_SuggestionOutput.prototype.constructor = $c_Lfrawa_typedjson_suggestion_SuggestionOutput;
+    $c_Lfrawa_typedjson_suggestion_SuggestionOutput.prototype.productPrefix__T = (function() {
+      return "SuggestionOutput"
     });
-    $c_Lfrawa_typedjson_suggestion_SuggestionResult.prototype.productArity__I = (function() {
+    $c_Lfrawa_typedjson_suggestion_SuggestionOutput.prototype.productArity__I = (function() {
       return 2
     });
-    $c_Lfrawa_typedjson_suggestion_SuggestionResult.prototype.productElement__I__O = (function(x$1) {
+    $c_Lfrawa_typedjson_suggestion_SuggestionOutput.prototype.productElement__I__O = (function(x$1) {
       switch (x$1) {
         case 0: {
-          return this.Lfrawa_typedjson_suggestion_SuggestionResult__f_suggestions;
+          return this.Lfrawa_typedjson_suggestion_SuggestionOutput__f_suggestions;
         }
         case 1: {
-          return this.Lfrawa_typedjson_suggestion_SuggestionResult__f_validated;
+          return this.Lfrawa_typedjson_suggestion_SuggestionOutput__f_validated;
         }
         default: {
           return $m_sr_Statics$().ioobe__I__O(x$1)
         }
       }
     });
-    $c_Lfrawa_typedjson_suggestion_SuggestionResult.prototype.productIterator__sc_Iterator = (function() {
+    $c_Lfrawa_typedjson_suggestion_SuggestionOutput.prototype.productIterator__sc_Iterator = (function() {
       return new $c_sr_ScalaRunTime$$anon$1(this)
     });
-    $c_Lfrawa_typedjson_suggestion_SuggestionResult.prototype.hashCode__I = (function() {
+    $c_Lfrawa_typedjson_suggestion_SuggestionOutput.prototype.hashCode__I = (function() {
       var this$2 = $m_s_util_hashing_MurmurHash3$();
       return this$2.productHash__s_Product__I__Z__I(this, (-889275714), false)
     });
-    $c_Lfrawa_typedjson_suggestion_SuggestionResult.prototype.toString__T = (function() {
+    $c_Lfrawa_typedjson_suggestion_SuggestionOutput.prototype.toString__T = (function() {
       return $m_sr_ScalaRunTime$()._toString__s_Product__T(this)
     });
-    $c_Lfrawa_typedjson_suggestion_SuggestionResult.prototype.equals__O__Z = (function(x$1) {
+    $c_Lfrawa_typedjson_suggestion_SuggestionOutput.prototype.equals__O__Z = (function(x$1) {
       if ((this === x$1)) {
         return true
-      } else if ((x$1 instanceof $c_Lfrawa_typedjson_suggestion_SuggestionResult)) {
-        var SuggestionResult$1 = $as_Lfrawa_typedjson_suggestion_SuggestionResult(x$1);
-        var x = this.Lfrawa_typedjson_suggestion_SuggestionResult__f_suggestions;
-        var x$2 = SuggestionResult$1.Lfrawa_typedjson_suggestion_SuggestionResult__f_suggestions;
+      } else if ((x$1 instanceof $c_Lfrawa_typedjson_suggestion_SuggestionOutput)) {
+        var SuggestionOutput$1 = $as_Lfrawa_typedjson_suggestion_SuggestionOutput(x$1);
+        var x = this.Lfrawa_typedjson_suggestion_SuggestionOutput__f_suggestions;
+        var x$2 = SuggestionOutput$1.Lfrawa_typedjson_suggestion_SuggestionOutput__f_suggestions;
         if (((x === null) ? (x$2 === null) : x.equals__O__Z(x$2))) {
-          var x$3 = this.Lfrawa_typedjson_suggestion_SuggestionResult__f_validated;
-          var x$4 = SuggestionResult$1.Lfrawa_typedjson_suggestion_SuggestionResult__f_validated;
+          var x$3 = this.Lfrawa_typedjson_suggestion_SuggestionOutput__f_validated;
+          var x$4 = SuggestionOutput$1.Lfrawa_typedjson_suggestion_SuggestionOutput__f_validated;
           return ((x$3 === null) ? (x$4 === null) : x$3.equals__O__Z(x$4))
         } else {
           return false
@@ -42543,19 +42618,19 @@
         return false
       }
     });
-    function $as_Lfrawa_typedjson_suggestion_SuggestionResult(obj) {
-      return (((obj instanceof $c_Lfrawa_typedjson_suggestion_SuggestionResult) || (obj === null)) ? obj : $throwClassCastException(obj, "frawa.typedjson.suggestion.SuggestionResult"))
+    function $as_Lfrawa_typedjson_suggestion_SuggestionOutput(obj) {
+      return (((obj instanceof $c_Lfrawa_typedjson_suggestion_SuggestionOutput) || (obj === null)) ? obj : $throwClassCastException(obj, "frawa.typedjson.suggestion.SuggestionOutput"))
     }
-    var $d_Lfrawa_typedjson_suggestion_SuggestionResult = new $TypeData().initClass({
-      Lfrawa_typedjson_suggestion_SuggestionResult: 0
-    }, false, "frawa.typedjson.suggestion.SuggestionResult", {
-      Lfrawa_typedjson_suggestion_SuggestionResult: 1,
+    var $d_Lfrawa_typedjson_suggestion_SuggestionOutput = new $TypeData().initClass({
+      Lfrawa_typedjson_suggestion_SuggestionOutput: 0
+    }, false, "frawa.typedjson.suggestion.SuggestionOutput", {
+      Lfrawa_typedjson_suggestion_SuggestionOutput: 1,
       O: 1,
       s_Product: 1,
       s_Equals: 1,
       Ljava_io_Serializable: 1
     });
-    $c_Lfrawa_typedjson_suggestion_SuggestionResult.prototype.$classData = $d_Lfrawa_typedjson_suggestion_SuggestionResult;
+    $c_Lfrawa_typedjson_suggestion_SuggestionOutput.prototype.$classData = $d_Lfrawa_typedjson_suggestion_SuggestionOutput;
     /** @constructor */
     function $c_Lfrawa_typedjson_util_UriUtil$CurrentLocation(uri) {
       this.Lfrawa_typedjson_util_UriUtil$CurrentLocation__f_uri = null;
@@ -42677,56 +42752,74 @@
     });
     $c_Lfrawa_typedjson_util_UriUtil$WithLocation.prototype.$classData = $d_Lfrawa_typedjson_util_UriUtil$WithLocation;
     /** @constructor */
-    function $c_Lfrawa_typedjson_validation_ValidationResult(errors) {
-      this.Lfrawa_typedjson_validation_ValidationResult__f_errors = null;
-      this.Lfrawa_typedjson_validation_ValidationResult__f_errors = errors;
+    function $c_Lfrawa_typedjson_validation_ValidationOutput(errors, annotations) {
+      this.Lfrawa_typedjson_validation_ValidationOutput__f_errors = null;
+      this.Lfrawa_typedjson_validation_ValidationOutput__f_annotations = null;
+      this.Lfrawa_typedjson_validation_ValidationOutput__f_errors = errors;
+      this.Lfrawa_typedjson_validation_ValidationOutput__f_annotations = annotations;
     }
-    $c_Lfrawa_typedjson_validation_ValidationResult.prototype = new $h_O();
-    $c_Lfrawa_typedjson_validation_ValidationResult.prototype.constructor = $c_Lfrawa_typedjson_validation_ValidationResult;
-    $c_Lfrawa_typedjson_validation_ValidationResult.prototype.productPrefix__T = (function() {
-      return "ValidationResult"
+    $c_Lfrawa_typedjson_validation_ValidationOutput.prototype = new $h_O();
+    $c_Lfrawa_typedjson_validation_ValidationOutput.prototype.constructor = $c_Lfrawa_typedjson_validation_ValidationOutput;
+    $c_Lfrawa_typedjson_validation_ValidationOutput.prototype.productPrefix__T = (function() {
+      return "ValidationOutput"
     });
-    $c_Lfrawa_typedjson_validation_ValidationResult.prototype.productArity__I = (function() {
-      return 1
+    $c_Lfrawa_typedjson_validation_ValidationOutput.prototype.productArity__I = (function() {
+      return 2
     });
-    $c_Lfrawa_typedjson_validation_ValidationResult.prototype.productElement__I__O = (function(x$1) {
-      return ((x$1 === 0) ? this.Lfrawa_typedjson_validation_ValidationResult__f_errors : $m_sr_Statics$().ioobe__I__O(x$1))
+    $c_Lfrawa_typedjson_validation_ValidationOutput.prototype.productElement__I__O = (function(x$1) {
+      switch (x$1) {
+        case 0: {
+          return this.Lfrawa_typedjson_validation_ValidationOutput__f_errors;
+        }
+        case 1: {
+          return this.Lfrawa_typedjson_validation_ValidationOutput__f_annotations;
+        }
+        default: {
+          return $m_sr_Statics$().ioobe__I__O(x$1)
+        }
+      }
     });
-    $c_Lfrawa_typedjson_validation_ValidationResult.prototype.productIterator__sc_Iterator = (function() {
+    $c_Lfrawa_typedjson_validation_ValidationOutput.prototype.productIterator__sc_Iterator = (function() {
       return new $c_sr_ScalaRunTime$$anon$1(this)
     });
-    $c_Lfrawa_typedjson_validation_ValidationResult.prototype.hashCode__I = (function() {
+    $c_Lfrawa_typedjson_validation_ValidationOutput.prototype.hashCode__I = (function() {
       var this$2 = $m_s_util_hashing_MurmurHash3$();
       return this$2.productHash__s_Product__I__Z__I(this, (-889275714), false)
     });
-    $c_Lfrawa_typedjson_validation_ValidationResult.prototype.toString__T = (function() {
+    $c_Lfrawa_typedjson_validation_ValidationOutput.prototype.toString__T = (function() {
       return $m_sr_ScalaRunTime$()._toString__s_Product__T(this)
     });
-    $c_Lfrawa_typedjson_validation_ValidationResult.prototype.equals__O__Z = (function(x$1) {
+    $c_Lfrawa_typedjson_validation_ValidationOutput.prototype.equals__O__Z = (function(x$1) {
       if ((this === x$1)) {
         return true
-      } else if ((x$1 instanceof $c_Lfrawa_typedjson_validation_ValidationResult)) {
-        var ValidationResult$1 = $as_Lfrawa_typedjson_validation_ValidationResult(x$1);
-        var x = this.Lfrawa_typedjson_validation_ValidationResult__f_errors;
-        var x$2 = ValidationResult$1.Lfrawa_typedjson_validation_ValidationResult__f_errors;
-        return ((x === null) ? (x$2 === null) : x.equals__O__Z(x$2))
+      } else if ((x$1 instanceof $c_Lfrawa_typedjson_validation_ValidationOutput)) {
+        var ValidationOutput$1 = $as_Lfrawa_typedjson_validation_ValidationOutput(x$1);
+        var x = this.Lfrawa_typedjson_validation_ValidationOutput__f_errors;
+        var x$2 = ValidationOutput$1.Lfrawa_typedjson_validation_ValidationOutput__f_errors;
+        if (((x === null) ? (x$2 === null) : x.equals__O__Z(x$2))) {
+          var x$3 = this.Lfrawa_typedjson_validation_ValidationOutput__f_annotations;
+          var x$4 = ValidationOutput$1.Lfrawa_typedjson_validation_ValidationOutput__f_annotations;
+          return ((x$3 === null) ? (x$4 === null) : x$3.equals__O__Z(x$4))
+        } else {
+          return false
+        }
       } else {
         return false
       }
     });
-    function $as_Lfrawa_typedjson_validation_ValidationResult(obj) {
-      return (((obj instanceof $c_Lfrawa_typedjson_validation_ValidationResult) || (obj === null)) ? obj : $throwClassCastException(obj, "frawa.typedjson.validation.ValidationResult"))
+    function $as_Lfrawa_typedjson_validation_ValidationOutput(obj) {
+      return (((obj instanceof $c_Lfrawa_typedjson_validation_ValidationOutput) || (obj === null)) ? obj : $throwClassCastException(obj, "frawa.typedjson.validation.ValidationOutput"))
     }
-    var $d_Lfrawa_typedjson_validation_ValidationResult = new $TypeData().initClass({
-      Lfrawa_typedjson_validation_ValidationResult: 0
-    }, false, "frawa.typedjson.validation.ValidationResult", {
-      Lfrawa_typedjson_validation_ValidationResult: 1,
+    var $d_Lfrawa_typedjson_validation_ValidationOutput = new $TypeData().initClass({
+      Lfrawa_typedjson_validation_ValidationOutput: 0
+    }, false, "frawa.typedjson.validation.ValidationOutput", {
+      Lfrawa_typedjson_validation_ValidationOutput: 1,
       O: 1,
       s_Product: 1,
       s_Equals: 1,
       Ljava_io_Serializable: 1
     });
-    $c_Lfrawa_typedjson_validation_ValidationResult.prototype.$classData = $d_Lfrawa_typedjson_validation_ValidationResult;
+    $c_Lfrawa_typedjson_validation_ValidationOutput.prototype.$classData = $d_Lfrawa_typedjson_validation_ValidationOutput;
     class $c_Ljava_io_IOException extends $c_jl_Exception {
     }
     function $as_Ljava_io_IOException(obj) {
@@ -46649,12 +46742,12 @@
     $c_Lfrawa_typedjson_keywords_Evaluator$$anonfun$3.prototype = new $h_sr_AbstractPartialFunction();
     $c_Lfrawa_typedjson_keywords_Evaluator$$anonfun$3.prototype.constructor = $c_Lfrawa_typedjson_keywords_Evaluator$$anonfun$3;
     $c_Lfrawa_typedjson_keywords_Evaluator$$anonfun$3.prototype.applyOrElse__T__F1__O = (function(x3, default$1) {
-      return (this.Lfrawa_typedjson_keywords_Evaluator$$anonfun$3__f_psBoth$1.exists__F1__Z(new $c_sjsr_AnonFunction1(((this$1, x1) => ((x$12$2) => {
-        var x$12 = $as_s_PartialFunction(x$12$2);
-        return x$12.isDefinedAt__O__Z(x1)
-      }))(this, x3))) ? new $c_sjsr_AnonFunction0(((this$2, x1$1) => (() => $m_Lfrawa_typedjson_keywords_Evaluator$().frawa$typedjson$keywords$Evaluator$$seq__sci_Seq__F1($as_sci_Seq($as_sc_IterableOps(this$2.Lfrawa_typedjson_keywords_Evaluator$$anonfun$3__f_psBoth$1.map__F1__O(new $c_sjsr_AnonFunction1(((this$3) => ((x$13$2) => {
-        var x$13 = $as_s_PartialFunction(x$13$2);
-        return x$13.lift__F1()
+      return (this.Lfrawa_typedjson_keywords_Evaluator$$anonfun$3__f_psBoth$1.exists__F1__Z(new $c_sjsr_AnonFunction1(((this$1, x1) => ((x$14$2) => {
+        var x$14 = $as_s_PartialFunction(x$14$2);
+        return x$14.isDefinedAt__O__Z(x1)
+      }))(this, x3))) ? new $c_sjsr_AnonFunction0(((this$2, x1$1) => (() => $m_Lfrawa_typedjson_keywords_Evaluator$().frawa$typedjson$keywords$Evaluator$$seq__sci_Seq__F1($as_sci_Seq($as_sc_IterableOps(this$2.Lfrawa_typedjson_keywords_Evaluator$$anonfun$3__f_psBoth$1.map__F1__O(new $c_sjsr_AnonFunction1(((this$3) => ((x$15$2) => {
+        var x$15 = $as_s_PartialFunction(x$15$2);
+        return x$15.lift__F1()
       }))()))).flatMap__F1__O(new $c_sjsr_AnonFunction1(((this$2$1, x1$1$1) => ((p$2) => {
         var p = $as_F1(p$2);
         var this$4 = $as_s_Option(p.apply__O__O(x1$1$1));
@@ -46662,15 +46755,15 @@
           return $m_s_None$()
         } else {
           var arg1 = this$4.get__O();
-          var x$14 = $as_F0(arg1);
-          return new $c_s_Some($as_F1(x$14.apply__O()))
+          var x$16 = $as_F0(arg1);
+          return new $c_s_Some($as_F1(x$16.apply__O()))
         }
       }))(this$2, x1$1)))))))(this, x3)) : default$1.apply__O__O(x3))
     });
     $c_Lfrawa_typedjson_keywords_Evaluator$$anonfun$3.prototype.isDefinedAt__T__Z = (function(x3) {
-      return this.Lfrawa_typedjson_keywords_Evaluator$$anonfun$3__f_psBoth$1.exists__F1__Z(new $c_sjsr_AnonFunction1(((this$1, x1) => ((x$12$2) => {
-        var x$12 = $as_s_PartialFunction(x$12$2);
-        return x$12.isDefinedAt__O__Z(x1)
+      return this.Lfrawa_typedjson_keywords_Evaluator$$anonfun$3__f_psBoth$1.exists__F1__Z(new $c_sjsr_AnonFunction1(((this$1, x1) => ((x$14$2) => {
+        var x$14 = $as_s_PartialFunction(x$14$2);
+        return x$14.isDefinedAt__O__Z(x1)
       }))(this, x3)))
     });
     $c_Lfrawa_typedjson_keywords_Evaluator$$anonfun$3.prototype.isDefinedAt__O__Z = (function(x) {
@@ -46699,10 +46792,10 @@
     }
     $c_Lfrawa_typedjson_keywords_Evaluator$$anonfun$4.prototype = new $h_sr_AbstractPartialFunction();
     $c_Lfrawa_typedjson_keywords_Evaluator$$anonfun$4.prototype.constructor = $c_Lfrawa_typedjson_keywords_Evaluator$$anonfun$4;
-    $c_Lfrawa_typedjson_keywords_Evaluator$$anonfun$4.prototype.applyOrElse__T__F1__O = (function(x$15, default$1) {
+    $c_Lfrawa_typedjson_keywords_Evaluator$$anonfun$4.prototype.applyOrElse__T__F1__O = (function(x$17, default$1) {
       return new $c_sjsr_AnonFunction0(((this$1) => (() => $m_Lfrawa_typedjson_keywords_Evaluator$().frawa$typedjson$keywords$Evaluator$$all__Lfrawa_typedjson_keywords_Processing__Lfrawa_typedjson_keywords_Keywords__F1(this$1.Lfrawa_typedjson_keywords_Evaluator$$anonfun$4__f_processing$4, this$1.Lfrawa_typedjson_keywords_Evaluator$$anonfun$4__f_keywords$5)))(this))
     });
-    $c_Lfrawa_typedjson_keywords_Evaluator$$anonfun$4.prototype.isDefinedAt__T__Z = (function(x$15) {
+    $c_Lfrawa_typedjson_keywords_Evaluator$$anonfun$4.prototype.isDefinedAt__T__Z = (function(x$17) {
       return true
     });
     $c_Lfrawa_typedjson_keywords_Evaluator$$anonfun$4.prototype.isDefinedAt__O__Z = (function(x) {
@@ -49354,6 +49447,56 @@
     });
     $c_Lfrawa_typedjson_validation_TypeMismatch.prototype.$classData = $d_Lfrawa_typedjson_validation_TypeMismatch;
     /** @constructor */
+    function $c_Lfrawa_typedjson_validation_UnknownFormat(format) {
+      this.Lfrawa_typedjson_validation_UnknownFormat__f_format = null;
+      this.Lfrawa_typedjson_validation_UnknownFormat__f_format = format;
+    }
+    $c_Lfrawa_typedjson_validation_UnknownFormat.prototype = new $h_O();
+    $c_Lfrawa_typedjson_validation_UnknownFormat.prototype.constructor = $c_Lfrawa_typedjson_validation_UnknownFormat;
+    $c_Lfrawa_typedjson_validation_UnknownFormat.prototype.productPrefix__T = (function() {
+      return "UnknownFormat"
+    });
+    $c_Lfrawa_typedjson_validation_UnknownFormat.prototype.productArity__I = (function() {
+      return 1
+    });
+    $c_Lfrawa_typedjson_validation_UnknownFormat.prototype.productElement__I__O = (function(x$1) {
+      return ((x$1 === 0) ? this.Lfrawa_typedjson_validation_UnknownFormat__f_format : $m_sr_Statics$().ioobe__I__O(x$1))
+    });
+    $c_Lfrawa_typedjson_validation_UnknownFormat.prototype.productIterator__sc_Iterator = (function() {
+      return new $c_sr_ScalaRunTime$$anon$1(this)
+    });
+    $c_Lfrawa_typedjson_validation_UnknownFormat.prototype.hashCode__I = (function() {
+      var this$2 = $m_s_util_hashing_MurmurHash3$();
+      return this$2.productHash__s_Product__I__Z__I(this, (-889275714), false)
+    });
+    $c_Lfrawa_typedjson_validation_UnknownFormat.prototype.toString__T = (function() {
+      return $m_sr_ScalaRunTime$()._toString__s_Product__T(this)
+    });
+    $c_Lfrawa_typedjson_validation_UnknownFormat.prototype.equals__O__Z = (function(x$1) {
+      if ((this === x$1)) {
+        return true
+      } else if ((x$1 instanceof $c_Lfrawa_typedjson_validation_UnknownFormat)) {
+        var UnknownFormat$1 = $as_Lfrawa_typedjson_validation_UnknownFormat(x$1);
+        return (this.Lfrawa_typedjson_validation_UnknownFormat__f_format === UnknownFormat$1.Lfrawa_typedjson_validation_UnknownFormat__f_format)
+      } else {
+        return false
+      }
+    });
+    function $as_Lfrawa_typedjson_validation_UnknownFormat(obj) {
+      return (((obj instanceof $c_Lfrawa_typedjson_validation_UnknownFormat) || (obj === null)) ? obj : $throwClassCastException(obj, "frawa.typedjson.validation.UnknownFormat"))
+    }
+    var $d_Lfrawa_typedjson_validation_UnknownFormat = new $TypeData().initClass({
+      Lfrawa_typedjson_validation_UnknownFormat: 0
+    }, false, "frawa.typedjson.validation.UnknownFormat", {
+      Lfrawa_typedjson_validation_UnknownFormat: 1,
+      O: 1,
+      Lfrawa_typedjson_validation_ValidationAnnotation: 1,
+      s_Product: 1,
+      s_Equals: 1,
+      Ljava_io_Serializable: 1
+    });
+    $c_Lfrawa_typedjson_validation_UnknownFormat.prototype.$classData = $d_Lfrawa_typedjson_validation_UnknownFormat;
+    /** @constructor */
     function $c_Lfrawa_typedjson_validation_UnsupportedCheck(validate) {
       this.Lfrawa_typedjson_validation_UnsupportedCheck__f_validate = null;
       this.Lfrawa_typedjson_validation_UnsupportedCheck__f_validate = validate;
@@ -49405,56 +49548,6 @@
       Ljava_io_Serializable: 1
     });
     $c_Lfrawa_typedjson_validation_UnsupportedCheck.prototype.$classData = $d_Lfrawa_typedjson_validation_UnsupportedCheck;
-    /** @constructor */
-    function $c_Lfrawa_typedjson_validation_UnsupportedFormat(format) {
-      this.Lfrawa_typedjson_validation_UnsupportedFormat__f_format = null;
-      this.Lfrawa_typedjson_validation_UnsupportedFormat__f_format = format;
-    }
-    $c_Lfrawa_typedjson_validation_UnsupportedFormat.prototype = new $h_O();
-    $c_Lfrawa_typedjson_validation_UnsupportedFormat.prototype.constructor = $c_Lfrawa_typedjson_validation_UnsupportedFormat;
-    $c_Lfrawa_typedjson_validation_UnsupportedFormat.prototype.productPrefix__T = (function() {
-      return "UnsupportedFormat"
-    });
-    $c_Lfrawa_typedjson_validation_UnsupportedFormat.prototype.productArity__I = (function() {
-      return 1
-    });
-    $c_Lfrawa_typedjson_validation_UnsupportedFormat.prototype.productElement__I__O = (function(x$1) {
-      return ((x$1 === 0) ? this.Lfrawa_typedjson_validation_UnsupportedFormat__f_format : $m_sr_Statics$().ioobe__I__O(x$1))
-    });
-    $c_Lfrawa_typedjson_validation_UnsupportedFormat.prototype.productIterator__sc_Iterator = (function() {
-      return new $c_sr_ScalaRunTime$$anon$1(this)
-    });
-    $c_Lfrawa_typedjson_validation_UnsupportedFormat.prototype.hashCode__I = (function() {
-      var this$2 = $m_s_util_hashing_MurmurHash3$();
-      return this$2.productHash__s_Product__I__Z__I(this, (-889275714), false)
-    });
-    $c_Lfrawa_typedjson_validation_UnsupportedFormat.prototype.toString__T = (function() {
-      return $m_sr_ScalaRunTime$()._toString__s_Product__T(this)
-    });
-    $c_Lfrawa_typedjson_validation_UnsupportedFormat.prototype.equals__O__Z = (function(x$1) {
-      if ((this === x$1)) {
-        return true
-      } else if ((x$1 instanceof $c_Lfrawa_typedjson_validation_UnsupportedFormat)) {
-        var UnsupportedFormat$1 = $as_Lfrawa_typedjson_validation_UnsupportedFormat(x$1);
-        return (this.Lfrawa_typedjson_validation_UnsupportedFormat__f_format === UnsupportedFormat$1.Lfrawa_typedjson_validation_UnsupportedFormat__f_format)
-      } else {
-        return false
-      }
-    });
-    function $as_Lfrawa_typedjson_validation_UnsupportedFormat(obj) {
-      return (((obj instanceof $c_Lfrawa_typedjson_validation_UnsupportedFormat) || (obj === null)) ? obj : $throwClassCastException(obj, "frawa.typedjson.validation.UnsupportedFormat"))
-    }
-    var $d_Lfrawa_typedjson_validation_UnsupportedFormat = new $TypeData().initClass({
-      Lfrawa_typedjson_validation_UnsupportedFormat: 0
-    }, false, "frawa.typedjson.validation.UnsupportedFormat", {
-      Lfrawa_typedjson_validation_UnsupportedFormat: 1,
-      O: 1,
-      Lfrawa_typedjson_validation_ValidationError: 1,
-      s_Product: 1,
-      s_Equals: 1,
-      Ljava_io_Serializable: 1
-    });
-    $c_Lfrawa_typedjson_validation_UnsupportedFormat.prototype.$classData = $d_Lfrawa_typedjson_validation_UnsupportedFormat;
     class $c_jl_ArithmeticException extends $c_jl_RuntimeException {
       constructor(s) {
         super();
@@ -74994,13 +75087,38 @@
     const initialSchema = `{
   "type": "boolean"
 }`;
-    let typedJsonSchema = $e_TypedJsonFactory
-        .withMetaSchema()
-        .forValue(initialSchema);
-    let typedJson = $e_TypedJsonFactory
-        .create()
-        .withSchema(typedJsonSchema)
-        .forValue(initialJson);
+    const schemaUpdate = StateEffect.define();
+    const typedJsonSchemaField = StateField.define({
+        create(state) {
+            return $e_TypedJsonFactory
+                .withMetaSchema()
+                .forValue(state.doc.sliceString(0));
+        },
+        update(value, tr) {
+            if (tr.docChanged) {
+                value = value.forValue(tr.state.doc.sliceString(0));
+            }
+            return value;
+        }
+    });
+    const typedJsonField = StateField.define({
+        create(state) {
+            return $e_TypedJsonFactory
+                .create()
+                .forValue(state.doc.sliceString(0));
+        },
+        update(value, tr) {
+            var _a;
+            const schema = (_a = tr.effects.find(e => e.is(schemaUpdate))) === null || _a === void 0 ? void 0 : _a.value;
+            if (schema) {
+                value = value.withSchema(schema);
+            }
+            if (tr.docChanged) {
+                value = value.forValue(tr.state.doc.sliceString(0));
+            }
+            return value;
+        }
+    });
     const state = EditorState.create({
         doc: initialJson,
         extensions: [
@@ -75008,13 +75126,9 @@
             json(),
             bracketMatching(),
             closeBrackets(),
-            EditorView.updateListener.of(update => {
-                if (update.docChanged) {
-                    typedJson = typedJson.forValue(update.state.doc.sliceString(0));
-                }
-            }),
-            autocompletion(autocompleteConfig(() => typedJson)),
-            linter(linterFun(() => typedJson)),
+            typedJsonField,
+            autocompletion(autocompleteConfig(typedJsonField)),
+            linter(linterFun(typedJsonField)),
             // lintGutter(),
             keymap.of(lintKeymap)
             // keymap.of(completionKeymap)
@@ -75027,38 +75141,32 @@
             json(),
             bracketMatching(),
             closeBrackets(),
+            typedJsonSchemaField,
             EditorView.updateListener.of(update => {
                 if (update.docChanged) {
-                    typedJsonSchema = typedJsonSchema.forValue(update.state.doc.sliceString(0));
-                    typedJson = typedJson.withSchema(typedJsonSchema);
+                    // view.dispatch({
+                    //     effects: [schemaUpdate.of(update.state.field(typedJsonSchemaField))]
+                    // })
+                    view.setState(view.state.update({
+                        effects: [schemaUpdate.of(update.state.field(typedJsonSchemaField))]
+                    }).state);
                 }
             }),
-            autocompletion(autocompleteConfig(() => typedJsonSchema)),
-            linter(linterFun(() => typedJsonSchema)),
+            autocompletion(autocompleteConfig(typedJsonSchemaField)),
+            linter(linterFun(typedJsonSchemaField)),
             // lintGutter(),
             keymap.of(lintKeymap)
             // keymap.of(completionKeymap)
         ],
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    window.view =
-        new EditorView({
-            state,
-            parent: document.querySelector("#editor") || undefined
-        });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    window.viewSchema =
-        new EditorView({
-            state: stateSchema,
-            parent: document.querySelector("#editorSchema") || undefined
-        });
-    function autocompleteConfig(getTypedJson) {
+    function autocompleteConfig(field) {
         return {
             activateOnTyping: false,
             defaultKeymap: true,
             override: [context => {
                     return new Promise(resolve => {
-                        const suggestions = getTypedJson().suggestAt(context.pos);
+                        const typedJson = context.state.field(field);
+                        const suggestions = typedJson.suggestAt(context.pos);
                         if (suggestions.length === 0) {
                             return resolve(null);
                         }
@@ -75084,8 +75192,6 @@
                                 }
                             });
                         });
-                        // console.log("FW", theSuggestion.suggestions.length, options.length)
-                        console.log("FW", context.pos, from, to);
                         return resolve({
                             // from: context.pos,
                             from,
@@ -75096,9 +75202,10 @@
                 }]
         };
     }
-    function linterFun(getTypedJson) {
+    function linterFun(field) {
         return (view) => {
-            const markers = getTypedJson().markers();
+            const typedJson = view.state.field(field);
+            const markers = typedJson.markers().sort((a, b) => a.start - b.start);
             const diagnostics = markers.map(marker => ({
                 from: marker.start,
                 to: marker.end - 1,
@@ -75109,6 +75216,21 @@
             return diagnostics;
         };
     }
+    const view = new EditorView({
+        state,
+        parent: document.querySelector("#editor") || undefined
+    });
+    const viewSchema = new EditorView({
+        state: stateSchema,
+        parent: document.querySelector("#editorSchema") || undefined
+    });
+    view.setState(view.state.update({
+        effects: [schemaUpdate.of(viewSchema.state.field(typedJsonSchemaField))]
+    }).state);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    window.view = view;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    window.viewSchema = viewSchema;
 
 })();
 //# sourceMappingURL=bundle.js.map
