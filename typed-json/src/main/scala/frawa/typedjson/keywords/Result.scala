@@ -1,16 +1,4 @@
-/*dd(other: Result[O]): Result[O] = {
- *     val combine = this.combineOutput.orElse(other.combineOutput)
- *         val os = combine.flatMap(c =>
- *               Seq(this.output, other.output).flatten
- *                       .reduceOption(c)
- *                           )
- *                               this
- *                                     .copy(count = this.count + 1)
- *                                           .copy(output = os)
- *                                                 .addEvaluations(other.evaluations)
- *                                                       .add(other.problems)
- *                                                         }
- *
+/*
  * Copyright 2021 Frank Wagner
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
