@@ -40,7 +40,7 @@ object SuggestionProcessing {
       Result.valid(SuggestionOutput(suggestions, Result.valid[ValidationOutput]))
     } else {
       val result = ValidationProcessing().simple(keyword)(value)
-      Result(result.valid, SuggestionOutput(Seq(), result))
+      Result(result.valid, Some(SuggestionOutput(Seq(), result)))
     }
   }
 

@@ -39,8 +39,7 @@ object Result {
   type Evalutation       = WithPointer[Evaluated]
   type OutputCombiner[O] = (O, O) => O
 
-  def apply[O](valid: Boolean, output: O): Result[O] = Result[O](valid, output)
-  def valid[O]: Result[O]                            = Result[O](valid = true, None, None)
+  def valid[O]: Result[O] = Result[O](valid = true, None, None)
   def valid[O](output: O)(implicit c: OutputCombiner[O]): Result[O] =
     Result[O](valid = true, Some(output), Some(c))
   def invalid[O]: Result[O] = Result[O](valid = false, None, None)
