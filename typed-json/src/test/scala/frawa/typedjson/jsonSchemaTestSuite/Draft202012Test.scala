@@ -40,5 +40,7 @@ class Draft202012Test extends JsonSchemaTestSuite {
     )
   )
 
+  // override protected val onlyDescription: Option[String] = Some("unevaluatedItems with not")
+
   checkFiles(draft202012Files)(parseJsonValue)
 }
