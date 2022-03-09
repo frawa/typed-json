@@ -76,9 +76,10 @@ object TypedJson {
     def apply(result: Result[ValidationOutput]): Output = {
       val errors =
         result.output
-      // .flatMap(x => x.errors).map(error => Error(error.pointer, error.result)) // .getOrElse(Seq())
-      // Output(errors)
-      Output(List.empty)
+          .map(_.errors)
+          .getOrElse(Seq())
+          .map(error => Error(error.pointer, error.result))
+      Output(errors)
     }
 
   }
