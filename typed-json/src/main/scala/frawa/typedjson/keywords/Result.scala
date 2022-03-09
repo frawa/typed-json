@@ -62,7 +62,7 @@ case class Result[O](
   def addWithoutOutput(others: Seq[Result[O]]): Result[O] =
     this
       .copy(count = this.count + Result.count(others))
-      .addEvaluations(others.flatMap(_.evaluations))
+      .addEvaluations(others.filter(_.valid).flatMap(_.evaluations))
       .add(others.map(_.problems).reduceOption(_.combine(_)).getOrElse(SchemaProblems.empty))
 
   def add(other: Result[O]): Result[O] = {
