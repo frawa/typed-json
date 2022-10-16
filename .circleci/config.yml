@@ -12,7 +12,7 @@ jobs:
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
       # documented at https://circleci.com/docs/2.0/circleci-images/
-      - image: cimg/openjdk:8.0-node
+      - image: cimg/openjdk:11.0-node
 
     working_directory: ~/repo
 
