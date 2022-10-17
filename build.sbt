@@ -44,23 +44,37 @@ lazy val sharedPlatformSettings = Seq(
 )
 
 lazy val sharedScalacSettings = Seq(
-  scalacOptions ++= Seq(
-    // "-Wunused:imports",     // TODO Scala3 equivalent
-    "-Xfatal-warnings",
-    "-feature",
-    "-deprecation",
-    "-unchecked"
-  ),
-  scalacOptions ++= (if (scalaVersion.value.startsWith("3"))
-                       Seq(
-                         "-source:3.0-migration",
-                         "-rewrite"
-                         //
-                       )
-                     else Seq()),
-  semanticdbEnabled                      := true,
-  semanticdbVersion                      := scalafixSemanticdb.revision,
-  ThisBuild / scalafixScalaBinaryVersion := "2.13"
+  scalacOptions ++= {
+    Seq(
+      // "-version",
+      // "-help",
+      "-encoding",
+      "UTF-8"
+      // "-feature"
+      // "-language:implicitConversions"
+      // disabled during the migration
+      // "-Xfatal-warnings"
+    ) ++
+      (CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((3, _)) =>
+          Seq(
+            "-unchecked",
+            "-source:3.2-migration",
+            "-explain",
+            "-rewrite"
+          )
+        case _ =>
+          Seq(
+            "-deprecation",
+            "-Xfatal-warnings",
+            "-Wunused:imports,privates,locals",
+            "-Wvalue-discard"
+          )
+      })
+  },
+  ThisBuild / semanticdbEnabled          := true,
+  ThisBuild / semanticdbVersion          := scalafixSemanticdb.revision,
+  ThisBuild / scalafixScalaBinaryVersion := "3.2"
 )
 
 lazy val strictScalacSettings = Seq(
