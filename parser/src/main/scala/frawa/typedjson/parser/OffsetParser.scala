@@ -63,7 +63,7 @@ object OffsetParser {
   def offsetAt(value: Offset.Value)(pointer: Pointer): Option[Offset] = {
     if (pointer.isInsideKey) {
       // TODO move into Pointer
-      val FieldToken(key) = pointer.segments.last
+      val FieldToken(key) = pointer.segments.last: @unchecked
       pointer.outer(value) match {
         case Some(ObjectValue(_, properties)) => properties.find(_._1.value == key).map(_._1.offset)
         case _                                => None
