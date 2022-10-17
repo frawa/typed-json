@@ -17,12 +17,16 @@ lazy val npmRunCI = taskKey[Unit]("npm run ci")
 
 lazy val publishToDocs = taskKey[Unit]("publish to docs/, aka GitHub Pages")
 
-lazy val scalaVersion213 = "2.13.10"
+// lazy val scalaVersion213 = "2.13.10"
+lazy val scalaVersion3 = "3.2.0"
 
 import xerial.sbt.Sonatype._
 
+// resolvers ++= Seq(Resolver.jcenterRepo, Resolver.sonatypeRepo("releases"))
+
 lazy val sharedSettings = Seq(
-  scalaVersion     := scalaVersion213,
+  // scalaVersion     := scalaVersion213,
+  scalaVersion     := scalaVersion3,
   organization     := "io.github.frawa",
   organizationName := "Frank Wagner",
   startYear        := Some(2021),
@@ -35,18 +39,25 @@ lazy val sharedSettings = Seq(
 )
 
 lazy val sharedPlatformSettings = Seq(
-  scalaVersion213
-  // "2.12.10"
+  // scalaVersion213,
+  scalaVersion3
 )
 
 lazy val sharedScalacSettings = Seq(
   scalacOptions ++= Seq(
-    "-Wunused:imports",
+    // "-Wunused:imports",     // TODO Scala3 equivalent
     "-Xfatal-warnings",
     "-feature",
     "-deprecation",
     "-unchecked"
   ),
+  scalacOptions ++= (if (scalaVersion.value.startsWith("3"))
+                       Seq(
+                         "-source:3.0-migration",
+                         "-rewrite"
+                         //
+                       )
+                     else Seq()),
   semanticdbEnabled                      := true,
   semanticdbVersion                      := scalafixSemanticdb.revision,
   ThisBuild / scalafixScalaBinaryVersion := "2.13"
@@ -54,9 +65,11 @@ lazy val sharedScalacSettings = Seq(
 
 lazy val strictScalacSettings = Seq(
   scalacOptions ++= Seq(
-    "-Xlint:inaccessible",
-    "-Xlint:nonlocal-return",
-    "-Xlint:deprecation"
+    // TODO Scala3 equivalent
+    // "-Xlint:inaccessible",
+    // "-Xlint:nonlocal-return",
+    // TODO remove?
+    // "-Xlint:deprecation"
     // "-language:implicitConversions",
     // "-language:higherKinds",
     // "-language:existentials",
@@ -168,8 +181,8 @@ lazy val macros = projectMatrix
     name := "typed-json-macros"
   )
   .settings(
-    libraryDependencies += "org.scala-lang"  % "scala-reflect" % scalaVersion.value,
-    libraryDependencies += "org.scalameta" %%% "munit"         % munitVersion % Test
+    // libraryDependencies += "org.scala-lang"  % "scala-reflect" % scalaVersion.value,
+    libraryDependencies += "org.scalameta" %%% "munit" % munitVersion % Test
   )
   .jvmPlatform(sharedPlatformSettings)
   .jsPlatform(sharedPlatformSettings)
@@ -211,8 +224,10 @@ lazy val typedJsonJsExport = project
     // TODO testing
     Test / test := {}
   )
-  .dependsOn(parserJawn.js(scalaVersion213))
-  .dependsOn(typedJson.js(scalaVersion213))
+  // .dependsOn(parserJawn.js(scalaVersion213))
+  // .dependsOn(typedJson.js(scalaVersion213))
+  .dependsOn(parserJawn.js(scalaVersion3))
+  .dependsOn(typedJson.js(scalaVersion3))
 
 // sample-editor
 npmCI := {
@@ -222,7 +237,7 @@ npmCI := {
 }
 
 npmRunCI := {
-  (typedJsonJsExport / Compile / fastLinkJS).value
+  val doit = (typedJsonJsExport / Compile / fastLinkJS).value
 
   import scala.sys.process._
   val log = streams.value.log
@@ -230,7 +245,7 @@ npmRunCI := {
 }
 
 publishToDocs := {
-  npmRunCI.value
+  val doit = npmRunCI.value
   IO.delete(file("./docs"))
   IO.copyDirectory(file("./sample-editor/public"), file("./docs"))
 }
