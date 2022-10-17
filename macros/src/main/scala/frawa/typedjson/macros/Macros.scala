@@ -19,43 +19,42 @@ package frawa.typedjson.macros
 import frawa.typedjson.parser.Value
 
 object Macros {
+  import scala.quoted.*
   import FileUtils._
   import JsonUtils._
 
-  import scala.language.experimental.macros
-  import scala.reflect.macros.blackbox._
-
-  def fileContent(path: String): String = macro fileContent_impl
-
-  def fileContent_impl(c: Context)(path: c.Expr[String]): c.Expr[String] = {
-    toStringExpr(c)(readContentOf(fromExpr(c)(path)))
+  inline def fileContent(inline path: String): String = ${
+    fileContent_impl('path)
   }
 
-  def jsonContent(path: String): Value = macro jsonContent_impl
-
-  def jsonContent_impl(c: Context)(path: c.Expr[String]): c.Expr[Value] = {
-    toJsonValueExpr(c)(parseJsonValue(readContentOf(fromExpr(c)(path))))
+  private def fileContent_impl(path: Expr[String])(using Quotes): Expr[String] = {
+    Expr(readContentOf(path.valueOrAbort))
   }
 
-  def folderContents(path: String, ext: String): Map[String, String] = macro folderContents_impl
-
-  def folderContents_impl(
-      c: Context
-  )(path: c.Expr[String], ext: c.Expr[String]): c.Expr[Map[String, String]] = {
-    import c.universe._
-    val content = readFolderContentsOf(fromExpr(c)(path), fromExpr(c)(ext))(identity)
-    c.Expr(q"""$content""")
+  inline def folderContents(inline path: String, ext: String): Map[String, String] = ${
+    folderContents_impl('path, 'ext)
   }
 
-  def folderJsonContents(path: String, ext: String): Map[String, Value] = macro folderJsonContents_impl
+  private def folderContents_impl(path: Expr[String], ext: Expr[String])(using Quotes): Expr[Map[String, String]] = {
+    Expr(readFolderContentsOf(path.valueOrAbort, ext.valueOrAbort)(identity))
+  }
 
-  def folderJsonContents_impl(
-      c: Context
-  )(path: c.Expr[String], ext: c.Expr[String]): c.Expr[Map[String, Value]] = {
-    import c.universe._
-    val content    = readFolderContentsOf(fromExpr(c)(path), fromExpr(c)(ext))(parseJsonValue)
-    implicit val l = JsonUtils.liftableJsonValue(c)
-    c.Expr(q"""$content""")
+  inline def jsonContent(inline path: String): Value = ${
+    jsonContent_impl('path)
+  }
+
+  private def jsonContent_impl(path: Expr[String])(using Quotes): Expr[Value] = {
+    import JsonUtils.given
+    Expr(parseJsonValue(readContentOf(path.valueOrAbort)))
+  }
+
+  inline def folderJsonContents(path: String, ext: String): Map[String, Value] = ${
+    folderJsonContents_impl('path, 'ext)
+  }
+
+  def folderJsonContents_impl(path: Expr[String], ext: Expr[String])(using Quotes): Expr[Map[String, Value]] = {
+    import JsonUtils.given
+    Expr(readFolderContentsOf(path.valueOrAbort, ext.valueOrAbort)(parseJsonValue))
   }
 
 }

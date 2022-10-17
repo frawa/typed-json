@@ -19,19 +19,14 @@ package frawa.typedjson.macros
 import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.jawn.JawnParser
 
-import scala.reflect.macros.blackbox
-import scala.reflect.macros.blackbox.Context
+// import scala.reflect.macros.blackbox
+// import scala.reflect.macros.blackbox.Context
 
 object JsonUtils {
+  import scala.quoted.*
   import Value._
 
   private val parser = new JawnParser
-
-  def toJsonValueExpr(c: Context)(value: Value): c.Expr[Value] = {
-    import c.universe._
-    implicit val l = JsonUtils.liftableJsonValue(c)
-    c.Expr(q"""$value""")
-  }
 
   def parseJsonValue(content: String): Value = {
     parser
@@ -45,24 +40,23 @@ object JsonUtils {
       .get
   }
 
-  def liftableJsonValue(c: blackbox.Context): c.universe.Liftable[Value] = {
-    import c.universe._
+  given [T <: Value]: ToExpr[T] with {
+    def apply(value: T)(using Quotes) = {
+      Expr(value)
+    }
+  }
 
-    implicit def liftBigDecimal: Liftable[BigDecimal] = (v: BigDecimal) => q"""BigDecimal(${v.toString()})"""
-    implicit def liftSeq: Liftable[Seq[Value]]        = (vs: Seq[Value]) => q"""Seq(..$vs)"""
-    implicit def liftValue: Liftable[Value]           = (v: Value) => toExpr(v).tree
-
-    def toExpr(value: Value) =
+  given ToExpr[Value] with {
+    def apply(value: Value)(using Quotes) = {
       value match {
-        case NullValue       => c.Expr(q"NullValue")
-        case StringValue(v)  => c.Expr(q"""StringValue($v)""")
-        case BoolValue(v)    => c.Expr(q"""BoolValue($v)""")
-        case NumberValue(v)  => c.Expr(q"""NumberValue(${v})""")
-        case ArrayValue(vs)  => c.Expr(q"""ArrayValue(${vs})""")
-        case ObjectValue(vs) => c.Expr(q"""ObjectValue(${vs})""")
+        case NullValue       => Expr(NullValue)
+        case StringValue(v)  => Expr(StringValue(v))
+        case BoolValue(v)    => Expr(BoolValue(v))
+        case NumberValue(v)  => Expr(NumberValue(v))
+        case ArrayValue(vs)  => Expr(ArrayValue(vs))
+        case ObjectValue(vs) => Expr(ObjectValue(vs))
       }
-
-    Liftable((v: Value) => toExpr(v).tree)
+    }
   }
 
 }
