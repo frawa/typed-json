@@ -35,7 +35,7 @@ object Pointer {
           .replace("~0", "~")
       )
       .drop(1)
-      .map(t => t.toIntOption.map(ArrayIndexToken).getOrElse(FieldToken(t)))
+      .map(t => t.toIntOption.map(ArrayIndexToken.apply).getOrElse(FieldToken(t)))
   )
 
 }
