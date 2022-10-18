@@ -58,7 +58,7 @@ lazy val sharedScalacSettings = Seq(
       (CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((3, _)) =>
           Seq(
-            "-unchecked",
+            // "-Ywarn-unused",
             "-source:3.2-migration",
             // "-source:3.0-migration",
             "-explain",
@@ -73,9 +73,9 @@ lazy val sharedScalacSettings = Seq(
           )
       })
   },
-  ThisBuild / semanticdbEnabled          := true,
-  ThisBuild / semanticdbVersion          := scalafixSemanticdb.revision,
-  ThisBuild / scalafixScalaBinaryVersion := "3.2"
+  ThisBuild / semanticdbEnabled := true,
+  ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+  // ThisBuild / scalafixScalaBinaryVersion := "3.2"
 )
 
 lazy val strictScalacSettings = Seq(
