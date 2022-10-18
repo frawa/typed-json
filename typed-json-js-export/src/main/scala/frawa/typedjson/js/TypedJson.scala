@@ -41,7 +41,7 @@ object TypedJsonFactory {
   def withMetaSchema(): TypedJson = {
     val resolver     = MetaSchemas.lazyResolver
     val base         = MetaSchemas.draft202012
-    val Some(schema) = resolver(base.resolve("schema"))
+    val Some(schema) = resolver(base.resolve("schema")): @unchecked
     val vocabulary   = Vocabulary.specDialect()
     val keywords     = Keywords(schema, Some(vocabulary), Some(resolver))
     TypedJson(Some(keywords))
