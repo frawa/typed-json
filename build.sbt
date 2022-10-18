@@ -48,8 +48,8 @@ lazy val sharedScalacSettings = Seq(
     Seq(
       // "-version",
       // "-help",
-      "-encoding",
-      "UTF-8"
+      // "-encoding",
+      // "UTF-8"
       // "-feature"
       // "-language:implicitConversions"
       // disabled during the migration
@@ -59,10 +59,12 @@ lazy val sharedScalacSettings = Seq(
         case Some((3, _)) =>
           Seq(
             // "-Ywarn-unused",
-            "-source:3.2-migration",
+            // "-source:future",
+            // "-source:future-migration",
+            // "-source:3.2-migration",
             // "-source:3.0-migration",
-            "-explain",
-            "-rewrite"
+            // "-rewrite",
+            // "-explain"
           )
         case _ =>
           Seq(
