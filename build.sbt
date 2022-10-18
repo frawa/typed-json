@@ -60,6 +60,7 @@ lazy val sharedScalacSettings = Seq(
           Seq(
             "-unchecked",
             "-source:3.2-migration",
+            // "-source:3.0-migration",
             "-explain",
             "-rewrite"
           )
