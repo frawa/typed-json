@@ -94,7 +94,7 @@ object ValidationProcessing {
       case MaxPropertiesKeyword(v)         => validateMaxProperties(v)
       case MinPropertiesKeyword(v)         => validateMinProperties(v)
       case DependentRequiredKeyword(v)     => validateDependentRequired(v)
-      case _                               => _ => Result.invalid(ValidationOutput.invalid(UnsupportedCheck(keyword)))
+      // case _                               => _ => Result.invalid(ValidationOutput.invalid(UnsupportedCheck(keyword)))
     }
   }
 
