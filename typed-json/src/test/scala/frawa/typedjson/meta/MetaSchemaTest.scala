@@ -33,7 +33,7 @@ class MetaSchemaTest extends FunSuite {
     EvaluatorFactory.make(ValidationProcessing(), lazyResolver = lazyResolver)
 
   def withSchemaSpec(name: String)(f: SchemaValue => Unit): Unit = {
-    val Some(schema) = resolver(base.resolve(name))
+    val Some(schema) = resolver(base.resolve(name)): @unchecked
     f(schema)
   }
 

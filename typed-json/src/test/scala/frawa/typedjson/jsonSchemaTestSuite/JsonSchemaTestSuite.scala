@@ -67,7 +67,7 @@ class JsonSchemaTestSuite extends FunSuite {
   private def checkTest(file: String)(testValue: Value): Unit = {
     testValue match {
       case ObjectValue(properties) =>
-        val StringValue(description: String) = properties("description")
+        val StringValue(description: String) = properties("description"): @unchecked
         val suiteName                        = s"$file - $description"
 
         val suiteOptions = onlyDescription
@@ -82,7 +82,7 @@ class JsonSchemaTestSuite extends FunSuite {
           .getOrElse(new TestOptions(suiteName))
 
         val schema            = properties("schema")
-        val ArrayValue(tests) = properties("tests")
+        val ArrayValue(tests) = properties("tests"): @unchecked
 
         val schemaValue = SchemaValue.root(schema)
         val id          = SchemaValue.id(schemaValue)
@@ -145,7 +145,10 @@ class JsonSchemaTestSuite extends FunSuite {
         assertEquals(result.ignoredKeywords(), Set.empty[String], data.failMessage)
         assertEquals(result.output, None, data.failMessage)
       } else {
-        fail("unexpected valid", clues(clue(data.failMessage), clue(data.expectedValid), clue(result)))
+        fail(
+          "unexpected valid",
+          clues(clue[String](data.failMessage), clue[Boolean](data.expectedValid), clue[Result[_]](result))
+        )
       }
     }
   }
@@ -166,10 +169,10 @@ class JsonSchemaTestSuite extends FunSuite {
   protected def checkFiles(files: Map[String, Value]): Unit = checkFiles[Value](files)(identity)
 
   private def testData(value: Value): TestData = {
-    val ObjectValue(properties)  = value
+    val ObjectValue(properties)  = value: @unchecked
     val data                     = properties("data")
-    val StringValue(failMessage) = properties("description")
-    val BoolValue(expected)      = properties("valid")
+    val StringValue(failMessage) = properties("description"): @unchecked
+    val BoolValue(expected)      = properties("valid"): @unchecked
     TestData(data, failMessage, expected)
   }
 

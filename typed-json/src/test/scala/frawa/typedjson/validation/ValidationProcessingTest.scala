@@ -780,7 +780,7 @@ class ValidationProcessingTest extends FunSuite {
           Seq(
             typedjson.keywords.WithPointer(
               result = NotInEnum(
-                values = Seq("array", "boolean", "integer", "null", "number", "object", "string").map(StringValue)
+                values = Seq("array", "boolean", "integer", "null", "number", "object", "string").map(StringValue.apply)
               ),
               pointer = Pointer.parse("/$defs/foo/type")
             ),

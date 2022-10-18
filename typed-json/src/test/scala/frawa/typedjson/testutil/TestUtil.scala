@@ -31,7 +31,7 @@ object TestUtil {
     parser
       .parse(text)
       .swap
-      .map(message => fail("no json value", clues(clue(message))))
+      .map(message => fail("no json value", clues(clue[String](message))))
       .swap
       .toOption
       .get
@@ -67,7 +67,7 @@ object TestUtil {
   )(implicit factory: EvaluatorFactory[SchemaValue, R]): Either[Nothing, Unit] = {
     val result = factory(schema).map(f)
     result.swap
-      .map(message => fail("creating keywords failed", clues(clue(message))))
+      .map(messages => fail("creating keywords failed", clues(clue[SchemaProblems](messages))))
       .swap
   }
 

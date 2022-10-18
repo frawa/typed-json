@@ -45,7 +45,7 @@ object Remotes {
           baseUriChangeFolderInSubschemaFiles.get(segments(1)).map(SchemaValue.root)
         case "draft2020-12" => draft202012Files.get(segments(1)).map(SchemaValue.root)
         case _ =>
-          println("MISSING in Remotes", segments(0))
+          printf("MISSING in Remotes: %s", segments(0))
           None
       }
     } else {

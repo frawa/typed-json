@@ -562,7 +562,7 @@ class SuggestProcessingTest extends FunSuite {
   private def assertSuggestForSchema(json: String, at: Pointer)(f: Seq[Value] => Unit): Unit = {
     val resolver     = MetaSchemas.lazyResolver
     val base         = MetaSchemas.draft202012
-    val Some(schema) = resolver(base.resolve("schema"))
+    val Some(schema) = resolver(base.resolve("schema")): @unchecked
 
     def factory(at: Pointer): EvaluatorFactory[SchemaValue, SuggestionOutput] =
       EvaluatorFactory.make(SuggestionProcessing(at), None, Some(resolver)).mapResult(assertNoIgnoredKeywords)

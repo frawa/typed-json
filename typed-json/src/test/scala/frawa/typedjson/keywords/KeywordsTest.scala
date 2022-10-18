@@ -45,7 +45,7 @@ class KeywordsTest extends FunSuite {
       f(keywords)
     }
     withParsed.swap
-      .map(messages => fail("parsing keywords failed", clues(clue(messages))))
+      .map(messages => fail("parsing keywords failed", clues(clue[SchemaProblems](messages))))
       .swap
   }
 
