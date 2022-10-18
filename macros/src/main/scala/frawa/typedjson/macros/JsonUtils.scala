@@ -40,23 +40,26 @@ object JsonUtils {
       .get
   }
 
-  given [T <: Value]: ToExpr[T] with {
-    def apply(value: T)(using Quotes) = {
-      Expr(value)
-    }
-  }
-
   given ToExpr[Value] with {
     def apply(value: Value)(using Quotes) = {
       value match {
-        case NullValue       => Expr(NullValue)
-        case StringValue(v)  => Expr(StringValue(v))
-        case BoolValue(v)    => Expr(BoolValue(v))
-        case NumberValue(v)  => Expr(NumberValue(v))
-        case ArrayValue(vs)  => Expr(ArrayValue(vs))
-        case ObjectValue(vs) => Expr(ObjectValue(vs))
+        case NullValue => '{ NullValue }
+        case StringValue(v) =>
+          val vv = Expr(v)
+          '{ StringValue($vv) }
+        case BoolValue(v) =>
+          val vv = Expr(v)
+          '{ BoolValue($vv) }
+        case NumberValue(v) =>
+          val vv = Expr(v)
+          '{ NumberValue($vv) }
+        case ArrayValue(vs) =>
+          val vv = Expr(vs)
+          '{ ArrayValue($vv) }
+        case ObjectValue(vs) =>
+          val vv = Expr(vs)
+          '{ ObjectValue($vv) }
       }
     }
   }
-
 }
