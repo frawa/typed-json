@@ -52,7 +52,7 @@ object Evaluator {
 
   private def applyToArray[R](pPrefix: Seq[EvalFun[R]], pItems: Option[EvalFun[R]])(
       aggregate: AggregateFun[R]
-  ): EvalFun[R] = { value: InnerValue =>
+  ): EvalFun[R] = { (value: InnerValue) =>
     value.value match {
       case ArrayValue(vs) =>
         val indexed = vs.zipWithIndex

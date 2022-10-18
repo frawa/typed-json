@@ -34,7 +34,7 @@ object SeqUtil {
   }
 
   def debugTraceValue[T](title: String): T => T = { v =>
-    println(title, v)
+    println(s"${title} ${v}")
     v
   }
 }

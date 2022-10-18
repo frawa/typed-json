@@ -195,13 +195,13 @@ case class Keywords(
         Right(add(ObjectRequiredKeyword(names)))
 
       case ("allOf", ArrayValue(values)) =>
-        addAll(values.map(SchemaValue(_)), resolver, scope1)(AllOfKeyword)
+        addAll(values.map(SchemaValue(_)), resolver, scope1)(AllOfKeyword.apply)
 
       case ("anyOf", ArrayValue(values)) =>
-        addAll(values.map(SchemaValue(_)), resolver, scope1)(AnyOfKeyword)
+        addAll(values.map(SchemaValue(_)), resolver, scope1)(AnyOfKeyword.apply)
 
       case ("oneOf", ArrayValue(values)) =>
-        addAll(values.map(SchemaValue(_)), resolver, scope1)(OneOfKeyword)
+        addAll(values.map(SchemaValue(_)), resolver, scope1)(OneOfKeyword.apply)
 
       case ("if", value) =>
         updateKeywordsInside(resolver.push(SchemaValue(value)), scope1)(IfThenElseKeyword()) { (keywords, keyword) =>
