@@ -95,7 +95,7 @@ case class Keywords(
   import Keywords._
   import frawa.typedjson.util.SeqUtil._
 
-  private def add(keyword: Keyword)(implicit location: CurrentLocation): Keywords =
+  private def add(keyword: Keyword)(using location: CurrentLocation): Keywords =
     this.copy(keywords = keywords :+ location(keyword))
 
   private def addAll(schemas: Seq[SchemaValue], resolver: SchemaResolver, scope: DynamicScope)(
@@ -104,7 +104,7 @@ case class Keywords(
     val keywords0 = schemas.zipWithIndex.map { case (v, i) =>
       Keywords.parseKeywords(vocabulary, resolver.push(v), scope.push(i))
     }
-    implicit val location = scope.currentLocation
+    given CurrentLocation = scope.currentLocation
     for keywords <- combineAllLefts(keywords0)(SchemaProblems.combine)
     yield add(f(keywords)).withIgnored(keywords.flatMap(_.ignored).toSet)
 
@@ -114,8 +114,8 @@ case class Keywords(
       resolver: SchemaResolver,
       scope: DynamicScope
   ): Either[SchemaProblems, Keywords] =
-    val scope1: DynamicScope = scope.push(keyword)
-    implicit val location    = scope1.currentLocation
+    val scope1: DynamicScope        = scope.push(keyword)
+    given location: CurrentLocation = scope1.currentLocation
 
     (keyword, value) match
       case ("type", StringValue(typeName)) =>
@@ -381,7 +381,7 @@ case class Keywords(
 
   private def updateKeyword[K <: Keyword: ClassTag](
       newKeyword: => K
-  )(f: K => K)(implicit location: CurrentLocation): Keywords =
+  )(f: K => K)(using location: CurrentLocation): Keywords =
     val keywords0: Seq[KeywordWithLocation] =
       if keywords.exists {
           case UriUtil.WithLocation(_, _: K) => true
@@ -399,7 +399,7 @@ case class Keywords(
       scope: DynamicScope
   )(
       newKeyword: => K
-  )(f: (Keywords, K) => K)(implicit location: CurrentLocation): Either[SchemaProblems, Keywords] =
+  )(f: (Keywords, K) => K)(using CurrentLocation): Either[SchemaProblems, Keywords] =
     for keywords <- Keywords.parseKeywords(vocabulary, resolution, scope)
     yield updateKeyword(newKeyword)(f(keywords, _))
 
@@ -446,7 +446,7 @@ object Keywords:
       .id(schema)
       .map(id => scope.push(resolver.absolute(id)))
       .getOrElse(scope)
-    implicit val location = scope1.currentLocation
+    given CurrentLocation = scope1.currentLocation
 
     schema.value match
       case BoolValue(v) => Right(Keywords(vocabulary, schema).add(TrivialKeyword(v)))

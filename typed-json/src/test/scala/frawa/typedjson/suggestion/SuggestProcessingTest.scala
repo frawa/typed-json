@@ -22,7 +22,7 @@ import frawa.typedjson.parser._
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestSchemas.{numberArraySchema, totoObjectSchema, totoRequiredObjectSchema}
-import frawa.typedjson.testutil.TestUtil._
+import frawa.typedjson.testutil.TestUtil.{_, given}
 import munit.FunSuite
 import frawa.typedjson.meta.MetaSchemas
 
@@ -36,7 +36,7 @@ class SuggestProcessingTest extends FunSuite:
   private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
       f: Seq[Value] => Unit
   ) =
-    implicit val toProcessor1: EvaluatorFactory[SchemaValue, SuggestionOutput] = factory(at)
+    given EvaluatorFactory[SchemaValue, SuggestionOutput] = factory(at)
     assertResult[SuggestionOutput](text)(schema) { result =>
       f(result.output.map(_.suggestions).getOrElse(Seq()).distinct)
     }
@@ -566,7 +566,7 @@ class SuggestProcessingTest extends FunSuite:
     def factory(at: Pointer): EvaluatorFactory[SchemaValue, SuggestionOutput] =
       EvaluatorFactory.make(SuggestionProcessing(at), None, Some(resolver)).mapResult(assertNoIgnoredKeywords)
 
-    implicit val factory1 = factory(at)
+    given EvaluatorFactory[SchemaValue, SuggestionOutput] = factory(at)
     assertResult[SuggestionOutput](json)(schema) { result =>
       f(result.output.map(_.suggestions).getOrElse(Seq()).distinct)
     }

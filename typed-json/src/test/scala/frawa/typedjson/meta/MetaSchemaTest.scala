@@ -29,7 +29,7 @@ class MetaSchemaTest extends FunSuite:
   private val base                                                   = MetaSchemas.draft202012
   private val lazyResolver: Some[LoadedSchemasResolver.LazyResolver] = Some(MetaSchemas.lazyResolver)
 
-  implicit val factory: EvaluatorFactory[SchemaValue, ValidationOutput] =
+  given EvaluatorFactory[SchemaValue, ValidationOutput] =
     EvaluatorFactory.make(ValidationProcessing(), lazyResolver = lazyResolver)
 
   def withSchemaSpec(name: String)(f: SchemaValue => Unit): Unit =

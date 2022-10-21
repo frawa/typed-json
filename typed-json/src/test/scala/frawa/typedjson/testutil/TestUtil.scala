@@ -24,10 +24,10 @@ import munit.Assertions.{assertEquals, clue, clues, fail}
 import java.net.URI
 
 object TestUtil:
-  implicit val parser: JawnParser                                       = new JawnParser
-  implicit val lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
+  given Parser                                     = new JawnParser
+  given Option[LoadedSchemasResolver.LazyResolver] = None
 
-  def parseJsonValue(text: String)(implicit parser: Parser): Value =
+  def parseJsonValue(text: String)(using parser: Parser): Value =
     parser
       .parse(text)
       .swap
@@ -36,10 +36,10 @@ object TestUtil:
       .toOption
       .get
 
-  def withSchema(text: String)(f: SchemaValue => Unit)(implicit parser: Parser): Unit =
+  def withSchema(text: String)(f: SchemaValue => Unit)(using parser: Parser): Unit =
     f(SchemaValue.root(parseJsonValue(text)))
 
-  def withLoadedSchemas(texts: Seq[String])(f: LoadedSchemasResolver => Unit)(implicit parser: Parser): Unit =
+  def withLoadedSchemas(texts: Seq[String])(f: LoadedSchemasResolver => Unit)(using Parser): Unit =
     val schemas  = texts.map(t => parseJsonValue(t)).map(SchemaValue(_))
     val resolver = LoadedSchemasResolver(schemas)
     f(resolver)
@@ -51,7 +51,7 @@ object TestUtil:
 
   def assertResult[R](valueText: String)(schema: SchemaValue)(
       f: Result[R] => Unit
-  )(implicit factory: EvaluatorFactory[SchemaValue, R], parser: Parser): Either[Nothing, Unit] =
+  )(using EvaluatorFactory[SchemaValue, R], Parser): Either[Nothing, Unit] =
     withProcessor[R](schema) { evaluator =>
       val value  = parseJsonValue(valueText)
       val result = evaluator(InnerValue(value))
@@ -60,7 +60,7 @@ object TestUtil:
 
   def withProcessor[R](schema: SchemaValue)(
       f: Evaluator[R] => Unit
-  )(implicit factory: EvaluatorFactory[SchemaValue, R]): Either[Nothing, Unit] =
+  )(using factory: EvaluatorFactory[SchemaValue, R]): Either[Nothing, Unit] =
     val result = factory(schema).map(f)
     result.swap
       .map(messages => fail("creating keywords failed", clues(clue[SchemaProblems](messages))))
@@ -89,4 +89,3 @@ object TestUtil:
       )
     case LazyParseKeywords(resolved, _) => LazyParseKeywords(resolved, assertableResolve)
     case _                              => keyword
-

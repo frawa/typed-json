@@ -28,7 +28,7 @@ object SuggestionProcessing:
 
   def apply(at: Pointer): Processing[SuggestionOutput] = Processing(simple(at), nested(at))
 
-  private implicit val combine: Result.OutputCombiner[SuggestionOutput] = add
+  private given Result.OutputCombiner[SuggestionOutput] = add
 
   private def add(o1: SuggestionOutput, o2: SuggestionOutput): SuggestionOutput =
     SuggestionOutput(o1.suggestions ++ o2.suggestions, o1.validated.add(o2.validated))

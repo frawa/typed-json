@@ -21,14 +21,14 @@ import frawa.typedjson.keywords.SchemaProblems.MissingReference
 import frawa.typedjson.keywords._
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.EvaluatorFactory
-import frawa.typedjson.testutil.TestUtil._
+import frawa.typedjson.testutil.TestUtil.{_, given}
 import munit.FunSuite
 
 class ValidationKeywordTest extends FunSuite:
 
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
-  private implicit val factory: EvaluatorFactory[SchemaValue, ValidationOutput] =
+  private given EvaluatorFactory[SchemaValue, ValidationOutput] =
     EvaluatorFactory.make(ValidationProcessing(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
 
   def validateJson(

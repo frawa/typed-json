@@ -28,10 +28,10 @@ object Result:
   type OutputCombiner[O] = (O, O) => O
 
   def valid[O]: Result[O] = Result[O](valid = true, None, None)
-  def valid[O](output: O)(implicit c: OutputCombiner[O]): Result[O] =
+  def valid[O](output: O)(using c: OutputCombiner[O]): Result[O] =
     Result[O](valid = true, Some(output), Some(c))
   def invalid[O]: Result[O] = Result[O](valid = false, None, None)
-  def invalid[O](output: O)(implicit c: OutputCombiner[O]): Result[O] =
+  def invalid[O](output: O)(using c: OutputCombiner[O]): Result[O] =
     Result[O](valid = false, Some(output), Some(c))
 
   private def count[R](results: Seq[Result[R]]): Int = results.map(_.count).sum

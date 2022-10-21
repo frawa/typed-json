@@ -57,8 +57,8 @@ object ValidationProcessing:
 
   def apply(): Processing[ValidationOutput] = Processing(simple, nested)
 
-  private val combiner: Combiner[ValidationOutput]                = new ValidationCombiner()
-  private implicit val f: Result.OutputCombiner[ValidationOutput] = ValidationOutput.add
+  private val combiner: Combiner[ValidationOutput]      = new ValidationCombiner()
+  private given Result.OutputCombiner[ValidationOutput] = ValidationOutput.add
 
   private val nullTypeMismatch    = TypeMismatch[NullValue.type]("null")
   private val booleanTypeMismatch = TypeMismatch[BoolValue]("boolean")

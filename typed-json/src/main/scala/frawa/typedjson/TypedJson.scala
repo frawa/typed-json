@@ -43,7 +43,7 @@ object TypedJson:
 
   def create(): TypedJson = new TypedJson(None)
 
-  def create(schemaJson: String)(implicit parser: Parser): Either[InputError, TypedJson] =
+  def create(schemaJson: String)(using parser: Parser): Either[InputError, TypedJson] =
     parser
       .parse(schemaJson)
       .swap
@@ -80,7 +80,7 @@ object TypedJson:
 class TypedJson(private val keywords: Option[Keywords]):
   import TypedJson._
 
-  def validate(json: String)(implicit parser: Parser): Either[InputError, Validation] =
+  def validate(json: String)(using parser: Parser): Either[InputError, Validation] =
     parser
       .parse(json)
       .swap

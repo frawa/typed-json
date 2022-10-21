@@ -23,7 +23,7 @@ class ZioParserTest extends FunSuite:
   import frawa.typedjson.parser.Value._
   import frawa.typedjson.parser.zio.ZioParser
 
-  implicit val parser: Parser = new ZioParser()
+  given Parser = new ZioParser()
 
   test("basic types") {
     assertEquals(Parser("""13"""), Right(NumberValue(13)))

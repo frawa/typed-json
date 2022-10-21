@@ -18,7 +18,7 @@ package frawa.typedjson.keywords
 
 import frawa.typedjson.parser.Value._
 import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.testutil.TestUtil._
+import frawa.typedjson.testutil.TestUtil.{_, given}
 import frawa.typedjson.util.UriUtil._
 import munit.FunSuite
 
@@ -227,7 +227,7 @@ class LoadedSchemasResolverTest extends FunSuite:
         SchemaResolution(schema1, resolver1) <- resolver.resolveRef(id)
         id1                                  <- SchemaValue.id(schema1)
         SchemaResolution(schema2, _)         <- resolver1.resolveDynamicRef("#items", scope)
-        case StringValue(anchor2)                 <- getAnchor(schema2.value)
+        case StringValue(anchor2) <- getAnchor(schema2.value)
       yield
         assertEquals(id1, id)
         assertEquals(anchor2, "items")
@@ -289,8 +289,8 @@ class LoadedSchemasResolverTest extends FunSuite:
         SchemaResolution(schema1, resolver1) <- resolver.resolveRef(id)
         id1                                  <- SchemaValue.id(schema1)
         SchemaResolution(schema2, _)         <- resolver1.resolveDynamicRef("#items", scope)
-        case StringValue(dynamicAnchor2)          <- getDynamicAnchor(schema2.value)
-        case StringValue(type2)                   <- getType(schema2.value)
+        case StringValue(dynamicAnchor2) <- getDynamicAnchor(schema2.value)
+        case StringValue(type2) <- getType(schema2.value)
       yield
         assertEquals(id1, id)
         assertEquals(dynamicAnchor2, "items")
@@ -328,4 +328,3 @@ class LoadedSchemasResolverTest extends FunSuite:
       assertEquals(uri(metaId), uri1)
     }
   }
-

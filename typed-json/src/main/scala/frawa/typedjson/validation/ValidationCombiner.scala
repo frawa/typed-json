@@ -20,7 +20,7 @@ import frawa.typedjson.keywords.Result
 import frawa.typedjson.pointer.Pointer
 
 class ValidationCombiner extends Combiner[ValidationOutput]:
-  private implicit val f: Result.OutputCombiner[ValidationOutput] = ValidationOutput.add
+  private given Result.OutputCombiner[ValidationOutput] = ValidationOutput.add
 
   override def allOf(results: Seq[Result[ValidationOutput]], pointer: Pointer): Result[ValidationOutput] =
     if results.isEmpty || results.forall(_.valid) then Result.valid

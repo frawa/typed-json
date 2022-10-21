@@ -20,7 +20,7 @@ trait Parser:
   def parse(json: String): Either[String, Value]
 
 object Parser:
-  def apply(json: String)(implicit parser: Parser): Either[String, Value] =
+  def apply(json: String)(using parser: Parser): Either[String, Value] =
     parser.parse(json)
 
 sealed trait Value
