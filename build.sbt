@@ -46,11 +46,12 @@ lazy val sharedPlatformSettings = Seq(
 lazy val sharedScalacSettings = Seq(
   scalacOptions ++= {
     Seq(
+      "-deprecation",
+      "-feature"
       // "-version",
       // "-help",
       // "-encoding",
       // "UTF-8"
-      // "-feature"
       // "-language:implicitConversions"
       // disabled during the migration
       // "-Xfatal-warnings"
@@ -58,6 +59,8 @@ lazy val sharedScalacSettings = Seq(
       (CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((3, _)) =>
           Seq(
+            "-unchecked",
+            "-Xmigration",
             "-new-syntax",
             "-indent"
             // "-rewrite"
@@ -71,7 +74,6 @@ lazy val sharedScalacSettings = Seq(
           )
         case _ =>
           Seq(
-            "-deprecation",
             "-Xfatal-warnings",
             "-Wunused:imports,privates,locals",
             "-Wvalue-discard"
