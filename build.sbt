@@ -58,6 +58,8 @@ lazy val sharedScalacSettings = Seq(
       (CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((3, _)) =>
           Seq(
+            "-new-syntax",
+            "-rewrite"
             // "-Ywarn-unused",
             // "-source:future",
             // "-source:future-migration",
