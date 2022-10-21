@@ -103,7 +103,7 @@ object Evaluator {
       aggregate: AggregateFun[R]
   ): EvalFun[R] = { value =>
     val ifResult = pIf(value)
-    val result   = if (ifResult.valid) Seq(ifResult, pThen(value)) else Seq(pElse(value))
+    val result   = if ifResult.valid then Seq(ifResult, pThen(value)) else Seq(pElse(value))
     aggregateAll(aggregate, result, value)
   }
 

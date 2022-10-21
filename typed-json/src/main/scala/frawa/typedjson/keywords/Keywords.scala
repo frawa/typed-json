@@ -105,9 +105,9 @@ case class Keywords(
       Keywords.parseKeywords(vocabulary, resolver.push(v), scope.push(i))
     }
     implicit val location = scope.currentLocation
-    for {
+    for
       keywords <- combineAllLefts(keywords0)(SchemaProblems.combine)
-    } yield {
+    yield {
       add(f(keywords)).withIgnored(keywords.flatMap(_.ignored).toSet)
     }
   }
@@ -138,31 +138,31 @@ case class Keywords(
         Right(add(UnionTypeKeyword(keywords)))
 
       case ("not", value) =>
-        for {
+        for
           keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(value)), scope1)
-        } yield {
+        yield {
           add(NotKeyword(keywords))
         }
 
       case ("items", value) =>
-        for {
+        for
           keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(value)), scope1)
-        } yield {
+        yield {
           updateKeyword(ArrayItemsKeyword())(check => check.copy(items = Some(keywords)))
         }
 
       case ("prefixItems", ArrayValue(vs)) =>
         val keywords0 = vs.map(v => Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(v)), scope1))
-        for {
+        for
           keywords <- combineAllLefts(keywords0)(SchemaProblems.combine)
-        } yield {
+        yield {
           updateKeyword(ArrayItemsKeyword())(check => check.copy(prefixItems = keywords))
         }
 
       case ("unevaluatedItems", v) =>
-        for {
+        for
           keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(v)), scope1)
-        } yield {
+        yield {
           Keywords(vocabulary, schema).add(UnevaluatedItemsKeyword(this, keywords))
         }
 
@@ -177,16 +177,16 @@ case class Keywords(
         }
 
       case ("additionalProperties", value) =>
-        for {
+        for
           keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(value)), scope1)
-        } yield {
+        yield {
           updateKeyword(ObjectPropertiesKeyword())(keyword => keyword.copy(additionalProperties = Some(keywords)))
         }
 
       case ("unevaluatedProperties", v) =>
-        for {
+        for
           keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(v)), scope1)
-        } yield {
+        yield {
           Keywords(vocabulary, schema).add(UnevaluatedPropertiesKeyword(this, keywords))
         }
 
@@ -241,26 +241,26 @@ case class Keywords(
         Right(this)
 
       case ("$ref", StringValue(ref)) =>
-        for {
+        for
           resolution <- resolver
             .resolveRef(ref)
             .map(Right(_))
             .getOrElse(Left(SchemaProblems(MissingReference(ref))))
           vocabulary1 <- SchemaValue.vocabulary(resolution, vocabulary)
           keyword = lazyResolve(vocabulary1, resolution, scope1)
-        } yield {
+        yield {
           add(keyword)
         }
 
       case ("$dynamicRef", StringValue(ref)) =>
-        for {
+        for
           resolution <- resolver
             .resolveDynamicRef(ref, scope)
             .map(Right(_))
             .getOrElse(Left(SchemaProblems(MissingDynamicReference(ref))))
           vocabulary1 <- SchemaValue.vocabulary(resolution, vocabulary)
           keyword = lazyResolve(vocabulary1, resolution, scope1)
-        } yield {
+        yield {
           add(keyword)
         }
 
@@ -299,9 +299,9 @@ case class Keywords(
         Right(add(UniqueItemsKeyword(v)))
 
       case ("propertyNames", value) =>
-        for {
+        for
           keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(value)), scope1)
-        } yield {
+        yield {
           add(PropertyNamesKeyword(keywords))
         }
 
@@ -351,16 +351,16 @@ case class Keywords(
             .parseKeywords(vocabulary, resolver.push(SchemaValue(v)), scope1)
             .map(p -> _)
         }.toSeq
-        for {
+        for
           keywords <- combineAllLefts(keywords0)(SchemaProblems.combine).map(_.toMap)
-        } yield {
+        yield {
           add(DependentSchemasKeyword(keywords))
         }
 
       case ("contains", v) =>
-        for {
+        for
           keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(v)), scope1)
-        } yield {
+        yield {
           updateKeyword(ContainsKeyword())(check => check.copy(schema = Some(keywords)))
         }
 
@@ -411,11 +411,11 @@ case class Keywords(
         case (prop, Left(problems))  => Left(problems.prefix(Pointer.empty / prop))
       }
       .toSeq
-    for {
+    for
       propKeywords <- combineAllLefts(propKeywords0)(SchemaProblems.combine)
       keywords = Map.from(propKeywords)
       ignored  = keywords.values.flatMap(_.ignored).toSet
-    } yield {
+    yield {
       f(keywords).withIgnored(ignored)
     }
   }
@@ -424,12 +424,12 @@ case class Keywords(
       newKeyword: => K
   )(f: K => K)(implicit location: CurrentLocation): Keywords = {
     val keywords0: Seq[KeywordWithLocation] =
-      if (
+      if
         keywords.exists {
           case UriUtil.WithLocation(_, _: K) => true
           case _                             => false
         }
-      ) {
+      then {
         keywords
       } else {
         keywords :+ location(newKeyword)
@@ -446,9 +446,9 @@ case class Keywords(
   )(
       newKeyword: => K
   )(f: (Keywords, K) => K)(implicit location: CurrentLocation): Either[SchemaProblems, Keywords] = {
-    for {
+    for
       keywords <- Keywords.parseKeywords(vocabulary, resolution, scope)
-    } yield {
+    yield {
       updateKeyword(newKeyword)(f(keywords, _))
     }
   }
@@ -483,10 +483,10 @@ object Keywords {
     val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema, lazyResolver)
     val scope                           = DynamicScope.empty.push(resolver.base)
     val parentVocabulary                = vocabulary.getOrElse(Vocabulary.coreVocabulary)
-    for {
+    for
       vocabulary <- SchemaValue.vocabulary(resolver.push(schema), parentVocabulary)
       keywords   <- Keywords.parseKeywords(vocabulary, resolver.push(schema), scope)
-    } yield keywords
+    yield keywords
   }
 
   def parseKeywords(
@@ -505,7 +505,7 @@ object Keywords {
       case BoolValue(v) => Right(Keywords(vocabulary, schema).add(TrivialKeyword(v)))
       case ObjectValue(properties) =>
         val keywords = Keywords(vocabulary, schema)
-        if (properties.isEmpty) {
+        if properties.isEmpty then {
           Right(keywords.add(TrivialKeyword(true)))
         } else {
           properties
@@ -515,7 +515,7 @@ object Keywords {
                 keywords,
                 keywords
                   .flatMap { keywords =>
-                    if (vocabulary.defines(keyword)) {
+                    if vocabulary.defines(keyword) then {
                       keywords
                         .withKeyword(keyword, value, resolver, scope1)
                         .swap

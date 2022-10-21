@@ -27,7 +27,7 @@ object OutputJson {
   }
 
   def basic(validation: TypedJson.Validation): Value = {
-    val errors = if (validation.output.errors.isEmpty) {
+    val errors = if validation.output.errors.isEmpty then {
       Map()
     } else {
       Map("errors" -> ArrayValue(validation.output.errors.map(toJson)))

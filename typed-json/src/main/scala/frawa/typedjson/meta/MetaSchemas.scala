@@ -29,7 +29,7 @@ object MetaSchemas {
   val draft202012: URI = uri("https://json-schema.org/draft/2020-12/")
 
   def lazyResolver: LoadedSchemasResolver.LazyResolver = { uri =>
-    if (uri.getSchemeSpecificPart.startsWith(draft202012.getSchemeSpecificPart)) {
+    if uri.getSchemeSpecificPart.startsWith(draft202012.getSchemeSpecificPart) then {
       resolve202012(draft202012.relativize(uri))
     } else { None }
   }

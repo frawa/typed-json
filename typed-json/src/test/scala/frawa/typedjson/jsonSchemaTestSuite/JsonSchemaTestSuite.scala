@@ -101,7 +101,7 @@ class JsonSchemaTestSuite extends FunSuite {
           factory.mapResult(assertNoIgnoredKeywords)
 
         val hasIgnoredFailMessage = ignoreFailMessageByDescription.contains(testId)
-        if (oneTestPerData || hasIgnoredFailMessage) {
+        if oneTestPerData || hasIgnoredFailMessage then {
           implicit val factory1: EvaluatorFactory[SchemaValue, ValidationOutput] = strictFactory
           withProcessor[ValidationOutput](schemaValue) { evaluator =>
             tests.foreach { value =>
@@ -138,9 +138,9 @@ class JsonSchemaTestSuite extends FunSuite {
   private def assertOne(evaluator: Evaluator[ValidationOutput]): TestData => Unit = { data =>
     val result = evaluator(InnerValue(data.data))
 
-    if (result.valid != data.expectedValid) {
+    if result.valid != data.expectedValid then {
       implicit val loc: Location = munit.Location.empty
-      if (!result.valid) {
+      if !result.valid then {
         assertEquals(result.problems.errors, Seq(), data.failMessage)
         assertEquals(result.ignoredKeywords(), Set.empty[String], data.failMessage)
         assertEquals(result.output, None, data.failMessage)

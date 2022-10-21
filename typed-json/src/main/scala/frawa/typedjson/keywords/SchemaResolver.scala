@@ -64,7 +64,7 @@ trait SchemaResolver {
     val fragment = uri.getFragment
     val dynamic = isDynamic(uri) ||
       scope.candidates.lastOption.map(UriUtil.withFragment(_, fragment)).exists(isDynamic)
-    if (dynamic && fragment != null) {
+    if dynamic && fragment != null then {
       scope.candidates
         .map(UriUtil.withFragment(_, fragment))
         .find(isDynamic)
@@ -77,7 +77,7 @@ trait SchemaResolver {
 
   private def withoutEmptyFragment(uri: URI): URI = {
     val fragment = uri.getFragment
-    if (fragment != null && fragment.isEmpty) {
+    if fragment != null && fragment.isEmpty then {
       UriUtil.withoutFragement(uri)
     } else {
       uri
@@ -85,7 +85,7 @@ trait SchemaResolver {
   }
 
   def resolveRef(uri: URI): Option[SchemaResolution] = {
-    if (uri.getFragment != null && uri.getFragment.startsWith("/")) {
+    if uri.getFragment != null && uri.getFragment.startsWith("/") then {
       val pointer = Pointer.parse(uri.getFragment)
       resolve(UriUtil.withoutFragement(uri))
         .flatMap(resolvePointer(_, pointer))

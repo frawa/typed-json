@@ -29,7 +29,7 @@ object Remotes {
   val remotesUri: URI = UriUtil.uri("http://localhost:1234")
 
   def lazyResolver: LoadedSchemasResolver.LazyResolver = { uri =>
-    if (uri.getSchemeSpecificPart.startsWith(remotesUri.getSchemeSpecificPart)) {
+    if uri.getSchemeSpecificPart.startsWith(remotesUri.getSchemeSpecificPart) then {
       resolveRemotes(remotesUri.relativize(uri))
     } else { None }
   }
@@ -37,7 +37,7 @@ object Remotes {
   private def resolveRemotes(relative: URI): Option[RootSchemaValue] = {
     val name     = relative.getSchemeSpecificPart
     val segments = name.split('/')
-    if (segments.length == 2) {
+    if segments.length == 2 then {
       segments(0) match {
         case "baseUriChange"       => baseUriChangeFiles.get(segments(1)).map(SchemaValue.root)
         case "baseUriChangeFolder" => baseUriChangeFolderFiles.get(segments(1)).map(SchemaValue.root)

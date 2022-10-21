@@ -42,7 +42,7 @@ object Pointer {
 
 case class Pointer(segments: Seq[Token], isInsideKey: Boolean = false) {
   override def toString: String = {
-    if (this.segments.isEmpty) {
+    if this.segments.isEmpty then {
       ""
     } else {
       "/" + this.segments.mkString("/")

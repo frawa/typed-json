@@ -35,7 +35,7 @@ object SuggestionProcessing {
   }
 
   private def simple(at: Pointer)(keyword: AssertionKeyword)(value: InnerValue): Result[SuggestionOutput] = {
-    if (at == value.pointer) {
+    if at == value.pointer then {
       val suggestions = suggestFor(keyword)(Seq(Result.valid))
       Result.valid(SuggestionOutput(suggestions, Result.valid[ValidationOutput]))
     } else {
@@ -48,10 +48,10 @@ object SuggestionProcessing {
       at: Pointer
   )(keyword: ApplicatorKeyword)(results: Seq[Result[SuggestionOutput]])(value: InnerValue): Result[SuggestionOutput] = {
     val current = results.flatMap(_.output).flatMap(_.suggestions)
-    if (at.isInsideKey && at.outer == value.pointer) {
+    if at.isInsideKey && at.outer == value.pointer then {
       val suggestions = onlyKeys(suggestFor(keyword)(Seq(Result.valid)))
       Result.valid(SuggestionOutput(current ++ suggestions, Result.valid))
-    } else if (at == value.pointer) {
+    } else if at == value.pointer then {
       val suggestions = suggestFor(keyword)(results)
       Result.valid(SuggestionOutput(current ++ suggestions, Result.valid))
     } else {

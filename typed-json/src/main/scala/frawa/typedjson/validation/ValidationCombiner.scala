@@ -23,7 +23,7 @@ class ValidationCombiner extends Combiner[ValidationOutput] {
   private implicit val f: Result.OutputCombiner[ValidationOutput] = ValidationOutput.add
 
   override def allOf(results: Seq[Result[ValidationOutput]], pointer: Pointer): Result[ValidationOutput] = {
-    if (results.isEmpty || results.forall(_.valid)) {
+    if results.isEmpty || results.forall(_.valid) then {
       Result.valid
     } else {
       invalid(results)
@@ -32,7 +32,7 @@ class ValidationCombiner extends Combiner[ValidationOutput] {
 
   private def invalid(results: Seq[Result[ValidationOutput]]): Result[ValidationOutput] = {
     val errors = results.flatMap(_.output).flatMap(_.errors)
-    if (errors.isEmpty) {
+    if errors.isEmpty then {
       Result.invalid
     } else {
       Result.invalid(ValidationOutput.invalid(errors))
@@ -46,7 +46,7 @@ class ValidationCombiner extends Combiner[ValidationOutput] {
   )
 
   override def anyOf(results: Seq[Result[ValidationOutput]], pointer: Pointer): Result[ValidationOutput] = {
-    if (results.isEmpty || results.exists(_.valid)) {
+    if results.isEmpty || results.exists(_.valid) then {
       Result.valid
     } else {
       invalid(results)
@@ -55,9 +55,9 @@ class ValidationCombiner extends Combiner[ValidationOutput] {
 
   override def oneOf(results: Seq[Result[ValidationOutput]], pointer: Pointer): Result[ValidationOutput] = {
     val valids = results.filter(_.valid)
-    if (valids.size == 1) {
+    if valids.size == 1 then {
       Result.valid
-    } else if (valids.isEmpty) {
+    } else if valids.isEmpty then {
       invalid(results)
     } else {
       invalid(NotOneOf(valids.size), pointer)
@@ -71,7 +71,7 @@ class ValidationCombiner extends Combiner[ValidationOutput] {
       max: Option[Int]
   ): Result[ValidationOutput] = {
     val count = results.count(_.valid)
-    if (min.getOrElse(1) <= count && !max.exists(count > _)) {
+    if min.getOrElse(1) <= count && !max.exists(count > _) then {
       Result.valid
     } else {
       invalid(NotContains(count), pointer)
@@ -79,7 +79,7 @@ class ValidationCombiner extends Combiner[ValidationOutput] {
   }
 
   override def not(results: Seq[Result[ValidationOutput]], pointer: Pointer): Result[ValidationOutput] = {
-    if (results.length == 1 && !results.head.valid) {
+    if results.length == 1 && !results.head.valid then {
       Result.valid
     } else {
       invalid(NotInvalid(), pointer)

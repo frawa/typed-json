@@ -126,7 +126,7 @@ object ValidationProcessing {
   private def validateInteger(): EvalFun = value =>
     value.value match {
       case NumberValue(v) =>
-        if (v.isWhole) {
+        if v.isWhole then {
           Result.valid
         } else {
           combiner.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
@@ -135,7 +135,7 @@ object ValidationProcessing {
     }
 
   private def validateTrivial(valid: Boolean): EvalFun = { value =>
-    if (valid) {
+    if valid then {
       Result.valid
     } else {
       combiner.invalid(FalseSchemaReason(), value.pointer)
@@ -146,7 +146,7 @@ object ValidationProcessing {
     value.value match {
       case ObjectValue(propertiesValues) =>
         val missingNames = required.filter(!propertiesValues.contains(_))
-        if (missingNames.isEmpty) {
+        if missingNames.isEmpty then {
           Result.valid
         } else {
           combiner.invalid(MissingRequiredProperties(missingNames), value.pointer)
@@ -156,7 +156,7 @@ object ValidationProcessing {
   }
 
   private def validateEnum(values: Seq[Value]): EvalFun = { value =>
-    if (values.contains(value.value)) {
+    if values.contains(value.value) then {
       Result.valid
     } else {
       combiner.invalid(NotInEnum(values), value.pointer)
@@ -168,7 +168,7 @@ object ValidationProcessing {
     value =>
       value.value match {
         case StringValue(v) =>
-          if (r.findFirstIn(v).isDefined)
+          if r.findFirstIn(v).isDefined then
             Result.valid
           else
             combiner.invalid(PatternMismatch(pattern), value.pointer)
@@ -338,7 +338,7 @@ object ValidationProcessing {
   private def validateStringValue(error: => ValidationError)(validate: String => Boolean): EvalFun = { value =>
     value.value match {
       case StringValue(v) =>
-        if (validate(v))
+        if validate(v) then
           Result.valid
         else
           combiner.invalid(error, value.pointer)
@@ -348,14 +348,14 @@ object ValidationProcessing {
 
   private def validateMinimum(min: BigDecimal, exclude: Boolean): EvalFun = {
     validateNumberValue(MinimumMismatch(min, exclude)) { v =>
-      if (exclude) min < v else min <= v
+      if exclude then min < v else min <= v
     }
   }
 
   private def validateNumberValue(error: => ValidationError)(validate: BigDecimal => Boolean): EvalFun = { value =>
     value.value match {
       case NumberValue(v) =>
-        if (validate(v))
+        if validate(v) then
           Result.valid
         else
           combiner.invalid(error, value.pointer)
@@ -366,7 +366,7 @@ object ValidationProcessing {
   private def validateArrayValue(error: => ValidationError)(validate: Seq[Value] => Boolean): EvalFun = { value =>
     value.value match {
       case ArrayValue(v) =>
-        if (validate(v))
+        if validate(v) then
           Result.valid
         else
           combiner.invalid(error, value.pointer)
@@ -388,7 +388,7 @@ object ValidationProcessing {
 
   private def validateMaximum(max: BigDecimal, exclude: Boolean): EvalFun = {
     validateNumberValue(MaximumMismatch(max, exclude)) { v =>
-      if (exclude) max > v else max >= v
+      if exclude then max > v else max >= v
     }
   }
 
@@ -407,7 +407,7 @@ object ValidationProcessing {
   private def countCharPoints(text: String): Int = {
     var i     = 0
     var count = 0
-    while (i < text.length()) {
+    while i < text.length() do {
       i += Character.charCount(text.codePointAt(i))
       count += 1
     }
@@ -430,7 +430,7 @@ object ValidationProcessing {
     value =>
       value.value match {
         case ObjectValue(v) =>
-          if (validate(v))
+          if validate(v) then
             Result.valid
           else
             combiner.invalid(error, value.pointer)
@@ -461,7 +461,7 @@ object ValidationProcessing {
               .filterNot(_.isEmpty)
               .map(property -> _)
           }
-        if (missing.isEmpty)
+        if missing.isEmpty then
           Result.valid
         else
           combiner.invalid(DependentRequiredMissing(missing), value.pointer)

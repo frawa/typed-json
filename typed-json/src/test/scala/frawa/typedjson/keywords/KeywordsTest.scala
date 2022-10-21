@@ -32,10 +32,10 @@ class KeywordsTest extends FunSuite {
   ): Either[Nothing, Unit] = {
     val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema)
     val scope                           = DynamicScope.empty
-    val withParsed = for {
+    val withParsed = for
       keywords <- Keywords.parseKeywords(vocabularyForTest, resolver.push(schema), scope)
-    } yield {
-      if (!allowIgnored) {
+    yield {
+      if !allowIgnored then {
         assertEquals(
           keywords.ignored,
           Set.empty[String],

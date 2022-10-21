@@ -170,12 +170,12 @@ class LoadedSchemasResolverTest extends FunSuite {
 
       val resolver1 = resolver.withBase(uriRoot1)
 
-      val Some((idA, idB)) = (for {
+      val Some((idA, idB)) = (for
         SchemaResolution(schemaA, _) <- resolver1.resolveDynamicRef("#anchor1", scope2)
         SchemaResolution(schemaB, _) <- resolver1.resolveDynamicRef("#anchor1", scope1)
         idA                          <- SchemaValue.id(schemaA)
         idB                          <- SchemaValue.id(schemaB)
-      } yield (idA, idB)): @unchecked
+      yield (idA, idB)): @unchecked
       assertEquals(idA, id2)
       assertEquals(idB, id1)
     }
@@ -223,12 +223,12 @@ class LoadedSchemasResolverTest extends FunSuite {
       Pointer.empty / "$comment"
 
       val scope = DynamicScope.empty.push(uriRoot)
-      val ok = for {
+      val ok = for
         SchemaResolution(schema1, resolver1) <- resolver.resolveRef(id)
         id1                                  <- SchemaValue.id(schema1)
         SchemaResolution(schema2, _)         <- resolver1.resolveDynamicRef("#items", scope)
         case StringValue(anchor2)                 <- getAnchor(schema2.value)
-      } yield {
+      yield {
         assertEquals(id1, id)
         assertEquals(anchor2, "items")
         true
@@ -286,13 +286,13 @@ class LoadedSchemasResolverTest extends FunSuite {
       val getType          = Pointer.empty / "type"
 
       val scope = DynamicScope.empty.push(uriRoot)
-      val ok = for {
+      val ok = for
         SchemaResolution(schema1, resolver1) <- resolver.resolveRef(id)
         id1                                  <- SchemaValue.id(schema1)
         SchemaResolution(schema2, _)         <- resolver1.resolveDynamicRef("#items", scope)
         case StringValue(dynamicAnchor2)          <- getDynamicAnchor(schema2.value)
         case StringValue(type2)                   <- getType(schema2.value)
-      } yield {
+      yield {
         assertEquals(id1, id)
         assertEquals(dynamicAnchor2, "items")
         assertEquals(type2, "string")
