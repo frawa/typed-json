@@ -23,7 +23,7 @@ import frawa.typedjson.validation.{ValidationProcessing, ValidationOutput}
 import munit.FunSuite
 
 // TODO still needed?
-class MetaSchemaTest extends FunSuite {
+class MetaSchemaTest extends FunSuite:
 
   private val resolver                                               = MetaSchemas.lazyResolver
   private val base                                                   = MetaSchemas.draft202012
@@ -32,12 +32,11 @@ class MetaSchemaTest extends FunSuite {
   implicit val factory: EvaluatorFactory[SchemaValue, ValidationOutput] =
     EvaluatorFactory.make(ValidationProcessing(), lazyResolver = lazyResolver)
 
-  def withSchemaSpec(name: String)(f: SchemaValue => Unit): Unit = {
+  def withSchemaSpec(name: String)(f: SchemaValue => Unit): Unit =
     val Some(schema) = resolver(base.resolve(name)): @unchecked
     f(schema)
-  }
 
-  def validateSpec(valueName: String, schemaName: String)(f: Result[ValidationOutput] => Unit): Unit = {
+  def validateSpec(valueName: String, schemaName: String)(f: Result[ValidationOutput] => Unit): Unit =
     withSchemaSpec(schemaName) { schema =>
       withSchemaSpec(valueName) { value =>
         withProcessor[ValidationOutput](schema) { evaluator =>
@@ -46,7 +45,6 @@ class MetaSchemaTest extends FunSuite {
         }
       }
     }
-  }
 
   test("validate core against core") {
     validateSpec("meta/core", "meta/core") { result =>
@@ -140,4 +138,3 @@ class MetaSchemaTest extends FunSuite {
       )
     }
   }
-}

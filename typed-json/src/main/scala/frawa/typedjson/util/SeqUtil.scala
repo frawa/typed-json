@@ -16,25 +16,22 @@
 
 package frawa.typedjson.util
 
-object SeqUtil {
+object SeqUtil:
 
-  def sequenceAllLefts[E, V](as: Seq[Either[E, V]]): Either[Seq[E], Seq[V]] = {
+  def sequenceAllLefts[E, V](as: Seq[Either[E, V]]): Either[Seq[E], Seq[V]] =
     as.foldLeft[Either[Seq[E], Seq[V]]](Right(Seq.empty[V])) {
       case (Right(acc), Right(v))   => Right(acc :+ v)
       case (Right(_), Left(error))  => Left(Seq(error))
       case (Left(acc), Left(error)) => Left(acc :+ error)
       case (Left(acc), _)           => Left(acc)
     }
-  }
 
-  def combineAllLefts[E, V](as: Seq[Either[E, V]])(combine: (E, E) => E): Either[E, Seq[V]] = {
+  def combineAllLefts[E, V](as: Seq[Either[E, V]])(combine: (E, E) => E): Either[E, Seq[V]] =
     sequenceAllLefts(as).swap
       .map(_.reduce(combine))
       .swap
-  }
 
   def debugTraceValue[T](title: String): T => T = { v =>
     printf("%s %s", title, v)
     v
   }
-}

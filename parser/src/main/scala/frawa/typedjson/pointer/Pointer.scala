@@ -19,7 +19,7 @@ package frawa.typedjson.pointer
 import frawa.typedjson.parser.{Offset, Value}
 import frawa.typedjson.parser.Value.{ArrayValue, ObjectValue}
 
-object Pointer {
+object Pointer:
   def empty = new Pointer(Nil)
 
   def apply(index: Int): Pointer    = Pointer.empty / index
@@ -38,34 +38,26 @@ object Pointer {
       .map(t => t.toIntOption.map(ArrayIndexToken.apply).getOrElse(FieldToken(t)))
   )
 
-}
 
-case class Pointer(segments: Seq[Token], isInsideKey: Boolean = false) {
-  override def toString: String = {
-    if this.segments.isEmpty then {
+case class Pointer(segments: Seq[Token], isInsideKey: Boolean = false):
+  override def toString: String =
+    if this.segments.isEmpty then
       ""
-    } else {
+    else
       "/" + this.segments.mkString("/")
-    }
-  }
 
-  def /(index: Int): Pointer = {
+  def /(index: Int): Pointer =
     new Pointer(segments :+ ArrayIndexToken(index))
-  }
-  def /(field: String): Pointer = {
+  def /(field: String): Pointer =
     new Pointer(segments :+ FieldToken(field))
-  }
-  def /(pointer: Pointer): Pointer = {
+  def /(pointer: Pointer): Pointer =
     new Pointer(segments ++ pointer.segments, isInsideKey = pointer.isInsideKey)
-  }
 
-  def insideKey: Pointer = {
+  def insideKey: Pointer =
     copy(isInsideKey = true)
-  }
 
-  def outer: Pointer = {
+  def outer: Pointer =
     new Pointer(segments.dropRight(1))
-  }
 
   def apply(value: Value): Option[Value] = segments.foldLeft(Option(value)) { case (v, segment) =>
     v.flatMap(v =>
@@ -105,18 +97,14 @@ case class Pointer(segments: Seq[Token], isInsideKey: Boolean = false) {
       }
     )
   }
-}
 
 trait Token
 
-case class ArrayIndexToken(index: Int) extends Token {
+case class ArrayIndexToken(index: Int) extends Token:
   override def toString: String = { index.toString }
-}
 
-case class FieldToken(field: String) extends Token {
-  override def toString: String = {
+case class FieldToken(field: String) extends Token:
+  override def toString: String =
     field
       .replace("~", "~0")
       .replace("/", "~1")
-  }
-}

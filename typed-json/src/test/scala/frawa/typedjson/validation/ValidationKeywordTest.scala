@@ -24,7 +24,7 @@ import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestUtil._
 import munit.FunSuite
 
-class ValidationKeywordTest extends FunSuite {
+class ValidationKeywordTest extends FunSuite:
 
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
@@ -33,9 +33,8 @@ class ValidationKeywordTest extends FunSuite {
 
   def validateJson(
       schema: SchemaValue
-  )(jsonText: String)(f: Result[ValidationOutput] => Unit): Either[Nothing, Unit] = {
+  )(jsonText: String)(f: Result[ValidationOutput] => Unit): Either[Nothing, Unit] =
     assertResult(jsonText)(schema)(f)
-  }
 
   test("multipleOf") {
     withSchema("""{"multipleOf": 2}""") { schema =>
@@ -607,4 +606,3 @@ class ValidationKeywordTest extends FunSuite {
       }
     }
   }
-}

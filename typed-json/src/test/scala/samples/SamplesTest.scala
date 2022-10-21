@@ -23,7 +23,7 @@ import frawa.typedjson.parser.jawn.JawnParser
 import frawa.typedjson.validation.TypeMismatch
 import frawa.typedjson.pointer.Pointer
 
-class SamplesTest extends FunSuite {
+class SamplesTest extends FunSuite:
 
   test("always valid without a schema") {
     implicit val p = new JawnParser()
@@ -58,4 +58,3 @@ class SamplesTest extends FunSuite {
     assertEquals(validation.map(_.output.errors), Right(Seq(TypedJson.Error(Pointer.empty, TypeMismatch("string")))))
   }
 
-}

@@ -19,25 +19,21 @@ package frawa.typedjson.validation
 import frawa.typedjson.keywords.Result
 import frawa.typedjson.pointer.Pointer
 
-class ValidationCombiner extends Combiner[ValidationOutput] {
+class ValidationCombiner extends Combiner[ValidationOutput]:
   private implicit val f: Result.OutputCombiner[ValidationOutput] = ValidationOutput.add
 
-  override def allOf(results: Seq[Result[ValidationOutput]], pointer: Pointer): Result[ValidationOutput] = {
-    if results.isEmpty || results.forall(_.valid) then {
+  override def allOf(results: Seq[Result[ValidationOutput]], pointer: Pointer): Result[ValidationOutput] =
+    if results.isEmpty || results.forall(_.valid) then
       Result.valid
-    } else {
+    else
       invalid(results)
-    }
-  }
 
-  private def invalid(results: Seq[Result[ValidationOutput]]): Result[ValidationOutput] = {
+  private def invalid(results: Seq[Result[ValidationOutput]]): Result[ValidationOutput] =
     val errors = results.flatMap(_.output).flatMap(_.errors)
-    if errors.isEmpty then {
+    if errors.isEmpty then
       Result.invalid
-    } else {
+    else
       Result.invalid(ValidationOutput.invalid(errors))
-    }
-  }
   override def valid(annotation: ValidationAnnotation, pointer: Pointer): Result[ValidationOutput] =
     Result.valid(ValidationOutput.valid(annotation, pointer))
 
@@ -45,52 +41,42 @@ class ValidationCombiner extends Combiner[ValidationOutput] {
     ValidationOutput.invalid(error, pointer)
   )
 
-  override def anyOf(results: Seq[Result[ValidationOutput]], pointer: Pointer): Result[ValidationOutput] = {
-    if results.isEmpty || results.exists(_.valid) then {
+  override def anyOf(results: Seq[Result[ValidationOutput]], pointer: Pointer): Result[ValidationOutput] =
+    if results.isEmpty || results.exists(_.valid) then
       Result.valid
-    } else {
+    else
       invalid(results)
-    }
-  }
 
-  override def oneOf(results: Seq[Result[ValidationOutput]], pointer: Pointer): Result[ValidationOutput] = {
+  override def oneOf(results: Seq[Result[ValidationOutput]], pointer: Pointer): Result[ValidationOutput] =
     val valids = results.filter(_.valid)
-    if valids.size == 1 then {
+    if valids.size == 1 then
       Result.valid
-    } else if valids.isEmpty then {
+    else if valids.isEmpty then
       invalid(results)
-    } else {
+    else
       invalid(NotOneOf(valids.size), pointer)
-    }
-  }
 
   override def contains(
       results: Seq[Result[ValidationOutput]],
       pointer: Pointer,
       min: Option[Int],
       max: Option[Int]
-  ): Result[ValidationOutput] = {
+  ): Result[ValidationOutput] =
     val count = results.count(_.valid)
-    if min.getOrElse(1) <= count && !max.exists(count > _) then {
+    if min.getOrElse(1) <= count && !max.exists(count > _) then
       Result.valid
-    } else {
+    else
       invalid(NotContains(count), pointer)
-    }
-  }
 
-  override def not(results: Seq[Result[ValidationOutput]], pointer: Pointer): Result[ValidationOutput] = {
-    if results.length == 1 && !results.head.valid then {
+  override def not(results: Seq[Result[ValidationOutput]], pointer: Pointer): Result[ValidationOutput] =
+    if results.length == 1 && !results.head.valid then
       Result.valid
-    } else {
+    else
       invalid(NotInvalid(), pointer)
-    }
-  }
 
   override def ifThenElse(
       results: Seq[Result[ValidationOutput]],
       pointer: Pointer
-  ): Result[ValidationOutput] = {
+  ): Result[ValidationOutput] =
     allOf(results, pointer)
-  }
 
-}

@@ -27,7 +27,7 @@ import munit.{FunSuite, Location, TestOptions}
 
 import java.net.URI
 
-class JsonSchemaTestSuite extends FunSuite {
+class JsonSchemaTestSuite extends FunSuite:
   protected val oneTestPerData      = false
   protected val ignore: Set[String] = Set()
 
@@ -41,17 +41,14 @@ class JsonSchemaTestSuite extends FunSuite {
 
   private case class TestData(data: Value, failMessage: String, expectedValid: Boolean)
 
-  private def check(fileAndContent: (String, Value)): Unit = {
+  private def check(fileAndContent: (String, Value)): Unit =
     val (file, content) = fileAndContent
     checkSuite(file)(content)
-  }
 
-  private def checkSuite(file: String)(testSuiteValue: Value): Unit = {
-    testSuiteValue match {
+  private def checkSuite(file: String)(testSuiteValue: Value): Unit =
+    testSuiteValue match
       case ArrayValue(tests) => tests.foreach(checkTest(file))
       case _                 => fail("invalid test json suite")
-    }
-  }
 
   private val vocabularyForTest = dialect(
     Seq(
@@ -64,8 +61,8 @@ class JsonSchemaTestSuite extends FunSuite {
     )
   )
 
-  private def checkTest(file: String)(testValue: Value): Unit = {
-    testValue match {
+  private def checkTest(file: String)(testValue: Value): Unit =
+    testValue match
       case ObjectValue(properties) =>
         val StringValue(description: String) = properties("description"): @unchecked
         val suiteName                        = s"$file - $description"
@@ -101,7 +98,7 @@ class JsonSchemaTestSuite extends FunSuite {
           factory.mapResult(assertNoIgnoredKeywords)
 
         val hasIgnoredFailMessage = ignoreFailMessageByDescription.contains(testId)
-        if oneTestPerData || hasIgnoredFailMessage then {
+        if oneTestPerData || hasIgnoredFailMessage then
           implicit val factory1: EvaluatorFactory[SchemaValue, ValidationOutput] = strictFactory
           withProcessor[ValidationOutput](schemaValue) { evaluator =>
             tests.foreach { value =>
@@ -119,7 +116,7 @@ class JsonSchemaTestSuite extends FunSuite {
               }
             }
           }
-        } else {
+        else
           implicit val factory1: EvaluatorFactory[SchemaValue, ValidationOutput] = factory
           test(suiteOptions) {
             withProcessor[ValidationOutput](schemaValue) { evaluator =>
@@ -130,30 +127,25 @@ class JsonSchemaTestSuite extends FunSuite {
                 }
             }
           }
-        }
       case _ => fail("invalid test json")
-    }
-  }
 
   private def assertOne(evaluator: Evaluator[ValidationOutput]): TestData => Unit = { data =>
     val result = evaluator(InnerValue(data.data))
 
-    if result.valid != data.expectedValid then {
+    if result.valid != data.expectedValid then
       implicit val loc: Location = munit.Location.empty
-      if !result.valid then {
+      if !result.valid then
         assertEquals(result.problems.errors, Seq(), data.failMessage)
         assertEquals(result.ignoredKeywords(), Set.empty[String], data.failMessage)
         assertEquals(result.output, None, data.failMessage)
-      } else {
+      else
         fail(
           "unexpected valid",
           clues(clue[String](data.failMessage), clue[Boolean](data.expectedValid), clue[Result[_]](result))
         )
-      }
-    }
   }
 
-  protected def checkFiles[T](files: Map[String, T])(f: T => Value): Unit = {
+  protected def checkFiles[T](files: Map[String, T])(f: T => Value): Unit =
     files
       .filterNot { case (file, _) =>
         ignore
@@ -164,16 +156,13 @@ class JsonSchemaTestSuite extends FunSuite {
       }
       .map(t => (t._1, f(t._2)))
       .foreach(check)
-  }
 
   protected def checkFiles(files: Map[String, Value]): Unit = checkFiles[Value](files)(identity)
 
-  private def testData(value: Value): TestData = {
+  private def testData(value: Value): TestData =
     val ObjectValue(properties)  = value: @unchecked
     val data                     = properties("data")
     val StringValue(failMessage) = properties("description"): @unchecked
     val BoolValue(expected)      = properties("valid"): @unchecked
     TestData(data, failMessage, expected)
-  }
 
-}

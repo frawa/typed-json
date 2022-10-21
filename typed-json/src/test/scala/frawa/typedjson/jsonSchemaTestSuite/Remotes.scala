@@ -21,7 +21,7 @@ import frawa.typedjson.util.UriUtil
 
 import java.net.URI
 
-object Remotes {
+object Remotes:
   import frawa.typedjson.parser._
   // not unused, used by macro
   import frawa.typedjson.parser.Value._
@@ -29,16 +29,16 @@ object Remotes {
   val remotesUri: URI = UriUtil.uri("http://localhost:1234")
 
   def lazyResolver: LoadedSchemasResolver.LazyResolver = { uri =>
-    if uri.getSchemeSpecificPart.startsWith(remotesUri.getSchemeSpecificPart) then {
+    if uri.getSchemeSpecificPart.startsWith(remotesUri.getSchemeSpecificPart) then
       resolveRemotes(remotesUri.relativize(uri))
-    } else { None }
+    else { None }
   }
 
-  private def resolveRemotes(relative: URI): Option[RootSchemaValue] = {
+  private def resolveRemotes(relative: URI): Option[RootSchemaValue] =
     val name     = relative.getSchemeSpecificPart
     val segments = name.split('/')
-    if segments.length == 2 then {
-      segments(0) match {
+    if segments.length == 2 then
+      segments(0) match
         case "baseUriChange"       => baseUriChangeFiles.get(segments(1)).map(SchemaValue.root)
         case "baseUriChangeFolder" => baseUriChangeFolderFiles.get(segments(1)).map(SchemaValue.root)
         case "baseUriChangeFolderInSubschema" =>
@@ -47,11 +47,8 @@ object Remotes {
         case _ =>
           printf("MISSING in Remotes: %s", segments(0))
           None
-      }
-    } else {
+    else
       remotesFiles.get(name).map(SchemaValue.root)
-    }
-  }
 
   import frawa.typedjson.macros.Macros._
 
@@ -69,4 +66,3 @@ object Remotes {
 
   private val draft202012Files: Map[String, Value] =
     folderJsonContents("./JSON-Schema-Test-Suite/remotes/draft2020-12", ".json")
-}

@@ -32,7 +32,7 @@ import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.validation.ValidationError
 import frawa.typedjson.keywords.Result
 
-object TypedJson {
+object TypedJson:
   case class Validation(valid: Boolean, output: Output)
   case class Output(errors: Seq[Error]) // TODO add annotations
   case class Error(pointer: Pointer, error: ValidationError)
@@ -43,24 +43,21 @@ object TypedJson {
 
   def create(): TypedJson = new TypedJson(None)
 
-  def create(schemaJson: String)(implicit parser: Parser): Either[InputError, TypedJson] = {
+  def create(schemaJson: String)(implicit parser: Parser): Either[InputError, TypedJson] =
     parser
       .parse(schemaJson)
       .swap
       .map(JsonError(_))
       .swap
       .flatMap(create(_))
-  }
 
-  def create(schema: Value): Either[InputError, TypedJson] = {
+  def create(schema: Value): Either[InputError, TypedJson] =
     withSchema(SchemaValue.root(schema))
-  }
 
-  def create(schema: Offset.Value): Either[InputError, TypedJson] = {
+  def create(schema: Offset.Value): Either[InputError, TypedJson] =
     withSchema(SchemaValue.root(Offset.withoutOffset(schema)))
-  }
 
-  private def withSchema(schema: SchemaValue): Either[InputError, TypedJson] = {
+  private def withSchema(schema: SchemaValue): Either[InputError, TypedJson] =
     val resolver   = MetaSchemas.lazyResolver
     val vocabulary = Vocabulary.specDialect()
     val keywords   = Keywords(schema, Some(vocabulary), Some(resolver))
@@ -68,28 +65,24 @@ object TypedJson {
       .map(SchemaErrors(_))
       .swap
       .map(keywords => new TypedJson(Some(keywords)))
-  }
 
-  object Output {
+  object Output:
     val empty: Output = Output(Seq.empty)
 
-    def apply(result: Result[ValidationOutput]): Output = {
+    def apply(result: Result[ValidationOutput]): Output =
       val errors =
         result.output
           .map(_.errors)
           .getOrElse(Seq())
           .map(error => Error(error.pointer, error.result))
       Output(errors)
-    }
 
-  }
 
-}
 
-class TypedJson(private val keywords: Option[Keywords]) {
+class TypedJson(private val keywords: Option[Keywords]):
   import TypedJson._
 
-  def validate(json: String)(implicit parser: Parser): Either[InputError, Validation] = {
+  def validate(json: String)(implicit parser: Parser): Either[InputError, Validation] =
     parser
       .parse(json)
       .swap
@@ -98,24 +91,19 @@ class TypedJson(private val keywords: Option[Keywords]) {
       .map { value =>
         validate(value).getOrElse(Validation(true, Output.empty))
       }
-  }
 
-  def validate(value: Value): Option[Validation] = {
+  def validate(value: Value): Option[Validation] =
     keywords
       .map(validator)
       .map { validator => validator(InnerValue(value)) }
       .map { result => Validation(result.valid, Output(result)) }
-  }
 
-  def validate(value: Offset.Value): Option[Validation] = {
+  def validate(value: Offset.Value): Option[Validation] =
     keywords
       .map(validator)
       .map { validator => validator(InnerValue(Offset.withoutOffset(value))) }
       .map { result => Validation(result.valid, Output(result)) }
-  }
 
-  def validator(keywords: Keywords): Evaluator[ValidationOutput] = {
+  def validator(keywords: Keywords): Evaluator[ValidationOutput] =
     Evaluator(keywords, ValidationProcessing())
-  }
 
-}

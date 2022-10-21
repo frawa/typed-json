@@ -22,7 +22,7 @@ import munit.FunSuite
 
 import java.net.URI
 
-class SchemaResolverTest extends FunSuite {
+class SchemaResolverTest extends FunSuite:
   val fooId       = "https://example.net/foo.json"
   val fooUri: URI = uri(fooId)
 
@@ -60,17 +60,15 @@ class SchemaResolverTest extends FunSuite {
       )
     )
 
-  case object MySchemaResolver extends SchemaResolver {
+  case object MySchemaResolver extends SchemaResolver:
 
     override val base: URI = fooUri
 
-    override def resolve(uri: URI): Option[SchemaResolution] = uri match {
+    override def resolve(uri: URI): Option[SchemaResolution] = uri match
       case `fooUri` => Some(SchemaResolution(fooSchema, this))
       case `gnuUri` => Some(SchemaResolution(gnuSchema, this))
       case _        => None
-    }
 
-  }
 
   test("absolute ref") {
     val resolved = MySchemaResolver.resolveRef(fooId).map(_.schema)
@@ -92,4 +90,3 @@ class SchemaResolverTest extends FunSuite {
     assertEquals(resolved, Some(fooSchema))
   }
 
-}

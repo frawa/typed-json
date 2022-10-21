@@ -18,9 +18,8 @@ package frawa.typedjson.macros
 
 import munit.FunSuite
 
-class JsonUtilsTest extends FunSuite {
+class JsonUtilsTest extends FunSuite:
 
   test("TODO test some".ignore) {
     assertEquals("", "")
   }
-}

@@ -19,7 +19,7 @@ package frawa.typedjson.parser.zio
 import frawa.typedjson.parser.Parser
 import munit._
 
-class ZioParserTest extends FunSuite {
+class ZioParserTest extends FunSuite:
   import frawa.typedjson.parser.Value._
   import frawa.typedjson.parser.zio.ZioParser
 
@@ -47,4 +47,3 @@ class ZioParserTest extends FunSuite {
       Left("(expected a 128 BigDecimal)")
     )
   }
-}

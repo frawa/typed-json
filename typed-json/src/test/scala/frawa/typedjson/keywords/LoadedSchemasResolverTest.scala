@@ -22,7 +22,7 @@ import frawa.typedjson.testutil.TestUtil._
 import frawa.typedjson.util.UriUtil._
 import munit.FunSuite
 
-class LoadedSchemasResolverTest extends FunSuite {
+class LoadedSchemasResolverTest extends FunSuite:
 
   test("first schema loader") {
     val id = "https://example.net/root.json"
@@ -228,11 +228,10 @@ class LoadedSchemasResolverTest extends FunSuite {
         id1                                  <- SchemaValue.id(schema1)
         SchemaResolution(schema2, _)         <- resolver1.resolveDynamicRef("#items", scope)
         case StringValue(anchor2)                 <- getAnchor(schema2.value)
-      yield {
+      yield
         assertEquals(id1, id)
         assertEquals(anchor2, "items")
         true
-      }
       ok.getOrElse {
         fail("unexpected None")
         false
@@ -292,12 +291,11 @@ class LoadedSchemasResolverTest extends FunSuite {
         SchemaResolution(schema2, _)         <- resolver1.resolveDynamicRef("#items", scope)
         case StringValue(dynamicAnchor2)          <- getDynamicAnchor(schema2.value)
         case StringValue(type2)                   <- getType(schema2.value)
-      yield {
+      yield
         assertEquals(id1, id)
         assertEquals(dynamicAnchor2, "items")
         assertEquals(type2, "string")
         true
-      }
       ok.getOrElse {
         fail("unexpected None")
         false
@@ -331,4 +329,3 @@ class LoadedSchemasResolverTest extends FunSuite {
     }
   }
 
-}

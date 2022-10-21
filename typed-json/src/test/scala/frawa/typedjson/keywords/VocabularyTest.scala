@@ -20,7 +20,7 @@ import frawa.typedjson.keywords.SchemaProblems.UnknownRequiredVocabulary
 import frawa.typedjson.util.UriUtil.uri
 import munit.FunSuite
 
-class VocabularyTest extends FunSuite {
+class VocabularyTest extends FunSuite:
   import Vocabulary._
 
   test("spec vocabularies no duplicates") {
@@ -88,4 +88,3 @@ class VocabularyTest extends FunSuite {
       )
     )
   }
-}

@@ -19,7 +19,7 @@ package frawa.typedjson.keywords
 import frawa.typedjson.util.UriUtil._
 import munit.FunSuite
 
-class DynamicScopeTest extends FunSuite {
+class DynamicScopeTest extends FunSuite:
   import DynamicScope._
 
   test("empty") {
@@ -89,4 +89,3 @@ class DynamicScopeTest extends FunSuite {
     )
   }
 
-}

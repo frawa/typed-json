@@ -19,7 +19,7 @@ package frawa.typedjson.parser
 import frawa.typedjson.pointer.Pointer
 import munit.FunSuite
 
-class OffsetParserTest extends FunSuite {
+class OffsetParserTest extends FunSuite:
   import OffsetParser.pointerAt
   import Offset._
 
@@ -103,4 +103,3 @@ class OffsetParserTest extends FunSuite {
     assertEquals(pointerAt(v)(33), Pointer.empty / "titi")
     assertEquals(pointerAt(v)(34), Pointer.empty)
   }
-}

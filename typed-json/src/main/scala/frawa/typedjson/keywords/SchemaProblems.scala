@@ -23,7 +23,7 @@ import java.net.URI
 
 case class SchemaProblems(
     errors: Seq[SchemaProblems.SchemaError]
-) {
+):
 
   def addErrors(errors: Seq[SchemaProblems.SchemaError]): SchemaProblems =
     copy(errors = this.errors ++ errors)
@@ -36,9 +36,8 @@ case class SchemaProblems(
 
   def dump(): String = errors.map(_.toString).mkString("\n")
 
-}
 
-object SchemaProblems {
+object SchemaProblems:
   val empty: SchemaProblems = SchemaProblems(Seq.empty)
 
   def apply(error: Error): SchemaProblems = SchemaProblems(Seq(WithPointer(error)))
@@ -53,4 +52,3 @@ object SchemaProblems {
   type SchemaError = WithPointer[Error]
 
   def combine(a: SchemaProblems, b: SchemaProblems): SchemaProblems = a.combine(b)
-}

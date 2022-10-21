@@ -21,11 +21,11 @@ import scala.io.Source
 // import scala.reflect.macros.blackbox.Context
 import scala.util.Using
 
-object FileUtils {
+object FileUtils:
 
   def readContentOf(path: String): String = Using.resource(Source.fromFile(path))(_.getLines().mkString("\n"))
 
-  def readFolderContentsOf[T](path: String, ext: String)(f: String => T): Map[String, T] = {
+  def readFolderContentsOf[T](path: String, ext: String)(f: String => T): Map[String, T] =
     import scala.jdk.CollectionConverters._
     Files
       .list(Paths.get(path))
@@ -37,7 +37,6 @@ object FileUtils {
       .sortBy(_.getFileName.toString)
       .map(path => (path.getFileName.toString, f(readContentOf(path.toAbsolutePath.toString))))
       .toMap
-  }
 
   /*
   def fromExpr(c: Context)(expr: c.Expr[String]): String = {
@@ -69,4 +68,3 @@ object FileUtils {
       .toMap
   }
    */
-}

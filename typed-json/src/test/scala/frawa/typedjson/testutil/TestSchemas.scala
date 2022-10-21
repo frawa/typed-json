@@ -19,7 +19,7 @@ package frawa.typedjson.testutil
 import frawa.typedjson.keywords.SchemaValue
 import frawa.typedjson.parser.Value._
 
-object TestSchemas {
+object TestSchemas:
   val nullSchema        = """{"type": "null"}"""
   val boolSchema        = """{"type": "boolean"}"""
   val trueSchema        = """true"""
@@ -216,4 +216,3 @@ object TestSchemas {
                                               |"$id": "https://example.net/root.json",
                                               |"$ref": "https://json-schema.org/draft/2020-12/schema"
                                               |}""".stripMargin
-}

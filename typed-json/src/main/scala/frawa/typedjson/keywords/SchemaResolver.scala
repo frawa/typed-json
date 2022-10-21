@@ -24,7 +24,7 @@ import java.net.URI
 
 case class SchemaResolution(schema: SchemaValue, resolver: SchemaResolver)
 
-trait SchemaResolver {
+trait SchemaResolver:
 
   val base: URI
 
@@ -33,69 +33,57 @@ trait SchemaResolver {
 
   def withBase(uri: URI): SchemaResolver = this
 
-  def push(schema: SchemaValue): SchemaResolution = {
+  def push(schema: SchemaValue): SchemaResolution =
     val resolver = SchemaValue
       .id(schema)
       .map(id => this.withBase(this.absolute(id)))
       .getOrElse(this)
     SchemaResolution(schema, resolver)
-  }
 
-  def absolute(ref: String): URI = {
+  def absolute(ref: String): URI =
     val uri1 = uri(ref)
     withoutEmptyFragment(
       Some(uri1)
         .filter(_.isAbsolute())
         .getOrElse(base.resolve(uri1))
     )
-  }
 
-  def resolveDynamicRef(ref: String, scope: DynamicScope): Option[SchemaResolution] = {
+  def resolveDynamicRef(ref: String, scope: DynamicScope): Option[SchemaResolution] =
     resolveDynamicRef(absolute(ref), scope)
-  }
 
-  def resolveRef(ref: String): Option[SchemaResolution] = {
+  def resolveRef(ref: String): Option[SchemaResolution] =
     resolveRef(absolute(ref))
-  }
 
-  private def resolveDynamicRef(uri: URI, scope: DynamicScope): Option[SchemaResolution] = {
+  private def resolveDynamicRef(uri: URI, scope: DynamicScope): Option[SchemaResolution] =
     val resolved = resolveRef(uri)
 
     val fragment = uri.getFragment
     val dynamic = isDynamic(uri) ||
       scope.candidates.lastOption.map(UriUtil.withFragment(_, fragment)).exists(isDynamic)
-    if dynamic && fragment != null then {
+    if dynamic && fragment != null then
       scope.candidates
         .map(UriUtil.withFragment(_, fragment))
         .find(isDynamic)
         .flatMap(resolve)
         .orElse(resolved)
-    } else {
+    else
       resolved
-    }
-  }
 
-  private def withoutEmptyFragment(uri: URI): URI = {
+  private def withoutEmptyFragment(uri: URI): URI =
     val fragment = uri.getFragment
-    if fragment != null && fragment.isEmpty then {
+    if fragment != null && fragment.isEmpty then
       UriUtil.withoutFragement(uri)
-    } else {
+    else
       uri
-    }
-  }
 
-  def resolveRef(uri: URI): Option[SchemaResolution] = {
-    if uri.getFragment != null && uri.getFragment.startsWith("/") then {
+  def resolveRef(uri: URI): Option[SchemaResolution] =
+    if uri.getFragment != null && uri.getFragment.startsWith("/") then
       val pointer = Pointer.parse(uri.getFragment)
       resolve(UriUtil.withoutFragement(uri))
         .flatMap(resolvePointer(_, pointer))
-    } else {
+    else
       resolve(uri)
-    }
-  }
 
-  private def resolvePointer(resolution: SchemaResolution, pointer: Pointer): Option[SchemaResolution] = {
+  private def resolvePointer(resolution: SchemaResolution, pointer: Pointer): Option[SchemaResolution] =
     val SchemaResolution(schema, resolver) = resolution
     pointer(schema.value).map(SchemaValue(_)).map(SchemaResolution(_, resolver))
-  }
-}

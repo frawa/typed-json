@@ -24,7 +24,7 @@ import frawa.typedjson.keywords.Result
 import frawa.typedjson.validation.FalseSchemaReason
 import frawa.typedjson.parser.jawn.JawnParser
 
-class OutputJsonTest extends FunSuite {
+class OutputJsonTest extends FunSuite:
 
   test("flag valid") {
     assertEquals(
@@ -85,9 +85,8 @@ class OutputJsonTest extends FunSuite {
     assertEquals(basic, expected)
   }
 
-}
 
-object Sample {
+object Sample:
   val schema: String = """|{
                   |  "$id": "https://example.com/polygon",
                   |  "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -157,4 +156,3 @@ object Sample {
                          |  ]
                          |}
                          |""".stripMargin
-}

@@ -18,7 +18,7 @@ package frawa.typedjson.jsonSchemaTestSuite
 
 import frawa.typedjson.testutil.TestUtil._
 
-class Draft202012Test extends JsonSchemaTestSuite {
+class Draft202012Test extends JsonSchemaTestSuite:
 //  import frawa.typedjson.parser._
   import frawa.typedjson.macros.Macros._
 
@@ -43,4 +43,3 @@ class Draft202012Test extends JsonSchemaTestSuite {
   // override protected val onlyDescription: Option[String] = Some("unevaluatedItems with not")
 
   checkFiles(draft202012Files)(parseJsonValue)
-}

@@ -22,13 +22,13 @@ import frawa.typedjson.parser.jawn.JawnParser
 // import scala.reflect.macros.blackbox
 // import scala.reflect.macros.blackbox.Context
 
-object JsonUtils {
+object JsonUtils:
   import scala.quoted.*
   import Value._
 
   private val parser = new JawnParser
 
-  def parseJsonValue(content: String): Value = {
+  def parseJsonValue(content: String): Value =
     parser
       .parse(content)
       .swap
@@ -38,11 +38,10 @@ object JsonUtils {
       .swap
       .toOption
       .get
-  }
 
-  given ToExpr[Value] with {
-    def apply(value: Value)(using Quotes) = {
-      value match {
+  given ToExpr[Value] with
+    def apply(value: Value)(using Quotes) =
+      value match
         case NullValue => '{ NullValue }
         case StringValue(v) =>
           val vv = Expr(v)
@@ -59,7 +58,3 @@ object JsonUtils {
         case ObjectValue(vs) =>
           val vv = Expr(vs)
           '{ ObjectValue($vv) }
-      }
-    }
-  }
-}

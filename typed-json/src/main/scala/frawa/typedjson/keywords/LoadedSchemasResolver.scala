@@ -23,33 +23,30 @@ import frawa.typedjson.util.UriUtil._
 
 import java.net.URI
 
-object LoadedSchemasResolver {
+object LoadedSchemasResolver:
   type LazyResolver = URI => Option[RootSchemaValue]
 
   val empty: LoadedSchemasResolver = LoadedSchemasResolver(uri(""))
 
-  def apply(schema: SchemaValue, lazyResolver: Option[LazyResolver]): LoadedSchemasResolver = {
+  def apply(schema: SchemaValue, lazyResolver: Option[LazyResolver]): LoadedSchemasResolver =
     val resolver = apply(schema)
     lazyResolver.map(resolver.withLazyResolver).getOrElse(resolver)
-  }
 
-  def apply(schema: SchemaValue): LoadedSchemasResolver = {
+  def apply(schema: SchemaValue): LoadedSchemasResolver =
     val firstId = SchemaValue
       .id(schema)
       .map(uri)
       .getOrElse(uri(""))
     val first = empty.add(firstId, schema).withBase(firstId)
     loadSchemas(schema.value, first)
-  }
 
-  def apply(schemas: Seq[SchemaValue]): LoadedSchemasResolver = {
+  def apply(schemas: Seq[SchemaValue]): LoadedSchemasResolver =
     schemas.foldLeft(empty) { case (resolver, schema) =>
       resolver.addAll(apply(schema))
     }
-  }
 
-  private def loadSchemas(value: Value, loaded: LoadedSchemasResolver): LoadedSchemasResolver = {
-    value match {
+  private def loadSchemas(value: Value, loaded: LoadedSchemasResolver): LoadedSchemasResolver =
+    value match
       case ObjectValue(properties) =>
         val loaded1 = properties
           .get("$id")
@@ -59,7 +56,7 @@ object LoadedSchemasResolver {
           .getOrElse(loaded)
         properties
           .foldLeft(loaded1) { case (loaded, (property, propertyValue)) =>
-            (property, propertyValue) match {
+            (property, propertyValue) match
               case ("$id", StringValue(_)) =>
                 // already handled with loaded1
                 loaded
@@ -70,11 +67,8 @@ object LoadedSchemasResolver {
                 val uri = loaded.absolute("#" + anchor)
                 loaded.addDynamic(uri, SchemaValue(value))
               case _ => loadNestedSchemaValues(property, propertyValue, loaded)
-            }
           }
       case _ => loaded
-    }
-  }
 
   private val getterByKeyword: Map[String, NestedSchemaGetter] = Map(
     "not"                   -> selfSchema,
@@ -100,34 +94,30 @@ object LoadedSchemasResolver {
   private type NestedSchemaGetter = Value => Seq[Value]
 
   private def selfSchema: NestedSchemaGetter = v => Seq(v)
-  private def arraySchemas: NestedSchemaGetter = {
+  private def arraySchemas: NestedSchemaGetter =
     case ArrayValue(vs) => vs
     case _              => Seq.empty
-  }
-  private def objectSchemas: NestedSchemaGetter = {
+  private def objectSchemas: NestedSchemaGetter =
     case ObjectValue(ps) => ps.values.toSeq
     case _               => Seq.empty
-  }
 
   private def loadNestedSchemaValues(
       property: String,
       value: Value,
       loaded: LoadedSchemasResolver
-  ): LoadedSchemasResolver = {
+  ): LoadedSchemasResolver =
     val nested = getterByKeyword.get(property).map(_(value)).getOrElse(Seq.empty)
     nested.foldLeft(loaded) { case (loaded, v) =>
       loaded.addAll(loadSchemas(v, loaded))
     }
-  }
 
-}
 
 case class LoadedSchemasResolver(
     override val base: URI,
     schemas: Map[URI, SchemaValue] = Map.empty,
     dynamicSchemas: Set[URI] = Set.empty,
     lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
-) extends SchemaResolver {
+) extends SchemaResolver:
 
   override def withBase(uri: URI): LoadedSchemasResolver = this.copy(base = uri)
 
@@ -159,4 +149,3 @@ case class LoadedSchemasResolver(
 
   private def addDynamic(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
     add(uri, schema).copy(dynamicSchemas = dynamicSchemas + uri)
-}

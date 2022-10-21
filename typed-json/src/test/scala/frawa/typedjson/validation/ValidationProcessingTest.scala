@@ -27,37 +27,33 @@ import frawa.typedjson.testutil.TestSchemas._
 import frawa.typedjson.testutil.TestUtil._
 import munit.FunSuite
 
-object ValidationProcessingTest {
+object ValidationProcessingTest:
 
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
   implicit val factory: EvaluatorFactory[SchemaValue, ValidationOutput] =
     EvaluatorFactory.make(ValidationProcessing(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
-}
 
-class ValidationProcessingTest extends FunSuite {
+class ValidationProcessingTest extends FunSuite:
   import ValidationProcessingTest._
 
   private def assertValidate(text: String)(
       schema: SchemaValue
   )(
       f: Result[ValidationOutput] => Unit
-  ): Either[Nothing, Unit] = {
+  ): Either[Nothing, Unit] =
     assertResult(text)(schema)(f)
-  }
 
   def assertValidate2(text: String)(
       schema: SchemaValue,
       c: EvaluatorFactory[SchemaValue, ValidationOutput]
   )(
       f: Result[ValidationOutput] => Unit
-  ): Either[Nothing, Unit] = {
+  ): Either[Nothing, Unit] =
     assertResult(text)(schema)(f)(c, implicitly[Parser])
-  }
 
-  private def assertErrors(result: Result[ValidationOutput], expected: Seq[WithPointer[ValidationError]]): Unit = {
+  private def assertErrors(result: Result[ValidationOutput], expected: Seq[WithPointer[ValidationError]]): Unit =
     assertEquals(result.output.map(_.errors).getOrElse(Seq()), expected)
-  }
 
   test("null") {
     withSchema(nullSchema) { schema =>
@@ -797,4 +793,3 @@ class ValidationProcessingTest extends FunSuite {
     }
   }
 
-}
