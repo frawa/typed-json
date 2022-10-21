@@ -72,10 +72,8 @@ case class Result[O](
     this.copy(evaluations = this.evaluations ++ es)
 
   def addIgnoredKeywords(ignored: Set[String], pointer: Pointer): Result[O] =
-    if ignored.isEmpty then
-      this
-    else
-      add(WithPointer(Ignored(ignored), pointer))
+    if ignored.isEmpty then this
+    else add(WithPointer(Ignored(ignored), pointer))
 
   def ignoredKeywords(): Set[String] =
     evaluations

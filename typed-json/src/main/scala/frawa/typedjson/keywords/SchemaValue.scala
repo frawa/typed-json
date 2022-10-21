@@ -64,4 +64,3 @@ object SchemaValue:
           }
           .map(Vocabulary.dialect)
           .getOrElse(Right(parentVocabulary))
-

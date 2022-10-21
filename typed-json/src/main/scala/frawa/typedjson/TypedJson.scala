@@ -77,8 +77,6 @@ object TypedJson:
           .map(error => Error(error.pointer, error.result))
       Output(errors)
 
-
-
 class TypedJson(private val keywords: Option[Keywords]):
   import TypedJson._
 
@@ -106,4 +104,3 @@ class TypedJson(private val keywords: Option[Keywords]):
 
   def validator(keywords: Keywords): Evaluator[ValidationOutput] =
     Evaluator(keywords, ValidationProcessing())
-

@@ -26,10 +26,9 @@ object OutputJson:
     ObjectValue(Map("valid" -> BoolValue(validation.valid)))
 
   def basic(validation: TypedJson.Validation): Value =
-    val errors = if validation.output.errors.isEmpty then
-      Map()
-    else
-      Map("errors" -> ArrayValue(validation.output.errors.map(toJson)))
+    val errors =
+      if validation.output.errors.isEmpty then Map()
+      else Map("errors" -> ArrayValue(validation.output.errors.map(toJson)))
     ObjectValue(Map("valid" -> BoolValue(validation.valid)) ++ errors)
 
   private def toJson(error: TypedJson.Error): Value =

@@ -52,4 +52,3 @@ object Macros:
   def folderJsonContents_impl(path: Expr[String], ext: Expr[String])(using Quotes): Expr[Map[String, Value]] =
     import JsonUtils.given
     Expr(readFolderContentsOf(path.valueOrAbort, ext.valueOrAbort)(parseJsonValue))
-

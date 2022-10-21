@@ -38,13 +38,10 @@ object Pointer:
       .map(t => t.toIntOption.map(ArrayIndexToken.apply).getOrElse(FieldToken(t)))
   )
 
-
 case class Pointer(segments: Seq[Token], isInsideKey: Boolean = false):
   override def toString: String =
-    if this.segments.isEmpty then
-      ""
-    else
-      "/" + this.segments.mkString("/")
+    if this.segments.isEmpty then ""
+    else "/" + this.segments.mkString("/")
 
   def /(index: Int): Pointer =
     new Pointer(segments :+ ArrayIndexToken(index))

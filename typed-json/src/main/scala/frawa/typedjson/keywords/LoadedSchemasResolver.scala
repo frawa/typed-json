@@ -111,7 +111,6 @@ object LoadedSchemasResolver:
       loaded.addAll(loadSchemas(v, loaded))
     }
 
-
 case class LoadedSchemasResolver(
     override val base: URI,
     schemas: Map[URI, SchemaValue] = Map.empty,

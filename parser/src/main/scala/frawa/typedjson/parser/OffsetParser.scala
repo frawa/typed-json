@@ -63,8 +63,7 @@ object OffsetParser:
       pointer.outer(value) match
         case Some(ObjectValue(_, properties)) => properties.find(_._1.value == key).map(_._1.offset)
         case _                                => None
-    else
-      pointer(value).map(_.offset)
+    else pointer(value).map(_.offset)
 
 case class Offset(start: Int, end: Int):
   // TODO end is exclusive, why is it inclusive here?

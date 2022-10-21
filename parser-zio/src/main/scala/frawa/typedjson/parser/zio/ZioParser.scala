@@ -36,4 +36,3 @@ class ZioParser extends Parser:
       case Json.Str(value)  => StringValue(value)
       case Arr(elements)    => ArrayValue(elements.map(toValue))
       case Obj(fields)      => ObjectValue(Map.from(fields.map(p => (p._1, toValue(p._2)))))
-

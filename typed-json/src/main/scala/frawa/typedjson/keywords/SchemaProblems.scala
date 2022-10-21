@@ -36,7 +36,6 @@ case class SchemaProblems(
 
   def dump(): String = errors.map(_.toString).mkString("\n")
 
-
 object SchemaProblems:
   val empty: SchemaProblems = SchemaProblems(Seq.empty)
 

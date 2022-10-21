@@ -66,23 +66,19 @@ trait SchemaResolver:
         .find(isDynamic)
         .flatMap(resolve)
         .orElse(resolved)
-    else
-      resolved
+    else resolved
 
   private def withoutEmptyFragment(uri: URI): URI =
     val fragment = uri.getFragment
-    if fragment != null && fragment.isEmpty then
-      UriUtil.withoutFragement(uri)
-    else
-      uri
+    if fragment != null && fragment.isEmpty then UriUtil.withoutFragement(uri)
+    else uri
 
   def resolveRef(uri: URI): Option[SchemaResolution] =
     if uri.getFragment != null && uri.getFragment.startsWith("/") then
       val pointer = Pointer.parse(uri.getFragment)
       resolve(UriUtil.withoutFragement(uri))
         .flatMap(resolvePointer(_, pointer))
-    else
-      resolve(uri)
+    else resolve(uri)
 
   private def resolvePointer(resolution: SchemaResolution, pointer: Pointer): Option[SchemaResolution] =
     val SchemaResolution(schema, resolver) = resolution

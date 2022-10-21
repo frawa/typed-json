@@ -122,35 +122,27 @@ object ValidationProcessing:
   private def validateInteger(): EvalFun = value =>
     value.value match
       case NumberValue(v) =>
-        if v.isWhole then
-          Result.valid
-        else
-          combiner.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
+        if v.isWhole then Result.valid
+        else combiner.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
       case _ => combiner.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
 
   private def validateTrivial(valid: Boolean): EvalFun = { value =>
-    if valid then
-      Result.valid
-    else
-      combiner.invalid(FalseSchemaReason(), value.pointer)
+    if valid then Result.valid
+    else combiner.invalid(FalseSchemaReason(), value.pointer)
   }
 
   private def validateObjectRequired(required: Seq[String]): EvalFun = { value =>
     value.value match
       case ObjectValue(propertiesValues) =>
         val missingNames = required.filter(!propertiesValues.contains(_))
-        if missingNames.isEmpty then
-          Result.valid
-        else
-          combiner.invalid(MissingRequiredProperties(missingNames), value.pointer)
+        if missingNames.isEmpty then Result.valid
+        else combiner.invalid(MissingRequiredProperties(missingNames), value.pointer)
       case _ => Result.valid
   }
 
   private def validateEnum(values: Seq[Value]): EvalFun = { value =>
-    if values.contains(value.value) then
-      Result.valid
-    else
-      combiner.invalid(NotInEnum(values), value.pointer)
+    if values.contains(value.value) then Result.valid
+    else combiner.invalid(NotInEnum(values), value.pointer)
   }
 
   private def validatePattern(pattern: String): EvalFun =
@@ -158,10 +150,8 @@ object ValidationProcessing:
     value =>
       value.value match
         case StringValue(v) =>
-          if r.findFirstIn(v).isDefined then
-            Result.valid
-          else
-            combiner.invalid(PatternMismatch(pattern), value.pointer)
+          if r.findFirstIn(v).isDefined then Result.valid
+          else combiner.invalid(PatternMismatch(pattern), value.pointer)
         case _ => Result.valid
 
   private def validateFormat(format: String): EvalFun =
@@ -316,10 +306,8 @@ object ValidationProcessing:
   private def validateStringValue(error: => ValidationError)(validate: String => Boolean): EvalFun = { value =>
     value.value match
       case StringValue(v) =>
-        if validate(v) then
-          Result.valid
-        else
-          combiner.invalid(error, value.pointer)
+        if validate(v) then Result.valid
+        else combiner.invalid(error, value.pointer)
       case _ => Result.valid
   }
 
@@ -331,20 +319,16 @@ object ValidationProcessing:
   private def validateNumberValue(error: => ValidationError)(validate: BigDecimal => Boolean): EvalFun = { value =>
     value.value match
       case NumberValue(v) =>
-        if validate(v) then
-          Result.valid
-        else
-          combiner.invalid(error, value.pointer)
+        if validate(v) then Result.valid
+        else combiner.invalid(error, value.pointer)
       case _ => Result.valid
   }
 
   private def validateArrayValue(error: => ValidationError)(validate: Seq[Value] => Boolean): EvalFun = { value =>
     value.value match
       case ArrayValue(v) =>
-        if validate(v) then
-          Result.valid
-        else
-          combiner.invalid(error, value.pointer)
+        if validate(v) then Result.valid
+        else combiner.invalid(error, value.pointer)
       case _ => Result.valid
   }
 
@@ -395,10 +379,8 @@ object ValidationProcessing:
     value =>
       value.value match
         case ObjectValue(v) =>
-          if validate(v) then
-            Result.valid
-          else
-            combiner.invalid(error, value.pointer)
+          if validate(v) then Result.valid
+          else combiner.invalid(error, value.pointer)
         case _ => Result.valid
 
   private def validateMaxProperties(max: BigDecimal): EvalFun =
@@ -422,10 +404,7 @@ object ValidationProcessing:
               .filterNot(_.isEmpty)
               .map(property -> _)
           }
-        if missing.isEmpty then
-          Result.valid
-        else
-          combiner.invalid(DependentRequiredMissing(missing), value.pointer)
+        if missing.isEmpty then Result.valid
+        else combiner.invalid(DependentRequiredMissing(missing), value.pointer)
       case _ => Result.valid
   }
-

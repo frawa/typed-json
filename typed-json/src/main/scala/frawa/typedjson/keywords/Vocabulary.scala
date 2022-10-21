@@ -186,4 +186,3 @@ object Vocabulary:
 
   def specDialect(): Vocabulary =
     specVocabularies.values.reduce(_.combine(_))
-

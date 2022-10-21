@@ -114,4 +114,3 @@ object SuggestionProcessing:
 
   private def onlyKeys(suggestions: Seq[Value]): Seq[StringValue] =
     suggestions.flatMap(Value.asObject).flatMap(_.keys).map(StringValue.apply)
-
