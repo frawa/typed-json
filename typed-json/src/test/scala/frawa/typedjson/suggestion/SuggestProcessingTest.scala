@@ -22,11 +22,11 @@ import frawa.typedjson.parser._
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestSchemas.{numberArraySchema, totoObjectSchema, totoRequiredObjectSchema}
-import frawa.typedjson.testutil.TestUtil._
+import frawa.typedjson.testutil.TestUtil.{_, given}
 import munit.FunSuite
 import frawa.typedjson.meta.MetaSchemas
 
-class SuggestProcessingTest extends FunSuite {
+class SuggestProcessingTest extends FunSuite:
 
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
@@ -35,12 +35,11 @@ class SuggestProcessingTest extends FunSuite {
 
   private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
       f: Seq[Value] => Unit
-  ) = {
-    implicit val toProcessor1: EvaluatorFactory[SchemaValue, SuggestionOutput] = factory(at)
+  ) =
+    given EvaluatorFactory[SchemaValue, SuggestionOutput] = factory(at)
     assertResult[SuggestionOutput](text)(schema) { result =>
       f(result.output.map(_.suggestions).getOrElse(Seq()).distinct)
     }
-  }
 
   test("suggest one object per property") {
     withSchema(totoObjectSchema) { schema =>
@@ -559,17 +558,15 @@ class SuggestProcessingTest extends FunSuite {
     }
   }
 
-  private def assertSuggestForSchema(json: String, at: Pointer)(f: Seq[Value] => Unit): Unit = {
+  private def assertSuggestForSchema(json: String, at: Pointer)(f: Seq[Value] => Unit): Unit =
     val resolver     = MetaSchemas.lazyResolver
     val base         = MetaSchemas.draft202012
-    val Some(schema) = resolver(base.resolve("schema"))
+    val Some(schema) = resolver(base.resolve("schema")): @unchecked
 
     def factory(at: Pointer): EvaluatorFactory[SchemaValue, SuggestionOutput] =
       EvaluatorFactory.make(SuggestionProcessing(at), None, Some(resolver)).mapResult(assertNoIgnoredKeywords)
 
-    implicit val factory1 = factory(at)
+    given EvaluatorFactory[SchemaValue, SuggestionOutput] = factory(at)
     assertResult[SuggestionOutput](json)(schema) { result =>
       f(result.output.map(_.suggestions).getOrElse(Seq()).distinct)
     }
-  }
-}

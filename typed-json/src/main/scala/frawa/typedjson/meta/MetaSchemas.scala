@@ -22,21 +22,21 @@ import frawa.typedjson.util.UriUtil.uri
 
 import java.net.URI
 
-object MetaSchemas {
+object MetaSchemas:
   // not unused, used by macro
   import frawa.typedjson.parser.Value._
 
   val draft202012: URI = uri("https://json-schema.org/draft/2020-12/")
 
   def lazyResolver: LoadedSchemasResolver.LazyResolver = { uri =>
-    if (uri.getSchemeSpecificPart.startsWith(draft202012.getSchemeSpecificPart)) {
+    if uri.getSchemeSpecificPart.startsWith(draft202012.getSchemeSpecificPart) then
       resolve202012(draft202012.relativize(uri))
-    } else { None }
+    else { None }
   }
 
-  private def resolve202012(relative: URI): Option[RootSchemaValue] = {
+  private def resolve202012(relative: URI): Option[RootSchemaValue] =
     val name = relative.getSchemeSpecificPart
-    name match {
+    name match
       case "schema"                 => Some(schemaContent)
       case "meta/applicator"        => Some(applicatorContent)
       case "meta/content"           => Some(contentContent)
@@ -46,8 +46,6 @@ object MetaSchemas {
       case "meta/unevaluated"       => Some(unevaluatedContent)
       case "meta/validation"        => Some(validationContent)
       case _                        => None
-    }
-  }
 
   import Macros._
 
@@ -59,4 +57,3 @@ object MetaSchemas {
   private val metaDataContent         = SchemaValue.root(jsonContent("./metaSchemas/meta/meta-data.json"))
   private val unevaluatedContent      = SchemaValue.root(jsonContent("./metaSchemas/meta/unevaluated.json"))
   private val validationContent       = SchemaValue.root(jsonContent("./metaSchemas/meta/validation.json"))
-}

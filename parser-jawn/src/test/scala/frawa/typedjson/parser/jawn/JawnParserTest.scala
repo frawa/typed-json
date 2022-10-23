@@ -21,7 +21,7 @@ import frawa.typedjson.parser.Value._
 import munit._
 
 class JawnParserTest extends FunSuite {
-  implicit val parser: Parser = new JawnParser()
+  given Parser = new JawnParser()
 
   test("basic types") {
     assertEquals(Parser("""13"""), Right(NumberValue(13)))

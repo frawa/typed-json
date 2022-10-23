@@ -16,7 +16,7 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-class Draft202012OptionalFormatTest extends JsonSchemaTestSuite {
+class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
   import frawa.typedjson.macros.Macros._
   import frawa.typedjson.parser._
   // not unused, used by macro
@@ -79,4 +79,3 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite {
   )
 
   checkFiles(draft202012OptionalFormatFiles)
-}

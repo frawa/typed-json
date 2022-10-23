@@ -16,18 +16,15 @@
 
 package frawa.typedjson.parser
 
-trait Parser {
+trait Parser:
   def parse(json: String): Either[String, Value]
-}
 
-object Parser {
-  def apply(json: String)(implicit parser: Parser): Either[String, Value] = {
+object Parser:
+  def apply(json: String)(using parser: Parser): Either[String, Value] =
     parser.parse(json)
-  }
-}
 
 sealed trait Value
-object Value {
+object Value:
   case class NumberValue(value: BigDecimal)              extends Value
   case class BoolValue(value: Boolean)                   extends Value
   case object NullValue                                  extends Value
@@ -35,20 +32,16 @@ object Value {
   case class ArrayValue(items: Seq[Value])               extends Value
   case class ObjectValue(properties: Map[String, Value]) extends Value
 
-  def asString(value: Value): Option[String] = value match {
+  def asString(value: Value): Option[String] = value match
     case StringValue(v) => Some(v)
     case _              => None
-  }
 
-  def asBool(value: Value): Option[Boolean] = value match {
+  def asBool(value: Value): Option[Boolean] = value match
     case BoolValue(v) => Some(v)
     case _            => None
-  }
 
-  def asObject(value: Value): Option[Map[String, Value]] = value match {
+  def asObject(value: Value): Option[Map[String, Value]] = value match
     case ObjectValue(v) => Some(v)
     case _              => None
-  }
 
   def asStrings(values: Seq[Value]): Seq[String] = values.flatMap(asString)
-}

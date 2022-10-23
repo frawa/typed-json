@@ -19,11 +19,11 @@ package frawa.typedjson.parser.zio
 import frawa.typedjson.parser.Parser
 import munit._
 
-class ZioParserTest extends FunSuite {
+class ZioParserTest extends FunSuite:
   import frawa.typedjson.parser.Value._
   import frawa.typedjson.parser.zio.ZioParser
 
-  implicit val parser: Parser = new ZioParser()
+  given Parser = new ZioParser()
 
   test("basic types") {
     assertEquals(Parser("""13"""), Right(NumberValue(13)))
@@ -47,4 +47,3 @@ class ZioParserTest extends FunSuite {
       Left("(expected a 128 BigDecimal)")
     )
   }
-}

@@ -53,12 +53,12 @@ case class NotContains(valid: Int)                                     extends V
 sealed trait ValidationAnnotation
 case class UnknownFormat(format: String) extends ValidationAnnotation
 
-object ValidationProcessing {
+object ValidationProcessing:
 
   def apply(): Processing[ValidationOutput] = Processing(simple, nested)
 
-  private val combiner: Combiner[ValidationOutput]                = new ValidationCombiner()
-  private implicit val f: Result.OutputCombiner[ValidationOutput] = ValidationOutput.add
+  private val combiner: Combiner[ValidationOutput]      = new ValidationCombiner()
+  private given Result.OutputCombiner[ValidationOutput] = ValidationOutput.add
 
   private val nullTypeMismatch    = TypeMismatch[NullValue.type]("null")
   private val booleanTypeMismatch = TypeMismatch[BoolValue]("boolean")
@@ -69,8 +69,8 @@ object ValidationProcessing {
 
   private type EvalFun = Evaluator.EvalFun[ValidationOutput]
 
-  private def simple(keyword: AssertionKeyword): EvalFun = {
-    keyword match {
+  private def simple(keyword: AssertionKeyword): EvalFun =
+    keyword match
       case NullTypeKeyword                 => validateType(nullTypeMismatch)
       case BooleanTypeKeyword              => validateType(booleanTypeMismatch)
       case StringTypeKeyword               => validateType(stringTypeMismatch)
@@ -94,12 +94,10 @@ object ValidationProcessing {
       case MaxPropertiesKeyword(v)         => validateMaxProperties(v)
       case MinPropertiesKeyword(v)         => validateMinProperties(v)
       case DependentRequiredKeyword(v)     => validateDependentRequired(v)
-      case _                               => _ => Result.invalid(ValidationOutput.invalid(UnsupportedCheck(keyword)))
-    }
-  }
+      // case _                               => _ => Result.invalid(ValidationOutput.invalid(UnsupportedCheck(keyword)))
 
   private def nested(keyword: ApplicatorKeyword)(results: Seq[Result[ValidationOutput]]): EvalFun = { value =>
-    keyword match {
+    keyword match
       case AllOfKeyword(_)                  => combiner.allOf(results, value.pointer)
       case AnyOfKeyword(_)                  => combiner.anyOf(results, value.pointer)
       case OneOfKeyword(_)                  => combiner.oneOf(results, value.pointer)
@@ -114,70 +112,50 @@ object ValidationProcessing {
       case ContainsKeyword(_, min, max)     => combiner.contains(results, value.pointer, min, max)
       case _: UnevaluatedItemsKeyword       => combiner.allOf(results, value.pointer)
       case _: UnevaluatedPropertiesKeyword  => combiner.allOf(results, value.pointer)
-    }
   }
 
   private def validateType[T <: Value: ClassTag](error: TypeMismatch[T]): EvalFun = value =>
-    value.value match {
+    value.value match
       case _: T => Result.valid
       case _    => combiner.invalid(error, value.pointer)
-    }
 
   private def validateInteger(): EvalFun = value =>
-    value.value match {
+    value.value match
       case NumberValue(v) =>
-        if (v.isWhole) {
-          Result.valid
-        } else {
-          combiner.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
-        }
+        if v.isWhole then Result.valid
+        else combiner.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
       case _ => combiner.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
-    }
 
   private def validateTrivial(valid: Boolean): EvalFun = { value =>
-    if (valid) {
-      Result.valid
-    } else {
-      combiner.invalid(FalseSchemaReason(), value.pointer)
-    }
+    if valid then Result.valid
+    else combiner.invalid(FalseSchemaReason(), value.pointer)
   }
 
   private def validateObjectRequired(required: Seq[String]): EvalFun = { value =>
-    value.value match {
+    value.value match
       case ObjectValue(propertiesValues) =>
         val missingNames = required.filter(!propertiesValues.contains(_))
-        if (missingNames.isEmpty) {
-          Result.valid
-        } else {
-          combiner.invalid(MissingRequiredProperties(missingNames), value.pointer)
-        }
+        if missingNames.isEmpty then Result.valid
+        else combiner.invalid(MissingRequiredProperties(missingNames), value.pointer)
       case _ => Result.valid
-    }
   }
 
   private def validateEnum(values: Seq[Value]): EvalFun = { value =>
-    if (values.contains(value.value)) {
-      Result.valid
-    } else {
-      combiner.invalid(NotInEnum(values), value.pointer)
-    }
+    if values.contains(value.value) then Result.valid
+    else combiner.invalid(NotInEnum(values), value.pointer)
   }
 
-  private def validatePattern(pattern: String): EvalFun = {
+  private def validatePattern(pattern: String): EvalFun =
     val r = pattern.r
     value =>
-      value.value match {
+      value.value match
         case StringValue(v) =>
-          if (r.findFirstIn(v).isDefined)
-            Result.valid
-          else
-            combiner.invalid(PatternMismatch(pattern), value.pointer)
+          if r.findFirstIn(v).isDefined then Result.valid
+          else combiner.invalid(PatternMismatch(pattern), value.pointer)
         case _ => Result.valid
-      }
-  }
 
-  private def validateFormat(format: String): EvalFun = {
-    format match {
+  private def validateFormat(format: String): EvalFun =
+    format match
       case "regex" =>
         validateStringValue(FormatMismatch(format)) { v =>
           Try(Pattern.compile(v)).isSuccess
@@ -185,49 +163,43 @@ object ValidationProcessing {
       case "email" =>
         validateStringValue(FormatMismatch(format)) { v =>
           // see https://emailregex.com/
-          val regex = {
+          val regex =
             """(?:[a-z\\d!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z\\d!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z\\d](?:[a-z\\d-]*[a-z\\d])?\.)+[a-z\\d](?:[a-z\\d-]*[a-z\\d])?|\[(?:(?:25[0-5]|2[0-4][\\d]|[01]?[\\d][\\d]?)\.){3}(?:25[0-5]|2[0-4][\\d]|[01]?[\\d][\\d]?|[a-z\\d-]*[a-z\\d]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])""".r
-          }
           regex.matches(v)
         }
       case "idn-email" =>
         validateStringValue(FormatMismatch(format)) { v =>
           // see https://stackoverflow.com/questions/13992403/regex-validation-of-email-addresses-according-to-rfc5321-rfc5322
-          val regex = {
+          val regex =
             """([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|"([ ]!#-[^-~ \t]|(\\[\t -~]))+")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])""".r
-          }
           regex.matches(v)
         }
       case "hostname" =>
         validateStringValue(FormatMismatch(format)) { v =>
           // see https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
-          val regex = {
+          val regex =
             """^(([a-zA-Z\\d]|[a-zA-Z\\d][a-zA-Z\\d\-]*[a-zA-Z\\d])\.)*([A-Za-z\\d]|[A-Za-z\\d][A-Za-z\\d\-]*[A-Za-z\\d])$""".r
-          }
           regex.matches(v)
         }
       case "idn-hostname" =>
         validateStringValue(FormatMismatch(format)) { v =>
           // see https://stackoverflow.com/questions/11809631/fully-qualified-domain-name-validation/26618995
-          val regex = {
+          val regex =
             """(?=^.{4,253}$)(^((?!-)[a-zA-Z\\d-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)""".r
-          }
           regex.matches(v)
         }
       case "ipv4" =>
         // see https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
         validateStringValue(FormatMismatch(format)) { v =>
-          val regex = {
+          val regex =
             """^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$""".r
-          }
           regex.matches(v)
         }
       case "ipv6" =>
         // see https://stackoverflow.com/questions/53497/regular-expression-that-matches-valid-ipv6-addresses
         validateStringValue(FormatMismatch(format)) { v =>
-          val regex = {
+          val regex =
             """(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))""".r
-          }
           regex.matches(v)
         }
       case "uri" =>
@@ -283,17 +255,15 @@ object ValidationProcessing {
       case "date" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
         validateStringValue(FormatMismatch(format)) { v =>
-          val `regex-date` = {
+          val `regex-date` =
             "\\d{4}-\\d{2}-\\d{2}".r
-          }
           `regex-date`.matches(v)
         }
       case "time" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
         validateStringValue(FormatMismatch(format)) { v =>
-          val `regex-time` = {
+          val `regex-time` =
             "(\\d{2}):(\\d{2}):(\\d{2})(\\.\\d+)?(Z|([+\\-]\\d{2}:\\d{2}))".r
-          }
           `regex-time`
             .findFirstMatchIn(v)
             .exists { m =>
@@ -332,126 +302,99 @@ object ValidationProcessing {
           duration.r.matches(v)
         }
       case _ => value => combiner.valid(UnknownFormat(format), value.pointer)
-    }
-  }
 
   private def validateStringValue(error: => ValidationError)(validate: String => Boolean): EvalFun = { value =>
-    value.value match {
+    value.value match
       case StringValue(v) =>
-        if (validate(v))
-          Result.valid
-        else
-          combiner.invalid(error, value.pointer)
+        if validate(v) then Result.valid
+        else combiner.invalid(error, value.pointer)
       case _ => Result.valid
-    }
   }
 
-  private def validateMinimum(min: BigDecimal, exclude: Boolean): EvalFun = {
+  private def validateMinimum(min: BigDecimal, exclude: Boolean): EvalFun =
     validateNumberValue(MinimumMismatch(min, exclude)) { v =>
-      if (exclude) min < v else min <= v
+      if exclude then min < v else min <= v
     }
-  }
 
   private def validateNumberValue(error: => ValidationError)(validate: BigDecimal => Boolean): EvalFun = { value =>
-    value.value match {
+    value.value match
       case NumberValue(v) =>
-        if (validate(v))
-          Result.valid
-        else
-          combiner.invalid(error, value.pointer)
+        if validate(v) then Result.valid
+        else combiner.invalid(error, value.pointer)
       case _ => Result.valid
-    }
   }
 
   private def validateArrayValue(error: => ValidationError)(validate: Seq[Value] => Boolean): EvalFun = { value =>
-    value.value match {
+    value.value match
       case ArrayValue(v) =>
-        if (validate(v))
-          Result.valid
-        else
-          combiner.invalid(error, value.pointer)
+        if validate(v) then Result.valid
+        else combiner.invalid(error, value.pointer)
       case _ => Result.valid
-    }
   }
 
-  private def validateUniqueItems(unique: Boolean): EvalFun = {
+  private def validateUniqueItems(unique: Boolean): EvalFun =
     validateArrayValue(ItemsNotUnique()) { v =>
       !unique || v.distinct.length == v.length
     }
-  }
 
-  private def validateMultipleOf(n: BigDecimal): EvalFun = {
+  private def validateMultipleOf(n: BigDecimal): EvalFun =
     validateNumberValue(NotMultipleOf(n)) { v =>
       (v / n).isValidInt
     }
-  }
 
-  private def validateMaximum(max: BigDecimal, exclude: Boolean): EvalFun = {
+  private def validateMaximum(max: BigDecimal, exclude: Boolean): EvalFun =
     validateNumberValue(MaximumMismatch(max, exclude)) { v =>
-      if (exclude) max > v else max >= v
+      if exclude then max > v else max >= v
     }
-  }
 
-  private def validateMaxLength(max: BigDecimal): EvalFun = {
+  private def validateMaxLength(max: BigDecimal): EvalFun =
     validateStringValue(MaxLengthMismatch(max)) { v =>
       countCharPoints(v) <= max
     }
-  }
 
-  private def validateMinLength(min: BigDecimal): EvalFun = {
+  private def validateMinLength(min: BigDecimal): EvalFun =
     validateStringValue(MinLengthMismatch(min)) { v =>
       countCharPoints(v) >= min
     }
-  }
 
-  private def countCharPoints(text: String): Int = {
+  private def countCharPoints(text: String): Int =
     var i     = 0
     var count = 0
-    while (i < text.length()) {
+    while i < text.length() do
       i += Character.charCount(text.codePointAt(i))
       count += 1
-    }
     count
-  }
 
-  private def validateMaxItems(max: BigDecimal): EvalFun = {
+  private def validateMaxItems(max: BigDecimal): EvalFun =
     validateArrayValue(MaxItemsMismatch(max)) { v =>
       max >= v.length
     }
-  }
 
-  private def validateMinItems(min: BigDecimal): EvalFun = {
+  private def validateMinItems(min: BigDecimal): EvalFun =
     validateArrayValue(MinItemsMismatch(min)) { v =>
       min <= v.length
     }
-  }
 
-  private def validateObjectValue(error: => ValidationError)(validate: Map[String, Value] => Boolean): EvalFun = {
+  private def validateObjectValue(error: => ValidationError)(validate: Map[String, Value] => Boolean): EvalFun =
     value =>
-      value.value match {
+      value.value match
         case ObjectValue(v) =>
-          if (validate(v))
-            Result.valid
-          else
-            combiner.invalid(error, value.pointer)
+          if validate(v) then Result.valid
+          else combiner.invalid(error, value.pointer)
         case _ => Result.valid
-      }
-  }
 
-  private def validateMaxProperties(max: BigDecimal): EvalFun = {
+  private def validateMaxProperties(max: BigDecimal): EvalFun =
     validateObjectValue(MaxPropertiesMismatch(max)) { v =>
       max >= v.keySet.size
     }
-  }
 
-  private def validateMinProperties(min: BigDecimal): EvalFun = {
+  private def validateMinProperties(min: BigDecimal): EvalFun =
     validateObjectValue(MinPropertiesMismatch(min)) { v =>
       min <= v.keySet.size
     }
-  }
 
   private def validateDependentRequired(required: Map[String, Seq[String]]): EvalFun = { value =>
-    value.value match {
+    value.value match
       case ObjectValue(v) =>
         val missing = required
           .flatMap { case (property, required) =>
@@ -461,12 +404,7 @@ object ValidationProcessing {
               .filterNot(_.isEmpty)
               .map(property -> _)
           }
-        if (missing.isEmpty)
-          Result.valid
-        else
-          combiner.invalid(DependentRequiredMissing(missing), value.pointer)
+        if missing.isEmpty then Result.valid
+        else combiner.invalid(DependentRequiredMissing(missing), value.pointer)
       case _ => Result.valid
-    }
   }
-
-}

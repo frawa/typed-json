@@ -23,7 +23,7 @@ import frawa.typedjson.util.UriUtil.uri
 
 import java.net.URI
 
-case class Vocabulary(keywords: Map[String, Vocabulary.NestedSchemaType]) {
+case class Vocabulary(keywords: Map[String, Vocabulary.NestedSchemaType]):
   import Vocabulary._
 
   def defines: String => Boolean = keywords.keySet.contains _
@@ -34,9 +34,8 @@ case class Vocabulary(keywords: Map[String, Vocabulary.NestedSchemaType]) {
       .map(_(value))
 
   def combine(other: Vocabulary): Vocabulary = this.copy(keywords = this.keywords ++ other.keywords)
-}
 
-object Vocabulary {
+object Vocabulary:
 
   trait NestedSchemaType
   case object NestedObjectSchemas extends NestedSchemaType
@@ -46,22 +45,19 @@ object Vocabulary {
 
   private type NestedSchemaGetter = Value => Seq[Value]
 
-  private def objectSchemas: NestedSchemaGetter = {
+  private def objectSchemas: NestedSchemaGetter =
     case ObjectValue(ps) => ps.values.toSeq
     case _               => Seq.empty
-  }
-  private def arraySchemas: NestedSchemaGetter = {
+  private def arraySchemas: NestedSchemaGetter =
     case ArrayValue(vs) => vs
     case _              => Seq.empty
-  }
   private def selfSchema: NestedSchemaGetter = v => Seq(v)
 
-  def nestedSchemasGetter(t: NestedSchemaType): Option[NestedSchemaGetter] = t match {
+  def nestedSchemasGetter(t: NestedSchemaType): Option[NestedSchemaGetter] = t match
     case NestedObjectSchemas => Some(objectSchemas)
     case NestedArraySchemas  => Some(arraySchemas)
     case NestedSelfSchema    => Some(selfSchema)
     case _                   => None
-  }
 
   private val coreKeywords: Map[String, NestedSchemaType] = Map(
     "$id"            -> NoNestedSchema,
@@ -170,7 +166,7 @@ object Vocabulary {
 
   val coreVocabulary: Vocabulary = specVocabularies(coreId)
 
-  def dialect(vocabularyIds: Map[URI, Boolean]): Either[SchemaProblems, Vocabulary] = {
+  def dialect(vocabularyIds: Map[URI, Boolean]): Either[SchemaProblems, Vocabulary] =
     val vocabularies = vocabularyIds
       .filter(_._2)
       .keys
@@ -187,9 +183,6 @@ object Vocabulary {
       .swap
       .map(_.reduce(_.combine(_)))
       .swap
-  }
 
   def specDialect(): Vocabulary =
     specVocabularies.values.reduce(_.combine(_))
-
-}

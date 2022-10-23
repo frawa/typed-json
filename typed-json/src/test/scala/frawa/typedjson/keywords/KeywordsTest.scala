@@ -20,47 +20,42 @@ import frawa.typedjson.keywords.SchemaProblems.InvalidSchemaValue
 import frawa.typedjson.parser.Value._
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.TestSchemas._
-import frawa.typedjson.testutil.TestUtil._
+import frawa.typedjson.testutil.TestUtil.{_, given}
 import frawa.typedjson.util.UriUtil.{WithLocation, uri}
 import munit.FunSuite
 
-class KeywordsTest extends FunSuite {
+class KeywordsTest extends FunSuite:
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId)).get
 
   private def assertKeywords(schema: SchemaValue, allowIgnored: Boolean = false)(
       f: Keywords => Unit
-  ): Either[Nothing, Unit] = {
+  ): Either[Nothing, Unit] =
     val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema)
     val scope                           = DynamicScope.empty
-    val withParsed = for {
-      keywords <- Keywords.parseKeywords(vocabularyForTest, resolver.push(schema), scope)
-    } yield {
-      if (!allowIgnored) {
-        assertEquals(
-          keywords.ignored,
-          Set.empty[String],
-          clue("unexpected ignored keywords")
-        )
-      }
-      f(keywords)
-    }
+    val withParsed =
+      for keywords <- Keywords.parseKeywords(vocabularyForTest, resolver.push(schema), scope)
+      yield
+        if !allowIgnored then
+          assertEquals(
+            keywords.ignored,
+            Set.empty[String],
+            clue("unexpected ignored keywords")
+          )
+        f(keywords)
     withParsed.swap
-      .map(messages => fail("parsing keywords failed", clues(clue(messages))))
+      .map(messages => fail("parsing keywords failed", clues(clue[SchemaProblems](messages))))
       .swap
-  }
 
   private def assertKeywordsWithIgnored(schema: SchemaValue) = assertKeywords(schema, allowIgnored = true) _
 
   private def assertSchemaProblems(schema: SchemaValue)(
       f: SchemaProblems => Unit
-  ): Unit = {
+  ): Unit =
     val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema)
     val scope                           = DynamicScope.empty
-    Keywords.parseKeywords(vocabularyForTest, resolver.push(schema), scope) match {
+    Keywords.parseKeywords(vocabularyForTest, resolver.push(schema), scope) match
       case Right(_)     => fail("parsing keywords expected to fail")
       case Left(errors) => f(errors)
-    }
-  }
 
   test("null") {
     withSchema(nullSchema) { schema =>
@@ -572,4 +567,3 @@ class KeywordsTest extends FunSuite {
       }
     }
   }
-}

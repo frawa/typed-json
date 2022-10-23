@@ -23,19 +23,18 @@ case class EvaluatedIndices(indices: Seq[Int])          extends Evaluated
 case class EvaluatedProperties(properties: Set[String]) extends Evaluated
 case class Ignored(keywords: Set[String])               extends Evaluated
 
-object Result {
+object Result:
   type Evalutation       = WithPointer[Evaluated]
   type OutputCombiner[O] = (O, O) => O
 
   def valid[O]: Result[O] = Result[O](valid = true, None, None)
-  def valid[O](output: O)(implicit c: OutputCombiner[O]): Result[O] =
+  def valid[O](output: O)(using c: OutputCombiner[O]): Result[O] =
     Result[O](valid = true, Some(output), Some(c))
   def invalid[O]: Result[O] = Result[O](valid = false, None, None)
-  def invalid[O](output: O)(implicit c: OutputCombiner[O]): Result[O] =
+  def invalid[O](output: O)(using c: OutputCombiner[O]): Result[O] =
     Result[O](valid = false, Some(output), Some(c))
 
   private def count[R](results: Seq[Result[R]]): Int = results.map(_.count).sum
-}
 
 case class Result[O](
     valid: Boolean,
@@ -44,7 +43,7 @@ case class Result[O](
     evaluations: Seq[Result.Evalutation] = Seq.empty,
     problems: SchemaProblems = SchemaProblems.empty,
     count: Int = 1
-) {
+):
 
   def addWithoutOutput(others: Seq[Result[O]]): Result[O] =
     this
@@ -52,7 +51,7 @@ case class Result[O](
       .addEvaluations(others.filter(_.valid).flatMap(_.evaluations))
       .add(others.map(_.problems).reduceOption(_.combine(_)).getOrElse(SchemaProblems.empty))
 
-  def add(other: Result[O]): Result[O] = {
+  def add(other: Result[O]): Result[O] =
     val combine = this.combineOutput.orElse(other.combineOutput)
     val os = combine.flatMap(c =>
       Seq(this.output, other.output).flatten
@@ -64,7 +63,6 @@ case class Result[O](
       .copy(output = os)
       .addEvaluations(other.evaluations)
       .add(other.problems)
-  }
 
   def add(p: SchemaProblems): Result[O] = this.copy(problems = this.problems.combine(p))
 
@@ -74,13 +72,10 @@ case class Result[O](
     this.copy(evaluations = this.evaluations ++ es)
 
   def addIgnoredKeywords(ignored: Set[String], pointer: Pointer): Result[O] =
-    if (ignored.isEmpty) {
-      this
-    } else {
-      add(WithPointer(Ignored(ignored), pointer))
-    }
+    if ignored.isEmpty then this
+    else add(WithPointer(Ignored(ignored), pointer))
 
-  def ignoredKeywords(): Set[String] = {
+  def ignoredKeywords(): Set[String] =
     evaluations
       .flatMap {
         case WithPointer(Ignored(ignored), _) => Some(ignored)
@@ -88,5 +83,3 @@ case class Result[O](
       }
       .reduceOption(_ ++ _)
       .getOrElse(Set.empty)
-  }
-}

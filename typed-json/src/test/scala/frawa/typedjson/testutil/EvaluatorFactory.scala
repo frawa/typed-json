@@ -19,18 +19,16 @@ package frawa.typedjson.testutil
 import frawa.typedjson.keywords._
 import frawa.typedjson.testutil
 
-case class EvaluatorFactory[V, R](create: EvaluatorFactory.CreateFun[V, R]) {
+case class EvaluatorFactory[V, R](create: EvaluatorFactory.CreateFun[V, R]):
 
   def apply(v: V): Either[SchemaProblems, Evaluator[R]] = create(v)
 
-  def mapResult(f: Result[R] => Result[R]): EvaluatorFactory[V, R] = {
+  def mapResult(f: Result[R] => Result[R]): EvaluatorFactory[V, R] =
     EvaluatorFactory(create.andThen(_.map { evaluator =>
       evaluator.andThen(f)
     }))
-  }
-}
 
-object EvaluatorFactory {
+object EvaluatorFactory:
   type CreateFun[V, R] = V => Either[SchemaProblems, Evaluator[R]]
 
   def make[R](
@@ -41,4 +39,3 @@ object EvaluatorFactory {
     Keywords(schema, vocabulary, lazyResolver).map(Evaluator(_, processing))
   })
 
-}

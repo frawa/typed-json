@@ -20,11 +20,10 @@ import frawa.typedjson.pointer.Pointer
 
 import java.net.URI
 
-object UriUtil {
+object UriUtil:
 
-  def uri(value: String): URI = {
+  def uri(value: String): URI =
     URI.create(escape(value))
-  }
 
   def withoutFragement(uri: URI): URI = new URI(uri.getScheme, uri.getSchemeSpecificPart, null)
 
@@ -36,12 +35,9 @@ object UriUtil {
 
   case class WithLocation[+T](uri: URI, value: T)
 
-  case class CurrentLocation(uri: URI) {
+  case class CurrentLocation(uri: URI):
     def apply[T](value: T): WithLocation[T] = WithLocation(uri, value)
-  }
 
-  private def escape(value: String): String = {
+  private def escape(value: String): String =
     // this is because the ScalaJS implementation of URI might fail
     value.replace("\\", "_")
-  }
-}

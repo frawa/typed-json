@@ -21,7 +21,7 @@ import frawa.typedjson.pointer.Pointer
 import munit._
 
 class JawnOffsetParserTest extends FunSuite {
-  implicit val parser: OffsetParser = new JawnParser()
+  given parser: OffsetParser = new JawnParser()
 
   import frawa.typedjson.parser.Offset._
 

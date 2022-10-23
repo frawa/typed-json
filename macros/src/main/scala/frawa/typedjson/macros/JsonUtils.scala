@@ -19,21 +19,13 @@ package frawa.typedjson.macros
 import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.jawn.JawnParser
 
-import scala.reflect.macros.blackbox
-import scala.reflect.macros.blackbox.Context
-
-object JsonUtils {
+object JsonUtils:
+  import scala.quoted.*
   import Value._
 
   private val parser = new JawnParser
 
-  def toJsonValueExpr(c: Context)(value: Value): c.Expr[Value] = {
-    import c.universe._
-    implicit val l = JsonUtils.liftableJsonValue(c)
-    c.Expr(q"""$value""")
-  }
-
-  def parseJsonValue(content: String): Value = {
+  def parseJsonValue(content: String): Value =
     parser
       .parse(content)
       .swap
@@ -43,26 +35,23 @@ object JsonUtils {
       .swap
       .toOption
       .get
-  }
 
-  def liftableJsonValue(c: blackbox.Context): c.universe.Liftable[Value] = {
-    import c.universe._
-
-    implicit def liftBigDecimal: Liftable[BigDecimal] = (v: BigDecimal) => q"""BigDecimal(${v.toString()})"""
-    implicit def liftSeq: Liftable[Seq[Value]]        = (vs: Seq[Value]) => q"""Seq(..$vs)"""
-    implicit def liftValue: Liftable[Value]           = (v: Value) => toExpr(v).tree
-
-    def toExpr(value: Value) =
-      value match {
-        case NullValue       => c.Expr(q"NullValue")
-        case StringValue(v)  => c.Expr(q"""StringValue($v)""")
-        case BoolValue(v)    => c.Expr(q"""BoolValue($v)""")
-        case NumberValue(v)  => c.Expr(q"""NumberValue(${v})""")
-        case ArrayValue(vs)  => c.Expr(q"""ArrayValue(${vs})""")
-        case ObjectValue(vs) => c.Expr(q"""ObjectValue(${vs})""")
-      }
-
-    Liftable((v: Value) => toExpr(v).tree)
-  }
-
-}
+  given ToExpr[Value] with
+    def apply(value: Value)(using Quotes) =
+      value match
+        case NullValue => '{ NullValue }
+        case StringValue(v) =>
+          val vv = Expr(v)
+          '{ StringValue($vv) }
+        case BoolValue(v) =>
+          val vv = Expr(v)
+          '{ BoolValue($vv) }
+        case NumberValue(v) =>
+          val vv = Expr(v)
+          '{ NumberValue($vv) }
+        case ArrayValue(vs) =>
+          val vv = Expr(vs)
+          '{ ArrayValue($vv) }
+        case ObjectValue(vs) =>
+          val vv = Expr(vs)
+          '{ ObjectValue($vv) }

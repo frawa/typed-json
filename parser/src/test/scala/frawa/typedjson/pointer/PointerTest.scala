@@ -21,7 +21,7 @@ import munit.FunSuite
 
 // see https://datatracker.ietf.org/doc/html/rfc6901
 
-class PointerTest extends FunSuite {
+class PointerTest extends FunSuite:
   import Pointer._
 
   test("empty") {
@@ -112,4 +112,3 @@ class PointerTest extends FunSuite {
     assertEquals(parse("/foo")(value), Some(NumberValue(13)))
     assertEquals(parse("/14")(value), Some(NumberValue(14)))
   }
-}

@@ -24,45 +24,40 @@ import frawa.typedjson.validation.{ValidationProcessing, ValidationOutput}
 
 case class SuggestionOutput(suggestions: Seq[Value], validated: Result[ValidationOutput])
 
-object SuggestionProcessing {
+object SuggestionProcessing:
 
   def apply(at: Pointer): Processing[SuggestionOutput] = Processing(simple(at), nested(at))
 
-  private implicit val combine: Result.OutputCombiner[SuggestionOutput] = add
+  private given Result.OutputCombiner[SuggestionOutput] = add
 
-  private def add(o1: SuggestionOutput, o2: SuggestionOutput): SuggestionOutput = {
+  private def add(o1: SuggestionOutput, o2: SuggestionOutput): SuggestionOutput =
     SuggestionOutput(o1.suggestions ++ o2.suggestions, o1.validated.add(o2.validated))
-  }
 
-  private def simple(at: Pointer)(keyword: AssertionKeyword)(value: InnerValue): Result[SuggestionOutput] = {
-    if (at == value.pointer) {
+  private def simple(at: Pointer)(keyword: AssertionKeyword)(value: InnerValue): Result[SuggestionOutput] =
+    if at == value.pointer then
       val suggestions = suggestFor(keyword)(Seq(Result.valid))
       Result.valid(SuggestionOutput(suggestions, Result.valid[ValidationOutput]))
-    } else {
+    else
       val result = ValidationProcessing().simple(keyword)(value)
       Result(result.valid, Some(SuggestionOutput(Seq(), result)))
-    }
-  }
 
   private def nested(
       at: Pointer
-  )(keyword: ApplicatorKeyword)(results: Seq[Result[SuggestionOutput]])(value: InnerValue): Result[SuggestionOutput] = {
+  )(keyword: ApplicatorKeyword)(results: Seq[Result[SuggestionOutput]])(value: InnerValue): Result[SuggestionOutput] =
     val current = results.flatMap(_.output).flatMap(_.suggestions)
-    if (at.isInsideKey && at.outer == value.pointer) {
+    if at.isInsideKey && at.outer == value.pointer then
       val suggestions = onlyKeys(suggestFor(keyword)(Seq(Result.valid)))
       Result.valid(SuggestionOutput(current ++ suggestions, Result.valid))
-    } else if (at == value.pointer) {
+    else if at == value.pointer then
       val suggestions = suggestFor(keyword)(results)
       Result.valid(SuggestionOutput(current ++ suggestions, Result.valid))
-    } else {
+    else
       val validated = results.flatMap(_.output).map(_.validated)
       val nested    = ValidationProcessing().nested(keyword)(validated)(value)
       Result.valid(SuggestionOutput(current, nested))
-    }
-  }
 
-  private def suggestFor(keyword: Keyword)(results: Seq[Result[SuggestionOutput]]): Seq[Value] = {
-    keyword match {
+  private def suggestFor(keyword: Keyword)(results: Seq[Result[SuggestionOutput]]): Seq[Value] =
+    keyword match
       case NullTypeKeyword    => Seq(NullValue)
       case BooleanTypeKeyword => Seq(BoolValue(true))
       case StringTypeKeyword  => Seq(StringValue(""))
@@ -116,11 +111,6 @@ object SuggestionProcessing {
         // useful for debugging:
         // Seq(StringValue(keyword.getClass.getSimpleName))
         Seq(NullValue)
-    }
-  }
 
-  private def onlyKeys(suggestions: Seq[Value]): Seq[StringValue] = {
-    suggestions.flatMap(Value.asObject).flatMap(_.keys).map(StringValue)
-  }
-
-}
+  private def onlyKeys(suggestions: Seq[Value]): Seq[StringValue] =
+    suggestions.flatMap(Value.asObject).flatMap(_.keys).map(StringValue.apply)

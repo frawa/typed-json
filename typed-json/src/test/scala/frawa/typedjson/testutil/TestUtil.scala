@@ -23,29 +23,26 @@ import munit.Assertions.{assertEquals, clue, clues, fail}
 
 import java.net.URI
 
-object TestUtil {
-  implicit val parser: JawnParser                                       = new JawnParser
-  implicit val lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
+object TestUtil:
+  given Parser                                     = new JawnParser
+  given Option[LoadedSchemasResolver.LazyResolver] = None
 
-  def parseJsonValue(text: String)(implicit parser: Parser): Value = {
+  def parseJsonValue(text: String)(using parser: Parser): Value =
     parser
       .parse(text)
       .swap
-      .map(message => fail("no json value", clues(clue(message))))
+      .map(message => fail("no json value", clues(clue[String](message))))
       .swap
       .toOption
       .get
-  }
 
-  def withSchema(text: String)(f: SchemaValue => Unit)(implicit parser: Parser): Unit = {
+  def withSchema(text: String)(f: SchemaValue => Unit)(using parser: Parser): Unit =
     f(SchemaValue.root(parseJsonValue(text)))
-  }
 
-  def withLoadedSchemas(texts: Seq[String])(f: LoadedSchemasResolver => Unit)(implicit parser: Parser): Unit = {
+  def withLoadedSchemas(texts: Seq[String])(f: LoadedSchemasResolver => Unit)(using Parser): Unit =
     val schemas  = texts.map(t => parseJsonValue(t)).map(SchemaValue(_))
     val resolver = LoadedSchemasResolver(schemas)
     f(resolver)
-  }
 
   def assertNoIgnoredKeywords[R]: Result[R] => Result[R] = { result =>
     assertEquals(result.ignoredKeywords(), Set.empty[String], "ignored keywords")
@@ -54,31 +51,28 @@ object TestUtil {
 
   def assertResult[R](valueText: String)(schema: SchemaValue)(
       f: Result[R] => Unit
-  )(implicit factory: EvaluatorFactory[SchemaValue, R], parser: Parser): Either[Nothing, Unit] = {
+  )(using EvaluatorFactory[SchemaValue, R], Parser): Either[Nothing, Unit] =
     withProcessor[R](schema) { evaluator =>
       val value  = parseJsonValue(valueText)
       val result = evaluator(InnerValue(value))
       f(result)
     }
-  }
 
   def withProcessor[R](schema: SchemaValue)(
       f: Evaluator[R] => Unit
-  )(implicit factory: EvaluatorFactory[SchemaValue, R]): Either[Nothing, Unit] = {
+  )(using factory: EvaluatorFactory[SchemaValue, R]): Either[Nothing, Unit] =
     val result = factory(schema).map(f)
     result.swap
-      .map(message => fail("creating keywords failed", clues(clue(message))))
+      .map(messages => fail("creating keywords failed", clues(clue[SchemaProblems](messages))))
       .swap
-  }
 
-  def dialect(vocabularyIds: Seq[URI]): Option[Vocabulary] = {
+  def dialect(vocabularyIds: Seq[URI]): Option[Vocabulary] =
     Vocabulary
       .dialect(vocabularyIds.map((_, true)).toMap)
       .swap
       .map(problems => throw new IllegalStateException(problems.dump()))
       .swap
       .toOption
-  }
 
   def assertable(keywords: Keywords): Keywords = keywords.copy(keywords = keywords.keywords.map(assertable))
 
@@ -87,7 +81,7 @@ object TestUtil {
   private def assertable(keyword: Keywords.KeywordWithLocation): Keywords.KeywordWithLocation =
     keyword.copy(value = assertable(keyword.value))
 
-  private def assertable(keyword: Keyword): Keyword = keyword match {
+  private def assertable(keyword: Keyword): Keyword = keyword match
     case ArrayItemsKeyword(items, prefixItems) =>
       ArrayItemsKeyword(
         items.map(assertable),
@@ -95,6 +89,3 @@ object TestUtil {
       )
     case LazyParseKeywords(resolved, _) => LazyParseKeywords(resolved, assertableResolve)
     case _                              => keyword
-  }
-
-}

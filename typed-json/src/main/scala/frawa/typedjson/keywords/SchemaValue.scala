@@ -24,34 +24,31 @@ import frawa.typedjson.util.UriUtil.uri
 import java.net.URI
 import scala.annotation.tailrec
 
-sealed trait SchemaValue {
+sealed trait SchemaValue:
   val value: Value
-}
 case class SchemaValue1(value: Value)                       extends SchemaValue
 case class RootSchemaValue(value: Value, meta: Option[URI]) extends SchemaValue
 //case class MetaSchemaValue(value: Value)                    extends SchemaValue
 
-object SchemaValue {
+object SchemaValue:
 
   def apply(value: Value): SchemaValue = SchemaValue1(value)
 
   def root(value: Value): RootSchemaValue = RootSchemaValue(value, get("$schema", value).map(uri))
 
-  def id(schema: SchemaValue): Option[String] = {
+  def id(schema: SchemaValue): Option[String] =
     get("$id", schema.value)
-  }
 
-  private def get(property: String, value: Value): Option[String] = {
+  private def get(property: String, value: Value): Option[String] =
     (Pointer.empty / property)(value).flatMap(Value.asString)
-  }
 
   @tailrec
   def vocabulary(
       resolution: SchemaResolution,
       parentVocabulary: Vocabulary
-  ): Either[SchemaProblems, Vocabulary] = {
+  ): Either[SchemaProblems, Vocabulary] =
     val SchemaResolution(schema, resolver) = resolution
-    schema match {
+    schema match
       case RootSchemaValue(value, meta) =>
         val valueWithVocabulary = meta
           .flatMap(resolver.resolveRef)
@@ -67,7 +64,3 @@ object SchemaValue {
           }
           .map(Vocabulary.dialect)
           .getOrElse(Right(parentVocabulary))
-    }
-  }
-
-}

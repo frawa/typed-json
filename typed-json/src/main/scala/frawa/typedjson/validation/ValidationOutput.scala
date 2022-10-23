@@ -24,7 +24,7 @@ case class ValidationOutput(
     annotations: Seq[ValidationOutput.Annotation] = Seq.empty
 )
 
-object ValidationOutput {
+object ValidationOutput:
   type Error      = WithPointer[ValidationError]
   type Annotation = WithPointer[ValidationAnnotation]
 
@@ -39,4 +39,3 @@ object ValidationOutput {
 
   def add(o1: ValidationOutput, o2: ValidationOutput): ValidationOutput =
     ValidationOutput(o1.errors ++ o2.errors, o1.annotations ++ o2.annotations)
-}
