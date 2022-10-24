@@ -78,7 +78,7 @@ object TypedJson:
       Output(errors)
 
 class TypedJson(private val keywords: Option[Keywords]):
-  import TypedJson._
+  import TypedJson.*
 
   def validate(json: String)(using parser: Parser): Either[InputError, Validation] =
     parser

@@ -17,7 +17,7 @@
 package frawa.typedjson.js
 
 import frawa.typedjson.parser.jawn.JawnParser
-import frawa.typedjson.keywords._
+import frawa.typedjson.keywords.*
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser.{Offset, OffsetParser, Value}
 import frawa.typedjson.pointer.Pointer
@@ -115,7 +115,7 @@ case class TypedJson(
         Seq(Marker.fromParsingError(error))
       case _ => Seq.empty
     }
-    js.Array(markers: _*)
+    js.Array(markers *)
   }
 
   @JSExport
@@ -134,7 +134,7 @@ case class TypedJson(
         }
       case _ => Seq.empty
     }
-    js.Array(suggestions: _*)
+    js.Array(suggestions *)
   }
 }
 
@@ -188,7 +188,7 @@ object Suggestions {
     val offset       = offsetAt(pointer)
     val (start, end) = offset.map(o => (o.start, o.end)).getOrElse((0, 0))
     val suggestions  = result.output.map(_.suggestions).getOrElse(Seq()).map(toSuggestion)
-    Suggestions(start, end, pointer.toString, js.Array(suggestions: _*))
+    Suggestions(start, end, pointer.toString, js.Array(suggestions *))
   }
 
   private def toSuggestion(value: Value): Suggestion = {
@@ -201,10 +201,10 @@ object Suggestions {
       case Value.BoolValue(value)   => value
       case Value.NullValue          => null
       case Value.StringValue(value) => value
-      case Value.ArrayValue(items)  => js.Array(items.map(toAny): _*)
+      case Value.ArrayValue(items)  => js.Array(items.map(toAny) *)
       case Value.ObjectValue(properties) =>
         val pairs = properties.map(t => (t._1, toAny(t._2))).toSeq
-        js.Dictionary(pairs: _*)
+        js.Dictionary(pairs *)
     }
   }
 }

@@ -21,7 +21,7 @@ import frawa.typedjson.pointer.Pointer
 import java.net.URI
 
 case class DynamicScope(uris: Seq[URI]):
-  import frawa.typedjson.util.UriUtil._
+  import frawa.typedjson.util.UriUtil.*
 
   def candidates: Seq[URI] = uris
     .map(withoutFragement)

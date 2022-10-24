@@ -17,7 +17,7 @@
 package frawa.typedjson
 
 import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.Value._
+import frawa.typedjson.parser.Value.*
 import frawa.typedjson.validation.ValidationError
 
 object OutputJson:

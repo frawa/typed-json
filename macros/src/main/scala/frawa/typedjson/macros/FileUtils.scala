@@ -26,7 +26,7 @@ object FileUtils:
   def readContentOf(path: String): String = Using.resource(Source.fromFile(path))(_.getLines().mkString("\n"))
 
   def readFolderContentsOf[T](path: String, ext: String)(f: String => T): Map[String, T] =
-    import scala.jdk.CollectionConverters._
+    import scala.jdk.CollectionConverters.*
     Files
       .list(Paths.get(path))
       .iterator

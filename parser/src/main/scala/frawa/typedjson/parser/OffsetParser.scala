@@ -20,7 +20,7 @@ import frawa.typedjson.parser.Offset.ObjectValue
 import frawa.typedjson.pointer.{FieldToken, Pointer}
 
 trait OffsetParser:
-  import Offset._
+  import Offset.*
   import OffsetParser.ParseError
   def parseWithOffset(json: String): Either[ParseError, Value]
 
@@ -70,7 +70,7 @@ case class Offset(start: Int, end: Int):
   def contains(at: Int): Boolean = start <= at && at <= end
 
 object Offset:
-  import frawa.typedjson.parser.{Value => ValueWO}
+  import frawa.typedjson.parser.{Value as ValueWO}
 
   sealed trait Value:
     val offset: Offset

@@ -17,16 +17,16 @@
 package frawa.typedjson.keywords
 
 import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.Value._
+import frawa.typedjson.parser.Value.*
 import frawa.typedjson.util.SeqUtil
 import frawa.typedjson.util.UriUtil.uri
 
 import java.net.URI
 
 case class Vocabulary(keywords: Map[String, Vocabulary.NestedSchemaType]):
-  import Vocabulary._
+  import Vocabulary.*
 
-  def defines: String => Boolean = keywords.keySet.contains _
+  def defines: String => Boolean = (() => keywords.keySet.contains)
   def nestedSchemas(keyword: String)(value: Value): Option[Seq[Value]] =
     keywords
       .get(keyword)

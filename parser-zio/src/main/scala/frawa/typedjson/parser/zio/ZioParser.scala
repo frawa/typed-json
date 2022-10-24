@@ -17,12 +17,12 @@
 package frawa.typedjson.parser.zio
 
 import frawa.typedjson.parser.{Parser, Value}
-import zio.json._
+import zio.json.*
 import zio.json.ast.Json
 import zio.json.ast.Json.{Arr, Obj}
 
 class ZioParser extends Parser:
-  import frawa.typedjson.parser.Value._
+  import frawa.typedjson.parser.Value.*
 
   override def parse(json: String): Either[String, Value] =
     val result = json.fromJson[Json]

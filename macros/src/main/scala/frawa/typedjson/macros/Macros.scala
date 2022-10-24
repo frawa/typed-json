@@ -20,8 +20,8 @@ import frawa.typedjson.parser.Value
 
 object Macros:
   import scala.quoted.*
-  import FileUtils._
-  import JsonUtils._
+  import FileUtils.*
+  import JsonUtils.*
 
   inline def fileContent(inline path: String): String = ${
     fileContent_impl('path)

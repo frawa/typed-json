@@ -21,7 +21,7 @@ import frawa.typedjson.parser.jawn.JawnParser
 
 object JsonUtils:
   import scala.quoted.*
-  import Value._
+  import Value.*
 
   private val parser = new JawnParser
 

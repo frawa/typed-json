@@ -24,7 +24,7 @@ import java.net.URI
 
 object MetaSchemas:
   // not unused, used by macro
-  import frawa.typedjson.parser.Value._
+  import frawa.typedjson.parser.Value.*
 
   val draft202012: URI = uri("https://json-schema.org/draft/2020-12/")
 
@@ -47,7 +47,7 @@ object MetaSchemas:
       case "meta/validation"        => Some(validationContent)
       case _                        => None
 
-  import Macros._
+  import Macros.*
 
   private val schemaContent           = SchemaValue.root(jsonContent("./metaSchemas/schema.json"))
   private val applicatorContent       = SchemaValue.root(jsonContent("./metaSchemas/meta/applicator.json"))

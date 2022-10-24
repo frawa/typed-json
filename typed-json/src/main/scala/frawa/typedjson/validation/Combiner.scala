@@ -16,7 +16,7 @@
 
 package frawa.typedjson.validation
 
-import frawa.typedjson.keywords._
+import frawa.typedjson.keywords.*
 import frawa.typedjson.pointer.Pointer
 
 trait Combiner[R]:

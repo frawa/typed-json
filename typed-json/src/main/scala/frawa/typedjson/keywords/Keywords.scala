@@ -22,8 +22,8 @@ import frawa.typedjson.keywords.SchemaProblems.{
   MissingReference,
   UnsupportedKeyword
 }
-import frawa.typedjson.parser.Value._
-import frawa.typedjson.parser._
+import frawa.typedjson.parser.Value.*
+import frawa.typedjson.parser.*
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.util.UriUtil
 import frawa.typedjson.util.UriUtil.CurrentLocation
@@ -92,8 +92,8 @@ case class Keywords(
     keywords: Seq[Keywords.KeywordWithLocation] = Seq.empty[Keywords.KeywordWithLocation],
     ignored: Set[String] = Set.empty
 ):
-  import Keywords._
-  import frawa.typedjson.util.SeqUtil._
+  import Keywords.*
+  import frawa.typedjson.util.SeqUtil.*
 
   private def add(keyword: Keyword)(using location: CurrentLocation): Keywords =
     this.copy(keywords = keywords :+ location(keyword))
