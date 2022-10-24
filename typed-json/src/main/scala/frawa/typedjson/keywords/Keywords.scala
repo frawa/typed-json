@@ -399,7 +399,7 @@ case class Keywords(
       scope: DynamicScope
   )(
       newKeyword: => K
-  )(f: (Keywords, K) => K)(using CurrentLocation, TypeTest[Keyword,K]): Either[SchemaProblems, Keywords] =
+  )(f: (Keywords, K) => K)(using CurrentLocation, TypeTest[Keyword, K]): Either[SchemaProblems, Keywords] =
     for keywords <- Keywords.parseKeywords(vocabulary, resolution, scope)
     yield updateKeyword(newKeyword)(f(keywords, _))
 
