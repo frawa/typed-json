@@ -61,15 +61,15 @@ lazy val sharedScalacSettings = Seq(
           Seq(
             "-unchecked",
             "-Xmigration",
-            "-new-syntax",
-            "-indent"
+            // "-new-syntax",
+            // "-indent",
             // "-rewrite"
             // "-Ywarn-unused",
             // "-source:future",
-            // "-source:future-migration",
+            "-source:future-migration",
             // "-source:3.2-migration",
             // "-source:3.0-migration",
-            // "-rewrite",
+            "-rewrite"
             // "-explain"
           )
         case _ =>
