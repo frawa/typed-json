@@ -18,7 +18,7 @@ package frawa.typedjson
 
 import munit.FunSuite
 
-import frawa.typedjson.parser.Value._
+import frawa.typedjson.parser.Value.*
 import frawa.typedjson.validation.ValidationOutput
 import frawa.typedjson.keywords.Result
 import frawa.typedjson.keywords.Result.OutputCombiner

@@ -16,11 +16,11 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import frawa.typedjson.testutil.TestUtil.{_, given}
+import frawa.typedjson.testutil.TestUtil.{*, given}
 import frawa.typedjson.macros.Macros
 
 class Draft202012Test extends JsonSchemaTestSuite:
-  import Macros._
+  import Macros.*
 
   // WONTWORK: Method too large: frawa/typedjson/jsonSchemaTestSuite/Draft202012Test.<init> ()V
 //  private val draft202012Files: Map[String, Value] =

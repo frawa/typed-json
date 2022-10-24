@@ -16,13 +16,13 @@
 
 package frawa.typedjson.pointer
 
-import frawa.typedjson.parser.Value._
+import frawa.typedjson.parser.Value.*
 import munit.FunSuite
 
 // see https://datatracker.ietf.org/doc/html/rfc6901
 
 class PointerTest extends FunSuite:
-  import Pointer._
+  import Pointer.*
 
   test("empty") {
     assertEquals(empty.toString(), "")

@@ -16,12 +16,12 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import frawa.typedjson.keywords._
+import frawa.typedjson.keywords.*
 import frawa.typedjson.meta.MetaSchemas
-import frawa.typedjson.parser.Value._
-import frawa.typedjson.parser._
+import frawa.typedjson.parser.Value.*
+import frawa.typedjson.parser.*
 import frawa.typedjson.testutil.EvaluatorFactory
-import frawa.typedjson.testutil.TestUtil._
+import frawa.typedjson.testutil.TestUtil.*
 import frawa.typedjson.validation.{ValidationProcessing, ValidationOutput}
 import munit.{FunSuite, Location, TestOptions}
 
@@ -141,7 +141,7 @@ class JsonSchemaTestSuite extends FunSuite:
       else
         fail(
           "unexpected valid",
-          clues(clue[String](data.failMessage), clue[Boolean](data.expectedValid), clue[Result[_]](result))
+          clues(clue[String](data.failMessage), clue[Boolean](data.expectedValid), clue[Result[?]](result))
         )
   }
 

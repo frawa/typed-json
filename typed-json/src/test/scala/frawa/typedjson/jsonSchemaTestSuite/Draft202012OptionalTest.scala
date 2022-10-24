@@ -16,11 +16,11 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import frawa.typedjson.testutil.TestUtil.{_, given}
+import frawa.typedjson.testutil.TestUtil.{*, given}
 import frawa.typedjson.macros.Macros
 
 class Draft202012OptionalTest extends JsonSchemaTestSuite:
-  import Macros._
+  import Macros.*
 
 //  private val draft202012OptionalFiles: Map[String, Value] =
 //    folderJsonContents("./JSON-Schema-Test-Suite/tests/draft2020-12/optional", ".json")

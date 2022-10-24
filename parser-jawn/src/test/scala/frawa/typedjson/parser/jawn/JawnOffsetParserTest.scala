@@ -18,12 +18,12 @@ package frawa.typedjson.parser.jawn
 
 import frawa.typedjson.parser.{Offset, OffsetParser}
 import frawa.typedjson.pointer.Pointer
-import munit._
+import munit.*
 
 class JawnOffsetParserTest extends FunSuite {
   given parser: OffsetParser = new JawnParser()
 
-  import frawa.typedjson.parser.Offset._
+  import frawa.typedjson.parser.Offset.*
 
   test("basic types") {
     assertEquals(parser.parseWithOffset("""13"""), Right(NumberValue(Offset(0, 2), 13)))

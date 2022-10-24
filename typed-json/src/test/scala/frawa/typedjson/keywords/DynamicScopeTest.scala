@@ -16,11 +16,11 @@
 
 package frawa.typedjson.keywords
 
-import frawa.typedjson.util.UriUtil._
+import frawa.typedjson.util.UriUtil.*
 import munit.FunSuite
 
 class DynamicScopeTest extends FunSuite:
-  import DynamicScope._
+  import DynamicScope.*
 
   test("empty") {
     assertEquals(empty.candidates, Seq())

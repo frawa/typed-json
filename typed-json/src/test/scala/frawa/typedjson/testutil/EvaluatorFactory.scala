@@ -16,7 +16,7 @@
 
 package frawa.typedjson.testutil
 
-import frawa.typedjson.keywords._
+import frawa.typedjson.keywords.*
 import frawa.typedjson.testutil
 
 case class EvaluatorFactory[V, R](create: EvaluatorFactory.CreateFun[V, R]):

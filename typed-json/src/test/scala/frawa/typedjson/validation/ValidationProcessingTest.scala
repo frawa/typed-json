@@ -17,14 +17,14 @@
 package frawa.typedjson.validation
 
 import frawa.typedjson
-import frawa.typedjson.keywords._
+import frawa.typedjson.keywords.*
 import frawa.typedjson.meta.MetaSchemas
-import frawa.typedjson.parser.Value._
-import frawa.typedjson.parser._
+import frawa.typedjson.parser.Value.*
+import frawa.typedjson.parser.*
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.EvaluatorFactory
-import frawa.typedjson.testutil.TestSchemas._
-import frawa.typedjson.testutil.TestUtil.{_, given}
+import frawa.typedjson.testutil.TestSchemas.*
+import frawa.typedjson.testutil.TestUtil.{*, given}
 import munit.FunSuite
 
 object ValidationProcessingTest:
@@ -35,7 +35,7 @@ object ValidationProcessingTest:
     EvaluatorFactory.make(ValidationProcessing(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
 
 class ValidationProcessingTest extends FunSuite:
-  import ValidationProcessingTest._
+  import ValidationProcessingTest.*
   import ValidationProcessingTest.given
 
   private def assertValidate(text: String)(

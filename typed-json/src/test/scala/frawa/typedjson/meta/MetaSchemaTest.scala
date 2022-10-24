@@ -16,9 +16,9 @@
 
 package frawa.typedjson.meta
 
-import frawa.typedjson.keywords._
+import frawa.typedjson.keywords.*
 import frawa.typedjson.testutil.EvaluatorFactory
-import frawa.typedjson.testutil.TestUtil._
+import frawa.typedjson.testutil.TestUtil.*
 import frawa.typedjson.validation.{ValidationProcessing, ValidationOutput}
 import munit.FunSuite
 

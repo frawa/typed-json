@@ -21,7 +21,7 @@ import frawa.typedjson.util.UriUtil.uri
 import munit.FunSuite
 
 class VocabularyTest extends FunSuite:
-  import Vocabulary._
+  import Vocabulary.*
 
   test("spec vocabularies no duplicates") {
     val dups = specVocabularies.values

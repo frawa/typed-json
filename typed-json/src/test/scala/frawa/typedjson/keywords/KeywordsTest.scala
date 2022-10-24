@@ -17,10 +17,10 @@
 package frawa.typedjson.keywords
 
 import frawa.typedjson.keywords.SchemaProblems.InvalidSchemaValue
-import frawa.typedjson.parser.Value._
+import frawa.typedjson.parser.Value.*
 import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.testutil.TestSchemas._
-import frawa.typedjson.testutil.TestUtil.{_, given}
+import frawa.typedjson.testutil.TestSchemas.*
+import frawa.typedjson.testutil.TestUtil.{*, given}
 import frawa.typedjson.util.UriUtil.{WithLocation, uri}
 import munit.FunSuite
 
@@ -46,7 +46,7 @@ class KeywordsTest extends FunSuite:
       .map(messages => fail("parsing keywords failed", clues(clue[SchemaProblems](messages))))
       .swap
 
-  private def assertKeywordsWithIgnored(schema: SchemaValue) = assertKeywords(schema, allowIgnored = true) _
+  private def assertKeywordsWithIgnored(schema: SchemaValue) = assertKeywords(schema, allowIgnored = true)
 
   private def assertSchemaProblems(schema: SchemaValue)(
       f: SchemaProblems => Unit

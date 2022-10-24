@@ -18,10 +18,10 @@ package frawa.typedjson.validation
 
 import frawa.typedjson
 import frawa.typedjson.keywords.SchemaProblems.MissingReference
-import frawa.typedjson.keywords._
+import frawa.typedjson.keywords.*
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.EvaluatorFactory
-import frawa.typedjson.testutil.TestUtil.{_, given}
+import frawa.typedjson.testutil.TestUtil.{*, given}
 import munit.FunSuite
 
 class ValidationKeywordTest extends FunSuite:

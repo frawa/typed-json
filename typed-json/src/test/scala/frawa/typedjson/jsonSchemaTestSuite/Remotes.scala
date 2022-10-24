@@ -22,9 +22,9 @@ import frawa.typedjson.util.UriUtil
 import java.net.URI
 
 object Remotes:
-  import frawa.typedjson.parser._
+  import frawa.typedjson.parser.*
   // not unused, used by macro
-  import frawa.typedjson.parser.Value._
+  import frawa.typedjson.parser.Value.*
 
   val remotesUri: URI = UriUtil.uri("http://localhost:1234")
 
@@ -50,7 +50,7 @@ object Remotes:
     else
       remotesFiles.get(name).map(SchemaValue.root)
 
-  import frawa.typedjson.macros.Macros._
+  import frawa.typedjson.macros.Macros.*
 
   private val remotesFiles: Map[String, Value] =
     folderJsonContents("./JSON-Schema-Test-Suite/remotes", ".json")

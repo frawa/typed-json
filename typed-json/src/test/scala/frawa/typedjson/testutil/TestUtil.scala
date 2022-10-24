@@ -17,7 +17,7 @@
 package frawa.typedjson.testutil
 
 import frawa.typedjson.parser.jawn.JawnParser
-import frawa.typedjson.keywords._
+import frawa.typedjson.keywords.*
 import frawa.typedjson.parser.{Parser, Value}
 import munit.Assertions.{assertEquals, clue, clues, fail}
 

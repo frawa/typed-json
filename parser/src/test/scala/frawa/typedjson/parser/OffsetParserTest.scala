@@ -21,7 +21,7 @@ import munit.FunSuite
 
 class OffsetParserTest extends FunSuite:
   import OffsetParser.pointerAt
-  import Offset._
+  import Offset.*
 
   test("pointerAt is empty on number") {
     val v = NumberValue(Offset(0, 2), 13)
