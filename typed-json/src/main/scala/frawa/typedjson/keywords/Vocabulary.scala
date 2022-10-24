@@ -26,7 +26,7 @@ import java.net.URI
 case class Vocabulary(keywords: Map[String, Vocabulary.NestedSchemaType]):
   import Vocabulary.*
 
-  def defines: String => Boolean = (() => keywords.keySet.contains)
+  def defines: String => Boolean = keywords.keySet.contains
   def nestedSchemas(keyword: String)(value: Value): Option[Seq[Value]] =
     keywords
       .get(keyword)
