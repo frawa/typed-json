@@ -29,7 +29,7 @@ import frawa.typedjson.util.UriUtil
 import frawa.typedjson.util.UriUtil.CurrentLocation
 
 import java.net.URI
-import scala.reflect.ClassTag
+import scala.reflect.TypeTest
 
 sealed trait Keyword
 sealed trait AssertionKeyword  extends Keyword
@@ -379,9 +379,9 @@ case class Keywords(
       ignored  = keywords.values.flatMap(_.ignored).toSet
     yield f(keywords).withIgnored(ignored)
 
-  private def updateKeyword[K <: Keyword: ClassTag](
+  private def updateKeyword[K <: Keyword](
       newKeyword: => K
-  )(f: K => K)(using location: CurrentLocation): Keywords =
+  )(f: K => K)(using location: CurrentLocation, tt: TypeTest[Keyword, K]): Keywords =
     val keywords0: Seq[KeywordWithLocation] =
       if keywords.exists {
           case UriUtil.WithLocation(_, _: K) => true
@@ -394,12 +394,12 @@ case class Keywords(
       case c @ _                                 => c
     })
 
-  private def updateKeywordsInside[K <: Keyword: ClassTag](
+  private def updateKeywordsInside[K <: Keyword](
       resolution: SchemaResolution,
       scope: DynamicScope
   )(
       newKeyword: => K
-  )(f: (Keywords, K) => K)(using CurrentLocation): Either[SchemaProblems, Keywords] =
+  )(f: (Keywords, K) => K)(using CurrentLocation, TypeTest[Keyword,K]): Either[SchemaProblems, Keywords] =
     for keywords <- Keywords.parseKeywords(vocabulary, resolution, scope)
     yield updateKeyword(newKeyword)(f(keywords, _))
 

@@ -24,8 +24,8 @@ import frawa.typedjson.pointer.Pointer
 import java.net.URI
 import java.util.UUID
 import java.util.regex.Pattern
-import scala.reflect.ClassTag
 import scala.util.Try
+import scala.reflect.TypeTest
 
 sealed trait ValidationError
 case class FalseSchemaReason()                                         extends ValidationError
@@ -114,7 +114,7 @@ object ValidationProcessing:
       case _: UnevaluatedPropertiesKeyword  => combiner.allOf(results, value.pointer)
   }
 
-  private def validateType[T <: Value: ClassTag](error: TypeMismatch[T]): EvalFun = value =>
+  private def validateType[T <: Value](error: TypeMismatch[T])(using TypeTest[Value, T]): EvalFun = value =>
     value.value match
       case _: T => Result.valid
       case _    => combiner.invalid(error, value.pointer)
