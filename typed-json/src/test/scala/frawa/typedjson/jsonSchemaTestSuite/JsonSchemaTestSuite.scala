@@ -27,7 +27,7 @@ import munit.{FunSuite, Location, TestOptions}
 
 import java.net.URI
 
-class JsonSchemaTestSuite extends FunSuite:
+open class JsonSchemaTestSuite extends FunSuite:
   protected val oneTestPerData      = false
   protected val ignore: Set[String] = Set()
 
