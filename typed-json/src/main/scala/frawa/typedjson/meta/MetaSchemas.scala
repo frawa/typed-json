@@ -49,11 +49,12 @@ object MetaSchemas:
 
   import Macros.*
 
-  private val schemaContent           = SchemaValue.root(jsonContent("./metaSchemas/schema.json"))
-  private val applicatorContent       = SchemaValue.root(jsonContent("./metaSchemas/meta/applicator.json"))
-  private val contentContent          = SchemaValue.root(jsonContent("./metaSchemas/meta/content.json"))
-  private val coreContent             = SchemaValue.root(jsonContent("./metaSchemas/meta/core.json"))
-  private val formatAnnotationContent = SchemaValue.root(jsonContent("./metaSchemas/meta/format-annotation.json"))
-  private val metaDataContent         = SchemaValue.root(jsonContent("./metaSchemas/meta/meta-data.json"))
-  private val unevaluatedContent      = SchemaValue.root(jsonContent("./metaSchemas/meta/unevaluated.json"))
-  private val validationContent       = SchemaValue.root(jsonContent("./metaSchemas/meta/validation.json"))
+  private val metaSchemas             = folderJsonContents("./metaSchemas", ".json")
+  private val schemaContent           = SchemaValue.root(metaSchemas.file("schema.json").get)
+  private val applicatorContent       = SchemaValue.root(metaSchemas.file("meta/applicator.json").get)
+  private val contentContent          = SchemaValue.root(metaSchemas.file("meta/content.json").get)
+  private val coreContent             = SchemaValue.root(metaSchemas.file("meta/core.json").get)
+  private val formatAnnotationContent = SchemaValue.root(metaSchemas.file("meta/format-annotation.json").get)
+  private val metaDataContent         = SchemaValue.root(metaSchemas.file("meta/meta-data.json").get)
+  private val unevaluatedContent      = SchemaValue.root(metaSchemas.file("meta/unevaluated.json").get)
+  private val validationContent       = SchemaValue.root(metaSchemas.file("meta/validation.json").get)
