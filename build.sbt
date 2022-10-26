@@ -17,7 +17,6 @@ lazy val npmRunCI = taskKey[Unit]("npm run ci")
 
 lazy val publishToDocs = taskKey[Unit]("publish to docs/, aka GitHub Pages")
 
-// lazy val scalaVersion213 = "2.13.10"
 lazy val scalaVersion3 = "3.2.0"
 
 import xerial.sbt.Sonatype._
@@ -25,7 +24,6 @@ import xerial.sbt.Sonatype._
 // resolvers ++= Seq(Resolver.jcenterRepo, Resolver.sonatypeRepo("releases"))
 
 lazy val sharedSettings = Seq(
-  // scalaVersion     := scalaVersion213,
   scalaVersion     := scalaVersion3,
   organization     := "io.github.frawa",
   organizationName := "Frank Wagner",
@@ -39,7 +37,6 @@ lazy val sharedSettings = Seq(
 )
 
 lazy val sharedPlatformSettings = Seq(
-  // scalaVersion213,
   scalaVersion3
 )
 
@@ -81,7 +78,6 @@ lazy val sharedScalacSettings = Seq(
   },
   ThisBuild / semanticdbEnabled := true,
   ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
-  // ThisBuild / scalafixScalaBinaryVersion := "3.2"
 )
 
 lazy val strictScalacSettings = Seq(
@@ -99,36 +95,11 @@ lazy val strictScalacSettings = Seq(
 )
 
 lazy val sharedTestSettings = Seq(
+  libraryDependencies += "org.scalameta" %% "munit" % munitVersion % Test,
   // Test / testOptions += Tests.Argument("+l", "-q", "--summary=0")
   // perferred to copy&paste expectations into tests:
   Test / testOptions += Tests.Argument("-q", "--summary=0")
 )
-
-lazy val allJvm = projectMatrix
-  .aggregate(
-    parser,
-    parserZio,
-    macros,
-    typedJson
-  )
-  .settings(sharedSettings)
-  .settings(
-    publish / skip := true
-  )
-  .jvmPlatform(sharedPlatformSettings)
-
-lazy val allJs = projectMatrix
-  .aggregate(
-    parser,
-    parserZio,
-    macros,
-    typedJson
-  )
-  .settings(sharedSettings)
-  .settings(
-    publish / skip := true
-  )
-  .jsPlatform(sharedPlatformSettings)
 
 lazy val root = project
   .in(file("."))
@@ -137,22 +108,21 @@ lazy val root = project
     name           := "typed-json-root",
     publish / skip := true
   )
-  .aggregate(allJvm.projectRefs: _*)
-  .aggregate(allJs.projectRefs: _*)
+  .aggregate(parser.projectRefs: _*)
+  .aggregate(parserZio.projectRefs: _*)
+  .aggregate(macros)
+  .aggregate(typedJson.projectRefs: _*)
   .aggregate(typedJsonJsExport)
 
 lazy val parser =
   projectMatrix
     .in(file("parser"))
-    .settings(sharedSettings)
-    .settings(sharedScalacSettings)
-    .settings(strictScalacSettings)
     .settings(
       name := "typed-json-parser"
     )
-    .settings(
-      libraryDependencies += "org.scalameta" %%% "munit" % munitVersion % Test
-    )
+    .settings(sharedSettings)
+    .settings(sharedScalacSettings)
+    .settings(strictScalacSettings)
     .settings(sharedTestSettings)
     .jvmPlatform(sharedPlatformSettings)
     .jsPlatform(sharedPlatformSettings)
@@ -160,16 +130,15 @@ lazy val parser =
 lazy val parserZio =
   projectMatrix
     .in(file("parser-zio"))
-    .settings(sharedSettings)
-    .settings(sharedScalacSettings)
-    .settings(strictScalacSettings)
     .settings(
       name := "typed-json-parser-zio"
     )
+    .settings(sharedSettings)
+    .settings(sharedScalacSettings)
+    .settings(strictScalacSettings)
     .settings(sharedTestSettings)
     .settings(
-      libraryDependencies += "dev.zio"       %%% "zio-json" % zioJsonVersion,
-      libraryDependencies += "org.scalameta" %%% "munit"    % munitVersion % Test
+      libraryDependencies += "dev.zio" %%% "zio-json" % zioJsonVersion
     )
     .jvmPlatform(sharedPlatformSettings)
     .jsPlatform(sharedPlatformSettings)
@@ -178,66 +147,57 @@ lazy val parserZio =
 lazy val parserJawn =
   projectMatrix
     .in(file("parser-jawn"))
-    .settings(sharedSettings)
-    .settings(sharedScalacSettings)
-    .settings(strictScalacSettings)
     .settings(
       name := "typed-json-parser-jawn"
     )
+    .settings(sharedSettings)
+    .settings(sharedScalacSettings)
+    .settings(strictScalacSettings)
     .settings(sharedTestSettings)
     .settings(
-      libraryDependencies += "org.typelevel" %%% "jawn-parser" % jawnVersion,
-      libraryDependencies += "org.scalameta" %%% "munit"       % munitVersion % Test
+      libraryDependencies += "org.typelevel" %%% "jawn-parser" % jawnVersion
     )
     .jvmPlatform(sharedPlatformSettings)
     .jsPlatform(sharedPlatformSettings)
     .dependsOn(parser)
 
-lazy val macros = projectMatrix
+lazy val macros = project
   .in(file("macros"))
-  .settings(sharedSettings)
-  .settings(sharedScalacSettings)
-  .settings(sharedTestSettings)
   .settings(
     name := "typed-json-macros"
   )
-  .settings(
-    // libraryDependencies += "org.scala-lang"  % "scala-reflect" % scalaVersion.value,
-    libraryDependencies += "org.scalameta" %%% "munit" % munitVersion % Test
-  )
-  .jvmPlatform(sharedPlatformSettings)
-  .jsPlatform(sharedPlatformSettings)
-  .dependsOn(parser)
-  .dependsOn(parserJawn)
+  .settings(sharedSettings)
+  .settings(sharedScalacSettings)
+  .settings(sharedTestSettings)
+  .settings()
+  .dependsOn(parser.jvm(scalaVersion3))
+  .dependsOn(parserJawn.jvm(scalaVersion3))
 
 lazy val typedJson =
   projectMatrix
     .in(file("typed-json"))
-    .settings(sharedSettings)
-    .settings(sharedScalacSettings)
-    .settings(strictScalacSettings)
     .settings(
       name := "typed-json"
     )
+    .settings(sharedSettings)
+    .settings(sharedScalacSettings)
+    .settings(strictScalacSettings)
     .settings(sharedTestSettings)
-    .settings(
-      libraryDependencies += "org.scalameta" %%% "munit" % munitVersion % Test
-    )
     .jvmPlatform(sharedPlatformSettings)
     .jsPlatform(sharedPlatformSettings)
-    .dependsOn(macros)
     .dependsOn(parser)
     .dependsOn(parserJawn % "test")
+    .configure(p => p.dependsOn(macros))
 
 lazy val typedJsonJsExport = project
   .in(file("typed-json-js-export"))
+  .settings(
+    name := "typed-json-js-export"
+  )
   .enablePlugins(ScalaJSPlugin)
   .settings(sharedSettings)
   .settings(sharedScalacSettings)
   .settings(strictScalacSettings)
-  .settings(
-    name := "typed-json-js-export"
-  )
   .settings(
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }
   )
@@ -245,8 +205,6 @@ lazy val typedJsonJsExport = project
     // TODO testing
     Test / test := {}
   )
-  // .dependsOn(parserJawn.js(scalaVersion213))
-  // .dependsOn(typedJson.js(scalaVersion213))
   .dependsOn(parserJawn.js(scalaVersion3))
   .dependsOn(typedJson.js(scalaVersion3))
 
