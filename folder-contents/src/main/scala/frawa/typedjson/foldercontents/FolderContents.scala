@@ -15,24 +15,30 @@
  */
 package frawa.typedjson.foldercontents
 
-import java.nio.file.{Files, Path, Paths}
-
 enum FolderContents[T]:
   case File(content: T)
   case Folder(items: Map[String, FolderContents[T]])
 
+  private type Path = Seq[String]
+
+  private def toPath(path: String): Path      = path.split("/").toSeq
+  private def getParent(path: Path): Path     = path.slice(0, path.length - 1)
+  private def getFileName(path: Path): String = path.last
+
   def file(path: String): Option[T] =
-    val p = Paths.get(path)
-    files(p.getParent()).get(p.getFileName().toString)
+    val p      = toPath(path)
+    val parent = getParent(p)
+    val file   = getFileName(p)
+    files(parent).get(p.last)
 
   def files(path: String): Map[String, T] =
-    files(Paths.get(path))
+    files(toPath(path))
 
   def files(): Map[String, T] =
-    files(null.asInstanceOf[Path])
+    files(Seq())
 
   private def files(path: Path): Map[String, T] =
-    if (path == null) then files(this)
+    if (path.isEmpty) then files(this)
     else folder(path).map(dir => files(dir)).getOrElse(Map())
 
   private def files(fc: FolderContents[T]): Map[String, T] =
@@ -51,12 +57,10 @@ enum FolderContents[T]:
     this match {
       case File(_) => None
       case Folder(items) =>
-        if path.getNameCount == 1 then {
-          items.get(path.getFileName().toString).flatMap(folder(_))
+        if path.size == 1 then {
+          items.get(getFileName(path)).flatMap(folder(_))
         } else {
-          val head = path.getName(0).toString
-          val tail = path.subpath(1, path.getNameCount - 1)
-          items.get(head).flatMap(_.folder(tail))
+          items.get(path.head).flatMap(_.folder(path.tail))
         }
     }
 
