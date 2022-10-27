@@ -22,10 +22,7 @@ import frawa.typedjson.macros.Macros
 class Draft202012OptionalTest extends JsonSchemaTestSuite:
   import Macros.*
 
-//  private val draft202012OptionalFiles: Map[String, Value] =
-//    folderJsonContents("./JSON-Schema-Test-Suite/tests/draft2020-12/optional", ".json")
-  private val draft202012OptionalFiles: Map[String, String] =
-    folderContents("./JSON-Schema-Test-Suite/tests/draft2020-12/optional", ".json")
+  private val draft202012OptionalFiles: Map[String, String] = draft202012.files("optional")
 
   // TODO un-ignore 'em
   override val ignore: Set[String] = Set(

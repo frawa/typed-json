@@ -25,8 +25,7 @@ class Draft202012Test extends JsonSchemaTestSuite:
   // WONTWORK: Method too large: frawa/typedjson/jsonSchemaTestSuite/Draft202012Test.<init> ()V
 //  private val draft202012Files: Map[String, Value] =
 //    folderJsonContents("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
-  private val draft202012Files: Map[String, String] =
-    folderContents("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
+  private val draft202012Files = draft202012.files()
 
   // TODO un-ignore 'em
   override val ignore: Set[String] = Set(
