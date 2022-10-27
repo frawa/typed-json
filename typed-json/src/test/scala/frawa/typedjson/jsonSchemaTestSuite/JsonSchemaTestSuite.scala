@@ -16,6 +16,8 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
+import munit.{FunSuite, Location, TestOptions}
+
 import frawa.typedjson.keywords.*
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser.Value.*
@@ -23,11 +25,15 @@ import frawa.typedjson.parser.*
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestUtil.*
 import frawa.typedjson.validation.{ValidationProcessing, ValidationOutput}
-import munit.{FunSuite, Location, TestOptions}
+import frawa.typedjson.macros.Macros
 
 import java.net.URI
 
 open class JsonSchemaTestSuite extends FunSuite:
+  import Macros._
+
+  protected val draft202012 = folderContents("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
+
   protected val oneTestPerData      = false
   protected val ignore: Set[String] = Set()
 

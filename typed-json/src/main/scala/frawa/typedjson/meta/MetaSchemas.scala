@@ -23,8 +23,6 @@ import frawa.typedjson.util.UriUtil.uri
 import java.net.URI
 
 object MetaSchemas:
-  // not unused, used by macro
-  import frawa.typedjson.parser.Value.*
 
   val draft202012: URI = uri("https://json-schema.org/draft/2020-12/")
 
@@ -36,25 +34,8 @@ object MetaSchemas:
 
   private def resolve202012(relative: URI): Option[RootSchemaValue] =
     val name = relative.getSchemeSpecificPart
-    name match
-      case "schema"                 => Some(schemaContent)
-      case "meta/applicator"        => Some(applicatorContent)
-      case "meta/content"           => Some(contentContent)
-      case "meta/core"              => Some(coreContent)
-      case "meta/format-annotation" => Some(formatAnnotationContent)
-      case "meta/meta-data"         => Some(metaDataContent)
-      case "meta/unevaluated"       => Some(unevaluatedContent)
-      case "meta/validation"        => Some(validationContent)
-      case _                        => None
+    metaSchemas.file(name + ".json").map(SchemaValue.root(_))
 
   import Macros.*
 
-  private val metaSchemas             = folderJsonContents("./metaSchemas", ".json")
-  private val schemaContent           = SchemaValue.root(metaSchemas.file("schema.json").get)
-  private val applicatorContent       = SchemaValue.root(metaSchemas.file("meta/applicator.json").get)
-  private val contentContent          = SchemaValue.root(metaSchemas.file("meta/content.json").get)
-  private val coreContent             = SchemaValue.root(metaSchemas.file("meta/core.json").get)
-  private val formatAnnotationContent = SchemaValue.root(metaSchemas.file("meta/format-annotation.json").get)
-  private val metaDataContent         = SchemaValue.root(metaSchemas.file("meta/meta-data.json").get)
-  private val unevaluatedContent      = SchemaValue.root(metaSchemas.file("meta/unevaluated.json").get)
-  private val validationContent       = SchemaValue.root(metaSchemas.file("meta/validation.json").get)
+  private val metaSchemas = folderJsonContents("./metaSchemas", ".json")
