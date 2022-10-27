@@ -30,9 +30,9 @@ import frawa.typedjson.macros.Macros
 import java.net.URI
 
 open class JsonSchemaTestSuite extends FunSuite:
-  import Macros._
+  import Macros.folderContents
 
-  protected val draft202012 = folderJsonContents("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
+  protected val draft202012 = folderContents("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
 
   protected val oneTestPerData      = false
   protected val ignore: Set[String] = Set()

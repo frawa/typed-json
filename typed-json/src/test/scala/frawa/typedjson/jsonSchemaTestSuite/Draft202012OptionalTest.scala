@@ -33,4 +33,4 @@ class Draft202012OptionalTest extends JsonSchemaTestSuite:
     "refOfUnknownKeyword.json"
   )
 
-  checkFiles(draft202012OptionalFiles)
+  checkFiles(draft202012OptionalFiles)(parseJsonValue)

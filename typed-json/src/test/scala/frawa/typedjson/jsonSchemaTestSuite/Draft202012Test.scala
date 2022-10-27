@@ -36,4 +36,4 @@ class Draft202012Test extends JsonSchemaTestSuite:
     )
   )
 
-  checkFiles(draft202012Files)
+  checkFiles(draft202012Files)(parseJsonValue)
