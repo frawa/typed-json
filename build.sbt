@@ -95,7 +95,7 @@ lazy val strictScalacSettings = Seq(
 )
 
 lazy val sharedTestSettings = Seq(
-  libraryDependencies += "org.scalameta" %% "munit" % munitVersion % Test,
+  libraryDependencies += "org.scalameta" %%% "munit" % munitVersion % Test,
   // Test / testOptions += Tests.Argument("+l", "-q", "--summary=0")
   // perferred to copy&paste expectations into tests:
   Test / testOptions += Tests.Argument("-q", "--summary=0")
@@ -200,9 +200,9 @@ lazy val typedJson =
     .jvmPlatform(sharedPlatformSettings)
     .jsPlatform(sharedPlatformSettings)
     .dependsOn(parser)
-    .dependsOn(parserJawn % "test")
-    .dependsOn(folderContents % "test")
     .configure(p => p.dependsOn(macros))
+    .dependsOn(folderContents)
+    .dependsOn(parserJawn % "test")
 
 lazy val typedJsonJsExport = project
   .in(file("typed-json-js-export"))
