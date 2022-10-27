@@ -77,4 +77,4 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
     )
   )
 
-  checkFiles(draft202012OptionalFormatFiles)(parseJsonValue)
+  checkFiles(draft202012OptionalFormatFiles)
