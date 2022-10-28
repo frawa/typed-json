@@ -37,6 +37,28 @@ class LoadedSchemasResolverTest extends FunSuite:
     }
   }
 
+  test("urn:uuid id resolving $ref from internal $defs") {
+    val id = "urn:uuid:feebdaed-ffff-0000-ffff-0000deadbeef/"
+    withSchema(s"""{
+                  |"$$id": "$id",
+                  |"$$defs": {"bar": {"type": "string"}},
+                  |"$$ref": "#/$$defs/bar"
+                  |}""".stripMargin) { schema =>
+      val resolver = LoadedSchemasResolver(schema)
+      val uri1     = uri(id)
+      assertEquals(resolver.base, uri1)
+      assertEquals(resolver.resolveRef(id).map(_.schema.value), Some(schema.value))
+      assertEquals(
+        resolver.resolveRef("#/$defs/bar").map(_.schema.value),
+        Some(
+          ObjectValue(
+            Map("type" -> StringValue("string"))
+          )
+        )
+      )
+    }
+  }
+
   test("$defs") {
     withSchema("""{
                  |"type": "null",

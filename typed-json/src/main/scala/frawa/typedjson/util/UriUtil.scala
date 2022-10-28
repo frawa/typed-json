@@ -33,6 +33,14 @@ object UriUtil:
   def withFragment(uri: URI, fragment: String): URI =
     new URI(uri.getScheme, uri.getSchemeSpecificPart, fragment)
 
+  def resolve(base: URI, uri: URI): URI =
+    if base.isOpaque() && isFragment(uri) then withFragment(base, uri.getFragment())
+    else base.resolve(uri)
+
+  private def isFragment(uri: URI): Boolean =
+    !uri.isOpaque() && uri.getScheme() == null && uri.getAuthority() == null && uri.getPath().isEmpty &&
+      uri.getFragment() != null
+
   case class WithLocation[+T](uri: URI, value: T)
 
   case class CurrentLocation(uri: URI):
