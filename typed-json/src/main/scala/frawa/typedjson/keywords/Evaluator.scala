@@ -35,7 +35,7 @@ object Evaluator:
     Evaluator(all(processing, keywords).andThen(_.addIgnoredKeywords(keywords.ignored, Pointer.empty)))
 
   private def all[O](processing: Processing[O], keywords: Keywords): EvalFun[O] = { value =>
-    seq(keywords.keywords.map(one(processing, _)))
+    seq(keywords.map(one(processing, _)))
       .andThen(_.addIgnoredKeywords(keywords.ignored, value.pointer))(value)
   }
 

@@ -37,7 +37,7 @@ object JsonUtils:
       .get
 
   given ToExpr[Value] with
-    def apply(value: Value)(using Quotes) =
+    def apply(value: Value)(using Quotes): Expr[Value] =
       value match
         case NullValue => '{ NullValue }
         case StringValue(v) =>

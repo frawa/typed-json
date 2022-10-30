@@ -18,13 +18,13 @@ package frawa.typedjson.jsonSchemaTestSuite
 
 import frawa.typedjson.keywords.{LoadedSchemasResolver, RootSchemaValue, SchemaValue}
 import frawa.typedjson.util.UriUtil
+import frawa.typedjson.foldercontents.FolderContents
 
 import java.net.URI
 
 object Remotes:
+  import frawa.typedjson.macros.FileUtils
   import frawa.typedjson.parser.*
-  // not unused, used by macro
-  import frawa.typedjson.parser.Value.*
 
   val remotesUri: URI = UriUtil.uri("http://localhost:1234")
 
@@ -35,34 +35,10 @@ object Remotes:
   }
 
   private def resolveRemotes(relative: URI): Option[RootSchemaValue] =
-    val name     = relative.getSchemeSpecificPart
-    val segments = name.split('/')
-    if segments.length == 2 then
-      segments(0) match
-        case "baseUriChange"       => baseUriChangeFiles.get(segments(1)).map(SchemaValue.root)
-        case "baseUriChangeFolder" => baseUriChangeFolderFiles.get(segments(1)).map(SchemaValue.root)
-        case "baseUriChangeFolderInSubschema" =>
-          baseUriChangeFolderInSubschemaFiles.get(segments(1)).map(SchemaValue.root)
-        case "draft2020-12" => draft202012Files.get(segments(1)).map(SchemaValue.root)
-        case _ =>
-          printf("MISSING in Remotes: %s", segments(0))
-          None
-    else
-      remotesFiles.get(name).map(SchemaValue.root)
+    val name = relative.getSchemeSpecificPart
+    remotesFiles.file(name).map(SchemaValue.root)
 
   import frawa.typedjson.macros.Macros.*
 
-  private val remotesFiles: Map[String, Value] =
+  private val remotesFiles: FolderContents[Value] =
     folderJsonContents("./JSON-Schema-Test-Suite/remotes", ".json")
-
-  private val baseUriChangeFiles: Map[String, Value] =
-    folderJsonContents("./JSON-Schema-Test-Suite/remotes/baseUriChange", ".json")
-
-  private val baseUriChangeFolderFiles: Map[String, Value] =
-    folderJsonContents("./JSON-Schema-Test-Suite/remotes/baseUriChangeFolder", ".json")
-
-  private val baseUriChangeFolderInSubschemaFiles: Map[String, Value] =
-    folderJsonContents("./JSON-Schema-Test-Suite/remotes/baseUriChangeFolderInSubschema", ".json")
-
-  private val draft202012Files: Map[String, Value] =
-    folderJsonContents("./JSON-Schema-Test-Suite/remotes/draft2020-12", ".json")

@@ -16,14 +16,13 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
+import frawa.typedjson.testutil.TestUtil.{given, *}
+
 class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
   import frawa.typedjson.macros.Macros.*
   import frawa.typedjson.parser.*
-  // not unused, used by macro
-  import frawa.typedjson.parser.Value.*
 
-  private val draft202012OptionalFormatFiles: Map[String, Value] =
-    folderJsonContents("./JSON-Schema-Test-Suite/tests/draft2020-12/optional/format", ".json")
+  private val draft202012OptionalFormatFiles = draft202012.files("/optional/format")
 
   // TODO un-ignore 'em
   override val ignore: Set[String] = Set(
@@ -78,4 +77,4 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
     )
   )
 
-  checkFiles(draft202012OptionalFormatFiles)
+  checkFiles(draft202012OptionalFormatFiles)(parseJsonValue)

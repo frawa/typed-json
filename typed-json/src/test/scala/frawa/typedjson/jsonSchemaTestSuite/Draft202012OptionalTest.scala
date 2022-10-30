@@ -22,10 +22,10 @@ import frawa.typedjson.macros.Macros
 class Draft202012OptionalTest extends JsonSchemaTestSuite:
   import Macros.*
 
-//  private val draft202012OptionalFiles: Map[String, Value] =
-//    folderJsonContents("./JSON-Schema-Test-Suite/tests/draft2020-12/optional", ".json")
-  private val draft202012OptionalFiles: Map[String, String] =
-    folderContents("./JSON-Schema-Test-Suite/tests/draft2020-12/optional", ".json")
+  private val draft202012OptionalFiles = draft202012.files("optional")
+
+  // override protected val onlyDescription: Option[String] =
+  //   Some("single dependency")
 
   // TODO un-ignore 'em
   override val ignore: Set[String] = Set(
@@ -33,7 +33,9 @@ class Draft202012OptionalTest extends JsonSchemaTestSuite:
     "ecmascript-regex.json",
     "float-overflow.json",
     "format-assertion.json",
-    "refOfUnknownKeyword.json"
+    "refOfUnknownKeyword.json",
+    "cross-draft.json",
+    "dependencies-compatibility.json"
   )
 
   checkFiles(draft202012OptionalFiles)(parseJsonValue)

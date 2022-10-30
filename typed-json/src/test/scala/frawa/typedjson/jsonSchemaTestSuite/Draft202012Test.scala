@@ -22,11 +22,9 @@ import frawa.typedjson.macros.Macros
 class Draft202012Test extends JsonSchemaTestSuite:
   import Macros.*
 
-  // WONTWORK: Method too large: frawa/typedjson/jsonSchemaTestSuite/Draft202012Test.<init> ()V
-//  private val draft202012Files: Map[String, Value] =
-//    folderJsonContents("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
-  private val draft202012Files: Map[String, String] =
-    folderContents("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
+  private val draft202012Files = draft202012.files()
+
+  // override protected val onlyDescription: Option[String] = Some("unevaluatedItems with nested items")
 
   // TODO un-ignore 'em
   override val ignore: Set[String] = Set(
@@ -39,7 +37,5 @@ class Draft202012Test extends JsonSchemaTestSuite:
       "Invalid use of fragments in location-independent $id" // TODO format "uri-reference"
     )
   )
-
-  // override protected val onlyDescription: Option[String] = Some("unevaluatedItems with not")
 
   checkFiles(draft202012Files)(parseJsonValue)

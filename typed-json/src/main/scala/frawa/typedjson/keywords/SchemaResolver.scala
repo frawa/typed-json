@@ -45,7 +45,7 @@ trait SchemaResolver:
     withoutEmptyFragment(
       Some(uri1)
         .filter(_.isAbsolute())
-        .getOrElse(base.resolve(uri1))
+        .getOrElse(UriUtil.resolve(base, uri1))
     )
 
   def resolveDynamicRef(ref: String, scope: DynamicScope): Option[SchemaResolution] =

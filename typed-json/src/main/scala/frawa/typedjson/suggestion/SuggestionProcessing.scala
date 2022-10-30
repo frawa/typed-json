@@ -66,7 +66,7 @@ object SuggestionProcessing:
       case ObjectTypeKeyword  => Seq(ObjectValue(Map()))
       case ObjectPropertiesKeyword(properties, _, _) =>
         properties.flatMap { case (prop, keywords) =>
-          keywords.keywords
+          keywords
             .flatMap(keyword => suggestFor(keyword.value)(results))
             .map(v => ObjectValue(Map(prop -> v)))
         }.toSeq
@@ -74,32 +74,26 @@ object SuggestionProcessing:
       case TrivialKeyword(v)               => Seq(BoolValue(v))
       case IfThenElseKeyword(ifChecks, thenChecks, elseChecks) =>
         Seq(ifChecks, thenChecks, elseChecks).flatten
-          .flatMap(_.keywords)
-          .flatMap(keyword => suggestFor(keyword.value)(results))
+          .flatMap(_.flatMap(keyword => suggestFor(keyword.value)(results)))
       case OneOfKeyword(keywords) =>
         keywords
-          .flatMap(_.keywords)
-          .flatMap(keyword => suggestFor(keyword.value)(results))
+          .flatMap(_.flatMap(keyword => suggestFor(keyword.value)(results)))
       case AnyOfKeyword(keywords) =>
         keywords
-          .flatMap(_.keywords)
-          .flatMap(keyword => suggestFor(keyword.value)(results))
+          .flatMap(_.flatMap(keyword => suggestFor(keyword.value)(results)))
       case AllOfKeyword(keywords) =>
         // TODO intersect?
         keywords
-          .flatMap(_.keywords)
-          .flatMap(keyword => suggestFor(keyword.value)(results))
+          .flatMap(_.flatMap(keyword => suggestFor(keyword.value)(results)))
       case EnumKeyword(values) => values
       case ArrayItemsKeyword(items, prefixItems) =>
         val itemArrays = Seq(items).flatten
-          .flatMap(_.keywords)
-          .flatMap(keyword => suggestFor(keyword.value)(results))
+          .flatMap(_.flatMap(keyword => suggestFor(keyword.value)(results)))
           .map(v => ArrayValue(Seq(v)))
         // TODO combinations? might explode?
         val tuplesOfHeads = ArrayValue(
           prefixItems
-            .flatMap(_.keywords)
-            .map(keyword => suggestFor(keyword.value)(results))
+            .map(_.flatMap(keyword => suggestFor(keyword.value)(results)))
             .map(_.headOption)
             .map(_.getOrElse(NullValue))
         )
