@@ -30,7 +30,8 @@ class Draft202012OptionalTest extends JsonSchemaTestSuite:
     "ecmascript-regex.json",
     "float-overflow.json",
     "format-assertion.json",
-    "refOfUnknownKeyword.json"
+    "refOfUnknownKeyword.json",
+    "cross-draft.json"
   )
 
   checkFiles(draft202012OptionalFiles)(parseJsonValue)
