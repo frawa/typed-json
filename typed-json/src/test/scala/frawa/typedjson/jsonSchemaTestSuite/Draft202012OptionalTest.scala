@@ -24,6 +24,9 @@ class Draft202012OptionalTest extends JsonSchemaTestSuite:
 
   private val draft202012OptionalFiles = draft202012.files("optional")
 
+  // override protected val onlyDescription: Option[String] =
+  //   Some("single dependency")
+
   // TODO un-ignore 'em
   override val ignore: Set[String] = Set(
 //    "bignum.json", // TODO bug/limitation (128bit big decimal?) in Zio parser?, refusing BigDecimal("12345678910111213141516171819202122232425262728293031")
@@ -31,7 +34,8 @@ class Draft202012OptionalTest extends JsonSchemaTestSuite:
     "float-overflow.json",
     "format-assertion.json",
     "refOfUnknownKeyword.json",
-    "cross-draft.json"
+    "cross-draft.json",
+    "dependencies-compatibility.json"
   )
 
   checkFiles(draft202012OptionalFiles)(parseJsonValue)
