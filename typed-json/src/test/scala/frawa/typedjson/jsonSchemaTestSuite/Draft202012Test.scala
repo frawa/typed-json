@@ -24,7 +24,7 @@ class Draft202012Test extends JsonSchemaTestSuite:
 
   private val draft202012Files = draft202012.files()
 
-  // override protected val onlyDescription: Option[String] = Some("remote HTTP ref with different URN $id")
+  // override protected val onlyDescription: Option[String] = Some("unevaluatedItems with nested items")
 
   // TODO un-ignore 'em
   override val ignore: Set[String] = Set(

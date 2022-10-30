@@ -89,14 +89,24 @@ case class UnevaluatedPropertiesKeyword(pushed: Keywords, unevaluated: Keywords)
 case class Keywords(
     vocabulary: Vocabulary,
     schema: SchemaValue,
-    keywords: Seq[Keywords.KeywordWithLocation] = Seq.empty[Keywords.KeywordWithLocation],
+    keywords: Seq[Keywords.KeywordWithLocation] = Seq(),
+    lastKeywords: Seq[Keywords => Keywords] = Seq(),
     ignored: Set[String] = Set.empty
 ):
   import Keywords.*
   import frawa.typedjson.util.SeqUtil.*
 
+  def map[E](f: KeywordWithLocation => E): Seq[E] =
+    keywords.map(f)
+
+  def flatMap[E](f: KeywordWithLocation => Seq[E]): Seq[E] =
+    keywords.flatMap(f)
+
   private def add(keyword: Keyword)(using location: CurrentLocation): Keywords =
     this.copy(keywords = keywords :+ location(keyword))
+
+  private def addLast(push: Keywords => Keywords)(using location: CurrentLocation): Keywords =
+    this.copy(lastKeywords = lastKeywords :+ push)
 
   private def addAll(schemas: Seq[SchemaValue], resolver: SchemaResolver, scope: DynamicScope)(
       f: Seq[Keywords] => Keyword
@@ -107,6 +117,11 @@ case class Keywords(
     given CurrentLocation = scope.currentLocation
     for keywords <- combineAllLefts(keywords0)(SchemaProblems.combine)
     yield add(f(keywords)).withIgnored(keywords.flatMap(_.ignored).toSet)
+
+  private def doneParsing(): Keywords =
+    lastKeywords.foldLeft(this) { (acc, push) =>
+      push(acc)
+    }
 
   private def withKeyword(
       keyword: String,
@@ -148,7 +163,7 @@ case class Keywords(
 
       case ("unevaluatedItems", v) =>
         for keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(v)), scope1)
-        yield Keywords(vocabulary, schema).add(UnevaluatedItemsKeyword(this, keywords))
+        yield addLast(pushed => Keywords(vocabulary, schema).add(UnevaluatedItemsKeyword(pushed, keywords)))
 
       case ("properties", ObjectValue(properties)) =>
         mapKeywordsFor(properties, resolver, scope1) { keywords =>
@@ -166,7 +181,7 @@ case class Keywords(
 
       case ("unevaluatedProperties", v) =>
         for keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(v)), scope1)
-        yield Keywords(vocabulary, schema).add(UnevaluatedPropertiesKeyword(this, keywords))
+        yield addLast(pushed => Keywords(vocabulary, schema).add(UnevaluatedPropertiesKeyword(pushed, keywords)))
 
       case ("required", ArrayValue(values)) =>
         def names = Value.asStrings(values)
@@ -473,8 +488,10 @@ object Keywords:
                   }
               )
             }
+            .map(_.doneParsing())
       case _ => Left(SchemaProblems(InvalidSchemaValue(schema.value)))
 
+  // TODO use SeqUtil.sequenceAll...
   private def accumulate(
       previous: Either[SchemaProblems, Keywords],
       current: Either[SchemaProblems, Keywords]

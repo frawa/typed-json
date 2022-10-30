@@ -409,6 +409,7 @@ class KeywordsTest extends FunSuite:
                     vocabularyForTest,
                     numberSchemaValue,
                     Seq(WithLocation(uri("#/if/type"), NumberTypeKeyword)),
+                    Seq(),
                     Set()
                   )
                 ),
@@ -417,6 +418,7 @@ class KeywordsTest extends FunSuite:
                     vocabularyForTest,
                     numberSchemaValue,
                     Seq(WithLocation(uri("#/then/type"), NumberTypeKeyword)),
+                    Seq(),
                     Set()
                   )
                 ),
@@ -425,6 +427,7 @@ class KeywordsTest extends FunSuite:
                     vocabularyForTest,
                     stringSchemaValue,
                     Seq(WithLocation(uri("#/else/type"), StringTypeKeyword)),
+                    Seq(),
                     Set()
                   )
                 )
