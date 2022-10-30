@@ -491,7 +491,6 @@ object Keywords:
             .map(_.doneParsing())
       case _ => Left(SchemaProblems(InvalidSchemaValue(schema.value)))
 
-  // TODO use SeqUtil.sequenceAll...
   private def accumulate(
       previous: Either[SchemaProblems, Keywords],
       current: Either[SchemaProblems, Keywords]
