@@ -69,7 +69,6 @@ class SchemaResolverTest extends FunSuite:
       case `gnuUri` => Some(SchemaResolution(gnuSchema, this))
       case _        => None
 
-
   test("absolute ref") {
     val resolved = MySchemaResolver.resolveRef(fooId).map(_.schema)
     assertEquals(resolved, Some(fooSchema))
@@ -89,4 +88,3 @@ class SchemaResolverTest extends FunSuite:
     val resolved = MySchemaResolver.resolveRef("#").map(_.schema)
     assertEquals(resolved, Some(fooSchema))
   }
-
