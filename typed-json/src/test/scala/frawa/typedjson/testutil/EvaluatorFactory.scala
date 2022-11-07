@@ -38,4 +38,3 @@ object EvaluatorFactory:
   ): EvaluatorFactory[SchemaValue, R] = testutil.EvaluatorFactory({ schema =>
     Keywords(schema, vocabulary, lazyResolver).map(Evaluator(_, processing))
   })
-

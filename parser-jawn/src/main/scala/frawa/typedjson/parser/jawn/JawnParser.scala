@@ -86,8 +86,7 @@ class JawnParser extends Parser with OffsetParser:
       private var currentKey: Option[Offset.StringValue]            = None
       private var properties: Map[Offset.StringValue, Offset.Value] = Map.empty
       override def add(s: CharSequence, index: Int): Unit =
-        if currentKey.isEmpty then
-          currentKey = Some(string(s, index))
+        if currentKey.isEmpty then currentKey = Some(string(s, index))
         else
           properties = properties + (
             (
@@ -125,8 +124,7 @@ class JawnParser extends Parser with OffsetParser:
     def recover(index: Int, dummy: T): T =
       @tailrec
       def go(v0: T): T =
-        if stack.isEmpty then
-          v0
+        if stack.isEmpty then v0
         else
           val c = stack.pop()
           c.add(v0, index)

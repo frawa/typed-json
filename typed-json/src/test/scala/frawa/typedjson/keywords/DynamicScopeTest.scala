@@ -88,4 +88,3 @@ class DynamicScopeTest extends FunSuite:
       )
     )
   }
-
