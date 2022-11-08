@@ -17,7 +17,7 @@ lazy val npmRunCI = taskKey[Unit]("npm run ci")
 
 lazy val publishToDocs = taskKey[Unit]("publish to docs/, aka GitHub Pages")
 
-lazy val scalaVersion3 = "3.2.0"
+lazy val scalaVersion3 = "3.2.1"
 
 import xerial.sbt.Sonatype._
 
