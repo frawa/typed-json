@@ -19,6 +19,7 @@ package frawa.typedjson.parser.jawn
 import frawa.typedjson.parser.{Offset, OffsetParser}
 import frawa.typedjson.pointer.Pointer
 import munit.*
+import frawa.typedjson.parser.OffsetParser.ParseError
 
 class JawnOffsetParserTest extends FunSuite {
   given parser: OffsetParser = new JawnParser()
@@ -341,6 +342,25 @@ class JawnOffsetParserTest extends FunSuite {
 
   private def offsetAt(json: String)(at: Pointer): Either[OffsetParser.ParseError, Option[Offset]] = {
     parser.parseWithOffset(json).map(OffsetParser.offsetAt(_)(at))
+  }
+
+  test("blank") {
+    // these crash JS runtime ...
+    val expected = Left(
+      value = ParseError(
+        offset = 0,
+        message = "blank input",
+        recoveredValue = None
+      )
+    )
+    assertEquals(
+      offsetAt(" ")(Pointer.empty),
+      expected
+    )
+    assertEquals(
+      offsetAt("")(Pointer.empty),
+      expected
+    )
   }
 
   test("offsetAt is empty on basic types") {
