@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { autocompletion } from "@codemirror/next/autocomplete"
+import { autocompletion, Completion, CompletionResult } from "@codemirror/next/autocomplete"
 import { CompletionConfig } from "@codemirror/next/autocomplete/src/config"
 import { basicSetup, EditorState, EditorView } from "@codemirror/next/basic-setup"
 import { closeBrackets } from "@codemirror/next/closebrackets"
@@ -124,8 +124,8 @@ function autocompleteConfig(field: StateField<TypedJson>): CompletionConfig {
                     return resolve(null)
                 }
                 const theSuggestion = suggestions[0]
-                const from = theSuggestion.start
-                const to = theSuggestion.end
+                const theStart = theSuggestion.start
+                const theEnd = theSuggestion.end
                 const options = theSuggestion.suggestions.map(suggestion => {
                     const value = suggestion.value
                     const label = JSON.stringify(value).slice(0, 21)
@@ -133,21 +133,22 @@ function autocompleteConfig(field: StateField<TypedJson>): CompletionConfig {
                     return ({
                         label,
                         info: pretty,
-                        // apply: pretty
-                        apply: (view: EditorView) => {
+                        apply: (view: EditorView, completion: Completion, from1: number, to1: number) => {
+                            const insert = completion.info as string
+                            const from = theStart !== 0 ? theStart : from1
+                            const to = theStart !== 0 ? theEnd : to1
                             const replace = view.state.update({
                                 changes: [
-                                    { from, to, insert: pretty }
+                                    { from, to, insert }
                                 ],
-                                selection: EditorSelection.cursor(from + pretty.length)
+                                selection: EditorSelection.cursor(from + (insert?.length ?? 0))
                             });
                             view.update([replace])
                         }
                     });
-                });
+                }).slice(0, 42)
                 return resolve({
-                    // from: context.pos,
-                    from,
+                    from: theStart !== 0 ? theStart : context.pos,
                     to: context.pos,
                     options
                 });
