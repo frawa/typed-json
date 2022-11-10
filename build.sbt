@@ -231,7 +231,7 @@ npmCI := {
 }
 
 npmRunCI := {
-  val doit = (typedJsonJsExport / Compile / fastLinkJS).value
+  val doit = (typedJsonJsExport / Compile / fastOptJS).value
 
   import scala.sys.process._
   val log = streams.value.log
