@@ -74784,6 +74784,7 @@
      * See the License for the specific language governing permissions and
      * limitations under the License.
      */
+    var _a;
     // see https://codemirror.net/6/docs/ref/
     const initialJson = `{
   "hello": "world"
@@ -74933,6 +74934,35 @@
     view.setState(view.state.update({
         effects: [schemaUpdate.of(viewSchema.state.field(typedJsonSchemaField))]
     }).state);
+    function replaceSchemaBy(value) {
+        const transaction = stateSchema.update({ changes: { from: 0, to: stateSchema.doc.length, insert: value } });
+        viewSchema.dispatch(transaction);
+    }
+    (_a = document.querySelector("#sample-schema")) === null || _a === void 0 ? void 0 : _a.addEventListener("change", (e) => {
+        var _a, _b;
+        const value = (_b = (_a = e.target) === null || _a === void 0 ? void 0 : _a.value) !== null && _b !== void 0 ? _b : '';
+        switch (value) {
+            case 'properties':
+                replaceSchemaBy(`{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+    "foo": {"type": "array", "maxItems": 3},
+        "bar": {"type": "array"}
+    },
+    "patternProperties": {"f.o": {"minItems": 2}},
+    "additionalProperties": {"type": "integer"}
+}`);
+                break;
+            case 'if-then-else':
+                replaceSchemaBy(`{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "then": { "const": "yes" },
+    "else": { "const": "other" },
+    "if": { "maxLength": 4 }
+}`);
+                break;
+        }
+    });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     window.view = view;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
