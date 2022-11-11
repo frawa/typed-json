@@ -11,11 +11,17 @@
     <div class="page">
         <div class="column">
             <h1>Json Editor</h1>
+            <small>Auto indent: cmd-a alt-cmd-\</small>
             <div id=editor></div>
         </div>
         <div class="column">
             <h1>Schema Editor</h1>
-            <small>Auto indent: cmd-a alt-cmd-\</small>
+            <label for="sample-schema">Try one of these:</label>
+            <select name="sample-schema" id="sample-schema">
+                <option value=""></option>
+                <option value="properties">Properties</option>
+                <option value="if-then-else">If/Then/Else</option>
+            </select>
             <div id=editorSchema></div>
         </div>
     </div>

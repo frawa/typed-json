@@ -186,6 +186,36 @@ view.setState(view.state.update({
     effects: [schemaUpdate.of(viewSchema.state.field(typedJsonSchemaField))]
 }).state);
 
+function replaceSchemaBy(value: string) {
+    const transaction = stateSchema.update({ changes: { from: 0, to: stateSchema.doc.length, insert: value } })
+    viewSchema.dispatch(transaction)
+}
+
+document.querySelector<HTMLSelectElement>("#sample-schema")?.addEventListener("change", (e) => {
+    const value: string = (e.target as any)?.value ?? ''
+    switch (value) {
+        case 'properties':
+            replaceSchemaBy(`{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+    "foo": {"type": "array", "maxItems": 3},
+        "bar": {"type": "array"}
+    },
+    "patternProperties": {"f.o": {"minItems": 2}},
+    "additionalProperties": {"type": "integer"}
+}`)
+            break;
+        case 'if-then-else':
+            replaceSchemaBy(`{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "then": { "const": "yes" },
+    "else": { "const": "other" },
+    "if": { "maxLength": 4 }
+}`)
+            break;
+    }
+});
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as any).view = view;
 
