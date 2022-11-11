@@ -361,6 +361,14 @@ class JawnOffsetParserTest extends FunSuite {
       offsetAt("")(Pointer.empty),
       expected
     )
+    assertEquals(
+      offsetAt("\"")(Pointer.empty),
+      expected
+    )
+    assertEquals(
+      offsetAt("   [   ")(Pointer.empty),
+      expected
+    )
   }
 
   test("offsetAt is empty on basic types") {

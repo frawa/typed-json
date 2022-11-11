@@ -31,7 +31,7 @@ class JawnParser extends Parser with OffsetParser:
     jawn.Parser.parseFromString(json)(valueFacade).toEither.swap.map(_.toString).swap
 
   override def parseWithOffset(json: String): Either[ParseError, Offset.Value] =
-    if json.isBlank() then Left(ParseError(0, "blank input", None))
+    if json.isBlank() || json.trim().length() < 2 then Left(ParseError(0, "blank input", None))
     else
       val recoveringFacade = new RecoveringFacade(offsetValueFacade)
       jawn.Parser
