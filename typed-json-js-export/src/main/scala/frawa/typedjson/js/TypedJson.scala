@@ -188,7 +188,7 @@ object Suggestions {
     val offset       = offsetAt(pointer)
     val (start, end) = offset.map(o => (o.start, o.end)).getOrElse((0, 0))
     val suggestions  = result.output.map(_.suggestions).getOrElse(Seq()).map(toSuggestion)
-    Suggestions(start, end, pointer.toString, js.Array(suggestions*))
+    Suggestions(start, end, pointer.toString, js.Array(suggestions.toSeq*))
   }
 
   private def toSuggestion(value: Value): Suggestion = {
