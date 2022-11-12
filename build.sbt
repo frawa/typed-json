@@ -1,5 +1,3 @@
-import Dependencies._
-
 addCommandAlias("lint", "headerCheckAll;fmtCheck;fixCheck;npmAll")
 addCommandAlias("lintFix", "headerCreateAll;fixFix;fmtFix")
 addCommandAlias("fmtCheck", "all scalafmtCheck scalafmtSbtCheck")
@@ -95,7 +93,7 @@ lazy val strictScalacSettings = Seq(
 )
 
 lazy val sharedTestSettings = Seq(
-  libraryDependencies += "org.scalameta" %%% "munit" % munitVersion % Test,
+  libraryDependencies += "org.scalameta" %%% "munit" % "1.0.0-M6" % Test,
   // Test / testOptions += Tests.Argument("+l", "-q", "--summary=0")
   // perferred to copy&paste expectations into tests:
   Test / testOptions += Tests.Argument("-q", "--summary=0")
@@ -152,7 +150,7 @@ lazy val parserZio =
     .settings(strictScalacSettings)
     .settings(sharedTestSettings)
     .settings(
-      libraryDependencies += "dev.zio" %%% "zio-json" % zioJsonVersion
+      libraryDependencies += "dev.zio" %%% "zio-json" % "0.3.0"
     )
     .jvmPlatform(sharedPlatformSettings)
     .jsPlatform(sharedPlatformSettings)
@@ -169,7 +167,7 @@ lazy val parserJawn =
     .settings(strictScalacSettings)
     .settings(sharedTestSettings)
     .settings(
-      libraryDependencies += "org.typelevel" %%% "jawn-parser" % jawnVersion
+      libraryDependencies += "org.typelevel" %%% "jawn-parser" % "1.3.1"
     )
     .jvmPlatform(sharedPlatformSettings)
     .jsPlatform(sharedPlatformSettings)
