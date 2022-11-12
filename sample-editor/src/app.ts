@@ -101,11 +101,13 @@ const stateSchema = EditorState.create({
         // keymap.of(completionKeymap)
         EditorView.updateListener.of(update => {
             if (update.docChanged) {
-                // view.setState(view.state.update({
-                // effects: [schemaUpdate.of(update.state.field(typedJsonSchemaField))]
-                // }).state)
+                const pos = view.state.selection.mainIndex
                 const transaction = view.state.update({
-                    effects: [schemaUpdate.of(update.state.field(typedJsonSchemaField))]
+                    effects: [schemaUpdate.of(update.state.field(typedJsonSchemaField))],
+                    changes: [
+                        // noop triggers linter, but keeps caret
+                        { from: pos, to: pos + 1, insert: view.state.doc.slice(pos, pos + 1) },
+                    ]
                 })
                 view.dispatch(transaction)
             }
