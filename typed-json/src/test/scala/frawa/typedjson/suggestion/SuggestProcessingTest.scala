@@ -34,11 +34,11 @@ class SuggestProcessingTest extends FunSuite:
     EvaluatorFactory.make(SuggestionProcessing(at), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
 
   private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
-      f: Seq[Value] => Unit
+      f: Set[Value] => Unit
   ) =
     given EvaluatorFactory[SchemaValue, SuggestionOutput] = factory(at)
     assertResult[SuggestionOutput](text)(schema) { result =>
-      f(result.output.map(_.suggestions).getOrElse(Seq()).distinct)
+      f(result.output.map(_.suggestions).getOrElse(Set()))
     }
 
   test("suggest one object per property") {
@@ -48,7 +48,7 @@ class SuggestProcessingTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Seq(
+          Set(
             ObjectValue(Map()),
             ObjectValue(Map("toto" -> NumberValue(0))),
             ObjectValue(Map("titi" -> StringValue("")))
@@ -65,7 +65,7 @@ class SuggestProcessingTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Seq(
+          Set(
             StringValue("toto"),
             StringValue("titi")
           )
@@ -93,7 +93,7 @@ class SuggestProcessingTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Seq(
+          Set(
             ObjectValue(Map()),
             ObjectValue(
               properties = Map(
@@ -134,7 +134,7 @@ class SuggestProcessingTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Seq(
+          Set(
             ObjectValue(Map()),
             ObjectValue(
               properties = Map(
@@ -196,7 +196,7 @@ class SuggestProcessingTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Seq(
+          Set(
             ObjectValue(
               properties = Map()
             ),
@@ -241,13 +241,13 @@ class SuggestProcessingTest extends FunSuite:
       assertSuggest("""13""")(schema) { result =>
         assertEquals(
           result,
-          Seq(NullValue, NumberValue(0))
+          Set(NullValue, NumberValue(0))
         )
       }
       assertSuggest("""true""")(schema) { result =>
         assertEquals(
           result,
-          Seq(NullValue, NumberValue(0))
+          Set(NullValue, NumberValue(0))
         )
       }
     }
@@ -262,13 +262,13 @@ class SuggestProcessingTest extends FunSuite:
       assertSuggest("""true""")(schema) { result =>
         assertEquals(
           result,
-          Seq(NumberValue(0), NumberValue(13), NumberValue(14))
+          Set(NumberValue(0), NumberValue(13), NumberValue(14))
         )
       }
       assertSuggest("""13""")(schema) { result =>
         assertEquals(
           result,
-          Seq(NumberValue(0), NumberValue(13), NumberValue(14))
+          Set(NumberValue(0), NumberValue(13), NumberValue(14))
         )
       }
     }
@@ -283,13 +283,13 @@ class SuggestProcessingTest extends FunSuite:
       assertSuggest("""true""")(schema) { result =>
         assertEquals(
           result,
-          Seq(BoolValue(true))
+          Set(BoolValue(true))
         )
       }
       assertSuggest("""13""")(schema) { result =>
         assertEquals(
           result,
-          Seq(BoolValue(true))
+          Set(BoolValue(true))
         )
       }
     }
@@ -329,7 +329,7 @@ class SuggestProcessingTest extends FunSuite:
       assertSuggest("""{}""")(schema) { result =>
         assertEquals(
           result,
-          Seq(
+          Set(
             ObjectValue(
               properties = Map()
             ),
@@ -374,7 +374,7 @@ class SuggestProcessingTest extends FunSuite:
       assertSuggest("""{"kind":"first"}""")(schema) { result =>
         assertEquals(
           result,
-          Seq(
+          Set(
             ObjectValue(
               properties = Map()
             ),
@@ -439,7 +439,7 @@ class SuggestProcessingTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Seq(
+          Set(
             ObjectValue(
               properties = Map()
             ),
@@ -463,7 +463,7 @@ class SuggestProcessingTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Seq(
+          Set(
             ObjectValue(Map()),
             ObjectValue(
               properties = Map(
@@ -487,7 +487,7 @@ class SuggestProcessingTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Seq(
+          Set(
             ArrayValue(Seq()),
             ArrayValue(Seq(NumberValue(0)))
           )
@@ -506,7 +506,7 @@ class SuggestProcessingTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Seq(
+          Set(
             NumberValue(0)
           )
         )
@@ -524,7 +524,7 @@ class SuggestProcessingTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Seq(
+          Set(
             NumberValue(0)
           )
         )
@@ -558,7 +558,7 @@ class SuggestProcessingTest extends FunSuite:
     }
   }
 
-  private def assertSuggestForSchema(json: String, at: Pointer)(f: Seq[Value] => Unit): Unit =
+  private def assertSuggestForSchema(json: String, at: Pointer)(f: Set[Value] => Unit): Unit =
     val resolver     = MetaSchemas.lazyResolver
     val base         = MetaSchemas.draft202012
     val Some(schema) = resolver(base.resolve("schema")): @unchecked
@@ -568,5 +568,5 @@ class SuggestProcessingTest extends FunSuite:
 
     given EvaluatorFactory[SchemaValue, SuggestionOutput] = factory(at)
     assertResult[SuggestionOutput](json)(schema) { result =>
-      f(result.output.map(_.suggestions).getOrElse(Seq()).distinct)
+      f(result.output.map(_.suggestions).getOrElse(Set()))
     }

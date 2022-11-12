@@ -89,7 +89,7 @@ case class UnevaluatedPropertiesKeyword(pushed: Keywords, unevaluated: Keywords)
 case class Keywords(
     vocabulary: Vocabulary,
     schema: SchemaValue,
-    keywords: Seq[Keywords.KeywordWithLocation] = Seq(),
+    keywords: Set[Keywords.KeywordWithLocation] = Set(),
     lastKeywords: Seq[Keywords => Keywords] = Seq(),
     ignored: Set[String] = Set.empty
 ):
@@ -97,13 +97,13 @@ case class Keywords(
   import frawa.typedjson.util.SeqUtil.*
 
   def map[E](f: KeywordWithLocation => E): Seq[E] =
-    keywords.map(f)
+    keywords.map(f).toSeq
 
-  def flatMap[E](f: KeywordWithLocation => Seq[E]): Seq[E] =
-    keywords.flatMap(f)
+  def flatMap[E](f: KeywordWithLocation => Set[E]): Seq[E] =
+    keywords.flatMap(f).toSeq
 
   private def add(keyword: Keyword)(using location: CurrentLocation): Keywords =
-    this.copy(keywords = keywords :+ location(keyword))
+    this.copy(keywords = keywords + location(keyword))
 
   private def addLast(push: Keywords => Keywords)(using location: CurrentLocation): Keywords =
     this.copy(lastKeywords = lastKeywords :+ push)
@@ -397,13 +397,13 @@ case class Keywords(
   private def updateKeyword[K <: Keyword](
       newKeyword: => K
   )(f: K => K)(using location: CurrentLocation, tt: TypeTest[Keyword, K]): Keywords =
-    val keywords0: Seq[KeywordWithLocation] =
+    val keywords0: Set[KeywordWithLocation] =
       if keywords.exists {
           case UriUtil.WithLocation(_, _: K) => true
           case _                             => false
         }
       then keywords
-      else keywords :+ location(newKeyword)
+      else keywords + location(newKeyword)
     this.copy(keywords = keywords0.map {
       case UriUtil.WithLocation(uri, keyword: K) => UriUtil.WithLocation(uri, f(keyword))
       case c @ _                                 => c

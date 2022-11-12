@@ -60,7 +60,7 @@ class KeywordsTest extends FunSuite:
   test("null") {
     withSchema(nullSchema) { schema =>
       assertKeywords(schema) { keywords =>
-        assertEquals(keywords.keywords, Seq(WithLocation(uri("#/type"), NullTypeKeyword)))
+        assertEquals(keywords.keywords, Set(WithLocation(uri("#/type"), NullTypeKeyword)))
       }
     }
   }
@@ -68,7 +68,7 @@ class KeywordsTest extends FunSuite:
   test("boolean") {
     withSchema(boolSchema) { schema =>
       assertKeywords(schema) { keywords =>
-        assertEquals(keywords.keywords, Seq(WithLocation(uri("#/type"), BooleanTypeKeyword)))
+        assertEquals(keywords.keywords, Set(WithLocation(uri("#/type"), BooleanTypeKeyword)))
       }
     }
   }
@@ -76,7 +76,7 @@ class KeywordsTest extends FunSuite:
   test("true schema") {
     withSchema(trueSchema) { schema =>
       assertKeywords(schema) { keywords =>
-        assertEquals(keywords.keywords, Seq(WithLocation(uri("#"), TrivialKeyword(true))))
+        assertEquals(keywords.keywords, Set(WithLocation(uri("#"), TrivialKeyword(true))))
       }
     }
   }
@@ -84,7 +84,7 @@ class KeywordsTest extends FunSuite:
   test("false schema") {
     withSchema(falseSchema) { schema =>
       assertKeywords(schema) { keywords =>
-        assertEquals(keywords.keywords, Seq(WithLocation(uri("#"), TrivialKeyword(false))))
+        assertEquals(keywords.keywords, Set(WithLocation(uri("#"), TrivialKeyword(false))))
       }
     }
   }
@@ -102,7 +102,7 @@ class KeywordsTest extends FunSuite:
       assertKeywords(schema) { keywords =>
         assertEquals(
           keywords.keywords,
-          Seq(
+          Set(
             WithLocation(
               uri("#/not"),
               NotKeyword(
@@ -113,7 +113,7 @@ class KeywordsTest extends FunSuite:
                       value = false
                     )
                   ),
-                  Seq(WithLocation(uri("#/not"), TrivialKeyword(false)))
+                  Set(WithLocation(uri("#/not"), TrivialKeyword(false)))
                 )
               )
             )
@@ -145,7 +145,7 @@ class KeywordsTest extends FunSuite:
   test("empty schema") {
     withSchema(emtpySchema) { schema =>
       assertKeywords(schema) { keywords =>
-        assertEquals(keywords.keywords, Seq(WithLocation(uri("#"), TrivialKeyword(true))))
+        assertEquals(keywords.keywords, Set(WithLocation(uri("#"), TrivialKeyword(true))))
       }
     }
   }
@@ -153,7 +153,7 @@ class KeywordsTest extends FunSuite:
   test("string") {
     withSchema(stringSchema) { schema =>
       assertKeywords(schema) { keywords =>
-        assertEquals(keywords.keywords, Seq(WithLocation(uri("#/type"), StringTypeKeyword)))
+        assertEquals(keywords.keywords, Set(WithLocation(uri("#/type"), StringTypeKeyword)))
       }
     }
   }
@@ -161,7 +161,7 @@ class KeywordsTest extends FunSuite:
   test("number") {
     withSchema(numberSchema) { schema =>
       assertKeywords(schema) { keywords =>
-        assertEquals(keywords.keywords, Seq(WithLocation(uri("#/type"), NumberTypeKeyword)))
+        assertEquals(keywords.keywords, Set(WithLocation(uri("#/type"), NumberTypeKeyword)))
       }
     }
   }
@@ -169,7 +169,7 @@ class KeywordsTest extends FunSuite:
   test("array") {
     withSchema(arraySchema) { schema =>
       assertKeywords(schema) { keywords =>
-        assertEquals(keywords.keywords, Seq(WithLocation(uri("#/type"), ArrayTypeKeyword)))
+        assertEquals(keywords.keywords, Set(WithLocation(uri("#/type"), ArrayTypeKeyword)))
       }
     }
   }
@@ -179,7 +179,7 @@ class KeywordsTest extends FunSuite:
       assertKeywords(schema) { keywords =>
         assertEquals(
           keywords.keywords,
-          Seq(
+          Set(
             WithLocation(uri("#/type"), ArrayTypeKeyword),
             WithLocation(
               uri("#/items"),
@@ -188,7 +188,7 @@ class KeywordsTest extends FunSuite:
                   Keywords(
                     vocabularyForTest,
                     numberSchemaValue,
-                    Seq(WithLocation(uri("#/items/type"), NumberTypeKeyword))
+                    Set(WithLocation(uri("#/items/type"), NumberTypeKeyword))
                   )
                 )
               )
@@ -201,7 +201,7 @@ class KeywordsTest extends FunSuite:
       assertKeywords(schema) { keywords =>
         assertEquals(
           keywords.keywords,
-          Seq(
+          Set(
             WithLocation(
               uri("#/items"),
               ArrayItemsKeyword(
@@ -209,7 +209,7 @@ class KeywordsTest extends FunSuite:
                   Keywords(
                     vocabularyForTest,
                     numberSchemaValue,
-                    Seq(WithLocation(uri("#/items/type"), NumberTypeKeyword))
+                    Set(WithLocation(uri("#/items/type"), NumberTypeKeyword))
                   )
                 )
               )
@@ -226,7 +226,7 @@ class KeywordsTest extends FunSuite:
       assertKeywords(schema) { keywords =>
         assertEquals(
           keywords.keywords,
-          Seq(
+          Set(
             WithLocation(uri("#/type"), ObjectTypeKeyword),
             WithLocation(
               uri("#/properties"),
@@ -235,7 +235,7 @@ class KeywordsTest extends FunSuite:
                   "toto" -> Keywords(
                     vocabularyForTest,
                     numberSchemaValue,
-                    keywords = List(
+                    keywords = Set(
                       WithLocation(uri("#/properties/toto/type"), NumberTypeKeyword)
                     ),
                     ignored = Set()
@@ -243,7 +243,7 @@ class KeywordsTest extends FunSuite:
                   "titi" -> Keywords(
                     vocabularyForTest,
                     stringSchemaValue,
-                    keywords = List(
+                    keywords = Set(
                       WithLocation(uri("#/properties/titi/type"), StringTypeKeyword)
                     ),
                     ignored = Set()
@@ -266,7 +266,7 @@ class KeywordsTest extends FunSuite:
       assertKeywords(schema) { keywords =>
         assertEquals(
           keywords.keywords,
-          Seq(
+          Set(
             WithLocation(uri("#/type"), ObjectTypeKeyword),
             WithLocation(
               uri("#/required"),
@@ -287,7 +287,7 @@ class KeywordsTest extends FunSuite:
       assertKeywords(schema) { keywords =>
         assertEquals(
           keywords.keywords,
-          Seq(
+          Set(
             WithLocation(
               uri("#/allOf"),
               AllOfKeyword(
@@ -295,9 +295,7 @@ class KeywordsTest extends FunSuite:
                   Keywords(
                     vocabularyForTest,
                     numberSchemaValue,
-                    keywords = List(
-                      WithLocation(uri("#/allOf/0/type"), NumberTypeKeyword)
-                    ),
+                    keywords = Set(WithLocation(uri("#/allOf/0/type"), NumberTypeKeyword)),
                     ignored = Set()
                   )
                 )
@@ -314,7 +312,7 @@ class KeywordsTest extends FunSuite:
       assertKeywords(schema) { keywords =>
         assertEquals(
           keywords.keywords,
-          Seq(
+          Set(
             WithLocation(
               uri("#/anyOf"),
               AnyOfKeyword(
@@ -330,9 +328,7 @@ class KeywordsTest extends FunSuite:
                         )
                       )
                     ),
-                    keywords = List(
-                      WithLocation(uri("#/anyOf/0/type"), NumberTypeKeyword)
-                    ),
+                    keywords = Set(WithLocation(uri("#/anyOf/0/type"), NumberTypeKeyword)),
                     ignored = Set()
                   ),
                   Keywords(
@@ -346,9 +342,7 @@ class KeywordsTest extends FunSuite:
                         )
                       )
                     ),
-                    keywords = List(
-                      WithLocation(uri("#/anyOf/1/type"), StringTypeKeyword)
-                    ),
+                    keywords = Set(WithLocation(uri("#/anyOf/1/type"), StringTypeKeyword)),
                     ignored = Set()
                   )
                 )
@@ -365,7 +359,7 @@ class KeywordsTest extends FunSuite:
       assertKeywords(schema) { keywords =>
         assertEquals(
           keywords.keywords,
-          Seq(
+          Set(
             WithLocation(
               uri("#/oneOf"),
               OneOfKeyword(
@@ -373,17 +367,13 @@ class KeywordsTest extends FunSuite:
                   Keywords(
                     vocabularyForTest,
                     numberSchemaValue,
-                    keywords = List(
-                      WithLocation(uri("#/oneOf/0/type"), NumberTypeKeyword)
-                    ),
+                    keywords = Set(WithLocation(uri("#/oneOf/0/type"), NumberTypeKeyword)),
                     ignored = Set()
                   ),
                   Keywords(
                     vocabularyForTest,
                     stringSchemaValue,
-                    keywords = List(
-                      WithLocation(uri("#/oneOf/1/type"), StringTypeKeyword)
-                    ),
+                    keywords = Set(WithLocation(uri("#/oneOf/1/type"), StringTypeKeyword)),
                     ignored = Set()
                   )
                 )
@@ -400,7 +390,7 @@ class KeywordsTest extends FunSuite:
       assertKeywords(schema) { keywords =>
         assertEquals(
           keywords.keywords,
-          Seq(
+          Set(
             WithLocation(
               uri("#/if"),
               IfThenElseKeyword(
@@ -408,7 +398,7 @@ class KeywordsTest extends FunSuite:
                   Keywords(
                     vocabularyForTest,
                     numberSchemaValue,
-                    Seq(WithLocation(uri("#/if/type"), NumberTypeKeyword)),
+                    Set(WithLocation(uri("#/if/type"), NumberTypeKeyword)),
                     Seq(),
                     Set()
                   )
@@ -417,7 +407,7 @@ class KeywordsTest extends FunSuite:
                   Keywords(
                     vocabularyForTest,
                     numberSchemaValue,
-                    Seq(WithLocation(uri("#/then/type"), NumberTypeKeyword)),
+                    Set(WithLocation(uri("#/then/type"), NumberTypeKeyword)),
                     Seq(),
                     Set()
                   )
@@ -426,7 +416,7 @@ class KeywordsTest extends FunSuite:
                   Keywords(
                     vocabularyForTest,
                     stringSchemaValue,
-                    Seq(WithLocation(uri("#/else/type"), StringTypeKeyword)),
+                    Set(WithLocation(uri("#/else/type"), StringTypeKeyword)),
                     Seq(),
                     Set()
                   )
@@ -444,7 +434,7 @@ class KeywordsTest extends FunSuite:
       assertKeywords(schema) { keywords =>
         assertEquals(
           keywords.keywords,
-          Seq(
+          Set(
             WithLocation(
               uri("#/type"),
               UnionTypeKeyword(
@@ -465,7 +455,7 @@ class KeywordsTest extends FunSuite:
       assertKeywords(schema) { keywords =>
         assertEquals(
           keywords.keywords,
-          Seq(
+          Set(
             WithLocation(uri("#/type"), StringTypeKeyword),
             WithLocation(
               uri("#/enum"),
@@ -491,7 +481,7 @@ class KeywordsTest extends FunSuite:
       assertKeywords(schema) { keywords =>
         assertEquals(
           keywords.keywords,
-          Seq(
+          Set(
             WithLocation(uri("#/type"), StringTypeKeyword),
             WithLocation(
               uri("#/const"),
@@ -514,7 +504,7 @@ class KeywordsTest extends FunSuite:
       assertKeywords(schema) { keywords =>
         assertEquals(
           assertable(keywords).keywords,
-          Seq(
+          Set(
             WithLocation(uri("https://example.net/root.json#/type"), ArrayTypeKeyword),
             WithLocation(
               uri("https://example.net/root.json#/items"),
@@ -531,7 +521,7 @@ class KeywordsTest extends FunSuite:
                         )
                       )
                     ),
-                    keywords = List(
+                    keywords = Set(
                       WithLocation(
                         uri("https://example.net/root.json#/items/$ref"),
                         LazyParseKeywords(uri("https://example.net/root.json#item"), assertableResolve)
@@ -564,7 +554,7 @@ class KeywordsTest extends FunSuite:
     withSchema(subItemRefDefsSchema) { schema =>
       assertKeywords(schema) { keywords =>
         assertEquals(
-          keywords.keywords.length,
+          keywords.keywords.size,
           2
         )
       }

@@ -22,7 +22,7 @@ import frawa.typedjson.parser.*
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.validation.{ValidationProcessing, ValidationOutput}
 
-case class SuggestionOutput(suggestions: Seq[Value], validated: Result[ValidationOutput])
+case class SuggestionOutput(suggestions: Set[Value], validated: Result[ValidationOutput])
 
 object SuggestionProcessing:
 
@@ -39,12 +39,12 @@ object SuggestionProcessing:
       Result.valid(SuggestionOutput(suggestions, Result.valid[ValidationOutput]))
     else
       val result = ValidationProcessing().simple(keyword)(value)
-      Result(result.valid, Some(SuggestionOutput(Seq(), result)))
+      Result(result.valid, Some(SuggestionOutput(Set(), result)))
 
   private def nested(
       at: Pointer
   )(keyword: ApplicatorKeyword)(results: Seq[Result[SuggestionOutput]])(value: InnerValue): Result[SuggestionOutput] =
-    val current = results.flatMap(_.output).flatMap(_.suggestions)
+    val current = results.flatMap(_.output).flatMap(_.suggestions).toSet
     if at.isInsideKey && at.outer == value.pointer then
       val suggestions = onlyKeys(suggestFor(keyword)(Seq(Result.valid)))
       Result.valid(SuggestionOutput(current ++ suggestions, Result.valid))
@@ -56,55 +56,59 @@ object SuggestionProcessing:
       val nested    = ValidationProcessing().nested(keyword)(validated)(value)
       Result.valid(SuggestionOutput(current, nested))
 
-  private def suggestFor(keyword: Keyword)(results: Seq[Result[SuggestionOutput]]): Seq[Value] =
+  private def suggestFor(keyword: Keyword)(results: Seq[Result[SuggestionOutput]]): Set[Value] =
     keyword match
-      case NullTypeKeyword    => Seq(NullValue)
-      case BooleanTypeKeyword => Seq(BoolValue(true))
-      case StringTypeKeyword  => Seq(StringValue(""))
-      case NumberTypeKeyword  => Seq(NumberValue(0))
-      case ArrayTypeKeyword   => Seq(ArrayValue(Seq()))
-      case ObjectTypeKeyword  => Seq(ObjectValue(Map()))
+      case NullTypeKeyword    => Set(NullValue)
+      case BooleanTypeKeyword => Set(BoolValue(true))
+      case StringTypeKeyword  => Set(StringValue(""))
+      case NumberTypeKeyword  => Set(NumberValue(0))
+      case ArrayTypeKeyword   => Set(ArrayValue(Seq()))
+      case ObjectTypeKeyword  => Set(ObjectValue(Map()))
       case ObjectPropertiesKeyword(properties, _, _) =>
         properties.flatMap { case (prop, keywords) =>
           keywords
-            .flatMap(keyword => suggestFor(keyword.value)(results))
+            .flatMap(keyword => suggestFor(keyword.value)(results).toSet)
             .map(v => ObjectValue(Map(prop -> v)))
-        }.toSeq
-      case ObjectRequiredKeyword(required) => Seq(ObjectValue(Map.from(required.map((_, NullValue)))))
-      case TrivialKeyword(v)               => Seq(BoolValue(v))
+        }.toSet
+      case ObjectRequiredKeyword(required) => Set(ObjectValue(Map.from(required.map((_, NullValue)))))
+      case TrivialKeyword(v)               => Set(BoolValue(v))
       case IfThenElseKeyword(ifChecks, thenChecks, elseChecks) =>
-        Seq(ifChecks, thenChecks, elseChecks).flatten
-          .flatMap(_.flatMap(keyword => suggestFor(keyword.value)(results)))
+        Set(ifChecks, thenChecks, elseChecks).flatten
+          .flatMap(_.flatMap(keyword => suggestFor(keyword.value)(results).toSet))
       case OneOfKeyword(keywords) =>
         keywords
           .flatMap(_.flatMap(keyword => suggestFor(keyword.value)(results)))
+          .toSet
       case AnyOfKeyword(keywords) =>
         keywords
           .flatMap(_.flatMap(keyword => suggestFor(keyword.value)(results)))
+          .toSet
       case AllOfKeyword(keywords) =>
         // TODO intersect?
         keywords
           .flatMap(_.flatMap(keyword => suggestFor(keyword.value)(results)))
-      case EnumKeyword(values) => values
+          .toSet
+      case EnumKeyword(values) => values.toSet
       case ArrayItemsKeyword(items, prefixItems) =>
         val itemArrays = Seq(items).flatten
-          .flatMap(_.flatMap(keyword => suggestFor(keyword.value)(results)))
+          .flatMap(_.flatMap(keyword => suggestFor(keyword.value)(results).toSet))
           .map(v => ArrayValue(Seq(v)))
         // TODO combinations? might explode?
         val tuplesOfHeads = ArrayValue(
           prefixItems
-            .map(_.flatMap(keyword => suggestFor(keyword.value)(results)))
+            .map(_.flatMap(keyword => suggestFor(keyword.value)(results).toSet))
             .map(_.headOption)
             .map(_.getOrElse(NullValue))
         )
-        itemArrays :+ tuplesOfHeads
+        (itemArrays :+ tuplesOfHeads).toSet
       case UnionTypeKeyword(keywords) =>
         keywords
           .flatMap(keyword => suggestFor(keyword.value)(results))
+          .toSet
       case _ =>
         // useful for debugging:
         // Seq(StringValue(keyword.getClass.getSimpleName))
-        Seq(NullValue)
+        Set(NullValue)
 
-  private def onlyKeys(suggestions: Seq[Value]): Seq[StringValue] =
-    suggestions.flatMap(Value.asObject).flatMap(_.keys).map(StringValue.apply)
+  private def onlyKeys(suggestions: Set[Value]): Set[StringValue] =
+    suggestions.flatMap(Value.asObject).flatMap(_.keys).map(StringValue.apply).toSet
