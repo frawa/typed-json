@@ -94,21 +94,22 @@ const stateSchema = EditorState.create({
         bracketMatching(),
         closeBrackets(),
         typedJsonSchemaField,
-        EditorView.updateListener.of(update => {
-            if (update.docChanged) {
-                // view.dispatch({
-                //     effects: [schemaUpdate.of(update.state.field(typedJsonSchemaField))]
-                // })
-                view.setState(view.state.update({
-                    effects: [schemaUpdate.of(update.state.field(typedJsonSchemaField))]
-                }).state)
-            }
-        }),
         autocompletion(autocompleteConfig(typedJsonSchemaField)),
         linter(linterFun(typedJsonSchemaField)),
         // lintGutter(),
-        keymap.of(lintKeymap)
+        keymap.of(lintKeymap),
         // keymap.of(completionKeymap)
+        EditorView.updateListener.of(update => {
+            if (update.docChanged) {
+                // view.setState(view.state.update({
+                // effects: [schemaUpdate.of(update.state.field(typedJsonSchemaField))]
+                // }).state)
+                const transaction = view.state.update({
+                    effects: [schemaUpdate.of(update.state.field(typedJsonSchemaField))]
+                })
+                view.dispatch(transaction)
+            }
+        })
     ],
 });
 
@@ -187,7 +188,9 @@ view.setState(view.state.update({
 }).state);
 
 function replaceSchemaBy(value: string) {
-    const transaction = stateSchema.update({ changes: { from: 0, to: stateSchema.doc.length, insert: value } })
+    const transaction = viewSchema.state.update({
+        changes: { from: 0, to: viewSchema.state.doc.length, insert: value }
+    })
     viewSchema.dispatch(transaction)
 }
 
