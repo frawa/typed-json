@@ -31,21 +31,19 @@ class JawnParser extends Parser with OffsetParser:
     jawn.Parser.parseFromString(json)(valueFacade).toEither.swap.map(_.toString).swap
 
   override def parseWithOffset(json: String): Either[ParseError, Offset.Value] =
-    if json.isBlank() || json.trim().length() < 2 then Left(ParseError(0, "blank input", None))
-    else
-      val recoveringFacade = new RecoveringFacade(offsetValueFacade)
-      jawn.Parser
-        .parseFromString(json)(recoveringFacade)
-        .fold(
-          {
-            case ParseException(message, offset, _, _) =>
-              val recovered = recoveringFacade.recover(offset, NullValue(Offset(offset, offset)))
-              Left(ParseError(offset, message, Some(recovered)))
-            case ex: Throwable =>
-              Left(ParseError(0, "internal parsing error: " + ex.getMessage, None))
-          },
-          Right(_)
-        )
+    val recoveringFacade = new RecoveringFacade(offsetValueFacade)
+    jawn.Parser
+      .parseFromString(json)(recoveringFacade)
+      .fold(
+        {
+          case ParseException(message, offset, _, _) =>
+            val recovered = recoveringFacade.recover(offset, NullValue(Offset(offset, offset)))
+            Left(ParseError(offset, message, Some(recovered)))
+          case ex: Throwable =>
+            Left(ParseError(0, "internal parsing error: " + ex.getMessage, None))
+        },
+        Right(_)
+      )
 
   private val valueFacade: jawn.Facade[Value] = new jawn.Facade.SimpleFacade[Value]:
     override def jarray(vs: List[Value]): Value         = Value.ArrayValue(vs)
