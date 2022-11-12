@@ -74796,21 +74796,24 @@
             bracketMatching(),
             closeBrackets(),
             typedJsonSchemaField,
-            EditorView.updateListener.of(update => {
-                if (update.docChanged) {
-                    // view.dispatch({
-                    //     effects: [schemaUpdate.of(update.state.field(typedJsonSchemaField))]
-                    // })
-                    view.setState(view.state.update({
-                        effects: [schemaUpdate.of(update.state.field(typedJsonSchemaField))]
-                    }).state);
-                }
-            }),
             autocompletion(autocompleteConfig(typedJsonSchemaField)),
             linter(linterFun(typedJsonSchemaField)),
             // lintGutter(),
-            keymap.of(lintKeymap)
+            keymap.of(lintKeymap),
             // keymap.of(completionKeymap)
+            EditorView.updateListener.of(update => {
+                if (update.docChanged) {
+                    const pos = view.state.selection.mainIndex;
+                    const transaction = view.state.update({
+                        effects: [schemaUpdate.of(update.state.field(typedJsonSchemaField))],
+                        changes: [
+                            // noop triggers linter, but keeps caret
+                            { from: pos, to: pos + 1, insert: view.state.doc.slice(pos, pos + 1) },
+                        ]
+                    });
+                    view.dispatch(transaction);
+                }
+            })
         ],
     });
     function autocompleteConfig(field) {
@@ -74884,7 +74887,9 @@
         effects: [schemaUpdate.of(viewSchema.state.field(typedJsonSchemaField))]
     }).state);
     function replaceSchemaBy(value) {
-        const transaction = stateSchema.update({ changes: { from: 0, to: stateSchema.doc.length, insert: value } });
+        const transaction = viewSchema.state.update({
+            changes: { from: 0, to: viewSchema.state.doc.length, insert: value }
+        });
         viewSchema.dispatch(transaction);
     }
     (_a = document.querySelector("#sample-schema")) === null || _a === void 0 ? void 0 : _a.addEventListener("change", (e) => {
