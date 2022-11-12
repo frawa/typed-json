@@ -217,6 +217,18 @@ lazy val typedJsonJsExport = project
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }
   )
   .settings(
+    // from https://github.com/typelevel/jawn/blob/v1.4.0/build.sbt#L25
+    // fixes parsing blank or incomplete strings
+    scalaJSLinkerConfig ~= {
+      _.withSemantics(
+        _.withArrayIndexOutOfBounds(org.scalajs.linker.interface.CheckedBehavior.Compliant)
+          .withStringIndexOutOfBounds(org.scalajs.linker.interface.CheckedBehavior.Compliant)
+          // _.withAsInstanceOfs(org.scalajs.linker.interface.CheckedBehavior.Unchecked)
+          // .withArrayIndexOutOfBounds(org.scalajs.linker.interface.CheckedBehavior.Unchecked)
+      )
+    }
+  )
+  .settings(
     // TODO testing
     Test / test := {}
   )
