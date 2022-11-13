@@ -156,6 +156,16 @@ lazy val parserZio =
     .jsPlatform(sharedPlatformSettings)
     .dependsOn(parser)
 
+// see https://www.scala-js.org/doc/semantics.html
+// from https://github.com/typelevel/jawn/blob/v1.4.0/build.sbt#L25
+// fixes parsing blank or incomplete strings
+lazy val jsSettingsJawn = Seq(scalaJSLinkerConfig ~= {
+  _.withSemantics(
+    _.withArrayIndexOutOfBounds(org.scalajs.linker.interface.CheckedBehavior.Compliant)
+      .withStringIndexOutOfBounds(org.scalajs.linker.interface.CheckedBehavior.Compliant)
+  )
+})
+
 lazy val parserJawn =
   projectMatrix
     .in(file("parser-jawn"))
@@ -170,7 +180,7 @@ lazy val parserJawn =
       libraryDependencies += "org.typelevel" %%% "jawn-parser" % "1.3.1"
     )
     .jvmPlatform(sharedPlatformSettings)
-    .jsPlatform(sharedPlatformSettings)
+    .jsPlatform(sharedPlatformSettings, jsSettingsJawn)
     .dependsOn(parser)
 
 lazy val macros = project
@@ -214,18 +224,7 @@ lazy val typedJsonJsExport = project
   .settings(
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }
   )
-  .settings(
-    // from https://github.com/typelevel/jawn/blob/v1.4.0/build.sbt#L25
-    // fixes parsing blank or incomplete strings
-    scalaJSLinkerConfig ~= {
-      _.withSemantics(
-        _.withArrayIndexOutOfBounds(org.scalajs.linker.interface.CheckedBehavior.Compliant)
-          .withStringIndexOutOfBounds(org.scalajs.linker.interface.CheckedBehavior.Compliant)
-          // _.withAsInstanceOfs(org.scalajs.linker.interface.CheckedBehavior.Unchecked)
-          // .withArrayIndexOutOfBounds(org.scalajs.linker.interface.CheckedBehavior.Unchecked)
-      )
-    }
-  )
+  .settings(jsSettingsJawn)
   .settings(
     // TODO testing
     Test / test := {}

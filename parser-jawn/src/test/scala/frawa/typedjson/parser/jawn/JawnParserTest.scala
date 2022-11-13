@@ -44,4 +44,26 @@ class JawnParserTest extends FunSuite {
       Right(NumberValue(BigDecimal("98249283749234923498293171823948729348710298301928331")))
     )
   }
+
+  test("blank") {
+    // these crash JS runtime ...
+    // fixed using compliant linker options for typed-json-js-export
+    val expected = Left("org.typelevel.jawn.IncompleteParseException: exhausted input")
+    assertEquals(
+      Parser(" "),
+      expected
+    )
+    assertEquals(
+      Parser(""),
+      expected
+    )
+    assertEquals(
+      Parser("\""),
+      expected
+    )
+    assertEquals(
+      Parser("   [   "),
+      expected
+    )
+  }
 }

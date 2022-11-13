@@ -344,13 +344,13 @@ class JawnOffsetParserTest extends FunSuite {
     parser.parseWithOffset(json).map(OffsetParser.offsetAt(_)(at))
   }
 
-  test("blank".ignore) {
+  test("blank") {
     // these crash JS runtime ...
     // fixed using compliant linker options for typed-json-js-export
     val expected = Left(
       value = ParseError(
         offset = 0,
-        message = "blank input",
+        message = "internal parsing error: exhausted input",
         recoveredValue = None
       )
     )
