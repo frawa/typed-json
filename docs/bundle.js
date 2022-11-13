@@ -40594,9 +40594,9 @@
     $c_Lfrawa_typedjson_js_Marker.prototype.$js$exported$prop$severity__O = (function() {
       return this.Lfrawa_typedjson_js_Marker__f_severity
     });
-    Object.defineProperty($c_Lfrawa_typedjson_js_Marker.prototype, "end", {
+    Object.defineProperty($c_Lfrawa_typedjson_js_Marker.prototype, "start", {
       "get": (function() {
-        return this.$js$exported$prop$end__O()
+        return this.$js$exported$prop$start__O()
       }),
       "configurable": true
     });
@@ -40606,21 +40606,21 @@
       }),
       "configurable": true
     });
-    Object.defineProperty($c_Lfrawa_typedjson_js_Marker.prototype, "start", {
+    Object.defineProperty($c_Lfrawa_typedjson_js_Marker.prototype, "severity", {
       "get": (function() {
-        return this.$js$exported$prop$start__O()
+        return this.$js$exported$prop$severity__O()
+      }),
+      "configurable": true
+    });
+    Object.defineProperty($c_Lfrawa_typedjson_js_Marker.prototype, "end", {
+      "get": (function() {
+        return this.$js$exported$prop$end__O()
       }),
       "configurable": true
     });
     Object.defineProperty($c_Lfrawa_typedjson_js_Marker.prototype, "pointer", {
       "get": (function() {
         return this.$js$exported$prop$pointer__O()
-      }),
-      "configurable": true
-    });
-    Object.defineProperty($c_Lfrawa_typedjson_js_Marker.prototype, "severity", {
-      "get": (function() {
-        return this.$js$exported$prop$severity__O()
       }),
       "configurable": true
     });
@@ -40793,15 +40793,15 @@
     $c_Lfrawa_typedjson_js_Suggestions.prototype.$js$exported$prop$suggestions__O = (function() {
       return this.Lfrawa_typedjson_js_Suggestions__f_suggestions
     });
-    Object.defineProperty($c_Lfrawa_typedjson_js_Suggestions.prototype, "end", {
-      "get": (function() {
-        return this.$js$exported$prop$end__O()
-      }),
-      "configurable": true
-    });
     Object.defineProperty($c_Lfrawa_typedjson_js_Suggestions.prototype, "start", {
       "get": (function() {
         return this.$js$exported$prop$start__O()
+      }),
+      "configurable": true
+    });
+    Object.defineProperty($c_Lfrawa_typedjson_js_Suggestions.prototype, "end", {
+      "get": (function() {
+        return this.$js$exported$prop$end__O()
       }),
       "configurable": true
     });
@@ -41107,20 +41107,20 @@
     $c_Lfrawa_typedjson_js_TypedJson.prototype.$js$exported$meth$suggestAt__I__O = (function(offset) {
       return this.suggestAt__I__sjs_js_Array(offset)
     });
-    $c_Lfrawa_typedjson_js_TypedJson.prototype.markers = (function() {
-      return this.$js$exported$meth$markers__O()
-    });
     $c_Lfrawa_typedjson_js_TypedJson.prototype.withSchema = (function(arg) {
       var prep0 = $as_Lfrawa_typedjson_js_TypedJson(arg);
       return this.$js$exported$meth$withSchema__Lfrawa_typedjson_js_TypedJson__O(prep0)
     });
-    $c_Lfrawa_typedjson_js_TypedJson.prototype.suggestAt = (function(arg) {
-      var prep0 = $uI(arg);
-      return this.$js$exported$meth$suggestAt__I__O(prep0)
-    });
     $c_Lfrawa_typedjson_js_TypedJson.prototype.forValue = (function(arg) {
       var prep0 = $as_T(arg);
       return this.$js$exported$meth$forValue__T__O(prep0)
+    });
+    $c_Lfrawa_typedjson_js_TypedJson.prototype.markers = (function() {
+      return this.$js$exported$meth$markers__O()
+    });
+    $c_Lfrawa_typedjson_js_TypedJson.prototype.suggestAt = (function(arg) {
+      var prep0 = $uI(arg);
+      return this.$js$exported$meth$suggestAt__I__O(prep0)
     });
     function $as_Lfrawa_typedjson_js_TypedJson(obj) {
       return (((obj instanceof $c_Lfrawa_typedjson_js_TypedJson) || (obj === null)) ? obj : $throwClassCastException(obj, "frawa.typedjson.js.TypedJson"))
@@ -74915,6 +74915,26 @@
     "if": { "maxLength": 4 }
 }`);
                 break;
+            case 'all-of':
+                replaceSchemaBy(`{
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {"bar": {"type": "integer"}},
+            "required": ["bar"],
+            "allOf" : [
+                {
+                    "properties": {
+                        "foo": {"type": "string"}
+                    },
+                    "required": ["foo"]
+                },
+                {
+                    "properties": {
+                        "baz": {"type": "null"}
+                    },
+                    "required": ["baz"]
+                }
+            ]
+        }`);
         }
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
