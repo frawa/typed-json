@@ -218,6 +218,26 @@ document.querySelector<HTMLSelectElement>("#sample-schema")?.addEventListener("c
     "if": { "maxLength": 4 }
 }`)
             break;
+        case 'all-of':
+            replaceSchemaBy(`{
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {"bar": {"type": "integer"}},
+            "required": ["bar"],
+            "allOf" : [
+                {
+                    "properties": {
+                        "foo": {"type": "string"}
+                    },
+                    "required": ["foo"]
+                },
+                {
+                    "properties": {
+                        "baz": {"type": "null"}
+                    },
+                    "required": ["baz"]
+                }
+            ]
+        }`)
     }
 });
 
