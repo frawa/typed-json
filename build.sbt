@@ -93,7 +93,7 @@ lazy val strictScalacSettings = Seq(
 )
 
 lazy val sharedTestSettings = Seq(
-  libraryDependencies += "org.scalameta" %%% "munit" % "1.0.0-M6" % Test,
+  libraryDependencies += "org.scalameta" %%% "munit" % "1.0.0-M7" % Test,
   // Test / testOptions += Tests.Argument("+l", "-q", "--summary=0")
   // perferred to copy&paste expectations into tests:
   Test / testOptions += Tests.Argument("-q", "--summary=0")
