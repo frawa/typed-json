@@ -65,6 +65,11 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
     ("uuid.json", "uuid format") -> Set(
       "wrong length"
     ),
+    ("email.json", "validation of e-mail addresses") -> Set(
+      "a quoted string with a space in the local part is valid",
+      "an IPv4-address-literal after the @ is valid",
+      "an IPv6-address-literal after the @ is valid"
+    ),
     ("time.json", "validation of time strings") -> Set(
       "a valid time string with leap second, Zulu",
       "valid leap second, zero time-offset",
