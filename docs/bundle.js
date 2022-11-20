@@ -18877,11 +18877,11 @@
     $c_Lfrawa_typedjson_js_TypedJsonFactory$.prototype.$js$exported$meth$withMetaSchema__O = (function() {
       return this.withMetaSchema__Lfrawa_typedjson_js_TypedJson()
     });
-    $c_Lfrawa_typedjson_js_TypedJsonFactory$.prototype.withMetaSchema = (function() {
-      return this.$js$exported$meth$withMetaSchema__O()
-    });
     $c_Lfrawa_typedjson_js_TypedJsonFactory$.prototype.create = (function() {
       return this.$js$exported$meth$create__O()
+    });
+    $c_Lfrawa_typedjson_js_TypedJsonFactory$.prototype.withMetaSchema = (function() {
+      return this.$js$exported$meth$withMetaSchema__O()
     });
     var $d_Lfrawa_typedjson_js_TypedJsonFactory$ = new $TypeData().initClass({
       Lfrawa_typedjson_js_TypedJsonFactory$: 0
@@ -19052,7 +19052,7 @@
     }
     function $p_Lfrawa_typedjson_meta_MetaSchemas$__resolve202012__Ljava_net_URI__s_Option($thiz, relative) {
       var name = $m_Ljava_net_URI$().java$net$URI$$decodeComponent__T__T(relative.Ljava_net_URI__f__schemeSpecificPart);
-      var this$1 = $thiz.Lfrawa_typedjson_meta_MetaSchemas$__f_metaSchemas.file__T__s_Option((name + ".json"));
+      var this$1 = $thiz.Lfrawa_typedjson_meta_MetaSchemas$__f_metaSchemas.get__O__s_Option((name + ".json"));
       if (this$1.isEmpty__Z()) {
         return $m_s_None$()
       } else {
@@ -19067,1278 +19067,1258 @@
       this.Lfrawa_typedjson_meta_MetaSchemas$__f_metaSchemas = null;
       $n_Lfrawa_typedjson_meta_MetaSchemas$ = this;
       this.Lfrawa_typedjson_meta_MetaSchemas$__f_draft202012 = $m_Lfrawa_typedjson_util_UriUtil$().uri__T__Ljava_net_URI("https://json-schema.org/draft/2020-12/");
-      var this$943 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x377 = $m_sr_ScalaRunTime$();
-      var this$125 = $m_s_Predef$().s_Predef$__f_Map;
+      var this$928 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x375 = $m_sr_ScalaRunTime$();
-      var _2 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta");
-      var $$x374 = new $c_T2("$dynamicAnchor", _2);
-      var _2$1 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/schema");
-      var $$x373 = new $c_T2("$id", _2$1);
-      var this$65 = $m_s_Predef$().s_Predef$__f_Map;
+      var this$198 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x373 = $m_sr_ScalaRunTime$();
+      var this$43 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x371 = $m_sr_ScalaRunTime$();
-      var this$19 = $m_s_Predef$().s_Predef$__f_Map;
+      var this$6 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x369 = $m_sr_ScalaRunTime$();
-      var _2$2 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var $$x368 = new $c_T2("deprecated", _2$2);
-      var this$9 = $m_s_Predef$().s_Predef$__f_Map;
+      var _2 = new $c_Lfrawa_typedjson_parser_Value$StringValue("integer");
+      var $$x368 = new $c_T2("type", _2);
+      var this$3 = $m_s_package$().BigDecimal__s_math_BigDecimal$();
+      var value = this$3.exact__T__s_math_BigDecimal("0");
+      var _2$1 = new $c_Lfrawa_typedjson_parser_Value$NumberValue(value);
+      var elems = $$x369.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x368, new $c_T2("minimum", _2$1)]));
+      var properties = this$6.from__sc_IterableOnce__sci_Map(elems);
+      var _2$2 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties);
+      var $$x370 = new $c_T2("nonNegativeInteger", _2$2);
+      var this$14 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x366 = $m_sr_ScalaRunTime$();
-      var _2$3 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
-      var elems = $$x366.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$3)]));
-      var properties = this$9.from__sc_IterableOnce__sci_Map(elems);
-      var _2$4 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties);
-      var $$x367 = new $c_T2("additionalProperties", _2$4);
-      var this$12 = $m_s_Predef$().s_Predef$__f_Map;
-      var elems$1 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([]));
-      var properties$1 = this$12.from__sc_IterableOnce__sci_Map(elems$1);
+      var _2$3 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/nonNegativeInteger");
+      var $$x365 = new $c_T2("$ref", _2$3);
+      var this$11 = $m_s_package$().BigDecimal__s_math_BigDecimal$();
+      var value$1 = this$11.exact__T__s_math_BigDecimal("0");
+      var _2$4 = new $c_Lfrawa_typedjson_parser_Value$NumberValue(value$1);
+      var elems$1 = $$x366.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x365, new $c_T2("default", _2$4)]));
+      var properties$1 = this$14.from__sc_IterableOnce__sci_Map(elems$1);
       var _2$5 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$1);
-      var $$x365 = new $c_T2("default", _2$5);
-      var _2$6 = new $c_Lfrawa_typedjson_parser_Value$StringValue("object");
-      var $$x364 = new $c_T2("type", _2$6);
-      var _2$7 = new $c_Lfrawa_typedjson_parser_Value$StringValue("\"definitions\" has been replaced by \"$defs\".");
-      var elems$2 = $$x369.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x368, $$x367, $$x365, $$x364, new $c_T2("$comment", _2$7)]));
-      var properties$2 = this$19.from__sc_IterableOnce__sci_Map(elems$2);
-      var _2$8 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$2);
-      var $$x370 = new $c_T2("definitions", _2$8);
-      var this$44 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x362 = $m_sr_ScalaRunTime$();
-      var _2$9 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var $$x361 = new $c_T2("deprecated", _2$9);
-      var this$34 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x359 = $m_sr_ScalaRunTime$();
-      var $$x358 = $m_sr_ScalaRunTime$();
+      var $$x367 = new $c_T2("nonNegativeIntegerDefault0", _2$5);
       var this$26 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x356 = $m_sr_ScalaRunTime$();
-      var _2$10 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
-      var elems$3 = $$x356.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$10)]));
-      var properties$3 = this$26.from__sc_IterableOnce__sci_Map(elems$3);
-      var $$x357 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$3);
-      var this$30 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x355 = $m_sr_ScalaRunTime$();
-      var _2$11 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta/validation#/$defs/stringArray");
-      var elems$4 = $$x355.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$11)]));
-      var properties$4 = this$30.from__sc_IterableOnce__sci_Map(elems$4);
-      var items = $$x358.wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([$$x357, new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$4)]));
-      var _2$12 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items);
-      var elems$5 = $$x359.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("anyOf", _2$12)]));
-      var properties$5 = this$34.from__sc_IterableOnce__sci_Map(elems$5);
-      var _2$13 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$5);
-      var $$x360 = new $c_T2("additionalProperties", _2$13);
-      var this$37 = $m_s_Predef$().s_Predef$__f_Map;
-      var elems$6 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([]));
-      var properties$6 = this$37.from__sc_IterableOnce__sci_Map(elems$6);
-      var _2$14 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$6);
-      var $$x354 = new $c_T2("default", _2$14);
-      var _2$15 = new $c_Lfrawa_typedjson_parser_Value$StringValue("object");
-      var $$x353 = new $c_T2("type", _2$15);
-      var _2$16 = new $c_Lfrawa_typedjson_parser_Value$StringValue("\"dependencies\" has been split and replaced by \"dependentSchemas\" and \"dependentRequired\" in order to serve their differing semantics.");
-      var elems$7 = $$x362.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x361, $$x360, $$x354, $$x353, new $c_T2("$comment", _2$16)]));
-      var properties$7 = this$44.from__sc_IterableOnce__sci_Map(elems$7);
-      var _2$17 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$7);
-      var $$x363 = new $c_T2("dependencies", _2$17);
-      var this$53 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x351 = $m_sr_ScalaRunTime$();
-      var _2$18 = new $c_Lfrawa_typedjson_parser_Value$StringValue("\"$recursiveAnchor\" has been replaced by \"$dynamicAnchor\".");
-      var $$x350 = new $c_T2("$comment", _2$18);
-      var _2$19 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta/core#/$defs/anchorString");
-      var $$x349 = new $c_T2("$ref", _2$19);
-      var _2$20 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var elems$8 = $$x351.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x350, $$x349, new $c_T2("deprecated", _2$20)]));
-      var properties$8 = this$53.from__sc_IterableOnce__sci_Map(elems$8);
-      var _2$21 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$8);
-      var $$x352 = new $c_T2("$recursiveAnchor", _2$21);
-      var this$62 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x363 = $m_sr_ScalaRunTime$();
+      var items = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("array"), new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean"), new $c_Lfrawa_typedjson_parser_Value$StringValue("integer"), new $c_Lfrawa_typedjson_parser_Value$StringValue("null"), new $c_Lfrawa_typedjson_parser_Value$StringValue("number"), new $c_Lfrawa_typedjson_parser_Value$StringValue("object"), new $c_Lfrawa_typedjson_parser_Value$StringValue("string")]));
+      var _2$6 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items);
+      var elems$2 = $$x363.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("enum", _2$6)]));
+      var properties$2 = this$26.from__sc_IterableOnce__sci_Map(elems$2);
+      var _2$7 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$2);
+      var $$x364 = new $c_T2("simpleTypes", _2$7);
+      var this$40 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x362 = $m_sr_ScalaRunTime$();
+      var _2$8 = new $c_Lfrawa_typedjson_parser_Value$StringValue("array");
+      var $$x361 = new $c_T2("type", _2$8);
+      var this$33 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x359 = $m_sr_ScalaRunTime$();
+      var _2$9 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
+      var elems$3 = $$x359.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$9)]));
+      var properties$3 = this$33.from__sc_IterableOnce__sci_Map(elems$3);
+      var _2$10 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$3);
+      var $$x360 = new $c_T2("items", _2$10);
+      var _2$11 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var $$x358 = new $c_T2("uniqueItems", _2$11);
+      var items$1 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([]));
+      var _2$12 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$1);
+      var elems$4 = $$x362.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x361, $$x360, $$x358, new $c_T2("default", _2$12)]));
+      var properties$4 = this$40.from__sc_IterableOnce__sci_Map(elems$4);
+      var _2$13 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$4);
+      var elems$5 = $$x371.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x370, $$x367, $$x364, new $c_T2("stringArray", _2$13)]));
+      var properties$5 = this$43.from__sc_IterableOnce__sci_Map(elems$5);
+      var _2$14 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$5);
+      var $$x372 = new $c_T2("$defs", _2$14);
+      var _2$15 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta");
+      var $$x357 = new $c_T2("$dynamicAnchor", _2$15);
+      var _2$16 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/meta/validation");
+      var $$x356 = new $c_T2("$id", _2$16);
+      var this$182 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x354 = $m_sr_ScalaRunTime$();
+      var this$52 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x352 = $m_sr_ScalaRunTime$();
+      var _2$17 = new $c_Lfrawa_typedjson_parser_Value$StringValue("number");
+      var elems$6 = $$x352.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$17)]));
+      var properties$6 = this$52.from__sc_IterableOnce__sci_Map(elems$6);
+      var _2$18 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$6);
+      var $$x353 = new $c_T2("exclusiveMaximum", _2$18);
+      var this$57 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x350 = $m_sr_ScalaRunTime$();
+      var _2$19 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/nonNegativeInteger");
+      var elems$7 = $$x350.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$19)]));
+      var properties$7 = this$57.from__sc_IterableOnce__sci_Map(elems$7);
+      var _2$20 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$7);
+      var $$x351 = new $c_T2("maxContains", _2$20);
+      var this$64 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x348 = $m_sr_ScalaRunTime$();
-      var _2$22 = new $c_Lfrawa_typedjson_parser_Value$StringValue("\"$recursiveRef\" has been replaced by \"$dynamicRef\".");
-      var $$x347 = new $c_T2("$comment", _2$22);
-      var _2$23 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta/core#/$defs/uriReferenceString");
-      var $$x346 = new $c_T2("$ref", _2$23);
-      var _2$24 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var elems$9 = $$x348.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x347, $$x346, new $c_T2("deprecated", _2$24)]));
-      var properties$9 = this$62.from__sc_IterableOnce__sci_Map(elems$9);
+      var _2$21 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
+      var $$x347 = new $c_T2("type", _2$21);
+      var _2$22 = new $c_Lfrawa_typedjson_parser_Value$StringValue("regex");
+      var elems$8 = $$x348.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x347, new $c_T2("format", _2$22)]));
+      var properties$8 = this$64.from__sc_IterableOnce__sci_Map(elems$8);
+      var _2$23 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$8);
+      var $$x349 = new $c_T2("pattern", _2$23);
+      var this$69 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x345 = $m_sr_ScalaRunTime$();
+      var _2$24 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/nonNegativeInteger");
+      var elems$9 = $$x345.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$24)]));
+      var properties$9 = this$69.from__sc_IterableOnce__sci_Map(elems$9);
       var _2$25 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$9);
-      var elems$10 = $$x371.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x370, $$x363, $$x352, new $c_T2("$recursiveRef", _2$25)]));
-      var properties$10 = this$65.from__sc_IterableOnce__sci_Map(elems$10);
-      var _2$26 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$10);
-      var $$x372 = new $c_T2("properties", _2$26);
+      var $$x346 = new $c_T2("maxProperties", _2$25);
+      var this$77 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x343 = $m_sr_ScalaRunTime$();
+      var _2$26 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/nonNegativeInteger");
+      var $$x342 = new $c_T2("$ref", _2$26);
+      var this$74 = $m_s_package$().BigDecimal__s_math_BigDecimal$();
+      var value$2 = this$74.exact__T__s_math_BigDecimal("1");
+      var _2$27 = new $c_Lfrawa_typedjson_parser_Value$NumberValue(value$2);
+      var elems$10 = $$x343.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x342, new $c_T2("default", _2$27)]));
+      var properties$10 = this$77.from__sc_IterableOnce__sci_Map(elems$10);
+      var _2$28 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$10);
+      var $$x344 = new $c_T2("minContains", _2$28);
       var this$82 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x344 = $m_sr_ScalaRunTime$();
-      var _2$27 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var $$x343 = new $c_T2("https://json-schema.org/draft/2020-12/vocab/applicator", _2$27);
-      var _2$28 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var $$x342 = new $c_T2("https://json-schema.org/draft/2020-12/vocab/content", _2$28);
-      var _2$29 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var $$x341 = new $c_T2("https://json-schema.org/draft/2020-12/vocab/unevaluated", _2$29);
-      var _2$30 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var $$x340 = new $c_T2("https://json-schema.org/draft/2020-12/vocab/meta-data", _2$30);
-      var _2$31 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var $$x339 = new $c_T2("https://json-schema.org/draft/2020-12/vocab/core", _2$31);
-      var _2$32 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var $$x338 = new $c_T2("https://json-schema.org/draft/2020-12/vocab/format-annotation", _2$32);
-      var _2$33 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var elems$11 = $$x344.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x343, $$x342, $$x341, $$x340, $$x339, $$x338, new $c_T2("https://json-schema.org/draft/2020-12/vocab/validation", _2$33)]));
+      var $$x340 = $m_sr_ScalaRunTime$();
+      var _2$29 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/nonNegativeInteger");
+      var elems$11 = $$x340.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$29)]));
       var properties$11 = this$82.from__sc_IterableOnce__sci_Map(elems$11);
-      var _2$34 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$11);
-      var $$x345 = new $c_T2("$vocabulary", _2$34);
-      var $$x336 = $m_sr_ScalaRunTime$();
-      var this$87 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x334 = $m_sr_ScalaRunTime$();
-      var _2$35 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta/core");
-      var elems$12 = $$x334.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$35)]));
-      var properties$12 = this$87.from__sc_IterableOnce__sci_Map(elems$12);
-      var $$x335 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$12);
-      var this$91 = $m_s_Predef$().s_Predef$__f_Map;
+      var _2$30 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$11);
+      var $$x341 = new $c_T2("maxItems", _2$30);
+      var _2$31 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var $$x339 = new $c_T2("const", _2$31);
+      var this$89 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x337 = $m_sr_ScalaRunTime$();
+      var _2$32 = new $c_Lfrawa_typedjson_parser_Value$StringValue("number");
+      var elems$12 = $$x337.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$32)]));
+      var properties$12 = this$89.from__sc_IterableOnce__sci_Map(elems$12);
+      var _2$33 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$12);
+      var $$x338 = new $c_T2("exclusiveMinimum", _2$33);
+      var this$96 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x335 = $m_sr_ScalaRunTime$();
+      var _2$34 = new $c_Lfrawa_typedjson_parser_Value$StringValue("array");
+      var $$x334 = new $c_T2("type", _2$34);
+      var _2$35 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var elems$13 = $$x335.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x334, new $c_T2("items", _2$35)]));
+      var properties$13 = this$96.from__sc_IterableOnce__sci_Map(elems$13);
+      var _2$36 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$13);
+      var $$x336 = new $c_T2("enum", _2$36);
+      var this$101 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x332 = $m_sr_ScalaRunTime$();
-      var _2$36 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta/applicator");
-      var elems$13 = $$x332.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$36)]));
-      var properties$13 = this$91.from__sc_IterableOnce__sci_Map(elems$13);
-      var $$x333 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$13);
-      var this$95 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x330 = $m_sr_ScalaRunTime$();
-      var _2$37 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta/unevaluated");
-      var elems$14 = $$x330.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$37)]));
-      var properties$14 = this$95.from__sc_IterableOnce__sci_Map(elems$14);
-      var $$x331 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$14);
-      var this$99 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x328 = $m_sr_ScalaRunTime$();
-      var _2$38 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta/validation");
-      var elems$15 = $$x328.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$38)]));
-      var properties$15 = this$99.from__sc_IterableOnce__sci_Map(elems$15);
-      var $$x329 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$15);
-      var this$103 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x326 = $m_sr_ScalaRunTime$();
-      var _2$39 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta/meta-data");
-      var elems$16 = $$x326.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$39)]));
-      var properties$16 = this$103.from__sc_IterableOnce__sci_Map(elems$16);
-      var $$x327 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$16);
-      var this$107 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x324 = $m_sr_ScalaRunTime$();
-      var _2$40 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta/format-annotation");
-      var elems$17 = $$x324.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$40)]));
-      var properties$17 = this$107.from__sc_IterableOnce__sci_Map(elems$17);
-      var $$x325 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$17);
+      var _2$37 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/nonNegativeIntegerDefault0");
+      var elems$14 = $$x332.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$37)]));
+      var properties$14 = this$101.from__sc_IterableOnce__sci_Map(elems$14);
+      var _2$38 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$14);
+      var $$x333 = new $c_T2("minItems", _2$38);
       var this$111 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x323 = $m_sr_ScalaRunTime$();
-      var _2$41 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta/content");
-      var elems$18 = $$x323.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$41)]));
-      var properties$18 = this$111.from__sc_IterableOnce__sci_Map(elems$18);
-      var items$1 = $$x336.wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([$$x335, $$x333, $$x331, $$x329, $$x327, $$x325, new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$18)]));
-      var _2$42 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$1);
-      var $$x337 = new $c_T2("allOf", _2$42);
-      var _2$43 = new $c_Lfrawa_typedjson_parser_Value$StringValue("Core and Validation specifications meta-schema");
-      var $$x322 = new $c_T2("title", _2$43);
-      var items$2 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("object"), new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean")]));
-      var _2$44 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$2);
-      var $$x321 = new $c_T2("type", _2$44);
-      var _2$45 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/schema");
-      var $$x320 = new $c_T2("$schema", _2$45);
-      var _2$46 = new $c_Lfrawa_typedjson_parser_Value$StringValue("This meta-schema also defines keywords that have appeared in previous drafts in order to prevent incompatible extensions as they remain in common use.");
-      var elems$19 = $$x375.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x374, $$x373, $$x372, $$x345, $$x337, $$x322, $$x321, $$x320, new $c_T2("$comment", _2$46)]));
-      var properties$19 = this$125.from__sc_IterableOnce__sci_Map(elems$19);
-      var content = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$19);
-      var _2$47 = new $c_Lfrawa_typedjson_foldercontents_FolderContents$File(content);
-      var $$x376 = new $c_T2("schema.json", _2$47);
-      var this$314 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x318 = $m_sr_ScalaRunTime$();
-      var this$310 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x317 = $m_sr_ScalaRunTime$();
-      var this$283 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x315 = $m_sr_ScalaRunTime$();
-      var this$131 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x313 = $m_sr_ScalaRunTime$();
-      var _2$48 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/outputUnit");
-      var elems$20 = $$x313.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$48)]));
-      var properties$20 = this$131.from__sc_IterableOnce__sci_Map(elems$20);
-      var _2$49 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$20);
-      var $$x314 = new $c_T2("verbose", _2$49);
-      var this$145 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x311 = $m_sr_ScalaRunTime$();
+      var $$x330 = $m_sr_ScalaRunTime$();
+      var _2$39 = new $c_Lfrawa_typedjson_parser_Value$StringValue("object");
+      var $$x329 = new $c_T2("type", _2$39);
+      var this$108 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x328 = $m_sr_ScalaRunTime$();
+      var _2$40 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/stringArray");
+      var elems$15 = $$x328.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$40)]));
+      var properties$15 = this$108.from__sc_IterableOnce__sci_Map(elems$15);
+      var _2$41 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$15);
+      var elems$16 = $$x330.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x329, new $c_T2("additionalProperties", _2$41)]));
+      var properties$16 = this$111.from__sc_IterableOnce__sci_Map(elems$16);
+      var _2$42 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$16);
+      var $$x331 = new $c_T2("dependentRequired", _2$42);
+      var this$116 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x326 = $m_sr_ScalaRunTime$();
+      var _2$43 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/nonNegativeIntegerDefault0");
+      var elems$17 = $$x326.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$43)]));
+      var properties$17 = this$116.from__sc_IterableOnce__sci_Map(elems$17);
+      var _2$44 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$17);
+      var $$x327 = new $c_T2("minLength", _2$44);
+      var this$121 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x324 = $m_sr_ScalaRunTime$();
+      var _2$45 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/nonNegativeInteger");
+      var elems$18 = $$x324.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$45)]));
+      var properties$18 = this$121.from__sc_IterableOnce__sci_Map(elems$18);
+      var _2$46 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$18);
+      var $$x325 = new $c_T2("maxLength", _2$46);
+      var this$126 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x322 = $m_sr_ScalaRunTime$();
+      var _2$47 = new $c_Lfrawa_typedjson_parser_Value$StringValue("number");
+      var elems$19 = $$x322.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$47)]));
+      var properties$19 = this$126.from__sc_IterableOnce__sci_Map(elems$19);
+      var _2$48 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$19);
+      var $$x323 = new $c_T2("maximum", _2$48);
+      var this$134 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x320 = $m_sr_ScalaRunTime$();
+      var _2$49 = new $c_Lfrawa_typedjson_parser_Value$StringValue("number");
+      var $$x319 = new $c_T2("type", _2$49);
+      var this$131 = $m_s_package$().BigDecimal__s_math_BigDecimal$();
+      var value$3 = this$131.exact__T__s_math_BigDecimal("0");
+      var _2$50 = new $c_Lfrawa_typedjson_parser_Value$NumberValue(value$3);
+      var elems$20 = $$x320.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x319, new $c_T2("exclusiveMinimum", _2$50)]));
+      var properties$20 = this$134.from__sc_IterableOnce__sci_Map(elems$20);
+      var _2$51 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$20);
+      var $$x321 = new $c_T2("multipleOf", _2$51);
       var this$139 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x309 = $m_sr_ScalaRunTime$();
-      var this$136 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x308 = $m_sr_ScalaRunTime$();
-      var _2$50 = new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean");
-      var elems$21 = $$x308.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$50)]));
-      var properties$21 = this$136.from__sc_IterableOnce__sci_Map(elems$21);
-      var _2$51 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$21);
-      var elems$22 = $$x309.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("valid", _2$51)]));
-      var properties$22 = this$139.from__sc_IterableOnce__sci_Map(elems$22);
-      var _2$52 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$22);
-      var $$x310 = new $c_T2("properties", _2$52);
-      var items$3 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("valid")]));
-      var _2$53 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$3);
-      var elems$23 = $$x311.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x310, new $c_T2("required", _2$53)]));
-      var properties$23 = this$145.from__sc_IterableOnce__sci_Map(elems$23);
-      var _2$54 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$23);
-      var $$x312 = new $c_T2("flag", _2$54);
-      var this$150 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x306 = $m_sr_ScalaRunTime$();
-      var _2$55 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/outputUnit");
-      var elems$24 = $$x306.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$55)]));
-      var properties$24 = this$150.from__sc_IterableOnce__sci_Map(elems$24);
-      var _2$56 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$24);
-      var $$x307 = new $c_T2("detailed", _2$56);
-      var this$155 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x304 = $m_sr_ScalaRunTime$();
-      var _2$57 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/outputUnit");
-      var elems$25 = $$x304.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$57)]));
-      var properties$25 = this$155.from__sc_IterableOnce__sci_Map(elems$25);
-      var _2$58 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$25);
-      var $$x305 = new $c_T2("basic", _2$58);
-      var this$270 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x302 = $m_sr_ScalaRunTime$();
-      var this$199 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x300 = $m_sr_ScalaRunTime$();
+      var $$x317 = $m_sr_ScalaRunTime$();
+      var _2$52 = new $c_Lfrawa_typedjson_parser_Value$StringValue("number");
+      var elems$21 = $$x317.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$52)]));
+      var properties$21 = this$139.from__sc_IterableOnce__sci_Map(elems$21);
+      var _2$53 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$21);
+      var $$x318 = new $c_T2("minimum", _2$53);
       var this$162 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x298 = $m_sr_ScalaRunTime$();
-      var _2$59 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
-      var $$x297 = new $c_T2("type", _2$59);
-      var _2$60 = new $c_Lfrawa_typedjson_parser_Value$StringValue("json-pointer");
-      var elems$26 = $$x298.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x297, new $c_T2("format", _2$60)]));
-      var properties$26 = this$162.from__sc_IterableOnce__sci_Map(elems$26);
-      var _2$61 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$26);
-      var $$x299 = new $c_T2("instanceLocation", _2$61);
+      var $$x315 = $m_sr_ScalaRunTime$();
+      var $$x314 = $m_sr_ScalaRunTime$();
+      var this$144 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x312 = $m_sr_ScalaRunTime$();
+      var _2$54 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/simpleTypes");
+      var elems$22 = $$x312.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$54)]));
+      var properties$22 = this$144.from__sc_IterableOnce__sci_Map(elems$22);
+      var $$x313 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$22);
+      var this$158 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x311 = $m_sr_ScalaRunTime$();
+      var _2$55 = new $c_Lfrawa_typedjson_parser_Value$StringValue("array");
+      var $$x310 = new $c_T2("type", _2$55);
+      var this$150 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x308 = $m_sr_ScalaRunTime$();
+      var _2$56 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/simpleTypes");
+      var elems$23 = $$x308.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$56)]));
+      var properties$23 = this$150.from__sc_IterableOnce__sci_Map(elems$23);
+      var _2$57 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$23);
+      var $$x309 = new $c_T2("items", _2$57);
+      var this$153 = $m_s_package$().BigDecimal__s_math_BigDecimal$();
+      var value$4 = this$153.exact__T__s_math_BigDecimal("1");
+      var _2$58 = new $c_Lfrawa_typedjson_parser_Value$NumberValue(value$4);
+      var $$x307 = new $c_T2("minItems", _2$58);
+      var _2$59 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var elems$24 = $$x311.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x310, $$x309, $$x307, new $c_T2("uniqueItems", _2$59)]));
+      var properties$24 = this$158.from__sc_IterableOnce__sci_Map(elems$24);
+      var items$2 = $$x314.wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([$$x313, new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$24)]));
+      var _2$60 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$2);
+      var elems$25 = $$x315.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("anyOf", _2$60)]));
+      var properties$25 = this$162.from__sc_IterableOnce__sci_Map(elems$25);
+      var _2$61 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$25);
+      var $$x316 = new $c_T2("type", _2$61);
       var this$167 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x305 = $m_sr_ScalaRunTime$();
+      var _2$62 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/stringArray");
+      var elems$26 = $$x305.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$62)]));
+      var properties$26 = this$167.from__sc_IterableOnce__sci_Map(elems$26);
+      var _2$63 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$26);
+      var $$x306 = new $c_T2("required", _2$63);
+      var this$174 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x303 = $m_sr_ScalaRunTime$();
+      var _2$64 = new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean");
+      var $$x302 = new $c_T2("type", _2$64);
+      var _2$65 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(false);
+      var elems$27 = $$x303.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x302, new $c_T2("default", _2$65)]));
+      var properties$27 = this$174.from__sc_IterableOnce__sci_Map(elems$27);
+      var _2$66 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$27);
+      var $$x304 = new $c_T2("uniqueItems", _2$66);
+      var this$179 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x301 = $m_sr_ScalaRunTime$();
+      var _2$67 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/nonNegativeIntegerDefault0");
+      var elems$28 = $$x301.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$67)]));
+      var properties$28 = this$179.from__sc_IterableOnce__sci_Map(elems$28);
+      var _2$68 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$28);
+      var elems$29 = $$x354.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x353, $$x351, $$x349, $$x346, $$x344, $$x341, $$x339, $$x338, $$x336, $$x333, $$x331, $$x327, $$x325, $$x323, $$x321, $$x318, $$x316, $$x306, $$x304, new $c_T2("minProperties", _2$68)]));
+      var properties$29 = this$182.from__sc_IterableOnce__sci_Map(elems$29);
+      var _2$69 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$29);
+      var $$x355 = new $c_T2("properties", _2$69);
+      var this$187 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x299 = $m_sr_ScalaRunTime$();
+      var _2$70 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var elems$30 = $$x299.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("https://json-schema.org/draft/2020-12/vocab/validation", _2$70)]));
+      var properties$30 = this$187.from__sc_IterableOnce__sci_Map(elems$30);
+      var _2$71 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$30);
+      var $$x300 = new $c_T2("$vocabulary", _2$71);
+      var _2$72 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/schema");
+      var $$x298 = new $c_T2("$schema", _2$72);
+      var _2$73 = new $c_Lfrawa_typedjson_parser_Value$StringValue("Validation vocabulary meta-schema");
+      var $$x297 = new $c_T2("title", _2$73);
+      var items$3 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("object"), new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean")]));
+      var _2$74 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$3);
+      var elems$31 = $$x373.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x372, $$x357, $$x356, $$x355, $$x300, $$x298, $$x297, new $c_T2("type", _2$74)]));
+      var properties$31 = this$198.from__sc_IterableOnce__sci_Map(elems$31);
+      var _2$75 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$31);
+      var $$x374 = new $c_T2("meta/validation.json", _2$75);
+      var this$261 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x295 = $m_sr_ScalaRunTime$();
-      var _2$62 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/outputUnitArray");
-      var elems$27 = $$x295.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$62)]));
-      var properties$27 = this$167.from__sc_IterableOnce__sci_Map(elems$27);
-      var _2$63 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$27);
-      var $$x296 = new $c_T2("annotations", _2$63);
-      var this$172 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x293 = $m_sr_ScalaRunTime$();
-      var _2$64 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
-      var elems$28 = $$x293.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$64)]));
-      var properties$28 = this$172.from__sc_IterableOnce__sci_Map(elems$28);
-      var _2$65 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$28);
-      var $$x294 = new $c_T2("error", _2$65);
-      var this$177 = $m_s_Predef$().s_Predef$__f_Map;
+      var _2$76 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta");
+      var $$x294 = new $c_T2("$dynamicAnchor", _2$76);
+      var _2$77 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/meta/meta-data");
+      var $$x293 = new $c_T2("$id", _2$77);
+      var this$245 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x291 = $m_sr_ScalaRunTime$();
-      var _2$66 = new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean");
-      var elems$29 = $$x291.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$66)]));
-      var properties$29 = this$177.from__sc_IterableOnce__sci_Map(elems$29);
-      var _2$67 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$29);
-      var $$x292 = new $c_T2("valid", _2$67);
-      var this$184 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x289 = $m_sr_ScalaRunTime$();
-      var _2$68 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
-      var $$x288 = new $c_T2("type", _2$68);
-      var _2$69 = new $c_Lfrawa_typedjson_parser_Value$StringValue("uri");
-      var elems$30 = $$x289.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x288, new $c_T2("format", _2$69)]));
-      var properties$30 = this$184.from__sc_IterableOnce__sci_Map(elems$30);
-      var _2$70 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$30);
-      var $$x290 = new $c_T2("absoluteKeywordLocation", _2$70);
-      var this$191 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x286 = $m_sr_ScalaRunTime$();
-      var _2$71 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
-      var $$x285 = new $c_T2("type", _2$71);
-      var _2$72 = new $c_Lfrawa_typedjson_parser_Value$StringValue("json-pointer");
-      var elems$31 = $$x286.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x285, new $c_T2("format", _2$72)]));
-      var properties$31 = this$191.from__sc_IterableOnce__sci_Map(elems$31);
-      var _2$73 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$31);
-      var $$x287 = new $c_T2("keywordLocation", _2$73);
-      var this$196 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x284 = $m_sr_ScalaRunTime$();
-      var _2$74 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/outputUnitArray");
-      var elems$32 = $$x284.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$74)]));
-      var properties$32 = this$196.from__sc_IterableOnce__sci_Map(elems$32);
-      var _2$75 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$32);
-      var elems$33 = $$x300.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x299, $$x296, $$x294, $$x292, $$x290, $$x287, new $c_T2("errors", _2$75)]));
-      var properties$33 = this$199.from__sc_IterableOnce__sci_Map(elems$33);
-      var _2$76 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$33);
-      var $$x301 = new $c_T2("properties", _2$76);
-      var items$4 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("valid"), new $c_Lfrawa_typedjson_parser_Value$StringValue("keywordLocation"), new $c_Lfrawa_typedjson_parser_Value$StringValue("instanceLocation")]));
-      var _2$77 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$4);
-      var $$x283 = new $c_T2("required", _2$77);
-      var $$x282 = $m_sr_ScalaRunTime$();
-      var this$233 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x280 = $m_sr_ScalaRunTime$();
-      var this$215 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x278 = $m_sr_ScalaRunTime$();
-      var this$212 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x277 = $m_sr_ScalaRunTime$();
       var this$209 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x276 = $m_sr_ScalaRunTime$();
-      var _2$78 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(false);
-      var elems$34 = $$x276.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("const", _2$78)]));
-      var properties$34 = this$209.from__sc_IterableOnce__sci_Map(elems$34);
-      var _2$79 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$34);
-      var elems$35 = $$x277.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("valid", _2$79)]));
-      var properties$35 = this$212.from__sc_IterableOnce__sci_Map(elems$35);
-      var _2$80 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$35);
-      var elems$36 = $$x278.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("properties", _2$80)]));
-      var properties$36 = this$215.from__sc_IterableOnce__sci_Map(elems$36);
-      var _2$81 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$36);
-      var $$x279 = new $c_T2("if", _2$81);
-      var this$230 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x275 = $m_sr_ScalaRunTime$();
-      var $$x274 = $m_sr_ScalaRunTime$();
+      var $$x289 = $m_sr_ScalaRunTime$();
+      var _2$78 = new $c_Lfrawa_typedjson_parser_Value$StringValue("array");
+      var $$x288 = new $c_T2("type", _2$78);
+      var _2$79 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var elems$32 = $$x289.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x288, new $c_T2("items", _2$79)]));
+      var properties$32 = this$209.from__sc_IterableOnce__sci_Map(elems$32);
+      var _2$80 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$32);
+      var $$x290 = new $c_T2("examples", _2$80);
+      var this$216 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x286 = $m_sr_ScalaRunTime$();
+      var _2$81 = new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean");
+      var $$x285 = new $c_T2("type", _2$81);
+      var _2$82 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(false);
+      var elems$33 = $$x286.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x285, new $c_T2("default", _2$82)]));
+      var properties$33 = this$216.from__sc_IterableOnce__sci_Map(elems$33);
+      var _2$83 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$33);
+      var $$x287 = new $c_T2("readOnly", _2$83);
       var this$221 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x272 = $m_sr_ScalaRunTime$();
-      var items$5 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("error")]));
-      var _2$82 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$5);
-      var elems$37 = $$x272.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("required", _2$82)]));
-      var properties$37 = this$221.from__sc_IterableOnce__sci_Map(elems$37);
-      var $$x273 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$37);
-      var this$226 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x271 = $m_sr_ScalaRunTime$();
-      var items$6 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("errors")]));
-      var _2$83 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$6);
-      var elems$38 = $$x271.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("required", _2$83)]));
-      var properties$38 = this$226.from__sc_IterableOnce__sci_Map(elems$38);
-      var items$7 = $$x274.wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([$$x273, new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$38)]));
-      var _2$84 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$7);
-      var elems$39 = $$x275.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("anyOf", _2$84)]));
-      var properties$39 = this$230.from__sc_IterableOnce__sci_Map(elems$39);
-      var _2$85 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$39);
-      var elems$40 = $$x280.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x279, new $c_T2("then", _2$85)]));
-      var properties$40 = this$233.from__sc_IterableOnce__sci_Map(elems$40);
-      var $$x281 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$40);
-      var this$266 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x270 = $m_sr_ScalaRunTime$();
-      var this$257 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x268 = $m_sr_ScalaRunTime$();
-      var $$x267 = $m_sr_ScalaRunTime$();
-      var this$243 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x265 = $m_sr_ScalaRunTime$();
-      var this$240 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x264 = $m_sr_ScalaRunTime$();
-      var this$237 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x263 = $m_sr_ScalaRunTime$();
-      var _2$86 = new $c_Lfrawa_typedjson_parser_Value$StringValue("/\\$ref/");
-      var elems$41 = $$x263.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("pattern", _2$86)]));
-      var properties$41 = this$237.from__sc_IterableOnce__sci_Map(elems$41);
-      var _2$87 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$41);
-      var elems$42 = $$x264.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("keywordLocation", _2$87)]));
-      var properties$42 = this$240.from__sc_IterableOnce__sci_Map(elems$42);
-      var _2$88 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$42);
-      var elems$43 = $$x265.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("properties", _2$88)]));
-      var properties$43 = this$243.from__sc_IterableOnce__sci_Map(elems$43);
-      var $$x266 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$43);
-      var this$253 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x262 = $m_sr_ScalaRunTime$();
+      var $$x283 = $m_sr_ScalaRunTime$();
+      var _2$84 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
+      var elems$34 = $$x283.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$84)]));
+      var properties$34 = this$221.from__sc_IterableOnce__sci_Map(elems$34);
+      var _2$85 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$34);
+      var $$x284 = new $c_T2("description", _2$85);
+      var this$228 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x281 = $m_sr_ScalaRunTime$();
+      var _2$86 = new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean");
+      var $$x280 = new $c_T2("type", _2$86);
+      var _2$87 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(false);
+      var elems$35 = $$x281.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x280, new $c_T2("default", _2$87)]));
+      var properties$35 = this$228.from__sc_IterableOnce__sci_Map(elems$35);
+      var _2$88 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$35);
+      var $$x282 = new $c_T2("deprecated", _2$88);
+      var this$235 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x278 = $m_sr_ScalaRunTime$();
+      var _2$89 = new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean");
+      var $$x277 = new $c_T2("type", _2$89);
+      var _2$90 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(false);
+      var elems$36 = $$x278.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x277, new $c_T2("default", _2$90)]));
+      var properties$36 = this$235.from__sc_IterableOnce__sci_Map(elems$36);
+      var _2$91 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$36);
+      var $$x279 = new $c_T2("writeOnly", _2$91);
+      var _2$92 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var $$x276 = new $c_T2("default", _2$92);
+      var this$242 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x275 = $m_sr_ScalaRunTime$();
+      var _2$93 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
+      var elems$37 = $$x275.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$93)]));
+      var properties$37 = this$242.from__sc_IterableOnce__sci_Map(elems$37);
+      var _2$94 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$37);
+      var elems$38 = $$x291.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x290, $$x287, $$x284, $$x282, $$x279, $$x276, new $c_T2("title", _2$94)]));
+      var properties$38 = this$245.from__sc_IterableOnce__sci_Map(elems$38);
+      var _2$95 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$38);
+      var $$x292 = new $c_T2("properties", _2$95);
       var this$250 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x261 = $m_sr_ScalaRunTime$();
-      var this$247 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x273 = $m_sr_ScalaRunTime$();
+      var _2$96 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var elems$39 = $$x273.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("https://json-schema.org/draft/2020-12/vocab/meta-data", _2$96)]));
+      var properties$39 = this$250.from__sc_IterableOnce__sci_Map(elems$39);
+      var _2$97 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$39);
+      var $$x274 = new $c_T2("$vocabulary", _2$97);
+      var _2$98 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/schema");
+      var $$x272 = new $c_T2("$schema", _2$98);
+      var _2$99 = new $c_Lfrawa_typedjson_parser_Value$StringValue("Meta-data vocabulary meta-schema");
+      var $$x271 = new $c_T2("title", _2$99);
+      var items$4 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("object"), new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean")]));
+      var _2$100 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$4);
+      var elems$40 = $$x295.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x294, $$x293, $$x292, $$x274, $$x272, $$x271, new $c_T2("type", _2$100)]));
+      var properties$40 = this$261.from__sc_IterableOnce__sci_Map(elems$40);
+      var _2$101 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$40);
+      var $$x296 = new $c_T2("meta/meta-data.json", _2$101);
+      var this$388 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x269 = $m_sr_ScalaRunTime$();
+      var _2$102 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta");
+      var $$x268 = new $c_T2("$dynamicAnchor", _2$102);
+      var _2$103 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/schema");
+      var $$x267 = new $c_T2("$id", _2$103);
+      var this$328 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x265 = $m_sr_ScalaRunTime$();
+      var this$282 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x263 = $m_sr_ScalaRunTime$();
+      var _2$104 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var $$x262 = new $c_T2("deprecated", _2$104);
+      var this$272 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x260 = $m_sr_ScalaRunTime$();
-      var _2$89 = new $c_Lfrawa_typedjson_parser_Value$StringValue("/\\$dynamicRef/");
-      var elems$44 = $$x260.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("pattern", _2$89)]));
-      var properties$44 = this$247.from__sc_IterableOnce__sci_Map(elems$44);
-      var _2$90 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$44);
-      var elems$45 = $$x261.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("keywordLocation", _2$90)]));
-      var properties$45 = this$250.from__sc_IterableOnce__sci_Map(elems$45);
-      var _2$91 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$45);
-      var elems$46 = $$x262.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("properties", _2$91)]));
-      var properties$46 = this$253.from__sc_IterableOnce__sci_Map(elems$46);
-      var items$8 = $$x267.wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([$$x266, new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$46)]));
-      var _2$92 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$8);
-      var elems$47 = $$x268.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("anyOf", _2$92)]));
-      var properties$47 = this$257.from__sc_IterableOnce__sci_Map(elems$47);
-      var _2$93 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$47);
-      var $$x269 = new $c_T2("if", _2$93);
-      var this$263 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x259 = $m_sr_ScalaRunTime$();
-      var items$9 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("absoluteKeywordLocation")]));
-      var _2$94 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$9);
-      var elems$48 = $$x259.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("required", _2$94)]));
-      var properties$48 = this$263.from__sc_IterableOnce__sci_Map(elems$48);
-      var _2$95 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$48);
-      var elems$49 = $$x270.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x269, new $c_T2("then", _2$95)]));
-      var properties$49 = this$266.from__sc_IterableOnce__sci_Map(elems$49);
-      var items$10 = $$x282.wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([$$x281, new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$49)]));
-      var _2$96 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$10);
-      var elems$50 = $$x302.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x301, $$x283, new $c_T2("allOf", _2$96)]));
-      var properties$50 = this$270.from__sc_IterableOnce__sci_Map(elems$50);
-      var _2$97 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$50);
-      var $$x303 = new $c_T2("outputUnit", _2$97);
-      var this$280 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x258 = $m_sr_ScalaRunTime$();
-      var _2$98 = new $c_Lfrawa_typedjson_parser_Value$StringValue("array");
-      var $$x257 = new $c_T2("type", _2$98);
-      var this$277 = $m_s_Predef$().s_Predef$__f_Map;
+      var _2$105 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
+      var elems$41 = $$x260.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$105)]));
+      var properties$41 = this$272.from__sc_IterableOnce__sci_Map(elems$41);
+      var _2$106 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$41);
+      var $$x261 = new $c_T2("additionalProperties", _2$106);
+      var this$275 = $m_s_Predef$().s_Predef$__f_Map;
+      var elems$42 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([]));
+      var properties$42 = this$275.from__sc_IterableOnce__sci_Map(elems$42);
+      var _2$107 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$42);
+      var $$x259 = new $c_T2("default", _2$107);
+      var _2$108 = new $c_Lfrawa_typedjson_parser_Value$StringValue("object");
+      var $$x258 = new $c_T2("type", _2$108);
+      var _2$109 = new $c_Lfrawa_typedjson_parser_Value$StringValue("\"definitions\" has been replaced by \"$defs\".");
+      var elems$43 = $$x263.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x262, $$x261, $$x259, $$x258, new $c_T2("$comment", _2$109)]));
+      var properties$43 = this$282.from__sc_IterableOnce__sci_Map(elems$43);
+      var _2$110 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$43);
+      var $$x264 = new $c_T2("definitions", _2$110);
+      var this$307 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x256 = $m_sr_ScalaRunTime$();
-      var _2$99 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/outputUnit");
-      var elems$51 = $$x256.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$99)]));
-      var properties$51 = this$277.from__sc_IterableOnce__sci_Map(elems$51);
-      var _2$100 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$51);
-      var elems$52 = $$x258.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x257, new $c_T2("items", _2$100)]));
-      var properties$52 = this$280.from__sc_IterableOnce__sci_Map(elems$52);
-      var _2$101 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$52);
-      var elems$53 = $$x315.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x314, $$x312, $$x307, $$x305, $$x303, new $c_T2("outputUnitArray", _2$101)]));
-      var properties$53 = this$283.from__sc_IterableOnce__sci_Map(elems$53);
-      var _2$102 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$53);
-      var $$x316 = new $c_T2("$defs", _2$102);
-      var _2$103 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/output/schema");
-      var $$x255 = new $c_T2("$id", _2$103);
-      var _2$104 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/schema");
-      var $$x254 = new $c_T2("$schema", _2$104);
-      var _2$105 = new $c_Lfrawa_typedjson_parser_Value$StringValue("A schema that validates the minimum requirements for validation output");
-      var $$x253 = new $c_T2("description", _2$105);
+      var _2$111 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var $$x255 = new $c_T2("deprecated", _2$111);
+      var this$297 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x253 = $m_sr_ScalaRunTime$();
       var $$x252 = $m_sr_ScalaRunTime$();
-      var this$294 = $m_s_Predef$().s_Predef$__f_Map;
+      var this$289 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x250 = $m_sr_ScalaRunTime$();
-      var _2$106 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/flag");
-      var elems$54 = $$x250.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$106)]));
-      var properties$54 = this$294.from__sc_IterableOnce__sci_Map(elems$54);
-      var $$x251 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$54);
-      var this$298 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x248 = $m_sr_ScalaRunTime$();
-      var _2$107 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/basic");
-      var elems$55 = $$x248.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$107)]));
-      var properties$55 = this$298.from__sc_IterableOnce__sci_Map(elems$55);
-      var $$x249 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$55);
-      var this$302 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x246 = $m_sr_ScalaRunTime$();
-      var _2$108 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/detailed");
-      var elems$56 = $$x246.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$108)]));
-      var properties$56 = this$302.from__sc_IterableOnce__sci_Map(elems$56);
-      var $$x247 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$56);
-      var this$306 = $m_s_Predef$().s_Predef$__f_Map;
+      var _2$112 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
+      var elems$44 = $$x250.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$112)]));
+      var properties$44 = this$289.from__sc_IterableOnce__sci_Map(elems$44);
+      var $$x251 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$44);
+      var this$293 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x249 = $m_sr_ScalaRunTime$();
+      var _2$113 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta/validation#/$defs/stringArray");
+      var elems$45 = $$x249.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$113)]));
+      var properties$45 = this$293.from__sc_IterableOnce__sci_Map(elems$45);
+      var items$5 = $$x252.wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([$$x251, new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$45)]));
+      var _2$114 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$5);
+      var elems$46 = $$x253.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("anyOf", _2$114)]));
+      var properties$46 = this$297.from__sc_IterableOnce__sci_Map(elems$46);
+      var _2$115 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$46);
+      var $$x254 = new $c_T2("additionalProperties", _2$115);
+      var this$300 = $m_s_Predef$().s_Predef$__f_Map;
+      var elems$47 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([]));
+      var properties$47 = this$300.from__sc_IterableOnce__sci_Map(elems$47);
+      var _2$116 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$47);
+      var $$x248 = new $c_T2("default", _2$116);
+      var _2$117 = new $c_Lfrawa_typedjson_parser_Value$StringValue("object");
+      var $$x247 = new $c_T2("type", _2$117);
+      var _2$118 = new $c_Lfrawa_typedjson_parser_Value$StringValue("\"dependencies\" has been split and replaced by \"dependentSchemas\" and \"dependentRequired\" in order to serve their differing semantics.");
+      var elems$48 = $$x256.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x255, $$x254, $$x248, $$x247, new $c_T2("$comment", _2$118)]));
+      var properties$48 = this$307.from__sc_IterableOnce__sci_Map(elems$48);
+      var _2$119 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$48);
+      var $$x257 = new $c_T2("dependencies", _2$119);
+      var this$316 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x245 = $m_sr_ScalaRunTime$();
-      var _2$109 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/verbose");
-      var elems$57 = $$x245.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$109)]));
-      var properties$57 = this$306.from__sc_IterableOnce__sci_Map(elems$57);
-      var items$11 = $$x252.wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([$$x251, $$x249, $$x247, new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$57)]));
-      var _2$110 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$11);
-      var elems$58 = $$x317.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x316, $$x255, $$x254, $$x253, new $c_T2("anyOf", _2$110)]));
-      var properties$58 = this$310.from__sc_IterableOnce__sci_Map(elems$58);
-      var content$1 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$58);
-      var _2$111 = new $c_Lfrawa_typedjson_foldercontents_FolderContents$File(content$1);
-      var elems$59 = $$x318.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("schema.json", _2$111)]));
-      var items$12 = this$314.from__sc_IterableOnce__sci_Map(elems$59);
-      var _2$112 = new $c_Lfrawa_typedjson_foldercontents_FolderContents$Folder(items$12);
-      var $$x319 = new $c_T2("output", _2$112);
-      var this$940 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x244 = $m_sr_ScalaRunTime$();
-      var this$457 = $m_s_Predef$().s_Predef$__f_Map;
+      var _2$120 = new $c_Lfrawa_typedjson_parser_Value$StringValue("\"$recursiveAnchor\" has been replaced by \"$dynamicAnchor\".");
+      var $$x244 = new $c_T2("$comment", _2$120);
+      var _2$121 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta/core#/$defs/anchorString");
+      var $$x243 = new $c_T2("$ref", _2$121);
+      var _2$122 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var elems$49 = $$x245.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x244, $$x243, new $c_T2("deprecated", _2$122)]));
+      var properties$49 = this$316.from__sc_IterableOnce__sci_Map(elems$49);
+      var _2$123 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$49);
+      var $$x246 = new $c_T2("$recursiveAnchor", _2$123);
+      var this$325 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x242 = $m_sr_ScalaRunTime$();
-      var this$330 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x240 = $m_sr_ScalaRunTime$();
-      var this$327 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x239 = $m_sr_ScalaRunTime$();
-      var _2$113 = new $c_Lfrawa_typedjson_parser_Value$StringValue("array");
-      var $$x238 = new $c_T2("type", _2$113);
-      var this$319 = $m_s_package$().BigDecimal__s_math_BigDecimal$();
-      var value = this$319.exact__T__s_math_BigDecimal("1");
-      var _2$114 = new $c_Lfrawa_typedjson_parser_Value$NumberValue(value);
-      var $$x237 = new $c_T2("minItems", _2$114);
-      var this$324 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x236 = $m_sr_ScalaRunTime$();
-      var _2$115 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
-      var elems$60 = $$x236.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$115)]));
-      var properties$59 = this$324.from__sc_IterableOnce__sci_Map(elems$60);
-      var _2$116 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$59);
-      var elems$61 = $$x239.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x238, $$x237, new $c_T2("items", _2$116)]));
-      var properties$60 = this$327.from__sc_IterableOnce__sci_Map(elems$61);
-      var _2$117 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$60);
-      var elems$62 = $$x240.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("schemaArray", _2$117)]));
-      var properties$61 = this$330.from__sc_IterableOnce__sci_Map(elems$62);
-      var _2$118 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$61);
-      var $$x241 = new $c_T2("$defs", _2$118);
-      var _2$119 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta");
-      var $$x235 = new $c_T2("$dynamicAnchor", _2$119);
-      var _2$120 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/meta/applicator");
-      var $$x234 = new $c_T2("$id", _2$120);
-      var this$441 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x232 = $m_sr_ScalaRunTime$();
-      var this$339 = $m_s_Predef$().s_Predef$__f_Map;
+      var _2$124 = new $c_Lfrawa_typedjson_parser_Value$StringValue("\"$recursiveRef\" has been replaced by \"$dynamicRef\".");
+      var $$x241 = new $c_T2("$comment", _2$124);
+      var _2$125 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta/core#/$defs/uriReferenceString");
+      var $$x240 = new $c_T2("$ref", _2$125);
+      var _2$126 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var elems$50 = $$x242.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x241, $$x240, new $c_T2("deprecated", _2$126)]));
+      var properties$50 = this$325.from__sc_IterableOnce__sci_Map(elems$50);
+      var _2$127 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$50);
+      var elems$51 = $$x265.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x264, $$x257, $$x246, new $c_T2("$recursiveRef", _2$127)]));
+      var properties$51 = this$328.from__sc_IterableOnce__sci_Map(elems$51);
+      var _2$128 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$51);
+      var $$x266 = new $c_T2("properties", _2$128);
+      var this$345 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x238 = $m_sr_ScalaRunTime$();
+      var _2$129 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var $$x237 = new $c_T2("https://json-schema.org/draft/2020-12/vocab/applicator", _2$129);
+      var _2$130 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var $$x236 = new $c_T2("https://json-schema.org/draft/2020-12/vocab/content", _2$130);
+      var _2$131 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var $$x235 = new $c_T2("https://json-schema.org/draft/2020-12/vocab/unevaluated", _2$131);
+      var _2$132 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var $$x234 = new $c_T2("https://json-schema.org/draft/2020-12/vocab/meta-data", _2$132);
+      var _2$133 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var $$x233 = new $c_T2("https://json-schema.org/draft/2020-12/vocab/core", _2$133);
+      var _2$134 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var $$x232 = new $c_T2("https://json-schema.org/draft/2020-12/vocab/format-annotation", _2$134);
+      var _2$135 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var elems$52 = $$x238.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x237, $$x236, $$x235, $$x234, $$x233, $$x232, new $c_T2("https://json-schema.org/draft/2020-12/vocab/validation", _2$135)]));
+      var properties$52 = this$345.from__sc_IterableOnce__sci_Map(elems$52);
+      var _2$136 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$52);
+      var $$x239 = new $c_T2("$vocabulary", _2$136);
       var $$x230 = $m_sr_ScalaRunTime$();
-      var _2$121 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
-      var elems$63 = $$x230.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$121)]));
-      var properties$62 = this$339.from__sc_IterableOnce__sci_Map(elems$63);
-      var _2$122 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$62);
-      var $$x231 = new $c_T2("if", _2$122);
-      var this$344 = $m_s_Predef$().s_Predef$__f_Map;
+      var this$350 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x228 = $m_sr_ScalaRunTime$();
-      var _2$123 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/schemaArray");
-      var elems$64 = $$x228.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$123)]));
-      var properties$63 = this$344.from__sc_IterableOnce__sci_Map(elems$64);
-      var _2$124 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$63);
-      var $$x229 = new $c_T2("anyOf", _2$124);
-      var this$357 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x226 = $m_sr_ScalaRunTime$();
-      var _2$125 = new $c_Lfrawa_typedjson_parser_Value$StringValue("object");
-      var $$x225 = new $c_T2("type", _2$125);
-      var this$351 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x223 = $m_sr_ScalaRunTime$();
-      var _2$126 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
-      var elems$65 = $$x223.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$126)]));
-      var properties$64 = this$351.from__sc_IterableOnce__sci_Map(elems$65);
-      var _2$127 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$64);
-      var $$x224 = new $c_T2("additionalProperties", _2$127);
+      var _2$137 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta/core");
+      var elems$53 = $$x228.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$137)]));
+      var properties$53 = this$350.from__sc_IterableOnce__sci_Map(elems$53);
+      var $$x229 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$53);
       var this$354 = $m_s_Predef$().s_Predef$__f_Map;
-      var elems$66 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([]));
-      var properties$65 = this$354.from__sc_IterableOnce__sci_Map(elems$66);
-      var _2$128 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$65);
-      var elems$67 = $$x226.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x225, $$x224, new $c_T2("default", _2$128)]));
-      var properties$66 = this$357.from__sc_IterableOnce__sci_Map(elems$67);
-      var _2$129 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$66);
-      var $$x227 = new $c_T2("dependentSchemas", _2$129);
+      var $$x226 = $m_sr_ScalaRunTime$();
+      var _2$138 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta/applicator");
+      var elems$54 = $$x226.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$138)]));
+      var properties$54 = this$354.from__sc_IterableOnce__sci_Map(elems$54);
+      var $$x227 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$54);
+      var this$358 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x224 = $m_sr_ScalaRunTime$();
+      var _2$139 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta/unevaluated");
+      var elems$55 = $$x224.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$139)]));
+      var properties$55 = this$358.from__sc_IterableOnce__sci_Map(elems$55);
+      var $$x225 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$55);
+      var this$362 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x222 = $m_sr_ScalaRunTime$();
+      var _2$140 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta/validation");
+      var elems$56 = $$x222.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$140)]));
+      var properties$56 = this$362.from__sc_IterableOnce__sci_Map(elems$56);
+      var $$x223 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$56);
+      var this$366 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x220 = $m_sr_ScalaRunTime$();
+      var _2$141 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta/meta-data");
+      var elems$57 = $$x220.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$141)]));
+      var properties$57 = this$366.from__sc_IterableOnce__sci_Map(elems$57);
+      var $$x221 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$57);
       var this$370 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x221 = $m_sr_ScalaRunTime$();
-      var _2$130 = new $c_Lfrawa_typedjson_parser_Value$StringValue("object");
-      var $$x220 = new $c_T2("type", _2$130);
-      var this$364 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x218 = $m_sr_ScalaRunTime$();
-      var _2$131 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
-      var elems$68 = $$x218.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$131)]));
-      var properties$67 = this$364.from__sc_IterableOnce__sci_Map(elems$68);
-      var _2$132 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$67);
-      var $$x219 = new $c_T2("additionalProperties", _2$132);
-      var this$367 = $m_s_Predef$().s_Predef$__f_Map;
-      var elems$69 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([]));
-      var properties$68 = this$367.from__sc_IterableOnce__sci_Map(elems$69);
-      var _2$133 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$68);
-      var elems$70 = $$x221.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x220, $$x219, new $c_T2("default", _2$133)]));
-      var properties$69 = this$370.from__sc_IterableOnce__sci_Map(elems$70);
-      var _2$134 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$69);
-      var $$x222 = new $c_T2("properties", _2$134);
-      var this$375 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x216 = $m_sr_ScalaRunTime$();
-      var _2$135 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
-      var elems$71 = $$x216.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$135)]));
-      var properties$70 = this$375.from__sc_IterableOnce__sci_Map(elems$71);
-      var _2$136 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$70);
-      var $$x217 = new $c_T2("not", _2$136);
-      var this$380 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x214 = $m_sr_ScalaRunTime$();
-      var _2$137 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/schemaArray");
-      var elems$72 = $$x214.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$137)]));
-      var properties$71 = this$380.from__sc_IterableOnce__sci_Map(elems$72);
-      var _2$138 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$71);
-      var $$x215 = new $c_T2("prefixItems", _2$138);
-      var this$385 = $m_s_Predef$().s_Predef$__f_Map;
+      var _2$142 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta/format-annotation");
+      var elems$58 = $$x218.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$142)]));
+      var properties$58 = this$370.from__sc_IterableOnce__sci_Map(elems$58);
+      var $$x219 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$58);
+      var this$374 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x217 = $m_sr_ScalaRunTime$();
+      var _2$143 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta/content");
+      var elems$59 = $$x217.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$143)]));
+      var properties$59 = this$374.from__sc_IterableOnce__sci_Map(elems$59);
+      var items$6 = $$x230.wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([$$x229, $$x227, $$x225, $$x223, $$x221, $$x219, new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$59)]));
+      var _2$144 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$6);
+      var $$x231 = new $c_T2("allOf", _2$144);
+      var _2$145 = new $c_Lfrawa_typedjson_parser_Value$StringValue("Core and Validation specifications meta-schema");
+      var $$x216 = new $c_T2("title", _2$145);
+      var items$7 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("object"), new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean")]));
+      var _2$146 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$7);
+      var $$x215 = new $c_T2("type", _2$146);
+      var _2$147 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/schema");
+      var $$x214 = new $c_T2("$schema", _2$147);
+      var _2$148 = new $c_Lfrawa_typedjson_parser_Value$StringValue("This meta-schema also defines keywords that have appeared in previous drafts in order to prevent incompatible extensions as they remain in common use.");
+      var elems$60 = $$x269.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x268, $$x267, $$x266, $$x239, $$x231, $$x216, $$x215, $$x214, new $c_T2("$comment", _2$148)]));
+      var properties$60 = this$388.from__sc_IterableOnce__sci_Map(elems$60);
+      var _2$149 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$60);
+      var $$x270 = new $c_T2("schema.json", _2$149);
+      var this$426 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x212 = $m_sr_ScalaRunTime$();
-      var _2$139 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
-      var elems$73 = $$x212.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$139)]));
-      var properties$72 = this$385.from__sc_IterableOnce__sci_Map(elems$73);
-      var _2$140 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$72);
-      var $$x213 = new $c_T2("contains", _2$140);
-      var this$390 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x210 = $m_sr_ScalaRunTime$();
-      var _2$141 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/schemaArray");
-      var elems$74 = $$x210.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$141)]));
-      var properties$73 = this$390.from__sc_IterableOnce__sci_Map(elems$74);
-      var _2$142 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$73);
-      var $$x211 = new $c_T2("oneOf", _2$142);
-      var this$395 = $m_s_Predef$().s_Predef$__f_Map;
+      var _2$150 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta");
+      var $$x211 = new $c_T2("$dynamicAnchor", _2$150);
+      var _2$151 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/meta/content");
+      var $$x210 = new $c_T2("$id", _2$151);
+      var this$410 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x208 = $m_sr_ScalaRunTime$();
-      var _2$143 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
-      var elems$75 = $$x208.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$143)]));
-      var properties$74 = this$395.from__sc_IterableOnce__sci_Map(elems$75);
-      var _2$144 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$74);
-      var $$x209 = new $c_T2("propertyNames", _2$144);
-      var this$400 = $m_s_Predef$().s_Predef$__f_Map;
+      var this$397 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x206 = $m_sr_ScalaRunTime$();
-      var _2$145 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/schemaArray");
-      var elems$76 = $$x206.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$145)]));
-      var properties$75 = this$400.from__sc_IterableOnce__sci_Map(elems$76);
-      var _2$146 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$75);
-      var $$x207 = new $c_T2("allOf", _2$146);
-      var this$405 = $m_s_Predef$().s_Predef$__f_Map;
+      var _2$152 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
+      var elems$61 = $$x206.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$152)]));
+      var properties$61 = this$397.from__sc_IterableOnce__sci_Map(elems$61);
+      var _2$153 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$61);
+      var $$x207 = new $c_T2("contentEncoding", _2$153);
+      var this$402 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x204 = $m_sr_ScalaRunTime$();
-      var _2$147 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
-      var elems$77 = $$x204.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$147)]));
-      var properties$76 = this$405.from__sc_IterableOnce__sci_Map(elems$77);
-      var _2$148 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$76);
-      var $$x205 = new $c_T2("else", _2$148);
-      var this$423 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x202 = $m_sr_ScalaRunTime$();
-      var _2$149 = new $c_Lfrawa_typedjson_parser_Value$StringValue("object");
-      var $$x201 = new $c_T2("type", _2$149);
-      var this$412 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x199 = $m_sr_ScalaRunTime$();
-      var _2$150 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
-      var elems$78 = $$x199.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$150)]));
-      var properties$77 = this$412.from__sc_IterableOnce__sci_Map(elems$78);
-      var _2$151 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$77);
-      var $$x200 = new $c_T2("additionalProperties", _2$151);
-      var this$417 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x197 = $m_sr_ScalaRunTime$();
-      var _2$152 = new $c_Lfrawa_typedjson_parser_Value$StringValue("regex");
-      var elems$79 = $$x197.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("format", _2$152)]));
-      var properties$78 = this$417.from__sc_IterableOnce__sci_Map(elems$79);
-      var _2$153 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$78);
-      var $$x198 = new $c_T2("propertyNames", _2$153);
-      var this$420 = $m_s_Predef$().s_Predef$__f_Map;
-      var elems$80 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([]));
-      var properties$79 = this$420.from__sc_IterableOnce__sci_Map(elems$80);
-      var _2$154 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$79);
-      var elems$81 = $$x202.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x201, $$x200, $$x198, new $c_T2("default", _2$154)]));
-      var properties$80 = this$423.from__sc_IterableOnce__sci_Map(elems$81);
-      var _2$155 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$80);
-      var $$x203 = new $c_T2("patternProperties", _2$155);
-      var this$428 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x195 = $m_sr_ScalaRunTime$();
+      var _2$154 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
+      var elems$62 = $$x204.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$154)]));
+      var properties$62 = this$402.from__sc_IterableOnce__sci_Map(elems$62);
+      var _2$155 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$62);
+      var $$x205 = new $c_T2("contentMediaType", _2$155);
+      var this$407 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x203 = $m_sr_ScalaRunTime$();
       var _2$156 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
-      var elems$82 = $$x195.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$156)]));
-      var properties$81 = this$428.from__sc_IterableOnce__sci_Map(elems$82);
-      var _2$157 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$81);
-      var $$x196 = new $c_T2("items", _2$157);
-      var this$433 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x193 = $m_sr_ScalaRunTime$();
-      var _2$158 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
-      var elems$83 = $$x193.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$158)]));
-      var properties$82 = this$433.from__sc_IterableOnce__sci_Map(elems$83);
-      var _2$159 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$82);
-      var $$x194 = new $c_T2("then", _2$159);
+      var elems$63 = $$x203.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$156)]));
+      var properties$63 = this$407.from__sc_IterableOnce__sci_Map(elems$63);
+      var _2$157 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$63);
+      var elems$64 = $$x208.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x207, $$x205, new $c_T2("contentSchema", _2$157)]));
+      var properties$64 = this$410.from__sc_IterableOnce__sci_Map(elems$64);
+      var _2$158 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$64);
+      var $$x209 = new $c_T2("properties", _2$158);
+      var this$415 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x201 = $m_sr_ScalaRunTime$();
+      var _2$159 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var elems$65 = $$x201.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("https://json-schema.org/draft/2020-12/vocab/content", _2$159)]));
+      var properties$65 = this$415.from__sc_IterableOnce__sci_Map(elems$65);
+      var _2$160 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$65);
+      var $$x202 = new $c_T2("$vocabulary", _2$160);
+      var _2$161 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/schema");
+      var $$x200 = new $c_T2("$schema", _2$161);
+      var _2$162 = new $c_Lfrawa_typedjson_parser_Value$StringValue("Content vocabulary meta-schema");
+      var $$x199 = new $c_T2("title", _2$162);
+      var items$8 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("object"), new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean")]));
+      var _2$163 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$8);
+      var elems$66 = $$x212.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x211, $$x210, $$x209, $$x202, $$x200, $$x199, new $c_T2("type", _2$163)]));
+      var properties$66 = this$426.from__sc_IterableOnce__sci_Map(elems$66);
+      var _2$164 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$66);
+      var $$x213 = new $c_T2("meta/content.json", _2$164);
+      var this$454 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x197 = $m_sr_ScalaRunTime$();
+      var _2$165 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta");
+      var $$x196 = new $c_T2("$dynamicAnchor", _2$165);
+      var _2$166 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/meta/format-annotation");
+      var $$x195 = new $c_T2("$id", _2$166);
       var this$438 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x193 = $m_sr_ScalaRunTime$();
+      var this$435 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x192 = $m_sr_ScalaRunTime$();
-      var _2$160 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
-      var elems$84 = $$x192.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$160)]));
-      var properties$83 = this$438.from__sc_IterableOnce__sci_Map(elems$84);
-      var _2$161 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$83);
-      var elems$85 = $$x232.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x231, $$x229, $$x227, $$x222, $$x217, $$x215, $$x213, $$x211, $$x209, $$x207, $$x205, $$x203, $$x196, $$x194, new $c_T2("additionalProperties", _2$161)]));
-      var properties$84 = this$441.from__sc_IterableOnce__sci_Map(elems$85);
-      var _2$162 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$84);
-      var $$x233 = new $c_T2("properties", _2$162);
-      var this$446 = $m_s_Predef$().s_Predef$__f_Map;
+      var _2$167 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
+      var elems$67 = $$x192.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$167)]));
+      var properties$67 = this$435.from__sc_IterableOnce__sci_Map(elems$67);
+      var _2$168 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$67);
+      var elems$68 = $$x193.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("format", _2$168)]));
+      var properties$68 = this$438.from__sc_IterableOnce__sci_Map(elems$68);
+      var _2$169 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$68);
+      var $$x194 = new $c_T2("properties", _2$169);
+      var this$443 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x190 = $m_sr_ScalaRunTime$();
-      var _2$163 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var elems$86 = $$x190.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("https://json-schema.org/draft/2020-12/vocab/applicator", _2$163)]));
-      var properties$85 = this$446.from__sc_IterableOnce__sci_Map(elems$86);
-      var _2$164 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$85);
-      var $$x191 = new $c_T2("$vocabulary", _2$164);
-      var _2$165 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/schema");
-      var $$x189 = new $c_T2("$schema", _2$165);
-      var _2$166 = new $c_Lfrawa_typedjson_parser_Value$StringValue("Applicator vocabulary meta-schema");
-      var $$x188 = new $c_T2("title", _2$166);
-      var items$13 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("object"), new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean")]));
-      var _2$167 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$13);
-      var elems$87 = $$x242.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x241, $$x235, $$x234, $$x233, $$x191, $$x189, $$x188, new $c_T2("type", _2$167)]));
-      var properties$86 = this$457.from__sc_IterableOnce__sci_Map(elems$87);
-      var content$2 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$86);
-      var _2$168 = new $c_Lfrawa_typedjson_foldercontents_FolderContents$File(content$2);
-      var $$x243 = new $c_T2("applicator.json", _2$168);
-      var this$486 = $m_s_Predef$().s_Predef$__f_Map;
+      var _2$170 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var elems$69 = $$x190.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("https://json-schema.org/draft/2020-12/vocab/format-annotation", _2$170)]));
+      var properties$69 = this$443.from__sc_IterableOnce__sci_Map(elems$69);
+      var _2$171 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$69);
+      var $$x191 = new $c_T2("$vocabulary", _2$171);
+      var _2$172 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/schema");
+      var $$x189 = new $c_T2("$schema", _2$172);
+      var _2$173 = new $c_Lfrawa_typedjson_parser_Value$StringValue("Format vocabulary meta-schema for annotation results");
+      var $$x188 = new $c_T2("title", _2$173);
+      var items$9 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("object"), new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean")]));
+      var _2$174 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$9);
+      var elems$70 = $$x197.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x196, $$x195, $$x194, $$x191, $$x189, $$x188, new $c_T2("type", _2$174)]));
+      var properties$70 = this$454.from__sc_IterableOnce__sci_Map(elems$70);
+      var _2$175 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$70);
+      var $$x198 = new $c_T2("meta/format-annotation.json", _2$175);
+      var this$597 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x186 = $m_sr_ScalaRunTime$();
-      var _2$169 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta");
-      var $$x185 = new $c_T2("$dynamicAnchor", _2$169);
-      var _2$170 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/meta/format-annotation");
-      var $$x184 = new $c_T2("$id", _2$170);
       var this$470 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x182 = $m_sr_ScalaRunTime$();
+      var $$x184 = $m_sr_ScalaRunTime$();
       var this$467 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x181 = $m_sr_ScalaRunTime$();
-      var _2$171 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
-      var elems$88 = $$x181.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$171)]));
-      var properties$87 = this$467.from__sc_IterableOnce__sci_Map(elems$88);
-      var _2$172 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$87);
-      var elems$89 = $$x182.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("format", _2$172)]));
-      var properties$88 = this$470.from__sc_IterableOnce__sci_Map(elems$89);
-      var _2$173 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$88);
-      var $$x183 = new $c_T2("properties", _2$173);
-      var this$475 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x179 = $m_sr_ScalaRunTime$();
-      var _2$174 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var elems$90 = $$x179.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("https://json-schema.org/draft/2020-12/vocab/format-annotation", _2$174)]));
-      var properties$89 = this$475.from__sc_IterableOnce__sci_Map(elems$90);
-      var _2$175 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$89);
-      var $$x180 = new $c_T2("$vocabulary", _2$175);
-      var _2$176 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/schema");
-      var $$x178 = new $c_T2("$schema", _2$176);
-      var _2$177 = new $c_Lfrawa_typedjson_parser_Value$StringValue("Format vocabulary meta-schema for annotation results");
-      var $$x177 = new $c_T2("title", _2$177);
-      var items$14 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("object"), new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean")]));
-      var _2$178 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$14);
-      var elems$91 = $$x186.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x185, $$x184, $$x183, $$x180, $$x178, $$x177, new $c_T2("type", _2$178)]));
-      var properties$90 = this$486.from__sc_IterableOnce__sci_Map(elems$91);
-      var content$3 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$90);
-      var _2$179 = new $c_Lfrawa_typedjson_foldercontents_FolderContents$File(content$3);
-      var $$x187 = new $c_T2("format-annotation.json", _2$179);
-      var this$550 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x175 = $m_sr_ScalaRunTime$();
-      var _2$180 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta");
-      var $$x174 = new $c_T2("$dynamicAnchor", _2$180);
-      var _2$181 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/meta/meta-data");
-      var $$x173 = new $c_T2("$id", _2$181);
-      var this$534 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x171 = $m_sr_ScalaRunTime$();
-      var this$498 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x169 = $m_sr_ScalaRunTime$();
-      var _2$182 = new $c_Lfrawa_typedjson_parser_Value$StringValue("array");
-      var $$x168 = new $c_T2("type", _2$182);
-      var _2$183 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var elems$92 = $$x169.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x168, new $c_T2("items", _2$183)]));
-      var properties$91 = this$498.from__sc_IterableOnce__sci_Map(elems$92);
-      var _2$184 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$91);
-      var $$x170 = new $c_T2("examples", _2$184);
-      var this$505 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x166 = $m_sr_ScalaRunTime$();
-      var _2$185 = new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean");
-      var $$x165 = new $c_T2("type", _2$185);
-      var _2$186 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(false);
-      var elems$93 = $$x166.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x165, new $c_T2("default", _2$186)]));
-      var properties$92 = this$505.from__sc_IterableOnce__sci_Map(elems$93);
-      var _2$187 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$92);
-      var $$x167 = new $c_T2("readOnly", _2$187);
+      var $$x183 = $m_sr_ScalaRunTime$();
+      var _2$176 = new $c_Lfrawa_typedjson_parser_Value$StringValue("array");
+      var $$x182 = new $c_T2("type", _2$176);
+      var this$459 = $m_s_package$().BigDecimal__s_math_BigDecimal$();
+      var value$5 = this$459.exact__T__s_math_BigDecimal("1");
+      var _2$177 = new $c_Lfrawa_typedjson_parser_Value$NumberValue(value$5);
+      var $$x181 = new $c_T2("minItems", _2$177);
+      var this$464 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x180 = $m_sr_ScalaRunTime$();
+      var _2$178 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
+      var elems$71 = $$x180.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$178)]));
+      var properties$71 = this$464.from__sc_IterableOnce__sci_Map(elems$71);
+      var _2$179 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$71);
+      var elems$72 = $$x183.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x182, $$x181, new $c_T2("items", _2$179)]));
+      var properties$72 = this$467.from__sc_IterableOnce__sci_Map(elems$72);
+      var _2$180 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$72);
+      var elems$73 = $$x184.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("schemaArray", _2$180)]));
+      var properties$73 = this$470.from__sc_IterableOnce__sci_Map(elems$73);
+      var _2$181 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$73);
+      var $$x185 = new $c_T2("$defs", _2$181);
+      var _2$182 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta");
+      var $$x179 = new $c_T2("$dynamicAnchor", _2$182);
+      var _2$183 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/meta/applicator");
+      var $$x178 = new $c_T2("$id", _2$183);
+      var this$581 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x176 = $m_sr_ScalaRunTime$();
+      var this$479 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x174 = $m_sr_ScalaRunTime$();
+      var _2$184 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
+      var elems$74 = $$x174.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$184)]));
+      var properties$74 = this$479.from__sc_IterableOnce__sci_Map(elems$74);
+      var _2$185 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$74);
+      var $$x175 = new $c_T2("if", _2$185);
+      var this$484 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x172 = $m_sr_ScalaRunTime$();
+      var _2$186 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/schemaArray");
+      var elems$75 = $$x172.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$186)]));
+      var properties$75 = this$484.from__sc_IterableOnce__sci_Map(elems$75);
+      var _2$187 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$75);
+      var $$x173 = new $c_T2("anyOf", _2$187);
+      var this$497 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x170 = $m_sr_ScalaRunTime$();
+      var _2$188 = new $c_Lfrawa_typedjson_parser_Value$StringValue("object");
+      var $$x169 = new $c_T2("type", _2$188);
+      var this$491 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x167 = $m_sr_ScalaRunTime$();
+      var _2$189 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
+      var elems$76 = $$x167.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$189)]));
+      var properties$76 = this$491.from__sc_IterableOnce__sci_Map(elems$76);
+      var _2$190 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$76);
+      var $$x168 = new $c_T2("additionalProperties", _2$190);
+      var this$494 = $m_s_Predef$().s_Predef$__f_Map;
+      var elems$77 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([]));
+      var properties$77 = this$494.from__sc_IterableOnce__sci_Map(elems$77);
+      var _2$191 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$77);
+      var elems$78 = $$x170.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x169, $$x168, new $c_T2("default", _2$191)]));
+      var properties$78 = this$497.from__sc_IterableOnce__sci_Map(elems$78);
+      var _2$192 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$78);
+      var $$x171 = new $c_T2("dependentSchemas", _2$192);
       var this$510 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x163 = $m_sr_ScalaRunTime$();
-      var _2$188 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
-      var elems$94 = $$x163.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$188)]));
-      var properties$93 = this$510.from__sc_IterableOnce__sci_Map(elems$94);
-      var _2$189 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$93);
-      var $$x164 = new $c_T2("description", _2$189);
-      var this$517 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x161 = $m_sr_ScalaRunTime$();
-      var _2$190 = new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean");
-      var $$x160 = new $c_T2("type", _2$190);
-      var _2$191 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(false);
-      var elems$95 = $$x161.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x160, new $c_T2("default", _2$191)]));
-      var properties$94 = this$517.from__sc_IterableOnce__sci_Map(elems$95);
-      var _2$192 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$94);
-      var $$x162 = new $c_T2("deprecated", _2$192);
-      var this$524 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x165 = $m_sr_ScalaRunTime$();
+      var _2$193 = new $c_Lfrawa_typedjson_parser_Value$StringValue("object");
+      var $$x164 = new $c_T2("type", _2$193);
+      var this$504 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x162 = $m_sr_ScalaRunTime$();
+      var _2$194 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
+      var elems$79 = $$x162.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$194)]));
+      var properties$79 = this$504.from__sc_IterableOnce__sci_Map(elems$79);
+      var _2$195 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$79);
+      var $$x163 = new $c_T2("additionalProperties", _2$195);
+      var this$507 = $m_s_Predef$().s_Predef$__f_Map;
+      var elems$80 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([]));
+      var properties$80 = this$507.from__sc_IterableOnce__sci_Map(elems$80);
+      var _2$196 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$80);
+      var elems$81 = $$x165.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x164, $$x163, new $c_T2("default", _2$196)]));
+      var properties$81 = this$510.from__sc_IterableOnce__sci_Map(elems$81);
+      var _2$197 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$81);
+      var $$x166 = new $c_T2("properties", _2$197);
+      var this$515 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x160 = $m_sr_ScalaRunTime$();
+      var _2$198 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
+      var elems$82 = $$x160.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$198)]));
+      var properties$82 = this$515.from__sc_IterableOnce__sci_Map(elems$82);
+      var _2$199 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$82);
+      var $$x161 = new $c_T2("not", _2$199);
+      var this$520 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x158 = $m_sr_ScalaRunTime$();
-      var _2$193 = new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean");
-      var $$x157 = new $c_T2("type", _2$193);
-      var _2$194 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(false);
-      var elems$96 = $$x158.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x157, new $c_T2("default", _2$194)]));
-      var properties$95 = this$524.from__sc_IterableOnce__sci_Map(elems$96);
-      var _2$195 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$95);
-      var $$x159 = new $c_T2("writeOnly", _2$195);
-      var _2$196 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var $$x156 = new $c_T2("default", _2$196);
-      var this$531 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x155 = $m_sr_ScalaRunTime$();
-      var _2$197 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
-      var elems$97 = $$x155.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$197)]));
-      var properties$96 = this$531.from__sc_IterableOnce__sci_Map(elems$97);
-      var _2$198 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$96);
-      var elems$98 = $$x171.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x170, $$x167, $$x164, $$x162, $$x159, $$x156, new $c_T2("title", _2$198)]));
-      var properties$97 = this$534.from__sc_IterableOnce__sci_Map(elems$98);
-      var _2$199 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$97);
-      var $$x172 = new $c_T2("properties", _2$199);
-      var this$539 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x153 = $m_sr_ScalaRunTime$();
-      var _2$200 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var elems$99 = $$x153.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("https://json-schema.org/draft/2020-12/vocab/meta-data", _2$200)]));
-      var properties$98 = this$539.from__sc_IterableOnce__sci_Map(elems$99);
-      var _2$201 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$98);
-      var $$x154 = new $c_T2("$vocabulary", _2$201);
-      var _2$202 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/schema");
-      var $$x152 = new $c_T2("$schema", _2$202);
-      var _2$203 = new $c_Lfrawa_typedjson_parser_Value$StringValue("Meta-data vocabulary meta-schema");
-      var $$x151 = new $c_T2("title", _2$203);
-      var items$15 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("object"), new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean")]));
-      var _2$204 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$15);
-      var elems$100 = $$x175.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x174, $$x173, $$x172, $$x154, $$x152, $$x151, new $c_T2("type", _2$204)]));
-      var properties$99 = this$550.from__sc_IterableOnce__sci_Map(elems$100);
-      var content$4 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$99);
-      var _2$205 = new $c_Lfrawa_typedjson_foldercontents_FolderContents$File(content$4);
-      var $$x176 = new $c_T2("meta-data.json", _2$205);
-      var this$584 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x149 = $m_sr_ScalaRunTime$();
-      var _2$206 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta");
-      var $$x148 = new $c_T2("$dynamicAnchor", _2$206);
-      var _2$207 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/meta/unevaluated");
-      var $$x147 = new $c_T2("$id", _2$207);
-      var this$568 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x145 = $m_sr_ScalaRunTime$();
-      var this$560 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x143 = $m_sr_ScalaRunTime$();
-      var _2$208 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
-      var elems$101 = $$x143.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$208)]));
-      var properties$100 = this$560.from__sc_IterableOnce__sci_Map(elems$101);
-      var _2$209 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$100);
-      var $$x144 = new $c_T2("unevaluatedItems", _2$209);
-      var this$565 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x142 = $m_sr_ScalaRunTime$();
+      var _2$200 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/schemaArray");
+      var elems$83 = $$x158.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$200)]));
+      var properties$83 = this$520.from__sc_IterableOnce__sci_Map(elems$83);
+      var _2$201 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$83);
+      var $$x159 = new $c_T2("prefixItems", _2$201);
+      var this$525 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x156 = $m_sr_ScalaRunTime$();
+      var _2$202 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
+      var elems$84 = $$x156.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$202)]));
+      var properties$84 = this$525.from__sc_IterableOnce__sci_Map(elems$84);
+      var _2$203 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$84);
+      var $$x157 = new $c_T2("contains", _2$203);
+      var this$530 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x154 = $m_sr_ScalaRunTime$();
+      var _2$204 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/schemaArray");
+      var elems$85 = $$x154.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$204)]));
+      var properties$85 = this$530.from__sc_IterableOnce__sci_Map(elems$85);
+      var _2$205 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$85);
+      var $$x155 = new $c_T2("oneOf", _2$205);
+      var this$535 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x152 = $m_sr_ScalaRunTime$();
+      var _2$206 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
+      var elems$86 = $$x152.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$206)]));
+      var properties$86 = this$535.from__sc_IterableOnce__sci_Map(elems$86);
+      var _2$207 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$86);
+      var $$x153 = new $c_T2("propertyNames", _2$207);
+      var this$540 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x150 = $m_sr_ScalaRunTime$();
+      var _2$208 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/schemaArray");
+      var elems$87 = $$x150.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$208)]));
+      var properties$87 = this$540.from__sc_IterableOnce__sci_Map(elems$87);
+      var _2$209 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$87);
+      var $$x151 = new $c_T2("allOf", _2$209);
+      var this$545 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x148 = $m_sr_ScalaRunTime$();
       var _2$210 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
-      var elems$102 = $$x142.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$210)]));
-      var properties$101 = this$565.from__sc_IterableOnce__sci_Map(elems$102);
-      var _2$211 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$101);
-      var elems$103 = $$x145.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x144, new $c_T2("unevaluatedProperties", _2$211)]));
-      var properties$102 = this$568.from__sc_IterableOnce__sci_Map(elems$103);
-      var _2$212 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$102);
-      var $$x146 = new $c_T2("properties", _2$212);
+      var elems$88 = $$x148.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$210)]));
+      var properties$88 = this$545.from__sc_IterableOnce__sci_Map(elems$88);
+      var _2$211 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$88);
+      var $$x149 = new $c_T2("else", _2$211);
+      var this$563 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x146 = $m_sr_ScalaRunTime$();
+      var _2$212 = new $c_Lfrawa_typedjson_parser_Value$StringValue("object");
+      var $$x145 = new $c_T2("type", _2$212);
+      var this$552 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x143 = $m_sr_ScalaRunTime$();
+      var _2$213 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
+      var elems$89 = $$x143.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$213)]));
+      var properties$89 = this$552.from__sc_IterableOnce__sci_Map(elems$89);
+      var _2$214 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$89);
+      var $$x144 = new $c_T2("additionalProperties", _2$214);
+      var this$557 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x141 = $m_sr_ScalaRunTime$();
+      var _2$215 = new $c_Lfrawa_typedjson_parser_Value$StringValue("regex");
+      var elems$90 = $$x141.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("format", _2$215)]));
+      var properties$90 = this$557.from__sc_IterableOnce__sci_Map(elems$90);
+      var _2$216 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$90);
+      var $$x142 = new $c_T2("propertyNames", _2$216);
+      var this$560 = $m_s_Predef$().s_Predef$__f_Map;
+      var elems$91 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([]));
+      var properties$91 = this$560.from__sc_IterableOnce__sci_Map(elems$91);
+      var _2$217 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$91);
+      var elems$92 = $$x146.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x145, $$x144, $$x142, new $c_T2("default", _2$217)]));
+      var properties$92 = this$563.from__sc_IterableOnce__sci_Map(elems$92);
+      var _2$218 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$92);
+      var $$x147 = new $c_T2("patternProperties", _2$218);
+      var this$568 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x139 = $m_sr_ScalaRunTime$();
+      var _2$219 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
+      var elems$93 = $$x139.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$219)]));
+      var properties$93 = this$568.from__sc_IterableOnce__sci_Map(elems$93);
+      var _2$220 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$93);
+      var $$x140 = new $c_T2("items", _2$220);
       var this$573 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x140 = $m_sr_ScalaRunTime$();
-      var _2$213 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var elems$104 = $$x140.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("https://json-schema.org/draft/2020-12/vocab/unevaluated", _2$213)]));
-      var properties$103 = this$573.from__sc_IterableOnce__sci_Map(elems$104);
-      var _2$214 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$103);
-      var $$x141 = new $c_T2("$vocabulary", _2$214);
-      var _2$215 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/schema");
-      var $$x139 = new $c_T2("$schema", _2$215);
-      var _2$216 = new $c_Lfrawa_typedjson_parser_Value$StringValue("Unevaluated applicator vocabulary meta-schema");
-      var $$x138 = new $c_T2("title", _2$216);
-      var items$16 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("object"), new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean")]));
-      var _2$217 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$16);
-      var elems$105 = $$x149.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x148, $$x147, $$x146, $$x141, $$x139, $$x138, new $c_T2("type", _2$217)]));
-      var properties$104 = this$584.from__sc_IterableOnce__sci_Map(elems$105);
-      var content$5 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$104);
-      var _2$218 = new $c_Lfrawa_typedjson_foldercontents_FolderContents$File(content$5);
-      var $$x150 = new $c_T2("unevaluated.json", _2$218);
-      var this$785 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x137 = $m_sr_ScalaRunTime$();
+      var _2$221 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
+      var elems$94 = $$x137.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$221)]));
+      var properties$94 = this$573.from__sc_IterableOnce__sci_Map(elems$94);
+      var _2$222 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$94);
+      var $$x138 = new $c_T2("then", _2$222);
+      var this$578 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x136 = $m_sr_ScalaRunTime$();
-      var this$630 = $m_s_Predef$().s_Predef$__f_Map;
+      var _2$223 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
+      var elems$95 = $$x136.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$223)]));
+      var properties$95 = this$578.from__sc_IterableOnce__sci_Map(elems$95);
+      var _2$224 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$95);
+      var elems$96 = $$x176.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x175, $$x173, $$x171, $$x166, $$x161, $$x159, $$x157, $$x155, $$x153, $$x151, $$x149, $$x147, $$x140, $$x138, new $c_T2("additionalProperties", _2$224)]));
+      var properties$96 = this$581.from__sc_IterableOnce__sci_Map(elems$96);
+      var _2$225 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$96);
+      var $$x177 = new $c_T2("properties", _2$225);
+      var this$586 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x134 = $m_sr_ScalaRunTime$();
-      var this$593 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x132 = $m_sr_ScalaRunTime$();
-      var _2$219 = new $c_Lfrawa_typedjson_parser_Value$StringValue("integer");
-      var $$x131 = new $c_T2("type", _2$219);
-      var this$590 = $m_s_package$().BigDecimal__s_math_BigDecimal$();
-      var value$1 = this$590.exact__T__s_math_BigDecimal("0");
-      var _2$220 = new $c_Lfrawa_typedjson_parser_Value$NumberValue(value$1);
-      var elems$106 = $$x132.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x131, new $c_T2("minimum", _2$220)]));
-      var properties$105 = this$593.from__sc_IterableOnce__sci_Map(elems$106);
-      var _2$221 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$105);
-      var $$x133 = new $c_T2("nonNegativeInteger", _2$221);
-      var this$601 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x129 = $m_sr_ScalaRunTime$();
-      var _2$222 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/nonNegativeInteger");
-      var $$x128 = new $c_T2("$ref", _2$222);
-      var this$598 = $m_s_package$().BigDecimal__s_math_BigDecimal$();
-      var value$2 = this$598.exact__T__s_math_BigDecimal("0");
-      var _2$223 = new $c_Lfrawa_typedjson_parser_Value$NumberValue(value$2);
-      var elems$107 = $$x129.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x128, new $c_T2("default", _2$223)]));
-      var properties$106 = this$601.from__sc_IterableOnce__sci_Map(elems$107);
-      var _2$224 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$106);
-      var $$x130 = new $c_T2("nonNegativeIntegerDefault0", _2$224);
-      var this$613 = $m_s_Predef$().s_Predef$__f_Map;
+      var _2$226 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var elems$97 = $$x134.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("https://json-schema.org/draft/2020-12/vocab/applicator", _2$226)]));
+      var properties$97 = this$586.from__sc_IterableOnce__sci_Map(elems$97);
+      var _2$227 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$97);
+      var $$x135 = new $c_T2("$vocabulary", _2$227);
+      var _2$228 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/schema");
+      var $$x133 = new $c_T2("$schema", _2$228);
+      var _2$229 = new $c_Lfrawa_typedjson_parser_Value$StringValue("Applicator vocabulary meta-schema");
+      var $$x132 = new $c_T2("title", _2$229);
+      var items$10 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("object"), new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean")]));
+      var _2$230 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$10);
+      var elems$98 = $$x186.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x185, $$x179, $$x178, $$x177, $$x135, $$x133, $$x132, new $c_T2("type", _2$230)]));
+      var properties$98 = this$597.from__sc_IterableOnce__sci_Map(elems$98);
+      var _2$231 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$98);
+      var $$x187 = new $c_T2("meta/applicator.json", _2$231);
+      var this$630 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x130 = $m_sr_ScalaRunTime$();
+      var _2$232 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta");
+      var $$x129 = new $c_T2("$dynamicAnchor", _2$232);
+      var _2$233 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/meta/unevaluated");
+      var $$x128 = new $c_T2("$id", _2$233);
+      var this$614 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x126 = $m_sr_ScalaRunTime$();
-      var items$17 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("array"), new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean"), new $c_Lfrawa_typedjson_parser_Value$StringValue("integer"), new $c_Lfrawa_typedjson_parser_Value$StringValue("null"), new $c_Lfrawa_typedjson_parser_Value$StringValue("number"), new $c_Lfrawa_typedjson_parser_Value$StringValue("object"), new $c_Lfrawa_typedjson_parser_Value$StringValue("string")]));
-      var _2$225 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$17);
-      var elems$108 = $$x126.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("enum", _2$225)]));
-      var properties$107 = this$613.from__sc_IterableOnce__sci_Map(elems$108);
-      var _2$226 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$107);
-      var $$x127 = new $c_T2("simpleTypes", _2$226);
-      var this$627 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x125 = $m_sr_ScalaRunTime$();
-      var _2$227 = new $c_Lfrawa_typedjson_parser_Value$StringValue("array");
-      var $$x124 = new $c_T2("type", _2$227);
-      var this$620 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x122 = $m_sr_ScalaRunTime$();
-      var _2$228 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
-      var elems$109 = $$x122.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$228)]));
-      var properties$108 = this$620.from__sc_IterableOnce__sci_Map(elems$109);
-      var _2$229 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$108);
-      var $$x123 = new $c_T2("items", _2$229);
-      var _2$230 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var $$x121 = new $c_T2("uniqueItems", _2$230);
-      var items$18 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([]));
-      var _2$231 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$18);
-      var elems$110 = $$x125.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x124, $$x123, $$x121, new $c_T2("default", _2$231)]));
-      var properties$109 = this$627.from__sc_IterableOnce__sci_Map(elems$110);
-      var _2$232 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$109);
-      var elems$111 = $$x134.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x133, $$x130, $$x127, new $c_T2("stringArray", _2$232)]));
-      var properties$110 = this$630.from__sc_IterableOnce__sci_Map(elems$111);
-      var _2$233 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$110);
-      var $$x135 = new $c_T2("$defs", _2$233);
-      var _2$234 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta");
-      var $$x120 = new $c_T2("$dynamicAnchor", _2$234);
-      var _2$235 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/meta/validation");
-      var $$x119 = new $c_T2("$id", _2$235);
-      var this$769 = $m_s_Predef$().s_Predef$__f_Map;
+      var this$606 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x124 = $m_sr_ScalaRunTime$();
+      var _2$234 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
+      var elems$99 = $$x124.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$234)]));
+      var properties$99 = this$606.from__sc_IterableOnce__sci_Map(elems$99);
+      var _2$235 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$99);
+      var $$x125 = new $c_T2("unevaluatedItems", _2$235);
+      var this$611 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x123 = $m_sr_ScalaRunTime$();
+      var _2$236 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
+      var elems$100 = $$x123.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$236)]));
+      var properties$100 = this$611.from__sc_IterableOnce__sci_Map(elems$100);
+      var _2$237 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$100);
+      var elems$101 = $$x126.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x125, new $c_T2("unevaluatedProperties", _2$237)]));
+      var properties$101 = this$614.from__sc_IterableOnce__sci_Map(elems$101);
+      var _2$238 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$101);
+      var $$x127 = new $c_T2("properties", _2$238);
+      var this$619 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x121 = $m_sr_ScalaRunTime$();
+      var _2$239 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var elems$102 = $$x121.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("https://json-schema.org/draft/2020-12/vocab/unevaluated", _2$239)]));
+      var properties$102 = this$619.from__sc_IterableOnce__sci_Map(elems$102);
+      var _2$240 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$102);
+      var $$x122 = new $c_T2("$vocabulary", _2$240);
+      var _2$241 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/schema");
+      var $$x120 = new $c_T2("$schema", _2$241);
+      var _2$242 = new $c_Lfrawa_typedjson_parser_Value$StringValue("Unevaluated applicator vocabulary meta-schema");
+      var $$x119 = new $c_T2("title", _2$242);
+      var items$11 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("object"), new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean")]));
+      var _2$243 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$11);
+      var elems$103 = $$x130.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x129, $$x128, $$x127, $$x122, $$x120, $$x119, new $c_T2("type", _2$243)]));
+      var properties$103 = this$630.from__sc_IterableOnce__sci_Map(elems$103);
+      var _2$244 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$103);
+      var $$x131 = new $c_T2("meta/unevaluated.json", _2$244);
+      var this$741 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x117 = $m_sr_ScalaRunTime$();
-      var this$639 = $m_s_Predef$().s_Predef$__f_Map;
+      var this$654 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x115 = $m_sr_ScalaRunTime$();
-      var _2$236 = new $c_Lfrawa_typedjson_parser_Value$StringValue("number");
-      var elems$112 = $$x115.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$236)]));
-      var properties$111 = this$639.from__sc_IterableOnce__sci_Map(elems$112);
-      var _2$237 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$111);
-      var $$x116 = new $c_T2("exclusiveMaximum", _2$237);
-      var this$644 = $m_s_Predef$().s_Predef$__f_Map;
+      var this$637 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x113 = $m_sr_ScalaRunTime$();
-      var _2$238 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/nonNegativeInteger");
-      var elems$113 = $$x113.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$238)]));
-      var properties$112 = this$644.from__sc_IterableOnce__sci_Map(elems$113);
-      var _2$239 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$112);
-      var $$x114 = new $c_T2("maxContains", _2$239);
+      var _2$245 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
+      var $$x112 = new $c_T2("type", _2$245);
+      var _2$246 = new $c_Lfrawa_typedjson_parser_Value$StringValue("^[A-Za-z_][-A-Za-z0-9._]*$");
+      var elems$104 = $$x113.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x112, new $c_T2("pattern", _2$246)]));
+      var properties$104 = this$637.from__sc_IterableOnce__sci_Map(elems$104);
+      var _2$247 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$104);
+      var $$x114 = new $c_T2("anchorString", _2$247);
+      var this$644 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x110 = $m_sr_ScalaRunTime$();
+      var _2$248 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
+      var $$x109 = new $c_T2("type", _2$248);
+      var _2$249 = new $c_Lfrawa_typedjson_parser_Value$StringValue("uri");
+      var elems$105 = $$x110.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x109, new $c_T2("format", _2$249)]));
+      var properties$105 = this$644.from__sc_IterableOnce__sci_Map(elems$105);
+      var _2$250 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$105);
+      var $$x111 = new $c_T2("uriString", _2$250);
       var this$651 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x111 = $m_sr_ScalaRunTime$();
-      var _2$240 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
-      var $$x110 = new $c_T2("type", _2$240);
-      var _2$241 = new $c_Lfrawa_typedjson_parser_Value$StringValue("regex");
-      var elems$114 = $$x111.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x110, new $c_T2("format", _2$241)]));
-      var properties$113 = this$651.from__sc_IterableOnce__sci_Map(elems$114);
-      var _2$242 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$113);
-      var $$x112 = new $c_T2("pattern", _2$242);
-      var this$656 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x108 = $m_sr_ScalaRunTime$();
-      var _2$243 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/nonNegativeInteger");
-      var elems$115 = $$x108.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$243)]));
-      var properties$114 = this$656.from__sc_IterableOnce__sci_Map(elems$115);
-      var _2$244 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$114);
-      var $$x109 = new $c_T2("maxProperties", _2$244);
-      var this$664 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x106 = $m_sr_ScalaRunTime$();
-      var _2$245 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/nonNegativeInteger");
-      var $$x105 = new $c_T2("$ref", _2$245);
-      var this$661 = $m_s_package$().BigDecimal__s_math_BigDecimal$();
-      var value$3 = this$661.exact__T__s_math_BigDecimal("1");
-      var _2$246 = new $c_Lfrawa_typedjson_parser_Value$NumberValue(value$3);
-      var elems$116 = $$x106.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x105, new $c_T2("default", _2$246)]));
-      var properties$115 = this$664.from__sc_IterableOnce__sci_Map(elems$116);
-      var _2$247 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$115);
-      var $$x107 = new $c_T2("minContains", _2$247);
-      var this$669 = $m_s_Predef$().s_Predef$__f_Map;
+      var _2$251 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
+      var $$x107 = new $c_T2("type", _2$251);
+      var _2$252 = new $c_Lfrawa_typedjson_parser_Value$StringValue("uri-reference");
+      var elems$106 = $$x108.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x107, new $c_T2("format", _2$252)]));
+      var properties$106 = this$651.from__sc_IterableOnce__sci_Map(elems$106);
+      var _2$253 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$106);
+      var elems$107 = $$x115.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x114, $$x111, new $c_T2("uriReferenceString", _2$253)]));
+      var properties$107 = this$654.from__sc_IterableOnce__sci_Map(elems$107);
+      var _2$254 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$107);
+      var $$x116 = new $c_T2("$defs", _2$254);
+      var _2$255 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta");
+      var $$x106 = new $c_T2("$dynamicAnchor", _2$255);
+      var _2$256 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/meta/core");
+      var $$x105 = new $c_T2("$id", _2$256);
+      var this$725 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x103 = $m_sr_ScalaRunTime$();
-      var _2$248 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/nonNegativeInteger");
-      var elems$117 = $$x103.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$248)]));
-      var properties$116 = this$669.from__sc_IterableOnce__sci_Map(elems$117);
-      var _2$249 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$116);
-      var $$x104 = new $c_T2("maxItems", _2$249);
-      var _2$250 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var $$x102 = new $c_T2("const", _2$250);
-      var this$676 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x100 = $m_sr_ScalaRunTime$();
-      var _2$251 = new $c_Lfrawa_typedjson_parser_Value$StringValue("number");
-      var elems$118 = $$x100.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$251)]));
-      var properties$117 = this$676.from__sc_IterableOnce__sci_Map(elems$118);
-      var _2$252 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$117);
-      var $$x101 = new $c_T2("exclusiveMinimum", _2$252);
-      var this$683 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x98 = $m_sr_ScalaRunTime$();
-      var _2$253 = new $c_Lfrawa_typedjson_parser_Value$StringValue("array");
-      var $$x97 = new $c_T2("type", _2$253);
-      var _2$254 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var elems$119 = $$x98.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x97, new $c_T2("items", _2$254)]));
-      var properties$118 = this$683.from__sc_IterableOnce__sci_Map(elems$119);
-      var _2$255 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$118);
-      var $$x99 = new $c_T2("enum", _2$255);
-      var this$688 = $m_s_Predef$().s_Predef$__f_Map;
+      var this$663 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x101 = $m_sr_ScalaRunTime$();
+      var _2$257 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/uriReferenceString");
+      var elems$108 = $$x101.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$257)]));
+      var properties$108 = this$663.from__sc_IterableOnce__sci_Map(elems$108);
+      var _2$258 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$108);
+      var $$x102 = new $c_T2("$ref", _2$258);
+      var this$673 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x99 = $m_sr_ScalaRunTime$();
+      var _2$259 = new $c_Lfrawa_typedjson_parser_Value$StringValue("object");
+      var $$x98 = new $c_T2("type", _2$259);
+      var this$670 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x97 = $m_sr_ScalaRunTime$();
+      var _2$260 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
+      var elems$109 = $$x97.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$260)]));
+      var properties$109 = this$670.from__sc_IterableOnce__sci_Map(elems$109);
+      var _2$261 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$109);
+      var elems$110 = $$x99.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x98, new $c_T2("additionalProperties", _2$261)]));
+      var properties$110 = this$673.from__sc_IterableOnce__sci_Map(elems$110);
+      var _2$262 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$110);
+      var $$x100 = new $c_T2("$defs", _2$262);
+      var this$678 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x95 = $m_sr_ScalaRunTime$();
-      var _2$256 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/nonNegativeIntegerDefault0");
-      var elems$120 = $$x95.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$256)]));
-      var properties$119 = this$688.from__sc_IterableOnce__sci_Map(elems$120);
-      var _2$257 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$119);
-      var $$x96 = new $c_T2("minItems", _2$257);
-      var this$698 = $m_s_Predef$().s_Predef$__f_Map;
+      var _2$263 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/anchorString");
+      var elems$111 = $$x95.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$263)]));
+      var properties$111 = this$678.from__sc_IterableOnce__sci_Map(elems$111);
+      var _2$264 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$111);
+      var $$x96 = new $c_T2("$dynamicAnchor", _2$264);
+      var this$687 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x93 = $m_sr_ScalaRunTime$();
-      var _2$258 = new $c_Lfrawa_typedjson_parser_Value$StringValue("object");
-      var $$x92 = new $c_T2("type", _2$258);
-      var this$695 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x91 = $m_sr_ScalaRunTime$();
-      var _2$259 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/stringArray");
-      var elems$121 = $$x91.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$259)]));
-      var properties$120 = this$695.from__sc_IterableOnce__sci_Map(elems$121);
-      var _2$260 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$120);
-      var elems$122 = $$x93.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x92, new $c_T2("additionalProperties", _2$260)]));
-      var properties$121 = this$698.from__sc_IterableOnce__sci_Map(elems$122);
-      var _2$261 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$121);
-      var $$x94 = new $c_T2("dependentRequired", _2$261);
-      var this$703 = $m_s_Predef$().s_Predef$__f_Map;
+      var _2$265 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/uriReferenceString");
+      var $$x92 = new $c_T2("$ref", _2$265);
+      var _2$266 = new $c_Lfrawa_typedjson_parser_Value$StringValue("Non-empty fragments not allowed.");
+      var $$x91 = new $c_T2("$comment", _2$266);
+      var _2$267 = new $c_Lfrawa_typedjson_parser_Value$StringValue("^[^#]*#?$");
+      var elems$112 = $$x93.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x92, $$x91, new $c_T2("pattern", _2$267)]));
+      var properties$112 = this$687.from__sc_IterableOnce__sci_Map(elems$112);
+      var _2$268 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$112);
+      var $$x94 = new $c_T2("$id", _2$268);
+      var this$692 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x89 = $m_sr_ScalaRunTime$();
-      var _2$262 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/nonNegativeIntegerDefault0");
-      var elems$123 = $$x89.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$262)]));
-      var properties$122 = this$703.from__sc_IterableOnce__sci_Map(elems$123);
-      var _2$263 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$122);
-      var $$x90 = new $c_T2("minLength", _2$263);
-      var this$708 = $m_s_Predef$().s_Predef$__f_Map;
+      var _2$269 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/anchorString");
+      var elems$113 = $$x89.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$269)]));
+      var properties$113 = this$692.from__sc_IterableOnce__sci_Map(elems$113);
+      var _2$270 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$113);
+      var $$x90 = new $c_T2("$anchor", _2$270);
+      var this$707 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x87 = $m_sr_ScalaRunTime$();
-      var _2$264 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/nonNegativeInteger");
-      var elems$124 = $$x87.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$264)]));
-      var properties$123 = this$708.from__sc_IterableOnce__sci_Map(elems$124);
-      var _2$265 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$123);
-      var $$x88 = new $c_T2("maxLength", _2$265);
-      var this$713 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x85 = $m_sr_ScalaRunTime$();
-      var _2$266 = new $c_Lfrawa_typedjson_parser_Value$StringValue("number");
-      var elems$125 = $$x85.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$266)]));
-      var properties$124 = this$713.from__sc_IterableOnce__sci_Map(elems$125);
-      var _2$267 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$124);
-      var $$x86 = new $c_T2("maximum", _2$267);
-      var this$721 = $m_s_Predef$().s_Predef$__f_Map;
+      var _2$271 = new $c_Lfrawa_typedjson_parser_Value$StringValue("object");
+      var $$x86 = new $c_T2("type", _2$271);
+      var this$699 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x84 = $m_sr_ScalaRunTime$();
+      var _2$272 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/uriString");
+      var elems$114 = $$x84.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$272)]));
+      var properties$114 = this$699.from__sc_IterableOnce__sci_Map(elems$114);
+      var _2$273 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$114);
+      var $$x85 = new $c_T2("propertyNames", _2$273);
+      var this$704 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x83 = $m_sr_ScalaRunTime$();
-      var _2$268 = new $c_Lfrawa_typedjson_parser_Value$StringValue("number");
-      var $$x82 = new $c_T2("type", _2$268);
-      var this$718 = $m_s_package$().BigDecimal__s_math_BigDecimal$();
-      var value$4 = this$718.exact__T__s_math_BigDecimal("0");
-      var _2$269 = new $c_Lfrawa_typedjson_parser_Value$NumberValue(value$4);
-      var elems$126 = $$x83.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x82, new $c_T2("exclusiveMinimum", _2$269)]));
-      var properties$125 = this$721.from__sc_IterableOnce__sci_Map(elems$126);
-      var _2$270 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$125);
-      var $$x84 = new $c_T2("multipleOf", _2$270);
-      var this$726 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x80 = $m_sr_ScalaRunTime$();
-      var _2$271 = new $c_Lfrawa_typedjson_parser_Value$StringValue("number");
-      var elems$127 = $$x80.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$271)]));
-      var properties$126 = this$726.from__sc_IterableOnce__sci_Map(elems$127);
-      var _2$272 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$126);
-      var $$x81 = new $c_T2("minimum", _2$272);
-      var this$749 = $m_s_Predef$().s_Predef$__f_Map;
+      var _2$274 = new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean");
+      var elems$115 = $$x83.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$274)]));
+      var properties$115 = this$704.from__sc_IterableOnce__sci_Map(elems$115);
+      var _2$275 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$115);
+      var elems$116 = $$x87.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x86, $$x85, new $c_T2("additionalProperties", _2$275)]));
+      var properties$116 = this$707.from__sc_IterableOnce__sci_Map(elems$116);
+      var _2$276 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$116);
+      var $$x88 = new $c_T2("$vocabulary", _2$276);
+      var this$712 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x81 = $m_sr_ScalaRunTime$();
+      var _2$277 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/uriString");
+      var elems$117 = $$x81.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$277)]));
+      var properties$117 = this$712.from__sc_IterableOnce__sci_Map(elems$117);
+      var _2$278 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$117);
+      var $$x82 = new $c_T2("$schema", _2$278);
+      var this$717 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x79 = $m_sr_ScalaRunTime$();
+      var _2$279 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/uriReferenceString");
+      var elems$118 = $$x79.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$279)]));
+      var properties$118 = this$717.from__sc_IterableOnce__sci_Map(elems$118);
+      var _2$280 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$118);
+      var $$x80 = new $c_T2("$dynamicRef", _2$280);
+      var this$722 = $m_s_Predef$().s_Predef$__f_Map;
       var $$x78 = $m_sr_ScalaRunTime$();
-      var $$x77 = $m_sr_ScalaRunTime$();
-      var this$731 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x75 = $m_sr_ScalaRunTime$();
-      var _2$273 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/simpleTypes");
-      var elems$128 = $$x75.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$273)]));
-      var properties$127 = this$731.from__sc_IterableOnce__sci_Map(elems$128);
-      var $$x76 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$127);
-      var this$745 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x74 = $m_sr_ScalaRunTime$();
-      var _2$274 = new $c_Lfrawa_typedjson_parser_Value$StringValue("array");
-      var $$x73 = new $c_T2("type", _2$274);
-      var this$737 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x71 = $m_sr_ScalaRunTime$();
-      var _2$275 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/simpleTypes");
-      var elems$129 = $$x71.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$275)]));
-      var properties$128 = this$737.from__sc_IterableOnce__sci_Map(elems$129);
-      var _2$276 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$128);
-      var $$x72 = new $c_T2("items", _2$276);
-      var this$740 = $m_s_package$().BigDecimal__s_math_BigDecimal$();
-      var value$5 = this$740.exact__T__s_math_BigDecimal("1");
-      var _2$277 = new $c_Lfrawa_typedjson_parser_Value$NumberValue(value$5);
-      var $$x70 = new $c_T2("minItems", _2$277);
-      var _2$278 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var elems$130 = $$x74.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x73, $$x72, $$x70, new $c_T2("uniqueItems", _2$278)]));
-      var properties$129 = this$745.from__sc_IterableOnce__sci_Map(elems$130);
-      var items$19 = $$x77.wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([$$x76, new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$129)]));
-      var _2$279 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$19);
-      var elems$131 = $$x78.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("anyOf", _2$279)]));
-      var properties$130 = this$749.from__sc_IterableOnce__sci_Map(elems$131);
-      var _2$280 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$130);
-      var $$x79 = new $c_T2("type", _2$280);
-      var this$754 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x68 = $m_sr_ScalaRunTime$();
-      var _2$281 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/stringArray");
-      var elems$132 = $$x68.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$281)]));
-      var properties$131 = this$754.from__sc_IterableOnce__sci_Map(elems$132);
-      var _2$282 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$131);
-      var $$x69 = new $c_T2("required", _2$282);
-      var this$761 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x66 = $m_sr_ScalaRunTime$();
-      var _2$283 = new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean");
-      var $$x65 = new $c_T2("type", _2$283);
-      var _2$284 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(false);
-      var elems$133 = $$x66.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x65, new $c_T2("default", _2$284)]));
-      var properties$132 = this$761.from__sc_IterableOnce__sci_Map(elems$133);
-      var _2$285 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$132);
-      var $$x67 = new $c_T2("uniqueItems", _2$285);
-      var this$766 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x64 = $m_sr_ScalaRunTime$();
-      var _2$286 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/nonNegativeIntegerDefault0");
-      var elems$134 = $$x64.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$286)]));
-      var properties$133 = this$766.from__sc_IterableOnce__sci_Map(elems$134);
-      var _2$287 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$133);
-      var elems$135 = $$x117.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x116, $$x114, $$x112, $$x109, $$x107, $$x104, $$x102, $$x101, $$x99, $$x96, $$x94, $$x90, $$x88, $$x86, $$x84, $$x81, $$x79, $$x69, $$x67, new $c_T2("minProperties", _2$287)]));
-      var properties$134 = this$769.from__sc_IterableOnce__sci_Map(elems$135);
-      var _2$288 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$134);
-      var $$x118 = new $c_T2("properties", _2$288);
-      var this$774 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x62 = $m_sr_ScalaRunTime$();
-      var _2$289 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var elems$136 = $$x62.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("https://json-schema.org/draft/2020-12/vocab/validation", _2$289)]));
-      var properties$135 = this$774.from__sc_IterableOnce__sci_Map(elems$136);
-      var _2$290 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$135);
-      var $$x63 = new $c_T2("$vocabulary", _2$290);
-      var _2$291 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/schema");
-      var $$x61 = new $c_T2("$schema", _2$291);
-      var _2$292 = new $c_Lfrawa_typedjson_parser_Value$StringValue("Validation vocabulary meta-schema");
-      var $$x60 = new $c_T2("title", _2$292);
-      var items$20 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("object"), new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean")]));
-      var _2$293 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$20);
-      var elems$137 = $$x136.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x135, $$x120, $$x119, $$x118, $$x63, $$x61, $$x60, new $c_T2("type", _2$293)]));
-      var properties$136 = this$785.from__sc_IterableOnce__sci_Map(elems$137);
-      var content$6 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$136);
-      var _2$294 = new $c_Lfrawa_typedjson_foldercontents_FolderContents$File(content$6);
-      var $$x137 = new $c_T2("validation.json", _2$294);
-      var this$824 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x58 = $m_sr_ScalaRunTime$();
-      var _2$295 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta");
-      var $$x57 = new $c_T2("$dynamicAnchor", _2$295);
-      var _2$296 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/meta/content");
-      var $$x56 = new $c_T2("$id", _2$296);
-      var this$808 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x54 = $m_sr_ScalaRunTime$();
-      var this$795 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x52 = $m_sr_ScalaRunTime$();
-      var _2$297 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
-      var elems$138 = $$x52.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$297)]));
-      var properties$137 = this$795.from__sc_IterableOnce__sci_Map(elems$138);
-      var _2$298 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$137);
-      var $$x53 = new $c_T2("contentEncoding", _2$298);
-      var this$800 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x50 = $m_sr_ScalaRunTime$();
-      var _2$299 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
-      var elems$139 = $$x50.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$299)]));
-      var properties$138 = this$800.from__sc_IterableOnce__sci_Map(elems$139);
-      var _2$300 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$138);
-      var $$x51 = new $c_T2("contentMediaType", _2$300);
-      var this$805 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x49 = $m_sr_ScalaRunTime$();
-      var _2$301 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
-      var elems$140 = $$x49.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$301)]));
-      var properties$139 = this$805.from__sc_IterableOnce__sci_Map(elems$140);
-      var _2$302 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$139);
-      var elems$141 = $$x54.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x53, $$x51, new $c_T2("contentSchema", _2$302)]));
-      var properties$140 = this$808.from__sc_IterableOnce__sci_Map(elems$141);
-      var _2$303 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$140);
-      var $$x55 = new $c_T2("properties", _2$303);
-      var this$813 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x47 = $m_sr_ScalaRunTime$();
-      var _2$304 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var elems$142 = $$x47.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("https://json-schema.org/draft/2020-12/vocab/content", _2$304)]));
-      var properties$141 = this$813.from__sc_IterableOnce__sci_Map(elems$142);
-      var _2$305 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$141);
-      var $$x48 = new $c_T2("$vocabulary", _2$305);
-      var _2$306 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/schema");
-      var $$x46 = new $c_T2("$schema", _2$306);
-      var _2$307 = new $c_Lfrawa_typedjson_parser_Value$StringValue("Content vocabulary meta-schema");
-      var $$x45 = new $c_T2("title", _2$307);
-      var items$21 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("object"), new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean")]));
-      var _2$308 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$21);
-      var elems$143 = $$x58.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x57, $$x56, $$x55, $$x48, $$x46, $$x45, new $c_T2("type", _2$308)]));
-      var properties$142 = this$824.from__sc_IterableOnce__sci_Map(elems$143);
-      var content$7 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$142);
-      var _2$309 = new $c_Lfrawa_typedjson_foldercontents_FolderContents$File(content$7);
-      var $$x59 = new $c_T2("content.json", _2$309);
-      var this$936 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x44 = $m_sr_ScalaRunTime$();
-      var this$849 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x42 = $m_sr_ScalaRunTime$();
-      var this$832 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x40 = $m_sr_ScalaRunTime$();
-      var _2$310 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
-      var $$x39 = new $c_T2("type", _2$310);
-      var _2$311 = new $c_Lfrawa_typedjson_parser_Value$StringValue("^[A-Za-z_][-A-Za-z0-9._]*$");
-      var elems$144 = $$x40.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x39, new $c_T2("pattern", _2$311)]));
-      var properties$143 = this$832.from__sc_IterableOnce__sci_Map(elems$144);
-      var _2$312 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$143);
-      var $$x41 = new $c_T2("anchorString", _2$312);
-      var this$839 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x37 = $m_sr_ScalaRunTime$();
-      var _2$313 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
-      var $$x36 = new $c_T2("type", _2$313);
-      var _2$314 = new $c_Lfrawa_typedjson_parser_Value$StringValue("uri");
-      var elems$145 = $$x37.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x36, new $c_T2("format", _2$314)]));
-      var properties$144 = this$839.from__sc_IterableOnce__sci_Map(elems$145);
-      var _2$315 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$144);
-      var $$x38 = new $c_T2("uriString", _2$315);
-      var this$846 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x35 = $m_sr_ScalaRunTime$();
-      var _2$316 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
-      var $$x34 = new $c_T2("type", _2$316);
-      var _2$317 = new $c_Lfrawa_typedjson_parser_Value$StringValue("uri-reference");
-      var elems$146 = $$x35.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x34, new $c_T2("format", _2$317)]));
-      var properties$145 = this$846.from__sc_IterableOnce__sci_Map(elems$146);
-      var _2$318 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$145);
-      var elems$147 = $$x42.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x41, $$x38, new $c_T2("uriReferenceString", _2$318)]));
-      var properties$146 = this$849.from__sc_IterableOnce__sci_Map(elems$147);
-      var _2$319 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$146);
-      var $$x43 = new $c_T2("$defs", _2$319);
-      var _2$320 = new $c_Lfrawa_typedjson_parser_Value$StringValue("meta");
-      var $$x33 = new $c_T2("$dynamicAnchor", _2$320);
-      var _2$321 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/meta/core");
-      var $$x32 = new $c_T2("$id", _2$321);
-      var this$920 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x30 = $m_sr_ScalaRunTime$();
-      var this$858 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x28 = $m_sr_ScalaRunTime$();
-      var _2$322 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/uriReferenceString");
-      var elems$148 = $$x28.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$322)]));
-      var properties$147 = this$858.from__sc_IterableOnce__sci_Map(elems$148);
-      var _2$323 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$147);
-      var $$x29 = new $c_T2("$ref", _2$323);
-      var this$868 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x26 = $m_sr_ScalaRunTime$();
-      var _2$324 = new $c_Lfrawa_typedjson_parser_Value$StringValue("object");
-      var $$x25 = new $c_T2("type", _2$324);
-      var this$865 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x24 = $m_sr_ScalaRunTime$();
-      var _2$325 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#meta");
-      var elems$149 = $$x24.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$dynamicRef", _2$325)]));
-      var properties$148 = this$865.from__sc_IterableOnce__sci_Map(elems$149);
-      var _2$326 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$148);
-      var elems$150 = $$x26.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x25, new $c_T2("additionalProperties", _2$326)]));
-      var properties$149 = this$868.from__sc_IterableOnce__sci_Map(elems$150);
-      var _2$327 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$149);
-      var $$x27 = new $c_T2("$defs", _2$327);
-      var this$873 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x22 = $m_sr_ScalaRunTime$();
-      var _2$328 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/anchorString");
-      var elems$151 = $$x22.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$328)]));
-      var properties$150 = this$873.from__sc_IterableOnce__sci_Map(elems$151);
-      var _2$329 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$150);
-      var $$x23 = new $c_T2("$dynamicAnchor", _2$329);
-      var this$882 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x20 = $m_sr_ScalaRunTime$();
-      var _2$330 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/uriReferenceString");
-      var $$x19 = new $c_T2("$ref", _2$330);
-      var _2$331 = new $c_Lfrawa_typedjson_parser_Value$StringValue("Non-empty fragments not allowed.");
-      var $$x18 = new $c_T2("$comment", _2$331);
-      var _2$332 = new $c_Lfrawa_typedjson_parser_Value$StringValue("^[^#]*#?$");
-      var elems$152 = $$x20.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x19, $$x18, new $c_T2("pattern", _2$332)]));
-      var properties$151 = this$882.from__sc_IterableOnce__sci_Map(elems$152);
-      var _2$333 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$151);
-      var $$x21 = new $c_T2("$id", _2$333);
-      var this$887 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x16 = $m_sr_ScalaRunTime$();
-      var _2$334 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/anchorString");
-      var elems$153 = $$x16.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$334)]));
-      var properties$152 = this$887.from__sc_IterableOnce__sci_Map(elems$153);
-      var _2$335 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$152);
-      var $$x17 = new $c_T2("$anchor", _2$335);
-      var this$902 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x14 = $m_sr_ScalaRunTime$();
-      var _2$336 = new $c_Lfrawa_typedjson_parser_Value$StringValue("object");
-      var $$x13 = new $c_T2("type", _2$336);
-      var this$894 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x11 = $m_sr_ScalaRunTime$();
-      var _2$337 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/uriString");
-      var elems$154 = $$x11.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$337)]));
-      var properties$153 = this$894.from__sc_IterableOnce__sci_Map(elems$154);
-      var _2$338 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$153);
-      var $$x12 = new $c_T2("propertyNames", _2$338);
-      var this$899 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x10 = $m_sr_ScalaRunTime$();
-      var _2$339 = new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean");
-      var elems$155 = $$x10.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$339)]));
-      var properties$154 = this$899.from__sc_IterableOnce__sci_Map(elems$155);
-      var _2$340 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$154);
-      var elems$156 = $$x14.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x13, $$x12, new $c_T2("additionalProperties", _2$340)]));
-      var properties$155 = this$902.from__sc_IterableOnce__sci_Map(elems$156);
-      var _2$341 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$155);
-      var $$x15 = new $c_T2("$vocabulary", _2$341);
-      var this$907 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x8 = $m_sr_ScalaRunTime$();
-      var _2$342 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/uriString");
-      var elems$157 = $$x8.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$342)]));
-      var properties$156 = this$907.from__sc_IterableOnce__sci_Map(elems$157);
-      var _2$343 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$156);
-      var $$x9 = new $c_T2("$schema", _2$343);
-      var this$912 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x6 = $m_sr_ScalaRunTime$();
-      var _2$344 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/uriReferenceString");
-      var elems$158 = $$x6.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$344)]));
-      var properties$157 = this$912.from__sc_IterableOnce__sci_Map(elems$158);
-      var _2$345 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$157);
-      var $$x7 = new $c_T2("$dynamicRef", _2$345);
-      var this$917 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x5 = $m_sr_ScalaRunTime$();
-      var _2$346 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
-      var elems$159 = $$x5.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$346)]));
-      var properties$158 = this$917.from__sc_IterableOnce__sci_Map(elems$159);
-      var _2$347 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$158);
-      var elems$160 = $$x30.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x29, $$x27, $$x23, $$x21, $$x17, $$x15, $$x9, $$x7, new $c_T2("$comment", _2$347)]));
-      var properties$159 = this$920.from__sc_IterableOnce__sci_Map(elems$160);
-      var _2$348 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$159);
-      var $$x31 = new $c_T2("properties", _2$348);
+      var _2$281 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
+      var elems$119 = $$x78.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$281)]));
+      var properties$119 = this$722.from__sc_IterableOnce__sci_Map(elems$119);
+      var _2$282 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$119);
+      var elems$120 = $$x103.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x102, $$x100, $$x96, $$x94, $$x90, $$x88, $$x82, $$x80, new $c_T2("$comment", _2$282)]));
+      var properties$120 = this$725.from__sc_IterableOnce__sci_Map(elems$120);
+      var _2$283 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$120);
+      var $$x104 = new $c_T2("properties", _2$283);
+      var this$730 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x76 = $m_sr_ScalaRunTime$();
+      var _2$284 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
+      var elems$121 = $$x76.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("https://json-schema.org/draft/2020-12/vocab/core", _2$284)]));
+      var properties$121 = this$730.from__sc_IterableOnce__sci_Map(elems$121);
+      var _2$285 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$121);
+      var $$x77 = new $c_T2("$vocabulary", _2$285);
+      var _2$286 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/schema");
+      var $$x75 = new $c_T2("$schema", _2$286);
+      var _2$287 = new $c_Lfrawa_typedjson_parser_Value$StringValue("Core vocabulary meta-schema");
+      var $$x74 = new $c_T2("title", _2$287);
+      var items$12 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("object"), new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean")]));
+      var _2$288 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$12);
+      var elems$122 = $$x117.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x116, $$x106, $$x105, $$x104, $$x77, $$x75, $$x74, new $c_T2("type", _2$288)]));
+      var properties$122 = this$741.from__sc_IterableOnce__sci_Map(elems$122);
+      var _2$289 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$122);
+      var $$x118 = new $c_T2("meta/core.json", _2$289);
       var this$925 = $m_s_Predef$().s_Predef$__f_Map;
-      var $$x3 = $m_sr_ScalaRunTime$();
-      var _2$349 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(true);
-      var elems$161 = $$x3.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("https://json-schema.org/draft/2020-12/vocab/core", _2$349)]));
-      var properties$160 = this$925.from__sc_IterableOnce__sci_Map(elems$161);
-      var _2$350 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$160);
-      var $$x4 = new $c_T2("$vocabulary", _2$350);
-      var _2$351 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/schema");
-      var $$x2 = new $c_T2("$schema", _2$351);
-      var _2$352 = new $c_Lfrawa_typedjson_parser_Value$StringValue("Core vocabulary meta-schema");
-      var $$x1 = new $c_T2("title", _2$352);
-      var items$22 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("object"), new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean")]));
-      var _2$353 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$22);
-      var elems$162 = $$x44.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x43, $$x33, $$x32, $$x31, $$x4, $$x2, $$x1, new $c_T2("type", _2$353)]));
-      var properties$161 = this$936.from__sc_IterableOnce__sci_Map(elems$162);
-      var content$8 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$161);
-      var _2$354 = new $c_Lfrawa_typedjson_foldercontents_FolderContents$File(content$8);
-      var elems$163 = $$x244.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x243, $$x187, $$x176, $$x150, $$x137, $$x59, new $c_T2("core.json", _2$354)]));
-      var items$23 = this$940.from__sc_IterableOnce__sci_Map(elems$163);
-      var _2$355 = new $c_Lfrawa_typedjson_foldercontents_FolderContents$Folder(items$23);
-      var elems$164 = $$x377.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x376, $$x319, new $c_T2("meta", _2$355)]));
-      var items$24 = this$943.from__sc_IterableOnce__sci_Map(elems$164);
-      this.Lfrawa_typedjson_meta_MetaSchemas$__f_metaSchemas = new $c_Lfrawa_typedjson_foldercontents_FolderContents$Folder(items$24);
+      var $$x73 = $m_sr_ScalaRunTime$();
+      var this$898 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x71 = $m_sr_ScalaRunTime$();
+      var this$746 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x69 = $m_sr_ScalaRunTime$();
+      var _2$290 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/outputUnit");
+      var elems$123 = $$x69.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$290)]));
+      var properties$123 = this$746.from__sc_IterableOnce__sci_Map(elems$123);
+      var _2$291 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$123);
+      var $$x70 = new $c_T2("verbose", _2$291);
+      var this$760 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x67 = $m_sr_ScalaRunTime$();
+      var this$754 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x65 = $m_sr_ScalaRunTime$();
+      var this$751 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x64 = $m_sr_ScalaRunTime$();
+      var _2$292 = new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean");
+      var elems$124 = $$x64.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$292)]));
+      var properties$124 = this$751.from__sc_IterableOnce__sci_Map(elems$124);
+      var _2$293 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$124);
+      var elems$125 = $$x65.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("valid", _2$293)]));
+      var properties$125 = this$754.from__sc_IterableOnce__sci_Map(elems$125);
+      var _2$294 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$125);
+      var $$x66 = new $c_T2("properties", _2$294);
+      var items$13 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("valid")]));
+      var _2$295 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$13);
+      var elems$126 = $$x67.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x66, new $c_T2("required", _2$295)]));
+      var properties$126 = this$760.from__sc_IterableOnce__sci_Map(elems$126);
+      var _2$296 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$126);
+      var $$x68 = new $c_T2("flag", _2$296);
+      var this$765 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x62 = $m_sr_ScalaRunTime$();
+      var _2$297 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/outputUnit");
+      var elems$127 = $$x62.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$297)]));
+      var properties$127 = this$765.from__sc_IterableOnce__sci_Map(elems$127);
+      var _2$298 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$127);
+      var $$x63 = new $c_T2("detailed", _2$298);
+      var this$770 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x60 = $m_sr_ScalaRunTime$();
+      var _2$299 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/outputUnit");
+      var elems$128 = $$x60.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$299)]));
+      var properties$128 = this$770.from__sc_IterableOnce__sci_Map(elems$128);
+      var _2$300 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$128);
+      var $$x61 = new $c_T2("basic", _2$300);
+      var this$885 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x58 = $m_sr_ScalaRunTime$();
+      var this$814 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x56 = $m_sr_ScalaRunTime$();
+      var this$777 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x54 = $m_sr_ScalaRunTime$();
+      var _2$301 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
+      var $$x53 = new $c_T2("type", _2$301);
+      var _2$302 = new $c_Lfrawa_typedjson_parser_Value$StringValue("json-pointer");
+      var elems$129 = $$x54.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x53, new $c_T2("format", _2$302)]));
+      var properties$129 = this$777.from__sc_IterableOnce__sci_Map(elems$129);
+      var _2$303 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$129);
+      var $$x55 = new $c_T2("instanceLocation", _2$303);
+      var this$782 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x51 = $m_sr_ScalaRunTime$();
+      var _2$304 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/outputUnitArray");
+      var elems$130 = $$x51.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$304)]));
+      var properties$130 = this$782.from__sc_IterableOnce__sci_Map(elems$130);
+      var _2$305 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$130);
+      var $$x52 = new $c_T2("annotations", _2$305);
+      var this$787 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x49 = $m_sr_ScalaRunTime$();
+      var _2$306 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
+      var elems$131 = $$x49.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$306)]));
+      var properties$131 = this$787.from__sc_IterableOnce__sci_Map(elems$131);
+      var _2$307 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$131);
+      var $$x50 = new $c_T2("error", _2$307);
+      var this$792 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x47 = $m_sr_ScalaRunTime$();
+      var _2$308 = new $c_Lfrawa_typedjson_parser_Value$StringValue("boolean");
+      var elems$132 = $$x47.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("type", _2$308)]));
+      var properties$132 = this$792.from__sc_IterableOnce__sci_Map(elems$132);
+      var _2$309 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$132);
+      var $$x48 = new $c_T2("valid", _2$309);
+      var this$799 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x45 = $m_sr_ScalaRunTime$();
+      var _2$310 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
+      var $$x44 = new $c_T2("type", _2$310);
+      var _2$311 = new $c_Lfrawa_typedjson_parser_Value$StringValue("uri");
+      var elems$133 = $$x45.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x44, new $c_T2("format", _2$311)]));
+      var properties$133 = this$799.from__sc_IterableOnce__sci_Map(elems$133);
+      var _2$312 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$133);
+      var $$x46 = new $c_T2("absoluteKeywordLocation", _2$312);
+      var this$806 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x42 = $m_sr_ScalaRunTime$();
+      var _2$313 = new $c_Lfrawa_typedjson_parser_Value$StringValue("string");
+      var $$x41 = new $c_T2("type", _2$313);
+      var _2$314 = new $c_Lfrawa_typedjson_parser_Value$StringValue("json-pointer");
+      var elems$134 = $$x42.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x41, new $c_T2("format", _2$314)]));
+      var properties$134 = this$806.from__sc_IterableOnce__sci_Map(elems$134);
+      var _2$315 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$134);
+      var $$x43 = new $c_T2("keywordLocation", _2$315);
+      var this$811 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x40 = $m_sr_ScalaRunTime$();
+      var _2$316 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/outputUnitArray");
+      var elems$135 = $$x40.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$316)]));
+      var properties$135 = this$811.from__sc_IterableOnce__sci_Map(elems$135);
+      var _2$317 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$135);
+      var elems$136 = $$x56.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x55, $$x52, $$x50, $$x48, $$x46, $$x43, new $c_T2("errors", _2$317)]));
+      var properties$136 = this$814.from__sc_IterableOnce__sci_Map(elems$136);
+      var _2$318 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$136);
+      var $$x57 = new $c_T2("properties", _2$318);
+      var items$14 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("valid"), new $c_Lfrawa_typedjson_parser_Value$StringValue("keywordLocation"), new $c_Lfrawa_typedjson_parser_Value$StringValue("instanceLocation")]));
+      var _2$319 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$14);
+      var $$x39 = new $c_T2("required", _2$319);
+      var $$x38 = $m_sr_ScalaRunTime$();
+      var this$848 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x36 = $m_sr_ScalaRunTime$();
+      var this$830 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x34 = $m_sr_ScalaRunTime$();
+      var this$827 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x33 = $m_sr_ScalaRunTime$();
+      var this$824 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x32 = $m_sr_ScalaRunTime$();
+      var _2$320 = new $c_Lfrawa_typedjson_parser_Value$BoolValue(false);
+      var elems$137 = $$x32.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("const", _2$320)]));
+      var properties$137 = this$824.from__sc_IterableOnce__sci_Map(elems$137);
+      var _2$321 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$137);
+      var elems$138 = $$x33.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("valid", _2$321)]));
+      var properties$138 = this$827.from__sc_IterableOnce__sci_Map(elems$138);
+      var _2$322 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$138);
+      var elems$139 = $$x34.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("properties", _2$322)]));
+      var properties$139 = this$830.from__sc_IterableOnce__sci_Map(elems$139);
+      var _2$323 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$139);
+      var $$x35 = new $c_T2("if", _2$323);
+      var this$845 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x31 = $m_sr_ScalaRunTime$();
+      var $$x30 = $m_sr_ScalaRunTime$();
+      var this$836 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x28 = $m_sr_ScalaRunTime$();
+      var items$15 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("error")]));
+      var _2$324 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$15);
+      var elems$140 = $$x28.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("required", _2$324)]));
+      var properties$140 = this$836.from__sc_IterableOnce__sci_Map(elems$140);
+      var $$x29 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$140);
+      var this$841 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x27 = $m_sr_ScalaRunTime$();
+      var items$16 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("errors")]));
+      var _2$325 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$16);
+      var elems$141 = $$x27.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("required", _2$325)]));
+      var properties$141 = this$841.from__sc_IterableOnce__sci_Map(elems$141);
+      var items$17 = $$x30.wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([$$x29, new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$141)]));
+      var _2$326 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$17);
+      var elems$142 = $$x31.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("anyOf", _2$326)]));
+      var properties$142 = this$845.from__sc_IterableOnce__sci_Map(elems$142);
+      var _2$327 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$142);
+      var elems$143 = $$x36.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x35, new $c_T2("then", _2$327)]));
+      var properties$143 = this$848.from__sc_IterableOnce__sci_Map(elems$143);
+      var $$x37 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$143);
+      var this$881 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x26 = $m_sr_ScalaRunTime$();
+      var this$872 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x24 = $m_sr_ScalaRunTime$();
+      var $$x23 = $m_sr_ScalaRunTime$();
+      var this$858 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x21 = $m_sr_ScalaRunTime$();
+      var this$855 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x20 = $m_sr_ScalaRunTime$();
+      var this$852 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x19 = $m_sr_ScalaRunTime$();
+      var _2$328 = new $c_Lfrawa_typedjson_parser_Value$StringValue("/\\$ref/");
+      var elems$144 = $$x19.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("pattern", _2$328)]));
+      var properties$144 = this$852.from__sc_IterableOnce__sci_Map(elems$144);
+      var _2$329 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$144);
+      var elems$145 = $$x20.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("keywordLocation", _2$329)]));
+      var properties$145 = this$855.from__sc_IterableOnce__sci_Map(elems$145);
+      var _2$330 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$145);
+      var elems$146 = $$x21.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("properties", _2$330)]));
+      var properties$146 = this$858.from__sc_IterableOnce__sci_Map(elems$146);
+      var $$x22 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$146);
+      var this$868 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x18 = $m_sr_ScalaRunTime$();
+      var this$865 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x17 = $m_sr_ScalaRunTime$();
+      var this$862 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x16 = $m_sr_ScalaRunTime$();
+      var _2$331 = new $c_Lfrawa_typedjson_parser_Value$StringValue("/\\$dynamicRef/");
+      var elems$147 = $$x16.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("pattern", _2$331)]));
+      var properties$147 = this$862.from__sc_IterableOnce__sci_Map(elems$147);
+      var _2$332 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$147);
+      var elems$148 = $$x17.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("keywordLocation", _2$332)]));
+      var properties$148 = this$865.from__sc_IterableOnce__sci_Map(elems$148);
+      var _2$333 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$148);
+      var elems$149 = $$x18.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("properties", _2$333)]));
+      var properties$149 = this$868.from__sc_IterableOnce__sci_Map(elems$149);
+      var items$18 = $$x23.wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([$$x22, new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$149)]));
+      var _2$334 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$18);
+      var elems$150 = $$x24.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("anyOf", _2$334)]));
+      var properties$150 = this$872.from__sc_IterableOnce__sci_Map(elems$150);
+      var _2$335 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$150);
+      var $$x25 = new $c_T2("if", _2$335);
+      var this$878 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x15 = $m_sr_ScalaRunTime$();
+      var items$19 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([new $c_Lfrawa_typedjson_parser_Value$StringValue("absoluteKeywordLocation")]));
+      var _2$336 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$19);
+      var elems$151 = $$x15.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("required", _2$336)]));
+      var properties$151 = this$878.from__sc_IterableOnce__sci_Map(elems$151);
+      var _2$337 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$151);
+      var elems$152 = $$x26.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x25, new $c_T2("then", _2$337)]));
+      var properties$152 = this$881.from__sc_IterableOnce__sci_Map(elems$152);
+      var items$20 = $$x38.wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([$$x37, new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$152)]));
+      var _2$338 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$20);
+      var elems$153 = $$x58.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x57, $$x39, new $c_T2("allOf", _2$338)]));
+      var properties$153 = this$885.from__sc_IterableOnce__sci_Map(elems$153);
+      var _2$339 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$153);
+      var $$x59 = new $c_T2("outputUnit", _2$339);
+      var this$895 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x14 = $m_sr_ScalaRunTime$();
+      var _2$340 = new $c_Lfrawa_typedjson_parser_Value$StringValue("array");
+      var $$x13 = new $c_T2("type", _2$340);
+      var this$892 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x12 = $m_sr_ScalaRunTime$();
+      var _2$341 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/outputUnit");
+      var elems$154 = $$x12.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$341)]));
+      var properties$154 = this$892.from__sc_IterableOnce__sci_Map(elems$154);
+      var _2$342 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$154);
+      var elems$155 = $$x14.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x13, new $c_T2("items", _2$342)]));
+      var properties$155 = this$895.from__sc_IterableOnce__sci_Map(elems$155);
+      var _2$343 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$155);
+      var elems$156 = $$x71.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x70, $$x68, $$x63, $$x61, $$x59, new $c_T2("outputUnitArray", _2$343)]));
+      var properties$156 = this$898.from__sc_IterableOnce__sci_Map(elems$156);
+      var _2$344 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$156);
+      var $$x72 = new $c_T2("$defs", _2$344);
+      var _2$345 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/output/schema");
+      var $$x11 = new $c_T2("$id", _2$345);
+      var _2$346 = new $c_Lfrawa_typedjson_parser_Value$StringValue("https://json-schema.org/draft/2020-12/schema");
+      var $$x10 = new $c_T2("$schema", _2$346);
+      var _2$347 = new $c_Lfrawa_typedjson_parser_Value$StringValue("A schema that validates the minimum requirements for validation output");
+      var $$x9 = new $c_T2("description", _2$347);
+      var $$x8 = $m_sr_ScalaRunTime$();
+      var this$909 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x6 = $m_sr_ScalaRunTime$();
+      var _2$348 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/flag");
+      var elems$157 = $$x6.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$348)]));
+      var properties$157 = this$909.from__sc_IterableOnce__sci_Map(elems$157);
+      var $$x7 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$157);
+      var this$913 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x4 = $m_sr_ScalaRunTime$();
+      var _2$349 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/basic");
+      var elems$158 = $$x4.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$349)]));
+      var properties$158 = this$913.from__sc_IterableOnce__sci_Map(elems$158);
+      var $$x5 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$158);
+      var this$917 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x2 = $m_sr_ScalaRunTime$();
+      var _2$350 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/detailed");
+      var elems$159 = $$x2.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$350)]));
+      var properties$159 = this$917.from__sc_IterableOnce__sci_Map(elems$159);
+      var $$x3 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$159);
+      var this$921 = $m_s_Predef$().s_Predef$__f_Map;
+      var $$x1 = $m_sr_ScalaRunTime$();
+      var _2$351 = new $c_Lfrawa_typedjson_parser_Value$StringValue("#/$defs/verbose");
+      var elems$160 = $$x1.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([new $c_T2("$ref", _2$351)]));
+      var properties$160 = this$921.from__sc_IterableOnce__sci_Map(elems$160);
+      var items$21 = $$x8.wrapRefArray__AO__sci_ArraySeq(new ($d_Lfrawa_typedjson_parser_Value.getArrayOf().constr)([$$x7, $$x5, $$x3, new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$160)]));
+      var _2$352 = new $c_Lfrawa_typedjson_parser_Value$ArrayValue(items$21);
+      var elems$161 = $$x73.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x72, $$x11, $$x10, $$x9, new $c_T2("anyOf", _2$352)]));
+      var properties$161 = this$925.from__sc_IterableOnce__sci_Map(elems$161);
+      var _2$353 = new $c_Lfrawa_typedjson_parser_Value$ObjectValue(properties$161);
+      var elems$162 = $$x375.wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x374, $$x296, $$x270, $$x213, $$x198, $$x187, $$x131, $$x118, new $c_T2("output/schema.json", _2$353)]));
+      this.Lfrawa_typedjson_meta_MetaSchemas$__f_metaSchemas = this$928.from__sc_IterableOnce__sci_Map(elems$162);
     }
     $c_Lfrawa_typedjson_meta_MetaSchemas$.prototype = new $h_O();
     $c_Lfrawa_typedjson_meta_MetaSchemas$.prototype.constructor = $c_Lfrawa_typedjson_meta_MetaSchemas$;
@@ -27829,13 +27809,6 @@
         }
       } else {
         return $m_s_reflect_ClassTag$().apply__jl_Class__s_reflect_ClassTag($objectGetClass(this$).getComponentType__jl_Class()).newArray__I__O(0)
-      }
-    });
-    $c_sc_ArrayOps$.prototype.tail$extension__O__O = (function(this$) {
-      if (($m_sr_ScalaRunTime$().array_length__O__I(this$) === 0)) {
-        throw $ct_jl_UnsupportedOperationException__T__(new $c_jl_UnsupportedOperationException(), "tail of empty array")
-      } else {
-        return $m_sc_ArrayOps$().slice$extension__O__I__I__O(this$, 1, $m_sr_ScalaRunTime$().array_length__O__I(this$))
       }
     });
     $c_sc_ArrayOps$.prototype.drop$extension__O__I__O = (function(this$, n) {
@@ -38119,14 +38092,6 @@
     function $f_sc_IterableOps__filterNot__F1__O($thiz, pred) {
       return $thiz.fromSpecific__sc_IterableOnce__O(new $c_sc_View$Filter($thiz, pred, true))
     }
-    function $f_sc_IterableOps__drop__I__O($thiz, n) {
-      return $thiz.fromSpecific__sc_IterableOnce__O($ct_sc_View$Drop__sc_IterableOps__I__(new $c_sc_View$Drop(), $thiz, n))
-    }
-    function $f_sc_IterableOps__tail__O($thiz) {
-      if ($thiz.isEmpty__Z()) {
-        throw $ct_jl_UnsupportedOperationException__(new $c_jl_UnsupportedOperationException())
-      }  return $thiz.drop__I__O(1)
-    }
     function $f_sc_IterableOps__map__F1__O($thiz, f) {
       return $thiz.iterableFactory__sc_IterableFactory().from__sc_IterableOnce__O($ct_sc_View$Map__sc_IterableOps__F1__(new $c_sc_View$Map(), $thiz, f))
     }
@@ -40594,21 +40559,21 @@
     $c_Lfrawa_typedjson_js_Marker.prototype.$js$exported$prop$severity__O = (function() {
       return this.Lfrawa_typedjson_js_Marker__f_severity
     });
-    Object.defineProperty($c_Lfrawa_typedjson_js_Marker.prototype, "start", {
-      "get": (function() {
-        return this.$js$exported$prop$start__O()
-      }),
-      "configurable": true
-    });
     Object.defineProperty($c_Lfrawa_typedjson_js_Marker.prototype, "message", {
       "get": (function() {
         return this.$js$exported$prop$message__O()
       }),
       "configurable": true
     });
-    Object.defineProperty($c_Lfrawa_typedjson_js_Marker.prototype, "severity", {
+    Object.defineProperty($c_Lfrawa_typedjson_js_Marker.prototype, "start", {
       "get": (function() {
-        return this.$js$exported$prop$severity__O()
+        return this.$js$exported$prop$start__O()
+      }),
+      "configurable": true
+    });
+    Object.defineProperty($c_Lfrawa_typedjson_js_Marker.prototype, "pointer", {
+      "get": (function() {
+        return this.$js$exported$prop$pointer__O()
       }),
       "configurable": true
     });
@@ -40618,9 +40583,9 @@
       }),
       "configurable": true
     });
-    Object.defineProperty($c_Lfrawa_typedjson_js_Marker.prototype, "pointer", {
+    Object.defineProperty($c_Lfrawa_typedjson_js_Marker.prototype, "severity", {
       "get": (function() {
-        return this.$js$exported$prop$pointer__O()
+        return this.$js$exported$prop$severity__O()
       }),
       "configurable": true
     });
@@ -40799,9 +40764,9 @@
       }),
       "configurable": true
     });
-    Object.defineProperty($c_Lfrawa_typedjson_js_Suggestions.prototype, "end", {
+    Object.defineProperty($c_Lfrawa_typedjson_js_Suggestions.prototype, "suggestions", {
       "get": (function() {
-        return this.$js$exported$prop$end__O()
+        return this.$js$exported$prop$suggestions__O()
       }),
       "configurable": true
     });
@@ -40811,9 +40776,9 @@
       }),
       "configurable": true
     });
-    Object.defineProperty($c_Lfrawa_typedjson_js_Suggestions.prototype, "suggestions", {
+    Object.defineProperty($c_Lfrawa_typedjson_js_Suggestions.prototype, "end", {
       "get": (function() {
-        return this.$js$exported$prop$suggestions__O()
+        return this.$js$exported$prop$end__O()
       }),
       "configurable": true
     });
@@ -41107,20 +41072,20 @@
     $c_Lfrawa_typedjson_js_TypedJson.prototype.$js$exported$meth$suggestAt__I__O = (function(offset) {
       return this.suggestAt__I__sjs_js_Array(offset)
     });
-    $c_Lfrawa_typedjson_js_TypedJson.prototype.withSchema = (function(arg) {
-      var prep0 = $as_Lfrawa_typedjson_js_TypedJson(arg);
-      return this.$js$exported$meth$withSchema__Lfrawa_typedjson_js_TypedJson__O(prep0)
-    });
     $c_Lfrawa_typedjson_js_TypedJson.prototype.forValue = (function(arg) {
       var prep0 = $as_T(arg);
       return this.$js$exported$meth$forValue__T__O(prep0)
     });
-    $c_Lfrawa_typedjson_js_TypedJson.prototype.markers = (function() {
-      return this.$js$exported$meth$markers__O()
+    $c_Lfrawa_typedjson_js_TypedJson.prototype.withSchema = (function(arg) {
+      var prep0 = $as_Lfrawa_typedjson_js_TypedJson(arg);
+      return this.$js$exported$meth$withSchema__Lfrawa_typedjson_js_TypedJson__O(prep0)
     });
     $c_Lfrawa_typedjson_js_TypedJson.prototype.suggestAt = (function(arg) {
       var prep0 = $uI(arg);
       return this.$js$exported$meth$suggestAt__I__O(prep0)
+    });
+    $c_Lfrawa_typedjson_js_TypedJson.prototype.markers = (function() {
+      return this.$js$exported$meth$markers__O()
     });
     function $as_Lfrawa_typedjson_js_TypedJson(obj) {
       return (((obj instanceof $c_Lfrawa_typedjson_js_TypedJson) || (obj === null)) ? obj : $throwClassCastException(obj, "frawa.typedjson.js.TypedJson"))
@@ -46852,9 +46817,8 @@
     }
     /** @constructor */
     function $c_sci_WrappedString$() {
-      this.sci_WrappedString$__f_empty = null;
       $n_sci_WrappedString$ = this;
-      this.sci_WrappedString$__f_empty = new $c_sci_WrappedString("");
+      new $c_sci_WrappedString("");
     }
     $c_sci_WrappedString$.prototype = new $h_O();
     $c_sci_WrappedString$.prototype.constructor = $c_sci_WrappedString$;
@@ -47059,121 +47023,6 @@
       /*<skip>*/
     }
     $h_s_util_Try.prototype = $c_s_util_Try.prototype;
-    function $p_Lfrawa_typedjson_foldercontents_FolderContents__toPath__T__sci_Seq($thiz, path) {
-      var xs = $f_T__split__T__I__AT(path, "/", 0);
-      return $m_sc_ArrayOps$().toIndexedSeq$extension__O__sci_IndexedSeq(xs)
-    }
-    function $p_Lfrawa_typedjson_foldercontents_FolderContents__getParent__sci_Seq__sci_Seq($thiz, path) {
-      return $as_sci_Seq(path.slice__I__I__O(0, (((-1) + path.length__I()) | 0)))
-    }
-    function $p_Lfrawa_typedjson_foldercontents_FolderContents__files__sci_Seq__sci_Map($thiz, path) {
-      if (path.isEmpty__Z()) {
-        return $p_Lfrawa_typedjson_foldercontents_FolderContents__files__Lfrawa_typedjson_foldercontents_FolderContents__sci_Map($thiz, $thiz)
-      } else {
-        var this$1 = $p_Lfrawa_typedjson_foldercontents_FolderContents__folder__sci_Seq__s_Option($thiz, path);
-        if (this$1.isEmpty__Z()) {
-          var this$2 = $m_s_None$();
-        } else {
-          var arg1 = this$1.get__O();
-          var dir = $as_Lfrawa_typedjson_foldercontents_FolderContents$Folder(arg1);
-          var this$2 = new $c_s_Some($p_Lfrawa_typedjson_foldercontents_FolderContents__files__Lfrawa_typedjson_foldercontents_FolderContents$Folder__sci_Map($thiz, dir));
-        }    if (this$2.isEmpty__Z()) {
-          var this$3 = $m_s_Predef$().s_Predef$__f_Map;
-          var elems = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([]));
-          var $$x1 = this$3.from__sc_IterableOnce__sci_Map(elems);
-        } else {
-          var $$x1 = this$2.get__O();
-        }    return $as_sci_Map($$x1)
-      }
-    }
-    function $p_Lfrawa_typedjson_foldercontents_FolderContents__files__Lfrawa_typedjson_foldercontents_FolderContents__sci_Map($thiz, fc) {
-      if ((fc instanceof $c_Lfrawa_typedjson_foldercontents_FolderContents$File)) {
-        $as_Lfrawa_typedjson_foldercontents_FolderContents$File(fc);
-        var this$2 = $m_s_Predef$().s_Predef$__f_Map;
-        var elems = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([]));
-        return this$2.from__sc_IterableOnce__sci_Map(elems)
-      }  if ((fc instanceof $c_Lfrawa_typedjson_foldercontents_FolderContents$Folder)) {
-        var folder = $as_Lfrawa_typedjson_foldercontents_FolderContents$Folder(fc);
-        return $p_Lfrawa_typedjson_foldercontents_FolderContents__files__Lfrawa_typedjson_foldercontents_FolderContents$Folder__sci_Map($thiz, folder)
-      }  throw new $c_s_MatchError(fc)
-    }
-    function $p_Lfrawa_typedjson_foldercontents_FolderContents__folder__Lfrawa_typedjson_foldercontents_FolderContents__s_Option($thiz, fc) {
-      if ((fc instanceof $c_Lfrawa_typedjson_foldercontents_FolderContents$File)) {
-        $as_Lfrawa_typedjson_foldercontents_FolderContents$File(fc);
-        return $m_s_None$()
-      }  if ((fc instanceof $c_Lfrawa_typedjson_foldercontents_FolderContents$Folder)) {
-        var folder = $as_Lfrawa_typedjson_foldercontents_FolderContents$Folder(fc);
-        return new $c_s_Some(folder)
-      }  throw new $c_s_MatchError(fc)
-    }
-    function $p_Lfrawa_typedjson_foldercontents_FolderContents__folder__sci_Seq__s_Option($thiz, path) {
-      if (($thiz instanceof $c_Lfrawa_typedjson_foldercontents_FolderContents$File)) {
-        $as_Lfrawa_typedjson_foldercontents_FolderContents$File($thiz);
-        return $m_s_None$()
-      }  if (($thiz instanceof $c_Lfrawa_typedjson_foldercontents_FolderContents$Folder)) {
-        var x$1$1 = $as_Lfrawa_typedjson_foldercontents_FolderContents$Folder($thiz);
-        var x14 = x$1$1.Lfrawa_typedjson_foldercontents_FolderContents$Folder__f_items;
-        if ((path.length__I() === 1)) {
-          var this$3 = x14.get__O__s_Option($as_T(path.last__O()));
-          if (this$3.isEmpty__Z()) {
-            return $m_s_None$()
-          } else {
-            var arg1 = this$3.get__O();
-            var _$1 = $as_Lfrawa_typedjson_foldercontents_FolderContents(arg1);
-            return $p_Lfrawa_typedjson_foldercontents_FolderContents__folder__Lfrawa_typedjson_foldercontents_FolderContents__s_Option($thiz, _$1)
-          }
-        } else {
-          var this$4 = x14.get__O__s_Option(path.head__O());
-          if (this$4.isEmpty__Z()) {
-            return $m_s_None$()
-          } else {
-            var arg1$1 = this$4.get__O();
-            var _$2 = $as_Lfrawa_typedjson_foldercontents_FolderContents(arg1$1);
-            return $p_Lfrawa_typedjson_foldercontents_FolderContents__folder__sci_Seq__s_Option(_$2, $as_sci_Seq(path.tail__O()))
-          }
-        }
-      }  throw new $c_s_MatchError($thiz)
-    }
-    function $p_Lfrawa_typedjson_foldercontents_FolderContents__files__Lfrawa_typedjson_foldercontents_FolderContents$Folder__sci_Map($thiz, folder) {
-      var this$5 = $as_sci_Map(folder.Lfrawa_typedjson_foldercontents_FolderContents$Folder__f_items.flatMap__F1__sc_IterableOps(new $c_sjsr_AnonFunction1(((x$1) => {
-        var x$1$1 = $as_T2(x$1);
-        if ((x$1$1 !== null)) {
-          var x20 = $as_Lfrawa_typedjson_foldercontents_FolderContents(x$1$1.T2__f__2);
-          var name = $as_T(x$1$1.T2__f__1);
-          if ((x20 instanceof $c_Lfrawa_typedjson_foldercontents_FolderContents$File)) {
-            var x$1$2 = $as_Lfrawa_typedjson_foldercontents_FolderContents$File(x20);
-            var x23 = x$1$2.Lfrawa_typedjson_foldercontents_FolderContents$File__f_content;
-            var value = new $c_T2(name, x23);
-            return new $c_s_Some(value)
-          }
-        }    return $m_s_None$()
-      }))));
-      $m_s_$less$colon$less$();
-      return this$5
-    }
-    /** @constructor */
-    function $c_Lfrawa_typedjson_foldercontents_FolderContents() {
-      /*<skip>*/
-    }
-    $c_Lfrawa_typedjson_foldercontents_FolderContents.prototype = new $h_O();
-    $c_Lfrawa_typedjson_foldercontents_FolderContents.prototype.constructor = $c_Lfrawa_typedjson_foldercontents_FolderContents;
-    /** @constructor */
-    function $h_Lfrawa_typedjson_foldercontents_FolderContents() {
-      /*<skip>*/
-    }
-    $h_Lfrawa_typedjson_foldercontents_FolderContents.prototype = $c_Lfrawa_typedjson_foldercontents_FolderContents.prototype;
-    $c_Lfrawa_typedjson_foldercontents_FolderContents.prototype.productIterator__sc_Iterator = (function() {
-      return new $c_s_Product$$anon$1(this)
-    });
-    $c_Lfrawa_typedjson_foldercontents_FolderContents.prototype.file__T__s_Option = (function(path) {
-      var p = $p_Lfrawa_typedjson_foldercontents_FolderContents__toPath__T__sci_Seq(this, path);
-      var parent = $p_Lfrawa_typedjson_foldercontents_FolderContents__getParent__sci_Seq__sci_Seq(this, p);
-      $as_T(p.last__O());
-      return $p_Lfrawa_typedjson_foldercontents_FolderContents__files__sci_Seq__sci_Map(this, parent).get__O__s_Option(p.last__O())
-    });
-    function $as_Lfrawa_typedjson_foldercontents_FolderContents(obj) {
-      return (((obj instanceof $c_Lfrawa_typedjson_foldercontents_FolderContents) || (obj === null)) ? obj : $throwClassCastException(obj, "frawa.typedjson.foldercontents.FolderContents"))
-    }
     /** @constructor */
     function $c_Lfrawa_typedjson_keywords_EvaluatedIndices(indices) {
       this.Lfrawa_typedjson_keywords_EvaluatedIndices__f_indices = null;
@@ -50562,9 +50411,6 @@
     }
     function $f_sc_IndexedSeqOps__map__F1__O($thiz, f) {
       return $thiz.iterableFactory__sc_IterableFactory().from__sc_IterableOnce__O($ct_sc_IndexedSeqView$Map__sc_IndexedSeqOps__F1__(new $c_sc_IndexedSeqView$Map(), $thiz, f))
-    }
-    function $f_sc_IndexedSeqOps__slice__I__I__O($thiz, from, until) {
-      return $thiz.fromSpecific__sc_IterableOnce__O(new $c_sc_IndexedSeqView$Slice($thiz, from, until))
     }
     function $f_sc_IndexedSeqOps__headOption__s_Option($thiz) {
       return ($thiz.isEmpty__Z() ? $m_s_None$() : new $c_s_Some($thiz.head__O()))
@@ -54449,110 +54295,6 @@
     });
     $c_s_util_Success.prototype.$classData = $d_s_util_Success;
     /** @constructor */
-    function $c_Lfrawa_typedjson_foldercontents_FolderContents$File(content) {
-      this.Lfrawa_typedjson_foldercontents_FolderContents$File__f_content = null;
-      this.Lfrawa_typedjson_foldercontents_FolderContents$File__f_content = content;
-    }
-    $c_Lfrawa_typedjson_foldercontents_FolderContents$File.prototype = new $h_Lfrawa_typedjson_foldercontents_FolderContents();
-    $c_Lfrawa_typedjson_foldercontents_FolderContents$File.prototype.constructor = $c_Lfrawa_typedjson_foldercontents_FolderContents$File;
-    $c_Lfrawa_typedjson_foldercontents_FolderContents$File.prototype.hashCode__I = (function() {
-      var this$2 = $m_s_util_hashing_MurmurHash3$();
-      return this$2.productHash__s_Product__I__Z__I(this, (-889275714), false)
-    });
-    $c_Lfrawa_typedjson_foldercontents_FolderContents$File.prototype.equals__O__Z = (function(x$0) {
-      if ((this === x$0)) {
-        return true
-      } else if ((x$0 instanceof $c_Lfrawa_typedjson_foldercontents_FolderContents$File)) {
-        var x$0$2 = $as_Lfrawa_typedjson_foldercontents_FolderContents$File(x$0);
-        var x = this.Lfrawa_typedjson_foldercontents_FolderContents$File__f_content;
-        var y = x$0$2.Lfrawa_typedjson_foldercontents_FolderContents$File__f_content;
-        return $m_sr_BoxesRunTime$().equals__O__O__Z(x, y)
-      } else {
-        return false
-      }
-    });
-    $c_Lfrawa_typedjson_foldercontents_FolderContents$File.prototype.toString__T = (function() {
-      return $m_sr_ScalaRunTime$()._toString__s_Product__T(this)
-    });
-    $c_Lfrawa_typedjson_foldercontents_FolderContents$File.prototype.productArity__I = (function() {
-      return 1
-    });
-    $c_Lfrawa_typedjson_foldercontents_FolderContents$File.prototype.productPrefix__T = (function() {
-      return "File"
-    });
-    $c_Lfrawa_typedjson_foldercontents_FolderContents$File.prototype.productElement__I__O = (function(n) {
-      if ((n === 0)) {
-        return this.Lfrawa_typedjson_foldercontents_FolderContents$File__f_content
-      }  throw $ct_jl_IndexOutOfBoundsException__T__(new $c_jl_IndexOutOfBoundsException(), ("" + n))
-    });
-    function $as_Lfrawa_typedjson_foldercontents_FolderContents$File(obj) {
-      return (((obj instanceof $c_Lfrawa_typedjson_foldercontents_FolderContents$File) || (obj === null)) ? obj : $throwClassCastException(obj, "frawa.typedjson.foldercontents.FolderContents$File"))
-    }
-    var $d_Lfrawa_typedjson_foldercontents_FolderContents$File = new $TypeData().initClass({
-      Lfrawa_typedjson_foldercontents_FolderContents$File: 0
-    }, false, "frawa.typedjson.foldercontents.FolderContents$File", {
-      Lfrawa_typedjson_foldercontents_FolderContents$File: 1,
-      Lfrawa_typedjson_foldercontents_FolderContents: 1,
-      O: 1,
-      s_Equals: 1,
-      s_Product: 1,
-      Ljava_io_Serializable: 1,
-      s_reflect_Enum: 1
-    });
-    $c_Lfrawa_typedjson_foldercontents_FolderContents$File.prototype.$classData = $d_Lfrawa_typedjson_foldercontents_FolderContents$File;
-    /** @constructor */
-    function $c_Lfrawa_typedjson_foldercontents_FolderContents$Folder(items) {
-      this.Lfrawa_typedjson_foldercontents_FolderContents$Folder__f_items = null;
-      this.Lfrawa_typedjson_foldercontents_FolderContents$Folder__f_items = items;
-    }
-    $c_Lfrawa_typedjson_foldercontents_FolderContents$Folder.prototype = new $h_Lfrawa_typedjson_foldercontents_FolderContents();
-    $c_Lfrawa_typedjson_foldercontents_FolderContents$Folder.prototype.constructor = $c_Lfrawa_typedjson_foldercontents_FolderContents$Folder;
-    $c_Lfrawa_typedjson_foldercontents_FolderContents$Folder.prototype.hashCode__I = (function() {
-      var this$2 = $m_s_util_hashing_MurmurHash3$();
-      return this$2.productHash__s_Product__I__Z__I(this, (-889275714), false)
-    });
-    $c_Lfrawa_typedjson_foldercontents_FolderContents$Folder.prototype.equals__O__Z = (function(x$0) {
-      if ((this === x$0)) {
-        return true
-      } else if ((x$0 instanceof $c_Lfrawa_typedjson_foldercontents_FolderContents$Folder)) {
-        var x$0$2 = $as_Lfrawa_typedjson_foldercontents_FolderContents$Folder(x$0);
-        var x = this.Lfrawa_typedjson_foldercontents_FolderContents$Folder__f_items;
-        var x$2 = x$0$2.Lfrawa_typedjson_foldercontents_FolderContents$Folder__f_items;
-        return ((x === null) ? (x$2 === null) : x.equals__O__Z(x$2))
-      } else {
-        return false
-      }
-    });
-    $c_Lfrawa_typedjson_foldercontents_FolderContents$Folder.prototype.toString__T = (function() {
-      return $m_sr_ScalaRunTime$()._toString__s_Product__T(this)
-    });
-    $c_Lfrawa_typedjson_foldercontents_FolderContents$Folder.prototype.productArity__I = (function() {
-      return 1
-    });
-    $c_Lfrawa_typedjson_foldercontents_FolderContents$Folder.prototype.productPrefix__T = (function() {
-      return "Folder"
-    });
-    $c_Lfrawa_typedjson_foldercontents_FolderContents$Folder.prototype.productElement__I__O = (function(n) {
-      if ((n === 0)) {
-        return this.Lfrawa_typedjson_foldercontents_FolderContents$Folder__f_items
-      }  throw $ct_jl_IndexOutOfBoundsException__T__(new $c_jl_IndexOutOfBoundsException(), ("" + n))
-    });
-    function $as_Lfrawa_typedjson_foldercontents_FolderContents$Folder(obj) {
-      return (((obj instanceof $c_Lfrawa_typedjson_foldercontents_FolderContents$Folder) || (obj === null)) ? obj : $throwClassCastException(obj, "frawa.typedjson.foldercontents.FolderContents$Folder"))
-    }
-    var $d_Lfrawa_typedjson_foldercontents_FolderContents$Folder = new $TypeData().initClass({
-      Lfrawa_typedjson_foldercontents_FolderContents$Folder: 0
-    }, false, "frawa.typedjson.foldercontents.FolderContents$Folder", {
-      Lfrawa_typedjson_foldercontents_FolderContents$Folder: 1,
-      Lfrawa_typedjson_foldercontents_FolderContents: 1,
-      O: 1,
-      s_Equals: 1,
-      s_Product: 1,
-      Ljava_io_Serializable: 1,
-      s_reflect_Enum: 1
-    });
-    $c_Lfrawa_typedjson_foldercontents_FolderContents$Folder.prototype.$classData = $d_Lfrawa_typedjson_foldercontents_FolderContents$Folder;
-    /** @constructor */
     function $c_Lfrawa_typedjson_keywords_AllOfKeyword(keywords) {
       this.Lfrawa_typedjson_keywords_AllOfKeyword__f_keywords = null;
       this.Lfrawa_typedjson_keywords_AllOfKeyword__f_keywords = keywords;
@@ -57154,12 +56896,6 @@
     $c_sc_AbstractIterable.prototype.filterNot__F1__O = (function(pred) {
       return $f_sc_IterableOps__filterNot__F1__O(this, pred)
     });
-    $c_sc_AbstractIterable.prototype.drop__I__O = (function(n) {
-      return $f_sc_IterableOps__drop__I__O(this, n)
-    });
-    $c_sc_AbstractIterable.prototype.tail__O = (function() {
-      return $f_sc_IterableOps__tail__O(this)
-    });
     $c_sc_AbstractIterable.prototype.map__F1__O = (function(f) {
       return $f_sc_IterableOps__map__F1__O(this, f)
     });
@@ -59204,9 +58940,6 @@
     }
     function $as_sc_View(obj) {
       return (($is_sc_View(obj) || (obj === null)) ? obj : $throwClassCastException(obj, "scala.collection.View"))
-    }
-    function $f_sci_IndexedSeqOps__slice__I__I__O($thiz, from, until) {
-      return (((from <= 0) && (until >= $thiz.length__I())) ? $thiz : $f_sc_IndexedSeqOps__slice__I__I__O($thiz, from, until))
     }
     /** @constructor */
     function $c_sci_Set$Set2$$anon$1(outer) {
@@ -61792,38 +61525,6 @@
       /*<skip>*/
     }
     $h_sc_View$Drop.prototype = $c_sc_View$Drop.prototype;
-    $c_sc_View$Drop.prototype.iterator__sc_Iterator = (function() {
-      return this.sc_View$Drop__f_underlying.iterator__sc_Iterator().drop__I__sc_Iterator(this.sc_View$Drop__f_n)
-    });
-    $c_sc_View$Drop.prototype.knownSize__I = (function() {
-      var size = this.sc_View$Drop__f_underlying.knownSize__I();
-      if ((size >= 0)) {
-        var x = ((size - this.sc_View$Drop__f_normN) | 0);
-        return ((x > 0) ? x : 0)
-      } else {
-        return (-1)
-      }
-    });
-    $c_sc_View$Drop.prototype.isEmpty__Z = (function() {
-      var this$1$1 = this.iterator__sc_Iterator();
-      return (!this$1$1.hasNext__Z())
-    });
-    var $d_sc_View$Drop = new $TypeData().initClass({
-      sc_View$Drop: 0
-    }, false, "scala.collection.View$Drop", {
-      sc_View$Drop: 1,
-      sc_AbstractView: 1,
-      sc_AbstractIterable: 1,
-      O: 1,
-      sc_Iterable: 1,
-      sc_IterableOnce: 1,
-      sc_IterableOps: 1,
-      sc_IterableOnceOps: 1,
-      sc_IterableFactoryDefaults: 1,
-      sc_View: 1,
-      Ljava_io_Serializable: 1
-    });
-    $c_sc_View$Drop.prototype.$classData = $d_sc_View$Drop;
     function $ct_sc_View$DropRight__sc_IterableOps__I__($thiz, underlying, n) {
       $thiz.sc_View$DropRight__f_underlying = underlying;
       $thiz.sc_View$DropRight__f_n = n;
@@ -62679,9 +62380,6 @@
     $c_sc_AbstractSeqView.prototype.map__F1__sc_SeqView = (function(f) {
       return $ct_sc_SeqView$Map__sc_SeqOps__F1__(new $c_sc_SeqView$Map(), this, f)
     });
-    $c_sc_AbstractSeqView.prototype.drop__I__sc_SeqView = (function(n) {
-      return $ct_sc_SeqView$Drop__sc_SeqOps__I__(new $c_sc_SeqView$Drop(), this, n)
-    });
     $c_sc_AbstractSeqView.prototype.stringPrefix__T = (function() {
       return "SeqView"
     });
@@ -62703,9 +62401,6 @@
     });
     $c_sc_AbstractSeqView.prototype.isEmpty__Z = (function() {
       return $f_sc_SeqOps__isEmpty__Z(this)
-    });
-    $c_sc_AbstractSeqView.prototype.drop__I__O = (function(n) {
-      return this.drop__I__sc_SeqView(n)
     });
     $c_sc_AbstractSeqView.prototype.map__F1__O = (function(f) {
       return this.map__F1__sc_SeqView(f)
@@ -62817,12 +62512,6 @@
       /*<skip>*/
     }
     $h_sc_SeqView$Drop.prototype = $c_sc_SeqView$Drop.prototype;
-    $c_sc_SeqView$Drop.prototype.map__F1__sc_SeqView = (function(f) {
-      return $ct_sc_SeqView$Map__sc_SeqOps__F1__(new $c_sc_SeqView$Map(), this, f)
-    });
-    $c_sc_SeqView$Drop.prototype.stringPrefix__T = (function() {
-      return "SeqView"
-    });
     $c_sc_SeqView$Drop.prototype.appendedAll__sc_IterableOnce__O = (function(suffix) {
       return $f_sc_IterableOps__concat__sc_IterableOnce__O(this, suffix)
     });
@@ -62836,9 +62525,6 @@
       var this$1$1 = this.iterator__sc_Iterator();
       return $f_sc_Iterator__indexWhere__F1__I__I(this$1$1, p, from)
     });
-    $c_sc_SeqView$Drop.prototype.lengthCompare__I__I = (function(len) {
-      return $f_sc_IterableOps__sizeCompare__I__I(this, len)
-    });
     $c_sc_SeqView$Drop.prototype.isEmpty__Z = (function() {
       return $f_sc_SeqOps__isEmpty__Z(this)
     });
@@ -62850,34 +62536,6 @@
     $c_sc_SeqView$Drop.prototype.apply__I__O = (function(i) {
       return this.sc_SeqView$Drop__f_underlying.apply__I__O(((i + this.sc_View$Drop__f_normN) | 0))
     });
-    $c_sc_SeqView$Drop.prototype.drop__I__sc_SeqView = (function(n) {
-      return $ct_sc_SeqView$Drop__sc_SeqOps__I__(new $c_sc_SeqView$Drop(), this.sc_SeqView$Drop__f_underlying, ((this.sc_SeqView$Drop__f_n + n) | 0))
-    });
-    $c_sc_SeqView$Drop.prototype.map__F1__O = (function(f) {
-      return this.map__F1__sc_SeqView(f)
-    });
-    $c_sc_SeqView$Drop.prototype.drop__I__O = (function(n) {
-      return this.drop__I__sc_SeqView(n)
-    });
-    var $d_sc_SeqView$Drop = new $TypeData().initClass({
-      sc_SeqView$Drop: 0
-    }, false, "scala.collection.SeqView$Drop", {
-      sc_SeqView$Drop: 1,
-      sc_View$Drop: 1,
-      sc_AbstractView: 1,
-      sc_AbstractIterable: 1,
-      O: 1,
-      sc_Iterable: 1,
-      sc_IterableOnce: 1,
-      sc_IterableOps: 1,
-      sc_IterableOnceOps: 1,
-      sc_IterableFactoryDefaults: 1,
-      sc_View: 1,
-      Ljava_io_Serializable: 1,
-      sc_SeqView: 1,
-      sc_SeqOps: 1
-    });
-    $c_sc_SeqView$Drop.prototype.$classData = $d_sc_SeqView$Drop;
     function $ct_sc_SeqView$DropRight__sc_SeqOps__I__($thiz, underlying, n) {
       $thiz.sc_SeqView$DropRight__f_underlying = underlying;
       $ct_sc_View$DropRight__sc_IterableOps__I__($thiz, underlying, n);
@@ -62994,9 +62652,6 @@
     $c_sc_SeqView$Map.prototype.map__F1__sc_SeqView = (function(f) {
       return $ct_sc_SeqView$Map__sc_SeqOps__F1__(new $c_sc_SeqView$Map(), this, f)
     });
-    $c_sc_SeqView$Map.prototype.drop__I__sc_SeqView = (function(n) {
-      return $ct_sc_SeqView$Drop__sc_SeqOps__I__(new $c_sc_SeqView$Drop(), this, n)
-    });
     $c_sc_SeqView$Map.prototype.stringPrefix__T = (function() {
       return "SeqView"
     });
@@ -63024,9 +62679,6 @@
     });
     $c_sc_SeqView$Map.prototype.length__I = (function() {
       return this.sc_SeqView$Map__f_underlying.length__I()
-    });
-    $c_sc_SeqView$Map.prototype.drop__I__O = (function(n) {
-      return this.drop__I__sc_SeqView(n)
     });
     $c_sc_SeqView$Map.prototype.map__F1__O = (function(f) {
       return this.map__F1__sc_SeqView(f)
@@ -63165,9 +62817,6 @@
     });
     $c_sc_AbstractIndexedSeqView.prototype.map__F1__O = (function(f) {
       return this.map__F1__sc_IndexedSeqView(f)
-    });
-    $c_sc_AbstractIndexedSeqView.prototype.drop__I__sc_SeqView = (function(n) {
-      return this.drop__I__sc_IndexedSeqView(n)
     });
     $c_sc_AbstractIndexedSeqView.prototype.drop__I__O = (function(n) {
       return this.drop__I__sc_IndexedSeqView(n)
@@ -63417,14 +63066,8 @@
     $c_sc_IndexedSeqView$Drop.prototype.knownSize__I = (function() {
       return this.length__I()
     });
-    $c_sc_IndexedSeqView$Drop.prototype.map__F1__sc_SeqView = (function(f) {
-      return this.map__F1__sc_IndexedSeqView(f)
-    });
     $c_sc_IndexedSeqView$Drop.prototype.map__F1__O = (function(f) {
       return this.map__F1__sc_IndexedSeqView(f)
-    });
-    $c_sc_IndexedSeqView$Drop.prototype.drop__I__sc_SeqView = (function(n) {
-      return this.drop__I__sc_IndexedSeqView(n)
     });
     $c_sc_IndexedSeqView$Drop.prototype.drop__I__O = (function(n) {
       return this.drop__I__sc_IndexedSeqView(n)
@@ -63541,9 +63184,6 @@
     $c_sc_IndexedSeqView$Id.prototype.map__F1__O = (function(f) {
       return $ct_sc_IndexedSeqView$Map__sc_IndexedSeqOps__F1__(new $c_sc_IndexedSeqView$Map(), this, f)
     });
-    $c_sc_IndexedSeqView$Id.prototype.drop__I__sc_SeqView = (function(n) {
-      return $ct_sc_IndexedSeqView$Drop__sc_IndexedSeqOps__I__(new $c_sc_IndexedSeqView$Drop(), this, n)
-    });
     $c_sc_IndexedSeqView$Id.prototype.drop__I__O = (function(n) {
       return $ct_sc_IndexedSeqView$Drop__sc_IndexedSeqOps__I__(new $c_sc_IndexedSeqView$Drop(), this, n)
     });
@@ -63618,9 +63258,6 @@
     $c_sc_IndexedSeqView$Map.prototype.map__F1__O = (function(f) {
       return this.map__F1__sc_IndexedSeqView(f)
     });
-    $c_sc_IndexedSeqView$Map.prototype.drop__I__sc_SeqView = (function(n) {
-      return this.drop__I__sc_IndexedSeqView(n)
-    });
     $c_sc_IndexedSeqView$Map.prototype.drop__I__O = (function(n) {
       return this.drop__I__sc_IndexedSeqView(n)
     });
@@ -63646,50 +63283,6 @@
       sc_IndexedSeqOps: 1
     });
     $c_sc_IndexedSeqView$Map.prototype.$classData = $d_sc_IndexedSeqView$Map;
-    /** @constructor */
-    function $c_sc_IndexedSeqView$Slice(underlying, from, until) {
-      this.sc_IndexedSeqView$Slice__f_underlying = null;
-      this.sc_IndexedSeqView$Slice__f_lo = 0;
-      this.sc_IndexedSeqView$Slice__f_hi = 0;
-      this.sc_IndexedSeqView$Slice__f_len = 0;
-      this.sc_IndexedSeqView$Slice__f_underlying = underlying;
-      this.sc_IndexedSeqView$Slice__f_lo = ((from > 0) ? from : 0);
-      var x = ((until > 0) ? until : 0);
-      var that = underlying.length__I();
-      this.sc_IndexedSeqView$Slice__f_hi = ((x < that) ? x : that);
-      var x$1 = ((this.sc_IndexedSeqView$Slice__f_hi - this.sc_IndexedSeqView$Slice__f_lo) | 0);
-      this.sc_IndexedSeqView$Slice__f_len = ((x$1 > 0) ? x$1 : 0);
-    }
-    $c_sc_IndexedSeqView$Slice.prototype = new $h_sc_AbstractIndexedSeqView();
-    $c_sc_IndexedSeqView$Slice.prototype.constructor = $c_sc_IndexedSeqView$Slice;
-    $c_sc_IndexedSeqView$Slice.prototype.apply__I__O = (function(i) {
-      return this.sc_IndexedSeqView$Slice__f_underlying.apply__I__O(((this.sc_IndexedSeqView$Slice__f_lo + i) | 0))
-    });
-    $c_sc_IndexedSeqView$Slice.prototype.length__I = (function() {
-      return this.sc_IndexedSeqView$Slice__f_len
-    });
-    var $d_sc_IndexedSeqView$Slice = new $TypeData().initClass({
-      sc_IndexedSeqView$Slice: 0
-    }, false, "scala.collection.IndexedSeqView$Slice", {
-      sc_IndexedSeqView$Slice: 1,
-      sc_AbstractIndexedSeqView: 1,
-      sc_AbstractSeqView: 1,
-      sc_AbstractView: 1,
-      sc_AbstractIterable: 1,
-      O: 1,
-      sc_Iterable: 1,
-      sc_IterableOnce: 1,
-      sc_IterableOps: 1,
-      sc_IterableOnceOps: 1,
-      sc_IterableFactoryDefaults: 1,
-      sc_View: 1,
-      Ljava_io_Serializable: 1,
-      sc_SeqView: 1,
-      sc_SeqOps: 1,
-      sc_IndexedSeqView: 1,
-      sc_IndexedSeqOps: 1
-    });
-    $c_sc_IndexedSeqView$Slice.prototype.$classData = $d_sc_IndexedSeqView$Slice;
     /** @constructor */
     function $c_sci_AbstractSeq() {
       /*<skip>*/
@@ -63737,9 +63330,6 @@
     });
     $c_scm_ArrayBufferView.prototype.map__F1__O = (function(f) {
       return this.map__F1__sc_IndexedSeqView(f)
-    });
-    $c_scm_ArrayBufferView.prototype.drop__I__sc_SeqView = (function(n) {
-      return this.drop__I__sc_IndexedSeqView(n)
     });
     $c_scm_ArrayBufferView.prototype.drop__I__O = (function(n) {
       return this.drop__I__sc_IndexedSeqView(n)
@@ -64535,14 +64125,8 @@
     $c_scm_CheckedIndexedSeqView$Drop.prototype.map__F1__sc_IndexedSeqView = (function(f) {
       return new $c_scm_CheckedIndexedSeqView$Map(this, f, this.scm_CheckedIndexedSeqView$Drop__f_mutationCount)
     });
-    $c_scm_CheckedIndexedSeqView$Drop.prototype.map__F1__sc_SeqView = (function(f) {
-      return new $c_scm_CheckedIndexedSeqView$Map(this, f, this.scm_CheckedIndexedSeqView$Drop__f_mutationCount)
-    });
     $c_scm_CheckedIndexedSeqView$Drop.prototype.map__F1__O = (function(f) {
       return new $c_scm_CheckedIndexedSeqView$Map(this, f, this.scm_CheckedIndexedSeqView$Drop__f_mutationCount)
-    });
-    $c_scm_CheckedIndexedSeqView$Drop.prototype.drop__I__sc_SeqView = (function(n) {
-      return new $c_scm_CheckedIndexedSeqView$Drop(this, n, this.scm_CheckedIndexedSeqView$Drop__f_mutationCount)
     });
     $c_scm_CheckedIndexedSeqView$Drop.prototype.drop__I__O = (function(n) {
       return new $c_scm_CheckedIndexedSeqView$Drop(this, n, this.scm_CheckedIndexedSeqView$Drop__f_mutationCount)
@@ -64597,9 +64181,6 @@
     });
     $c_scm_CheckedIndexedSeqView$Map.prototype.map__F1__O = (function(f) {
       return new $c_scm_CheckedIndexedSeqView$Map(this, f, this.scm_CheckedIndexedSeqView$Map__f_mutationCount)
-    });
-    $c_scm_CheckedIndexedSeqView$Map.prototype.drop__I__sc_SeqView = (function(n) {
-      return new $c_scm_CheckedIndexedSeqView$Drop(this, n, this.scm_CheckedIndexedSeqView$Map__f_mutationCount)
     });
     $c_scm_CheckedIndexedSeqView$Map.prototype.drop__I__O = (function(n) {
       return new $c_scm_CheckedIndexedSeqView$Drop(this, n, this.scm_CheckedIndexedSeqView$Map__f_mutationCount)
@@ -65657,9 +65238,6 @@
         return new $c_sci_HashSet(newRootNode)
       }
     });
-    $c_sci_HashSet.prototype.drop__I__O = (function(n) {
-      return $as_sci_HashSet($f_sc_IterableOps__drop__I__O(this, n))
-    });
     $c_sci_HashSet.prototype.concat__sc_IterableOnce__sc_SetOps = (function(that) {
       return this.concat__sc_IterableOnce__sci_HashSet(that)
     });
@@ -65761,24 +65339,6 @@
         var state = new $c_sjsr_AnonFunction0((() => $p_sci_LazyList__dropRightState__sci_LazyList__sci_LazyList$State($thiz.scala$collection$immutable$LazyList$$state__sci_LazyList$State().tail__sci_LazyList(), scout.scala$collection$immutable$LazyList$$state__sci_LazyList$State().tail__sci_LazyList())));
         var tl = new $c_sci_LazyList(state);
         return new $c_sci_LazyList$State$Cons(hd, tl)
-      }
-    }
-    function $p_sci_LazyList__takeImpl__I__sci_LazyList($thiz, n) {
-      if ((n <= 0)) {
-        return $m_sci_LazyList$().sci_LazyList$__f__empty
-      } else {
-        $m_sci_LazyList$();
-        var state = new $c_sjsr_AnonFunction0((() => {
-          if ($thiz.isEmpty__Z()) {
-            return $m_sci_LazyList$State$Empty$()
-          } else {
-            $m_sci_LazyList$();
-            var hd = $thiz.scala$collection$immutable$LazyList$$state__sci_LazyList$State().head__O();
-            var tl = $p_sci_LazyList__takeImpl__I__sci_LazyList($thiz.scala$collection$immutable$LazyList$$state__sci_LazyList$State().tail__sci_LazyList(), (((-1) + n) | 0));
-            return new $c_sci_LazyList$State$Cons(hd, tl)
-          }
-        }));
-        return new $c_sci_LazyList(state)
       }
     }
     function $p_sci_LazyList__addStringNoForce__jl_StringBuilder__T__T__T__jl_StringBuilder($thiz, b, start, sep, end) {
@@ -66099,12 +65659,6 @@
         return new $c_sci_LazyList(state)
       }
     });
-    $c_sci_LazyList.prototype.take__I__sci_LazyList = (function(n) {
-      return ((this.sci_LazyList__f_scala$collection$immutable$LazyList$$stateEvaluated && this.isEmpty__Z()) ? $m_sci_LazyList$().sci_LazyList$__f__empty : $p_sci_LazyList__takeImpl__I__sci_LazyList(this, n))
-    });
-    $c_sci_LazyList.prototype.slice__I__I__sci_LazyList = (function(from, until) {
-      return this.take__I__sci_LazyList(until).drop__I__sci_LazyList(from)
-    });
     $c_sci_LazyList.prototype.addString__scm_StringBuilder__T__T__T__scm_StringBuilder = (function(sb, start, sep, end) {
       this.force__sci_LazyList();
       $p_sci_LazyList__addStringNoForce__jl_StringBuilder__T__T__T__jl_StringBuilder(this, sb.scm_StringBuilder__f_underlying, start, sep, end);
@@ -66120,9 +65674,6 @@
     $c_sci_LazyList.prototype.isDefinedAt__O__Z = (function(x) {
       var x$1 = $uI(x);
       return $f_sc_LinearSeqOps__isDefinedAt__I__Z(this, x$1)
-    });
-    $c_sci_LazyList.prototype.slice__I__I__O = (function(from, until) {
-      return this.slice__I__I__sci_LazyList(from, until)
     });
     $c_sci_LazyList.prototype.dropRight__I__O = (function(n) {
       return this.dropRight__I__sci_LazyList(n)
@@ -66239,30 +65790,6 @@
       var this$1$1 = this.sci_WrappedString__f_scala$collection$immutable$WrappedString$$self;
       return this$1$1.length
     });
-    $c_sci_WrappedString.prototype.slice__I__I__sci_WrappedString = (function(from, until) {
-      var start = ((from < 0) ? 0 : from);
-      if ((until <= start)) {
-        var $$x1 = true;
-      } else {
-        var this$1$1 = this.sci_WrappedString__f_scala$collection$immutable$WrappedString$$self;
-        var $$x1 = (start >= this$1$1.length);
-      }  if ($$x1) {
-        return $m_sci_WrappedString$().sci_WrappedString$__f_empty
-      }  var this$2 = this.sci_WrappedString__f_scala$collection$immutable$WrappedString$$self;
-      if ((until > this$2.length)) {
-        var this$3 = this.sci_WrappedString__f_scala$collection$immutable$WrappedString$$self;
-        var end = this$3.length;
-      } else {
-        var end = until;
-      }  var this$4 = this.sci_WrappedString__f_scala$collection$immutable$WrappedString$$self;
-      if ((start < 0)) {
-        $charAt(this$4, start);
-      }  if ((end > this$4.length)) {
-        $charAt(this$4, end);
-      }  if ((end < start)) {
-        $charAt(this$4, (-1));
-      }  return new $c_sci_WrappedString($as_T(this$4.substring(start, end)))
-    });
     $c_sci_WrappedString.prototype.length__I = (function() {
       var this$1$1 = this.sci_WrappedString__f_scala$collection$immutable$WrappedString$$self;
       return this$1$1.length
@@ -66323,9 +65850,6 @@
     });
     $c_sci_WrappedString.prototype.appendedAll__sc_IterableOnce__O = (function(suffix) {
       return this.appendedAll__sc_IterableOnce__sci_IndexedSeq(suffix)
-    });
-    $c_sci_WrappedString.prototype.slice__I__I__O = (function(from, until) {
-      return this.slice__I__I__sci_WrappedString(from, until)
     });
     $c_sci_WrappedString.prototype.fromSpecific__sc_IterableOnce__O = (function(coll) {
       return $m_sci_WrappedString$().fromSpecific__sc_IterableOnce__sci_WrappedString(coll)
@@ -66429,9 +65953,6 @@
     $c_sjsr_WrappedVarArgs.prototype.applyPreferredMaxLength__I = (function() {
       return $m_sci_IndexedSeqDefaults$().sci_IndexedSeqDefaults$__f_defaultApplyPreferredMaxLength
     });
-    $c_sjsr_WrappedVarArgs.prototype.slice__I__I__O = (function(from, until) {
-      return $f_sci_IndexedSeqOps__slice__I__I__O(this, from, until)
-    });
     $c_sjsr_WrappedVarArgs.prototype.iterator__sc_Iterator = (function() {
       var this$1$1 = new $c_sc_IndexedSeqView$Id(this);
       return $ct_sc_IndexedSeqView$IndexedSeqViewIterator__sc_IndexedSeqView__(new $c_sc_IndexedSeqView$IndexedSeqViewIterator(), this$1$1)
@@ -66499,9 +66020,6 @@
     });
     $c_sjsr_WrappedVarArgs.prototype.newSpecificBuilder__scm_Builder = (function() {
       return $m_sjsr_WrappedVarArgs$().newBuilder__scm_Builder()
-    });
-    $c_sjsr_WrappedVarArgs.prototype.tail__O = (function() {
-      return $f_sc_IterableOps__tail__O(this)
     });
     $c_sjsr_WrappedVarArgs.prototype.foreach__F1__V = (function(f) {
       $f_sc_IterableOnceOps__foreach__F1__V(this, f);
@@ -66774,9 +66292,6 @@
       } else {
         return new $c_sci_HashMap(newRootNode)
       }
-    });
-    $c_sci_HashMap.prototype.drop__I__O = (function(n) {
-      return $as_sci_HashMap($f_sc_IterableOps__drop__I__O(this, n))
     });
     $c_sci_HashMap.prototype.last__O = (function() {
       return $as_T2(this.reverseIterator__sc_Iterator().next__O())
@@ -67241,9 +66756,6 @@
     $c_sci_NumericRange.prototype.iterableFactory__sc_SeqFactory = (function() {
       return $m_sci_IndexedSeq$()
     });
-    $c_sci_NumericRange.prototype.slice__I__I__O = (function(from, until) {
-      return $f_sci_IndexedSeqOps__slice__I__I__O(this, from, until)
-    });
     $c_sci_NumericRange.prototype.stringPrefix__T = (function() {
       return "IndexedSeq"
     });
@@ -67271,19 +66783,6 @@
     });
     $c_sci_NumericRange.prototype.head__O = (function() {
       return (this.isEmpty__Z() ? $m_sci_Nil$().head__E() : this.sci_NumericRange__f_start)
-    });
-    $c_sci_NumericRange.prototype.tail__sci_NumericRange = (function() {
-      if (this.isEmpty__Z()) {
-        $m_sci_Nil$().tail__E();
-      } else if (this.sci_NumericRange__f_isInclusive) {
-        var this$1$1 = this.sci_NumericRange__f_scala$collection$immutable$NumericRange$$num;
-        var lhs = this.sci_NumericRange__f_start;
-        return new $c_sci_NumericRange$Inclusive(new $c_s_math_Integral$IntegralOps(this$1$1, lhs).$plus__O__O(this.sci_NumericRange__f_step), this.sci_NumericRange__f_end, this.sci_NumericRange__f_step, this.sci_NumericRange__f_scala$collection$immutable$NumericRange$$num)
-      } else {
-        var this$2 = this.sci_NumericRange__f_scala$collection$immutable$NumericRange$$num;
-        var lhs$1 = this.sci_NumericRange__f_start;
-        return new $c_sci_NumericRange$Exclusive(new $c_s_math_Integral$IntegralOps(this$2, lhs$1).$plus__O__O(this.sci_NumericRange__f_step), this.sci_NumericRange__f_end, this.sci_NumericRange__f_step, this.sci_NumericRange__f_scala$collection$immutable$NumericRange$$num)
-      }
     });
     $c_sci_NumericRange.prototype.apply__I__O = (function(idx) {
       if (((idx < 0) || (idx >= this.length__I()))) {
@@ -67471,9 +66970,6 @@
     });
     $c_sci_NumericRange.prototype.apply__O__O = (function(v1) {
       return this.apply__I__O($uI(v1))
-    });
-    $c_sci_NumericRange.prototype.tail__O = (function() {
-      return this.tail__sci_NumericRange()
     });
     function $as_sci_NumericRange(obj) {
       return (((obj instanceof $c_sci_NumericRange) || (obj === null)) ? obj : $throwClassCastException(obj, "scala.collection.immutable.NumericRange"))
@@ -67676,9 +67172,6 @@
     $c_sci_ArraySeq.prototype.dropRight__I__sci_ArraySeq = (function(n) {
       return ((n <= 0) ? this : $m_sci_ArraySeq$().unsafeWrapArray__O__sci_ArraySeq($m_sc_ArrayOps$().dropRight$extension__O__I__O(this.unsafeArray__O(), n)))
     });
-    $c_sci_ArraySeq.prototype.slice__I__I__sci_ArraySeq = (function(from, until) {
-      return (((from <= 0) && ($m_sr_ScalaRunTime$().array_length__O__I(this.unsafeArray__O()) <= until)) ? this : $m_sci_ArraySeq$().unsafeWrapArray__O__sci_ArraySeq($m_sc_ArrayOps$().slice$extension__O__I__I__O(this.unsafeArray__O(), from, until)))
-    });
     $c_sci_ArraySeq.prototype.foldLeft__O__F2__O = (function(z, f) {
       var array = this.unsafeArray__O();
       var b = z;
@@ -67688,9 +67181,6 @@
         b = f.apply__O__O__O(b, a);
         i = ((1 + i) | 0);
       }  return b
-    });
-    $c_sci_ArraySeq.prototype.tail__sci_ArraySeq = (function() {
-      return $m_sci_ArraySeq$().unsafeWrapArray__O__sci_ArraySeq($m_sc_ArrayOps$().tail$extension__O__O(this.unsafeArray__O()))
     });
     $c_sci_ArraySeq.prototype.className__T = (function() {
       return "ArraySeq"
@@ -67713,12 +67203,6 @@
       var this$1$1 = $m_sci_ArraySeq$();
       var evidence$5 = this.elemTag__s_reflect_ClassTag();
       return this$1$1.from__sc_IterableOnce__s_reflect_ClassTag__sci_ArraySeq(coll, evidence$5)
-    });
-    $c_sci_ArraySeq.prototype.tail__O = (function() {
-      return this.tail__sci_ArraySeq()
-    });
-    $c_sci_ArraySeq.prototype.slice__I__I__O = (function(from, until) {
-      return this.slice__I__I__sci_ArraySeq(from, until)
     });
     $c_sci_ArraySeq.prototype.dropRight__I__O = (function(n) {
       return this.dropRight__I__sci_ArraySeq(n)
@@ -67801,63 +67285,6 @@
       Ljava_io_Serializable: 1
     });
     $c_sci_NumericRange$Exclusive.prototype.$classData = $d_sci_NumericRange$Exclusive;
-    /** @constructor */
-    function $c_sci_NumericRange$Inclusive(start, end, step, num) {
-      this.sci_NumericRange__f_length = 0;
-      this.sci_NumericRange__f_isEmpty = false;
-      this.sci_NumericRange__f_hashCode = 0;
-      this.sci_NumericRange__f_start = null;
-      this.sci_NumericRange__f_end = null;
-      this.sci_NumericRange__f_step = null;
-      this.sci_NumericRange__f_isInclusive = false;
-      this.sci_NumericRange__f_scala$collection$immutable$NumericRange$$num = null;
-      this.sci_NumericRange__f_bitmap$0 = 0;
-      this.sci_NumericRange$Inclusive__f_num = null;
-      this.sci_NumericRange$Inclusive__f_num = num;
-      $ct_sci_NumericRange__O__O__O__Z__s_math_Integral__(this, start, end, step, true, num);
-    }
-    $c_sci_NumericRange$Inclusive.prototype = new $h_sci_NumericRange();
-    $c_sci_NumericRange$Inclusive.prototype.constructor = $c_sci_NumericRange$Inclusive;
-    $c_sci_NumericRange$Inclusive.prototype.copy__O__O__O__sci_NumericRange$Inclusive = (function(start, end, step) {
-      $m_sci_NumericRange$();
-      var num = this.sci_NumericRange$Inclusive__f_num;
-      return new $c_sci_NumericRange$Inclusive(start, end, step, num)
-    });
-    $c_sci_NumericRange$Inclusive.prototype.copy__O__O__O__sci_NumericRange = (function(start, end, step) {
-      return this.copy__O__O__O__sci_NumericRange$Inclusive(start, end, step)
-    });
-    var $d_sci_NumericRange$Inclusive = new $TypeData().initClass({
-      sci_NumericRange$Inclusive: 0
-    }, false, "scala.collection.immutable.NumericRange$Inclusive", {
-      sci_NumericRange$Inclusive: 1,
-      sci_NumericRange: 1,
-      sci_AbstractSeq: 1,
-      sc_AbstractSeq: 1,
-      sc_AbstractIterable: 1,
-      O: 1,
-      sc_Iterable: 1,
-      sc_IterableOnce: 1,
-      sc_IterableOps: 1,
-      sc_IterableOnceOps: 1,
-      sc_IterableFactoryDefaults: 1,
-      sc_Seq: 1,
-      s_PartialFunction: 1,
-      F1: 1,
-      sc_SeqOps: 1,
-      s_Equals: 1,
-      sci_Seq: 1,
-      sci_Iterable: 1,
-      sci_SeqOps: 1,
-      sci_IndexedSeq: 1,
-      sc_IndexedSeq: 1,
-      sc_IndexedSeqOps: 1,
-      sci_IndexedSeqOps: 1,
-      sci_StrictOptimizedSeqOps: 1,
-      sc_StrictOptimizedSeqOps: 1,
-      sc_StrictOptimizedIterableOps: 1,
-      Ljava_io_Serializable: 1
-    });
-    $c_sci_NumericRange$Inclusive.prototype.$classData = $d_sci_NumericRange$Inclusive;
     function $ct_sci_Vector__AO__($thiz, prefix1) {
       $thiz.sci_Vector__f_prefix1 = prefix1;
       return $thiz
@@ -68050,10 +67477,12 @@
       }
     });
     $c_sci_Vector.prototype.dropRight__I__O = (function(n) {
-      return $as_sci_Vector(this.slice__I__I__O(0, ((this.length__I() - ((n > 0) ? n : 0)) | 0)))
+      var until = ((this.length__I() - ((n > 0) ? n : 0)) | 0);
+      return this.slice__I__I__sci_Vector(0, until)
     });
     $c_sci_Vector.prototype.drop__I__O = (function(n) {
-      return $as_sci_Vector(this.slice__I__I__O(n, this.length__I()))
+      var until = this.length__I();
+      return this.slice__I__I__sci_Vector(n, until)
     });
     $c_sci_Vector.prototype.appendedAll__sc_IterableOnce__O = (function(suffix) {
       return this.appendedAll__sc_IterableOnce__sci_Vector(suffix)
@@ -69378,33 +68807,6 @@
         return $as_sci_List($f_sc_StrictOptimizedSeqOps__appendedAll__sc_IterableOnce__O(this, suffix))
       }
     });
-    $c_sci_List.prototype.take__I__sci_List = (function(n) {
-      if ((this.isEmpty__Z() || (n <= 0))) {
-        return $m_sci_Nil$()
-      } else {
-        var h = new $c_sci_$colon$colon(this.head__O(), $m_sci_Nil$());
-        var t = h;
-        var rest = $as_sci_List(this.tail__O());
-        var i = 1;
-        while (true) {
-          if (rest.isEmpty__Z()) {
-            return this
-          }      if ((i < n)) {
-            i = ((1 + i) | 0);
-            var nx = new $c_sci_$colon$colon(rest.head__O(), $m_sci_Nil$());
-            t.sci_$colon$colon__f_next = nx;
-            t = nx;
-            rest = $as_sci_List(rest.tail__O());
-          } else {
-            break
-          }
-        }    return h
-      }
-    });
-    $c_sci_List.prototype.slice__I__I__sci_List = (function(from, until) {
-      var lo = ((from > 0) ? from : 0);
-      return (((until <= lo) || this.isEmpty__Z()) ? $m_sci_Nil$() : $as_sci_List($p_sc_StrictOptimizedLinearSeqOps__loop$2__I__sc_LinearSeq__sc_LinearSeq(this, lo, this)).take__I__sci_List(((until - lo) | 0)))
-    });
     $c_sci_List.prototype.map__F1__sci_List = (function(f) {
       if ((this === $m_sci_Nil$())) {
         return $m_sci_Nil$()
@@ -69532,9 +68934,6 @@
     $c_sci_List.prototype.map__F1__O = (function(f) {
       return this.map__F1__sci_List(f)
     });
-    $c_sci_List.prototype.slice__I__I__O = (function(from, until) {
-      return this.slice__I__I__sci_List(from, until)
-    });
     $c_sci_List.prototype.appendedAll__sc_IterableOnce__O = (function(suffix) {
       return this.appendedAll__sc_IterableOnce__sci_List(suffix)
     });
@@ -69561,9 +68960,6 @@
       var hi = ((until < b) ? until : b);
       var newlen = ((hi - lo) | 0);
       return ((newlen === this.length__I()) ? this : ((hi <= lo) ? $m_sci_Vector0$() : this.slice0__I__I__sci_Vector(lo, hi)))
-    });
-    $c_sci_VectorImpl.prototype.slice__I__I__O = (function(from, until) {
-      return this.slice__I__I__sci_Vector(from, until)
     });
     /** @constructor */
     function $c_scm_ArraySeq$ofBoolean(array) {
@@ -70742,15 +70138,6 @@
       var original = this.sci_Vector__f_prefix1;
       return new $c_sci_Vector1($m_ju_Arrays$().copyOfRange__AO__I__I__AO(original, lo, hi))
     });
-    $c_sci_Vector1.prototype.tail__sci_Vector = (function() {
-      if ((this.sci_Vector__f_prefix1.u.length === 1)) {
-        return $m_sci_Vector0$()
-      } else {
-        var a = this.sci_Vector__f_prefix1;
-        var to = a.u.length;
-        return new $c_sci_Vector1($m_ju_Arrays$().copyOfRange__AO__I__I__AO(a, 1, to))
-      }
-    });
     $c_sci_Vector1.prototype.vectorSliceCount__I = (function() {
       return 1
     });
@@ -70760,9 +70147,6 @@
     $c_sci_Vector1.prototype.appendedAll0__sc_IterableOnce__I__sci_Vector = (function(suffix, k) {
       var data1b = $m_sci_VectorStatics$().append1IfSpace__AO__sc_IterableOnce__AO(this.sci_Vector__f_prefix1, suffix);
       return ((data1b !== null) ? new $c_sci_Vector1(data1b) : $c_sci_Vector.prototype.appendedAll0__sc_IterableOnce__I__sci_Vector.call(this, suffix, k))
-    });
-    $c_sci_Vector1.prototype.tail__O = (function() {
-      return this.tail__sci_Vector()
     });
     $c_sci_Vector1.prototype.map__F1__O = (function(f) {
       return this.map__F1__sci_Vector(f)
@@ -71002,9 +70386,6 @@
       a.set(0, elem);
       return new $c_sci_Vector1(a)
     });
-    $c_sci_Vector0$.prototype.tail__sci_Vector = (function() {
-      throw $ct_jl_UnsupportedOperationException__T__(new $c_jl_UnsupportedOperationException(), "empty.tail")
-    });
     $c_sci_Vector0$.prototype.slice0__I__I__sci_Vector = (function(lo, hi) {
       return this
     });
@@ -71022,9 +70403,6 @@
     });
     $c_sci_Vector0$.prototype.ioob__I__jl_IndexOutOfBoundsException = (function(index) {
       return $ct_jl_IndexOutOfBoundsException__T__(new $c_jl_IndexOutOfBoundsException(), (index + " is out of bounds (empty vector)"))
-    });
-    $c_sci_Vector0$.prototype.tail__O = (function() {
-      return this.tail__sci_Vector()
     });
     $c_sci_Vector0$.prototype.map__F1__O = (function(f) {
       return this
@@ -71217,20 +70595,6 @@
       b.consider__I__AO__V(1, this.sci_BigVector__f_suffix1);
       return b.result__sci_Vector()
     });
-    $c_sci_Vector2.prototype.tail__sci_Vector = (function() {
-      if ((this.sci_Vector2__f_len1 > 1)) {
-        var a = this.sci_Vector__f_prefix1;
-        var to = a.u.length;
-        var x$1 = $m_ju_Arrays$().copyOfRange__AO__I__I__AO(a, 1, to);
-        var x$2 = (((-1) + this.sci_Vector2__f_len1) | 0);
-        var x$3 = (((-1) + this.sci_BigVector__f_length0) | 0);
-        var x$4 = this.sci_Vector2__f_data2;
-        var x$5 = this.sci_BigVector__f_suffix1;
-        return new $c_sci_Vector2(x$1, x$2, x$4, x$5, x$3)
-      } else {
-        return this.slice0__I__I__sci_Vector(1, this.sci_BigVector__f_length0)
-      }
-    });
     $c_sci_Vector2.prototype.vectorSliceCount__I = (function() {
       return 3
     });
@@ -71261,9 +70625,6 @@
       } else {
         return $c_sci_Vector.prototype.appendedAll0__sc_IterableOnce__I__sci_Vector.call(this, suffix, k)
       }
-    });
-    $c_sci_Vector2.prototype.tail__O = (function() {
-      return this.tail__sci_Vector()
     });
     $c_sci_Vector2.prototype.map__F1__O = (function(f) {
       return this.map__F1__sci_Vector(f)
@@ -71559,23 +70920,6 @@
       b.consider__I__AO__V(1, this.sci_BigVector__f_suffix1);
       return b.result__sci_Vector()
     });
-    $c_sci_Vector3.prototype.tail__sci_Vector = (function() {
-      if ((this.sci_Vector3__f_len1 > 1)) {
-        var a = this.sci_Vector__f_prefix1;
-        var to = a.u.length;
-        var x$1 = $m_ju_Arrays$().copyOfRange__AO__I__I__AO(a, 1, to);
-        var x$2 = (((-1) + this.sci_Vector3__f_len1) | 0);
-        var x$3 = (((-1) + this.sci_Vector3__f_len12) | 0);
-        var x$4 = (((-1) + this.sci_BigVector__f_length0) | 0);
-        var x$5 = this.sci_Vector3__f_prefix2;
-        var x$6 = this.sci_Vector3__f_data3;
-        var x$7 = this.sci_Vector3__f_suffix2;
-        var x$8 = this.sci_BigVector__f_suffix1;
-        return new $c_sci_Vector3(x$1, x$2, x$5, x$3, x$6, x$7, x$8, x$4)
-      } else {
-        return this.slice0__I__I__sci_Vector(1, this.sci_BigVector__f_length0)
-      }
-    });
     $c_sci_Vector3.prototype.vectorSliceCount__I = (function() {
       return 5
     });
@@ -71615,9 +70959,6 @@
       } else {
         return $c_sci_Vector.prototype.appendedAll0__sc_IterableOnce__I__sci_Vector.call(this, suffix, k)
       }
-    });
-    $c_sci_Vector3.prototype.tail__O = (function() {
-      return this.tail__sci_Vector()
     });
     $c_sci_Vector3.prototype.map__F1__O = (function(f) {
       return this.map__F1__sci_Vector(f)
@@ -72044,26 +71385,6 @@
       b.consider__I__AO__V(1, this.sci_BigVector__f_suffix1);
       return b.result__sci_Vector()
     });
-    $c_sci_Vector4.prototype.tail__sci_Vector = (function() {
-      if ((this.sci_Vector4__f_len1 > 1)) {
-        var a = this.sci_Vector__f_prefix1;
-        var to = a.u.length;
-        var x$1 = $m_ju_Arrays$().copyOfRange__AO__I__I__AO(a, 1, to);
-        var x$2 = (((-1) + this.sci_Vector4__f_len1) | 0);
-        var x$3 = (((-1) + this.sci_Vector4__f_len12) | 0);
-        var x$4 = (((-1) + this.sci_Vector4__f_len123) | 0);
-        var x$5 = (((-1) + this.sci_BigVector__f_length0) | 0);
-        var x$6 = this.sci_Vector4__f_prefix2;
-        var x$7 = this.sci_Vector4__f_prefix3;
-        var x$8 = this.sci_Vector4__f_data4;
-        var x$9 = this.sci_Vector4__f_suffix3;
-        var x$10 = this.sci_Vector4__f_suffix2;
-        var x$11 = this.sci_BigVector__f_suffix1;
-        return new $c_sci_Vector4(x$1, x$2, x$6, x$3, x$7, x$4, x$8, x$9, x$10, x$11, x$5)
-      } else {
-        return this.slice0__I__I__sci_Vector(1, this.sci_BigVector__f_length0)
-      }
-    });
     $c_sci_Vector4.prototype.vectorSliceCount__I = (function() {
       return 7
     });
@@ -72112,9 +71433,6 @@
       } else {
         return $c_sci_Vector.prototype.appendedAll0__sc_IterableOnce__I__sci_Vector.call(this, suffix, k)
       }
-    });
-    $c_sci_Vector4.prototype.tail__O = (function() {
-      return this.tail__sci_Vector()
     });
     $c_sci_Vector4.prototype.map__F1__O = (function(f) {
       return this.map__F1__sci_Vector(f)
@@ -72702,29 +72020,6 @@
       b.consider__I__AO__V(1, this.sci_BigVector__f_suffix1);
       return b.result__sci_Vector()
     });
-    $c_sci_Vector5.prototype.tail__sci_Vector = (function() {
-      if ((this.sci_Vector5__f_len1 > 1)) {
-        var a = this.sci_Vector__f_prefix1;
-        var to = a.u.length;
-        var x$1 = $m_ju_Arrays$().copyOfRange__AO__I__I__AO(a, 1, to);
-        var x$2 = (((-1) + this.sci_Vector5__f_len1) | 0);
-        var x$3 = (((-1) + this.sci_Vector5__f_len12) | 0);
-        var x$4 = (((-1) + this.sci_Vector5__f_len123) | 0);
-        var x$5 = (((-1) + this.sci_Vector5__f_len1234) | 0);
-        var x$6 = (((-1) + this.sci_BigVector__f_length0) | 0);
-        var x$7 = this.sci_Vector5__f_prefix2;
-        var x$8 = this.sci_Vector5__f_prefix3;
-        var x$9 = this.sci_Vector5__f_prefix4;
-        var x$10 = this.sci_Vector5__f_data5;
-        var x$11 = this.sci_Vector5__f_suffix4;
-        var x$12 = this.sci_Vector5__f_suffix3;
-        var x$13 = this.sci_Vector5__f_suffix2;
-        var x$14 = this.sci_BigVector__f_suffix1;
-        return new $c_sci_Vector5(x$1, x$2, x$7, x$3, x$8, x$4, x$9, x$5, x$10, x$11, x$12, x$13, x$14, x$6)
-      } else {
-        return this.slice0__I__I__sci_Vector(1, this.sci_BigVector__f_length0)
-      }
-    });
     $c_sci_Vector5.prototype.vectorSliceCount__I = (function() {
       return 9
     });
@@ -72782,9 +72077,6 @@
       } else {
         return $c_sci_Vector.prototype.appendedAll0__sc_IterableOnce__I__sci_Vector.call(this, suffix, k)
       }
-    });
-    $c_sci_Vector5.prototype.tail__O = (function() {
-      return this.tail__sci_Vector()
     });
     $c_sci_Vector5.prototype.map__F1__O = (function(f) {
       return this.map__F1__sci_Vector(f)
@@ -73532,32 +72824,6 @@
       b.consider__I__AO__V(1, this.sci_BigVector__f_suffix1);
       return b.result__sci_Vector()
     });
-    $c_sci_Vector6.prototype.tail__sci_Vector = (function() {
-      if ((this.sci_Vector6__f_len1 > 1)) {
-        var a = this.sci_Vector__f_prefix1;
-        var to = a.u.length;
-        var x$1 = $m_ju_Arrays$().copyOfRange__AO__I__I__AO(a, 1, to);
-        var x$2 = (((-1) + this.sci_Vector6__f_len1) | 0);
-        var x$3 = (((-1) + this.sci_Vector6__f_len12) | 0);
-        var x$4 = (((-1) + this.sci_Vector6__f_len123) | 0);
-        var x$5 = (((-1) + this.sci_Vector6__f_len1234) | 0);
-        var x$6 = (((-1) + this.sci_Vector6__f_len12345) | 0);
-        var x$7 = (((-1) + this.sci_BigVector__f_length0) | 0);
-        var x$8 = this.sci_Vector6__f_prefix2;
-        var x$9 = this.sci_Vector6__f_prefix3;
-        var x$10 = this.sci_Vector6__f_prefix4;
-        var x$11 = this.sci_Vector6__f_prefix5;
-        var x$12 = this.sci_Vector6__f_data6;
-        var x$13 = this.sci_Vector6__f_suffix5;
-        var x$14 = this.sci_Vector6__f_suffix4;
-        var x$15 = this.sci_Vector6__f_suffix3;
-        var x$16 = this.sci_Vector6__f_suffix2;
-        var x$17 = this.sci_BigVector__f_suffix1;
-        return new $c_sci_Vector6(x$1, x$2, x$8, x$3, x$9, x$4, x$10, x$5, x$11, x$6, x$12, x$13, x$14, x$15, x$16, x$17, x$7)
-      } else {
-        return this.slice0__I__I__sci_Vector(1, this.sci_BigVector__f_length0)
-      }
-    });
     $c_sci_Vector6.prototype.vectorSliceCount__I = (function() {
       return 11
     });
@@ -73624,9 +72890,6 @@
       } else {
         return $c_sci_Vector.prototype.appendedAll0__sc_IterableOnce__I__sci_Vector.call(this, suffix, k)
       }
-    });
-    $c_sci_Vector6.prototype.tail__O = (function() {
-      return this.tail__sci_Vector()
     });
     $c_sci_Vector6.prototype.map__F1__O = (function(f) {
       return this.map__F1__sci_Vector(f)
