@@ -19,7 +19,7 @@ lazy val scalaVersion3 = "3.2.1"
 
 import xerial.sbt.Sonatype._
 
-// resolvers ++= Seq(Resolver.jcenterRepo, Resolver.sonatypeRepo("releases"))
+ThisBuild / resolvers += "Sonatype OSS Releases" at "https://s01.oss.sonatype.org/content/repositories/releases"
 
 lazy val sharedSettings = Seq(
   scalaVersion     := scalaVersion3,
