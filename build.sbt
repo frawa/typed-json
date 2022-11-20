@@ -74,8 +74,8 @@ lazy val sharedScalacSettings = Seq(
           )
       })
   },
-  ThisBuild / semanticdbEnabled := true,
-  ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+  ThisBuild / semanticdbEnabled := true
+  // ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 )
 
 lazy val strictScalacSettings = Seq(
@@ -93,7 +93,7 @@ lazy val strictScalacSettings = Seq(
 )
 
 lazy val sharedTestSettings = Seq(
-  libraryDependencies += "org.scalameta" %%% "munit" % "1.0.0-M6" % Test,
+  libraryDependencies += "org.scalameta" %%% "munit" % "1.0.0-M7" % Test,
   // Test / testOptions += Tests.Argument("+l", "-q", "--summary=0")
   // perferred to copy&paste expectations into tests:
   Test / testOptions += Tests.Argument("-q", "--summary=0")
@@ -200,6 +200,9 @@ lazy val typedJson =
     .in(file("typed-json"))
     .settings(
       name := "typed-json"
+    )
+    .settings(
+      libraryDependencies += "io.github.frawa" %%% "inline-files" % "LATEST-SNAPSHOT" changing ()
     )
     .settings(sharedSettings)
     .settings(sharedScalacSettings)

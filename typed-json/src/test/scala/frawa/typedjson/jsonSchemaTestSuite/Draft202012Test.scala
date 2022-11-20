@@ -19,6 +19,8 @@ package frawa.typedjson.jsonSchemaTestSuite
 import frawa.typedjson.testutil.TestUtil.{*, given}
 import frawa.typedjson.macros.Macros
 
+import frawa.inlinefiles.InlineFiles.*
+
 class Draft202012Test extends JsonSchemaTestSuite:
   import Macros.*
 

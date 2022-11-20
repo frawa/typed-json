@@ -19,10 +19,12 @@ package frawa.typedjson.jsonSchemaTestSuite
 import frawa.typedjson.testutil.TestUtil.{*, given}
 import frawa.typedjson.macros.Macros
 
+import frawa.inlinefiles.InlineFiles.*
+
 class Draft202012OptionalTest extends JsonSchemaTestSuite:
   import Macros.*
 
-  private val draft202012OptionalFiles = draft202012.files("optional")
+  private val draft202012OptionalFiles = draft202012.folder("optional")
 
   // override protected val onlyDescription: Option[String] =
   //   Some("single dependency")

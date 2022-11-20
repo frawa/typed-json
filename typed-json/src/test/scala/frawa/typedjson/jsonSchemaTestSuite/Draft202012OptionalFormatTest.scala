@@ -18,11 +18,13 @@ package frawa.typedjson.jsonSchemaTestSuite
 
 import frawa.typedjson.testutil.TestUtil.{given, *}
 
+import frawa.inlinefiles.InlineFiles.*
+
 class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
   import frawa.typedjson.macros.Macros.*
   import frawa.typedjson.parser.*
 
-  private val draft202012OptionalFormatFiles = draft202012.files("/optional/format")
+  private val draft202012OptionalFormatFiles = draft202012.filter(e => e._1.startsWith("optional/format"))
 
   // TODO un-ignore 'em
   override val ignore: Set[String] = Set(
