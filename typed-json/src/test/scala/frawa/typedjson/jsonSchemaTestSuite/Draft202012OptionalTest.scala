@@ -24,7 +24,7 @@ import frawa.inlinefiles.InlineFiles.*
 class Draft202012OptionalTest extends JsonSchemaTestSuite:
   import Macros.*
 
-  private val draft202012OptionalFiles = draft202012.folder("optional")
+  private val draft202012OptionalFiles = draft202012.folder("optional").files()
 
   // override protected val onlyDescription: Option[String] =
   //   Some("single dependency")
