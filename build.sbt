@@ -19,7 +19,7 @@ lazy val scalaVersion3 = "3.2.1"
 
 import xerial.sbt.Sonatype._
 
-// resolvers ++= Seq(Resolver.jcenterRepo, Resolver.sonatypeRepo("releases"))
+ThisBuild / resolvers += "Sonatype OSS Releases" at "https://s01.oss.sonatype.org/content/repositories/releases"
 
 lazy val sharedSettings = Seq(
   scalaVersion     := scalaVersion3,
@@ -74,8 +74,8 @@ lazy val sharedScalacSettings = Seq(
           )
       })
   },
-  ThisBuild / semanticdbEnabled := true,
-  ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+  ThisBuild / semanticdbEnabled := true
+  // ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 )
 
 lazy val strictScalacSettings = Seq(
@@ -107,7 +107,7 @@ lazy val root = project
     publish / skip := true
   )
   .aggregate(parser.projectRefs: _*)
-  .aggregate(folderContents.projectRefs: _*)
+  .aggregate(parserJawn.projectRefs: _*)
   .aggregate(parserZio.projectRefs: _*)
   .aggregate(macros)
   .aggregate(typedJson.projectRefs: _*)
@@ -118,19 +118,6 @@ lazy val parser =
     .in(file("parser"))
     .settings(
       name := "typed-json-parser"
-    )
-    .settings(sharedSettings)
-    .settings(sharedScalacSettings)
-    .settings(strictScalacSettings)
-    .settings(sharedTestSettings)
-    .jvmPlatform(sharedPlatformSettings)
-    .jsPlatform(sharedPlatformSettings)
-
-lazy val folderContents =
-  projectMatrix
-    .in(file("folder-contents"))
-    .settings(
-      name := "typed-json-folder-contents"
     )
     .settings(sharedSettings)
     .settings(sharedScalacSettings)
@@ -191,8 +178,10 @@ lazy val macros = project
   .settings(sharedSettings)
   .settings(sharedScalacSettings)
   .settings(sharedTestSettings)
+  .settings(
+    libraryDependencies += "io.github.frawa" %%% "inline-files" % "0.5.2"
+  )
   .dependsOn(parser.jvm(scalaVersion3))
-  .dependsOn(folderContents.jvm(scalaVersion3))
   .dependsOn(parserJawn.jvm(scalaVersion3))
 
 lazy val typedJson =
@@ -200,6 +189,9 @@ lazy val typedJson =
     .in(file("typed-json"))
     .settings(
       name := "typed-json"
+    )
+    .settings(
+      libraryDependencies += "io.github.frawa" %%% "inline-files" % "0.5.2" % Test
     )
     .settings(sharedSettings)
     .settings(sharedScalacSettings)
@@ -209,7 +201,6 @@ lazy val typedJson =
     .jsPlatform(sharedPlatformSettings)
     .dependsOn(parser)
     .configure(p => p.dependsOn(macros))
-    .dependsOn(folderContents)
     .dependsOn(parserJawn % "test")
 
 lazy val typedJsonJsExport = project

@@ -34,8 +34,6 @@ object MetaSchemas:
 
   private def resolve202012(relative: URI): Option[RootSchemaValue] =
     val name = relative.getSchemeSpecificPart
-    metaSchemas.file(name + ".json").map(SchemaValue.root(_))
+    metaSchemas.get(name + ".json").map(SchemaValue.root(_))
 
-  import Macros.*
-
-  private val metaSchemas = folderJsonContents("./metaSchemas", ".json")
+  private val metaSchemas = Macros.inlineJsonContents("./metaSchemas", ".json")

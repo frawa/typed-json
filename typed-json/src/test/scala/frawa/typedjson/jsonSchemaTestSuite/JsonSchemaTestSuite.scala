@@ -27,12 +27,12 @@ import frawa.typedjson.testutil.TestUtil.*
 import frawa.typedjson.validation.{ValidationProcessing, ValidationOutput}
 import frawa.typedjson.macros.Macros
 
+import frawa.inlinefiles.InlineFiles
+
 import java.net.URI
 
 open class JsonSchemaTestSuite extends FunSuite:
-  import Macros.folderContents
-
-  protected val draft202012 = folderContents("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
+  protected val draft202012 = InlineFiles.inlineDeepTextFiles("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
 
   protected val oneTestPerData      = false
   protected val ignore: Set[String] = Set()

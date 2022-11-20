@@ -19,9 +19,9 @@ package frawa.typedjson.jsonSchemaTestSuite
 import frawa.typedjson.testutil.TestUtil.{*, given}
 import frawa.typedjson.macros.Macros
 
-class Draft202012Test extends JsonSchemaTestSuite:
-  import Macros.*
+import frawa.inlinefiles.InlineFiles.*
 
+class Draft202012Test extends JsonSchemaTestSuite:
   private val draft202012Files = draft202012.files()
 
   // override protected val onlyDescription: Option[String] = Some("unevaluatedItems with nested items")
