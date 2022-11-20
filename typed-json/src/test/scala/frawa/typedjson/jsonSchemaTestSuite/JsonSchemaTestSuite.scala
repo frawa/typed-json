@@ -34,7 +34,6 @@ import java.net.URI
 open class JsonSchemaTestSuite extends FunSuite:
   import Macros.folderContents
 
-  // protected val draft202012 = folderContents("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
   protected val draft202012 = InlineFiles.inlineDeepTextFiles("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
 
   protected val oneTestPerData      = false
