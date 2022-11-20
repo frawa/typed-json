@@ -18,14 +18,11 @@ package frawa.typedjson.jsonSchemaTestSuite
 
 import frawa.typedjson.keywords.{LoadedSchemasResolver, RootSchemaValue, SchemaValue}
 import frawa.typedjson.util.UriUtil
-import frawa.typedjson.foldercontents.FolderContents
+import frawa.typedjson.parser.*
 
 import java.net.URI
 
 object Remotes:
-  import frawa.typedjson.macros.FileUtils
-  import frawa.typedjson.parser.*
-
   val remotesUri: URI = UriUtil.uri("http://localhost:1234")
 
   def lazyResolver: LoadedSchemasResolver.LazyResolver = { uri =>
@@ -36,9 +33,8 @@ object Remotes:
 
   private def resolveRemotes(relative: URI): Option[RootSchemaValue] =
     val name = relative.getSchemeSpecificPart
-    remotesFiles.file(name).map(SchemaValue.root)
+    remotesFiles.get(name).map(SchemaValue.root)
 
   import frawa.typedjson.macros.Macros.*
 
-  private val remotesFiles: FolderContents[Value] =
-    folderJsonContents("./JSON-Schema-Test-Suite/remotes", ".json")
+  private val remotesFiles = inlineJsonContents("./JSON-Schema-Test-Suite/remotes", ".json")

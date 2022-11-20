@@ -107,7 +107,7 @@ lazy val root = project
     publish / skip := true
   )
   .aggregate(parser.projectRefs: _*)
-  .aggregate(folderContents.projectRefs: _*)
+  .aggregate(parserJawn.projectRefs: _*)
   .aggregate(parserZio.projectRefs: _*)
   .aggregate(macros)
   .aggregate(typedJson.projectRefs: _*)
@@ -118,19 +118,6 @@ lazy val parser =
     .in(file("parser"))
     .settings(
       name := "typed-json-parser"
-    )
-    .settings(sharedSettings)
-    .settings(sharedScalacSettings)
-    .settings(strictScalacSettings)
-    .settings(sharedTestSettings)
-    .jvmPlatform(sharedPlatformSettings)
-    .jsPlatform(sharedPlatformSettings)
-
-lazy val folderContents =
-  projectMatrix
-    .in(file("folder-contents"))
-    .settings(
-      name := "typed-json-folder-contents"
     )
     .settings(sharedSettings)
     .settings(sharedScalacSettings)
@@ -191,8 +178,10 @@ lazy val macros = project
   .settings(sharedSettings)
   .settings(sharedScalacSettings)
   .settings(sharedTestSettings)
+  .settings(
+    libraryDependencies += "io.github.frawa" %%% "inline-files" % "LATEST-SNAPSHOT" changing ()
+  )
   .dependsOn(parser.jvm(scalaVersion3))
-  .dependsOn(folderContents.jvm(scalaVersion3))
   .dependsOn(parserJawn.jvm(scalaVersion3))
 
 lazy val typedJson =
@@ -202,7 +191,7 @@ lazy val typedJson =
       name := "typed-json"
     )
     .settings(
-      libraryDependencies += "io.github.frawa" %%% "inline-files" % "LATEST-SNAPSHOT" changing ()
+      libraryDependencies += "io.github.frawa" %%% "inline-files" % "LATEST-SNAPSHOT" % Test
     )
     .settings(sharedSettings)
     .settings(sharedScalacSettings)
@@ -212,7 +201,6 @@ lazy val typedJson =
     .jsPlatform(sharedPlatformSettings)
     .dependsOn(parser)
     .configure(p => p.dependsOn(macros))
-    .dependsOn(folderContents)
     .dependsOn(parserJawn % "test")
 
 lazy val typedJsonJsExport = project

@@ -16,47 +16,18 @@
 
 package frawa.typedjson.macros
 
+import scala.quoted.*
+
+import frawa.inlinefiles.compiletime.FileContents
+
 import frawa.typedjson.parser.Value
-import frawa.typedjson.foldercontents.FolderContents
+import JsonUtils.{given, *}
 
 object Macros:
-  import scala.quoted.*
-  import JsonUtils.{given, *}
-  import FileUtils.{given, *}
 
-  // inline def fileContent(inline path: String): String = ${
-  //   fileContent_impl('path)
-  // }
-
-  // private def fileContent_impl(path: Expr[String])(using Quotes): Expr[String] =
-  //   Expr(readContentOf(path.valueOrAbort))
-
-  // inline def folderFileContents(inline path: String, ext: String): Map[String, String] = ${
-  //   folderFileContents_impl('path, 'ext)
-  // }
-
-  // private def folderFileContents_impl(path: Expr[String], ext: Expr[String])(using
-  //     Quotes
-  // ): Expr[Map[String, String]] =
-  //   Expr(readFolderFileContentsOf(path.valueOrAbort, ext.valueOrAbort)(identity))
-
-  inline def folderContents(inline path: String, ext: String): FolderContents[String] = ${
-    folderContents_impl('path, 'ext)
+  inline def inlineJsonContents(path: String, ext: String): Map[String, Value] = ${
+    inlineJsonContents_impl('path, 'ext)
   }
 
-  private def folderContents_impl(path: Expr[String], ext: Expr[String])(using Quotes): Expr[FolderContents[String]] =
-    Expr(readFolderContentsOf(path.valueOrAbort, ext.valueOrAbort)(identity))
-
-  // inline def jsonContent(inline path: String): Value = ${
-  //   jsonContent_impl('path)
-  // }
-
-  // private def jsonContent_impl(path: Expr[String])(using Quotes): Expr[Value] =
-  //   Expr(parseJsonValue(readContentOf(path.valueOrAbort)))
-
-  inline def folderJsonContents(path: String, ext: String): FolderContents[Value] = ${
-    folderJsonContents_impl('path, 'ext)
-  }
-
-  def folderJsonContents_impl(path: Expr[String], ext: Expr[String])(using Quotes): Expr[FolderContents[Value]] =
-    Expr(readFolderContentsOf(path.valueOrAbort, ext.valueOrAbort)(parseJsonValue))
+  def inlineJsonContents_impl(path: Expr[String], ext: Expr[String])(using Quotes): Expr[Map[String, Value]] =
+    Expr(FileContents.parseTextContentsIn(path.valueOrAbort, ext.valueOrAbort, true)(parseJsonValue))
