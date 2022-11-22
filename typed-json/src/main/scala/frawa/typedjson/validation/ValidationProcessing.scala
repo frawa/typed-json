@@ -242,7 +242,7 @@ object ValidationProcessing:
         }
       case "relative-json-pointer" =>
         validateStringValue(FormatMismatch(format)) { v =>
-          !v.startsWith("/") && Pointer.parse("/" + v).toString().equals("/" + v)
+          !v.isBlank() && !v.startsWith("/") && Pointer.parse("/" + v).toString().equals("/" + v)
         }
       case "date-time" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
