@@ -564,8 +564,8 @@ class ValidationKeywordTest extends FunSuite:
           Some(
             ValidationOutput(
               Seq(
-                typedjson.keywords.WithPointer(FalseSchemaReason(), Pointer.empty / "gnu"),
-                typedjson.keywords.WithPointer(FalseSchemaReason(), Pointer.empty / "bar")
+                typedjson.keywords.WithPointer(FalseSchemaReason(), Pointer.empty / "bar"),
+                typedjson.keywords.WithPointer(FalseSchemaReason(), Pointer.empty / "gnu")
               )
             )
           )

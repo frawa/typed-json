@@ -53,10 +53,14 @@ case class Result[O](
 
   def add(other: Result[O]): Result[O] =
     val combine = this.combineOutput.orElse(other.combineOutput)
-    val os = combine.flatMap(c =>
-      Seq(this.output, other.output).flatten
-        .reduceOption(c)
-    )
+    val os = combine
+      .flatMap(c =>
+        this.output
+          .zip(other.output)
+          .map(c.apply)
+      )
+      .orElse(this.output)
+      .orElse(other.output)
     this
       .copy(valid = this.valid && other.valid)
       .copy(count = this.count + other.count)
