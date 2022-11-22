@@ -164,7 +164,7 @@ lazy val parserJawn =
     .settings(strictScalacSettings)
     .settings(sharedTestSettings)
     .settings(
-      libraryDependencies += "org.typelevel" %%% "jawn-parser" % "1.3.1"
+      libraryDependencies += "org.typelevel" %%% "jawn-parser" % "1.3.2"
     )
     .jvmPlatform(sharedPlatformSettings)
     .jsPlatform(sharedPlatformSettings, jsSettingsJawn)
