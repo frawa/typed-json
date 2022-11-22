@@ -1,0 +1,13 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+template: |
+  # What's Changed
+  $CHANGES
+categories:
+  - title: 'Dependency Updates'
+    label: 'dependencies'
+
+autolabeler:
+  - label: 'dependencies'
+    body:
+      - '/Configure Scala Steward for your repository with/'

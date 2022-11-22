@@ -30,7 +30,7 @@ lazy val sharedSettings = Seq(
   description            := "A library helping type Json data with Json Schema.",
   sonatypeProjectHosting := Some(GitHubHosting("frawa", "typed-json", "agilecoderfrank@gmail.com")),
   sonatypeCredentialHost := "s01.oss.sonatype.org",
-  publishTo              := sonatypePublishToBundle.value,
+  sonatypeRepository     := "https://s01.oss.sonatype.org/service/local",
   versionScheme          := Some("semver-spec")
 )
 
