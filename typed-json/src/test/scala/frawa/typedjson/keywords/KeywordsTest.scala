@@ -392,7 +392,7 @@ class KeywordsTest extends FunSuite:
           keywords.keywords,
           Set(
             WithLocation(
-              uri("#/if"),
+              uri("#/else"),
               IfThenElseKeyword(
                 Some(
                   Keywords(

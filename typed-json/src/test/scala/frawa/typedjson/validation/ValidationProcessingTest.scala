@@ -623,20 +623,20 @@ class ValidationProcessingTest extends FunSuite:
           result,
           Seq(
             typedjson.keywords.WithPointer(
-              result = TypeMismatch(
-                expected = "string"
-              ),
-              pointer = Pointer(
-                segments = Nil
-              )
-            ),
-            typedjson.keywords.WithPointer(
               result = NotInEnum(
                 values = List(
                   StringValue(
                     value = "first"
                   )
                 )
+              ),
+              pointer = Pointer(
+                segments = Nil
+              )
+            ),
+            typedjson.keywords.WithPointer(
+              result = TypeMismatch(
+                expected = "string"
               ),
               pointer = Pointer(
                 segments = Nil
@@ -778,7 +778,15 @@ class ValidationProcessingTest extends FunSuite:
           Seq(
             typedjson.keywords.WithPointer(
               result = NotInEnum(
-                values = Seq("array", "boolean", "integer", "null", "number", "object", "string").map(StringValue.apply)
+                values = Seq(
+                  "array",
+                  "boolean",
+                  "integer",
+                  "null",
+                  "number",
+                  "object",
+                  "string"
+                ).map(StringValue.apply)
               ),
               pointer = Pointer.parse("/$defs/foo/type")
             ),
