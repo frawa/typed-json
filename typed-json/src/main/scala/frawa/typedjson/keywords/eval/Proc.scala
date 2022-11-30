@@ -17,7 +17,13 @@ class ProcDefault[O, R[O]] extends Proc[O, R]:
 
   private type Fun = InnerValue => O
   def process(keyword: KeywordWithLocation)(using rops: ResultOps[R])(using ops: OutputOps[O]): EvalFun[O, R] =
-    val fun: Fun = keyword.value match {
+    keyword.value match {
+      case assertion: AssertionKeyword   => validate(assertion)
+      case aggregator: ApplicatorKeyword => aggregate(aggregator)
+    }
+
+  private def validate(keyword: AssertionKeyword)(using rops: ResultOps[R])(using ops: OutputOps[O]): EvalFun[O, R] =
+    val fun: Fun = keyword match {
       case NullTypeKeyword                 => validateType(nullTypeMismatch)
       case BooleanTypeKeyword              => validateType(booleanTypeMismatch)
       case StringTypeKeyword               => validateType(stringTypeMismatch)
@@ -43,6 +49,25 @@ class ProcDefault[O, R[O]] extends Proc[O, R]:
       case DependentRequiredKeyword(v)     => validateDependentRequired(v)
     }
     fun.andThen(rops.pure(_))
+
+  private def aggregate(
+      aggregator: ApplicatorKeyword
+  )(using ResultOps[R])(using ops: OutputOps[O]): EvalFun[O, R] = aggregator match {
+    case c: ArrayItemsKeyword            => evalArrayItems(c)
+    case c: ObjectPropertiesKeyword      => evalObjectProperties(c)
+    case c: NotKeyword                   => evalNot(c.keywords)
+    case c: AllOfKeyword                 => evalApplicator(c.keywords)(ops.all)
+    case c: AnyOfKeyword                 => evalApplicator(c.keywords)(ops.any)
+    case c: OneOfKeyword                 => evalApplicator(c.keywords)(ops.one)
+    case c: UnionTypeKeyword             => evalUnionType(c)
+    case c: IfThenElseKeyword            => evalIfThenElse(c)
+    case c: PropertyNamesKeyword         => evalPropertyNames(c)
+    case c: LazyParseKeywords            => evalLazyParseKeywords(c)
+    case c: DependentSchemasKeyword      => evalDependentSchemas(c)
+    case c: ContainsKeyword              => evalContains(c)
+    case c: UnevaluatedItemsKeyword      => ??? // evalUnevaluated(processing, c)
+    case c: UnevaluatedPropertiesKeyword => ??? // evalUnevaluated(processing, c)
+  }
 
   private val nullTypeMismatch    = TypeMismatch[NullValue.type]("null")
   private val booleanTypeMismatch = TypeMismatch[BoolValue]("boolean")
@@ -354,3 +379,188 @@ class ProcDefault[O, R[O]] extends Proc[O, R]:
         else ops.invalid(DependentRequiredMissing(missing), value.pointer)
       case _ => ops.valid
   }
+
+  private def evalArrayItems(keyword: ArrayItemsKeyword)(using rops: ResultOps[R])(using
+      ops: OutputOps[O]
+  ): EvalFun[O, R] =
+    val pPrefix = keyword.prefixItems.map(process(_))
+    val pItems  = keyword.items.map(process(_))
+    applyToArray(pPrefix, pItems)(ops.all)
+
+  private def applyToArray(pPrefix: Seq[EvalFun[O, R]], pItems: Option[EvalFun[O, R]])(
+      aggregate: Seq[O] => O
+  )(using rops: ResultOps[R])(using ops: OutputOps[O]): EvalFun[O, R] = (value: InnerValue) =>
+    value.value match
+      case ArrayValue(vs) =>
+        val indexed = vs.zipWithIndex
+          .map { case (v, index) =>
+            InnerValue(v, value.pointer / index)
+          }
+        val resultPrefix = pPrefix.zip(indexed).map { case (p, v) => p(v) }
+        val result       = pItems.map(pItems => indexed.drop(pPrefix.size).map(pItems)).getOrElse(Seq())
+        val indices      = Seq.range(0, resultPrefix.size + result.size)
+        // aggregateAll(aggregate, resultPrefix ++ result, value).add(WithPointer(EvaluatedIndices(indices)))
+        Util.sequence(resultPrefix ++ result).map(aggregate)
+      case _ => rops.pure(ops.valid)
+
+  private def evalNot(keywords: Keywords)(using ResultOps[R])(using ops: OutputOps[O]): EvalFun[O, R] = value =>
+    val p      = process(keywords)
+    val result = p(value)
+    result.map(_.not)
+
+  private def evalApplicator(keywords: Seq[Keywords])(
+      aggregate: Seq[O] => O
+  )(using ResultOps[R])(using OutputOps[O]): EvalFun[O, R] =
+    val p = keywords.map(process(_))
+    applyToValue(p)(aggregate)
+
+  private def applyToValue(ps: Seq[EvalFun[O, R]])(aggregate: Seq[O] => O)(using ResultOps[R]): EvalFun[O, R] = value =>
+    val result = ps.map(_(value))
+    Util.sequence(result).map(aggregate)
+
+  private def aggregateThem(rs: Seq[R[O]], aggregate: Seq[O] => O)(using ResultOps[R]): R[O] =
+    Util.sequence(rs).map(aggregate)
+
+  private def evalObjectProperties(
+      keyword: ObjectPropertiesKeyword
+  )(using ResultOps[R])(using ops: OutputOps[O]): EvalFun[O, R] =
+    val psProperties = keyword.properties.map { case (key, keywords) =>
+      val partial: PartialFunction[String, () => EvalFun[O, R]] =
+        case k if k == key =>
+          () => process(keywords)
+      partial
+    }.toSeq
+
+    val psPatterns = keyword.patternProperties.map { case (regex, keywords) =>
+      val r = regex.r
+      val partial: PartialFunction[String, () => EvalFun[O, R]] =
+        case k if r.findFirstIn(k).isDefined => () => process(keywords)
+      partial
+    }.toSeq
+
+    val psBoth = psProperties ++ psPatterns
+
+    val psAll: PartialFunction[String, () => EvalFun[O, R]] =
+      case k if psBoth.exists(_.isDefinedAt(k)) =>
+        () => all(psBoth.map(_.lift).flatMap { p => p(k).map(_()) })
+
+    val psAdditional = keyword.additionalProperties.map { keywords =>
+      val partial: PartialFunction[String, () => EvalFun[O, R]] = { _ => () => process(keywords) }
+      partial
+    }
+
+    val ps = psAdditional.map(psAll.orElse(_)).getOrElse(psAll)
+    value => {
+      applyToObject(ps)(ops.all)(value)
+    }
+
+  private def applyToObject(
+      ps: => PartialFunction[String, () => EvalFun[O, R]]
+  )(aggregate: Seq[O] => O)(using rops: ResultOps[R])(using ops: OutputOps[O]): EvalFun[O, R] = value =>
+    value.value match
+      case ObjectValue(vs) =>
+        val evaluated = vs.view
+          .map { case (key, v) =>
+            (key, InnerValue(v, value.pointer / key))
+          }
+          .flatMap { case (key, inner) =>
+            val p = ps.lift(key)
+            p.map(p => (key, p()(inner)))
+          }
+          .toSeq
+        val result        = evaluated.map(_._2)
+        val evaluatedKeys = EvaluatedProperties(evaluated.filter(_._2.isValid).map(_._1).toSet)
+        val annotation    = WithPointer(evaluatedKeys, value.pointer)
+        // aggregateAll(aggregate, result, value).add(annotation)
+        aggregateThem(result, aggregate)
+      case _ => rops.pure(ops.valid)
+
+  private def evalUnionType(keyword: UnionTypeKeyword)(using ResultOps[R])(using
+      ops: OutputOps[O]
+  ): EvalFun[O, R] =
+    val p = keyword.keywords.map(process(_))
+    applyToValue(p)(ops.one)
+
+  private def evalIfThenElse(keyword: IfThenElseKeyword)(using ResultOps[R])(using OutputOps[O]): EvalFun[O, R] =
+    keyword.ifKeywords
+      .map(ifChecks =>
+        applyCondition(
+          process(ifChecks),
+          option(keyword.thenKeywords.map(process(_))),
+          option(keyword.elseKeywords.map(process(_)))
+        )
+      )
+      .getOrElse(noop)
+
+  private def applyCondition(pIf: EvalFun[O, R], pThen: EvalFun[O, R], pElse: EvalFun[O, R])(using ResultOps[R])(using
+      ops: OutputOps[O]
+  ): EvalFun[O, R] = value =>
+    val ifResult = pIf(value)
+    // val result   = if ifResult.valid then Seq(ifResult, pThen(value)) else Seq(pElse(value))
+    ifResult
+      .flatMap { o =>
+        if o.isValid then Util.sequence(Seq(ifResult, pThen(value)))
+        else Util.sequence(Seq(pElse(value)))
+      }
+      .map(ops.all)
+
+  private def noop(using rops: ResultOps[R])(using ops: OutputOps[O]): EvalFun[O, R] = _ => rops.pure(ops.valid)
+
+  private def option(p: Option[EvalFun[O, R]])(using ResultOps[R])(using OutputOps[O]): EvalFun[O, R] =
+    p.getOrElse(noop)
+
+  private def evalPropertyNames(
+      keyword: PropertyNamesKeyword
+  )(using rops: ResultOps[R])(using ops: OutputOps[O]): EvalFun[O, R] = value =>
+    value.value match
+      case ObjectValue(vs) =>
+        val p     = process(keyword.keywords)
+        val names = vs.keySet
+        val result = names.map { name =>
+          (name, p(InnerValue(StringValue(name), value.pointer / name)))
+        }.toSeq
+        val validNames = result.filter(_._2.isValid).map(_._1).toSet
+        val annotation = WithPointer(EvaluatedProperties(validNames), value.pointer)
+        // aggregateAll(aggregate, result.map(_._2), value).add(annotation)
+        aggregateThem(result.map(_._2), ops.all)
+      case _ => rops.pure(ops.valid)
+
+  private def evalLazyParseKeywords(keyword: LazyParseKeywords)(using rops: ResultOps[R])(using
+      ops: OutputOps[O]
+  ): EvalFun[O, R] =
+    keyword.parse() match
+      case Right(keywords) => process(keywords)
+      case Left(problems)  => _ => rops.pure(ops.invalid(problems))
+
+  private def evalDependentSchemas(keyword: DependentSchemasKeyword)(using rops: ResultOps[R])(using
+      ops: OutputOps[O]
+  ): EvalFun[O, R] =
+    value =>
+      value.value match
+        case ObjectValue(v) =>
+          val ps     = v.keySet.flatMap(keyword.keywords.get).map(process(_)).toSeq
+          val result = ps.map(_(value))
+          aggregateThem(result, ops.all)
+        case _ => rops.pure(ops.valid)
+
+  private def evalContains(keyword: ContainsKeyword)(using rops: ResultOps[R])(using
+      ops: OutputOps[O]
+  ): EvalFun[O, R] = value =>
+    value.value match
+      case ArrayValue(vs) =>
+        keyword.schema
+          .map { schema =>
+            val p = process(schema)
+            val indexed = vs.zipWithIndex
+              .map { case (v, index) =>
+                InnerValue(v, value.pointer / index)
+              }
+            val result       = indexed.map(p(_))
+            val validIndices = result.zipWithIndex.filter(_._1.isValid).map(_._2)
+            // aggregateAll(aggregate, result, value).add(
+            //   typedjson.keywords.WithPointer(EvaluatedIndices(validIndices), value.pointer)
+            // )
+            aggregateThem(result, os => ops.contains(os, keyword.min, keyword.max, value.pointer))
+          }
+          .getOrElse(rops.pure(ops.valid))
+      case _ => rops.pure(ops.valid)

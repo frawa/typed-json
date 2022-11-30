@@ -6,6 +6,7 @@ import frawa.typedjson.keywords.Keyword
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.validation.ValidationError
 import frawa.typedjson.validation.ValidationAnnotation
+import frawa.typedjson.keywords.SchemaProblems
 
 object Eval:
   type EvalFun[O, R[O]]      = InnerValue => R[O]
@@ -14,18 +15,23 @@ object Eval:
   def compile[O, R[O]](keywords: Keywords)(using proc: Proc[O, R])(using ResultOps[R])(using
       OutputOps[O]
   ): EvalFun[O, R] =
-    all(keywords.map(proc.process))
-
-  private def all[O, R[O]](es: Seq[EvalFun[O, R]])(using ResultOps[R])(using outops: OutputOps[O]): EvalFun[O, R] =
-    (value: InnerValue) =>
-      Util
-        .sequence(es.map(_(value)))
-        .map(xs => outops.unit.all(xs))
+    proc.process(keywords)
 
 trait Proc[O, R[O]]:
   import Keywords.KeywordWithLocation
   import Eval.EvalFun
+
   def process(keyword: KeywordWithLocation)(using ResultOps[R])(using outops: OutputOps[O]): EvalFun[O, R]
+
+  def process(keywords: Keywords)(using ResultOps[R])(using OutputOps[O]): EvalFun[O, R] = all(
+    keywords.map(process)
+  )
+
+  protected def all[O, R[O]](es: Seq[EvalFun[O, R]])(using ResultOps[R])(using ops: OutputOps[O]): EvalFun[O, R] =
+    (value: InnerValue) =>
+      Util
+        .sequence(es.map(_(value)))
+        .map(ops.all(_))
 
 object Proc:
   given [O, R[O]]: Proc[O, R] = ProcDefault()
@@ -34,8 +40,17 @@ trait OutputOps[O] extends Monoid[O]:
   def valid: O
   def valid(annotation: ValidationAnnotation, pointer: Pointer): O
   def invalid(error: ValidationError, pointer: Pointer): O
+  def invalid(problems: SchemaProblems): O
+
+  def all(os: Seq[O]): O
+  def any(os: Seq[O]): O
+  def one(os: Seq[O]): O
+  def contains(os: Seq[O], min: Option[Int], max: Option[Int], pointer: Pointer): O
+
   def unit = valid
-  extension [O](o: O) def all(os: Seq[O]): O
+  extension [O](o: O)
+    def not: O
+    def isValid: Boolean
 
 trait ResultOps[R[_]] extends Monad[R]
 
