@@ -20,14 +20,14 @@ class EvalTest extends FunSuite:
   given Eval[MyR, MyO] = eval
 
   test("null") {
-    withCompiledSchema(nullSchema, eval) { fun =>
+    withCompiledSchema(nullSchema) { fun =>
       assertEquals(fun(NullValue), MyO(true))
       assertEquals(fun(BoolValue(true)), MyO(false))
     }
   }
 
   test("true") {
-    withCompiledSchema(trueSchema, eval) { fun =>
+    withCompiledSchema(trueSchema) { fun =>
       assertEquals(fun(BoolValue(true)), MyO(true))
       assertEquals(fun(NullValue), MyO(true))
     }
@@ -42,7 +42,7 @@ object Util:
         f(keywords)
       }
 
-  def withCompiledSchema[R[_], O](schema: String, eval: Eval[R, O])(f: R[Eval.Fun[O]] => Unit): Unit =
+  def withCompiledSchema[R[_], O](schema: String)(using eval: Eval[R, O])(f: R[Eval.Fun[O]] => Unit): Unit =
     withSchema(schema) { schema =>
       withKeywords(schema) { keywords =>
         val fun = eval.compile(keywords)
