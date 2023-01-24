@@ -27,13 +27,13 @@ end TheResultMonad
 object Eval:
   type Fun[O] = Value => O
 
-class Eval[R[_]: TheResultMonad, O: OutputOps](using Proc[O]):
+class Eval[R[_]: TheResultMonad, O: OutputOps]:
   import Eval.Fun
   import Keywords.KeywordWithLocation
   // type AggregateFun[O, R[O]] = Seq[R[O]] => EvalFun[O, R]
 
-  protected val monad = summon[TheResultMonad[R]]
-  protected val proc  = summon[Proc[O]]
+  protected val monad    = summon[TheResultMonad[R]]
+  protected val validate = Validate[O]
 
   final def eval(keyword: Keyword)(value: Value): O =
     val compiled = compile(keyword)
@@ -41,7 +41,7 @@ class Eval[R[_]: TheResultMonad, O: OutputOps](using Proc[O]):
 
   final def compile(keyword: Keyword): R[Fun[O]] = evalOne(keyword)
   final def compile(keywords: Keywords): R[Fun[O]] =
-    monad.map(compile(keywords.keywords.toSeq))(fs => proc.validateAll(fs))
+    monad.map(compile(keywords.keywords.toSeq))(fs => validate.validateAll(fs))
   final def compile(keywords: Seq[KeywordWithLocation]): R[Seq[Fun[O]]] =
     val fs = keywords.map(_.value).map(compile)
     fs.foldLeft(monad.unit(Seq())) { (acc, f) =>
@@ -52,45 +52,13 @@ class Eval[R[_]: TheResultMonad, O: OutputOps](using Proc[O]):
 
   private def evalOne(k: Keyword): R[Fun[O]] = // value => ops.valid
     k match {
-      case NullTypeKeyword    => monad.unit(proc.validateType(proc.nullTypeMismatch))
-      case TrivialKeyword(v)  => monad.unit(proc.validateTrivial(v))
-      case BooleanTypeKeyword => monad.unit(proc.validateType(proc.booleanTypeMismatch))
+      case NullTypeKeyword    => monad.unit(validate.validateType(validate.nullTypeMismatch))
+      case TrivialKeyword(v)  => monad.unit(validate.validateTrivial(v))
+      case BooleanTypeKeyword => monad.unit(validate.validateType(validate.booleanTypeMismatch))
       // ...
-      case NotKeyword(ks)       => monad.map(compile(ks))(f => proc.validateNot(f))
-      case UnionTypeKeyword(ks) => monad.map(compile(ks))(fs => proc.validateUnion(fs))
+      case NotKeyword(ks)       => monad.map(compile(ks))(f => validate.validateNot(f))
+      case UnionTypeKeyword(ks) => monad.map(compile(ks))(fs => validate.validateUnion(fs))
     }
-
-trait Proc[O: OutputOps]:
-  import Eval.Fun
-
-  def process(keyword: Keyword): Value => O
-
-  def validateType[T <: Value](error: TypeMismatch[T])(using TypeTest[Value, T]): Fun[O]
-
-  def validateTrivial(v: Boolean): Fun[O]
-  def validateNot(f: Fun[O]): Fun[O]
-  def validateUnion(fs: Seq[Fun[O]]): Fun[O]
-  def validateAll(fs: Seq[Fun[O]]): Fun[O]
-
-  val nullTypeMismatch    = TypeMismatch[NullValue.type]("null")
-  val booleanTypeMismatch = TypeMismatch[BoolValue]("boolean")
-  val stringTypeMismatch  = TypeMismatch[StringValue]("string")
-  val numberTypeMismatch  = TypeMismatch[NumberValue]("number")
-  val arrayTypeMismatch   = TypeMismatch[ArrayValue]("array")
-  val objectTypeMismatch  = TypeMismatch[ObjectValue]("object")
-
-  // def process(keywords: Keywords)(using ResultOps[R])(using OutputOps[O]): EvalFun[O, R] = all(
-  //   keywords.map(process)
-  // )
-
-  // protected def all[O, R[O]](es: Seq[EvalFun[O, R]])(using ResultOps[R])(using ops: OutputOps[O]): EvalFun[O, R] =
-  //   (value: InnerValue) =>
-  //     Util
-  //       .sequence(es.map(_(value)))
-  //       .map(ops.all(_))
-
-// object Proc:
-// given [O, R[O]]: Proc[O, R] = ProcDefault()
 
 trait OutputOps[O] extends Monoid[O]:
   def valid: O

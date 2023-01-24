@@ -73,23 +73,3 @@ object Util:
       def not: MyO         = ???
       def isValid: Boolean = ???
     //   def combine(o2: MyO): MyO = all(Seq(o, o2))
-
-  given Proc[MyO] with
-    import Eval.Fun
-
-    private val ops = summon[OutputOps[MyO]]
-
-    def process(keyword: Keyword): Value => MyO = ???
-
-    def validateType[T <: Value](error: TypeMismatch[T])(using TypeTest[Value, T]): Fun[MyO] = value =>
-      value match
-        case _: T => ops.valid
-        case _    => ops.invalid(error, Pointer.empty)
-
-    def validateTrivial(valid: Boolean): Fun[MyO] = value =>
-      if valid then ops.valid
-      else ops.invalid(FalseSchemaReason(), Pointer.empty)
-
-    def validateNot(f: Fun[MyO]): Fun[MyO]         = ???
-    def validateUnion(fs: Seq[Fun[MyO]]): Fun[MyO] = ???
-    def validateAll(fs: Seq[Fun[MyO]]): Fun[MyO]   = value => ops.all(fs.map(_(value)))
