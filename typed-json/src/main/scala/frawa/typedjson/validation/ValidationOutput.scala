@@ -18,6 +18,8 @@ package frawa.typedjson.validation
 
 import frawa.typedjson.keywords.WithPointer
 import frawa.typedjson.pointer.Pointer
+// import frawa.typedjson.eval.OutputOps
+import frawa.typedjson.keywords.SchemaProblems
 
 case class ValidationOutput(
     errors: Seq[ValidationOutput.Error],
@@ -39,3 +41,21 @@ object ValidationOutput:
 
   def add(o1: ValidationOutput, o2: ValidationOutput): ValidationOutput =
     ValidationOutput(o1.errors ++ o2.errors, o1.annotations ++ o2.annotations)
+
+/*
+class ValidationOutputOps extends OutputOps[ValidationOutput]:
+  def valid: ValidationOutput = ValidationOutput(Seq())
+  def valid(annotation: ValidationAnnotation, pointer: Pointer): ValidationOutput =
+    ValidationOutput.valid(annotation, pointer)
+  def invalid(error: ValidationError, pointer: Pointer): ValidationOutput = ValidationOutput.invalid(error, pointer)
+  def invalid(problems: SchemaProblems): ValidationOutput                 = ??? // ValidationOutput.invalid(problems)
+
+  def all(os: Seq[ValidationOutput]): ValidationOutput                                                            = ???
+  def any(os: Seq[ValidationOutput]): ValidationOutput                                                            = ???
+  def one(os: Seq[ValidationOutput]): ValidationOutput                                                            = ???
+  def contains(os: Seq[ValidationOutput], min: Option[Int], max: Option[Int], pointer: Pointer): ValidationOutput = ???
+
+  extension (o: ValidationOutput)
+    def not: ValidationOutput = ???
+    def isValid: Boolean      = ???
+ */

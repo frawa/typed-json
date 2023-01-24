@@ -23,6 +23,9 @@ import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestUtil.{*, given}
 import munit.FunSuite
+import frawa.typedjson.testutil.EvalFactory
+// import frawa.typedjson.eval.ResultOps
+// import frawa.typedjson.eval.OutputOps
 
 class ValidationKeywordTest extends FunSuite:
 
@@ -31,9 +34,14 @@ class ValidationKeywordTest extends FunSuite:
   private given EvaluatorFactory[SchemaValue, ValidationOutput] =
     EvaluatorFactory.make(ValidationProcessing(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
 
-  def validateJson(
+  // private given EvalFactory[ValidationOutput, Result] with
+  //   given rops: ResultOps[Result]                                            = ???
+  //   given ops: OutputOps[ValidationOutput]                                   = ???
+  //   def parseKeywords(schema: SchemaValue): Either[SchemaProblems, Keywords] = ???
+
+  private def validateJson(
       schema: SchemaValue
-  )(jsonText: String)(f: Result[ValidationOutput] => Unit): Either[Nothing, Unit] =
+  )(jsonText: String)(f: Result[ValidationOutput] => Unit) =
     assertResult(jsonText)(schema)(f)
 
   test("multipleOf") {

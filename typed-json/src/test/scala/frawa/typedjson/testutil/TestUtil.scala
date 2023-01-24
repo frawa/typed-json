@@ -22,6 +22,7 @@ import frawa.typedjson.parser.{Parser, Value}
 import munit.Assertions.{assertEquals, clue, clues, fail}
 
 import java.net.URI
+// import frawa.typedjson.eval.Eval
 
 object TestUtil:
   given Parser                                     = new JawnParser
@@ -48,6 +49,14 @@ object TestUtil:
     assertEquals(result.ignoredKeywords(), Set.empty[String], "ignored keywords")
     result
   }
+
+  // def assertResult13[O, R[O]](valueText: String)(schema: SchemaValue)(
+  //     f: R[O] => Unit
+  // )(using evalFactory: EvalFactory[O, R])(using Parser): Unit =
+  //   val eval   = evalFactory.compile(schema)
+  //   val value  = parseJsonValue(valueText)
+  //   val result = eval(InnerValue(value))
+  //   f(result)
 
   def assertResult[R](valueText: String)(schema: SchemaValue)(
       f: Result[R] => Unit

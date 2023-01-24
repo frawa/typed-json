@@ -2,7 +2,6 @@ package frawa.typedjson.eval
 
 import frawa.typedjson.keywords.Keywords
 import Keywords.KeywordWithLocation
-import Eval.EvalFun
 import frawa.typedjson.keywords.*
 import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.Value.*
@@ -12,18 +11,20 @@ import java.net.URI
 import java.util.UUID
 import frawa.typedjson.pointer.Pointer
 
-class ProcDefault[O, R[O]] extends Proc[O, R]:
+/*
+class ProcDefault[O: OutputOps] extends Proc[O]:
   import frawa.typedjson.validation.*
 
-  private type Fun = InnerValue => O
-  def process(keyword: KeywordWithLocation)(using rops: ResultOps[R])(using ops: OutputOps[O]): EvalFun[O, R] =
+  private type EvalFun[O] = Value => O
+
+  def process(keyword: KeywordWithLocation): EvalFun[O] =
     keyword.value match {
       case assertion: AssertionKeyword   => validate(assertion)
       case aggregator: ApplicatorKeyword => aggregate(aggregator)
     }
 
-  private def validate(keyword: AssertionKeyword)(using rops: ResultOps[R])(using ops: OutputOps[O]): EvalFun[O, R] =
-    val fun: Fun = keyword match {
+  private def validate(keyword: AssertionKeyword): EvalFun[O] =
+    keyword match {
       case NullTypeKeyword                 => validateType(nullTypeMismatch)
       case BooleanTypeKeyword              => validateType(booleanTypeMismatch)
       case StringTypeKeyword               => validateType(stringTypeMismatch)
@@ -48,7 +49,6 @@ class ProcDefault[O, R[O]] extends Proc[O, R]:
       case MinPropertiesKeyword(v)         => validateMinProperties(v)
       case DependentRequiredKeyword(v)     => validateDependentRequired(v)
     }
-    fun.andThen(rops.pure(_))
 
   private def aggregate(
       aggregator: ApplicatorKeyword
@@ -468,9 +468,9 @@ class ProcDefault[O, R[O]] extends Proc[O, R]:
             p.map(p => (key, p()(inner)))
           }
           .toSeq
-        val result        = evaluated.map(_._2)
-        val evaluatedKeys = EvaluatedProperties(evaluated.filter(_._2.isValid).map(_._1).toSet)
-        val annotation    = WithPointer(evaluatedKeys, value.pointer)
+        val result = evaluated.map(_._2)
+        // val evaluatedKeys = EvaluatedProperties(evaluated.filter(_._2.isValid).map(_._1).toSet)
+        // val annotation    = WithPointer(evaluatedKeys, value.pointer)
         // aggregateAll(aggregate, result, value).add(annotation)
         aggregateThem(result, aggregate)
       case _ => rops.pure(ops.valid)
@@ -519,8 +519,8 @@ class ProcDefault[O, R[O]] extends Proc[O, R]:
         val result = names.map { name =>
           (name, p(InnerValue(StringValue(name), value.pointer / name)))
         }.toSeq
-        val validNames = result.filter(_._2.isValid).map(_._1).toSet
-        val annotation = WithPointer(EvaluatedProperties(validNames), value.pointer)
+        // val validNames = result.filter(_._2.isValid).map(_._1).toSet
+        // val annotation = WithPointer(EvaluatedProperties(validNames), value.pointer)
         // aggregateAll(aggregate, result.map(_._2), value).add(annotation)
         aggregateThem(result.map(_._2), ops.all)
       case _ => rops.pure(ops.valid)
@@ -555,8 +555,8 @@ class ProcDefault[O, R[O]] extends Proc[O, R]:
               .map { case (v, index) =>
                 InnerValue(v, value.pointer / index)
               }
-            val result       = indexed.map(p(_))
-            val validIndices = result.zipWithIndex.filter(_._1.isValid).map(_._2)
+            val result = indexed.map(p(_))
+            // val validIndices = result.zipWithIndex.filter(_._1.isValid).map(_._2)
             // aggregateAll(aggregate, result, value).add(
             //   typedjson.keywords.WithPointer(EvaluatedIndices(validIndices), value.pointer)
             // )
@@ -564,3 +564,4 @@ class ProcDefault[O, R[O]] extends Proc[O, R]:
           }
           .getOrElse(rops.pure(ops.valid))
       case _ => rops.pure(ops.valid)
+ */
