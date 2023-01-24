@@ -15,6 +15,7 @@ import frawa.typedjson.keywords.NullTypeKeyword
 import frawa.typedjson.keywords.NotKeyword
 import frawa.typedjson.keywords.UnionTypeKeyword
 import scala.reflect.TypeTest
+import frawa.typedjson.keywords.TrivialKeyword
 
 trait TheResultMonad[R[_]]:
   def unit[A](a: A): R[A]
@@ -52,6 +53,7 @@ class Eval[R[_]: TheResultMonad, O: OutputOps](using Proc[O]):
   private def evalOne(k: Keyword): R[Fun[O]] = // value => ops.valid
     k match {
       case NullTypeKeyword    => monad.unit(proc.validateType(proc.nullTypeMismatch))
+      case TrivialKeyword(v)  => monad.unit(proc.validateTrivial(v))
       case BooleanTypeKeyword => monad.unit(proc.validateType(proc.booleanTypeMismatch))
       // ...
       case NotKeyword(ks)       => monad.map(compile(ks))(f => proc.validateNot(f))
@@ -65,6 +67,7 @@ trait Proc[O: OutputOps]:
 
   def validateType[T <: Value](error: TypeMismatch[T])(using TypeTest[Value, T]): Fun[O]
 
+  def validateTrivial(v: Boolean): Fun[O]
   def validateNot(f: Fun[O]): Fun[O]
   def validateUnion(fs: Seq[Fun[O]]): Fun[O]
   def validateAll(fs: Seq[Fun[O]]): Fun[O]

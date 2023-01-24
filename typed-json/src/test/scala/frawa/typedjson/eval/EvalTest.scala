@@ -16,14 +16,20 @@ import scala.reflect.TypeTest
 class EvalTest extends FunSuite:
   import Util.{_, given}
 
+  val eval             = Eval[MyR, MyO]
+  given Eval[MyR, MyO] = eval
+
   test("null") {
-    withSchema(nullSchema) { schema =>
-      withKeywords(schema) { keywords =>
-        val eval = Eval[MyR, MyO]
-        val fun  = eval.compile(keywords)
-        assertEquals(fun(NullValue), MyO(true))
-        assertEquals(fun(BoolValue(true)), MyO(false))
-      }
+    withCompiledSchema(nullSchema, eval) { fun =>
+      assertEquals(fun(NullValue), MyO(true))
+      assertEquals(fun(BoolValue(true)), MyO(false))
+    }
+  }
+
+  test("true") {
+    withCompiledSchema(trueSchema, eval) { fun =>
+      assertEquals(fun(BoolValue(true)), MyO(true))
+      assertEquals(fun(NullValue), MyO(true))
     }
   }
 
@@ -35,6 +41,14 @@ object Util:
       .map { keywords =>
         f(keywords)
       }
+
+  def withCompiledSchema[R[_], O](schema: String, eval: Eval[R, O])(f: R[Eval.Fun[O]] => Unit): Unit =
+    withSchema(schema) { schema =>
+      withKeywords(schema) { keywords =>
+        val fun = eval.compile(keywords)
+        f(fun)
+      }
+    }
 
   type MyR[O] = O
   case class MyO(valid: Boolean)
@@ -71,6 +85,10 @@ object Util:
       value match
         case _: T => ops.valid
         case _    => ops.invalid(error, Pointer.empty)
+
+    def validateTrivial(valid: Boolean): Fun[MyO] = value =>
+      if valid then ops.valid
+      else ops.invalid(FalseSchemaReason(), Pointer.empty)
 
     def validateNot(f: Fun[MyO]): Fun[MyO]         = ???
     def validateUnion(fs: Seq[Fun[MyO]]): Fun[MyO] = ???
