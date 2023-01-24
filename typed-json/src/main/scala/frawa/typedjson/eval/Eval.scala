@@ -26,6 +26,7 @@ end TheResultMonad
 
 object Eval:
   type Fun[O] = Value => O
+  def map[O](fun: Fun[O])(f: O => O): Fun[O] = value => f(fun(value))
 
 class Eval[R[_]: TheResultMonad, O: OutputOps]:
   import Eval.Fun

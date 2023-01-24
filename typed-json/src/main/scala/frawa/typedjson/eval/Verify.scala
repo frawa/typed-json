@@ -29,6 +29,6 @@ class Verify[O: OutputOps]:
     if valid then ops.valid
     else ops.invalid(FalseSchemaReason(), Pointer.empty)
 
-  def verifyNot(f: Fun[O]): Fun[O]         = ???
+  def verifyNot(f: Fun[O]): Fun[O]         = Eval.map(f)(_.not)
   def verifyUnion(fs: Seq[Fun[O]]): Fun[O] = ???
-  def verifyAll(fs: Seq[Fun[O]]): Fun[O] = value => ops.all(fs.map(_(value)))
+  def verifyAll(fs: Seq[Fun[O]]): Fun[O]   = value => ops.all(fs.map(_(value)))

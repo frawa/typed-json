@@ -49,6 +49,40 @@ class EvalTest extends FunSuite:
     }
   }
 
+  test("false") {
+    given Eval[MyR, MyO] = eval
+    withCompiledSchema(falseSchema) { fun =>
+      assertEquals(fun(BoolValue(true)), MyO(false))
+      assertEquals(fun(NullValue), MyO(false))
+      assertEquals(fun(parseJsonValue("13")), MyO(false))
+    }
+  }
+
+  test("false with errors") {
+    given Eval[MyResult, MyOutput] = eval2
+    withCompiledSchema(falseSchema) { fun =>
+      assertEquals(fun(parseJsonValue("{}")), MyOutput(false, Seq(FalseSchemaReason())))
+    }
+  }
+
+  test("not false") {
+    given Eval[MyR, MyO] = eval
+    withCompiledSchema(notFalseSchema) { fun =>
+      assertEquals(fun(parseJsonValue("null")), MyO(true))
+      assertEquals(fun(parseJsonValue("13")), MyO(true))
+      assertEquals(fun(parseJsonValue("{}")), MyO(true))
+    }
+  }
+
+  test("not empty with errors") {
+    given Eval[MyResult, MyOutput] = eval2
+    withCompiledSchema("""{"not": {}}""") { fun =>
+      assertEquals(fun(parseJsonValue("null")), MyOutput(false, Seq(NotInvalid())))
+      assertEquals(fun(parseJsonValue("13")), MyOutput(false, Seq(NotInvalid())))
+      assertEquals(fun(parseJsonValue("{}")), MyOutput(false, Seq(NotInvalid())))
+    }
+  }
+
 object Util:
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
@@ -86,7 +120,7 @@ object Util:
     def contains(os: Seq[MyO], min: Option[Int], max: Option[Int], pointer: Pointer): MyO = ???
 
     extension (o: MyO)
-      def not: MyO         = ???
+      def not: MyO         = o.copy(valid = !o.valid)
       def isValid: Boolean = ???
     //   def combine(o2: MyO): MyO = all(Seq(o, o2))
 
@@ -110,5 +144,7 @@ object Util:
     def contains(os: Seq[MyOutput], min: Option[Int], max: Option[Int], pointer: Pointer): MyOutput = ???
 
     extension (o: MyOutput)
-      def not: MyOutput    = ???
+      def not: MyOutput =
+        if o.valid then o.copy(valid = false, errors = Seq(NotInvalid()))
+        else o.copy(valid = true, errors = Seq())
       def isValid: Boolean = ???
