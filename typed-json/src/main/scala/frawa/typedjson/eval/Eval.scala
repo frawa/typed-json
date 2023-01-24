@@ -32,8 +32,8 @@ class Eval[R[_]: TheResultMonad, O: OutputOps]:
   import Keywords.KeywordWithLocation
   // type AggregateFun[O, R[O]] = Seq[R[O]] => EvalFun[O, R]
 
-  protected val monad    = summon[TheResultMonad[R]]
-  protected val validate = Validate[O]
+  protected val monad  = summon[TheResultMonad[R]]
+  protected val verify = Verify[O]
 
   final def eval(keyword: Keyword)(value: Value): O =
     val compiled = compile(keyword)
@@ -41,7 +41,7 @@ class Eval[R[_]: TheResultMonad, O: OutputOps]:
 
   final def compile(keyword: Keyword): R[Fun[O]] = evalOne(keyword)
   final def compile(keywords: Keywords): R[Fun[O]] =
-    monad.map(compile(keywords.keywords.toSeq))(fs => validate.validateAll(fs))
+    monad.map(compile(keywords.keywords.toSeq))(fs => verify.verifyAll(fs))
   final def compile(keywords: Seq[KeywordWithLocation]): R[Seq[Fun[O]]] =
     val fs = keywords.map(_.value).map(compile)
     fs.foldLeft(monad.unit(Seq())) { (acc, f) =>
@@ -50,14 +50,14 @@ class Eval[R[_]: TheResultMonad, O: OutputOps]:
 
   final def eval(compiled: R[Fun[O]], value: Value): R[O] = monad.map(compiled)(f => f(value))
 
-  private def evalOne(k: Keyword): R[Fun[O]] = // value => ops.valid
+  private def evalOne(k: Keyword): R[Fun[O]] =
     k match {
-      case NullTypeKeyword    => monad.unit(validate.validateType(validate.nullTypeMismatch))
-      case TrivialKeyword(v)  => monad.unit(validate.validateTrivial(v))
-      case BooleanTypeKeyword => monad.unit(validate.validateType(validate.booleanTypeMismatch))
+      case NullTypeKeyword    => monad.unit(verify.verifyType(verify.nullTypeMismatch))
+      case TrivialKeyword(v)  => monad.unit(verify.verifyTrivial(v))
+      case BooleanTypeKeyword => monad.unit(verify.verifyType(verify.booleanTypeMismatch))
       // ...
-      case NotKeyword(ks)       => monad.map(compile(ks))(f => validate.validateNot(f))
-      case UnionTypeKeyword(ks) => monad.map(compile(ks))(fs => validate.validateUnion(fs))
+      case NotKeyword(ks)       => monad.map(compile(ks))(f => verify.verifyNot(f))
+      case UnionTypeKeyword(ks) => monad.map(compile(ks))(fs => verify.verifyUnion(fs))
     }
 
 trait OutputOps[O] extends Monoid[O]:
