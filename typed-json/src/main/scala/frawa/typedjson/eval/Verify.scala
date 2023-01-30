@@ -32,3 +32,10 @@ class Verify[O: OutputOps]:
   def verifyNot(f: Fun[O]): Fun[O]         = Eval.map(f)(_.not)
   def verifyUnion(fs: Seq[Fun[O]]): Fun[O] = ???
   def verifyAll(fs: Seq[Fun[O]]): Fun[O]   = value => ops.all(fs.map(_(value)))
+
+  def verfyArrayItems(items: Option[Fun[O]], prefixItems: Seq[Fun[O]]): Fun[O] = value =>
+    items
+      .zip(Value.asArray(value))
+      .map((f, vs) => vs.map(f(_)))
+      .map(os => ops.all(os))
+      .getOrElse(ops.valid)

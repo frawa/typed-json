@@ -16,6 +16,9 @@ import frawa.typedjson.keywords.NotKeyword
 import frawa.typedjson.keywords.UnionTypeKeyword
 import scala.reflect.TypeTest
 import frawa.typedjson.keywords.TrivialKeyword
+import frawa.typedjson.keywords.ArrayItemsKeyword
+import frawa.typedjson.keywords.NumberTypeKeyword
+import frawa.typedjson.keywords.ArrayTypeKeyword
 
 trait TheResultMonad[R[_]]:
   def unit[A](a: A): R[A]
@@ -48,6 +51,13 @@ class Eval[R[_]: TheResultMonad, O: OutputOps]:
     fs.foldLeft(monad.unit(Seq())) { (acc, f) =>
       monad.flatMap(acc)(acc => monad.flatMap(f)(f => monad.unit(acc :+ f)))
     }
+  final def compile(o: Option[Keywords]): R[Option[Fun[O]]] =
+    o.map(o => compile(o)).map(o => monad.map(o)(o => Option(o))).getOrElse(monad.unit(Option.empty))
+  final def compile2(ks: Seq[Keywords]): R[Seq[Fun[O]]] =
+    val fs = ks.map(compile)
+    fs.foldLeft(monad.unit(Seq())) { (acc, f) =>
+      monad.flatMap(acc)(acc => monad.flatMap(f)(f => monad.unit(acc :+ f)))
+    }
 
   final def eval(compiled: R[Fun[O]], value: Value): R[O] = monad.map(compiled)(f => f(value))
 
@@ -56,8 +66,14 @@ class Eval[R[_]: TheResultMonad, O: OutputOps]:
       case NullTypeKeyword    => monad.unit(verify.verifyType(verify.nullTypeMismatch))
       case TrivialKeyword(v)  => monad.unit(verify.verifyTrivial(v))
       case BooleanTypeKeyword => monad.unit(verify.verifyType(verify.booleanTypeMismatch))
+      case NumberTypeKeyword  => monad.unit(verify.verifyType(verify.numberTypeMismatch))
+      case ArrayTypeKeyword   => monad.unit(verify.verifyType(verify.arrayTypeMismatch))
+      case NotKeyword(ks)     => monad.map(compile(ks))(f => verify.verifyNot(f))
+      case ArrayItemsKeyword(items, prefixItems) =>
+        monad.flatMap(compile(items))(items =>
+          monad.map(compile2(prefixItems))(prefixItems => verify.verfyArrayItems(items, prefixItems))
+        )
       // ...
-      case NotKeyword(ks)       => monad.map(compile(ks))(f => verify.verifyNot(f))
       case UnionTypeKeyword(ks) => monad.map(compile(ks))(fs => verify.verifyUnion(fs))
     }
 

@@ -45,3 +45,7 @@ object Value:
     case _              => None
 
   def asStrings(values: Seq[Value]): Seq[String] = values.flatMap(asString)
+
+  def asArray(value: Value): Option[Seq[Value]] = value match
+    case ArrayValue(v) => Some(v)
+    case _             => None

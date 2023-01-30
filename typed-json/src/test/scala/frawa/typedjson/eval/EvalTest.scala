@@ -83,14 +83,24 @@ class EvalTest extends FunSuite:
     }
   }
 
+  test("array items") {
+    given Eval[MyResult, MyOutput] = eval2
+    withCompiledSchema(numberArraySchema) { fun =>
+      assertEquals(fun(parseJsonValue("null")), MyOutput(false, Seq(TypeMismatch("array"))))
+      assertEquals(fun(parseJsonValue("[13]")), MyOutput(true, Seq()))
+      assertEquals(fun(parseJsonValue("[true]")), MyOutput(false, Seq(TypeMismatch("number"))))
+    }
+  }
+
 object Util:
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
   def withKeywords(schema: SchemaValue)(f: Keywords => Unit): Unit =
     Keywords(schema, vocabularyForTest, None)
-      .map { keywords =>
-        f(keywords)
-      }
+      .fold(
+        errors => throw new IllegalArgumentException(s"no keywords: $errors"),
+        keywords => f(keywords)
+      )
 
   def withCompiledSchema[R[_], O](schema: String)(using eval: Eval[R, O])(f: R[Eval.Fun[O]] => Unit): Unit =
     withSchema(schema) { schema =>
