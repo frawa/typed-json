@@ -92,6 +92,21 @@ class EvalTest extends FunSuite:
     }
   }
 
+  test("object") {
+    given Eval[MyResult, MyOutput] = eval2
+    withCompiledSchema(totoObjectSchema) { fun =>
+      assertEquals(
+        fun(parseJsonValue("""{
+                             |"toto": 13,
+                             |"titi": "hello"
+                             |}
+                             |""".stripMargin)),
+        MyOutput(true, Seq())
+      )
+    assertEquals(fun(parseJsonValue("null")), MyOutput(false, Seq(TypeMismatch("object"))))
+    }
+  }
+
 object Util:
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 

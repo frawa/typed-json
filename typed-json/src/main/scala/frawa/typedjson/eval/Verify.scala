@@ -39,3 +39,18 @@ class Verify[O: OutputOps]:
       .map((f, vs) => vs.map(f(_)))
       .map(os => ops.all(os))
       .getOrElse(ops.valid)
+
+  def verfyObjectProperties(
+      properties: Map[String, Fun[O]],
+      patternProperties: Map[String, Fun[O]],
+      additionalProperties: Option[Fun[O]]
+  ): Fun[O] = value =>
+    Value
+      .asObject(value)
+      .map { vs =>
+        properties.flatMap { (p, f) =>
+          vs.get(p).map(f(_))
+        }.toSeq
+      }
+      .map(os => ops.all(os))
+      .getOrElse(ops.valid)

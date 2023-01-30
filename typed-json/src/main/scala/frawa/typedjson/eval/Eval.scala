@@ -19,6 +19,9 @@ import frawa.typedjson.keywords.TrivialKeyword
 import frawa.typedjson.keywords.ArrayItemsKeyword
 import frawa.typedjson.keywords.NumberTypeKeyword
 import frawa.typedjson.keywords.ArrayTypeKeyword
+import frawa.typedjson.keywords.ObjectPropertiesKeyword
+import frawa.typedjson.keywords.StringTypeKeyword
+import frawa.typedjson.keywords.ObjectTypeKeyword
 
 trait TheResultMonad[R[_]]:
   def unit[A](a: A): R[A]
@@ -59,6 +62,13 @@ class Eval[R[_]: TheResultMonad, O: OutputOps]:
       monad.flatMap(acc)(acc => monad.flatMap(f)(f => monad.unit(acc :+ f)))
     }
 
+  final def compile(o: Map[String, Keywords]): R[Map[String, Fun[O]]] =
+    val fs = o
+      .mapValues(o => compile(o))
+    fs.foldLeft(monad.unit(Map.empty[String, Fun[O]])) { (acc, f) =>
+      monad.flatMap(acc)(acc => monad.flatMap(f._2)(ff => monad.unit(acc + (f._1 -> ff))))
+    }
+
   final def eval(compiled: R[Fun[O]], value: Value): R[O] = monad.map(compiled)(f => f(value))
 
   private def evalOne(k: Keyword): R[Fun[O]] =
@@ -67,11 +77,21 @@ class Eval[R[_]: TheResultMonad, O: OutputOps]:
       case TrivialKeyword(v)  => monad.unit(verify.verifyTrivial(v))
       case BooleanTypeKeyword => monad.unit(verify.verifyType(verify.booleanTypeMismatch))
       case NumberTypeKeyword  => monad.unit(verify.verifyType(verify.numberTypeMismatch))
+      case StringTypeKeyword  => monad.unit(verify.verifyType(verify.stringTypeMismatch))
       case ArrayTypeKeyword   => monad.unit(verify.verifyType(verify.arrayTypeMismatch))
+      case ObjectTypeKeyword  => monad.unit(verify.verifyType(verify.objectTypeMismatch))
       case NotKeyword(ks)     => monad.map(compile(ks))(f => verify.verifyNot(f))
       case ArrayItemsKeyword(items, prefixItems) =>
         monad.flatMap(compile(items))(items =>
           monad.map(compile2(prefixItems))(prefixItems => verify.verfyArrayItems(items, prefixItems))
+        )
+      case ObjectPropertiesKeyword(properties, patternProperties, additionalProperties) =>
+        monad.flatMap(compile(properties))(properties =>
+          monad.flatMap(compile(patternProperties))(patternProperties =>
+            monad.map(compile(additionalProperties))(additionalProperties =>
+              verify.verfyObjectProperties(properties, patternProperties, additionalProperties)
+            )
+          )
         )
       // ...
       case UnionTypeKeyword(ks) => monad.map(compile(ks))(fs => verify.verifyUnion(fs))
