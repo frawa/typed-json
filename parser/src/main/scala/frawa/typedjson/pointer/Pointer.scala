@@ -44,17 +44,17 @@ case class Pointer(segments: Seq[Token], isInsideKey: Boolean = false):
     else "/" + this.segments.mkString("/")
 
   def /(index: Int): Pointer =
-    new Pointer(segments :+ ArrayIndexToken(index))
+    Pointer(segments :+ ArrayIndexToken(index))
   def /(field: String): Pointer =
-    new Pointer(segments :+ FieldToken(field))
+    Pointer(segments :+ FieldToken(field))
   def /(pointer: Pointer): Pointer =
-    new Pointer(segments ++ pointer.segments, isInsideKey = pointer.isInsideKey)
+    Pointer(segments ++ pointer.segments, isInsideKey = pointer.isInsideKey)
 
   def insideKey: Pointer =
     copy(isInsideKey = true)
 
   def outer: Pointer =
-    new Pointer(segments.dropRight(1))
+    Pointer(segments.dropRight(1))
 
   def apply(value: Value): Option[Value] = segments.foldLeft(Option(value)) { case (v, segment) =>
     v.flatMap(v =>
