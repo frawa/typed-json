@@ -42,9 +42,11 @@ import frawa.typedjson.keywords.WithPointer
 
 trait TheResultMonad[R[_]]:
   def unit[A](a: A): R[A]
-  def flatMap[A, B](a: R[A])(f: A => R[B]): R[B]
-  def map[A, B](a: R[A])(f: A => B): R[B] = flatMap(a)(a => unit(f(a)))
+  def bind[A, B](a: R[A])(f: A => R[B]): R[B]
   def output[O](result: R[O]): O
+  extension [A](r: R[A])
+    def flatMap[B](f: A => R[B]): R[B] = bind(r)(f)
+    def map[B](f: A => B): R[B]        = bind(r)(a => unit(f(a)))
 end TheResultMonad
 
 object Eval:
@@ -54,37 +56,52 @@ object Eval:
 class Eval[R[_]: TheResultMonad, O: OutputOps]:
   import Eval.Fun
   import Keywords.KeywordWithLocation
-  // type AggregateFun[O, R[O]] = Seq[R[O]] => EvalFun[O, R]
 
   protected val monad  = summon[TheResultMonad[R]]
   protected val verify = Verify[O]
 
-  // final def eval(keyword: Keyword)(value: Value): O =
-  //   val compiled = compile(keyword)
-  //   monad.output(eval(compiled, value))
-
   final def fun(compiled: R[Fun[O]]): R[Value => O] = monad.map(compiled)(f => value => f(WithPointer(value)))
 
-  final def compile(keyword: Keyword): R[Fun[O]] = compileOne(keyword)
   final def compile(keywords: Keywords): R[Fun[O]] =
     monad.map(compile(keywords.keywords.toSeq))(fs => verify.verifyAll(fs))
-  final def compile(keywords: Seq[KeywordWithLocation]): R[Seq[Fun[O]]] =
+
+  private final def compile(keyword: Keyword): R[Fun[O]] =
+    compileOne(keyword)
+
+  private final def compile(o: Option[Keywords]): R[Option[Fun[O]]] =
+    o.map(o => compile(o)).map(o => monad.map(o)(o => Option(o))).getOrElse(monad.unit(Option.empty))
+
+  private final def compile(keywords: Seq[KeywordWithLocation]): R[Seq[Fun[O]]] =
     val fs = keywords.map(_.value).map(compile)
     fs.foldLeft(monad.unit(Seq())) { (acc, f) =>
-      monad.flatMap(acc)(acc => monad.flatMap(f)(f => monad.unit(acc :+ f)))
-    }
-  final def compile(o: Option[Keywords]): R[Option[Fun[O]]] =
-    o.map(o => compile(o)).map(o => monad.map(o)(o => Option(o))).getOrElse(monad.unit(Option.empty))
-  final def compile2(ks: Seq[Keywords]): R[Seq[Fun[O]]] =
-    val fs = ks.map(compile)
-    fs.foldLeft(monad.unit(Seq())) { (acc, f) =>
-      monad.flatMap(acc)(acc => monad.flatMap(f)(f => monad.unit(acc :+ f)))
+      for {
+        acc <- acc
+        f   <- f
+      } yield {
+        acc :+ f
+      }
     }
 
-  final def compile(o: Map[String, Keywords]): R[Map[String, Fun[O]]] =
+  private final def compile2(ks: Seq[Keywords]): R[Seq[Fun[O]]] =
+    val fs = ks.map(compile)
+    fs.foldLeft(monad.unit(Seq())) { (acc, f) =>
+      for {
+        acc <- acc
+        f   <- f
+      } yield {
+        acc :+ f
+      }
+    }
+
+  private final def compile(o: Map[String, Keywords]): R[Map[String, Fun[O]]] =
     val fs = o.view.mapValues(o => compile(o))
-    fs.foldLeft(monad.unit(Map.empty[String, Fun[O]])) { (acc, f) =>
-      monad.flatMap(acc)(acc => monad.flatMap(f._2)(ff => monad.unit(acc + (f._1 -> ff))))
+    fs.foldLeft(monad.unit(Map.empty[String, Fun[O]])) { case (acc, (p, f)) =>
+      for {
+        acc <- acc
+        f   <- f
+      } yield {
+        acc + (p -> f)
+      }
     }
 
   private def compileOne(k: Keyword): R[Fun[O]] =
@@ -98,17 +115,22 @@ class Eval[R[_]: TheResultMonad, O: OutputOps]:
       case ObjectTypeKeyword  => monad.unit(verify.verifyType(verify.objectTypeMismatch))
       case NotKeyword(ks)     => monad.map(compile(ks))(f => verify.verifyNot(f))
       case ArrayItemsKeyword(items, prefixItems) =>
-        monad.flatMap(compile(items))(items =>
-          monad.map(compile2(prefixItems))(prefixItems => verify.verfyArrayItems(items, prefixItems))
-        )
+        for {
+          items       <- compile(items)
+          prefixItems <- compile2(prefixItems)
+        } yield {
+          verify.verfyArrayItems(items, prefixItems)
+        }
       case ObjectPropertiesKeyword(properties, patternProperties, additionalProperties) =>
-        monad.flatMap(compile(properties))(properties =>
-          monad.flatMap(compile(patternProperties))(patternProperties =>
-            monad.map(compile(additionalProperties))(additionalProperties =>
-              verify.verfyObjectProperties(properties, patternProperties, additionalProperties)
-            )
-          )
-        )
+        for {
+          properties           <- compile(properties)
+          patternProperties    <- compile(patternProperties)
+          additionalProperties <- compile(additionalProperties)
+        } yield {
+          verify.verfyObjectProperties(properties, patternProperties, additionalProperties)
+
+        }
+
       // ...
       case UnionTypeKeyword(ks) => monad.map(compile(ks))(fs => verify.verifyUnion(fs))
     }

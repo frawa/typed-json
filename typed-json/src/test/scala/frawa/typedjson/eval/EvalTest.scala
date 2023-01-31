@@ -161,9 +161,9 @@ object Util:
   case class MyO(valid: Boolean)
 
   given TheResultMonad[MyR] with
-    def unit[A](a: A): MyR[A]                            = a
-    def flatMap[A, B](a: MyR[A])(f: A => MyR[B]): MyR[B] = f(a)
-    def output[O](result: MyR[O]): O                     = result
+    def unit[A](a: A): MyR[A]                         = a
+    def bind[A, B](a: MyR[A])(f: A => MyR[B]): MyR[B] = f(a)
+    def output[O](result: MyR[O]): O                  = result
 
   given OutputOps[MyO] with
     def valid: MyO                                                     = MyO(true)
