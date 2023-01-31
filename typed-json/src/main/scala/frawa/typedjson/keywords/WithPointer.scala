@@ -18,5 +18,11 @@ package frawa.typedjson.keywords
 
 import frawa.typedjson.pointer.Pointer
 
-case class WithPointer[+R](result: R, pointer: Pointer = Pointer.empty):
-  def prefix(prefix: Pointer): WithPointer[R] = this.copy(pointer = prefix / this.pointer)
+case class WithPointer[+T](value: T, pointer: Pointer = Pointer.empty):
+  // TODO remove?
+  def prefix(prefix: Pointer): WithPointer[T] =
+    copy(pointer = prefix / this.pointer)
+
+  // TODO needed?
+  def map(f: Pointer => Pointer): WithPointer[T] =
+    copy(pointer = f(pointer))
