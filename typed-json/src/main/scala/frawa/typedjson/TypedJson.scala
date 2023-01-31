@@ -74,7 +74,7 @@ object TypedJson:
         result.output
           .map(_.errors)
           .getOrElse(Seq())
-          .map(error => Error(error.pointer, error.result))
+          .map(error => Error(error.pointer, error.value))
       Output(errors)
 
 class TypedJson(private val keywords: Option[Keywords]):

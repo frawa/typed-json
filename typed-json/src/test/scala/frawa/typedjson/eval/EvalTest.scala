@@ -104,7 +104,10 @@ class EvalTest extends FunSuite:
     withCompiledSchema(numberArraySchema) { fun =>
       assertEquals(fun(parseJsonValue("null")), MyOutput(false, Seq(WithPointer(TypeMismatch("array")))))
       assertEquals(fun(parseJsonValue("[13]")), MyOutput(true, Seq()))
-      assertEquals(fun(parseJsonValue("[true]")), MyOutput(false, Seq(WithPointer(TypeMismatch("number")))))
+      assertEquals(
+        fun(parseJsonValue("[true]")),
+        MyOutput(false, Seq(WithPointer(TypeMismatch("number"), Pointer.empty / 0)))
+      )
     }
   }
 
@@ -126,7 +129,7 @@ class EvalTest extends FunSuite:
     }
   }
 
-  test("object with pointer".ignore) {
+  test("object with pointer") {
     given Eval[MyResult, MyOutput] = eval2
     withCompiledSchema(totoObjectSchema) { fun =>
       assertEquals(
@@ -146,10 +149,10 @@ object Util:
         keywords => f(keywords)
       )
 
-  def withCompiledSchema[R[_], O](schema: String)(using eval: Eval[R, O])(f: R[Eval.Fun[O]] => Unit): Unit =
+  def withCompiledSchema[R[_], O](schema: String)(using eval: Eval[R, O])(f: R[Value => O] => Unit): Unit =
     withSchema(schema) { schema =>
       withKeywords(schema) { keywords =>
-        val fun = eval.compile(keywords)
+        val fun = eval.fun(eval.compile(keywords))
         f(fun)
       }
     }

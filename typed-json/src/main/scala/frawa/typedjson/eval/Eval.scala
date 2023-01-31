@@ -38,6 +38,7 @@ import frawa.typedjson.keywords.ArrayTypeKeyword
 import frawa.typedjson.keywords.ObjectPropertiesKeyword
 import frawa.typedjson.keywords.StringTypeKeyword
 import frawa.typedjson.keywords.ObjectTypeKeyword
+import frawa.typedjson.keywords.WithPointer
 
 trait TheResultMonad[R[_]]:
   def unit[A](a: A): R[A]
@@ -47,7 +48,7 @@ trait TheResultMonad[R[_]]:
 end TheResultMonad
 
 object Eval:
-  type Fun[O] = Value => O
+  type Fun[O] = WithPointer[Value] => O
   def map[O](fun: Fun[O])(f: O => O): Fun[O] = value => f(fun(value))
 
 class Eval[R[_]: TheResultMonad, O: OutputOps]:
@@ -62,7 +63,7 @@ class Eval[R[_]: TheResultMonad, O: OutputOps]:
   //   val compiled = compile(keyword)
   //   monad.output(eval(compiled, value))
 
-  // final def eval(compiled: R[Fun[O]], value: Value): R[O] = monad.map(compiled)(f => f(value))
+  final def fun(compiled: R[Fun[O]]): R[Value => O] = monad.map(compiled)(f => value => f(WithPointer(value)))
 
   final def compile(keyword: Keyword): R[Fun[O]] = compileOne(keyword)
   final def compile(keywords: Keywords): R[Fun[O]] =

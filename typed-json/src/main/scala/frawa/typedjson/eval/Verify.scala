@@ -23,6 +23,7 @@ import scala.reflect.TypeTest
 import frawa.typedjson.parser.Value._
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.validation.FalseSchemaReason
+import frawa.typedjson.keywords.WithPointer
 
 class Verify[O: OutputOps]:
   import Eval.Fun
@@ -37,13 +38,13 @@ class Verify[O: OutputOps]:
   private val ops = summon[OutputOps[O]]
 
   def verifyType[T <: Value](error: TypeMismatch[T])(using TypeTest[Value, T]): Fun[O] = value =>
-    value match
+    value.value match
       case _: T => ops.valid
-      case _    => ops.invalid(error, Pointer.empty)
+      case _    => ops.invalid(error, value.pointer)
 
   def verifyTrivial(valid: Boolean): Fun[O] = value =>
     if valid then ops.valid
-    else ops.invalid(FalseSchemaReason(), Pointer.empty)
+    else ops.invalid(FalseSchemaReason(), value.pointer)
 
   def verifyNot(f: Fun[O]): Fun[O]         = Eval.map(f)(_.not)
   def verifyUnion(fs: Seq[Fun[O]]): Fun[O] = ???
@@ -51,8 +52,10 @@ class Verify[O: OutputOps]:
 
   def verfyArrayItems(items: Option[Fun[O]], prefixItems: Seq[Fun[O]]): Fun[O] = value =>
     items
-      .zip(Value.asArray(value))
-      .map((f, vs) => vs.map(f(_)))
+      .zip(Value.asArray(value.value))
+      .map { (f, vs) =>
+        vs.zipWithIndex.map((v, i) => f(WithPointer(v, value.pointer / i)))
+      }
       .map(os => ops.all(os))
       .getOrElse(ops.valid)
 
@@ -62,10 +65,10 @@ class Verify[O: OutputOps]:
       additionalProperties: Option[Fun[O]]
   ): Fun[O] = value =>
     Value
-      .asObject(value)
+      .asObject(value.value)
       .map { vs =>
         properties.flatMap { (p, f) =>
-          vs.get(p).map(f(_))
+          vs.get(p).map(v => f(WithPointer(v, value.pointer / p)))
         }.toSeq
       }
       .map(os => ops.all(os))
