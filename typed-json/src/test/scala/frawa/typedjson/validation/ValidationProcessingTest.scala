@@ -107,7 +107,7 @@ class ValidationProcessingTest extends FunSuite:
           result,
           Seq(
             typedjson.keywords.WithPointer(
-              result = FalseSchemaReason(),
+              FalseSchemaReason(),
               pointer = Pointer(
                 segments = Nil
               )
@@ -121,7 +121,7 @@ class ValidationProcessingTest extends FunSuite:
           result,
           Seq(
             typedjson.keywords.WithPointer(
-              result = FalseSchemaReason(),
+              FalseSchemaReason(),
               pointer = Pointer(
                 segments = Nil
               )
@@ -135,7 +135,7 @@ class ValidationProcessingTest extends FunSuite:
           result,
           Seq(
             typedjson.keywords.WithPointer(
-              result = FalseSchemaReason(),
+              FalseSchemaReason(),
               pointer = Pointer(
                 segments = Nil
               )
@@ -188,7 +188,7 @@ class ValidationProcessingTest extends FunSuite:
           result,
           Seq(
             typedjson.keywords.WithPointer(
-              result = NotInvalid(),
+              NotInvalid(),
               pointer = Pointer(
                 segments = Nil
               )
@@ -202,7 +202,7 @@ class ValidationProcessingTest extends FunSuite:
           result,
           Seq(
             typedjson.keywords.WithPointer(
-              result = NotInvalid(),
+              NotInvalid(),
               pointer = Pointer(
                 segments = Nil
               )
@@ -216,7 +216,7 @@ class ValidationProcessingTest extends FunSuite:
           result,
           Seq(
             typedjson.keywords.WithPointer(
-              result = NotInvalid(),
+              NotInvalid(),
               pointer = Pointer(
                 segments = Nil
               )
@@ -337,7 +337,7 @@ class ValidationProcessingTest extends FunSuite:
           result,
           Seq(
             WithPointer(
-              result = MissingRequiredProperties(Seq("titi"))
+              MissingRequiredProperties(Seq("titi"))
             )
           )
         )
@@ -623,7 +623,7 @@ class ValidationProcessingTest extends FunSuite:
           result,
           Seq(
             typedjson.keywords.WithPointer(
-              result = NotInEnum(
+              NotInEnum(
                 values = List(
                   StringValue(
                     value = "first"
@@ -635,7 +635,7 @@ class ValidationProcessingTest extends FunSuite:
               )
             ),
             typedjson.keywords.WithPointer(
-              result = TypeMismatch(
+              TypeMismatch(
                 expected = "string"
               ),
               pointer = Pointer(
@@ -650,7 +650,7 @@ class ValidationProcessingTest extends FunSuite:
           result,
           Seq(
             typedjson.keywords.WithPointer(
-              result = NotInEnum(
+              NotInEnum(
                 values = List(
                   StringValue(
                     value = "first"
@@ -678,7 +678,7 @@ class ValidationProcessingTest extends FunSuite:
           result,
           Seq(
             typedjson.keywords.WithPointer(
-              result = TypeMismatch(
+              TypeMismatch(
                 expected = "array"
               ),
               pointer = Pointer(
@@ -703,7 +703,7 @@ class ValidationProcessingTest extends FunSuite:
           result,
           Seq(
             typedjson.keywords.WithPointer(
-              result = TypeMismatch(
+              TypeMismatch(
                 expected = "number"
               ),
               pointer = Pointer.parse("/foo")
@@ -732,13 +732,13 @@ class ValidationProcessingTest extends FunSuite:
           result,
           Seq(
             typedjson.keywords.WithPointer(
-              result = TypeMismatch(
+              TypeMismatch(
                 expected = "number"
               ),
               pointer = Pointer.parse("/foo")
             ),
             typedjson.keywords.WithPointer(
-              result = TypeMismatch(
+              TypeMismatch(
                 expected = "array"
               ),
               pointer = Pointer.parse("/foo")
@@ -777,7 +777,7 @@ class ValidationProcessingTest extends FunSuite:
           result,
           Seq(
             typedjson.keywords.WithPointer(
-              result = NotInEnum(
+              NotInEnum(
                 values = Seq(
                   "array",
                   "boolean",
@@ -791,7 +791,7 @@ class ValidationProcessingTest extends FunSuite:
               pointer = Pointer.parse("/$defs/foo/type")
             ),
             typedjson.keywords.WithPointer(
-              result = TypeMismatch(
+              TypeMismatch(
                 expected = "array"
               ),
               pointer = Pointer.parse("/$defs/foo/type")
