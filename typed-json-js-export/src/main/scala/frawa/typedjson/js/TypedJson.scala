@@ -151,7 +151,7 @@ case class Marker(
 object Marker {
   def fromSchemaError(error: SchemaProblems.SchemaError): Marker = {
     // TODO localized messages
-    val message = error.result.toString
+    val message = error.value.toString
     Marker(0, 0, error.pointer.toString, message, "error")
   }
 
@@ -159,7 +159,7 @@ object Marker {
     val offset       = offsetAt(error.pointer)
     val (start, end) = offset.map(o => (o.start, o.end)).getOrElse((0, 0))
     // TODO localized messages
-    val message = error.result.toString
+    val message = error.value.toString
     Marker(start, end, error.pointer.toString, message, "error")
   }
 
