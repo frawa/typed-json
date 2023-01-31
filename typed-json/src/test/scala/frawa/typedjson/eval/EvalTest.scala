@@ -59,7 +59,7 @@ class EvalTest extends FunSuite:
         fun(BoolValue(true)),
         MyOutput(
           false,
-          Seq(TypeMismatch("null"))
+          Seq(WithPointer(TypeMismatch("null")))
         )
       )
     }
@@ -77,7 +77,7 @@ class EvalTest extends FunSuite:
   test("false with errors") {
     given Eval[MyResult, MyOutput] = eval2
     withCompiledSchema(falseSchema) { fun =>
-      assertEquals(fun(parseJsonValue("{}")), MyOutput(false, Seq(FalseSchemaReason())))
+      assertEquals(fun(parseJsonValue("{}")), MyOutput(false, Seq(WithPointer(FalseSchemaReason()))))
     }
   }
 
@@ -93,18 +93,18 @@ class EvalTest extends FunSuite:
   test("not empty with errors") {
     given Eval[MyResult, MyOutput] = eval2
     withCompiledSchema("""{"not": {}}""") { fun =>
-      assertEquals(fun(parseJsonValue("null")), MyOutput(false, Seq(NotInvalid())))
-      assertEquals(fun(parseJsonValue("13")), MyOutput(false, Seq(NotInvalid())))
-      assertEquals(fun(parseJsonValue("{}")), MyOutput(false, Seq(NotInvalid())))
+      assertEquals(fun(parseJsonValue("null")), MyOutput(false, Seq(WithPointer(NotInvalid()))))
+      assertEquals(fun(parseJsonValue("13")), MyOutput(false, Seq(WithPointer(NotInvalid()))))
+      assertEquals(fun(parseJsonValue("{}")), MyOutput(false, Seq(WithPointer(NotInvalid()))))
     }
   }
 
   test("array items") {
     given Eval[MyResult, MyOutput] = eval2
     withCompiledSchema(numberArraySchema) { fun =>
-      assertEquals(fun(parseJsonValue("null")), MyOutput(false, Seq(TypeMismatch("array"))))
+      assertEquals(fun(parseJsonValue("null")), MyOutput(false, Seq(WithPointer(TypeMismatch("array")))))
       assertEquals(fun(parseJsonValue("[13]")), MyOutput(true, Seq()))
-      assertEquals(fun(parseJsonValue("[true]")), MyOutput(false, Seq(TypeMismatch("number"))))
+      assertEquals(fun(parseJsonValue("[true]")), MyOutput(false, Seq(WithPointer(TypeMismatch("number")))))
     }
   }
 
@@ -121,7 +121,17 @@ class EvalTest extends FunSuite:
       )
       assertEquals(
         fun(parseJsonValue("null")),
-        MyOutput(false, Seq(TypeMismatch("object")))
+        MyOutput(false, Seq(WithPointer(TypeMismatch("object"))))
+      )
+    }
+  }
+
+  test("object with pointer".ignore) {
+    given Eval[MyResult, MyOutput] = eval2
+    withCompiledSchema(totoObjectSchema) { fun =>
+      assertEquals(
+        fun(parseJsonValue("""{"toto": 13,"titi": true}""")),
+        MyOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / "titi")))
       )
     }
   }
@@ -168,8 +178,11 @@ object Util:
       def isValid: Boolean = ???
     //   def combine(o2: MyO): MyO = all(Seq(o, o2))
 
-  type MyResult[O] = MyR[O]
-  case class MyOutput(valid: Boolean, errors: Seq[ValidationError])
+  type MyResult[O]   = MyR[O]
+  type MyOutputError = WithPointer[ValidationError]
+  // TODO this will converge to "basic" output format,
+  // see https://json-schema.org/draft/2020-12/json-schema-core.html#name-basic
+  case class MyOutput(valid: Boolean, errors: Seq[MyOutputError])
 
   // given TheResultMonad[MyResult] with
   //   def unit[A](a: A): MyResult[A]                                      = a
@@ -179,8 +192,8 @@ object Util:
   given OutputOps[MyOutput] with
     def valid: MyOutput                                                     = MyOutput(true, Seq())
     def valid(annotation: ValidationAnnotation, pointer: Pointer): MyOutput = MyOutput(true, Seq())
-    def invalid(error: ValidationError, pointer: Pointer): MyOutput         = MyOutput(false, Seq(error))
-    def invalid(problems: SchemaProblems): MyOutput                         = MyOutput(false, Seq())
+    def invalid(error: ValidationError, pointer: Pointer): MyOutput = MyOutput(false, Seq(WithPointer(error, pointer)))
+    def invalid(problems: SchemaProblems): MyOutput                 = MyOutput(false, Seq())
 
     def all(os: Seq[MyOutput]): MyOutput = MyOutput(os.forall(_.valid), os.flatMap(_.errors))
     def any(os: Seq[MyOutput]): MyOutput = ???
@@ -189,6 +202,6 @@ object Util:
 
     extension (o: MyOutput)
       def not: MyOutput =
-        if o.valid then o.copy(valid = false, errors = Seq(NotInvalid()))
+        if o.valid then o.copy(valid = false, errors = Seq(WithPointer(NotInvalid())))
         else o.copy(valid = true, errors = Seq())
       def isValid: Boolean = ???
