@@ -58,11 +58,13 @@ class Eval[R[_]: TheResultMonad, O: OutputOps]:
   protected val monad  = summon[TheResultMonad[R]]
   protected val verify = Verify[O]
 
-  final def eval(keyword: Keyword)(value: Value): O =
-    val compiled = compile(keyword)
-    monad.output(eval(compiled, value))
+  // final def eval(keyword: Keyword)(value: Value): O =
+  //   val compiled = compile(keyword)
+  //   monad.output(eval(compiled, value))
 
-  final def compile(keyword: Keyword): R[Fun[O]] = evalOne(keyword)
+  // final def eval(compiled: R[Fun[O]], value: Value): R[O] = monad.map(compiled)(f => f(value))
+
+  final def compile(keyword: Keyword): R[Fun[O]] = compileOne(keyword)
   final def compile(keywords: Keywords): R[Fun[O]] =
     monad.map(compile(keywords.keywords.toSeq))(fs => verify.verifyAll(fs))
   final def compile(keywords: Seq[KeywordWithLocation]): R[Seq[Fun[O]]] =
@@ -79,15 +81,12 @@ class Eval[R[_]: TheResultMonad, O: OutputOps]:
     }
 
   final def compile(o: Map[String, Keywords]): R[Map[String, Fun[O]]] =
-    val fs = o
-      .mapValues(o => compile(o))
+    val fs = o.view.mapValues(o => compile(o))
     fs.foldLeft(monad.unit(Map.empty[String, Fun[O]])) { (acc, f) =>
       monad.flatMap(acc)(acc => monad.flatMap(f._2)(ff => monad.unit(acc + (f._1 -> ff))))
     }
 
-  final def eval(compiled: R[Fun[O]], value: Value): R[O] = monad.map(compiled)(f => f(value))
-
-  private def evalOne(k: Keyword): R[Fun[O]] =
+  private def compileOne(k: Keyword): R[Fun[O]] =
     k match {
       case NullTypeKeyword    => monad.unit(verify.verifyType(verify.nullTypeMismatch))
       case TrivialKeyword(v)  => monad.unit(verify.verifyTrivial(v))
