@@ -243,6 +243,19 @@ class EvalTest extends FunSuite:
     }
   }
 
+  test("not") {
+    withCompiledSchema("""{"not": { "type": "number" }}""") { fun =>
+      assertEquals(
+        fun(parseJsonValue("true")),
+        MyOutput(true, Seq())
+      )
+      assertEquals(
+        fun(parseJsonValue("1313")),
+        MyOutput(false, Seq(WithPointer(NotInvalid())))
+      )
+    }
+  }
+
 object Util:
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
