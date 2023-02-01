@@ -87,3 +87,4 @@ class Verify[O: OutputOps]:
 
   def verifyAllOf(fs: Seq[Fun[O]]): Fun[O] = value => ops.all(fs.map(_(value)))
   def verifyAnyOf(fs: Seq[Fun[O]]): Fun[O] = value => ops.any(fs.map(_(value)))
+  def verifyOneOf(fs: Seq[Fun[O]]): Fun[O] = value => ops.one(fs.map(_(value)))

@@ -204,6 +204,45 @@ class EvalTest extends FunSuite:
     }
   }
 
+  test("one of") {
+    withCompiledSchema(oneOfSchema) { fun =>
+      assertEquals(
+        fun(parseJsonValue("1313")),
+        MyOutput(true, Seq())
+      )
+    }
+  }
+
+  test("failed one of: none") {
+    withCompiledSchema("""{
+                         |"oneOf": [
+                         |  { "type": "string" },
+                         |  { "type": "boolean" }
+                         |]
+                         |}
+                         |""".stripMargin) { fun =>
+      assertEquals(
+        fun(parseJsonValue("1313")),
+        MyOutput(false, Seq(WithPointer(TypeMismatch("string")), WithPointer(TypeMismatch("boolean"))))
+      )
+    }
+  }
+
+  test("failed one of: two") {
+    withCompiledSchema("""{
+                         |"oneOf": [
+                         |  { "type": "number" },
+                         |  { "type": "number" }
+                         |]
+                         |}
+                         |""".stripMargin) { fun =>
+      assertEquals(
+        fun(parseJsonValue("1313")),
+        MyOutput(false, Seq(WithPointer(NotOneOf(2))))
+      )
+    }
+  }
+
 object Util:
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
@@ -267,7 +306,12 @@ object Util:
     def any(os: Seq[MyOutput]): MyOutput =
       val valid = os.exists(_.valid)
       MyOutput(valid, if valid then Seq() else os.flatMap(_.errors))
-    def one(os: Seq[MyOutput]): MyOutput                                                            = ???
+    def one(os: Seq[MyOutput]): MyOutput =
+      val count = os.count(_.valid)
+      if count == 1 then valid
+      else if count == 0 then MyOutput(false, os.flatMap(_.errors))
+      else invalid(NotOneOf(count), Pointer.empty)
+
     def contains(os: Seq[MyOutput], min: Option[Int], max: Option[Int], pointer: Pointer): MyOutput = ???
 
     extension (o: MyOutput)
