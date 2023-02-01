@@ -81,6 +81,29 @@ class EvalTest extends FunSuite:
     }
   }
 
+  test("boolean") {
+    withCompiledSchema(boolSchema) { fun =>
+      assertEquals(fun(parseJsonValue("true")), BasicOutput(true, Seq()))
+      assertEquals(fun(parseJsonValue("13")), BasicOutput(false, Seq(WithPointer(TypeMismatch("boolean")))))
+    }
+  }
+
+  test("true schema") {
+    withCompiledSchema(trueSchema) { fun =>
+      assertEquals(fun(parseJsonValue("null")), BasicOutput(true, Seq()))
+      assertEquals(fun(parseJsonValue("13")), BasicOutput(true, Seq()))
+      assertEquals(fun(parseJsonValue("{}")), BasicOutput(true, Seq()))
+    }
+  }
+
+  test("false schema") {
+    withCompiledSchema(falseSchema) { fun =>
+      assertEquals(fun(parseJsonValue("null")), BasicOutput(false, Seq(WithPointer(FalseSchemaReason()))))
+      assertEquals(fun(parseJsonValue("13")), BasicOutput(false, Seq(WithPointer(FalseSchemaReason()))))
+      assertEquals(fun(parseJsonValue("{}")), BasicOutput(false, Seq(WithPointer(FalseSchemaReason()))))
+    }
+  }
+
   test("not false") {
     given Eval[MyR, FlagOutput] = evalFlag
     withCompiledSchema(notFalseSchema) { fun =>
@@ -90,11 +113,40 @@ class EvalTest extends FunSuite:
     }
   }
 
-  test("not empty with errors") {
+  test("empty schema") {
+    withCompiledSchema(emtpySchema) { fun =>
+      assertEquals(fun(parseJsonValue("null")), BasicOutput(true, Seq()))
+      assertEquals(fun(parseJsonValue("13")), BasicOutput(true, Seq()))
+      assertEquals(fun(parseJsonValue("{}")), BasicOutput(true, Seq()))
+    }
+  }
+
+  test("not empty schema") {
     withCompiledSchema("""{"not": {}}""") { fun =>
       assertEquals(fun(parseJsonValue("null")), BasicOutput(false, Seq(WithPointer(NotInvalid()))))
       assertEquals(fun(parseJsonValue("13")), BasicOutput(false, Seq(WithPointer(NotInvalid()))))
       assertEquals(fun(parseJsonValue("{}")), BasicOutput(false, Seq(WithPointer(NotInvalid()))))
+    }
+  }
+
+  test("string") {
+    withCompiledSchema(stringSchema) { fun =>
+      assertEquals(fun(parseJsonValue(""""hello"""")), BasicOutput(true, Seq()))
+      assertEquals(fun(parseJsonValue("13")), BasicOutput(false, Seq(WithPointer(TypeMismatch("string")))))
+    }
+  }
+
+  test("number") {
+    withCompiledSchema(numberSchema) { fun =>
+      assertEquals(fun(parseJsonValue("13")), BasicOutput(true, Seq()))
+      assertEquals(fun(parseJsonValue("null")), BasicOutput(false, Seq(WithPointer(TypeMismatch("number")))))
+    }
+  }
+
+  test("array") {
+    withCompiledSchema(numberArraySchema) { fun =>
+      assertEquals(fun(parseJsonValue("[13]")), BasicOutput(true, Seq()))
+      assertEquals(fun(parseJsonValue("null")), BasicOutput(false, Seq(WithPointer(TypeMismatch("array")))))
     }
   }
 
