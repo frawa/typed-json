@@ -143,22 +143,22 @@ class Eval[R[_]: TheResultMonad, O: OutputOps]:
       case UnionTypeKeyword(ks) => monad.map(compile(ks))(fs => verify.verifyUnion(fs))
     }
 
-trait OutputOps[O] extends Monoid[O]:
+trait OutputOps[O]: // extends Monoid[O]:
   def valid: O
   def valid(annotation: ValidationAnnotation, pointer: Pointer): O
   def invalid(error: ValidationError, pointer: Pointer): O
   def invalid(problems: SchemaProblems): O
 
-  def all(os: Seq[O]): O
-  def any(os: Seq[O]): O
-  def one(os: Seq[O]): O
+  def all(os: Seq[O], pointer: Pointer): O
+  def any(os: Seq[O], pointer: Pointer): O
+  def one(os: Seq[O], pointer: Pointer): O
   def contains(os: Seq[O], min: Option[Int], max: Option[Int], pointer: Pointer): O
 
   def unit = valid
   extension (o: O)
     def not: O
     def isValid: Boolean
-    def combine(o2: O): O = all(Seq(o, o2))
+    // def combine(o2: O): O = all(Seq(o, o2))
 
 trait ResultOps[R[_]] extends Monad[R]
 

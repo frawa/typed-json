@@ -49,7 +49,7 @@ class Verify[O: OutputOps]:
 
   def verifyNot(f: Fun[O]): Fun[O]         = Eval.map(f)(_.not)
   def verifyUnion(fs: Seq[Fun[O]]): Fun[O] = ???
-  def verifyAll(fs: Seq[Fun[O]]): Fun[O]   = value => ops.all(fs.map(_(value)))
+  def verifyAll(fs: Seq[Fun[O]]): Fun[O]   = value => ops.all(fs.map(_(value)), value.pointer)
 
   def verfyArrayItems(items: Option[Fun[O]], prefixItems: Seq[Fun[O]]): Fun[O] = value =>
     items
@@ -57,7 +57,7 @@ class Verify[O: OutputOps]:
       .map { (f, vs) =>
         vs.zipWithIndex.map((v, i) => f(WithPointer(v, value.pointer / i)))
       }
-      .map(os => ops.all(os))
+      .map(os => ops.all(os, value.pointer))
       .getOrElse(ops.valid)
 
   def verfyObjectProperties(
@@ -72,7 +72,7 @@ class Verify[O: OutputOps]:
           vs.get(p).map(v => f(WithPointer(v, value.pointer / p)))
         }.toSeq
       }
-      .map(os => ops.all(os))
+      .map(os => ops.all(os, value.pointer))
       .getOrElse(ops.valid)
 
   def verifyObjectRequired(names: Seq[String]): Fun[O] = value =>
@@ -85,6 +85,6 @@ class Verify[O: OutputOps]:
       }
       .getOrElse(ops.valid)
 
-  def verifyAllOf(fs: Seq[Fun[O]]): Fun[O] = value => ops.all(fs.map(_(value)))
-  def verifyAnyOf(fs: Seq[Fun[O]]): Fun[O] = value => ops.any(fs.map(_(value)))
-  def verifyOneOf(fs: Seq[Fun[O]]): Fun[O] = value => ops.one(fs.map(_(value)))
+  def verifyAllOf(fs: Seq[Fun[O]]): Fun[O] = value => ops.all(fs.map(_(value)), value.pointer)
+  def verifyAnyOf(fs: Seq[Fun[O]]): Fun[O] = value => ops.any(fs.map(_(value)), value.pointer)
+  def verifyOneOf(fs: Seq[Fun[O]]): Fun[O] = value => ops.one(fs.map(_(value)), value.pointer)

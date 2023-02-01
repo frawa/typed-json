@@ -288,9 +288,9 @@ object Util:
     def invalid(error: ValidationError, pointer: Pointer): MyO         = MyO(false)
     def invalid(problems: SchemaProblems): MyO                         = MyO(false)
 
-    def all(os: Seq[MyO]): MyO                                                            = MyO(os.forall(_.valid))
-    def any(os: Seq[MyO]): MyO                                                            = ???
-    def one(os: Seq[MyO]): MyO                                                            = ???
+    def all(os: Seq[MyO], pointer: Pointer): MyO                                          = MyO(os.forall(_.valid))
+    def any(os: Seq[MyO], pointer: Pointer): MyO                                          = ???
+    def one(os: Seq[MyO], pointer: Pointer): MyO                                          = ???
     def contains(os: Seq[MyO], min: Option[Int], max: Option[Int], pointer: Pointer): MyO = ???
 
     extension (o: MyO)
@@ -315,11 +315,11 @@ object Util:
     def invalid(error: ValidationError, pointer: Pointer): MyOutput = MyOutput(false, Seq(WithPointer(error, pointer)))
     def invalid(problems: SchemaProblems): MyOutput                 = MyOutput(false, Seq())
 
-    def all(os: Seq[MyOutput]): MyOutput = MyOutput(os.forall(_.valid), os.flatMap(_.errors))
-    def any(os: Seq[MyOutput]): MyOutput =
+    def all(os: Seq[MyOutput], pointer: Pointer): MyOutput = MyOutput(os.forall(_.valid), os.flatMap(_.errors))
+    def any(os: Seq[MyOutput], pointer: Pointer): MyOutput =
       val valid = os.exists(_.valid)
       MyOutput(valid, if valid then Seq() else os.flatMap(_.errors))
-    def one(os: Seq[MyOutput]): MyOutput =
+    def one(os: Seq[MyOutput], pointer: Pointer): MyOutput =
       val count = os.count(_.valid)
       if count == 1 then valid
       else if count == 0 then MyOutput(false, os.flatMap(_.errors))
