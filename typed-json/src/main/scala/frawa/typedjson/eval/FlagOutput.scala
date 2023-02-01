@@ -23,4 +23,4 @@ object FlagOutput:
 
     extension (o: FlagOutput)
       def not(pointer: Pointer): FlagOutput = o.copy(valid = !o.valid)
-      def isValid: Boolean                  = ???
+      def isValid: Boolean                  = o.valid

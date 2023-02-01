@@ -256,6 +256,86 @@ class EvalTest extends FunSuite:
     }
   }
 
+  test("if/then/else") {
+    withCompiledSchema(ifThenElseSchema) { fun =>
+      assertEquals(
+        fun(parseJsonValue("1313")),
+        BasicOutput(true, Seq())
+      )
+      assertEquals(
+        fun(parseJsonValue(""""string"""")),
+        BasicOutput(true, Seq())
+      )
+      assertEquals(
+        fun(parseJsonValue("null")),
+        BasicOutput(false, Seq(WithPointer(TypeMismatch("string"))))
+      )
+    }
+  }
+
+  test("if/else") {
+    withCompiledSchema("""{
+                         |"if": { "type": "number" },
+                         |"else": { "type": "string" }
+                         |}
+                         |""".stripMargin) { fun =>
+      assertEquals(
+        fun(parseJsonValue("1313")),
+        BasicOutput(true, Seq())
+      )
+      assertEquals(
+        fun(parseJsonValue(""""string"""")),
+        BasicOutput(true, Seq())
+      )
+      assertEquals(
+        fun(parseJsonValue("null")),
+        BasicOutput(false, Seq(WithPointer(TypeMismatch("string"))))
+      )
+    }
+  }
+
+  test("if/then") {
+    withCompiledSchema("""{
+                         |"if": { "type": "number" },
+                         |"then": { "type": "number" }
+                         |}
+                         |""".stripMargin) { fun =>
+      assertEquals(
+        fun(parseJsonValue("1313")),
+        BasicOutput(true, Seq())
+      )
+      assertEquals(
+        fun(parseJsonValue(""""string"""")),
+        BasicOutput(true, Seq())
+      )
+      assertEquals(
+        fun(parseJsonValue("null")),
+        BasicOutput(true, Seq())
+      )
+    }
+  }
+
+  test("then/else") {
+    withCompiledSchema("""{
+                         |"then": { "type": "number" },
+                         |"else": { "type": "string" }
+                         |}
+                         |""".stripMargin) { fun =>
+      assertEquals(
+        fun(parseJsonValue("1313")),
+        BasicOutput(true, Seq())
+      )
+      assertEquals(
+        fun(parseJsonValue(""""string"""")),
+        BasicOutput(true, Seq())
+      )
+      assertEquals(
+        fun(parseJsonValue("null")),
+        BasicOutput(true, Seq())
+      )
+    }
+  }
+
 object Util:
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 

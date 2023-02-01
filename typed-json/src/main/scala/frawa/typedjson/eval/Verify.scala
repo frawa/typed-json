@@ -88,3 +88,12 @@ class Verify[O: OutputOps]:
   def verifyAllOf(fs: Seq[Fun[O]]): Fun[O] = value => ops.all(fs.map(_(value)), value.pointer)
   def verifyAnyOf(fs: Seq[Fun[O]]): Fun[O] = value => ops.any(fs.map(_(value)), value.pointer)
   def verifyOneOf(fs: Seq[Fun[O]]): Fun[O] = value => ops.one(fs.map(_(value)), value.pointer)
+
+  def verfyIfThenElse(fIf: Option[Fun[O]], fThen: Option[Fun[O]], fElse: Option[Fun[O]]): Fun[O] = value =>
+    fIf
+      .flatMap { fIf =>
+        val condition = fIf(value)
+        if condition.isValid then fThen.map(fThen => ops.all(Seq(condition, fThen(value)), value.pointer))
+        else fElse.map(fElse => fElse(value))
+      }
+      .getOrElse(ops.valid(value.pointer))

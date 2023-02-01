@@ -39,5 +39,5 @@ object BasicOutput {
       def not(pointer: Pointer): BasicOutput =
         if o.valid then o.copy(valid = false, errors = Seq(WithPointer(NotInvalid(), pointer)))
         else o.copy(valid = true, errors = Seq())
-      def isValid: Boolean = ???
+      def isValid: Boolean = o.valid
 }
