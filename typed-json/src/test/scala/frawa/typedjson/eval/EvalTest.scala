@@ -420,14 +420,35 @@ class EvalTest extends FunSuite:
         BasicOutput(
           false,
           Seq(
-            WithPointer(
-              NotInEnum(
-                Seq(
-                  StringValue("foo"),
-                  StringValue("bar")
-                )
-              )
-            )
+            WithPointer(NotInEnum(Seq(StringValue("foo"), StringValue("bar"))))
+          )
+        )
+      )
+    }
+  }
+
+  test("const") {
+    withCompiledSchema(constSchema) { fun =>
+      assertEquals(
+        fun(parseJsonValue(""""first"""")),
+        BasicOutput(true, Seq())
+      )
+      assertEquals(
+        fun(parseJsonValue("{}")),
+        BasicOutput(
+          false,
+          Seq(
+            WithPointer(NotInEnum(Seq(StringValue("first")))),
+            WithPointer(TypeMismatch("string"))
+          )
+        )
+      )
+      assertEquals(
+        fun(parseJsonValue(""""second"""")),
+        BasicOutput(
+          false,
+          Seq(
+            WithPointer(NotInEnum(Seq(StringValue("first"))))
           )
         )
       )
