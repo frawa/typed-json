@@ -17,7 +17,7 @@ object BasicOutput {
   type Error = WithPointer[ValidationError]
 
   given OutputOps[BasicOutput] with
-    def valid: BasicOutput                                                     = BasicOutput(true, Seq())
+    def valid(pointer: Pointer): BasicOutput                                   = BasicOutput(true, Seq())
     def valid(annotation: ValidationAnnotation, pointer: Pointer): BasicOutput = BasicOutput(true, Seq())
     def invalid(error: ValidationError, pointer: Pointer): BasicOutput =
       BasicOutput(false, Seq(WithPointer(error, pointer)))
@@ -29,15 +29,15 @@ object BasicOutput {
       BasicOutput(valid, if valid then Seq() else os.flatMap(_.errors))
     def one(os: Seq[BasicOutput], pointer: Pointer): BasicOutput =
       val count = os.count(_.valid)
-      if count == 1 then valid
+      if count == 1 then valid(pointer)
       else if count == 0 then BasicOutput(false, os.flatMap(_.errors))
       else invalid(NotOneOf(count), Pointer.empty)
 
     def contains(os: Seq[BasicOutput], min: Option[Int], max: Option[Int], pointer: Pointer): BasicOutput = ???
 
     extension (o: BasicOutput)
-      def not: BasicOutput =
-        if o.valid then o.copy(valid = false, errors = Seq(WithPointer(NotInvalid())))
+      def not(pointer: Pointer): BasicOutput =
+        if o.valid then o.copy(valid = false, errors = Seq(WithPointer(NotInvalid(), pointer)))
         else o.copy(valid = true, errors = Seq())
       def isValid: Boolean = ???
 }

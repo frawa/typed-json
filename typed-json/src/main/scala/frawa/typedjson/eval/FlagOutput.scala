@@ -11,7 +11,7 @@ case class FlagOutput(valid: Boolean)
 
 object FlagOutput:
   given OutputOps[FlagOutput] with
-    def valid: FlagOutput                                                     = FlagOutput(true)
+    def valid(pointer: Pointer): FlagOutput                                   = FlagOutput(true)
     def valid(annotation: ValidationAnnotation, pointer: Pointer): FlagOutput = FlagOutput(true)
     def invalid(error: ValidationError, pointer: Pointer): FlagOutput         = FlagOutput(false)
     def invalid(problems: SchemaProblems): FlagOutput                         = FlagOutput(false)
@@ -22,5 +22,5 @@ object FlagOutput:
     def contains(os: Seq[FlagOutput], min: Option[Int], max: Option[Int], pointer: Pointer): FlagOutput = ???
 
     extension (o: FlagOutput)
-      def not: FlagOutput  = o.copy(valid = !o.valid)
-      def isValid: Boolean = ???
+      def not(pointer: Pointer): FlagOutput = o.copy(valid = !o.valid)
+      def isValid: Boolean                  = ???

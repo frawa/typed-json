@@ -40,14 +40,14 @@ class Verify[O: OutputOps]:
 
   def verifyType[T <: Value](error: TypeMismatch[T])(using TypeTest[Value, T]): Fun[O] = value =>
     value.value match
-      case _: T => ops.valid
+      case _: T => ops.valid(value.pointer)
       case _    => ops.invalid(error, value.pointer)
 
   def verifyTrivial(valid: Boolean): Fun[O] = value =>
-    if valid then ops.valid
+    if valid then ops.valid(value.pointer)
     else ops.invalid(FalseSchemaReason(), value.pointer)
 
-  def verifyNot(f: Fun[O]): Fun[O]         = Eval.map(f)(_.not)
+  def verifyNot(f: Fun[O]): Fun[O]         = value => f(value).not(value.pointer)
   def verifyUnion(fs: Seq[Fun[O]]): Fun[O] = ???
   def verifyAll(fs: Seq[Fun[O]]): Fun[O]   = value => ops.all(fs.map(_(value)), value.pointer)
 
@@ -58,7 +58,7 @@ class Verify[O: OutputOps]:
         vs.zipWithIndex.map((v, i) => f(WithPointer(v, value.pointer / i)))
       }
       .map(os => ops.all(os, value.pointer))
-      .getOrElse(ops.valid)
+      .getOrElse(ops.valid(value.pointer))
 
   def verfyObjectProperties(
       properties: Map[String, Fun[O]],
@@ -73,17 +73,17 @@ class Verify[O: OutputOps]:
         }.toSeq
       }
       .map(os => ops.all(os, value.pointer))
-      .getOrElse(ops.valid)
+      .getOrElse(ops.valid(value.pointer))
 
   def verifyObjectRequired(names: Seq[String]): Fun[O] = value =>
     Value
       .asObject(value.value)
       .map { vs =>
         val missingNames = names.filter(!vs.contains(_))
-        if missingNames.isEmpty then ops.valid
+        if missingNames.isEmpty then ops.valid(value.pointer)
         else ops.invalid(MissingRequiredProperties(missingNames), value.pointer)
       }
-      .getOrElse(ops.valid)
+      .getOrElse(ops.valid(value.pointer))
 
   def verifyAllOf(fs: Seq[Fun[O]]): Fun[O] = value => ops.all(fs.map(_(value)), value.pointer)
   def verifyAnyOf(fs: Seq[Fun[O]]): Fun[O] = value => ops.any(fs.map(_(value)), value.pointer)
