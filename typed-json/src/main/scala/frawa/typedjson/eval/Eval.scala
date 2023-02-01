@@ -41,6 +41,7 @@ import frawa.typedjson.keywords.ObjectTypeKeyword
 import frawa.typedjson.keywords.WithPointer
 import frawa.typedjson.keywords.ObjectRequiredKeyword
 import frawa.typedjson.keywords.AllOfKeyword
+import frawa.typedjson.keywords.AnyOfKeyword
 
 trait TheResultMonad[R[_]]:
   def unit[A](a: A): R[A]
@@ -134,6 +135,7 @@ class Eval[R[_]: TheResultMonad, O: OutputOps]:
 
       case ObjectRequiredKeyword(names) => monad.unit(verify.verifyObjectRequired(names))
       case AllOfKeyword(ks)             => compile2(ks).map(f => verify.verifyAllOf(f))
+      case AnyOfKeyword(ks)             => compile2(ks).map(f => verify.verifyAnyOf(f))
 
       // ...
       case UnionTypeKeyword(ks) => monad.map(compile(ks))(fs => verify.verifyUnion(fs))

@@ -169,6 +169,7 @@ class EvalTest extends FunSuite:
       )
     }
   }
+
   test("impossible all of") {
     withCompiledSchema("""{
                          |"allOf": [
@@ -180,6 +181,25 @@ class EvalTest extends FunSuite:
       assertEquals(
         fun(parseJsonValue("1313")),
         MyOutput(false, Seq(WithPointer(TypeMismatch("string"))))
+      )
+    }
+  }
+
+  test("any of") {
+    withCompiledSchema(anyOfSchema) { fun =>
+      assertEquals(
+        fun(parseJsonValue("1313")),
+        MyOutput(true, Seq())
+      )
+      assertEquals(
+        fun(parseJsonValue("true")),
+        MyOutput(
+          false,
+          Seq(
+            WithPointer(TypeMismatch("number")),
+            WithPointer(TypeMismatch("string"))
+          )
+        )
       )
     }
   }
@@ -244,8 +264,10 @@ object Util:
     def invalid(problems: SchemaProblems): MyOutput                 = MyOutput(false, Seq())
 
     def all(os: Seq[MyOutput]): MyOutput = MyOutput(os.forall(_.valid), os.flatMap(_.errors))
-    def any(os: Seq[MyOutput]): MyOutput = ???
-    def one(os: Seq[MyOutput]): MyOutput = ???
+    def any(os: Seq[MyOutput]): MyOutput =
+      val valid = os.exists(_.valid)
+      MyOutput(valid, if valid then Seq() else os.flatMap(_.errors))
+    def one(os: Seq[MyOutput]): MyOutput                                                            = ???
     def contains(os: Seq[MyOutput], min: Option[Int], max: Option[Int], pointer: Pointer): MyOutput = ???
 
     extension (o: MyOutput)
