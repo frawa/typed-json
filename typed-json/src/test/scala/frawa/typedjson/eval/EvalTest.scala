@@ -35,6 +35,8 @@ class EvalTest extends FunSuite:
   val eval  = Eval[MyR, MyO]
   val eval2 = Eval[MyResult, MyOutput]
 
+  given Eval[MyResult, MyOutput] = eval2
+
   test("null") {
     given Eval[MyR, MyO] = eval
     withCompiledSchema(nullSchema) { fun =>
@@ -52,7 +54,6 @@ class EvalTest extends FunSuite:
   }
 
   test("null with errors") {
-    given Eval[MyResult, MyOutput] = eval2
     withCompiledSchema(nullSchema) { fun =>
       assertEquals(fun(NullValue), MyOutput(true, Seq()))
       assertEquals(
@@ -75,7 +76,6 @@ class EvalTest extends FunSuite:
   }
 
   test("false with errors") {
-    given Eval[MyResult, MyOutput] = eval2
     withCompiledSchema(falseSchema) { fun =>
       assertEquals(fun(parseJsonValue("{}")), MyOutput(false, Seq(WithPointer(FalseSchemaReason()))))
     }
@@ -91,7 +91,6 @@ class EvalTest extends FunSuite:
   }
 
   test("not empty with errors") {
-    given Eval[MyResult, MyOutput] = eval2
     withCompiledSchema("""{"not": {}}""") { fun =>
       assertEquals(fun(parseJsonValue("null")), MyOutput(false, Seq(WithPointer(NotInvalid()))))
       assertEquals(fun(parseJsonValue("13")), MyOutput(false, Seq(WithPointer(NotInvalid()))))
@@ -100,7 +99,6 @@ class EvalTest extends FunSuite:
   }
 
   test("array items") {
-    given Eval[MyResult, MyOutput] = eval2
     withCompiledSchema(numberArraySchema) { fun =>
       assertEquals(fun(parseJsonValue("null")), MyOutput(false, Seq(WithPointer(TypeMismatch("array")))))
       assertEquals(fun(parseJsonValue("[13]")), MyOutput(true, Seq()))
@@ -112,7 +110,6 @@ class EvalTest extends FunSuite:
   }
 
   test("object") {
-    given Eval[MyResult, MyOutput] = eval2
     withCompiledSchema(totoObjectSchema) { fun =>
       assertEquals(
         fun(parseJsonValue("""{
@@ -130,11 +127,19 @@ class EvalTest extends FunSuite:
   }
 
   test("object with pointer") {
-    given Eval[MyResult, MyOutput] = eval2
     withCompiledSchema(totoObjectSchema) { fun =>
       assertEquals(
         fun(parseJsonValue("""{"toto": 13,"titi": true}""")),
         MyOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / "titi")))
+      )
+    }
+  }
+
+  test("object missing property") {
+    withCompiledSchema(totoObjectSchema) { fun =>
+      assertEquals(
+        fun(parseJsonValue("""{"toto": 13}""")),
+        MyOutput(true, Seq())
       )
     }
   }
