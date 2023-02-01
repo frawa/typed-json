@@ -32,33 +32,33 @@ import scala.reflect.TypeTest
 class EvalTest extends FunSuite:
   import Util.{_, given}
 
-  val eval  = Eval[MyR, MyO]
-  val eval2 = Eval[MyResult, MyOutput]
+  val evalFlag  = Eval[MyR, FlagOutput]
+  val evalBasic = Eval[MyResult, BasicOutput]
 
-  given Eval[MyResult, MyOutput] = eval2
+  given Eval[MyResult, BasicOutput] = evalBasic
 
   test("null") {
-    given Eval[MyR, MyO] = eval
+    given Eval[MyR, FlagOutput] = evalFlag
     withCompiledSchema(nullSchema) { fun =>
-      assertEquals(fun(NullValue), MyO(true))
-      assertEquals(fun(BoolValue(true)), MyO(false))
+      assertEquals(fun(NullValue), FlagOutput(true))
+      assertEquals(fun(BoolValue(true)), FlagOutput(false))
     }
   }
 
   test("true") {
-    given Eval[MyR, MyO] = eval
+    given Eval[MyR, FlagOutput] = evalFlag
     withCompiledSchema(trueSchema) { fun =>
-      assertEquals(fun(BoolValue(true)), MyO(true))
-      assertEquals(fun(NullValue), MyO(true))
+      assertEquals(fun(BoolValue(true)), FlagOutput(true))
+      assertEquals(fun(NullValue), FlagOutput(true))
     }
   }
 
   test("null with errors") {
     withCompiledSchema(nullSchema) { fun =>
-      assertEquals(fun(NullValue), MyOutput(true, Seq()))
+      assertEquals(fun(NullValue), BasicOutput(true, Seq()))
       assertEquals(
         fun(BoolValue(true)),
-        MyOutput(
+        BasicOutput(
           false,
           Seq(WithPointer(TypeMismatch("null")))
         )
@@ -67,44 +67,44 @@ class EvalTest extends FunSuite:
   }
 
   test("false") {
-    given Eval[MyR, MyO] = eval
+    given Eval[MyR, FlagOutput] = evalFlag
     withCompiledSchema(falseSchema) { fun =>
-      assertEquals(fun(BoolValue(true)), MyO(false))
-      assertEquals(fun(NullValue), MyO(false))
-      assertEquals(fun(parseJsonValue("13")), MyO(false))
+      assertEquals(fun(BoolValue(true)), FlagOutput(false))
+      assertEquals(fun(NullValue), FlagOutput(false))
+      assertEquals(fun(parseJsonValue("13")), FlagOutput(false))
     }
   }
 
   test("false with errors") {
     withCompiledSchema(falseSchema) { fun =>
-      assertEquals(fun(parseJsonValue("{}")), MyOutput(false, Seq(WithPointer(FalseSchemaReason()))))
+      assertEquals(fun(parseJsonValue("{}")), BasicOutput(false, Seq(WithPointer(FalseSchemaReason()))))
     }
   }
 
   test("not false") {
-    given Eval[MyR, MyO] = eval
+    given Eval[MyR, FlagOutput] = evalFlag
     withCompiledSchema(notFalseSchema) { fun =>
-      assertEquals(fun(parseJsonValue("null")), MyO(true))
-      assertEquals(fun(parseJsonValue("13")), MyO(true))
-      assertEquals(fun(parseJsonValue("{}")), MyO(true))
+      assertEquals(fun(parseJsonValue("null")), FlagOutput(true))
+      assertEquals(fun(parseJsonValue("13")), FlagOutput(true))
+      assertEquals(fun(parseJsonValue("{}")), FlagOutput(true))
     }
   }
 
   test("not empty with errors") {
     withCompiledSchema("""{"not": {}}""") { fun =>
-      assertEquals(fun(parseJsonValue("null")), MyOutput(false, Seq(WithPointer(NotInvalid()))))
-      assertEquals(fun(parseJsonValue("13")), MyOutput(false, Seq(WithPointer(NotInvalid()))))
-      assertEquals(fun(parseJsonValue("{}")), MyOutput(false, Seq(WithPointer(NotInvalid()))))
+      assertEquals(fun(parseJsonValue("null")), BasicOutput(false, Seq(WithPointer(NotInvalid()))))
+      assertEquals(fun(parseJsonValue("13")), BasicOutput(false, Seq(WithPointer(NotInvalid()))))
+      assertEquals(fun(parseJsonValue("{}")), BasicOutput(false, Seq(WithPointer(NotInvalid()))))
     }
   }
 
   test("array items") {
     withCompiledSchema(numberArraySchema) { fun =>
-      assertEquals(fun(parseJsonValue("null")), MyOutput(false, Seq(WithPointer(TypeMismatch("array")))))
-      assertEquals(fun(parseJsonValue("[13]")), MyOutput(true, Seq()))
+      assertEquals(fun(parseJsonValue("null")), BasicOutput(false, Seq(WithPointer(TypeMismatch("array")))))
+      assertEquals(fun(parseJsonValue("[13]")), BasicOutput(true, Seq()))
       assertEquals(
         fun(parseJsonValue("[true]")),
-        MyOutput(false, Seq(WithPointer(TypeMismatch("number"), Pointer.empty / 0)))
+        BasicOutput(false, Seq(WithPointer(TypeMismatch("number"), Pointer.empty / 0)))
       )
     }
   }
@@ -117,11 +117,11 @@ class EvalTest extends FunSuite:
                              |"titi": "hello"
                              |}
                              |""".stripMargin)),
-        MyOutput(true, Seq())
+        BasicOutput(true, Seq())
       )
       assertEquals(
         fun(parseJsonValue("null")),
-        MyOutput(false, Seq(WithPointer(TypeMismatch("object"))))
+        BasicOutput(false, Seq(WithPointer(TypeMismatch("object"))))
       )
     }
   }
@@ -130,7 +130,7 @@ class EvalTest extends FunSuite:
     withCompiledSchema(totoObjectSchema) { fun =>
       assertEquals(
         fun(parseJsonValue("""{"toto": 13,"titi": true}""")),
-        MyOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / "titi")))
+        BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / "titi")))
       )
     }
   }
@@ -139,7 +139,7 @@ class EvalTest extends FunSuite:
     withCompiledSchema(totoObjectSchema) { fun =>
       assertEquals(
         fun(parseJsonValue("""{"toto": 13}""")),
-        MyOutput(true, Seq())
+        BasicOutput(true, Seq())
       )
     }
   }
@@ -156,7 +156,7 @@ class EvalTest extends FunSuite:
                          |""".stripMargin) { fun =>
       assertEquals(
         fun(parseJsonValue("""{"toto": 13}""")),
-        MyOutput(false, Seq(WithPointer(MissingRequiredProperties(Seq("titi")))))
+        BasicOutput(false, Seq(WithPointer(MissingRequiredProperties(Seq("titi")))))
       )
     }
   }
@@ -165,7 +165,7 @@ class EvalTest extends FunSuite:
     withCompiledSchema(allOfSchema) { fun =>
       assertEquals(
         fun(parseJsonValue("13")),
-        MyOutput(true, Seq())
+        BasicOutput(true, Seq())
       )
     }
   }
@@ -180,7 +180,7 @@ class EvalTest extends FunSuite:
                          |""".stripMargin) { fun =>
       assertEquals(
         fun(parseJsonValue("1313")),
-        MyOutput(false, Seq(WithPointer(TypeMismatch("string"))))
+        BasicOutput(false, Seq(WithPointer(TypeMismatch("string"))))
       )
     }
   }
@@ -189,11 +189,11 @@ class EvalTest extends FunSuite:
     withCompiledSchema(anyOfSchema) { fun =>
       assertEquals(
         fun(parseJsonValue("1313")),
-        MyOutput(true, Seq())
+        BasicOutput(true, Seq())
       )
       assertEquals(
         fun(parseJsonValue("true")),
-        MyOutput(
+        BasicOutput(
           false,
           Seq(
             WithPointer(TypeMismatch("number")),
@@ -208,7 +208,7 @@ class EvalTest extends FunSuite:
     withCompiledSchema(oneOfSchema) { fun =>
       assertEquals(
         fun(parseJsonValue("1313")),
-        MyOutput(true, Seq())
+        BasicOutput(true, Seq())
       )
     }
   }
@@ -223,7 +223,7 @@ class EvalTest extends FunSuite:
                          |""".stripMargin) { fun =>
       assertEquals(
         fun(parseJsonValue("1313")),
-        MyOutput(false, Seq(WithPointer(TypeMismatch("string")), WithPointer(TypeMismatch("boolean"))))
+        BasicOutput(false, Seq(WithPointer(TypeMismatch("string")), WithPointer(TypeMismatch("boolean"))))
       )
     }
   }
@@ -238,7 +238,7 @@ class EvalTest extends FunSuite:
                          |""".stripMargin) { fun =>
       assertEquals(
         fun(parseJsonValue("1313")),
-        MyOutput(false, Seq(WithPointer(NotOneOf(2))))
+        BasicOutput(false, Seq(WithPointer(NotOneOf(2))))
       )
     }
   }
@@ -247,11 +247,11 @@ class EvalTest extends FunSuite:
     withCompiledSchema("""{"not": { "type": "number" }}""") { fun =>
       assertEquals(
         fun(parseJsonValue("true")),
-        MyOutput(true, Seq())
+        BasicOutput(true, Seq())
       )
       assertEquals(
         fun(parseJsonValue("1313")),
-        MyOutput(false, Seq(WithPointer(NotInvalid())))
+        BasicOutput(false, Seq(WithPointer(NotInvalid())))
       )
     }
   }
@@ -275,60 +275,15 @@ object Util:
     }
 
   type MyR[O] = O
-  case class MyO(valid: Boolean)
 
   given TheResultMonad[MyR] with
     def unit[A](a: A): MyR[A]                         = a
     def bind[A, B](a: MyR[A])(f: A => MyR[B]): MyR[B] = f(a)
     def output[O](result: MyR[O]): O                  = result
 
-  given OutputOps[MyO] with
-    def valid: MyO                                                     = MyO(true)
-    def valid(annotation: ValidationAnnotation, pointer: Pointer): MyO = MyO(true)
-    def invalid(error: ValidationError, pointer: Pointer): MyO         = MyO(false)
-    def invalid(problems: SchemaProblems): MyO                         = MyO(false)
-
-    def all(os: Seq[MyO], pointer: Pointer): MyO                                          = MyO(os.forall(_.valid))
-    def any(os: Seq[MyO], pointer: Pointer): MyO                                          = ???
-    def one(os: Seq[MyO], pointer: Pointer): MyO                                          = ???
-    def contains(os: Seq[MyO], min: Option[Int], max: Option[Int], pointer: Pointer): MyO = ???
-
-    extension (o: MyO)
-      def not: MyO         = o.copy(valid = !o.valid)
-      def isValid: Boolean = ???
-    //   def combine(o2: MyO): MyO = all(Seq(o, o2))
-
-  type MyResult[O]   = MyR[O]
-  type MyOutputError = WithPointer[ValidationError]
-  // TODO this will converge to "basic" output format,
-  // see https://json-schema.org/draft/2020-12/json-schema-core.html#name-basic
-  case class MyOutput(valid: Boolean, errors: Seq[MyOutputError])
+  type MyResult[O] = MyR[O]
 
   // given TheResultMonad[MyResult] with
   //   def unit[A](a: A): MyResult[A]                                      = a
   //   def flatMap[A, B](a: MyResult[A])(f: A => MyResult[B]): MyResult[B] = f(a)
   //   def output[O](result: MyResult[O]): O                               = result
-
-  given OutputOps[MyOutput] with
-    def valid: MyOutput                                                     = MyOutput(true, Seq())
-    def valid(annotation: ValidationAnnotation, pointer: Pointer): MyOutput = MyOutput(true, Seq())
-    def invalid(error: ValidationError, pointer: Pointer): MyOutput = MyOutput(false, Seq(WithPointer(error, pointer)))
-    def invalid(problems: SchemaProblems): MyOutput                 = MyOutput(false, Seq())
-
-    def all(os: Seq[MyOutput], pointer: Pointer): MyOutput = MyOutput(os.forall(_.valid), os.flatMap(_.errors))
-    def any(os: Seq[MyOutput], pointer: Pointer): MyOutput =
-      val valid = os.exists(_.valid)
-      MyOutput(valid, if valid then Seq() else os.flatMap(_.errors))
-    def one(os: Seq[MyOutput], pointer: Pointer): MyOutput =
-      val count = os.count(_.valid)
-      if count == 1 then valid
-      else if count == 0 then MyOutput(false, os.flatMap(_.errors))
-      else invalid(NotOneOf(count), Pointer.empty)
-
-    def contains(os: Seq[MyOutput], min: Option[Int], max: Option[Int], pointer: Pointer): MyOutput = ???
-
-    extension (o: MyOutput)
-      def not: MyOutput =
-        if o.valid then o.copy(valid = false, errors = Seq(WithPointer(NotInvalid())))
-        else o.copy(valid = true, errors = Seq())
-      def isValid: Boolean = ???
