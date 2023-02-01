@@ -26,6 +26,7 @@ import frawa.typedjson.validation.FalseSchemaReason
 import frawa.typedjson.keywords.WithPointer
 import frawa.typedjson.validation.MissingRequiredProperties
 import frawa.typedjson.validation.NotOneOf
+import frawa.typedjson.validation.NotInEnum
 
 class Verify[O: OutputOps]:
   import Eval.Fun
@@ -108,3 +109,7 @@ class Verify[O: OutputOps]:
         else fElse.map(fElse => fElse(value))
       }
       .getOrElse(ops.valid(value.pointer))
+
+  def verifyEnum(vs: Seq[Value]): Fun[O] = value =>
+    if vs.contains(value.value) then ops.valid(value.pointer)
+    else ops.invalid(NotInEnum(vs), value.pointer)

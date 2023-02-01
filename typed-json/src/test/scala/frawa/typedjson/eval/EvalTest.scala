@@ -405,6 +405,35 @@ class EvalTest extends FunSuite:
     }
   }
 
+  test("enum") {
+    withCompiledSchema(enumSchema) { fun =>
+      assertEquals(
+        fun(parseJsonValue(""""foo"""")),
+        BasicOutput(true, Seq())
+      )
+      assertEquals(
+        fun(parseJsonValue(""""bar"""")),
+        BasicOutput(true, Seq())
+      )
+      assertEquals(
+        fun(parseJsonValue(""""hello"""")),
+        BasicOutput(
+          false,
+          Seq(
+            WithPointer(
+              NotInEnum(
+                Seq(
+                  StringValue("foo"),
+                  StringValue("bar")
+                )
+              )
+            )
+          )
+        )
+      )
+    }
+  }
+
 object Util:
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 

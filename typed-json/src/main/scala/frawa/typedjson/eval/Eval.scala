@@ -44,6 +44,7 @@ import frawa.typedjson.keywords.AllOfKeyword
 import frawa.typedjson.keywords.AnyOfKeyword
 import frawa.typedjson.keywords.OneOfKeyword
 import frawa.typedjson.keywords.IfThenElseKeyword
+import frawa.typedjson.keywords.EnumKeyword
 
 trait TheResultMonad[R[_]]:
   def unit[A](a: A): R[A]
@@ -111,14 +112,15 @@ class Eval[R[_]: TheResultMonad, O: OutputOps]:
 
   private def compileOne(k: Keyword): R[Fun[O]] =
     k match {
-      case NullTypeKeyword    => monad.unit(verify.verifyType(verify.nullTypeMismatch))
-      case TrivialKeyword(v)  => monad.unit(verify.verifyTrivial(v))
-      case BooleanTypeKeyword => monad.unit(verify.verifyType(verify.booleanTypeMismatch))
-      case NumberTypeKeyword  => monad.unit(verify.verifyType(verify.numberTypeMismatch))
-      case StringTypeKeyword  => monad.unit(verify.verifyType(verify.stringTypeMismatch))
-      case ArrayTypeKeyword   => monad.unit(verify.verifyType(verify.arrayTypeMismatch))
-      case ObjectTypeKeyword  => monad.unit(verify.verifyType(verify.objectTypeMismatch))
-      case NotKeyword(ks)     => compile(ks).map(f => verify.verifyNot(f))
+      case NullTypeKeyword      => monad.unit(verify.verifyType(verify.nullTypeMismatch))
+      case TrivialKeyword(v)    => monad.unit(verify.verifyTrivial(v))
+      case BooleanTypeKeyword   => monad.unit(verify.verifyType(verify.booleanTypeMismatch))
+      case NumberTypeKeyword    => monad.unit(verify.verifyType(verify.numberTypeMismatch))
+      case StringTypeKeyword    => monad.unit(verify.verifyType(verify.stringTypeMismatch))
+      case ArrayTypeKeyword     => monad.unit(verify.verifyType(verify.arrayTypeMismatch))
+      case ObjectTypeKeyword    => monad.unit(verify.verifyType(verify.objectTypeMismatch))
+      case UnionTypeKeyword(ks) => monad.map(compile(ks))(fs => verify.verifyUnion(fs))
+      case NotKeyword(ks)       => compile(ks).map(f => verify.verifyNot(f))
       case ArrayItemsKeyword(items, prefixItems) =>
         for {
           items       <- compile(items)
@@ -134,7 +136,6 @@ class Eval[R[_]: TheResultMonad, O: OutputOps]:
         } yield {
           verify.verfyObjectProperties(properties, patternProperties, additionalProperties)
         }
-
       case ObjectRequiredKeyword(names) => monad.unit(verify.verifyObjectRequired(names))
       case AllOfKeyword(ks)             => compile2(ks).map(f => verify.verifyAllOf(f))
       case AnyOfKeyword(ks)             => compile2(ks).map(f => verify.verifyAnyOf(f))
@@ -147,9 +148,8 @@ class Eval[R[_]: TheResultMonad, O: OutputOps]:
         } yield {
           verify.verfyIfThenElse(ksIf, ksThen, ksElse)
         }
-
+      case EnumKeyword(vs) => monad.unit(verify.verifyEnum(vs))
       // ...
-      case UnionTypeKeyword(ks) => monad.map(compile(ks))(fs => verify.verifyUnion(fs))
     }
 
 trait OutputOps[O]: // extends Monoid[O]:
