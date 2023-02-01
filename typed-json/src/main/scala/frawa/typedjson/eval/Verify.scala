@@ -24,6 +24,7 @@ import frawa.typedjson.parser.Value._
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.validation.FalseSchemaReason
 import frawa.typedjson.keywords.WithPointer
+import frawa.typedjson.validation.MissingRequiredProperties
 
 class Verify[O: OutputOps]:
   import Eval.Fun
@@ -72,4 +73,14 @@ class Verify[O: OutputOps]:
         }.toSeq
       }
       .map(os => ops.all(os))
+      .getOrElse(ops.valid)
+
+  def verifyObjectRequired(names: Seq[String]): Fun[O] = value =>
+    Value
+      .asObject(value.value)
+      .map { vs =>
+        val missingNames = names.filter(!vs.contains(_))
+        if missingNames.isEmpty then ops.valid
+        else ops.invalid(MissingRequiredProperties(missingNames), value.pointer)
+      }
       .getOrElse(ops.valid)

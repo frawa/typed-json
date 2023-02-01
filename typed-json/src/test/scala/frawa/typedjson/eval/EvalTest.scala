@@ -144,6 +144,23 @@ class EvalTest extends FunSuite:
     }
   }
 
+  test("object missing required property") {
+    withCompiledSchema("""{
+                         |"type": "object",
+                         |"properties": {
+                         |  "toto": { "type": "number" },
+                         |  "titi": { "type": "string" }
+                         |},
+                         |"required": ["titi"]
+                         |}
+                         |""".stripMargin) { fun =>
+      assertEquals(
+        fun(parseJsonValue("""{"toto": 13}""")),
+        MyOutput(false, Seq(WithPointer(MissingRequiredProperties(Seq("titi")))))
+      )
+    }
+  }
+
 object Util:
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 

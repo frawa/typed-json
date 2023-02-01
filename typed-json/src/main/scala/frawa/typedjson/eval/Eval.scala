@@ -39,6 +39,7 @@ import frawa.typedjson.keywords.ObjectPropertiesKeyword
 import frawa.typedjson.keywords.StringTypeKeyword
 import frawa.typedjson.keywords.ObjectTypeKeyword
 import frawa.typedjson.keywords.WithPointer
+import frawa.typedjson.keywords.ObjectRequiredKeyword
 
 trait TheResultMonad[R[_]]:
   def unit[A](a: A): R[A]
@@ -128,8 +129,9 @@ class Eval[R[_]: TheResultMonad, O: OutputOps]:
           additionalProperties <- compile(additionalProperties)
         } yield {
           verify.verfyObjectProperties(properties, patternProperties, additionalProperties)
-
         }
+
+      case ObjectRequiredKeyword(names) => monad.unit(verify.verifyObjectRequired(names))
 
       // ...
       case UnionTypeKeyword(ks) => monad.map(compile(ks))(fs => verify.verifyUnion(fs))
