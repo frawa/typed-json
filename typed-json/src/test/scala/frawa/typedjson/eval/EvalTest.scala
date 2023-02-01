@@ -161,6 +161,29 @@ class EvalTest extends FunSuite:
     }
   }
 
+  test("all of") {
+    withCompiledSchema(allOfSchema) { fun =>
+      assertEquals(
+        fun(parseJsonValue("13")),
+        MyOutput(true, Seq())
+      )
+    }
+  }
+  test("impossible all of") {
+    withCompiledSchema("""{
+                         |"allOf": [
+                         |  { "type": "number" },
+                         |  { "type": "string" }
+                         |]
+                         |}
+                         |""".stripMargin) { fun =>
+      assertEquals(
+        fun(parseJsonValue("1313")),
+        MyOutput(false, Seq(WithPointer(TypeMismatch("string"))))
+      )
+    }
+  }
+
 object Util:
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 

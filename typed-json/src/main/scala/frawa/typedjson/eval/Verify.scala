@@ -84,3 +84,5 @@ class Verify[O: OutputOps]:
         else ops.invalid(MissingRequiredProperties(missingNames), value.pointer)
       }
       .getOrElse(ops.valid)
+
+  def verifyAllOf(fs: Seq[Fun[O]]): Fun[O] = value => ops.all(fs.map(_(value)))
