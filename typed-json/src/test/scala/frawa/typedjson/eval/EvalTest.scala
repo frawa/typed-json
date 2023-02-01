@@ -336,6 +336,23 @@ class EvalTest extends FunSuite:
     }
   }
 
+  test("null or string") {
+    withCompiledSchema(nullOrStringSchema) { fun =>
+      assertEquals(
+        fun(parseJsonValue("null")),
+        BasicOutput(true, Seq())
+      )
+      assertEquals(
+        fun(parseJsonValue(""""hello"""")),
+        BasicOutput(true, Seq())
+      )
+      assertEquals(
+        fun(parseJsonValue("13")),
+        BasicOutput(false, Seq(WithPointer(TypeMismatch("null")), WithPointer(TypeMismatch("string"))))
+      )
+    }
+  }
+
 object Util:
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 

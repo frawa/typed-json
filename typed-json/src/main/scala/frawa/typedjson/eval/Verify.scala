@@ -49,7 +49,7 @@ class Verify[O: OutputOps]:
     else ops.invalid(FalseSchemaReason(), value.pointer)
 
   def verifyNot(f: Fun[O]): Fun[O]         = value => f(value).not(value.pointer)
-  def verifyUnion(fs: Seq[Fun[O]]): Fun[O] = ???
+  def verifyUnion(fs: Seq[Fun[O]]): Fun[O] = verifyOneOf(fs)
   def verifyAll(fs: Seq[Fun[O]]): Fun[O]   = value => ops.all(fs.map(_(value)), value.pointer)
 
   def verfyArrayItems(items: Option[Fun[O]], prefixItems: Seq[Fun[O]]): Fun[O] = value =>
