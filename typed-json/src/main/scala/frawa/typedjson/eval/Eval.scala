@@ -154,14 +154,12 @@ class Eval[R[_]: TheResultMonad, O: OutputOps]:
 
 trait OutputOps[O]: // extends Monoid[O]:
   def valid(pointer: Pointer): O
-  def valid(annotation: ValidationAnnotation, pointer: Pointer): O
+  // def valid(annotation: ValidationAnnotation, pointer: Pointer): O
   def invalid(error: ValidationError, pointer: Pointer): O
-  def invalid(problems: SchemaProblems): O
+  // def invalid(problems: SchemaProblems): O
 
   def all(os: Seq[O], pointer: Pointer): O
-  def any(os: Seq[O], pointer: Pointer): O
-  def one(os: Seq[O], pointer: Pointer): O
-  def contains(os: Seq[O], min: Option[Int], max: Option[Int], pointer: Pointer): O
+  // def contains(os: Seq[O], min: Option[Int], max: Option[Int], pointer: Pointer): O
 
   // def unit = valid
   extension (o: O)

@@ -25,6 +25,7 @@ import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.validation.FalseSchemaReason
 import frawa.typedjson.keywords.WithPointer
 import frawa.typedjson.validation.MissingRequiredProperties
+import frawa.typedjson.validation.NotOneOf
 
 class Verify[O: OutputOps]:
   import Eval.Fun
@@ -86,8 +87,18 @@ class Verify[O: OutputOps]:
       .getOrElse(ops.valid(value.pointer))
 
   def verifyAllOf(fs: Seq[Fun[O]]): Fun[O] = value => ops.all(fs.map(_(value)), value.pointer)
-  def verifyAnyOf(fs: Seq[Fun[O]]): Fun[O] = value => ops.any(fs.map(_(value)), value.pointer)
-  def verifyOneOf(fs: Seq[Fun[O]]): Fun[O] = value => ops.one(fs.map(_(value)), value.pointer)
+  def verifyAnyOf(fs: Seq[Fun[O]]): Fun[O] = value =>
+    val os    = fs.map(_(value))
+    val valid = os.exists(_.isValid)
+    if valid then ops.valid(value.pointer)
+    else ops.all(os, value.pointer) // TODO new error NoneOf?
+
+  def verifyOneOf(fs: Seq[Fun[O]]): Fun[O] = value =>
+    val os    = fs.map(_(value))
+    val count = os.count(_.isValid)
+    if count == 1 then ops.valid(value.pointer)
+    else if count == 0 then ops.all(os, value.pointer) // TODO new error NoneOf?
+    else ops.invalid(NotOneOf(count), value.pointer)
 
   def verfyIfThenElse(fIf: Option[Fun[O]], fThen: Option[Fun[O]], fElse: Option[Fun[O]]): Fun[O] = value =>
     fIf

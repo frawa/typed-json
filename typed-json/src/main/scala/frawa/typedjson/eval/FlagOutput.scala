@@ -17,9 +17,6 @@ object FlagOutput:
     def invalid(problems: SchemaProblems): FlagOutput                         = FlagOutput(false)
 
     def all(os: Seq[FlagOutput], pointer: Pointer): FlagOutput = FlagOutput(os.forall(_.valid))
-    def any(os: Seq[FlagOutput], pointer: Pointer): FlagOutput = ???
-    def one(os: Seq[FlagOutput], pointer: Pointer): FlagOutput = ???
-    def contains(os: Seq[FlagOutput], min: Option[Int], max: Option[Int], pointer: Pointer): FlagOutput = ???
 
     extension (o: FlagOutput)
       def not(pointer: Pointer): FlagOutput = o.copy(valid = !o.valid)
