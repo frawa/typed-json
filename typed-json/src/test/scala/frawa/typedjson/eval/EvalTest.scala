@@ -465,20 +465,29 @@ object Util:
         keywords => f(keywords)
       )
 
-  def withCompiledSchema[R[_], O](schema: String)(using eval: Eval[R, O])(f: R[Value => O] => Unit): Unit =
+  def withCompiledSchema[R[_]: TheResultMonad, O](
+      schema: String
+  )(using eval: Eval[R, O])(f: (Value => O) => Unit): Unit =
     withSchema(schema) { schema =>
       withKeywords(schema) { keywords =>
-        val fun = eval.fun(eval.compile(keywords))
+        val fun = eval.fun(eval.compile(keywords)).get
         f(fun)
       }
     }
 
-  type MyR[O] = O
+  type MyState = Int
+  type MyR[O]  = MyState => (O, MyState)
+  val myZero: MyState = 0
 
   given TheResultMonad[MyR] with
-    def unit[A](a: A): MyR[A]                         = a
-    def bind[A, B](a: MyR[A])(f: A => MyR[B]): MyR[B] = f(a)
-    def output[O](result: MyR[O]): O                  = result
+    def unit[A](a: A): MyR[A] = s => (a, s)
+    def bind[A, B](a: MyR[A])(f: A => MyR[B]): MyR[B] = s =>
+      val (a2, s2) = a(s)
+      f(a2)(s2 + 1)
+    def fetch[O](result: MyR[O]): O =
+      val (o, count) = result(myZero)
+      // println(s"counted $count binds")
+      o
 
   type MyResult[O] = MyR[O]
 

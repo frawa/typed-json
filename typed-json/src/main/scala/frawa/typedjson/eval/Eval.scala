@@ -49,10 +49,11 @@ import frawa.typedjson.keywords.EnumKeyword
 trait TheResultMonad[R[_]]:
   def unit[A](a: A): R[A]
   def bind[A, B](a: R[A])(f: A => R[B]): R[B]
-  def output[O](result: R[O]): O
+  def fetch[O](result: R[O]): O
   extension [A](r: R[A])
     def flatMap[B](f: A => R[B]): R[B] = bind(r)(f)
     def map[B](f: A => B): R[B]        = bind(r)(a => unit(f(a)))
+    def get: A                         = fetch(r)
 end TheResultMonad
 
 object Eval:
