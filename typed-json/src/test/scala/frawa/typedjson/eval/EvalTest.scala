@@ -45,6 +45,18 @@ class EvalTest extends FunSuite:
     // println(s"counted ${s.count} binds")
     o
 
+  private def doApplyBulk[O: OutputOps](fun: MyR[O][Value => O], values: Seq[Value], fun2: MyState => Unit)(using
+      resolver: SchemaResolver
+  ): Seq[O] =
+    val (s, os) = values
+      .foldLeft((myZero(resolver), Seq.empty[O])) { case ((state, os), v) =>
+        val (o, s) = fun.map(_(v))(state)
+        (s, os :+ o)
+      }
+    // println(s"state cached resolutions ${s.resolved.keySet} ${s.hits}")
+    fun2(s)
+    os
+
   test("null") {
     given Eval[MyR[FlagOutput], FlagOutput] = evalFlag
     withCompiledSchema(nullSchema) { fun =>
@@ -489,6 +501,21 @@ class EvalTest extends FunSuite:
     }
   }
 
+  test("$id/$ref/$def bulk") {
+    withCompiledSchema(idRefDefsSchema) { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(parseJsonValue("[1313]"), parseJsonValue("""["hello"]""")),
+          state =>
+            assertEquals(state.resolved.keySet, Set("#item"))
+            assertEquals(state.hits, Map("#item" -> 1))
+        ),
+        Seq(BasicOutput(true, Seq()), BasicOutput(false, Seq(WithPointer(TypeMismatch("number"), Pointer.empty / 0))))
+      )
+    }
+  }
+
   test("$ref in properties") {
     withCompiledSchema(refInPropertiesSchema) { fun =>
       assertEquals(
@@ -525,15 +552,16 @@ object Util:
       }
     }
 
-    // TODO possible?
+  // TODO possible?
   // case class MyState[O: OutputOps](resolver: SchemaResolver, count: Int, resolved: Map[String, MyR[Eval.Fun[O]]])
-  case class MyState[O: OutputOps](
+  case class MyState(
       resolver: SchemaResolver,
       count: Int,
-      resolved: Map[String, Either[SchemaProblems, Keywords]]
+      resolved: Map[String, Either[SchemaProblems, Keywords]],
+      hits: Map[String, Int]
   )
-  type MyR[O] = [A] =>> MyState[O] => (A, MyState[O])
-  def myZero[O: OutputOps](resolver: SchemaResolver) = MyState[O](resolver, 0, Map.empty)
+  type MyR[O] = [A] =>> MyState => (A, MyState)
+  def myZero[O: OutputOps](resolver: SchemaResolver) = MyState(resolver, 0, Map.empty, Map.empty)
 
   given [O: OutputOps]: TheResultMonad[MyR[O], O] with
     def unit[A](a: A): MyR[O][A] = s => (a, s)
@@ -546,22 +574,25 @@ object Util:
   object MyState:
     def resolve[O: OutputOps](ref: String)(using eval: Eval[MyR[O], O]): MyR[O][Eval.Fun[O]] =
       val ops = summon[OutputOps[O]]
-      (state: MyState[O]) =>
+      (state: MyState) =>
         val alreadyResolved = state.resolved
           .get(ref)
-          .map((_, state))
+          .map { ks =>
+            val state1 = state.copy(hits = state.hits.updatedWith(ref)(_.map(_ + 1).orElse(Some(1))))
+            (ks, state1)
+          }
         lazy val newlyResolved = state.resolver
           .resolveRef(ref)
           .map(resolution =>
             val SchemaResolution(schema, resolver) = resolution
             // TODO resolver?
             val ks     = Keywords(schema, vocabularyForTest, None)
-            val state2 = state.copy(resolved = state.resolved + (ref -> ks))
-            (ks, state2)
+            val state1 = state.copy(resolved = state.resolved + (ref -> ks))
+            (ks, state1)
           )
         val compiled = alreadyResolved
           .orElse(newlyResolved)
-          .map { (ks, state1) =>
+          .map { (ks, state) =>
             ks.fold(
               problems => {
                 val f =
