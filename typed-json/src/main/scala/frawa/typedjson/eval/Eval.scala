@@ -47,6 +47,8 @@ import frawa.typedjson.keywords.IfThenElseKeyword
 import frawa.typedjson.keywords.EnumKeyword
 import frawa.typedjson.keywords.LazyParseKeywords
 import frawa.typedjson.keywords.RefKeyword
+import frawa.typedjson.keywords.MinItemsKeyword
+import frawa.typedjson.keywords.UniqueItemsKeyword
 
 trait TheResultMonad[R[_], O: OutputOps]:
   def unit[A](a: A): R[A]
@@ -156,6 +158,8 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case RefKeyword(ref) =>
         given Eval[R, O] = this
         monad.resolve(ref)
+      case MinItemsKeyword(min)       => monad.unit(verify.verifyMinItems(min))
+      case UniqueItemsKeyword(unique) => monad.unit(verify.verifyUniqueItems(unique))
       // ...
       // TODO to be removed, ignore for now
       case _: LazyParseKeywords => monad.unit(value => summon[OutputOps[O]].valid(value.pointer))

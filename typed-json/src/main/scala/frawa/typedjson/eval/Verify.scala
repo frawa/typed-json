@@ -27,6 +27,8 @@ import frawa.typedjson.keywords.WithPointer
 import frawa.typedjson.validation.MissingRequiredProperties
 import frawa.typedjson.validation.NotOneOf
 import frawa.typedjson.validation.NotInEnum
+import frawa.typedjson.validation.MinItemsMismatch
+import frawa.typedjson.validation.ItemsNotUnique
 
 class Verify[O: OutputOps]:
   import Eval.Fun
@@ -113,3 +115,21 @@ class Verify[O: OutputOps]:
   def verifyEnum(vs: Seq[Value]): Fun[O] = value =>
     if vs.contains(value.value) then ops.valid(value.pointer)
     else ops.invalid(NotInEnum(vs), value.pointer)
+
+  def verifyMinItems(min: BigDecimal): Fun[O] = value =>
+    Value
+      .asArray(value.value)
+      .map { vs =>
+        if min <= vs.length then ops.valid(value.pointer)
+        else ops.invalid(MinItemsMismatch(min), value.pointer)
+      }
+      .getOrElse(ops.valid(value.pointer))
+
+  def verifyUniqueItems(unique: Boolean): Fun[O] = value =>
+    Value
+      .asArray(value.value)
+      .map { vs =>
+        if !unique || vs.distinct.length == vs.length then ops.valid(value.pointer)
+        else ops.invalid(ItemsNotUnique(), value.pointer)
+      }
+      .getOrElse(ops.valid(value.pointer))
