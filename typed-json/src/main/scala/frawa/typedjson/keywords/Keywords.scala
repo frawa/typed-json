@@ -65,22 +65,25 @@ case class IfThenElseKeyword(
     thenKeywords: Option[Keywords] = None,
     elseKeywords: Option[Keywords] = None
 ) extends ApplicatorKeyword
-case class PatternKeyword(pattern: String)                                                 extends AssertionKeyword
-case class FormatKeyword(format: String)                                                   extends AssertionKeyword
-case class MinimumKeyword(min: BigDecimal, exclude: Boolean = false)                       extends AssertionKeyword
-case class UniqueItemsKeyword(unique: Boolean)                                             extends AssertionKeyword
-case class PropertyNamesKeyword(keywords: Keywords)                                        extends ApplicatorKeyword
+case class PatternKeyword(pattern: String)                           extends AssertionKeyword
+case class FormatKeyword(format: String)                             extends AssertionKeyword
+case class MinimumKeyword(min: BigDecimal, exclude: Boolean = false) extends AssertionKeyword
+case class UniqueItemsKeyword(unique: Boolean)                       extends AssertionKeyword
+case class PropertyNamesKeyword(keywords: Keywords)                  extends ApplicatorKeyword
+// TODO remove when new Eval is done
 case class LazyParseKeywords(resolved: URI, parse: () => Either[SchemaProblems, Keywords]) extends ApplicatorKeyword
-case class MultipleOfKeyword(n: BigDecimal)                                                extends AssertionKeyword
-case class MaximumKeyword(max: BigDecimal, exclude: Boolean = false)                       extends AssertionKeyword
-case class MaxLengthKeyword(max: BigDecimal)                                               extends AssertionKeyword
-case class MinLengthKeyword(min: BigDecimal)                                               extends AssertionKeyword
-case class MaxItemsKeyword(max: BigDecimal)                                                extends AssertionKeyword
-case class MinItemsKeyword(min: BigDecimal)                                                extends AssertionKeyword
-case class MaxPropertiesKeyword(max: BigDecimal)                                           extends AssertionKeyword
-case class MinPropertiesKeyword(min: BigDecimal)                                           extends AssertionKeyword
-case class DependentRequiredKeyword(required: Map[String, Seq[String]])                    extends AssertionKeyword
-case class DependentSchemasKeyword(keywords: Map[String, Keywords])                        extends ApplicatorKeyword
+// TODO for new Eval
+case class RefKeyword(ref: String)                                      extends AssertionKeyword
+case class MultipleOfKeyword(n: BigDecimal)                             extends AssertionKeyword
+case class MaximumKeyword(max: BigDecimal, exclude: Boolean = false)    extends AssertionKeyword
+case class MaxLengthKeyword(max: BigDecimal)                            extends AssertionKeyword
+case class MinLengthKeyword(min: BigDecimal)                            extends AssertionKeyword
+case class MaxItemsKeyword(max: BigDecimal)                             extends AssertionKeyword
+case class MinItemsKeyword(min: BigDecimal)                             extends AssertionKeyword
+case class MaxPropertiesKeyword(max: BigDecimal)                        extends AssertionKeyword
+case class MinPropertiesKeyword(min: BigDecimal)                        extends AssertionKeyword
+case class DependentRequiredKeyword(required: Map[String, Seq[String]]) extends AssertionKeyword
+case class DependentSchemasKeyword(keywords: Map[String, Keywords])     extends ApplicatorKeyword
 case class ContainsKeyword(schema: Option[Keywords] = None, min: Option[Int] = None, max: Option[Int] = None)
     extends ApplicatorKeyword
 case class UnevaluatedItemsKeyword(pushed: Keywords, unevaluated: Keywords)      extends ApplicatorKeyword
@@ -241,7 +244,7 @@ case class Keywords(
             .getOrElse(Left(SchemaProblems(MissingReference(ref))))
           vocabulary1 <- SchemaValue.vocabulary(resolution, vocabulary)
           keyword = lazyResolve(vocabulary1, resolution, scope1)
-        yield add(keyword)
+        yield add(keyword).add(RefKeyword(ref))
 
       case ("$dynamicRef", StringValue(ref)) =>
         for

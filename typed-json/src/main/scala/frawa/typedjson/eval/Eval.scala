@@ -45,27 +45,30 @@ import frawa.typedjson.keywords.AnyOfKeyword
 import frawa.typedjson.keywords.OneOfKeyword
 import frawa.typedjson.keywords.IfThenElseKeyword
 import frawa.typedjson.keywords.EnumKeyword
+import frawa.typedjson.keywords.LazyParseKeywords
+import frawa.typedjson.keywords.RefKeyword
 
-trait TheResultMonad[R[_]]:
+trait TheResultMonad[R[_], O: OutputOps]:
   def unit[A](a: A): R[A]
   def bind[A, B](a: R[A])(f: A => R[B]): R[B]
-  def fetch[O](result: R[O]): O
+  // extras
+  def resolve(ref: String)(using eval: Eval[R, O]): R[Eval.Fun[O]]
+  //
   extension [A](r: R[A])
     def flatMap[B](f: A => R[B]): R[B] = bind(r)(f)
     def map[B](f: A => B): R[B]        = bind(r)(a => unit(f(a)))
-    def get: A                         = fetch(r)
 end TheResultMonad
 
 object Eval:
   type Fun[O] = WithPointer[Value] => O
   def map[O](fun: Fun[O])(f: O => O): Fun[O] = value => f(fun(value))
 
-class Eval[R[_]: TheResultMonad, O: OutputOps]:
+class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
   import Eval.Fun
   import Keywords.KeywordWithLocation
 
-  protected val monad  = summon[TheResultMonad[R]]
-  protected val verify = Verify[O]
+  protected val monad  = summon[TheResultMonad[R, O]]
+  protected def verify = Verify[O]
 
   final def fun(compiled: R[Fun[O]]): R[Value => O] = monad.map(compiled)(f => value => f(WithPointer(value)))
 
@@ -138,9 +141,9 @@ class Eval[R[_]: TheResultMonad, O: OutputOps]:
           verify.verfyObjectProperties(properties, patternProperties, additionalProperties)
         }
       case ObjectRequiredKeyword(names) => monad.unit(verify.verifyObjectRequired(names))
-      case AllOfKeyword(ks)             => compile2(ks).map(f => verify.verifyAllOf(f))
-      case AnyOfKeyword(ks)             => compile2(ks).map(f => verify.verifyAnyOf(f))
-      case OneOfKeyword(ks)             => compile2(ks).map(f => verify.verifyOneOf(f))
+      case AllOfKeyword(ks)             => compile2(ks).map(fs => verify.verifyAllOf(fs))
+      case AnyOfKeyword(ks)             => compile2(ks).map(fs => verify.verifyAnyOf(fs))
+      case OneOfKeyword(ks)             => compile2(ks).map(fs => verify.verifyOneOf(fs))
       case IfThenElseKeyword(ksIf, ksThen, ksElse) =>
         for {
           ksIf   <- compile(ksIf)
@@ -150,7 +153,12 @@ class Eval[R[_]: TheResultMonad, O: OutputOps]:
           verify.verfyIfThenElse(ksIf, ksThen, ksElse)
         }
       case EnumKeyword(vs) => monad.unit(verify.verifyEnum(vs))
+      case RefKeyword(ref) =>
+        given Eval[R, O] = this
+        monad.resolve(ref)
       // ...
+      // TODO to be removed, ignore for now
+      case _: LazyParseKeywords => monad.unit(value => summon[OutputOps[O]].valid(value.pointer))
     }
 
 trait OutputOps[O]: // extends Monoid[O]:

@@ -49,6 +49,8 @@ case class MaxPropertiesMismatch(max: BigDecimal)                      extends V
 case class MinPropertiesMismatch(min: BigDecimal)                      extends ValidationError
 case class DependentRequiredMissing(missing: Map[String, Seq[String]]) extends ValidationError
 case class NotContains(valid: Int)                                     extends ValidationError
+//TODO for new Eval
+case class CannotResolve(ref: String, problems: Option[SchemaProblems]) extends ValidationError
 
 sealed trait ValidationAnnotation
 case class UnknownFormat(format: String) extends ValidationAnnotation
@@ -94,6 +96,7 @@ object ValidationProcessing:
       case MaxPropertiesKeyword(v)         => validateMaxProperties(v)
       case MinPropertiesKeyword(v)         => validateMinProperties(v)
       case DependentRequiredKeyword(v)     => validateDependentRequired(v)
+      case _: RefKeyword                   => value => Result.valid // for new Eval
       // case _                               => _ => Result.invalid(ValidationOutput.invalid(UnsupportedCheck(keyword)))
 
   private def nested(keyword: ApplicatorKeyword)(results: Seq[Result[ValidationOutput]]): EvalFun = { value =>
@@ -107,7 +110,7 @@ object ValidationProcessing:
       case ArrayItemsKeyword(_, _)          => combiner.allOf(results, value.pointer)
       case IfThenElseKeyword(_, _, _)       => combiner.ifThenElse(results, value.pointer)
       case PropertyNamesKeyword(_)          => combiner.allOf(results, value.pointer)
-      case _: LazyParseKeywords             => combiner.allOf(results, value.pointer)
+      case _: LazyParseKeywords             => combiner.allOf(results, value.pointer) // TODO remove
       case DependentSchemasKeyword(_)       => combiner.allOf(results, value.pointer)
       case ContainsKeyword(_, min, max)     => combiner.contains(results, value.pointer, min, max)
       case _: UnevaluatedItemsKeyword       => combiner.allOf(results, value.pointer)

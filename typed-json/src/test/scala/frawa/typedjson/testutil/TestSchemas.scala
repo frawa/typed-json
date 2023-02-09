@@ -106,6 +106,14 @@ object TestSchemas:
                                   |}
                                   |}""".stripMargin
 
+  val missingIdRefDefsSchema: String = """{
+                                         |"$id": "https://example.net/root.json",
+                                         |"type": "array",
+                                         |"items": {
+                                         |    "$ref": "#missing"
+                                         |}
+                                         |}""".stripMargin
+
   val recursiveRefDefsSchema: String = """|{
                                           |"$ref": "#/$defs/list",
                                           |"$defs": {
