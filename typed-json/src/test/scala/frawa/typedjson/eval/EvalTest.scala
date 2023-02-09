@@ -529,6 +529,35 @@ class EvalTest extends FunSuite:
     }
   }
 
+  test("$ref at root") {
+    withCompiledSchema(refAtRootSchema) { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""{ "foo": 13 }"""),
+            parseJsonValue("""{ "foo": [13] }"""),
+            parseJsonValue("""{ "foo": true }""")
+          ),
+          state =>
+            assertEquals(state.resolved.keySet, Set("#object", "#/$defs/numberType"))
+            assertEquals(state.hits, Map("#/$defs/numberType" -> 5, "#object" -> 2))
+        ),
+        Seq(
+          BasicOutput(true, Seq()),
+          BasicOutput(true, Seq()),
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(TypeMismatch("number"), Pointer.empty / "foo"),
+              WithPointer(TypeMismatch("array"), Pointer.empty / "foo")
+            )
+          )
+        )
+      )
+    }
+  }
+
 object Util:
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
@@ -584,9 +613,8 @@ object Util:
         lazy val newlyResolved = state.resolver
           .resolveRef(ref)
           .map(resolution =>
-            val SchemaResolution(schema, resolver) = resolution
-            // TODO resolver?
-            val ks     = Keywords(schema, vocabularyForTest, None)
+            // TODO dynamic scope
+            val ks     = Keywords.parseKeywords(vocabularyForTest.get, resolution, DynamicScope.empty)
             val state1 = state.copy(resolved = state.resolved + (ref -> ks))
             (ks, state1)
           )
