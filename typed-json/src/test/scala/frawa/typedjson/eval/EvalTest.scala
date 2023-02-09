@@ -483,8 +483,21 @@ class EvalTest extends FunSuite:
         BasicOutput(true, Seq())
       )
       assertEquals(
-        doApply(fun, parseJsonValue(""""hello"""")),
-        BasicOutput(false, Seq(WithPointer(TypeMismatch("array"))))
+        doApply(fun, parseJsonValue("""["hello"]""")),
+        BasicOutput(false, Seq(WithPointer(TypeMismatch("number"), Pointer.empty / 0)))
+      )
+    }
+  }
+
+  test("$ref in properties") {
+    withCompiledSchema(refInPropertiesSchema) { fun =>
+      assertEquals(
+        doApply(fun, parseJsonValue("""{ "foo": 13 }""")),
+        BasicOutput(true, Seq())
+      )
+      assertEquals(
+        doApply(fun, parseJsonValue("""{ "foo": true }""")),
+        BasicOutput(false, Seq(WithPointer(TypeMismatch("number"), Pointer.empty / "foo")))
       )
     }
   }
@@ -542,7 +555,7 @@ object Util:
           .map(resolution =>
             val SchemaResolution(schema, resolver) = resolution
             // TODO resolver?
-            val ks     = Keywords(schema, None, None)
+            val ks     = Keywords(schema, vocabularyForTest, None)
             val state2 = state.copy(resolved = state.resolved + (ref -> ks))
             (ks, state2)
           )
