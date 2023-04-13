@@ -558,6 +558,35 @@ class EvalTest extends FunSuite:
     }
   }
 
+  test("$ref to validation spec, with two '$ref's") {
+    withCompiledSchema(refToValidationSpec) { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""{ "$defs": { "foo": { "type": "boolean" } } }"""),
+            parseJsonValue("""{ "$defs": { "foo": { "type": ["boolean"] } } }"""),
+            parseJsonValue("""{ "$defs": { "foo": { "type": 13 } } }""")
+          ),
+          state =>
+            assertEquals(state.resolved.keySet, Set("#object", "#/$defs/numberType"))
+            assertEquals(state.hits, Map("#/$defs/numberType" -> 5, "#object" -> 2))
+        ),
+        Seq(
+          BasicOutput(true, Seq()),
+          BasicOutput(true, Seq()),
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(TypeMismatch("number"), Pointer.empty / "foo"),
+              WithPointer(TypeMismatch("array"), Pointer.empty / "foo")
+            )
+          )
+        )
+      )
+    }
+  }
+
 object Util:
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
 
