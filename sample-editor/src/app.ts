@@ -53,11 +53,60 @@ editor.create(document.getElementById('editor')!, {
   theme: "vs-dark",
 });
 
-editor.create(document.getElementById('editorSchema')!, {
+const editorSchema = editor.create(document.getElementById('editorSchema')!, {
   value: initialSchema,
   language: 'json',
   ...common,
   theme: "vs-dark",
+});
+
+function replaceSchemaBy(value: string) {
+  editorSchema.setValue(value)
+}
+
+document.querySelector<HTMLSelectElement>("#sample-schema")?.addEventListener("change", (e) => {
+  const value: string = (e.target as any)?.value ?? ''
+  switch (value) {
+    case 'properties':
+      replaceSchemaBy(`{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+    "foo": {"type": "array", "maxItems": 3},
+        "bar": {"type": "array"}
+    },
+    "patternProperties": {"f.o": {"minItems": 2}},
+    "additionalProperties": {"type": "integer"}
+}`)
+      break;
+    case 'if-then-else':
+      replaceSchemaBy(`{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "then": { "const": "yes" },
+    "else": { "const": "other" },
+    "if": { "maxLength": 4 }
+}`)
+      break;
+    case 'all-of':
+      replaceSchemaBy(`{
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "properties": {"bar": {"type": "integer"}},
+            "required": ["bar"],
+            "allOf" : [
+                {
+                    "properties": {
+                        "foo": {"type": "string"}
+                    },
+                    "required": ["foo"]
+                },
+                {
+                    "properties": {
+                        "baz": {"type": "null"}
+                    },
+                    "required": ["baz"]
+                }
+            ]
+        }`)
+  }
 });
 
 
@@ -215,60 +264,3 @@ editor.create(document.getElementById('editorSchema')!, {
 //     effects: [schemaUpdate.of(viewSchema.state.field(typedJsonSchemaField))]
 // }).state);
 
-// function replaceSchemaBy(value: string) {
-//     const transaction = viewSchema.state.update({
-//         changes: { from: 0, to: viewSchema.state.doc.length, insert: value }
-//     })
-//     viewSchema.dispatch(transaction)
-// }
-
-// document.querySelector<HTMLSelectElement>("#sample-schema")?.addEventListener("change", (e) => {
-//     const value: string = (e.target as any)?.value ?? ''
-//     switch (value) {
-//         case 'properties':
-//             replaceSchemaBy(`{
-//     "$schema": "https://json-schema.org/draft/2020-12/schema",
-//     "properties": {
-//     "foo": {"type": "array", "maxItems": 3},
-//         "bar": {"type": "array"}
-//     },
-//     "patternProperties": {"f.o": {"minItems": 2}},
-//     "additionalProperties": {"type": "integer"}
-// }`)
-//             break;
-//         case 'if-then-else':
-//             replaceSchemaBy(`{
-//     "$schema": "https://json-schema.org/draft/2020-12/schema",
-//     "then": { "const": "yes" },
-//     "else": { "const": "other" },
-//     "if": { "maxLength": 4 }
-// }`)
-//             break;
-//         case 'all-of':
-//             replaceSchemaBy(`{
-//             "$schema": "https://json-schema.org/draft/2020-12/schema",
-//             "properties": {"bar": {"type": "integer"}},
-//             "required": ["bar"],
-//             "allOf" : [
-//                 {
-//                     "properties": {
-//                         "foo": {"type": "string"}
-//                     },
-//                     "required": ["foo"]
-//                 },
-//                 {
-//                     "properties": {
-//                         "baz": {"type": "null"}
-//                     },
-//                     "required": ["baz"]
-//                 }
-//             ]
-//         }`)
-//     }
-// });
-
-// // eslint-disable-next-line @typescript-eslint/no-explicit-any
-// (window as any).view = view;
-
-// // eslint-disable-next-line @typescript-eslint/no-explicit-any
-// (window as any).viewSchema = viewSchema
