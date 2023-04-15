@@ -23,3 +23,7 @@ Useful links.
 
 - Jawn <https://github.com/typelevel/jawn>
 - ZIO Json <https://zio.github.io/zio-json/>
+
+- https://rollupjs.org/
+- https://microsoft.github.io/monaco-editor/docs.html
+- https://github.com/microsoft/monaco-editor/tree/main/samples/browser-esm-webpack-typescript
