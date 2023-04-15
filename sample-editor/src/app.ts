@@ -44,6 +44,10 @@ const common: editor.IEditorOptions = {
   bracketPairColorization: {
     enabled: true,
   },
+  suggest: {
+    preview: true,
+    previewMode: 'subwordSmart'
+  }
 }
 
 const editorJson = editor.create(document.getElementById('editor')!, {
@@ -53,7 +57,6 @@ const editorJson = editor.create(document.getElementById('editor')!, {
   theme: "vs-dark",
 });
 
-
 const editorSchema = editor.create(document.getElementById('editorSchema')!, {
   value: initialSchema,
   language: 'json',
@@ -61,6 +64,9 @@ const editorSchema = editor.create(document.getElementById('editorSchema')!, {
   theme: "vs-dark",
 });
 
+// WTF?
+(editorJson.getContribution("editor.contrib.suggestController") as any).widget.value._setDetailsVisible(true);
+(editorSchema.getContribution("editor.contrib.suggestController") as any).widget.value._setDetailsVisible(true);
 
 let typedJsonSchema = TypedJsonFactory
   .withMetaSchema()
@@ -108,7 +114,9 @@ languages.registerCompletionItemProvider("json", {
         label,
         kind: 0,
         detail,
-        documentation: pretty,
+        documentation: {
+          value: "```\n" + pretty + "\n```",
+        },
         insertText: '',
         range: {
           startColumn: position.column,
@@ -154,43 +162,43 @@ document.querySelector<HTMLSelectElement>("#sample-schema")?.addEventListener("c
   switch (value) {
     case 'properties':
       replaceSchemaBy(`{
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "properties": {
-    "foo": {"type": "array", "maxItems": 3},
-        "bar": {"type": "array"}
-    },
-    "patternProperties": {"f.o": {"minItems": 2}},
-    "additionalProperties": {"type": "integer"}
-}`)
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "properties": {
+          "foo": { "type": "array", "maxItems": 3 },
+          "bar": { "type": "array" }
+        },
+        "patternProperties": { "f.o": { "minItems": 2 } },
+        "additionalProperties": { "type": "integer" }
+      } `)
       break;
     case 'if-then-else':
       replaceSchemaBy(`{
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "then": { "const": "yes" },
-    "else": { "const": "other" },
-    "if": { "maxLength": 4 }
-}`)
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "then": { "const": "yes" },
+        "else": { "const": "other" },
+        "if": { "maxLength": 4 }
+      } `)
       break;
     case 'all-of':
       replaceSchemaBy(`{
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "properties": {"bar": {"type": "integer"}},
-            "required": ["bar"],
-            "allOf" : [
-                {
-                    "properties": {
-                        "foo": {"type": "string"}
-                    },
-                    "required": ["foo"]
-                },
-                {
-                    "properties": {
-                        "baz": {"type": "null"}
-                    },
-                    "required": ["baz"]
-                }
-            ]
-        }`)
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "properties": { "bar": { "type": "integer" } },
+        "required": ["bar"],
+          "allOf" : [
+            {
+              "properties": {
+                "foo": { "type": "string" }
+              },
+              "required": ["foo"]
+            },
+            {
+              "properties": {
+                "baz": { "type": "null" }
+              },
+              "required": ["baz"]
+            }
+          ]
+      } `)
   }
 });
 
