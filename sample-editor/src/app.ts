@@ -61,27 +61,34 @@ const editorSchema = editor.create(document.getElementById('editorSchema')!, {
   theme: "vs-dark",
 });
 
-editorSchema.onDidChangeModelContent(e => { })
 
-const typedJsonSchema = TypedJsonFactory
+let typedJsonSchema = TypedJsonFactory
   .withMetaSchema()
   .forValue(editorSchema.getValue())
 
-const typedJson = TypedJsonFactory
+let typedJson = TypedJsonFactory
   .create()
   .withSchema(typedJsonSchema)
   .forValue(editorSchema.getValue())
 
+editorSchema.onDidChangeModelContent(e => {
+  typedJsonSchema = typedJsonSchema.forValue(editorSchema.getValue())
+  typedJson = typedJson.withSchema(typedJsonSchema)
+})
 
-const typedJsonById: { [key: string]: TypedJson } = {}
-typedJsonById[editorJson.getModel()!.id] = typedJson
-typedJsonById[editorSchema.getModel()!.id] = typedJsonSchema
+editorJson.onDidChangeModelContent(e => {
+  typedJson = typedJson.forValue(editorJson.getValue())
+})
+
+const typedJsonById: { [key: string]: () => TypedJson } = {}
+typedJsonById[editorJson.getModel()!.id] = () => typedJson
+typedJsonById[editorSchema.getModel()!.id] = () => typedJsonSchema
 
 languages.registerCompletionItemProvider("json", {
   triggerCharacters: [' '],
   provideCompletionItems: (model, position, context) => {
     // console.log("FW", model.id, model.uri)
-    const typedJsonSuggetions = typedJsonById[model.id].suggestAt(model.getOffsetAt(position))
+    const typedJsonSuggetions = typedJsonById[model.id]().suggestAt(model.getOffsetAt(position))
     if (typedJsonSuggetions.length === 0) {
       return {
         suggestions: []
@@ -89,40 +96,44 @@ languages.registerCompletionItemProvider("json", {
     }
     const theSuggestion = typedJsonSuggetions[0];
     // TODO
-    // const start = model.getPositionAt(theSuggestion.start)
-    // const end = model.getPositionAt(theSuggestion.end)
+    const start = model.getPositionAt(theSuggestion.start)
+    const end = model.getPositionAt(theSuggestion.end + 1)
     // console.log("FW suggestions", typedJsonSuggetions.length, theSuggestion.suggestions)
     const suggestions: languages.CompletionItem[] = theSuggestion.suggestions.map(s => {
       const value = s.value
       const label = JSON.stringify(value).slice(0, 21)
       const pretty = JSON.stringify(value, null, 2)
+      const detail = `${theSuggestion.pointer} ${start.lineNumber}:${start.column}-${end.lineNumber}:${end.column}`
       return {
         label,
         kind: 0,
-        insertText: pretty,
+        detail,
+        documentation: pretty,
+        insertText: '',
         range: {
-          startColumn: model.getWordAtPosition(position)?.startColumn ?? position.column,
+          startColumn: position.column,
           startLineNumber: position.lineNumber,
           endColumn: position.column,
           endLineNumber: position.lineNumber,
         },
-        // TODO aggressive replace from typedJson suggestion
-        // insertText: '',
-        // range: {
-        //   startColumn: position.column,
-        //   startLineNumber: position.lineNumber,
-        //   endColumn: position.column,
-        //   endLineNumber: position.lineNumber,
-        // },
-        // additionalTextEdits: [{
-        //   range: {
-        //     startColumn: start.column,
-        //     startLineNumber: start.lineNumber,
-        //     endColumn: end.column,
-        //     endLineNumber: end.lineNumber
-        //   },
-        //   text: pretty
-        // }]
+        // TODO aggressive replace from typedJson suggestion        
+        additionalTextEdits: [{
+          //   range: {
+          //     startColumn: model.getWordAtPosition(position)?.startColumn ?? position.column,
+          //     startLineNumber: position.lineNumber,
+          //     endColumn: position.column,
+          //     endLineNumber: position.lineNumber
+          //   },
+          //   text: pretty
+          // }, {
+          range: {
+            startColumn: start.column,
+            startLineNumber: start.lineNumber,
+            endColumn: end.column,
+            endLineNumber: end.lineNumber
+          },
+          text: pretty
+        }]
       };
     });
     return {
@@ -169,6 +180,7 @@ document.querySelector<HTMLSelectElement>("#sample-schema")?.addEventListener("c
                 {
                     "properties": {
                         "foo": {"type": "string"}
+                    },
                     "required": ["foo"]
                 },
                 {
