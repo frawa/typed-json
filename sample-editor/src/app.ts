@@ -17,7 +17,7 @@
 /// <reference path="./typedjson.d.ts"/>
 import { TypedJson, TypedJsonFactory } from "typedjson"
 
-import { editor } from 'monaco-editor';
+import { editor, languages } from 'monaco-editor';
 import './app.css';
 
 // @ts-ignore
@@ -46,12 +46,13 @@ const common: editor.IEditorOptions = {
   },
 }
 
-editor.create(document.getElementById('editor')!, {
+const editorJson = editor.create(document.getElementById('editor')!, {
   value: initialJson,
   language: 'json',
   ...common,
   theme: "vs-dark",
 });
+
 
 const editorSchema = editor.create(document.getElementById('editorSchema')!, {
   value: initialSchema,
@@ -59,6 +60,79 @@ const editorSchema = editor.create(document.getElementById('editorSchema')!, {
   ...common,
   theme: "vs-dark",
 });
+
+editorSchema.onDidChangeModelContent(e => { })
+
+const typedJsonSchema = TypedJsonFactory
+  .withMetaSchema()
+  .forValue(editorSchema.getValue())
+
+const typedJson = TypedJsonFactory
+  .create()
+  .withSchema(typedJsonSchema)
+  .forValue(editorSchema.getValue())
+
+
+const typedJsonById: { [key: string]: TypedJson } = {}
+typedJsonById[editorJson.getModel()!.id] = typedJson
+typedJsonById[editorSchema.getModel()!.id] = typedJsonSchema
+
+languages.registerCompletionItemProvider("json", {
+  triggerCharacters: [' '],
+  provideCompletionItems: (model, position, context) => {
+    // console.log("FW", model.id, model.uri)
+    const typedJsonSuggetions = typedJsonById[model.id].suggestAt(model.getOffsetAt(position))
+    if (typedJsonSuggetions.length === 0) {
+      return {
+        suggestions: []
+      }
+    }
+    const theSuggestion = typedJsonSuggetions[0];
+    // TODO
+    // const start = model.getPositionAt(theSuggestion.start)
+    // const end = model.getPositionAt(theSuggestion.end)
+    // console.log("FW suggestions", typedJsonSuggetions.length, theSuggestion.suggestions)
+    const suggestions: languages.CompletionItem[] = theSuggestion.suggestions.map(s => {
+      const value = s.value
+      const label = JSON.stringify(value).slice(0, 21)
+      const pretty = JSON.stringify(value, null, 2)
+      return {
+        label,
+        kind: 0,
+        insertText: pretty,
+        range: {
+          startColumn: model.getWordAtPosition(position)?.startColumn ?? position.column,
+          startLineNumber: position.lineNumber,
+          endColumn: position.column,
+          endLineNumber: position.lineNumber,
+        },
+        // TODO aggressive replace from typedJson suggestion
+        // insertText: '',
+        // range: {
+        //   startColumn: position.column,
+        //   startLineNumber: position.lineNumber,
+        //   endColumn: position.column,
+        //   endLineNumber: position.lineNumber,
+        // },
+        // additionalTextEdits: [{
+        //   range: {
+        //     startColumn: start.column,
+        //     startLineNumber: start.lineNumber,
+        //     endColumn: end.column,
+        //     endLineNumber: end.lineNumber
+        //   },
+        //   text: pretty
+        // }]
+      };
+    });
+    return {
+      suggestions
+    }
+  }
+})
+
+// languages.json.jsonDefaults.setDiagnosticsOptions({})
+
 
 function replaceSchemaBy(value: string) {
   editorSchema.setValue(value)
@@ -95,7 +169,6 @@ document.querySelector<HTMLSelectElement>("#sample-schema")?.addEventListener("c
                 {
                     "properties": {
                         "foo": {"type": "string"}
-                    },
                     "required": ["foo"]
                 },
                 {
@@ -108,132 +181,6 @@ document.querySelector<HTMLSelectElement>("#sample-schema")?.addEventListener("c
         }`)
   }
 });
-
-
-
-// const schemaUpdate: StateEffectType<TypedJson> = StateEffect.define()
-
-// const typedJsonSchemaField: StateField<TypedJson> = StateField.define({
-//     create(state) {
-//         return TypedJsonFactory
-//             .withMetaSchema()
-//             .forValue(state.doc.sliceString(0))
-//     },
-//     update(value, tr) {
-//         if (tr.docChanged) {
-//             value = value.forValue(tr.state.doc.sliceString(0))
-//         }
-//         return value
-//     }
-// })
-
-// const typedJsonField: StateField<TypedJson> = StateField.define({
-//     create(state) {
-//         return TypedJsonFactory
-//             .create()
-//             .forValue(state.doc.sliceString(0))
-//     },
-//     update(value, tr) {
-//         const schema = tr.effects.find(e => e.is(schemaUpdate))?.value
-//         if (schema) {
-//             value = value.withSchema(schema)
-//         }
-//         if (tr.docChanged) {
-//             value = value.forValue(tr.state.doc.sliceString(0))
-//         }
-//         return value
-//     }
-// })
-
-// const state = EditorState.create({
-//     doc: initialJson,
-//     extensions: [
-//         basicSetup,
-//         json(),
-//         bracketMatching(),
-//         closeBrackets(),
-//         typedJsonField,
-//         autocompletion(autocompleteConfig(typedJsonField)),
-//         linter(linterFun(typedJsonField)),
-//         // lintGutter(),
-//         keymap.of(lintKeymap)
-//         // keymap.of(completionKeymap)
-//     ],
-// });
-
-// const stateSchema = EditorState.create({
-//     doc: initialSchema,
-//     extensions: [
-//         basicSetup,
-//         json(),
-//         bracketMatching(),
-//         closeBrackets(),
-//         typedJsonSchemaField,
-//         autocompletion(autocompleteConfig(typedJsonSchemaField)),
-//         linter(linterFun(typedJsonSchemaField)),
-//         // lintGutter(),
-//         keymap.of(lintKeymap),
-//         // keymap.of(completionKeymap)
-//         EditorView.updateListener.of(update => {
-//             if (update.docChanged) {
-//                 const pos = view.state.selection.mainIndex
-//                 const transaction = view.state.update({
-//                     effects: [schemaUpdate.of(update.state.field(typedJsonSchemaField))],
-//                     changes: [
-//                         // noop triggers linter, but keeps caret
-//                         { from: pos, to: pos + 1, insert: view.state.doc.slice(pos, pos + 1) },
-//                     ]
-//                 })
-//                 view.dispatch(transaction)
-//             }
-//         })
-//     ],
-// });
-
-// function autocompleteConfig(field: StateField<TypedJson>): CompletionConfig {
-//     return {
-//         activateOnTyping: false,
-//         defaultKeymap: true,
-//         override: [context => {
-//             return new Promise(resolve => {
-//                 const typedJson = context.state.field(field)
-//                 const suggestions = typedJson.suggestAt(context.pos)
-//                 if (suggestions.length === 0) {
-//                     return resolve(null)
-//                 }
-//                 const theSuggestion = suggestions[0]
-//                 const theStart = theSuggestion.start
-//                 const theEnd = theSuggestion.end
-//                 const options = theSuggestion.suggestions.map(suggestion => {
-//                     const value = suggestion.value
-//                     const label = JSON.stringify(value).slice(0, 21)
-//                     const pretty = JSON.stringify(value, null, 2)
-//                     return ({
-//                         label,
-//                         info: pretty,
-//                         apply: (view: EditorView, completion: Completion, from1: number, to1: number) => {
-//                             const insert = completion.info as string
-//                             const from = theStart !== 0 ? theStart : from1
-//                             const to = theStart !== 0 ? theEnd : to1
-//                             const replace = view.state.update({
-//                                 changes: [
-//                                     { from, to, insert }
-//                                 ],
-//                                 selection: EditorSelection.cursor(from + (insert?.length ?? 0))
-//                             });
-//                             view.update([replace])
-//                         }
-//                     });
-//                 }).slice(0, 42)
-//                 return resolve({
-//                     from: theStart !== 0 ? theStart : context.pos,
-//                     to: context.pos,
-//                     options
-//                 });
-//             });
-//         }]
-//     }
-// }
 
 // function linterFun(field: StateField<TypedJson>) {
 //     return (view: EditorView) => {
@@ -249,18 +196,3 @@ document.querySelector<HTMLSelectElement>("#sample-schema")?.addEventListener("c
 //         return diagnostics;
 //     }
 // }
-
-// const view = new EditorView({
-//     state,
-//     parent: document.querySelector("#editor") || undefined
-// });
-
-// const viewSchema = new EditorView({
-//     state: stateSchema,
-//     parent: document.querySelector("#editorSchema") || undefined
-// });
-
-// view.setState(view.state.update({
-//     effects: [schemaUpdate.of(viewSchema.state.field(typedJsonSchemaField))]
-// }).state);
-
