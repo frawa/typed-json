@@ -77,13 +77,20 @@ let typedJson = TypedJsonFactory
   .withSchema(typedJsonSchema)
   .forValue(editorSchema.getValue())
 
+validateAndSetMarkers(typedJsonSchema, editorSchema)
+validateAndSetMarkers(typedJson, editorJson)
+
 editorSchema.onDidChangeModelContent(e => {
   typedJsonSchema = typedJsonSchema.forValue(editorSchema.getValue())
-  typedJson = typedJson.withSchema(typedJsonSchema)
+  const valid = validateAndSetMarkers(typedJsonSchema, editorSchema)
+  if (valid) {
+    typedJson = typedJson.withSchema(typedJsonSchema)
+  }
 })
 
 editorJson.onDidChangeModelContent(e => {
   typedJson = typedJson.forValue(editorJson.getValue())
+  validateAndSetMarkers(typedJson, editorJson)
 })
 
 const typedJsonById: { [key: string]: () => TypedJson } = {}
@@ -149,6 +156,28 @@ languages.registerCompletionItemProvider("json", {
     }
   }
 })
+
+function validateAndSetMarkers(tj: TypedJson, e: editor.IStandaloneCodeEditor): boolean {
+  const model = e.getModel()
+  if (!model) {
+    return false;
+  }
+  const markers: editor.IMarkerData[] = tj.markers().map(marker => {
+    const start = model.getPositionAt(marker.start)
+    const end = model.getPositionAt(marker.end)
+    return <editor.IMarkerData>{
+      severity: 8, //editor.MarkerSeverity.Error,
+      message: marker.message,
+      source: marker.pointer,
+      startLineNumber: start.lineNumber,
+      startColumn: start.column,
+      endLineNumber: end.lineNumber,
+      endColumn: end.column
+    }
+  })
+  editor.setModelMarkers(model, "TypedJson", markers)
+  return markers.length === 0;
+}
 
 // languages.json.jsonDefaults.setDiagnosticsOptions({})
 
