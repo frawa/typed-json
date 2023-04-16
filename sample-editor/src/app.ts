@@ -230,18 +230,3 @@ document.querySelector<HTMLSelectElement>("#sample-schema")?.addEventListener("c
       } `)
   }
 });
-
-// function linterFun(field: StateField<TypedJson>) {
-//     return (view: EditorView) => {
-//         const typedJson = view.state.field(field)
-//         const markers = typedJson.markers().sort((a, b) => a.start - b.start)
-//         const diagnostics: Diagnostic[] = markers.map(marker => ({
-//             from: marker.start,
-//             to: marker.end - 1,
-//             message: marker.message,
-//             severity: "error", // TODO from marker.severity,
-//             source: marker.pointer
-//         }));
-//         return diagnostics;
-//     }
-// }
