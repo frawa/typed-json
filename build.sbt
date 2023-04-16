@@ -241,7 +241,7 @@ npmRunCI := {
 publishToDocs := {
   val doit = npmRunCI.value
   IO.delete(file("./docs"))
-  IO.copyDirectory(file("./sample-editor/public"), file("./docs"))
+  IO.copyDirectory(file("./sample-editor/dist"), file("./docs"))
 }
 
 (Compile / packageBin) := ((Compile / packageBin) dependsOn publishToDocs).value
