@@ -3,7 +3,7 @@
   "scripts": {
     "build": "webpack",
     "start": "webpack serve",
-    "ci": "npx build && npx lint && npx check",
+    "ci": "npm run build && npm run lint && npm run check",
     "lint": "eslint",
     "check": "tsc --noEmit"
   },
