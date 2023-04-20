@@ -16,49 +16,31 @@
 
 package frawa.typedjson.eval
 
-import frawa.typedjson.keywords.Keywords
-import frawa.typedjson.keywords.InnerValue
-import frawa.typedjson.keywords.Keyword
-import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.validation.ValidationError
-import frawa.typedjson.validation.ValidationAnnotation
-import frawa.typedjson.keywords.SchemaProblems
-import frawa.typedjson.keywords.BooleanTypeKeyword
-import frawa.typedjson.validation.TypeMismatch
+import frawa.typedjson.keywords.*
 import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.Value._
-import frawa.typedjson.keywords.NullTypeKeyword
-import frawa.typedjson.keywords.NotKeyword
-import frawa.typedjson.keywords.UnionTypeKeyword
+import frawa.typedjson.parser.Value.*
+import frawa.typedjson.pointer.Pointer
+import frawa.typedjson.validation.{TypeMismatch, ValidationAnnotation, ValidationError}
+
 import scala.reflect.TypeTest
-import frawa.typedjson.keywords.TrivialKeyword
-import frawa.typedjson.keywords.ArrayItemsKeyword
-import frawa.typedjson.keywords.NumberTypeKeyword
-import frawa.typedjson.keywords.ArrayTypeKeyword
-import frawa.typedjson.keywords.ObjectPropertiesKeyword
-import frawa.typedjson.keywords.StringTypeKeyword
-import frawa.typedjson.keywords.ObjectTypeKeyword
-import frawa.typedjson.keywords.WithPointer
-import frawa.typedjson.keywords.ObjectRequiredKeyword
-import frawa.typedjson.keywords.AllOfKeyword
-import frawa.typedjson.keywords.AnyOfKeyword
-import frawa.typedjson.keywords.OneOfKeyword
-import frawa.typedjson.keywords.IfThenElseKeyword
-import frawa.typedjson.keywords.EnumKeyword
-import frawa.typedjson.keywords.LazyParseKeywords
-import frawa.typedjson.keywords.RefKeyword
-import frawa.typedjson.keywords.MinItemsKeyword
-import frawa.typedjson.keywords.UniqueItemsKeyword
 
 trait TheResultMonad[R[_], O: OutputOps]:
   def unit[A](a: A): R[A]
+
   def bind[A, B](a: R[A])(f: A => R[B]): R[B]
+
   // extras
-  def resolve(ref: String)(using eval: Eval[R, O]): R[Eval.Fun[O]]
+  def resolve(resolution: SchemaResolution, vocabulary: Vocabulary, scope: DynamicScope)(using
+                                                                                         eval: Eval[R, O]
+  ): R[Eval.Fun[O]]
+
+  def resolveDynamic(resolution: SchemaResolution, vocabulary: Vocabulary, scope: DynamicScope)(using
+                                                                                                eval: Eval[R, O]
+  ): R[Eval.Fun[O]]
   //
-  extension [A](r: R[A])
+  extension[A] (r: R[A])
     def flatMap[B](f: A => R[B]): R[B] = bind(r)(f)
-    def map[B](f: A => B): R[B]        = bind(r)(a => unit(f(a)))
+    def map[B](f: A => B): R[B] = bind(r)(a => unit(f(a)))
 end TheResultMonad
 
 object Eval:
@@ -145,21 +127,34 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case ObjectRequiredKeyword(names) => monad.unit(verify.verifyObjectRequired(names))
       case AllOfKeyword(ks)             => compile2(ks).map(fs => verify.verifyAllOf(fs))
       case AnyOfKeyword(ks)             => compile2(ks).map(fs => verify.verifyAnyOf(fs))
-      case OneOfKeyword(ks)             => compile2(ks).map(fs => verify.verifyOneOf(fs))
+      case OneOfKeyword(ks) => compile2(ks).map(fs => verify.verifyOneOf(fs))
       case IfThenElseKeyword(ksIf, ksThen, ksElse) =>
         for {
-          ksIf   <- compile(ksIf)
+          ksIf <- compile(ksIf)
           ksThen <- compile(ksThen)
           ksElse <- compile(ksElse)
         } yield {
           verify.verfyIfThenElse(ksIf, ksThen, ksElse)
         }
       case EnumKeyword(vs) => monad.unit(verify.verifyEnum(vs))
-      case RefKeyword(ref) =>
+      case RefKeyword(resolution, vocabulary, scope) =>
         given Eval[R, O] = this
-        monad.resolve(ref)
-      case MinItemsKeyword(min)       => monad.unit(verify.verifyMinItems(min))
+
+        monad.resolve(resolution, vocabulary, scope)
+      case DynamicRefKeyword(resolution, vocabulary, scope) =>
+        given Eval[R, O] = this
+
+        monad.resolveDynamic(resolution, vocabulary, scope)
+      case MinItemsKeyword(min) => monad.unit(verify.verifyMinItems(min))
       case UniqueItemsKeyword(unique) => monad.unit(verify.verifyUniqueItems(unique))
+      case MinimumKeyword(min, exclude) => monad.unit(verify.verifyMinimum(min, exclude))
+      case PatternKeyword(pattern) => monad.unit(verify.verifyPattern(pattern))
+      case PropertyNamesKeyword(ks) =>
+        for {
+          f <- compile(ks)
+        } yield {
+          verify.verifyPropertyNames(f)
+        }
       // ...
       // TODO to be removed, ignore for now
       case _: LazyParseKeywords => monad.unit(value => summon[OutputOps[O]].valid(value.pointer))

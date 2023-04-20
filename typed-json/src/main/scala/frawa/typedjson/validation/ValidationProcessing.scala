@@ -17,15 +17,15 @@
 package frawa.typedjson.validation
 
 import frawa.typedjson.keywords.*
-import frawa.typedjson.parser.Value.*
 import frawa.typedjson.parser.*
+import frawa.typedjson.parser.Value.*
 import frawa.typedjson.pointer.Pointer
 
 import java.net.URI
 import java.util.UUID
 import java.util.regex.Pattern
-import scala.util.Try
 import scala.reflect.TypeTest
+import scala.util.Try
 
 sealed trait ValidationError
 case class FalseSchemaReason()                                         extends ValidationError
@@ -49,8 +49,12 @@ case class MaxPropertiesMismatch(max: BigDecimal)                      extends V
 case class MinPropertiesMismatch(min: BigDecimal)                      extends ValidationError
 case class DependentRequiredMissing(missing: Map[String, Seq[String]]) extends ValidationError
 case class NotContains(valid: Int)                                     extends ValidationError
+
 //TODO for new Eval
 case class CannotResolve(ref: String, problems: Option[SchemaProblems]) extends ValidationError
+
+case class CannotResolveDynamic(ref: String, scope: DynamicScope, problems: Option[SchemaProblems])
+  extends ValidationError
 
 sealed trait ValidationAnnotation
 case class UnknownFormat(format: String) extends ValidationAnnotation
@@ -87,25 +91,28 @@ object ValidationProcessing:
       case FormatKeyword(format)           => validateFormat(format)
       case MinimumKeyword(v, exclude)      => validateMinimum(v, exclude)
       case UniqueItemsKeyword(v)           => validateUniqueItems(v)
-      case MultipleOfKeyword(n)            => validateMultipleOf(n)
-      case MaximumKeyword(v, exclude)      => validateMaximum(v, exclude)
-      case MaxLengthKeyword(v)             => validateMaxLength(v)
-      case MinLengthKeyword(v)             => validateMinLength(v)
-      case MaxItemsKeyword(v)              => validateMaxItems(v)
-      case MinItemsKeyword(v)              => validateMinItems(v)
-      case MaxPropertiesKeyword(v)         => validateMaxProperties(v)
-      case MinPropertiesKeyword(v)         => validateMinProperties(v)
-      case DependentRequiredKeyword(v)     => validateDependentRequired(v)
-      case _: RefKeyword                   => value => Result.valid // for new Eval
-      // case _                               => _ => Result.invalid(ValidationOutput.invalid(UnsupportedCheck(keyword)))
+      case MultipleOfKeyword(n) => validateMultipleOf(n)
+      case MaximumKeyword(v, exclude) => validateMaximum(v, exclude)
+      case MaxLengthKeyword(v) => validateMaxLength(v)
+      case MinLengthKeyword(v) => validateMinLength(v)
+      case MaxItemsKeyword(v) => validateMaxItems(v)
+      case MinItemsKeyword(v) => validateMinItems(v)
+      case MaxPropertiesKeyword(v) => validateMaxProperties(v)
+      case MinPropertiesKeyword(v) => validateMinProperties(v)
+      case DependentRequiredKeyword(v) => validateDependentRequired(v)
+      case _: RefKeyword => value
+        => Result.valid // for new Eval
+      case _: DynamicRefKeyword => value
+        => Result.valid // for new Eval
+  // case _                               => _ => Result.invalid(ValidationOutput.invalid(UnsupportedCheck(keyword)))
 
   private def nested(keyword: ApplicatorKeyword)(results: Seq[Result[ValidationOutput]]): EvalFun = { value =>
     keyword match
-      case AllOfKeyword(_)                  => combiner.allOf(results, value.pointer)
-      case AnyOfKeyword(_)                  => combiner.anyOf(results, value.pointer)
-      case OneOfKeyword(_)                  => combiner.oneOf(results, value.pointer)
-      case NotKeyword(_)                    => combiner.not(results, value.pointer)
-      case UnionTypeKeyword(_)              => combiner.oneOf(results, value.pointer)
+      case AllOfKeyword(_) => combiner.allOf(results, value.pointer)
+      case AnyOfKeyword(_) => combiner.anyOf(results, value.pointer)
+      case OneOfKeyword(_) => combiner.oneOf(results, value.pointer)
+      case NotKeyword(_) => combiner.not(results, value.pointer)
+      case UnionTypeKeyword(_) => combiner.oneOf(results, value.pointer)
       case ObjectPropertiesKeyword(_, _, _) => combiner.allOf(results, value.pointer)
       case ArrayItemsKeyword(_, _)          => combiner.allOf(results, value.pointer)
       case IfThenElseKeyword(_, _, _)       => combiner.ifThenElse(results, value.pointer)

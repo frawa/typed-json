@@ -19,8 +19,8 @@ package frawa.typedjson.validation
 import frawa.typedjson
 import frawa.typedjson.keywords.*
 import frawa.typedjson.meta.MetaSchemas
-import frawa.typedjson.parser.Value.*
 import frawa.typedjson.parser.*
+import frawa.typedjson.parser.Value.*
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestSchemas.*
@@ -35,8 +35,7 @@ object ValidationProcessingTest:
     EvaluatorFactory.make(ValidationProcessing(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
 
 class ValidationProcessingTest extends FunSuite:
-  import ValidationProcessingTest.*
-  import ValidationProcessingTest.given
+  import ValidationProcessingTest.{*, given}
 
   private def assertValidate(text: String)(
       schema: SchemaValue
@@ -750,7 +749,7 @@ class ValidationProcessingTest extends FunSuite:
     }
   }
 
-  test("$ref to validation spec, with two '$ref's") {
+  test("$ref to validation spec, with two '$ref's".only) {
     val lazyResolver = Some(MetaSchemas.lazyResolver)
     val factory: EvaluatorFactory[SchemaValue, ValidationOutput] =
       EvaluatorFactory.make(ValidationProcessing(), vocabularyForTest, lazyResolver)

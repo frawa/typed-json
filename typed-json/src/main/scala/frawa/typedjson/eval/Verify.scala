@@ -16,29 +16,24 @@
 
 package frawa.typedjson.eval
 
-import frawa.typedjson.keywords.Keyword
+import frawa.typedjson.keywords.{Keyword, WithPointer}
 import frawa.typedjson.parser.Value
-import frawa.typedjson.validation.TypeMismatch
-import scala.reflect.TypeTest
-import frawa.typedjson.parser.Value._
+import frawa.typedjson.parser.Value.*
 import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.validation.FalseSchemaReason
-import frawa.typedjson.keywords.WithPointer
-import frawa.typedjson.validation.MissingRequiredProperties
-import frawa.typedjson.validation.NotOneOf
-import frawa.typedjson.validation.NotInEnum
-import frawa.typedjson.validation.MinItemsMismatch
-import frawa.typedjson.validation.ItemsNotUnique
+import frawa.typedjson.validation.*
+
+import scala.reflect.TypeTest
 
 class Verify[O: OutputOps]:
+
   import Eval.Fun
 
-  val nullTypeMismatch    = TypeMismatch[NullValue.type]("null")
+  val nullTypeMismatch = TypeMismatch[NullValue.type]("null")
   val booleanTypeMismatch = TypeMismatch[BoolValue]("boolean")
-  val stringTypeMismatch  = TypeMismatch[StringValue]("string")
-  val numberTypeMismatch  = TypeMismatch[NumberValue]("number")
-  val arrayTypeMismatch   = TypeMismatch[ArrayValue]("array")
-  val objectTypeMismatch  = TypeMismatch[ObjectValue]("object")
+  val stringTypeMismatch = TypeMismatch[StringValue]("string")
+  val numberTypeMismatch = TypeMismatch[NumberValue]("number")
+  val arrayTypeMismatch = TypeMismatch[ArrayValue]("array")
+  val objectTypeMismatch = TypeMismatch[ObjectValue]("object")
 
   private val ops = summon[OutputOps[O]]
 
@@ -72,8 +67,21 @@ class Verify[O: OutputOps]:
     Value
       .asObject(value.value)
       .map { vs =>
-        properties.flatMap { (p, f) =>
-          vs.get(p).map(v => f(WithPointer(v, value.pointer / p)))
+        vs.flatMap { (p, v) =>
+          val f = properties
+            .get(p)
+            .orElse {
+              patternProperties
+                .find { (regex, f) =>
+                  val r = regex.r
+                  r.findFirstIn(p).isDefined
+                }
+                .map(_._2)
+            }
+            .orElse {
+              additionalProperties
+            }
+          f.map(f => f(WithPointer(v, value.pointer / p)))
         }.toSeq
       }
       .map(os => ops.all(os, value.pointer))
@@ -131,5 +139,46 @@ class Verify[O: OutputOps]:
       .map { vs =>
         if !unique || vs.distinct.length == vs.length then ops.valid(value.pointer)
         else ops.invalid(ItemsNotUnique(), value.pointer)
+      }
+      .getOrElse(ops.valid(value.pointer))
+
+  def verifyMinimum(min: BigDecimal, exclude: Boolean): Fun[O] =
+    verifyNumberValue(MinimumMismatch(min, exclude)) { v =>
+      if exclude then min < v else min <= v
+    }
+
+  private def verifyNumberValue(error: => ValidationError)(validate: BigDecimal => Boolean): Fun[O] = value =>
+    Value
+      .asNumber(value.value)
+      .map { v =>
+        if validate(v) then ops.valid(value.pointer)
+        else ops.invalid(error, value.pointer)
+      }
+      .getOrElse(ops.valid(value.pointer));
+
+  def verifyPattern(pattern: String): Fun[O] =
+    val r = pattern.r
+    value =>
+      Value
+        .asString(value.value)
+        .map { v =>
+          if r.findFirstIn(v).isDefined then ops.valid(value.pointer)
+          else ops.invalid(PatternMismatch(pattern), value.pointer)
+        }
+        .getOrElse(ops.valid(value.pointer))
+
+  def verifyPropertyNames(
+                           f: Fun[O]
+                         ): Fun[O] = value =>
+    Value
+      .asObject(value.value)
+      .map { vs =>
+        val names = vs.keySet
+        val os = names.map { name =>
+          (name, f(WithPointer(StringValue(name), value.pointer / name)))
+        }.toSeq
+        // val validNames = os.filter(_._2.isValid).map(_._1).toSet
+        // TODO annotation EvaluatedProperties() with validNames
+        ops.all(os.map(_._2), value.pointer)
       }
       .getOrElse(ops.valid(value.pointer))

@@ -16,14 +16,9 @@
 
 package frawa.typedjson.keywords
 
-import frawa.typedjson.keywords.SchemaProblems.{
-  InvalidSchemaValue,
-  MissingDynamicReference,
-  MissingReference,
-  UnsupportedKeyword
-}
-import frawa.typedjson.parser.Value.*
+import frawa.typedjson.keywords.SchemaProblems.{InvalidSchemaValue, MissingDynamicReference, MissingReference, UnsupportedKeyword}
 import frawa.typedjson.parser.*
+import frawa.typedjson.parser.Value.*
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.util.UriUtil
 import frawa.typedjson.util.UriUtil.CurrentLocation
@@ -65,23 +60,43 @@ case class IfThenElseKeyword(
     thenKeywords: Option[Keywords] = None,
     elseKeywords: Option[Keywords] = None
 ) extends ApplicatorKeyword
-case class PatternKeyword(pattern: String)                           extends AssertionKeyword
-case class FormatKeyword(format: String)                             extends AssertionKeyword
+
+case class PatternKeyword(pattern: String) extends AssertionKeyword
+
+case class FormatKeyword(format: String) extends AssertionKeyword
+
 case class MinimumKeyword(min: BigDecimal, exclude: Boolean = false) extends AssertionKeyword
-case class UniqueItemsKeyword(unique: Boolean)                       extends AssertionKeyword
-case class PropertyNamesKeyword(keywords: Keywords)                  extends ApplicatorKeyword
+
+case class UniqueItemsKeyword(unique: Boolean) extends AssertionKeyword
+
+case class PropertyNamesKeyword(keywords: Keywords) extends ApplicatorKeyword
+
 // TODO remove when new Eval is done
 case class LazyParseKeywords(resolved: URI, parse: () => Either[SchemaProblems, Keywords]) extends ApplicatorKeyword
+
 // TODO for new Eval
-case class RefKeyword(ref: String)                                      extends AssertionKeyword
-case class MultipleOfKeyword(n: BigDecimal)                             extends AssertionKeyword
-case class MaximumKeyword(max: BigDecimal, exclude: Boolean = false)    extends AssertionKeyword
-case class MaxLengthKeyword(max: BigDecimal)                            extends AssertionKeyword
-case class MinLengthKeyword(min: BigDecimal)                            extends AssertionKeyword
-case class MaxItemsKeyword(max: BigDecimal)                             extends AssertionKeyword
-case class MinItemsKeyword(min: BigDecimal)                             extends AssertionKeyword
-case class MaxPropertiesKeyword(max: BigDecimal)                        extends AssertionKeyword
-case class MinPropertiesKeyword(min: BigDecimal)                        extends AssertionKeyword
+case class RefKeyword(resolution: SchemaResolution, vocabulary: Vocabulary, scope: DynamicScope)
+  extends AssertionKeyword
+
+case class DynamicRefKeyword(resolution: SchemaResolution, vocabulary: Vocabulary, scope: DynamicScope)
+  extends AssertionKeyword
+
+case class MultipleOfKeyword(n: BigDecimal) extends AssertionKeyword
+
+case class MaximumKeyword(max: BigDecimal, exclude: Boolean = false) extends AssertionKeyword
+
+case class MaxLengthKeyword(max: BigDecimal) extends AssertionKeyword
+
+case class MinLengthKeyword(min: BigDecimal) extends AssertionKeyword
+
+case class MaxItemsKeyword(max: BigDecimal) extends AssertionKeyword
+
+case class MinItemsKeyword(min: BigDecimal) extends AssertionKeyword
+
+case class MaxPropertiesKeyword(max: BigDecimal) extends AssertionKeyword
+
+case class MinPropertiesKeyword(min: BigDecimal) extends AssertionKeyword
+
 case class DependentRequiredKeyword(required: Map[String, Seq[String]]) extends AssertionKeyword
 case class DependentSchemasKeyword(keywords: Map[String, Keywords])     extends ApplicatorKeyword
 case class ContainsKeyword(schema: Option[Keywords] = None, min: Option[Int] = None, max: Option[Int] = None)
@@ -237,6 +252,8 @@ case class Keywords(
         Right(this)
 
       case ("$ref", StringValue(ref)) =>
+        // TODO later
+        // Right(add(RefKeyword(ref)))
         for
           resolution <- resolver
             .resolveRef(ref)
@@ -244,9 +261,11 @@ case class Keywords(
             .getOrElse(Left(SchemaProblems(MissingReference(ref))))
           vocabulary1 <- SchemaValue.vocabulary(resolution, vocabulary)
           keyword = lazyResolve(vocabulary1, resolution, scope1)
-        yield add(keyword).add(RefKeyword(ref))
+        yield add(keyword).add(RefKeyword(resolution, vocabulary, scope1))
 
       case ("$dynamicRef", StringValue(ref)) =>
+        // TODO later
+        // Right(add(DynamicRefKeyword(ref, scope)))
         for
           resolution <- resolver
             .resolveDynamicRef(ref, scope)
@@ -254,7 +273,7 @@ case class Keywords(
             .getOrElse(Left(SchemaProblems(MissingDynamicReference(ref))))
           vocabulary1 <- SchemaValue.vocabulary(resolution, vocabulary)
           keyword = lazyResolve(vocabulary1, resolution, scope1)
-        yield add(keyword)
+        yield add(keyword).add(DynamicRefKeyword(resolution, vocabulary1, scope1))
 
       case ("$comment", StringValue(_)) =>
         // only for schema authors and readers
@@ -366,7 +385,9 @@ case class Keywords(
       //   Right(this)
       // }
 
-      case _ => Left(SchemaProblems(UnsupportedKeyword(keyword)))
+      case _ =>
+        println(s"FW unsupported $keyword")
+        Left(SchemaProblems(UnsupportedKeyword(keyword)))
 
   private def lazyResolve(
       vocabulary: Vocabulary,
@@ -486,6 +507,7 @@ object Keywords:
                         .map(_.prefix(prefix))
                         .swap
                     } else {
+                      println(s"FW ignore ${keyword}")
                       Right(keywords.withIgnored(keyword))
                     }
                   }
