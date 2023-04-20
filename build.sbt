@@ -6,10 +6,6 @@ addCommandAlias("fixCheck", "scalafixAll --check")
 addCommandAlias("fixFix", "scalafixAll")
 addCommandAlias("npmAll", "npmCI;npmRunCI")
 
-// dev convenience
-addCommandAlias("testJs", "allJsJS/test")
-addCommandAlias("testJvm", "allJvm/test")
-
 lazy val npmCI    = taskKey[Unit]("npm ci")
 lazy val npmRunCI = taskKey[Unit]("npm run ci")
 
