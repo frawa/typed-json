@@ -25,6 +25,19 @@ object UriUtil:
   def uri(value: String): URI =
     URI.create(escape(value))
 
+  def absolute(ref: String, base: URI): URI =
+    val uri1 = uri(ref)
+    withoutEmptyFragment(
+      Some(uri1)
+        .filter(_.isAbsolute())
+        .getOrElse(UriUtil.resolve(base, uri1))
+    )
+
+  private def withoutEmptyFragment(uri: URI): URI =
+    val fragment = uri.getFragment
+    if fragment != null && fragment.isEmpty then withoutFragement(uri)
+    else uri
+
   def withoutFragement(uri: URI): URI = new URI(uri.getScheme, uri.getSchemeSpecificPart, null)
 
   def withFragment(uri: URI, pointer: Pointer): URI =

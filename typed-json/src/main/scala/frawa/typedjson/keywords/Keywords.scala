@@ -75,11 +75,9 @@ case class PropertyNamesKeyword(keywords: Keywords) extends ApplicatorKeyword
 case class LazyParseKeywords(resolved: URI, parse: () => Either[SchemaProblems, Keywords]) extends ApplicatorKeyword
 
 // TODO for new Eval
-case class RefKeyword(resolution: SchemaResolution, vocabulary: Vocabulary, scope: DynamicScope)
-  extends AssertionKeyword
+case class RefKeyword(ref: String, base: URI, scope: DynamicScope) extends AssertionKeyword
 
-case class DynamicRefKeyword(resolution: SchemaResolution, vocabulary: Vocabulary, scope: DynamicScope)
-  extends AssertionKeyword
+case class DynamicRefKeyword(ref: String, base: URI, scope: DynamicScope) extends AssertionKeyword
 
 case class MultipleOfKeyword(n: BigDecimal) extends AssertionKeyword
 
@@ -261,7 +259,7 @@ case class Keywords(
             .getOrElse(Left(SchemaProblems(MissingReference(ref))))
           vocabulary1 <- SchemaValue.vocabulary(resolution, vocabulary)
           keyword = lazyResolve(vocabulary1, resolution, scope1)
-        yield add(keyword).add(RefKeyword(resolution, vocabulary, scope1))
+        yield add(keyword).add(RefKeyword(ref, resolver.base, scope1))
 
       case ("$dynamicRef", StringValue(ref)) =>
         // TODO later
@@ -273,7 +271,7 @@ case class Keywords(
             .getOrElse(Left(SchemaProblems(MissingDynamicReference(ref))))
           vocabulary1 <- SchemaValue.vocabulary(resolution, vocabulary)
           keyword = lazyResolve(vocabulary1, resolution, scope1)
-        yield add(keyword).add(DynamicRefKeyword(resolution, vocabulary1, scope1))
+        yield add(keyword).add(DynamicRefKeyword(ref, resolver.base, scope1))
 
       case ("$comment", StringValue(_)) =>
         // only for schema authors and readers
@@ -386,7 +384,6 @@ case class Keywords(
       // }
 
       case _ =>
-        println(s"FW unsupported $keyword")
         Left(SchemaProblems(UnsupportedKeyword(keyword)))
 
   private def lazyResolve(
@@ -507,7 +504,6 @@ object Keywords:
                         .map(_.prefix(prefix))
                         .swap
                     } else {
-                      println(s"FW ignore ${keyword}")
                       Right(keywords.withIgnored(keyword))
                     }
                   }

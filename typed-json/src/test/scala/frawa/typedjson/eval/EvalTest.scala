@@ -17,6 +17,7 @@
 package frawa.typedjson.eval
 
 import frawa.typedjson.eval.*
+import frawa.typedjson.eval.MyState.MyR
 import frawa.typedjson.keywords.*
 import frawa.typedjson.keywords.SchemaProblems.MissingReference
 import frawa.typedjson.meta.MetaSchemas
@@ -25,12 +26,17 @@ import frawa.typedjson.parser.Value.*
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.TestSchemas.*
 import frawa.typedjson.testutil.TestUtil.{*, given}
+import frawa.typedjson.util.UriUtil
+import frawa.typedjson.util.UriUtil.uri
 import frawa.typedjson.validation.*
 import munit.FunSuite
 
+import java.net.URI
 import scala.reflect.TypeTest
 
 class EvalTest extends FunSuite:
+
+  import MyState.{*, given}
   import Util.{*, given}
   // import FlagOutput.given
   // import BasicOutput.given
@@ -41,19 +47,19 @@ class EvalTest extends FunSuite:
   given Eval[MyR[BasicOutput], BasicOutput] = evalBasic
 
   private def doApply[O: OutputOps](fun: MyR[O][Value => O], value: Value)(using resolver: SchemaResolver): O =
-    val (o, s) = fun.map(_(value))(myZero(resolver))
+    val (o, s) = fun.map(_(value))(myZero(resolver, vocabularyForTest.get))
     // println(s"counted ${s.count} binds")
     o
 
   private def doApplyBulk[O: OutputOps](fun: MyR[O][Value => O], values: Seq[Value], fun2: MyState => Unit)(using
       resolver: SchemaResolver
   ): Seq[O] =
+    val zero = myZero(resolver, vocabularyForTest.get)
     val (s, os) = values
-      .foldLeft((myZero(resolver), Seq.empty[O])) { case ((state, os), v) =>
-        val (o, s) = fun.map(_(v))(state)
-        (s, os :+ o)
+      .foldLeft((zero, Seq.empty[O])) { case ((state, os), v) =>
+        val (o, state1) = fun.map(_(v))(state)
+        (state1, os :+ o)
       }
-    // println(s"state cached resolutions ${s.resolved.keySet} ${s.hits}")
     fun2(s)
     os
 
@@ -508,8 +514,8 @@ class EvalTest extends FunSuite:
           fun,
           Seq(parseJsonValue("[1313]"), parseJsonValue("""["hello"]""")),
           state =>
-            assertEquals(state.resolved.keySet, Set("#item"))
-            assertEquals(state.hits, Map("#item" -> 1))
+            assertEquals(state.cache.keySet, Set("https://example.net/root.json#item"))
+            assertEquals(state.hits, Map("https://example.net/root.json#item" -> 1))
         ),
         Seq(BasicOutput(true, Seq()), BasicOutput(false, Seq(WithPointer(TypeMismatch("number"), Pointer.empty / 0))))
       )
@@ -540,8 +546,17 @@ class EvalTest extends FunSuite:
             parseJsonValue("""{ "foo": true }""")
           ),
           state =>
-            assertEquals(state.resolved.keySet, Set("#object", "#/$defs/numberType"))
-            assertEquals(state.hits, Map("#/$defs/numberType" -> 5, "#object" -> 2))
+            assertEquals(
+              state.cache.keySet,
+              Set("https://example.net/root.json#object", "https://example.net/root.json#/$defs/numberType")
+            )
+            assertEquals(
+              state.hits,
+              Map(
+                "https://example.net/root.json#/$defs/numberType" -> 5,
+                "https://example.net/root.json#object" -> 2
+              )
+            )
         ),
         Seq(
           BasicOutput(true, Seq()),
@@ -558,7 +573,7 @@ class EvalTest extends FunSuite:
     }
   }
 
-  test("$ref to validation spec, with two '$ref's".only) {
+  test("$ref to validation spec, with two '$ref's") {
     val lazyResolver = Some(MetaSchemas.lazyResolver)
     withCompiledSchema(refToValidationSpec, lazyResolver) { fun =>
       assertEquals(
@@ -571,17 +586,17 @@ class EvalTest extends FunSuite:
           ),
           state =>
             assertEquals(
-              state.resolved.keySet,
+              state.cache.keySet,
               Set(
-                //                "https://json-schema.org/draft/2020-12/meta/validation",
-                //                "https://json-schema.org/draft/2020-12/meta/core"
+                "https://json-schema.org/draft/2020-12/meta/validation",
+                "https://json-schema.org/draft/2020-12/meta/core"
               )
             )
             assertEquals(
               state.hits,
               Map(
-                //                "https://json-schema.org/draft/2020-12/meta/validation" -> 2,
-                //                "https://json-schema.org/draft/2020-12/meta/core"       -> 2
+                "https://json-schema.org/draft/2020-12/meta/validation" -> 2,
+                "https://json-schema.org/draft/2020-12/meta/core" -> 2
               )
             )
         ),
@@ -600,7 +615,7 @@ class EvalTest extends FunSuite:
                     "null",
                     "number",
                     "object",
-                    "string"
+                    "string13"
                   ).map(StringValue.apply)
                 ),
                 pointer = Pointer.parse("/$defs/foo/type")
@@ -617,165 +632,3 @@ class EvalTest extends FunSuite:
       )
     }
   }
-
-object Util:
-  private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
-
-  def withKeywords(schema: SchemaValue, lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None)(
-    f: Keywords => Unit
-  ): Unit =
-  // TODO avoid lazyResolver
-    Keywords(schema, vocabularyForTest, lazyResolver)
-      .fold(
-        errors => throw new IllegalArgumentException(s"no keywords: $errors"),
-        keywords => f(keywords)
-      )
-
-  type AssertingFun[R[_], O] = SchemaResolver ?=> R[Value => O] => Unit
-
-  def withCompiledSchema[R[_], O](
-                                   schema: String,
-                                   lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
-                                 )(using eval: Eval[R, O])(using TheResultMonad[R, O])(f: AssertingFun[R, O]): Unit =
-    withSchema(schema) { schema =>
-      withKeywords(schema, lazyResolver) { keywords =>
-        val fun = eval.fun(eval.compile(keywords))
-
-        given SchemaResolver = LoadedSchemasResolver(schema, lazyResolver)
-
-        f(fun)
-      }
-    }
-
-  // TODO possible?
-  // case class MyState[O: OutputOps](resolver: SchemaResolver, count: Int, resolved: Map[String, MyR[Eval.Fun[O]]])
-  case class MyState(
-      resolver: SchemaResolver,
-      count: Int,
-      resolved: Map[String, Either[SchemaProblems, Keywords]],
-      hits: Map[String, Int]
-  )
-  type MyR[O] = [A] =>> MyState => (A, MyState)
-  def myZero[O: OutputOps](resolver: SchemaResolver) = MyState(resolver, 0, Map.empty, Map.empty)
-
-  given [O: OutputOps]: TheResultMonad[MyR[O], O] with
-    def unit[A](a: A): MyR[O][A] = s => (a, s)
-
-    def bind[A, B](a: MyR[O][A])(f: A => MyR[O][B]): MyR[O][B] = s =>
-      val (a2, s2) = a(s)
-      f(a2)(s2.copy(count = s2.count + 1))
-
-    def resolve(resolution: SchemaResolution, vocabulary: Vocabulary, scope: DynamicScope)(using
-                                                                                           eval: Eval[MyR[O], O]
-    ): MyR[O][Eval.Fun[O]] =
-      MyState.resolve(resolution, vocabulary, scope)
-
-    def resolveDynamic(resolution: SchemaResolution, vocabulary: Vocabulary, scope: DynamicScope)(using
-                                                                                                  eval: Eval[MyR[O], O]
-    ): MyR[O][Eval.Fun[O]] =
-      MyState.resolveDynamic(resolution, vocabulary, scope)
-
-  object MyState:
-    def resolve[O: OutputOps](resolution: SchemaResolution, vocabulary: Vocabulary, scope: DynamicScope)(using
-                                                                                                         eval: Eval[MyR[O], O]
-    ): MyR[O][Eval.Fun[O]] =
-      val ops = summon[OutputOps[O]]
-      (state: MyState) =>
-        //        val alreadyResolved = state.resolved
-        //          .get("maybelater")
-        //          .map { ks =>
-        ////            println(s"FW already resolved ${ref} ${ks.map(_.keywords.size)}")
-        //            val state1 = state.copy(hits = state.hits.updatedWith(ref)(_.map(_ + 1).orElse(Some(1))))
-        //            (ks, state1)
-        //          }
-        //        lazy val newlyResolved = state.resolver
-        //          .resolveRef(ref)
-        //          .map(resolution =>
-        //            // TODO dynamic scope
-        //            // TODO vocabulary
-        //            val ks = Keywords.parseKeywords(vocabulary, resolution, scope)
-        ////            println(
-        ////              s"FW newly resolved ${resolution.resolver.base} ${ks.map(_.keywords.size)}"
-        ////            )
-        //            val state1 = state.copy(resolved = state.resolved + (ref -> ks))
-        //            (ks, state1)
-        //          )
-        val resolved = Some((Keywords.parseKeywords(vocabulary, resolution, scope), state))
-        val compiled = resolved
-          //          .orElse(newlyResolved)
-          .map { (ks, state) =>
-            ks.fold(
-              problems => {
-                val ref = resolution.resolver.base.toString
-                val f =
-                  (value: WithPointer[Value]) => ops.invalid(CannotResolve(ref, Some(problems)), value.pointer)
-                (f, state)
-              },
-              ks =>
-                val f = (value: WithPointer[Value]) =>
-                  //                  println(s"FW late compiled ${ks.schema}")
-                  // TODO lost state update?
-                  val (compiled, state1) = eval.compile(ks)(state)
-                  compiled(value)
-                (f, state)
-            )
-          }
-        compiled.getOrElse {
-          // TODO
-          // val f = (value: WithPointer[Value]) => ops.invalid(MissingReference(ref), value.pointer)
-          val ref = resolution.resolver.base.toString
-          val f = (value: WithPointer[Value]) => ops.invalid(CannotResolve(ref, None), value.pointer)
-          (f, state)
-        }
-
-    def resolveDynamic[O: OutputOps](resolution: SchemaResolution, vocabulary: Vocabulary, scope: DynamicScope)(using
-                                                                                                                eval: Eval[MyR[O], O]
-    ): MyR[O][Eval.Fun[O]] =
-      val ops = summon[OutputOps[O]]
-      (state: MyState) =>
-        //        state.resolver
-        //          .resolveDynamicRef(ref, scope.parent())
-        //          .map(resolution =>
-        //            println(s"FW dynamically resolved ${ref} ${resolution.resolver.base}")
-        //            // TODO dynamic scope?
-        //            // TODO vocabulary
-        //            val ks = Keywords.parseKeywords(vocabularyForTest.get, resolution, scope)
-        //            // val state1 = state.copy(resolved = state.resolved + (ref -> ks))
-        //            // TODO cache dynamic resolutions??
-        //            (ks, state)
-        //          )
-        val parsed = Some((Keywords.parseKeywords(vocabulary, resolution, scope), state))
-        parsed
-          .map { (ks, state) =>
-            ks.fold(
-              problems => {
-                val ref = resolution.resolver.base.toString
-                val f =
-                  (value: WithPointer[Value]) =>
-                    ops.invalid(CannotResolveDynamic(ref, scope, Some(problems)), value.pointer)
-                (f, state)
-              },
-              ks =>
-                val f = (value: WithPointer[Value]) =>
-                  //                  println(s"FW late compiled ${ks.schema}")
-                  // TODO lost state update?
-                  val (compiled, state1) = eval.compile(ks)(state)
-                  compiled(value)
-                (f, state)
-            )
-          }
-          .getOrElse {
-            // TODO
-            // val f = (value: WithPointer[Value]) => ops.invalid(MissingReference(ref), value.pointer)
-            val ref = resolution.resolver.base.toString
-            val f = (value: WithPointer[Value]) => ops.invalid(CannotResolveDynamic(ref, scope, None), value.pointer)
-            (f, state)
-          }
-// for
-//   resolution <- resolver
-//     .resolveDynamicRef(ref, scope)
-//     .map(Right(_))
-//     .getOrElse(Left(SchemaProblems(MissingDynamicReference(ref))))
-//   vocabulary1 <- SchemaValue.vocabulary(resolution, vocabulary)
-//   keyword = lazyResolve(vocabulary1, resolution, scope1)
-// yield add(keyword).add(DynamicRefKeyword(ref, scope))

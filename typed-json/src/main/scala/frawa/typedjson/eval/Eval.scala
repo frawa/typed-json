@@ -22,6 +22,7 @@ import frawa.typedjson.parser.Value.*
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.validation.{TypeMismatch, ValidationAnnotation, ValidationError}
 
+import java.net.URI
 import scala.reflect.TypeTest
 
 trait TheResultMonad[R[_], O: OutputOps]:
@@ -30,12 +31,12 @@ trait TheResultMonad[R[_], O: OutputOps]:
   def bind[A, B](a: R[A])(f: A => R[B]): R[B]
 
   // extras
-  def resolve(resolution: SchemaResolution, vocabulary: Vocabulary, scope: DynamicScope)(using
-                                                                                         eval: Eval[R, O]
+  def resolve(ref: String, base: URI, scope: DynamicScope)(using
+                                                           eval: Eval[R, O]
   ): R[Eval.Fun[O]]
 
-  def resolveDynamic(resolution: SchemaResolution, vocabulary: Vocabulary, scope: DynamicScope)(using
-                                                                                                eval: Eval[R, O]
+  def resolveDynamic(ref: String, base: URI, scope: DynamicScope)(using
+                                                                  eval: Eval[R, O]
   ): R[Eval.Fun[O]]
   //
   extension[A] (r: R[A])
@@ -48,13 +49,16 @@ object Eval:
   def map[O](fun: Fun[O])(f: O => O): Fun[O] = value => f(fun(value))
 
 class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
+
   import Eval.Fun
   import Keywords.KeywordWithLocation
 
-  protected val monad  = summon[TheResultMonad[R, O]]
-  protected def verify = Verify[O]
+  private val monad = summon[TheResultMonad[R, O]]
 
-  final def fun(compiled: R[Fun[O]]): R[Value => O] = monad.map(compiled)(f => value => f(WithPointer(value)))
+  private def verify = Verify[O]
+
+  final def fun(compiled: R[Fun[O]]): R[Value => O] =
+    monad.map(compiled)(f => value => f(WithPointer(value)))
 
   final def compile(keywords: Keywords): R[Fun[O]] =
     monad.map(compile(keywords.keywords.toSeq))(fs => verify.verifyAll(fs))
@@ -126,7 +130,7 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         }
       case ObjectRequiredKeyword(names) => monad.unit(verify.verifyObjectRequired(names))
       case AllOfKeyword(ks)             => compile2(ks).map(fs => verify.verifyAllOf(fs))
-      case AnyOfKeyword(ks)             => compile2(ks).map(fs => verify.verifyAnyOf(fs))
+      case AnyOfKeyword(ks) => compile2(ks).map(fs => verify.verifyAnyOf(fs))
       case OneOfKeyword(ks) => compile2(ks).map(fs => verify.verifyOneOf(fs))
       case IfThenElseKeyword(ksIf, ksThen, ksElse) =>
         for {
@@ -137,14 +141,14 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
           verify.verfyIfThenElse(ksIf, ksThen, ksElse)
         }
       case EnumKeyword(vs) => monad.unit(verify.verifyEnum(vs))
-      case RefKeyword(resolution, vocabulary, scope) =>
+      case RefKeyword(ref, base, scope) =>
         given Eval[R, O] = this
 
-        monad.resolve(resolution, vocabulary, scope)
-      case DynamicRefKeyword(resolution, vocabulary, scope) =>
+        monad.resolve(ref, base, scope)
+      case DynamicRefKeyword(ref, base, scope) =>
         given Eval[R, O] = this
 
-        monad.resolveDynamic(resolution, vocabulary, scope)
+        monad.resolveDynamic(ref, base, scope)
       case MinItemsKeyword(min) => monad.unit(verify.verifyMinItems(min))
       case UniqueItemsKeyword(unique) => monad.unit(verify.verifyUniqueItems(unique))
       case MinimumKeyword(min, exclude) => monad.unit(verify.verifyMinimum(min, exclude))
