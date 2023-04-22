@@ -17,7 +17,7 @@
 package frawa.typedjson.eval
 
 import frawa.typedjson.eval.*
-import frawa.typedjson.eval.MyState.MyR
+import frawa.typedjson.eval.MyState.{MyR, given}
 import frawa.typedjson.keywords.*
 import frawa.typedjson.keywords.SchemaProblems.MissingReference
 import frawa.typedjson.meta.MetaSchemas
@@ -554,7 +554,7 @@ class EvalTest extends FunSuite:
               state.hits,
               Map(
                 "https://example.net/root.json#/$defs/numberType" -> 5,
-                "https://example.net/root.json#object" -> 2
+                "https://example.net/root.json#object"            -> 2
               )
             )
         ),
@@ -596,7 +596,7 @@ class EvalTest extends FunSuite:
               state.hits,
               Map(
                 "https://json-schema.org/draft/2020-12/meta/validation" -> 2,
-                "https://json-schema.org/draft/2020-12/meta/core" -> 2
+                "https://json-schema.org/draft/2020-12/meta/core"       -> 2
               )
             )
         ),
@@ -615,7 +615,7 @@ class EvalTest extends FunSuite:
                     "null",
                     "number",
                     "object",
-                    "string13"
+                    "string"
                   ).map(StringValue.apply)
                 ),
                 pointer = Pointer.parse("/$defs/foo/type")

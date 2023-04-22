@@ -32,16 +32,16 @@ trait TheResultMonad[R[_], O: OutputOps]:
 
   // extras
   def resolve(ref: String, base: URI, scope: DynamicScope)(using
-                                                           eval: Eval[R, O]
+      eval: Eval[R, O]
   ): R[Eval.Fun[O]]
 
   def resolveDynamic(ref: String, base: URI, scope: DynamicScope)(using
-                                                                  eval: Eval[R, O]
+      eval: Eval[R, O]
   ): R[Eval.Fun[O]]
   //
-  extension[A] (r: R[A])
+  extension [A](r: R[A])
     def flatMap[B](f: A => R[B]): R[B] = bind(r)(f)
-    def map[B](f: A => B): R[B] = bind(r)(a => unit(f(a)))
+    def map[B](f: A => B): R[B]        = bind(r)(a => unit(f(a)))
 end TheResultMonad
 
 object Eval:
@@ -108,6 +108,7 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case TrivialKeyword(v)    => monad.unit(verify.verifyTrivial(v))
       case BooleanTypeKeyword   => monad.unit(verify.verifyType(verify.booleanTypeMismatch))
       case NumberTypeKeyword    => monad.unit(verify.verifyType(verify.numberTypeMismatch))
+      case IntegerTypeKeyword   => monad.unit(verify.verifyInteger())
       case StringTypeKeyword    => monad.unit(verify.verifyType(verify.stringTypeMismatch))
       case ArrayTypeKeyword     => monad.unit(verify.verifyType(verify.arrayTypeMismatch))
       case ObjectTypeKeyword    => monad.unit(verify.verifyType(verify.objectTypeMismatch))
@@ -130,11 +131,11 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         }
       case ObjectRequiredKeyword(names) => monad.unit(verify.verifyObjectRequired(names))
       case AllOfKeyword(ks)             => compile2(ks).map(fs => verify.verifyAllOf(fs))
-      case AnyOfKeyword(ks) => compile2(ks).map(fs => verify.verifyAnyOf(fs))
-      case OneOfKeyword(ks) => compile2(ks).map(fs => verify.verifyOneOf(fs))
+      case AnyOfKeyword(ks)             => compile2(ks).map(fs => verify.verifyAnyOf(fs))
+      case OneOfKeyword(ks)             => compile2(ks).map(fs => verify.verifyOneOf(fs))
       case IfThenElseKeyword(ksIf, ksThen, ksElse) =>
         for {
-          ksIf <- compile(ksIf)
+          ksIf   <- compile(ksIf)
           ksThen <- compile(ksThen)
           ksElse <- compile(ksElse)
         } yield {
@@ -143,22 +144,21 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case EnumKeyword(vs) => monad.unit(verify.verifyEnum(vs))
       case RefKeyword(ref, base, scope) =>
         given Eval[R, O] = this
-
         monad.resolve(ref, base, scope)
       case DynamicRefKeyword(ref, base, scope) =>
         given Eval[R, O] = this
-
         monad.resolveDynamic(ref, base, scope)
-      case MinItemsKeyword(min) => monad.unit(verify.verifyMinItems(min))
-      case UniqueItemsKeyword(unique) => monad.unit(verify.verifyUniqueItems(unique))
+      case MinItemsKeyword(min)         => monad.unit(verify.verifyMinItems(min))
+      case UniqueItemsKeyword(unique)   => monad.unit(verify.verifyUniqueItems(unique))
       case MinimumKeyword(min, exclude) => monad.unit(verify.verifyMinimum(min, exclude))
-      case PatternKeyword(pattern) => monad.unit(verify.verifyPattern(pattern))
+      case PatternKeyword(pattern)      => monad.unit(verify.verifyPattern(pattern))
       case PropertyNamesKeyword(ks) =>
         for {
           f <- compile(ks)
         } yield {
           verify.verifyPropertyNames(f)
         }
+      case FormatKeyword(format) => monad.unit(verify.verifyFormat(format))
       // ...
       // TODO to be removed, ignore for now
       case _: LazyParseKeywords => monad.unit(value => summon[OutputOps[O]].valid(value.pointer))

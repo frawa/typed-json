@@ -21,6 +21,7 @@ import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.Value.*
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.validation.*
+import frawa.typedjson.validation.ValidationProcessing.EvalFun
 
 import scala.reflect.TypeTest
 
@@ -28,12 +29,12 @@ class Verify[O: OutputOps]:
 
   import Eval.Fun
 
-  val nullTypeMismatch = TypeMismatch[NullValue.type]("null")
+  val nullTypeMismatch    = TypeMismatch[NullValue.type]("null")
   val booleanTypeMismatch = TypeMismatch[BoolValue]("boolean")
-  val stringTypeMismatch = TypeMismatch[StringValue]("string")
-  val numberTypeMismatch = TypeMismatch[NumberValue]("number")
-  val arrayTypeMismatch = TypeMismatch[ArrayValue]("array")
-  val objectTypeMismatch = TypeMismatch[ObjectValue]("object")
+  val stringTypeMismatch  = TypeMismatch[StringValue]("string")
+  val numberTypeMismatch  = TypeMismatch[NumberValue]("number")
+  val arrayTypeMismatch   = TypeMismatch[ArrayValue]("array")
+  val objectTypeMismatch  = TypeMismatch[ObjectValue]("object")
 
   private val ops = summon[OutputOps[O]]
 
@@ -167,9 +168,7 @@ class Verify[O: OutputOps]:
         }
         .getOrElse(ops.valid(value.pointer))
 
-  def verifyPropertyNames(
-                           f: Fun[O]
-                         ): Fun[O] = value =>
+  def verifyPropertyNames(f: Fun[O]): Fun[O] = value =>
     Value
       .asObject(value.value)
       .map { vs =>
@@ -180,5 +179,30 @@ class Verify[O: OutputOps]:
         // val validNames = os.filter(_._2.isValid).map(_._1).toSet
         // TODO annotation EvaluatedProperties() with validNames
         ops.all(os.map(_._2), value.pointer)
+      }
+      .getOrElse(ops.valid(value.pointer))
+
+  def verifyFormat(format: String): Fun[O] = value =>
+    Formats
+      .hasFormat(format)
+      .map { pred =>
+        Value
+          .asString(value.value)
+          .filterNot(pred)
+          .map { _ =>
+            ops.invalid(FormatMismatch(format), value.pointer)
+          }
+          .getOrElse(ops.valid(value.pointer))
+      }
+      .getOrElse(ops.valid(value.pointer))
+    // TODO
+//      .getOrElse(ops.invalid(UnknownFormat(format), value.pointer))
+
+  def verifyInteger(): Fun[O] = value =>
+    Value
+      .asNumber(value.value)
+      .filterNot(_.isWhole)
+      .map { _ =>
+        ops.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
       }
       .getOrElse(ops.valid(value.pointer))

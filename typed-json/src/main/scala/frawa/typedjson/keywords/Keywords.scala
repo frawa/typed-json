@@ -16,7 +16,12 @@
 
 package frawa.typedjson.keywords
 
-import frawa.typedjson.keywords.SchemaProblems.{InvalidSchemaValue, MissingDynamicReference, MissingReference, UnsupportedKeyword}
+import frawa.typedjson.keywords.SchemaProblems.{
+  InvalidSchemaValue,
+  MissingDynamicReference,
+  MissingReference,
+  UnsupportedKeyword
+}
 import frawa.typedjson.parser.*
 import frawa.typedjson.parser.Value.*
 import frawa.typedjson.pointer.Pointer
@@ -251,15 +256,15 @@ case class Keywords(
 
       case ("$ref", StringValue(ref)) =>
         // TODO later
-        // Right(add(RefKeyword(ref)))
-        for
-          resolution <- resolver
-            .resolveRef(ref)
-            .map(Right(_))
-            .getOrElse(Left(SchemaProblems(MissingReference(ref))))
-          vocabulary1 <- SchemaValue.vocabulary(resolution, vocabulary)
-          keyword = lazyResolve(vocabulary1, resolution, scope1)
-        yield add(keyword).add(RefKeyword(ref, resolver.base, scope1))
+        Right(add(RefKeyword(ref, resolver.base, scope1)))
+//        for
+//          resolution <- resolver
+//            .resolveRef(ref)
+//            .map(Right(_))
+//            .getOrElse(Left(SchemaProblems(MissingReference(ref))))
+//          vocabulary1 <- SchemaValue.vocabulary(resolution, vocabulary)
+//          keyword = lazyResolve(vocabulary1, resolution, scope1)
+//        yield add(keyword).add(RefKeyword(ref, resolver.base, scope1))
 
       case ("$dynamicRef", StringValue(ref)) =>
         // TODO later

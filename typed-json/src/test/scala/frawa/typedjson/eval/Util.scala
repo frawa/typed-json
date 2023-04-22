@@ -39,19 +39,4 @@ object Util:
       }
     }
 
-  given [O: OutputOps]: TheResultMonad[MyR[O], O] with
-    def unit[A](a: A): MyR[O][A] = s => (a, s)
-
-    def bind[A, B](a: MyR[O][A])(f: A => MyR[O][B]): MyR[O][B] = s =>
-      val (a2, s2) = a(s)
-      f(a2)(s2.copy(count = s2.count + 1))
-
-    def resolve(ref: String, base: URI, scope: DynamicScope)(using
-        eval: Eval[MyR[O], O]
-    ): MyR[O][Eval.Fun[O]] =
-      MyState.resolve(ref, base, scope)
-
-    def resolveDynamic(ref: String, base: URI, scope: DynamicScope)(using
-        eval: Eval[MyR[O], O]
-    ): MyR[O][Eval.Fun[O]] =
-      MyState.resolveDynamic(ref, base, scope)
+  
