@@ -67,6 +67,54 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
     if valid then ops.valid(pointer)
     else ops.all(os, pointer) // TODO new error NoneOf?
 
+  private def verifyNumberValue(error: => ValidationError)(validate: BigDecimal => Boolean): Fun[R[O]] =
+    funUnit2 { value =>
+      Value
+        .asNumber(value.value)
+        .map { v =>
+          if validate(v) then ops.valid(value.pointer)
+          else ops.invalid(error, value.pointer)
+        }
+    }
+
+  private def verifyStringValue(error: => ValidationError)(validate: String => Boolean): Fun[R[O]] =
+    funUnit2 { value =>
+      Value
+        .asString(value.value)
+        .map { v =>
+          if validate(v) then ops.valid(value.pointer)
+          else ops.invalid(error, value.pointer)
+        }
+    }
+
+  private def verifyArrayValue(error: => ValidationError)(validate: Seq[Value] => Boolean): Fun[R[O]] =
+    funUnit2 { value =>
+      Value
+        .asArray(value.value)
+        .map { v =>
+          if validate(v) then ops.valid(value.pointer)
+          else ops.invalid(error, value.pointer)
+        }
+    }
+
+  private def verifyObjectValue(error: => ValidationError)(validate: Map[String, Value] => Boolean): Fun[R[O]] =
+    funUnit2 { value =>
+      Value
+        .asObject(value.value)
+        .map { v =>
+          if validate(v) then ops.valid(value.pointer)
+          else ops.invalid(error, value.pointer)
+        }
+    }
+
+  private def countCharPoints(text: String): Int =
+    var i     = 0
+    var count = 0
+    while i < text.length() do
+      i += Character.charCount(text.codePointAt(i))
+      count += 1
+    count
+
   // verifys
 
   def verifyType[T <: Value](error: TypeMismatch[T])(using TypeTest[Value, T]): Fun[R[O]] =
@@ -159,23 +207,18 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
     }
 
   def verifyMinItems(min: BigDecimal): Fun[R[O]] =
-    funUnit2 { value =>
-      Value
-        .asArray(value.value)
-        .map { vs =>
-          if min <= vs.length then ops.valid(value.pointer)
-          else ops.invalid(MinItemsMismatch(min), value.pointer)
-        }
+    verifyArrayValue(MinItemsMismatch(min)) { vs =>
+      min <= vs.length
+    }
+
+  def verifyMaxItems(max: BigDecimal): Fun[R[O]] =
+    verifyArrayValue(MaxItemsMismatch(max)) { vs =>
+      max >= vs.length
     }
 
   def verifyUniqueItems(unique: Boolean): Fun[R[O]] =
-    funUnit2 { value =>
-      Value
-        .asArray(value.value)
-        .map { vs =>
-          if !unique || vs.distinct.length == vs.length then ops.valid(value.pointer)
-          else ops.invalid(ItemsNotUnique(), value.pointer)
-        }
+    verifyArrayValue(ItemsNotUnique()) { vs =>
+      !unique || vs.distinct.length == vs.length
     }
 
   def verifyMinimum(min: BigDecimal, exclude: Boolean): Fun[R[O]] =
@@ -183,25 +226,10 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       if exclude then min < v else min <= v
     }
 
-  private def verifyNumberValue(error: => ValidationError)(validate: BigDecimal => Boolean): Fun[R[O]] =
-    funUnit2 { value =>
-      Value
-        .asNumber(value.value)
-        .map { v =>
-          if validate(v) then ops.valid(value.pointer)
-          else ops.invalid(error, value.pointer)
-        }
-    }
-
   def verifyPattern(pattern: String): Fun[R[O]] =
     val r = pattern.r
-    funUnit2 { value =>
-      Value
-        .asString(value.value)
-        .map { v =>
-          if r.findFirstIn(v).isDefined then ops.valid(value.pointer)
-          else ops.invalid(PatternMismatch(pattern), value.pointer)
-        }
+    verifyStringValue(PatternMismatch(pattern)) { v =>
+      r.findFirstIn(v).isDefined
     }
 
   def verifyPropertyNames(f: Fun[R[O]]): Fun[R[O]] = value =>
@@ -236,11 +264,31 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
     }
 
   def verifyInteger(): Fun[R[O]] =
-    funUnit2 { value =>
-      Value
-        .asNumber(value.value)
-        .filterNot(_.isWhole)
-        .map { _ =>
-          ops.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
-        }
+    verifyNumberValue(TypeMismatch[NumberValue]("integer")) { v =>
+      v.isWhole
+    }
+
+  def verifyMultiple(n: BigDecimal): Fun[R[O]] =
+    verifyNumberValue(NotMultipleOf(n)) { v =>
+      (v / n).isValidInt
+    }
+
+  def verifyMaxLength(max: BigDecimal): Fun[R[O]] =
+    verifyStringValue(MaxLengthMismatch(max)) { v =>
+      countCharPoints(v) <= max
+    }
+
+  def verifyMinLength(min: BigDecimal): Fun[R[O]] =
+    verifyStringValue(MinLengthMismatch(min)) { v =>
+      countCharPoints(v) >= min
+    }
+
+  def verifyMaxProperties(max: BigDecimal): Fun[R[O]] =
+    verifyObjectValue(MaxPropertiesMismatch(max)) { v =>
+      max >= v.keySet.size
+    }
+
+  def verifyMinProperties(min: BigDecimal): Fun[R[O]] =
+    verifyObjectValue(MinPropertiesMismatch(min)) { v =>
+      min <= v.keySet.size
     }

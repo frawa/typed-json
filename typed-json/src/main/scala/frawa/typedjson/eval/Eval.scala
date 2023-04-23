@@ -132,11 +132,17 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         given Eval[R, O] = this
         monad.resolveDynamic(ref, base, scope)
       case MinItemsKeyword(min)         => verify.verifyMinItems(min)
+      case MaxItemsKeyword(min)         => verify.verifyMaxItems(min)
       case UniqueItemsKeyword(unique)   => verify.verifyUniqueItems(unique)
       case MinimumKeyword(min, exclude) => verify.verifyMinimum(min, exclude)
       case PatternKeyword(pattern)      => verify.verifyPattern(pattern)
       case PropertyNamesKeyword(ks)     => verify.verifyPropertyNames(compile(ks))
       case FormatKeyword(format)        => verify.verifyFormat(format)
+      case MultipleOfKeyword(n)         => verify.verifyMultiple(n)
+      case MaxLengthKeyword(n)          => verify.verifyMaxLength(n)
+      case MinLengthKeyword(n)          => verify.verifyMinLength(n)
+      case MaxPropertiesKeyword(max)    => verify.verifyMaxProperties(max)
+      case MinPropertiesKeyword(max)    => verify.verifyMinProperties(max)
       // ...
       // TODO to be removed, ignore for now
       // case _: LazyParseKeywords => value => summon[OutputOps[O]].valid(value.pointer))

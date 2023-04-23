@@ -635,3 +635,286 @@ class EvalTest extends FunSuite:
       )
     }
   }
+
+  // done ValidationProcessingTest: all tests migrated
+
+  // start ValidattionKeywordTest
+
+  test("multipleOf") {
+    withCompiledSchema("""{"multipleOf": 2}""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(parseJsonValue("""13"""), parseJsonValue("""12""")),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(NotMultipleOf(2))
+            )
+          ),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
+
+  test("minimum") {
+    withCompiledSchema("""{"minimum": 13}""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(parseJsonValue("""12"""), parseJsonValue("""1313""")),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(MinimumMismatch(13, exclude = false))
+            )
+          ),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
+
+  test("exclusiveMinimum") {
+    withCompiledSchema("""{"exclusiveMinimum": 13}""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(parseJsonValue("""13"""), parseJsonValue("""14""")),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(MinimumMismatch(13, exclude = true))
+            )
+          ),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
+
+  test("maxLength") {
+    withCompiledSchema("""{"maxLength": 3}""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue(""""toto""""),
+            parseJsonValue(""""bar"""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(MaxLengthMismatch(3))
+            )
+          ),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
+
+  test("minLength") {
+    withCompiledSchema("""{"minLength": 4}""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue(""""bar""""),
+            parseJsonValue(""""toto"""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(MinLengthMismatch(4))
+            )
+          ),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
+
+  test("pattern") {
+    withCompiledSchema("""{"pattern": "foo\\d\\d"}""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue(""""foo""""),
+            parseJsonValue(""""foo13"""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(PatternMismatch("foo\\d\\d"))
+            )
+          ),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
+
+  test("minItems") {
+    withCompiledSchema("""{"minItems": 3}""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""[1,2]"""),
+            parseJsonValue("""[2,3,4]""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(MinItemsMismatch(3))
+            )
+          ),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
+
+  test("maxItems") {
+    withCompiledSchema("""{"maxItems": 2}""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""[1,2,3]"""),
+            parseJsonValue("""[2,3]""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(MaxItemsMismatch(2))
+            )
+          ),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
+
+  test("uniqueItems") {
+    withCompiledSchema("""{"uniqueItems": true}""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""[1,1]"""),
+            parseJsonValue("""[13]""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(ItemsNotUnique())
+            )
+          ),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
+
+  test("maxProperties") {
+    withCompiledSchema("""{"maxProperties": 2}""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""{"gnu": 1, "bar": 2, "foo": 3}"""),
+            parseJsonValue("""{"bar": 2, "foo": 3}""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(MaxPropertiesMismatch(2))
+            )
+          ),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
+
+  test("minProperties") {
+    withCompiledSchema("""{"minProperties": 3}""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""{"bar": 2, "foo": 3}"""),
+            parseJsonValue("""{"gnu": 1, "bar": 2, "foo": 3}""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(MinPropertiesMismatch(3))
+            )
+          ),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
+
+  test("required") {
+    withCompiledSchema("""{"required": ["bar", "foo"]}""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""{"gnu": 1, "bar": 2}"""),
+            parseJsonValue("""{"bar": 2, "foo": 3}""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(MissingRequiredProperties(Seq("foo")))
+            )
+          ),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
