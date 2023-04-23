@@ -41,17 +41,17 @@ class EvalTest extends FunSuite:
   // import FlagOutput.given
   // import BasicOutput.given
 
-  val evalFlag  = Eval[MyR[FlagOutput], FlagOutput]
-  val evalBasic = Eval[MyR[BasicOutput], BasicOutput]
+  val evalFlag  = Eval[MyR, FlagOutput]
+  val evalBasic = Eval[MyR, BasicOutput]
 
-  given Eval[MyR[BasicOutput], BasicOutput] = evalBasic
+  given Eval[MyR, BasicOutput] = evalBasic
 
-  private def doApply[O: OutputOps](fun: Value => MyR[O][O], value: Value)(using resolver: SchemaResolver): O =
+  private def doApply[O: OutputOps](fun: Value => MyR[O], value: Value)(using resolver: SchemaResolver): O =
     val (o, s) = fun(value)(myZero(resolver, vocabularyForTest.get))
     // println(s"counted ${s.count} binds")
     o
 
-  private def doApplyBulk[O: OutputOps](fun: Value => MyR[O][O], values: Seq[Value], fun2: MyState => Unit)(using
+  private def doApplyBulk[O: OutputOps](fun: Value => MyR[O], values: Seq[Value], fun2: MyState => Unit)(using
       resolver: SchemaResolver
   ): Seq[O] =
     val zero = myZero(resolver, vocabularyForTest.get)
@@ -64,7 +64,7 @@ class EvalTest extends FunSuite:
     os
 
   test("null") {
-    given Eval[MyR[FlagOutput], FlagOutput] = evalFlag
+    given Eval[MyR, FlagOutput] = evalFlag
     withCompiledSchema(nullSchema) { fun =>
       assertEquals(doApply(fun, NullValue), FlagOutput(true))
       assertEquals(doApply(fun, BoolValue(true)), FlagOutput(false))
@@ -72,7 +72,7 @@ class EvalTest extends FunSuite:
   }
 
   test("true") {
-    given Eval[MyR[FlagOutput], FlagOutput] = evalFlag
+    given Eval[MyR, FlagOutput] = evalFlag
     withCompiledSchema(trueSchema) { fun =>
       assertEquals(doApply(fun, BoolValue(true)), FlagOutput(true))
       assertEquals(doApply(fun, NullValue), FlagOutput(true))
@@ -93,7 +93,7 @@ class EvalTest extends FunSuite:
   }
 
   test("false") {
-    given Eval[MyR[FlagOutput], FlagOutput] = evalFlag
+    given Eval[MyR, FlagOutput] = evalFlag
     withCompiledSchema(falseSchema) { fun =>
       assertEquals(doApply(fun, BoolValue(true)), FlagOutput(false))
       assertEquals(doApply(fun, NullValue), FlagOutput(false))
@@ -131,7 +131,7 @@ class EvalTest extends FunSuite:
   }
 
   test("not false") {
-    given Eval[MyR[FlagOutput], FlagOutput] = evalFlag
+    given Eval[MyR, FlagOutput] = evalFlag
     withCompiledSchema(notFalseSchema) { fun =>
       assertEquals(doApply(fun, parseJsonValue("null")), FlagOutput(true))
       assertEquals(doApply(fun, parseJsonValue("13")), FlagOutput(true))

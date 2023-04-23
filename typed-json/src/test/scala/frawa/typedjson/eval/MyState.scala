@@ -19,53 +19,53 @@ case class MyState(
 )
 
 object MyState:
-  type MyR[O] = [A] =>> MyState => (A, MyState)
+  type MyR = [A] =>> MyState => (A, MyState)
 
   type Cached = (SchemaResolution, Either[SchemaProblems, Vocabulary])
 
-  def unit[A](a: A): MyR[A][A] = s => (a, s)
+  def unit[A](a: A): MyR[A] = s => (a, s)
 
-  def bind[A, B](a: MyR[A][A])(f: A => MyR[B][B]): MyR[B][B] = s =>
+  def bind[A, B](a: MyR[A])(f: A => MyR[B]): MyR[B] = s =>
     val (a2, s2) = a(s)
     f(a2)(s2.copy(count = s2.count + 1))
 
-  given [O: OutputOps]: TheResultMonad[MyR[O], O] with
-    def unit[A](a: A): MyR[O][A] =
+  given [O: OutputOps]: TheResultMonad[MyR, O] with
+    def unit[A](a: A): MyR[A] =
       MyState.unit(a)
 
-    def bind[A, B](a: MyR[O][A])(f: A => MyR[O][B]): MyR[O][B] =
+    def bind[A, B](a: MyR[A])(f: A => MyR[B]): MyR[B] =
       MyState.bind(a)(f)
 
     def resolve(ref: String, base: URI, scope: DynamicScope)(using
-        eval: Eval[MyR[O], O]
-    ): Eval.Fun[MyR[O][O]] =
+        eval: Eval[MyR, O]
+    ): Eval.Fun[MyR[O]] =
       MyState.resolve(ref, base, scope) // .flatMap(ff => unit((value: WithPointer[Value]) => ff(value)))
 
     def resolveDynamic(ref: String, base: URI, scope: DynamicScope)(using
-        eval: Eval[MyR[O], O]
-    ): Eval.Fun[MyR[O][O]] =
+        eval: Eval[MyR, O]
+    ): Eval.Fun[MyR[O]] =
       MyState.resolveDynamic(ref, base, scope) // .flatMap(ff => unit((value: WithPointer[Value]) => ff(value)))
 
   def myZero[O: OutputOps](resolver: SchemaResolver, vocabulary: Vocabulary): MyState =
     MyState(resolver, vocabulary, 0, Map.empty, Map.empty)
 
   def resolve[O: OutputOps](ref: String, base: URI, scope: DynamicScope)(using
-      eval: Eval[MyR[O], O]
-  ): Eval.Fun[MyR[O][O]] =
+      eval: Eval[MyR, O]
+  ): Eval.Fun[MyR[O]] =
     doResolve(ref, base, scope) { (ref, resolver) =>
       resolver.resolveRef(ref)
     }
 
   def resolveDynamic[O: OutputOps](ref: String, base: URI, scope: DynamicScope)(using
-      eval: Eval[MyR[O], O]
-  ): Eval.Fun[MyR[O][O]] =
+      eval: Eval[MyR, O]
+  ): Eval.Fun[MyR[O]] =
     doResolve(ref, base, scope) { (ref, resolver) => resolver.resolveDynamicRef(ref, scope) }
 
   def doResolve[O: OutputOps](ref: String, base: URI, scope: DynamicScope)(
       resolve: (String, SchemaResolver) => Option[SchemaResolution]
   )(using
-      eval: Eval[MyR[O], O]
-  ): Eval.Fun[MyR[O][O]] = value =>
+      eval: Eval[MyR, O]
+  ): Eval.Fun[MyR[O]] = value =>
     state =>
       val ops = summon[OutputOps[O]]
       val uri = UriUtil.absolute(ref, base).toString()
