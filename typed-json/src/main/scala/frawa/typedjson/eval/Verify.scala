@@ -39,20 +39,13 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
   private val ops   = summon[OutputOps[O]]
   private val monad = summon[TheResultMonad[R, O]]
 
-  def verifyType[T <: Value](error: TypeMismatch[T])(using TypeTest[Value, T]): Fun[O] = value =>
-    value.value match
-      case _: T => ops.valid(value.pointer)
-      case _    => ops.invalid(error, value.pointer)
+  // utils
 
-  def verifyTrivial(valid: Boolean): Fun[O] = value =>
-    if valid then ops.valid(value.pointer)
-    else ops.invalid(FalseSchemaReason(), value.pointer)
+  private def funUnit(f: Fun[O]): Fun[R[O]] =
+    value => monad.unit(f(value))
 
-  def verifyAllOf(fun: Fun[R[Seq[O]]]): Fun[R[O]] = funMap(fun)(verifyAllOf)
-  def verifyNot(fun: Fun[R[O]]): Fun[R[O]]        = funMap(fun)(verifyNot)
-  def verifyUnion(fs: Fun[R[Seq[O]]]): Fun[R[O]]  = verifyOneOf(fs)
-  def verifyOneOf(fun: Fun[R[Seq[O]]]): Fun[R[O]] = funMap(fun)(verifyOneOf)
-  def verifyAnyOf(fun: Fun[R[Seq[O]]]): Fun[R[O]] = funMap(fun)(verifyAnyOf)
+  private def funUnit2(f: Fun[Option[O]]): Fun[R[O]] =
+    value => monad.unit(f(value).getOrElse(ops.valid(value.pointer)))
 
   private def funMap[A, B](fun: Fun[R[A]])(f: (A, Pointer) => B): Fun[R[B]] =
     value => fun(value).map(a => f(a, value.pointer))
@@ -73,6 +66,27 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
     val valid = os.exists(_.isValid)
     if valid then ops.valid(pointer)
     else ops.all(os, pointer) // TODO new error NoneOf?
+
+  // verifys
+
+  def verifyType[T <: Value](error: TypeMismatch[T])(using TypeTest[Value, T]): Fun[R[O]] =
+    funUnit { value =>
+      value.value match
+        case _: T => ops.valid(value.pointer)
+        case _    => ops.invalid(error, value.pointer)
+    }
+
+  def verifyTrivial(valid: Boolean): Fun[R[O]] =
+    funUnit { value =>
+      if valid then ops.valid(value.pointer)
+      else ops.invalid(FalseSchemaReason(), value.pointer)
+    }
+
+  def verifyAllOf(fun: Fun[R[Seq[O]]]): Fun[R[O]] = funMap(fun)(verifyAllOf)
+  def verifyNot(fun: Fun[R[O]]): Fun[R[O]]        = funMap(fun)(verifyNot)
+  def verifyUnion(fs: Fun[R[Seq[O]]]): Fun[R[O]]  = verifyOneOf(fs)
+  def verifyOneOf(fun: Fun[R[Seq[O]]]): Fun[R[O]] = funMap(fun)(verifyOneOf)
+  def verifyAnyOf(fun: Fun[R[Seq[O]]]): Fun[R[O]] = funMap(fun)(verifyAnyOf)
 
   def verifyArrayItems(items: Option[Fun[R[O]]], prefixItems: Seq[Fun[R[O]]]): Fun[R[O]] = value =>
     items
@@ -111,15 +125,16 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       .map(ros => FP.Util.sequence(ros).map(os => ops.all(os, value.pointer)))
       .getOrElse(monad.unit(ops.valid(value.pointer)))
 
-  def verifyObjectRequired(names: Seq[String]): Fun[O] = value =>
-    Value
-      .asObject(value.value)
-      .map { vs =>
-        val missingNames = names.filter(!vs.contains(_))
-        if missingNames.isEmpty then ops.valid(value.pointer)
-        else ops.invalid(MissingRequiredProperties(missingNames), value.pointer)
-      }
-      .getOrElse(ops.valid(value.pointer))
+  def verifyObjectRequired(names: Seq[String]): Fun[R[O]] =
+    funUnit2 { value =>
+      Value
+        .asObject(value.value)
+        .map { vs =>
+          val missingNames = names.filter(!vs.contains(_))
+          if missingNames.isEmpty then ops.valid(value.pointer)
+          else ops.invalid(MissingRequiredProperties(missingNames), value.pointer)
+        }
+    }
 
   def verfyIfThenElse(fIf: Option[Fun[R[O]]], fThen: Option[Fun[R[O]]], fElse: Option[Fun[R[O]]]): Fun[R[O]] = value =>
     fIf
@@ -137,52 +152,57 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       }
       .getOrElse(monad.unit(ops.valid(value.pointer)))
 
-  def verifyEnum(vs: Seq[Value]): Fun[O] = value =>
-    if vs.contains(value.value) then ops.valid(value.pointer)
-    else ops.invalid(NotInEnum(vs), value.pointer)
+  def verifyEnum(vs: Seq[Value]): Fun[R[O]] =
+    funUnit { value =>
+      if vs.contains(value.value) then ops.valid(value.pointer)
+      else ops.invalid(NotInEnum(vs), value.pointer)
+    }
 
-  def verifyMinItems(min: BigDecimal): Fun[O] = value =>
-    Value
-      .asArray(value.value)
-      .map { vs =>
-        if min <= vs.length then ops.valid(value.pointer)
-        else ops.invalid(MinItemsMismatch(min), value.pointer)
-      }
-      .getOrElse(ops.valid(value.pointer))
+  def verifyMinItems(min: BigDecimal): Fun[R[O]] =
+    funUnit2 { value =>
+      Value
+        .asArray(value.value)
+        .map { vs =>
+          if min <= vs.length then ops.valid(value.pointer)
+          else ops.invalid(MinItemsMismatch(min), value.pointer)
+        }
+    }
 
-  def verifyUniqueItems(unique: Boolean): Fun[O] = value =>
-    Value
-      .asArray(value.value)
-      .map { vs =>
-        if !unique || vs.distinct.length == vs.length then ops.valid(value.pointer)
-        else ops.invalid(ItemsNotUnique(), value.pointer)
-      }
-      .getOrElse(ops.valid(value.pointer))
+  def verifyUniqueItems(unique: Boolean): Fun[R[O]] =
+    funUnit2 { value =>
+      Value
+        .asArray(value.value)
+        .map { vs =>
+          if !unique || vs.distinct.length == vs.length then ops.valid(value.pointer)
+          else ops.invalid(ItemsNotUnique(), value.pointer)
+        }
+    }
 
-  def verifyMinimum(min: BigDecimal, exclude: Boolean): Fun[O] =
+  def verifyMinimum(min: BigDecimal, exclude: Boolean): Fun[R[O]] =
     verifyNumberValue(MinimumMismatch(min, exclude)) { v =>
       if exclude then min < v else min <= v
     }
 
-  private def verifyNumberValue(error: => ValidationError)(validate: BigDecimal => Boolean): Fun[O] = value =>
-    Value
-      .asNumber(value.value)
-      .map { v =>
-        if validate(v) then ops.valid(value.pointer)
-        else ops.invalid(error, value.pointer)
-      }
-      .getOrElse(ops.valid(value.pointer));
+  private def verifyNumberValue(error: => ValidationError)(validate: BigDecimal => Boolean): Fun[R[O]] =
+    funUnit2 { value =>
+      Value
+        .asNumber(value.value)
+        .map { v =>
+          if validate(v) then ops.valid(value.pointer)
+          else ops.invalid(error, value.pointer)
+        }
+    }
 
-  def verifyPattern(pattern: String): Fun[O] =
+  def verifyPattern(pattern: String): Fun[R[O]] =
     val r = pattern.r
-    value =>
+    funUnit2 { value =>
       Value
         .asString(value.value)
         .map { v =>
           if r.findFirstIn(v).isDefined then ops.valid(value.pointer)
           else ops.invalid(PatternMismatch(pattern), value.pointer)
         }
-        .getOrElse(ops.valid(value.pointer))
+    }
 
   def verifyPropertyNames(f: Fun[R[O]]): Fun[R[O]] = value =>
     Value
@@ -198,27 +218,29 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       }
       .getOrElse(monad.unit(ops.valid(value.pointer)))
 
-  def verifyFormat(format: String): Fun[O] = value =>
-    Formats
-      .hasFormat(format)
-      .map { pred =>
-        Value
-          .asString(value.value)
-          .filterNot(pred)
-          .map { _ =>
-            ops.invalid(FormatMismatch(format), value.pointer)
-          }
-          .getOrElse(ops.valid(value.pointer))
-      }
-      .getOrElse(ops.valid(value.pointer))
+  def verifyFormat(format: String): Fun[R[O]] =
+    funUnit2 { value =>
+      Formats
+        .hasFormat(format)
+        .map { pred =>
+          Value
+            .asString(value.value)
+            .filterNot(pred)
+            .map { _ =>
+              ops.invalid(FormatMismatch(format), value.pointer)
+            }
+            .getOrElse(ops.valid(value.pointer))
+        }
     // TODO
-//      .getOrElse(ops.invalid(UnknownFormat(format), value.pointer))
+    // ops.invalid(UnknownFormat(format), value.pointer)
+    }
 
-  def verifyInteger(): Fun[O] = value =>
-    Value
-      .asNumber(value.value)
-      .filterNot(_.isWhole)
-      .map { _ =>
-        ops.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
-      }
-      .getOrElse(ops.valid(value.pointer))
+  def verifyInteger(): Fun[R[O]] =
+    funUnit2 { value =>
+      Value
+        .asNumber(value.value)
+        .filterNot(_.isWhole)
+        .map { _ =>
+          ops.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)
+        }
+    }

@@ -94,19 +94,16 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
   private final def compile(kks: Map[String, Keywords]): Map[String, Fun[R[O]]] =
     kks.view.mapValues(compile).toMap
 
-  private def unitFun(f: Fun[O]): Fun[R[O]] =
-    value => monad.unit(f(value))
-
   private def compileOne(k: Keyword): Fun[R[O]] =
     k match {
-      case NullTypeKeyword      => unitFun(verify.verifyType(verify.nullTypeMismatch))
-      case TrivialKeyword(v)    => unitFun(verify.verifyTrivial(v))
-      case BooleanTypeKeyword   => unitFun(verify.verifyType(verify.booleanTypeMismatch))
-      case NumberTypeKeyword    => unitFun(verify.verifyType(verify.numberTypeMismatch))
-      case IntegerTypeKeyword   => unitFun(verify.verifyInteger())
-      case StringTypeKeyword    => unitFun(verify.verifyType(verify.stringTypeMismatch))
-      case ArrayTypeKeyword     => unitFun(verify.verifyType(verify.arrayTypeMismatch))
-      case ObjectTypeKeyword    => unitFun(verify.verifyType(verify.objectTypeMismatch))
+      case NullTypeKeyword      => verify.verifyType(verify.nullTypeMismatch)
+      case TrivialKeyword(v)    => verify.verifyTrivial(v)
+      case BooleanTypeKeyword   => verify.verifyType(verify.booleanTypeMismatch)
+      case NumberTypeKeyword    => verify.verifyType(verify.numberTypeMismatch)
+      case IntegerTypeKeyword   => verify.verifyInteger()
+      case StringTypeKeyword    => verify.verifyType(verify.stringTypeMismatch)
+      case ArrayTypeKeyword     => verify.verifyType(verify.arrayTypeMismatch)
+      case ObjectTypeKeyword    => verify.verifyType(verify.objectTypeMismatch)
       case UnionTypeKeyword(ks) => verify.verifyUnion(compileSeqWith(ks))
       case NotKeyword(kk)       => verify.verifyNot(compile(kk))
       case ArrayItemsKeyword(items, prefixItems) =>
@@ -118,7 +115,7 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         val funPatternProperties    = compile(patternProperties)
         val funAdditionalProperties = additionalProperties.map(compile)
         verify.verfyObjectProperties(funProperties, funPatternProperties, funAdditionalProperties)
-      case ObjectRequiredKeyword(names) => unitFun(verify.verifyObjectRequired(names))
+      case ObjectRequiredKeyword(names) => verify.verifyObjectRequired(names)
       case AllOfKeyword(kks)            => verify.verifyAllOf(compileSeqKeywords(kks))
       case AnyOfKeyword(kks)            => verify.verifyAnyOf(compileSeqKeywords(kks))
       case OneOfKeyword(kks)            => verify.verifyOneOf(compileSeqKeywords(kks))
@@ -127,22 +124,22 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         val funThen = ksThen.map(compile)
         val funElse = ksElse.map(compile)
         verify.verfyIfThenElse(funIf, funThen, funElse)
-      case EnumKeyword(vs) => unitFun(verify.verifyEnum(vs))
+      case EnumKeyword(vs) => verify.verifyEnum(vs)
       case RefKeyword(ref, base, scope) =>
         given Eval[R, O] = this
         monad.resolve(ref, base, scope)
       case DynamicRefKeyword(ref, base, scope) =>
         given Eval[R, O] = this
         monad.resolveDynamic(ref, base, scope)
-      case MinItemsKeyword(min)         => unitFun(verify.verifyMinItems(min))
-      case UniqueItemsKeyword(unique)   => unitFun(verify.verifyUniqueItems(unique))
-      case MinimumKeyword(min, exclude) => unitFun(verify.verifyMinimum(min, exclude))
-      case PatternKeyword(pattern)      => unitFun(verify.verifyPattern(pattern))
+      case MinItemsKeyword(min)         => verify.verifyMinItems(min)
+      case UniqueItemsKeyword(unique)   => verify.verifyUniqueItems(unique)
+      case MinimumKeyword(min, exclude) => verify.verifyMinimum(min, exclude)
+      case PatternKeyword(pattern)      => verify.verifyPattern(pattern)
       case PropertyNamesKeyword(ks)     => verify.verifyPropertyNames(compile(ks))
-      case FormatKeyword(format)        => unitFun(verify.verifyFormat(format))
+      case FormatKeyword(format)        => verify.verifyFormat(format)
       // ...
       // TODO to be removed, ignore for now
-      // case _: LazyParseKeywords => unitFun(value => summon[OutputOps[O]].valid(value.pointer))
+      // case _: LazyParseKeywords => value => summon[OutputOps[O]].valid(value.pointer))
     }
 
 trait OutputOps[O]: // extends Monoid[O]:
