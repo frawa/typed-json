@@ -23,21 +23,27 @@ object MyState:
 
   type Cached = (SchemaResolution, Either[SchemaProblems, Vocabulary])
 
-  given [O: OutputOps]: TheResultMonad[MyR[O], O] with
-    def unit[A](a: A): MyR[O][A] = s => (a, s)
+  def unit[A](a: A): MyR[A][A] = s => (a, s)
 
-    def bind[A, B](a: MyR[O][A])(f: A => MyR[O][B]): MyR[O][B] = s =>
-      val (a2, s2) = a(s)
-      f(a2)(s2.copy(count = s2.count + 1))
+  def bind[A, B](a: MyR[A][A])(f: A => MyR[B][B]): MyR[B][B] = s =>
+    val (a2, s2) = a(s)
+    f(a2)(s2.copy(count = s2.count + 1))
+
+  given [O: OutputOps]: TheResultMonad[MyR[O], O] with
+    def unit[A](a: A): MyR[O][A] =
+      MyState.unit(a)
+
+    def bind[A, B](a: MyR[O][A])(f: A => MyR[O][B]): MyR[O][B] =
+      MyState.bind(a)(f)
 
     def resolve(ref: String, base: URI, scope: DynamicScope)(using
         eval: Eval[MyR[O], O]
-    ): MyR[O][Eval.Fun[O]] =
+    ): Eval.Fun[MyR[O][O]] =
       MyState.resolve(ref, base, scope) // .flatMap(ff => unit((value: WithPointer[Value]) => ff(value)))
 
     def resolveDynamic(ref: String, base: URI, scope: DynamicScope)(using
         eval: Eval[MyR[O], O]
-    ): MyR[O][Eval.Fun[O]] =
+    ): Eval.Fun[MyR[O][O]] =
       MyState.resolveDynamic(ref, base, scope) // .flatMap(ff => unit((value: WithPointer[Value]) => ff(value)))
 
   def myZero[O: OutputOps](resolver: SchemaResolver, vocabulary: Vocabulary): MyState =
@@ -45,23 +51,23 @@ object MyState:
 
   def resolve[O: OutputOps](ref: String, base: URI, scope: DynamicScope)(using
       eval: Eval[MyR[O], O]
-  ): MyR[O][Eval.Fun[O]] =
+  ): Eval.Fun[MyR[O][O]] =
     doResolve(ref, base, scope) { (ref, resolver) =>
       resolver.resolveRef(ref)
     }
 
   def resolveDynamic[O: OutputOps](ref: String, base: URI, scope: DynamicScope)(using
       eval: Eval[MyR[O], O]
-  ): MyR[O][Eval.Fun[O]] =
+  ): Eval.Fun[MyR[O][O]] =
     doResolve(ref, base, scope) { (ref, resolver) => resolver.resolveDynamicRef(ref, scope) }
 
   def doResolve[O: OutputOps](ref: String, base: URI, scope: DynamicScope)(
       resolve: (String, SchemaResolver) => Option[SchemaResolution]
   )(using
       eval: Eval[MyR[O], O]
-  ): MyR[O][Eval.Fun[O]] =
-    val ops = summon[OutputOps[O]]
-    (state: MyState) =>
+  ): Eval.Fun[MyR[O][O]] = value =>
+    state =>
+      val ops = summon[OutputOps[O]]
       val uri = UriUtil.absolute(ref, base).toString()
       val alreadyCached = state.cache
         .get(uri)
@@ -86,29 +92,21 @@ object MyState:
         }
       val compiled = alreadyCached
         .orElse(newlyCached)
-        .map { case ((resolution, vocabulary), state0) =>
+        .map { case ((resolution, vocabulary), state) =>
           vocabulary
             .flatMap(vocabulary => Keywords.parseKeywords(vocabulary, resolution, scope))
             .fold(
               { problems =>
                 val ref = resolution.resolver.base.toString
-                val f: Eval.Fun[O] = { (value: WithPointer[Value]) =>
-                  ops.invalid(CannotResolve(ref, Some(problems)), value.pointer)
-                }
-                (f, state0)
+                (ops.invalid(CannotResolve(ref, Some(problems)), value.pointer), state)
               },
               { ks =>
-                val f: MyR[O][Eval.Fun[O]] = { state =>
-                  val (compiled, state1) = eval.compile(ks)(state)
-                  (value => compiled(value), state1)
-                }
-                f(state0)
+                eval.compile(ks)(value)(state)
               }
             )
         }
       compiled.getOrElse {
         // TODO
-        // val f = (value: WithPointer[Value]) => ops.invalid(MissingReference(ref), value.pointer)
-        val f = (value: WithPointer[Value]) => ops.invalid(CannotResolve(ref, None), value.pointer)
-        (f, state)
+        // (ops.invalid(MissingReference(ref), value.pointer,state)
+        (ops.invalid(CannotResolve(ref, None), value.pointer), state)
       }

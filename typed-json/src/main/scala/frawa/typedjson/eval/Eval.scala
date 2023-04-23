@@ -25,7 +25,7 @@ import frawa.typedjson.validation.{TypeMismatch, ValidationAnnotation, Validatio
 import java.net.URI
 import scala.reflect.TypeTest
 
-trait TheResultMonad[R[_], O: OutputOps]:
+trait TheResultMonad[R[_], O: OutputOps] extends FP.Monad[R]:
   def unit[A](a: A): R[A]
 
   def bind[A, B](a: R[A])(f: A => R[B]): R[B]
@@ -33,12 +33,13 @@ trait TheResultMonad[R[_], O: OutputOps]:
   // extras
   def resolve(ref: String, base: URI, scope: DynamicScope)(using
       eval: Eval[R, O]
-  ): R[Eval.Fun[O]]
+  ): Eval.Fun[R[O]]
 
   def resolveDynamic(ref: String, base: URI, scope: DynamicScope)(using
       eval: Eval[R, O]
-  ): R[Eval.Fun[O]]
+  ): Eval.Fun[R[O]]
   //
+
   extension [A](r: R[A])
     def flatMap[B](f: A => R[B]): R[B] = bind(r)(f)
     def map[B](f: A => B): R[B]        = bind(r)(a => unit(f(a)))
@@ -55,113 +56,93 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 
   private val monad = summon[TheResultMonad[R, O]]
 
-  private def verify = Verify[O]
+  private def verify = Verify[R, O]
 
-  final def fun(compiled: R[Fun[O]]): R[Value => O] =
-    monad.map(compiled)(f => value => f(WithPointer(value)))
+  final def fun(compiled: Fun[R[O]]): Value => R[O] = value => compiled(WithPointer(value))
 
-  final def compile(keywords: Keywords): R[Fun[O]] =
-    monad.map(compile(keywords.keywords.toSeq))(fs => verify.verifyAll(fs))
+  final def compile(keywords: Keywords): Fun[R[O]] =
+    val ks  = keywords.keywords.toSeq
+    val fun = compileSeqWith(ks)
+    verify.verifyAllOf(fun)
 
-  private final def compile(keyword: Keyword): R[Fun[O]] =
+  private final def compile(keyword: Keyword): Fun[R[O]] =
     compileOne(keyword)
 
-  private final def compile(o: Option[Keywords]): R[Option[Fun[O]]] =
-    o.map(o => compile(o)).map(o => monad.map(o)(o => Option(o))).getOrElse(monad.unit(Option.empty))
+  private final def compileSeqWith(kws: Seq[KeywordWithLocation]): Fun[R[Seq[O]]] =
+    val ks = kws.map(_.value)
+    compileSeq(ks)
 
-  private final def compile(keywords: Seq[KeywordWithLocation]): R[Seq[Fun[O]]] =
-    val fs = keywords.map(_.value).map(compile)
-    fs.foldLeft(monad.unit(Seq())) { (acc, f) =>
-      for {
-        acc <- acc
-        f   <- f
-      } yield {
-        acc :+ f
-      }
+  private final def compileSeq(ks: Seq[Keyword]): Fun[R[Seq[O]]] =
+    val funs = ks.map(compile)
+    funSequence(funs)
+
+  private final def funSequence(funs: Seq[Fun[R[O]]]): Fun[R[Seq[O]]] =
+    funs.foldLeft(funUnit(Seq.empty[O])) { (acc, fun) =>
+      funFlatMap(fun)(o => value => acc(value).map(os => os :+ o))
     }
 
-  private final def compile2(ks: Seq[Keywords]): R[Seq[Fun[O]]] =
-    val fs = ks.map(compile)
-    fs.foldLeft(monad.unit(Seq())) { (acc, f) =>
-      for {
-        acc <- acc
-        f   <- f
-      } yield {
-        acc :+ f
-      }
-    }
+  private final def funUnit[A](a: A): Fun[R[A]] =
+    value => monad.unit(a)
 
-  private final def compile(o: Map[String, Keywords]): R[Map[String, Fun[O]]] =
-    val fs = o.view.mapValues(o => compile(o))
-    fs.foldLeft(monad.unit(Map.empty[String, Fun[O]])) { case (acc, (p, f)) =>
-      for {
-        acc <- acc
-        f   <- f
-      } yield {
-        acc + (p -> f)
-      }
-    }
+  private final def funFlatMap[A, B](fun: Fun[R[A]])(f: A => Fun[R[B]]): Fun[R[B]] =
+    value => fun(value).flatMap(a => f(a)(value))
 
-  private def compileOne(k: Keyword): R[Fun[O]] =
+  private final def compileSeqKeywords(kks: Seq[Keywords]): Fun[R[Seq[O]]] =
+    val funs = kks.map(compile)
+    funSequence(funs)
+
+  private final def compile(kks: Map[String, Keywords]): Map[String, Fun[R[O]]] =
+    kks.view.mapValues(compile).toMap
+
+  private def unitFun(f: Fun[O]): Fun[R[O]] =
+    value => monad.unit(f(value))
+
+  private def compileOne(k: Keyword): Fun[R[O]] =
     k match {
-      case NullTypeKeyword      => monad.unit(verify.verifyType(verify.nullTypeMismatch))
-      case TrivialKeyword(v)    => monad.unit(verify.verifyTrivial(v))
-      case BooleanTypeKeyword   => monad.unit(verify.verifyType(verify.booleanTypeMismatch))
-      case NumberTypeKeyword    => monad.unit(verify.verifyType(verify.numberTypeMismatch))
-      case IntegerTypeKeyword   => monad.unit(verify.verifyInteger())
-      case StringTypeKeyword    => monad.unit(verify.verifyType(verify.stringTypeMismatch))
-      case ArrayTypeKeyword     => monad.unit(verify.verifyType(verify.arrayTypeMismatch))
-      case ObjectTypeKeyword    => monad.unit(verify.verifyType(verify.objectTypeMismatch))
-      case UnionTypeKeyword(ks) => monad.map(compile(ks))(fs => verify.verifyUnion(fs))
-      case NotKeyword(ks)       => compile(ks).map(f => verify.verifyNot(f))
+      case NullTypeKeyword      => unitFun(verify.verifyType(verify.nullTypeMismatch))
+      case TrivialKeyword(v)    => unitFun(verify.verifyTrivial(v))
+      case BooleanTypeKeyword   => unitFun(verify.verifyType(verify.booleanTypeMismatch))
+      case NumberTypeKeyword    => unitFun(verify.verifyType(verify.numberTypeMismatch))
+      case IntegerTypeKeyword   => unitFun(verify.verifyInteger())
+      case StringTypeKeyword    => unitFun(verify.verifyType(verify.stringTypeMismatch))
+      case ArrayTypeKeyword     => unitFun(verify.verifyType(verify.arrayTypeMismatch))
+      case ObjectTypeKeyword    => unitFun(verify.verifyType(verify.objectTypeMismatch))
+      case UnionTypeKeyword(ks) => verify.verifyUnion(compileSeqWith(ks))
+      case NotKeyword(kk)       => verify.verifyNot(compile(kk))
       case ArrayItemsKeyword(items, prefixItems) =>
-        for {
-          items       <- compile(items)
-          prefixItems <- compile2(prefixItems)
-        } yield {
-          verify.verfyArrayItems(items, prefixItems)
-        }
+        val funItems       = items.map(compile)
+        val funPrefixItems = prefixItems.map(compile)
+        verify.verifyArrayItems(funItems, funPrefixItems)
       case ObjectPropertiesKeyword(properties, patternProperties, additionalProperties) =>
-        for {
-          properties           <- compile(properties)
-          patternProperties    <- compile(patternProperties)
-          additionalProperties <- compile(additionalProperties)
-        } yield {
-          verify.verfyObjectProperties(properties, patternProperties, additionalProperties)
-        }
-      case ObjectRequiredKeyword(names) => monad.unit(verify.verifyObjectRequired(names))
-      case AllOfKeyword(ks)             => compile2(ks).map(fs => verify.verifyAllOf(fs))
-      case AnyOfKeyword(ks)             => compile2(ks).map(fs => verify.verifyAnyOf(fs))
-      case OneOfKeyword(ks)             => compile2(ks).map(fs => verify.verifyOneOf(fs))
+        val funProperties           = compile(properties)
+        val funPatternProperties    = compile(patternProperties)
+        val funAdditionalProperties = additionalProperties.map(compile)
+        verify.verfyObjectProperties(funProperties, funPatternProperties, funAdditionalProperties)
+      case ObjectRequiredKeyword(names) => unitFun(verify.verifyObjectRequired(names))
+      case AllOfKeyword(kks)            => verify.verifyAllOf(compileSeqKeywords(kks))
+      case AnyOfKeyword(kks)            => verify.verifyAnyOf(compileSeqKeywords(kks))
+      case OneOfKeyword(kks)            => verify.verifyOneOf(compileSeqKeywords(kks))
       case IfThenElseKeyword(ksIf, ksThen, ksElse) =>
-        for {
-          ksIf   <- compile(ksIf)
-          ksThen <- compile(ksThen)
-          ksElse <- compile(ksElse)
-        } yield {
-          verify.verfyIfThenElse(ksIf, ksThen, ksElse)
-        }
-      case EnumKeyword(vs) => monad.unit(verify.verifyEnum(vs))
+        val funIf   = ksIf.map(compile)
+        val funThen = ksThen.map(compile)
+        val funElse = ksElse.map(compile)
+        verify.verfyIfThenElse(funIf, funThen, funElse)
+      case EnumKeyword(vs) => unitFun(verify.verifyEnum(vs))
       case RefKeyword(ref, base, scope) =>
         given Eval[R, O] = this
         monad.resolve(ref, base, scope)
       case DynamicRefKeyword(ref, base, scope) =>
         given Eval[R, O] = this
         monad.resolveDynamic(ref, base, scope)
-      case MinItemsKeyword(min)         => monad.unit(verify.verifyMinItems(min))
-      case UniqueItemsKeyword(unique)   => monad.unit(verify.verifyUniqueItems(unique))
-      case MinimumKeyword(min, exclude) => monad.unit(verify.verifyMinimum(min, exclude))
-      case PatternKeyword(pattern)      => monad.unit(verify.verifyPattern(pattern))
-      case PropertyNamesKeyword(ks) =>
-        for {
-          f <- compile(ks)
-        } yield {
-          verify.verifyPropertyNames(f)
-        }
-      case FormatKeyword(format) => monad.unit(verify.verifyFormat(format))
+      case MinItemsKeyword(min)         => unitFun(verify.verifyMinItems(min))
+      case UniqueItemsKeyword(unique)   => unitFun(verify.verifyUniqueItems(unique))
+      case MinimumKeyword(min, exclude) => unitFun(verify.verifyMinimum(min, exclude))
+      case PatternKeyword(pattern)      => unitFun(verify.verifyPattern(pattern))
+      case PropertyNamesKeyword(ks)     => verify.verifyPropertyNames(compile(ks))
+      case FormatKeyword(format)        => unitFun(verify.verifyFormat(format))
       // ...
       // TODO to be removed, ignore for now
-      case _: LazyParseKeywords => monad.unit(value => summon[OutputOps[O]].valid(value.pointer))
+      // case _: LazyParseKeywords => unitFun(value => summon[OutputOps[O]].valid(value.pointer))
     }
 
 trait OutputOps[O]: // extends Monoid[O]:
@@ -179,39 +160,4 @@ trait OutputOps[O]: // extends Monoid[O]:
     def isValid: Boolean
     // def combine(o2: O): O = all(Seq(o, o2))
 
-trait ResultOps[R[_]] extends Monad[R]
-
-object Util:
-  def sequence[A, F[A]](cs: Seq[F[A]])(using monad: Monad[F]): F[Seq[A]] =
-    cs.foldLeft(monad.pure(Seq.empty)) { (acc, c) =>
-      acc.flatMap(cs => c.map(cs :+ _))
-    }
-
-trait State[S]: // extends Monad[[A] =>> State[A] => (A, State[A])]:
-  type S1[A] = S => (A, S)
-
-  def pure[A](a: A): S1[A] = s => (a, s)
-  def flatMap[A, B](a: S1[A])(f: A => S1[B]): S1[B] = s0 =>
-    val (aa, s1) = a(s0)
-    f(aa)(s1)
-
-trait Monad[F[_]] extends Functor[F]:
-
-  /** The unit value for a monad */
-  def pure[A](x: A): F[A]
-
-  extension [A](x: F[A])
-    /** The fundamental composition operation */
-    def flatMap[B](f: A => F[B]): F[B]
-
-  /** The `map` operation can now be defined in terms of `flatMap` */
-  // def map[B](f: A => B) = x.flatMap(f.andThen(pure))
-
-trait Functor[F[_]]:
-  extension [A](x: F[A]) def map[B](f: A => B): F[B]
-
-trait SemiGroup[T]:
-  extension (x: T) def combine(y: T): T
-
-trait Monoid[T] extends SemiGroup[T]:
-  def unit: T
+trait ResultOps[R[_]] extends FP.Monad[R]

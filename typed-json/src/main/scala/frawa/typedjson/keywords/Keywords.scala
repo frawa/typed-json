@@ -268,15 +268,15 @@ case class Keywords(
 
       case ("$dynamicRef", StringValue(ref)) =>
         // TODO later
-        // Right(add(DynamicRefKeyword(ref, scope)))
-        for
-          resolution <- resolver
-            .resolveDynamicRef(ref, scope)
-            .map(Right(_))
-            .getOrElse(Left(SchemaProblems(MissingDynamicReference(ref))))
-          vocabulary1 <- SchemaValue.vocabulary(resolution, vocabulary)
-          keyword = lazyResolve(vocabulary1, resolution, scope1)
-        yield add(keyword).add(DynamicRefKeyword(ref, resolver.base, scope1))
+        Right(add(DynamicRefKeyword(ref, resolver.base, scope1)))
+      // for
+      //   resolution <- resolver
+      //     .resolveDynamicRef(ref, scope)
+      //     .map(Right(_))
+      //     .getOrElse(Left(SchemaProblems(MissingDynamicReference(ref))))
+      //   vocabulary1 <- SchemaValue.vocabulary(resolution, vocabulary)
+      //   keyword = lazyResolve(vocabulary1, resolution, scope1)
+      // yield add(keyword).add(DynamicRefKeyword(ref, resolver.base, scope1))
 
       case ("$comment", StringValue(_)) =>
         // only for schema authors and readers

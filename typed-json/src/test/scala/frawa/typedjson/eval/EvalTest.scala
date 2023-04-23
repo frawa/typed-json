@@ -46,18 +46,18 @@ class EvalTest extends FunSuite:
 
   given Eval[MyR[BasicOutput], BasicOutput] = evalBasic
 
-  private def doApply[O: OutputOps](fun: MyR[O][Value => O], value: Value)(using resolver: SchemaResolver): O =
-    val (o, s) = fun.map(_(value))(myZero(resolver, vocabularyForTest.get))
+  private def doApply[O: OutputOps](fun: Value => MyR[O][O], value: Value)(using resolver: SchemaResolver): O =
+    val (o, s) = fun(value)(myZero(resolver, vocabularyForTest.get))
     // println(s"counted ${s.count} binds")
     o
 
-  private def doApplyBulk[O: OutputOps](fun: MyR[O][Value => O], values: Seq[Value], fun2: MyState => Unit)(using
+  private def doApplyBulk[O: OutputOps](fun: Value => MyR[O][O], values: Seq[Value], fun2: MyState => Unit)(using
       resolver: SchemaResolver
   ): Seq[O] =
     val zero = myZero(resolver, vocabularyForTest.get)
     val (s, os) = values
       .foldLeft((zero, Seq.empty[O])) { case ((state, os), v) =>
-        val (o, state1) = fun.map(_(v))(state)
+        val (o, state1) = fun(v)(state)
         (state1, os :+ o)
       }
     fun2(s)
@@ -484,8 +484,7 @@ class EvalTest extends FunSuite:
     }
   }
 
-  // TODO
-  test("missing $id/$ref/$def".ignore) {
+  test("missing $id/$ref/$def") {
     withCompiledSchema(missingIdRefDefsSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("[1313]")),
@@ -553,7 +552,7 @@ class EvalTest extends FunSuite:
             assertEquals(
               state.hits,
               Map(
-                "https://example.net/root.json#/$defs/numberType" -> 5,
+                "https://example.net/root.json#/$defs/numberType" -> 3,
                 "https://example.net/root.json#object"            -> 2
               )
             )
@@ -588,15 +587,19 @@ class EvalTest extends FunSuite:
             assertEquals(
               state.cache.keySet,
               Set(
+                "https://json-schema.org/draft/2020-12/meta/core",
+                "https://json-schema.org/draft/2020-12/meta/core#meta",
                 "https://json-schema.org/draft/2020-12/meta/validation",
-                "https://json-schema.org/draft/2020-12/meta/core"
+                "https://json-schema.org/draft/2020-12/meta/validation#/$defs/simpleTypes"
               )
             )
             assertEquals(
               state.hits,
               Map(
-                "https://json-schema.org/draft/2020-12/meta/validation" -> 2,
-                "https://json-schema.org/draft/2020-12/meta/core"       -> 2
+                "https://json-schema.org/draft/2020-12/meta/core"                          -> 5,
+                "https://json-schema.org/draft/2020-12/meta/validation"                    -> 5,
+                "https://json-schema.org/draft/2020-12/meta/core#meta"                     -> 2,
+                "https://json-schema.org/draft/2020-12/meta/validation#/$defs/simpleTypes" -> 3
               )
             )
         ),

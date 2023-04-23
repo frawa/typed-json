@@ -18,25 +18,26 @@ package frawa.typedjson.eval
 
 import frawa.typedjson.keywords.{Keyword, WithPointer}
 import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.Value.*
+import frawa.typedjson.parser.Value.{NullValue, *}
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.validation.*
 import frawa.typedjson.validation.ValidationProcessing.EvalFun
 
 import scala.reflect.TypeTest
 
-class Verify[O: OutputOps]:
+class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 
   import Eval.Fun
 
-  val nullTypeMismatch    = TypeMismatch[NullValue.type]("null")
-  val booleanTypeMismatch = TypeMismatch[BoolValue]("boolean")
-  val stringTypeMismatch  = TypeMismatch[StringValue]("string")
-  val numberTypeMismatch  = TypeMismatch[NumberValue]("number")
-  val arrayTypeMismatch   = TypeMismatch[ArrayValue]("array")
-  val objectTypeMismatch  = TypeMismatch[ObjectValue]("object")
+  val nullTypeMismatch: TypeMismatch[NullValue.type] = TypeMismatch("null")
+  val booleanTypeMismatch: TypeMismatch[BoolValue]   = TypeMismatch("boolean")
+  val stringTypeMismatch: TypeMismatch[StringValue]  = TypeMismatch("string")
+  val numberTypeMismatch: TypeMismatch[NumberValue]  = TypeMismatch("number")
+  val arrayTypeMismatch: TypeMismatch[ArrayValue]    = TypeMismatch("array")
+  val objectTypeMismatch: TypeMismatch[ObjectValue]  = TypeMismatch("object")
 
-  private val ops = summon[OutputOps[O]]
+  private val ops   = summon[OutputOps[O]]
+  private val monad = summon[TheResultMonad[R, O]]
 
   def verifyType[T <: Value](error: TypeMismatch[T])(using TypeTest[Value, T]): Fun[O] = value =>
     value.value match
@@ -47,24 +48,46 @@ class Verify[O: OutputOps]:
     if valid then ops.valid(value.pointer)
     else ops.invalid(FalseSchemaReason(), value.pointer)
 
-  def verifyNot(f: Fun[O]): Fun[O]         = value => f(value).not(value.pointer)
-  def verifyUnion(fs: Seq[Fun[O]]): Fun[O] = verifyOneOf(fs)
-  def verifyAll(fs: Seq[Fun[O]]): Fun[O]   = value => ops.all(fs.map(_(value)), value.pointer)
+  def verifyAllOf(fun: Fun[R[Seq[O]]]): Fun[R[O]] = funMap(fun)(verifyAllOf)
+  def verifyNot(fun: Fun[R[O]]): Fun[R[O]]        = funMap(fun)(verifyNot)
+  def verifyUnion(fs: Fun[R[Seq[O]]]): Fun[R[O]]  = verifyOneOf(fs)
+  def verifyOneOf(fun: Fun[R[Seq[O]]]): Fun[R[O]] = funMap(fun)(verifyOneOf)
+  def verifyAnyOf(fun: Fun[R[Seq[O]]]): Fun[R[O]] = funMap(fun)(verifyAnyOf)
 
-  def verfyArrayItems(items: Option[Fun[O]], prefixItems: Seq[Fun[O]]): Fun[O] = value =>
+  private def funMap[A, B](fun: Fun[R[A]])(f: (A, Pointer) => B): Fun[R[B]] =
+    value => fun(value).map(a => f(a, value.pointer))
+
+  private def verifyAllOf(os: Seq[O], pointer: Pointer): O =
+    ops.all(os, pointer)
+
+  private def verifyNot(o: O, pointer: Pointer): O =
+    o.not(pointer)
+
+  private def verifyOneOf(os: Seq[O], pointer: Pointer): O =
+    val count = os.count(_.isValid)
+    if count == 1 then ops.valid(pointer)
+    else if count == 0 then ops.all(os, pointer) // TODO new error NoneOf?
+    else ops.invalid(NotOneOf(count), pointer)
+
+  private def verifyAnyOf(os: Seq[O], pointer: Pointer): O =
+    val valid = os.exists(_.isValid)
+    if valid then ops.valid(pointer)
+    else ops.all(os, pointer) // TODO new error NoneOf?
+
+  def verifyArrayItems(items: Option[Fun[R[O]]], prefixItems: Seq[Fun[R[O]]]): Fun[R[O]] = value =>
     items
       .zip(Value.asArray(value.value))
       .map { (f, vs) =>
         vs.zipWithIndex.map((v, i) => f(WithPointer(v, value.pointer / i)))
       }
-      .map(os => ops.all(os, value.pointer))
-      .getOrElse(ops.valid(value.pointer))
+      .map(ros => FP.Util.sequence(ros).map(os => ops.all(os, value.pointer)))
+      .getOrElse { monad.unit(ops.valid(value.pointer)) }
 
   def verfyObjectProperties(
-      properties: Map[String, Fun[O]],
-      patternProperties: Map[String, Fun[O]],
-      additionalProperties: Option[Fun[O]]
-  ): Fun[O] = value =>
+      properties: Map[String, Fun[R[O]]],
+      patternProperties: Map[String, Fun[R[O]]],
+      additionalProperties: Option[Fun[R[O]]]
+  ): Fun[R[O]] = value =>
     Value
       .asObject(value.value)
       .map { vs =>
@@ -85,8 +108,8 @@ class Verify[O: OutputOps]:
           f.map(f => f(WithPointer(v, value.pointer / p)))
         }.toSeq
       }
-      .map(os => ops.all(os, value.pointer))
-      .getOrElse(ops.valid(value.pointer))
+      .map(ros => FP.Util.sequence(ros).map(os => ops.all(os, value.pointer)))
+      .getOrElse(monad.unit(ops.valid(value.pointer)))
 
   def verifyObjectRequired(names: Seq[String]): Fun[O] = value =>
     Value
@@ -98,28 +121,21 @@ class Verify[O: OutputOps]:
       }
       .getOrElse(ops.valid(value.pointer))
 
-  def verifyAllOf(fs: Seq[Fun[O]]): Fun[O] = value => ops.all(fs.map(_(value)), value.pointer)
-  def verifyAnyOf(fs: Seq[Fun[O]]): Fun[O] = value =>
-    val os    = fs.map(_(value))
-    val valid = os.exists(_.isValid)
-    if valid then ops.valid(value.pointer)
-    else ops.all(os, value.pointer) // TODO new error NoneOf?
-
-  def verifyOneOf(fs: Seq[Fun[O]]): Fun[O] = value =>
-    val os    = fs.map(_(value))
-    val count = os.count(_.isValid)
-    if count == 1 then ops.valid(value.pointer)
-    else if count == 0 then ops.all(os, value.pointer) // TODO new error NoneOf?
-    else ops.invalid(NotOneOf(count), value.pointer)
-
-  def verfyIfThenElse(fIf: Option[Fun[O]], fThen: Option[Fun[O]], fElse: Option[Fun[O]]): Fun[O] = value =>
+  def verfyIfThenElse(fIf: Option[Fun[R[O]]], fThen: Option[Fun[R[O]]], fElse: Option[Fun[R[O]]]): Fun[R[O]] = value =>
     fIf
-      .flatMap { fIf =>
+      .map { fIf =>
         val condition = fIf(value)
-        if condition.isValid then fThen.map(fThen => ops.all(Seq(condition, fThen(value)), value.pointer))
-        else fElse.map(fElse => fElse(value))
+        condition.map(_.isValid).flatMap { isValid =>
+          val fully =
+            if isValid then
+              fThen
+                .map(_(value))
+                .map(fThen => FP.Util.sequence(Seq(condition, fThen)).map(os => ops.all(os, value.pointer)))
+            else fElse.map(fElse => fElse(value))
+          fully.getOrElse(monad.unit(ops.valid(value.pointer)))
+        }
       }
-      .getOrElse(ops.valid(value.pointer))
+      .getOrElse(monad.unit(ops.valid(value.pointer)))
 
   def verifyEnum(vs: Seq[Value]): Fun[O] = value =>
     if vs.contains(value.value) then ops.valid(value.pointer)
@@ -168,19 +184,19 @@ class Verify[O: OutputOps]:
         }
         .getOrElse(ops.valid(value.pointer))
 
-  def verifyPropertyNames(f: Fun[O]): Fun[O] = value =>
+  def verifyPropertyNames(f: Fun[R[O]]): Fun[R[O]] = value =>
     Value
       .asObject(value.value)
       .map { vs =>
         val names = vs.keySet
-        val os = names.map { name =>
+        val ros = names.map { name =>
           (name, f(WithPointer(StringValue(name), value.pointer / name)))
         }.toSeq
         // val validNames = os.filter(_._2.isValid).map(_._1).toSet
         // TODO annotation EvaluatedProperties() with validNames
-        ops.all(os.map(_._2), value.pointer)
+        FP.Util.sequence(ros.map(_._2)).map(os => ops.all(os, value.pointer))
       }
-      .getOrElse(ops.valid(value.pointer))
+      .getOrElse(monad.unit(ops.valid(value.pointer)))
 
   def verifyFormat(format: String): Fun[O] = value =>
     Formats

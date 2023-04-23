@@ -24,7 +24,7 @@ object Util:
         keywords => f(keywords)
       )
 
-  type AssertingFun[R[_], O] = SchemaResolver ?=> R[Value => O] => Unit
+  type AssertingFun[R[_], O] = SchemaResolver ?=> (Value => R[O]) => Unit
 
   def withCompiledSchema[R[_], O](
       schema: String,
@@ -32,11 +32,9 @@ object Util:
   )(using eval: Eval[R, O])(using TheResultMonad[R, O])(f: AssertingFun[R, O]): Unit =
     withSchema(schema) { schema =>
       withKeywords(schema, lazyResolver) { keywords =>
-        val c                = eval.compile(keywords)
-        val fun              = eval.fun(c)
+        val compiled         = eval.compile(keywords)
+        val fun              = eval.fun(compiled)
         given SchemaResolver = LoadedSchemasResolver(schema, lazyResolver)
         f(fun)
       }
     }
-
-  
