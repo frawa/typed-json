@@ -39,12 +39,12 @@ object MyState:
     def resolve(ref: String, base: URI, scope: DynamicScope)(using
         eval: Eval[MyR, O]
     ): Eval.Fun[MyR[O]] =
-      MyState.resolve(ref, base, scope) // .flatMap(ff => unit((value: WithPointer[Value]) => ff(value)))
+      MyState.resolve(ref, base, scope)
 
     def resolveDynamic(ref: String, base: URI, scope: DynamicScope)(using
         eval: Eval[MyR, O]
     ): Eval.Fun[MyR[O]] =
-      MyState.resolveDynamic(ref, base, scope) // .flatMap(ff => unit((value: WithPointer[Value]) => ff(value)))
+      MyState.resolveDynamic(ref, base, scope)
 
   def myZero[O: OutputOps](resolver: SchemaResolver, vocabulary: Vocabulary): MyState =
     MyState(resolver, vocabulary, 0, Map.empty, Map.empty)
@@ -68,7 +68,7 @@ object MyState:
   ): Eval.Fun[MyR[O]] = value =>
     state =>
       val ops = summon[OutputOps[O]]
-      val uri = UriUtil.absolute(ref, base).toString()
+      val uri = UriUtil.absolute(ref, base).toString
       val alreadyCached = state.cache
         .get(uri)
         .map { cached =>
