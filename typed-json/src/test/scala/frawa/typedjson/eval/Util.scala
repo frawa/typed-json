@@ -31,10 +31,35 @@ object Util:
       lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
   )(using eval: Eval[R, O])(using TheResultMonad[R, O])(f: AssertingFun[R, O]): Unit =
     withSchema(schema) { schema =>
-      withKeywords(schema, lazyResolver) { keywords =>
-        val compiled         = eval.compile(keywords)
-        val fun              = eval.fun(compiled)
-        given SchemaResolver = LoadedSchemasResolver(schema, lazyResolver)
-        f(fun)
-      }
+      withCompiledSchemaValue(schema, lazyResolver)(f)
     }
+
+  def withCompiledSchemaValue[R[_], O](
+      schema: SchemaValue,
+      lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
+  )(using eval: Eval[R, O])(using TheResultMonad[R, O])(f: AssertingFun[R, O]): Unit =
+    withKeywords(schema, lazyResolver) { keywords =>
+      val compiled         = eval.compile(keywords)
+      val fun              = eval.fun(compiled)
+      given SchemaResolver = LoadedSchemasResolver(schema, lazyResolver)
+      f(fun)
+    }
+
+  import frawa.typedjson.eval.MyState.{*, given}
+
+  def doApply[O: OutputOps](fun: Value => MyR[O], value: Value)(using resolver: SchemaResolver): O =
+    val (o, s) = fun(value)(myZero(resolver, vocabularyForTest.get))
+    // println(s"counted ${s.count} binds")
+    o
+
+  def doApplyBulk[O: OutputOps](fun: Value => MyR[O], values: Seq[Value], fun2: MyState => Unit)(using
+      resolver: SchemaResolver
+  ): Seq[O] =
+    val zero = myZero(resolver, vocabularyForTest.get)
+    val (s, os) = values
+      .foldLeft((zero, Seq.empty[O])) { case ((state, os), v) =>
+        val (o, state1) = fun(v)(state)
+        (state1, os :+ o)
+      }
+    fun2(s)
+    os

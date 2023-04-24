@@ -36,7 +36,6 @@ import scala.reflect.TypeTest
 
 class EvalTest extends FunSuite:
 
-  import MyState.{*, given}
   import Util.{*, given}
   // import FlagOutput.given
   // import BasicOutput.given
@@ -45,23 +44,6 @@ class EvalTest extends FunSuite:
   val evalBasic = Eval[MyR, BasicOutput]
 
   given Eval[MyR, BasicOutput] = evalBasic
-
-  private def doApply[O: OutputOps](fun: Value => MyR[O], value: Value)(using resolver: SchemaResolver): O =
-    val (o, s) = fun(value)(myZero(resolver, vocabularyForTest.get))
-    // println(s"counted ${s.count} binds")
-    o
-
-  private def doApplyBulk[O: OutputOps](fun: Value => MyR[O], values: Seq[Value], fun2: MyState => Unit)(using
-      resolver: SchemaResolver
-  ): Seq[O] =
-    val zero = myZero(resolver, vocabularyForTest.get)
-    val (s, os) = values
-      .foldLeft((zero, Seq.empty[O])) { case ((state, os), v) =>
-        val (o, state1) = fun(v)(state)
-        (state1, os :+ o)
-      }
-    fun2(s)
-    os
 
   test("null") {
     given Eval[MyR, FlagOutput] = evalFlag
