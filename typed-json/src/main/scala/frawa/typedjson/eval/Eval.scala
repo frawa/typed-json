@@ -77,15 +77,9 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
     funSequence(funs)
 
   private final def funSequence(funs: Seq[Fun[R[O]]]): Fun[R[Seq[O]]] =
-    funs.foldLeft(funUnit(Seq.empty[O])) { (acc, fun) =>
-      funFlatMap(fun)(o => value => acc(value).map(os => os :+ o))
-    }
-
-  private final def funUnit[A](a: A): Fun[R[A]] =
-    value => monad.unit(a)
-
-  private final def funFlatMap[A, B](fun: Fun[R[A]])(f: A => Fun[R[B]]): Fun[R[B]] =
-    value => fun(value).flatMap(a => f(a)(value))
+    value =>
+      val ros = funs.map(fun => fun(value))
+      FP.Util.sequence(ros)
 
   private final def compileSeqKeywords(kks: Seq[Keywords]): Fun[R[Seq[O]]] =
     val funs = kks.map(compile)
