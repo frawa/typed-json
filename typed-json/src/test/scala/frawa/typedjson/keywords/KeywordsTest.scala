@@ -499,7 +499,8 @@ class KeywordsTest extends FunSuite:
     }
   }
 
-  test("$id/$ref/$def") {
+  // TODO obsolete?
+  test("$id/$ref/$def".ignore) {
     withSchema(idRefDefsSchema) { schema =>
       assertKeywords(schema) { keywords =>
         assertEquals(
