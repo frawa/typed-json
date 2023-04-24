@@ -1166,3 +1166,35 @@ class EvalTest extends FunSuite:
       )
     }
   }
+
+  test("missing deep lazy $ref raises error") {
+    withCompiledSchema("""|{
+                          |"$id": "http://myhost:1313/",
+                          |"items": {"$ref": "myItems"},
+                          |"$defs": {
+                          |  "foo": {
+                          |    "$id": "myItems",
+                          |    "$ref": "missing.json"
+                          |  }
+                          |}
+                          |}
+                          |""".stripMargin) { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""[ 13 ]""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(CannotResolve("missing.json", None), Pointer.empty / 0)
+            )
+          )
+        )
+      )
+    }
+  }
