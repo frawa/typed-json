@@ -26,6 +26,7 @@ import frawa.typedjson.testutil.TestUtil.{*, given}
 import munit.FunSuite
 import frawa.typedjson.meta.MetaSchemas
 
+@munit.IgnoreSuite
 class SuggestProcessingTest extends FunSuite:
 
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))

@@ -18,6 +18,7 @@ package frawa.typedjson.quickfix
 
 import munit.FunSuite
 
+@munit.IgnoreSuite
 class QuickfixTest extends FunSuite:
 
   test("TODO quickfix".ignore) {}

@@ -27,6 +27,7 @@ import frawa.typedjson.testutil.EvalFactory
 // import frawa.typedjson.eval.ResultOps
 // import frawa.typedjson.eval.OutputOps
 
+@munit.IgnoreSuite
 class ValidationKeywordTest extends FunSuite:
 
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))

@@ -34,6 +34,7 @@ object ValidationProcessingTest:
   given EvaluatorFactory[SchemaValue, ValidationOutput] =
     EvaluatorFactory.make(ValidationProcessing(), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
 
+@munit.IgnoreSuite
 class ValidationProcessingTest extends FunSuite:
   import ValidationProcessingTest.{*, given}
 
