@@ -145,6 +145,7 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case MinPropertiesKeyword(max)          => verify.verifyMinProperties(max)
       case DependentRequiredKeyword(required) => verify.verifyDependentRequired(required)
       case DependentSchemasKeyword(keywords)  => verify.verifyDependentSchemas(compile(keywords))
+      case ContainsKeyword(schema, min, max)  => verify.verifyContains(schema.map(compile), min, max)
       // ...
       // TODO to be removed, ignore for now
       // case _: LazyParseKeywords => value => summon[OutputOps[O]].valid(value.pointer))

@@ -1016,3 +1016,153 @@ class EvalTest extends FunSuite:
       )
     }
   }
+
+  test("contains") {
+    withCompiledSchema("""{"contains": {"type": "number"}}""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""["gnu", true]"""),
+            parseJsonValue("""[13, "foo", true]"""),
+            parseJsonValue("""[13, 14, "foo", true]""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(NotContains(0))
+            )
+          ),
+          BasicOutput(true, Seq()),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
+
+  test("minContains") {
+    withCompiledSchema("""|{"contains": {"type": "number"},
+                          |"minContains": 2
+                          |}""".stripMargin) { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""[13, "gnu", true]"""),
+            parseJsonValue("""[13, 14, "foo", true]""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(NotContains(1))
+            )
+          ),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
+
+  test("maxContains") {
+    withCompiledSchema("""|{"contains": {"type": "number"},
+                          |"maxContains": 2
+                          |}""".stripMargin) { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""[13, 14, 15, "gnu", true]"""),
+            parseJsonValue("""[]"""),
+            parseJsonValue("""[13, 14, "foo", true]""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(NotContains(3))
+            )
+          ),
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(NotContains(0))
+            )
+          ),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
+
+  test("minContains without contains") {
+    withCompiledSchema("""{"minContains": 2}""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""[13, "gnu", true]"""),
+            parseJsonValue("""[13, 14, "foo", true]""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(true, Seq()),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
+
+  test("maxContains without contains") {
+    withCompiledSchema("""{"maxContains": 2}""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""[13, "gnu", true]"""),
+            parseJsonValue("""[13, 14, "foo", true]""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(true, Seq()),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
+
+  test("patternProperties") {
+    withCompiledSchema("""|{"patternProperties": { "^f": {} },
+                          |"additionalProperties": false
+                          |}""".stripMargin) { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""{"gnu": 13, "bar": true}"""),
+            parseJsonValue("""{"foo": "ok"}""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(FalseSchemaReason(), Pointer.empty / "bar"),
+              WithPointer(FalseSchemaReason(), Pointer.empty / "gnu")
+            )
+          ),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }

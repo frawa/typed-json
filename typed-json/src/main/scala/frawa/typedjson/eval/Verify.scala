@@ -336,3 +336,25 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       }
       .map(ros => FP.Util.sequence(ros).map(os => ops.all(os, value.pointer)))
       .getOrElse(monad.unit(ops.valid(value.pointer)))
+
+  def verifyContains(
+      schema: Option[Fun[R[O]]],
+      min: Option[Int],
+      max: Option[Int]
+  ): Fun[R[O]] = value =>
+    Value
+      .asArray(value.value)
+      .flatMap { vs =>
+        val indexed = vs.zipWithIndex
+          .map { case (v, index) =>
+            WithPointer(v, value.pointer / index)
+          }
+        schema.map(indexed.map(_)).map { ros =>
+          FP.Util.sequence(ros).map { os =>
+            val count = os.count(_.isValid)
+            if min.getOrElse(1) <= count && !max.exists(count > _) then ops.valid(value.pointer)
+            else ops.invalid(NotContains(count), value.pointer)
+          }
+        }
+      }
+      .getOrElse(monad.unit(ops.valid(value.pointer)))
