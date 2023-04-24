@@ -137,10 +137,22 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
   def verifyAnyOf(fun: Fun[R[Seq[O]]]): Fun[R[O]] = funMap(fun)(verifyAnyOf)
 
   def verifyArrayItems(items: Option[Fun[R[O]]], prefixItems: Seq[Fun[R[O]]]): Fun[R[O]] = value =>
-    items
-      .zip(Value.asArray(value.value))
-      .map { (f, vs) =>
-        vs.zipWithIndex.map((v, i) => f(WithPointer(v, value.pointer / i)))
+    Value
+      .asArray(value.value)
+      .map { vs =>
+        val indexed = vs.zipWithIndex
+          .map { case (v, index) =>
+            WithPointer(v, value.pointer / index)
+          }
+        val ros1 = prefixItems.zip(indexed).map { (f, v) =>
+          f(v)
+        }
+        val ros2 = items
+          .map { items =>
+            indexed.drop(prefixItems.size).map(items)
+          }
+          .getOrElse(Seq())
+        ros1 ++ ros2
       }
       .map(ros => FP.Util.sequence(ros).map(os => ops.all(os, value.pointer)))
       .getOrElse { monad.unit(ops.valid(value.pointer)) }
@@ -292,3 +304,35 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
     verifyObjectValue(MinPropertiesMismatch(min)) { v =>
       min <= v.keySet.size
     }
+
+  def verifyDependentRequired(required: Map[String, Seq[String]]): Fun[R[O]] = value =>
+    Value
+      .asObject(value.value)
+      .map { v =>
+        val missing = required
+          .flatMap { case (property, required) =>
+            v
+              .get(property)
+              .map { _ => required.filterNot(v.contains) }
+              .filterNot(_.isEmpty)
+              .map(property -> _)
+          }
+        missing
+      }
+      .filterNot(_.isEmpty)
+      .map { missing =>
+        monad.unit(ops.invalid(DependentRequiredMissing(missing), value.pointer))
+      }
+      .getOrElse(monad.unit(ops.valid(value.pointer)))
+
+  def verifyDependentSchemas(
+      schemas: Map[String, Fun[R[O]]]
+  ): Fun[R[O]] = value =>
+    Value
+      .asObject(value.value)
+      .map { vs =>
+        val required = vs.keySet.flatMap(schemas.get)
+        required.map(_(value)).toSeq
+      }
+      .map(ros => FP.Util.sequence(ros).map(os => ops.all(os, value.pointer)))
+      .getOrElse(monad.unit(ops.valid(value.pointer)))

@@ -918,3 +918,101 @@ class EvalTest extends FunSuite:
       )
     }
   }
+
+  test("dependentRequired") {
+    withCompiledSchema("""{"dependentRequired": {"foo": ["bar", "gnu"]}}""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""{"foo": 1, "bar": 2}"""),
+            parseJsonValue("""{"foo": 1, "bar": 2, "gnu": 3}""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(DependentRequiredMissing(Map("foo" -> Seq("gnu"))))
+            )
+          ),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
+
+  test("dependentSchemas") {
+    withCompiledSchema("""{"dependentSchemas": {"foo": true, "gnu": false}}""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""{"gnu": 1}"""),
+            parseJsonValue("""{"foo": 1}""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(FalseSchemaReason())
+            )
+          ),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
+
+  test("prefixItems") {
+    withCompiledSchema("""{"prefixItems": [{"type": "number"}, {"type": "string"}]}""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""["gnu"]"""),
+            parseJsonValue("""[13, "foo", true]""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(TypeMismatch("number"), Pointer.empty / 0)
+            )
+          ),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
+
+  test("prefixItems and items") {
+    withCompiledSchema("""|{"prefixItems": [{"type": "number"}, {"type": "string"}],
+                          |"items": {"type": "boolean"}
+                          |}""".stripMargin) { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""[13, "gnu", "boom"]"""),
+            parseJsonValue("""[13, "foo", true]""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(
+              WithPointer(TypeMismatch("boolean"), Pointer.empty / 2)
+            )
+          ),
+          BasicOutput(true, Seq())
+        )
+      )
+    }
+  }
