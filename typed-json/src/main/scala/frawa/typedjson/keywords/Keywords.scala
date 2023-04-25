@@ -509,6 +509,7 @@ object Keywords:
                         .map(_.prefix(prefix))
                         .swap
                     } else {
+                      // println(s"FW ignored ${keyword}")
                       Right(keywords.withIgnored(keyword))
                     }
                   }

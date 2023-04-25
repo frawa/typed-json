@@ -24,6 +24,7 @@ import frawa.typedjson.validation.*
 import frawa.typedjson.validation.ValidationProcessing.EvalFun
 
 import scala.reflect.TypeTest
+import frawa.typedjson.keywords.EvaluatedIndices
 
 class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 
@@ -141,7 +142,7 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       .asArray(value.value)
       .map { vs =>
         val indexed = vs.zipWithIndex
-          .map { case (v, index) =>
+          .map { (v, index) =>
             WithPointer(v, value.pointer / index)
           }
         val ros1 = prefixItems.zip(indexed).map { (f, v) =>
@@ -154,7 +155,14 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
           .getOrElse(Seq())
         ros1 ++ ros2
       }
-      .map(ros => FP.Util.sequence(ros).map(os => ops.all(os, value.pointer)))
+      .map { ros =>
+        FP.Util.sequence(ros).map { os =>
+          val validIndices = os.zipWithIndex
+            .filter(_._1.isValid)
+            .map(_._2)
+          ops.all(os, value.pointer).withAnnotation(EvaluatedIndices(validIndices))
+        }
+      }
       .getOrElse { monad.unit(ops.valid(value.pointer)) }
 
   def verfyObjectProperties(
@@ -346,7 +354,7 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       .asArray(value.value)
       .flatMap { vs =>
         val indexed = vs.zipWithIndex
-          .map { case (v, index) =>
+          .map { (v, index) =>
             WithPointer(v, value.pointer / index)
           }
         schema.map(indexed.map(_)).map { ros =>
@@ -358,3 +366,45 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         }
       }
       .getOrElse(monad.unit(ops.valid(value.pointer)))
+
+  def verifyUnevaluatedItems(
+      pushed: Seq[Fun[R[O]]],
+      unevaluated: Fun[R[O]]
+  ): Fun[R[O]] = value =>
+    val ros = pushed.map(_(value))
+    Value
+      .asArray(value.value)
+      .map { vs =>
+        val seqEvaluatedIndices = ros
+          .map { ro =>
+            ro.map { o =>
+              val evaluatedIndices = o.annotation
+                .map {
+                  case EvaluatedIndices(indices) => indices
+                  case _                         => Seq()
+                }
+                .getOrElse(Seq())
+                .toSet
+              evaluatedIndices
+            }
+          }
+        val ros1 = FP.Util
+          .sequence(seqEvaluatedIndices)
+          .map(_.flatten.toSet)
+          .flatMap { evaluated =>
+            val all       = Seq.range(0, vs.length).toSet
+            val remaining = if evaluated.isEmpty then all else all.filterNot(evaluated.contains)
+            val remainingIndexed = vs.zipWithIndex
+              .filter { (v, index) =>
+                remaining.contains(index)
+              }
+              .map { case (v, index) =>
+                WithPointer(v, value.pointer / index)
+              }
+            val ros = remainingIndexed.map(unevaluated)
+            FP.Util.sequence(ros).map(os => ops.all(os, value.pointer))
+          }
+        ros1
+        // FP.Util.sequence(ros).map(os => ops.all(os, value.pointer))
+      }
+      .getOrElse(FP.Util.sequence(ros).map(os => ops.all(os, value.pointer)))

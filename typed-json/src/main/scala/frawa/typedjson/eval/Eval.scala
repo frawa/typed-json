@@ -140,6 +140,9 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case DependentRequiredKeyword(required) => verify.verifyDependentRequired(required)
       case DependentSchemasKeyword(keywords)  => verify.verifyDependentSchemas(compile(keywords))
       case ContainsKeyword(schema, min, max)  => verify.verifyContains(schema.map(compile), min, max)
+      case UnevaluatedItemsKeyword(pushed, unevaluated) =>
+        val funs = pushed.keywords.map(_.value).map(compile).toSeq
+        verify.verifyUnevaluatedItems(funs, compile(unevaluated))
       // ...
       // TODO to be removed, ignore for now
       // case _: LazyParseKeywords => value => summon[OutputOps[O]].valid(value.pointer))
@@ -147,17 +150,14 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 
 trait OutputOps[O]: // extends Monoid[O]:
   def valid(pointer: Pointer): O
-  // def valid(annotation: ValidationAnnotation, pointer: Pointer): O
   def invalid(error: ValidationError, pointer: Pointer): O
-  // def invalid(problems: SchemaProblems): O
 
   def all(os: Seq[O], pointer: Pointer): O
-  // def contains(os: Seq[O], min: Option[Int], max: Option[Int], pointer: Pointer): O
 
-  // def unit = valid
   extension (o: O)
     def not(pointer: Pointer): O
     def isValid: Boolean
-    // def combine(o2: O): O = all(Seq(o, o2))
+    def withAnnotation(annotation: Evaluated): O
+    def annotation: Option[Evaluated]
 
 trait ResultOps[R[_]] extends FP.Monad[R]

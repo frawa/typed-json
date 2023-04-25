@@ -1180,3 +1180,24 @@ class EvalTest extends FunSuite:
       )
     }
   }
+
+  test("unevaluatedItems") {
+    withCompiledSchema("""{ "unevaluatedItems": { "type": "string" } }""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""[]"""),
+            parseJsonValue("""["foo"]"""),
+            parseJsonValue("""[42]""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(true, Seq()),
+          BasicOutput(true, Seq()),
+          BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 0)))
+        )
+      )
+    }
+  }

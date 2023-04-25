@@ -11,7 +11,7 @@ import java.net.URI
 
 object Util:
   val vocabularyForTest: Option[Vocabulary] = dialect(
-    Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId)
+    Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId, Vocabulary.unevaluatedId)
   )
 
   def withKeywords(schema: SchemaValue, lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None)(
