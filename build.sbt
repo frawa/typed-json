@@ -189,6 +189,9 @@ lazy val typedJson =
     .settings(
       libraryDependencies += "io.github.frawa" %%% "inline-files" % "0.5.2" % Test
     )
+    .settings(
+      unmanagedSources / excludeFilter := "*/suggestion/*" || "*/validation/*"
+    )
     .settings(sharedSettings)
     .settings(sharedScalacSettings)
     .settings(strictScalacSettings)
