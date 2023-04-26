@@ -63,7 +63,7 @@ class EvalTest extends FunSuite:
 
   test("null with errors") {
     withCompiledSchema(nullSchema) { fun =>
-      assertEquals(doApply(fun, NullValue), BasicOutput(true, Seq()))
+      assertEquals(doApply(fun, NullValue), BasicOutput(true))
       assertEquals(
         doApply(fun, BoolValue(true)),
         BasicOutput(
@@ -91,16 +91,16 @@ class EvalTest extends FunSuite:
 
   test("boolean") {
     withCompiledSchema(boolSchema) { fun =>
-      assertEquals(doApply(fun, parseJsonValue("true")), BasicOutput(true, Seq()))
+      assertEquals(doApply(fun, parseJsonValue("true")), BasicOutput(true))
       assertEquals(doApply(fun, parseJsonValue("13")), BasicOutput(false, Seq(WithPointer(TypeMismatch("boolean")))))
     }
   }
 
   test("true schema") {
     withCompiledSchema(trueSchema) { fun =>
-      assertEquals(doApply(fun, parseJsonValue("null")), BasicOutput(true, Seq()))
-      assertEquals(doApply(fun, parseJsonValue("13")), BasicOutput(true, Seq()))
-      assertEquals(doApply(fun, parseJsonValue("{}")), BasicOutput(true, Seq()))
+      assertEquals(doApply(fun, parseJsonValue("null")), BasicOutput(true))
+      assertEquals(doApply(fun, parseJsonValue("13")), BasicOutput(true))
+      assertEquals(doApply(fun, parseJsonValue("{}")), BasicOutput(true))
     }
   }
 
@@ -123,9 +123,9 @@ class EvalTest extends FunSuite:
 
   test("empty schema") {
     withCompiledSchema(emtpySchema) { fun =>
-      assertEquals(doApply(fun, parseJsonValue("null")), BasicOutput(true, Seq()))
-      assertEquals(doApply(fun, parseJsonValue("13")), BasicOutput(true, Seq()))
-      assertEquals(doApply(fun, parseJsonValue("{}")), BasicOutput(true, Seq()))
+      assertEquals(doApply(fun, parseJsonValue("null")), BasicOutput(true))
+      assertEquals(doApply(fun, parseJsonValue("13")), BasicOutput(true))
+      assertEquals(doApply(fun, parseJsonValue("{}")), BasicOutput(true))
     }
   }
 
@@ -139,32 +139,41 @@ class EvalTest extends FunSuite:
 
   test("string") {
     withCompiledSchema(stringSchema) { fun =>
-      assertEquals(doApply(fun, parseJsonValue(""""hello"""")), BasicOutput(true, Seq()))
+      assertEquals(doApply(fun, parseJsonValue(""""hello"""")), BasicOutput(true))
       assertEquals(doApply(fun, parseJsonValue("13")), BasicOutput(false, Seq(WithPointer(TypeMismatch("string")))))
     }
   }
 
   test("number") {
     withCompiledSchema(numberSchema) { fun =>
-      assertEquals(doApply(fun, parseJsonValue("13")), BasicOutput(true, Seq()))
+      assertEquals(doApply(fun, parseJsonValue("13")), BasicOutput(true))
       assertEquals(doApply(fun, parseJsonValue("null")), BasicOutput(false, Seq(WithPointer(TypeMismatch("number")))))
     }
   }
 
   test("array") {
     withCompiledSchema(numberArraySchema) { fun =>
-      assertEquals(doApply(fun, parseJsonValue("[13]")), BasicOutput(true, Seq()))
-      assertEquals(doApply(fun, parseJsonValue("null")), BasicOutput(false, Seq(WithPointer(TypeMismatch("array")))))
+      assertEquals(doApply(fun, parseJsonValue("[13]")), BasicOutput(true, annotations = Seq(EvaluatedIndices(Seq(0)))))
+      assertEquals(
+        doApply(fun, parseJsonValue("null")),
+        BasicOutput(false, Seq(WithPointer(TypeMismatch("array"))))
+      )
     }
   }
 
   test("array items") {
     withCompiledSchema(numberArraySchema) { fun =>
-      assertEquals(doApply(fun, parseJsonValue("null")), BasicOutput(false, Seq(WithPointer(TypeMismatch("array")))))
-      assertEquals(doApply(fun, parseJsonValue("[13]")), BasicOutput(true, Seq()))
+      assertEquals(
+        doApply(fun, parseJsonValue("null")),
+        BasicOutput(false, Seq(WithPointer(TypeMismatch("array"))))
+      )
+      assertEquals(doApply(fun, parseJsonValue("[13]")), BasicOutput(true, annotations = Seq(EvaluatedIndices(Seq(0)))))
       assertEquals(
         doApply(fun, parseJsonValue("[true]")),
-        BasicOutput(false, Seq(WithPointer(TypeMismatch("number"), Pointer.empty / 0)))
+        BasicOutput(
+          false,
+          Seq(WithPointer(TypeMismatch("number"), Pointer.empty / 0))
+        )
       )
     }
   }
@@ -180,7 +189,7 @@ class EvalTest extends FunSuite:
                            |}
                            |""".stripMargin)
         ),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue("null")),
@@ -202,7 +211,7 @@ class EvalTest extends FunSuite:
     withCompiledSchema(totoObjectSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("""{"toto": 13}""")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
     }
   }
@@ -228,7 +237,7 @@ class EvalTest extends FunSuite:
     withCompiledSchema(allOfSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("13")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
     }
   }
@@ -252,7 +261,7 @@ class EvalTest extends FunSuite:
     withCompiledSchema(anyOfSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("1313")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue("true")),
@@ -271,7 +280,7 @@ class EvalTest extends FunSuite:
     withCompiledSchema(oneOfSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("1313")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
     }
   }
@@ -310,7 +319,7 @@ class EvalTest extends FunSuite:
     withCompiledSchema("""{"not": { "type": "number" }}""") { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("true")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue("1313")),
@@ -323,11 +332,11 @@ class EvalTest extends FunSuite:
     withCompiledSchema(ifThenElseSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("1313")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue(""""string"""")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue("null")),
@@ -344,11 +353,11 @@ class EvalTest extends FunSuite:
                          |""".stripMargin) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("1313")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue(""""string"""")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue("null")),
@@ -365,15 +374,15 @@ class EvalTest extends FunSuite:
                          |""".stripMargin) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("1313")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue(""""string"""")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue("null")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
     }
   }
@@ -386,15 +395,15 @@ class EvalTest extends FunSuite:
                          |""".stripMargin) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("1313")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue(""""string"""")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue("null")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
     }
   }
@@ -403,11 +412,11 @@ class EvalTest extends FunSuite:
     withCompiledSchema(nullOrStringSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("null")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue(""""hello"""")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue("13")),
@@ -420,11 +429,11 @@ class EvalTest extends FunSuite:
     withCompiledSchema(enumSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue(""""foo"""")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue(""""bar"""")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue(""""hello"""")),
@@ -442,7 +451,7 @@ class EvalTest extends FunSuite:
     withCompiledSchema(constSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue(""""first"""")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue("{}")),
@@ -470,7 +479,10 @@ class EvalTest extends FunSuite:
     withCompiledSchema(missingIdRefDefsSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("[1313]")),
-        BasicOutput(false, Seq(WithPointer(CannotResolve("#missing", None), Pointer.empty / 0)))
+        BasicOutput(
+          false,
+          Seq(WithPointer(CannotResolve("#missing", None), Pointer.empty / 0))
+        )
       )
     }
   }
@@ -479,11 +491,14 @@ class EvalTest extends FunSuite:
     withCompiledSchema(idRefDefsSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("[1313]")),
-        BasicOutput(true, Seq())
+        BasicOutput(true, Seq(), annotations = Seq(EvaluatedIndices(Seq(0))))
       )
       assertEquals(
         doApply(fun, parseJsonValue("""["hello"]""")),
-        BasicOutput(false, Seq(WithPointer(TypeMismatch("number"), Pointer.empty / 0)))
+        BasicOutput(
+          false,
+          Seq(WithPointer(TypeMismatch("number"), Pointer.empty / 0))
+        )
       )
     }
   }
@@ -498,7 +513,13 @@ class EvalTest extends FunSuite:
             assertEquals(state.cache.keySet, Set("https://example.net/root.json#item"))
             assertEquals(state.hits, Map("https://example.net/root.json#item" -> 1))
         ),
-        Seq(BasicOutput(true, Seq()), BasicOutput(false, Seq(WithPointer(TypeMismatch("number"), Pointer.empty / 0))))
+        Seq(
+          BasicOutput(true, Seq(), annotations = Seq(EvaluatedIndices(Seq(0)))),
+          BasicOutput(
+            false,
+            Seq(WithPointer(TypeMismatch("number"), Pointer.empty / 0))
+          )
+        )
       )
     }
   }
@@ -507,7 +528,7 @@ class EvalTest extends FunSuite:
     withCompiledSchema(refInPropertiesSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("""{ "foo": 13 }""")),
-        BasicOutput(true, Seq())
+        BasicOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue("""{ "foo": true }""")),
@@ -540,8 +561,8 @@ class EvalTest extends FunSuite:
             )
         ),
         Seq(
-          BasicOutput(true, Seq()),
-          BasicOutput(true, Seq()),
+          BasicOutput(true),
+          BasicOutput(true),
           BasicOutput(
             false,
             Seq(
@@ -586,8 +607,8 @@ class EvalTest extends FunSuite:
             )
         ),
         Seq(
-          BasicOutput(true, Seq()),
-          BasicOutput(true, Seq()),
+          BasicOutput(true),
+          BasicOutput(true),
           BasicOutput(
             false,
             Seq(
@@ -637,7 +658,7 @@ class EvalTest extends FunSuite:
               WithPointer(NotMultipleOf(2))
             )
           ),
-          BasicOutput(true, Seq())
+          BasicOutput(true)
         )
       )
     }
@@ -658,7 +679,7 @@ class EvalTest extends FunSuite:
               WithPointer(MinimumMismatch(13, exclude = false))
             )
           ),
-          BasicOutput(true, Seq())
+          BasicOutput(true)
         )
       )
     }
@@ -679,7 +700,7 @@ class EvalTest extends FunSuite:
               WithPointer(MinimumMismatch(13, exclude = true))
             )
           ),
-          BasicOutput(true, Seq())
+          BasicOutput(true)
         )
       )
     }
@@ -703,7 +724,7 @@ class EvalTest extends FunSuite:
               WithPointer(MaxLengthMismatch(3))
             )
           ),
-          BasicOutput(true, Seq())
+          BasicOutput(true)
         )
       )
     }
@@ -727,7 +748,7 @@ class EvalTest extends FunSuite:
               WithPointer(MinLengthMismatch(4))
             )
           ),
-          BasicOutput(true, Seq())
+          BasicOutput(true)
         )
       )
     }
@@ -751,7 +772,7 @@ class EvalTest extends FunSuite:
               WithPointer(PatternMismatch("foo\\d\\d"))
             )
           ),
-          BasicOutput(true, Seq())
+          BasicOutput(true)
         )
       )
     }
@@ -775,7 +796,7 @@ class EvalTest extends FunSuite:
               WithPointer(MinItemsMismatch(3))
             )
           ),
-          BasicOutput(true, Seq())
+          BasicOutput(true)
         )
       )
     }
@@ -799,7 +820,7 @@ class EvalTest extends FunSuite:
               WithPointer(MaxItemsMismatch(2))
             )
           ),
-          BasicOutput(true, Seq())
+          BasicOutput(true)
         )
       )
     }
@@ -823,7 +844,7 @@ class EvalTest extends FunSuite:
               WithPointer(ItemsNotUnique())
             )
           ),
-          BasicOutput(true, Seq())
+          BasicOutput(true)
         )
       )
     }
@@ -847,7 +868,7 @@ class EvalTest extends FunSuite:
               WithPointer(MaxPropertiesMismatch(2))
             )
           ),
-          BasicOutput(true, Seq())
+          BasicOutput(true)
         )
       )
     }
@@ -871,7 +892,7 @@ class EvalTest extends FunSuite:
               WithPointer(MinPropertiesMismatch(3))
             )
           ),
-          BasicOutput(true, Seq())
+          BasicOutput(true)
         )
       )
     }
@@ -895,7 +916,7 @@ class EvalTest extends FunSuite:
               WithPointer(MissingRequiredProperties(Seq("foo")))
             )
           ),
-          BasicOutput(true, Seq())
+          BasicOutput(true)
         )
       )
     }
@@ -919,7 +940,7 @@ class EvalTest extends FunSuite:
               WithPointer(DependentRequiredMissing(Map("foo" -> Seq("gnu"))))
             )
           ),
-          BasicOutput(true, Seq())
+          BasicOutput(true)
         )
       )
     }
@@ -943,7 +964,7 @@ class EvalTest extends FunSuite:
               WithPointer(FalseSchemaReason())
             )
           ),
-          BasicOutput(true, Seq())
+          BasicOutput(true)
         )
       )
     }
@@ -967,7 +988,7 @@ class EvalTest extends FunSuite:
               WithPointer(TypeMismatch("number"), Pointer.empty / 0)
             )
           ),
-          BasicOutput(true, Seq())
+          BasicOutput(true, annotations = List(EvaluatedIndices(Seq(0, 1))))
         )
       )
     }
@@ -991,9 +1012,10 @@ class EvalTest extends FunSuite:
             false,
             Seq(
               WithPointer(TypeMismatch("boolean"), Pointer.empty / 2)
-            )
+            ),
+            annotations = Seq(EvaluatedIndices(Seq(0, 1)))
           ),
-          BasicOutput(true, Seq())
+          BasicOutput(true, annotations = Seq(EvaluatedIndices(Seq(0, 1, 2))))
         )
       )
     }
@@ -1018,8 +1040,8 @@ class EvalTest extends FunSuite:
               WithPointer(NotContains(0))
             )
           ),
-          BasicOutput(true, Seq()),
-          BasicOutput(true, Seq())
+          BasicOutput(true, annotations = List(EvaluatedIndices(Seq(0)))),
+          BasicOutput(true, annotations = List(EvaluatedIndices(Seq(0, 1))))
         )
       )
     }
@@ -1043,9 +1065,10 @@ class EvalTest extends FunSuite:
             false,
             Seq(
               WithPointer(NotContains(1))
-            )
+            ),
+            annotations = Seq(EvaluatedIndices(Seq(0)))
           ),
-          BasicOutput(true, Seq())
+          BasicOutput(true, annotations = Seq(EvaluatedIndices(Seq(0, 1))))
         )
       )
     }
@@ -1070,7 +1093,8 @@ class EvalTest extends FunSuite:
             false,
             Seq(
               WithPointer(NotContains(3))
-            )
+            ),
+            annotations = Seq(EvaluatedIndices(Seq(0, 1, 2)))
           ),
           BasicOutput(
             false,
@@ -1078,7 +1102,7 @@ class EvalTest extends FunSuite:
               WithPointer(NotContains(0))
             )
           ),
-          BasicOutput(true, Seq())
+          BasicOutput(true, annotations = Seq(EvaluatedIndices(Seq(0, 1))))
         )
       )
     }
@@ -1096,8 +1120,8 @@ class EvalTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(true, Seq()),
-          BasicOutput(true, Seq())
+          BasicOutput(true),
+          BasicOutput(true)
         )
       )
     }
@@ -1115,8 +1139,8 @@ class EvalTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(true, Seq()),
-          BasicOutput(true, Seq())
+          BasicOutput(true),
+          BasicOutput(true)
         )
       )
     }
@@ -1143,7 +1167,7 @@ class EvalTest extends FunSuite:
               WithPointer(FalseSchemaReason(), Pointer.empty / "gnu")
             )
           ),
-          BasicOutput(true, Seq())
+          BasicOutput(true)
         )
       )
     }
@@ -1194,8 +1218,8 @@ class EvalTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(true, Seq()),
-          BasicOutput(true, Seq()),
+          BasicOutput(true),
+          BasicOutput(true),
           BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 0)))
         )
       )
@@ -1214,7 +1238,7 @@ class EvalTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(true, Seq()),
+          BasicOutput(true),
           BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
         )
       )
@@ -1233,7 +1257,7 @@ class EvalTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(true, Seq()),
+          BasicOutput(true),
           BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
         )
       )
@@ -1256,7 +1280,29 @@ class EvalTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(true, Seq()),
+          BasicOutput(true),
+          BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
+        )
+      )
+    }
+  }
+
+  test("unevaluatedItems with nested items") {
+    withCompiledSchema("""|{
+                          |"allOf": [{"items": {"type": "boolean"}}],
+                          |"unevaluatedItems": { "type": "string" }
+                          |}""".stripMargin) { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""[true, "foo", false]"""),
+            parseJsonValue("""[true, 13, false]""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(true),
           BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
         )
       )

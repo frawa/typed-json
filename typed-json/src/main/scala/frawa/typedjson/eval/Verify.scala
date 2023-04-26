@@ -383,12 +383,12 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         val seqEvaluatedIndices = ros
           .map { ro =>
             ro.map { o =>
-              val evaluatedIndices = o.annotation
-                .map {
+              val evaluatedIndices = o
+                .getAnnotations()
+                .flatMap {
                   case EvaluatedIndices(indices) => indices
                   case _                         => Seq()
                 }
-                .getOrElse(Seq())
                 .toSet
               evaluatedIndices
             }

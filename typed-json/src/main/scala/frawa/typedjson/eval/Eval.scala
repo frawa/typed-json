@@ -158,6 +158,14 @@ trait OutputOps[O]: // extends Monoid[O]:
     def not(pointer: Pointer): O
     def isValid: Boolean
     def withAnnotation(annotation: Evaluated): O
-    def annotation: Option[Evaluated]
+    def getAnnotations(): Seq[Evaluated]
+
+object OutputOps:
+  def mergeAnnotations(es: Seq[Evaluated]): Seq[Evaluated] =
+    val indices = es.flatMap {
+      case EvaluatedIndices(indices) => indices
+      case _                         => Seq()
+    }.distinct
+    if indices.nonEmpty then Seq(EvaluatedIndices(indices)) else Seq()
 
 trait ResultOps[R[_]] extends FP.Monad[R]
