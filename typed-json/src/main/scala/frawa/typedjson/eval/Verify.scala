@@ -360,8 +360,13 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         schema.map(indexed.map(_)).map { ros =>
           FP.Util.sequence(ros).map { os =>
             val count = os.count(_.isValid)
-            if min.getOrElse(1) <= count && !max.exists(count > _) then ops.valid(value.pointer)
-            else ops.invalid(NotContains(count), value.pointer)
+            val o =
+              if min.getOrElse(1) <= count && !max.exists(count > _) then ops.valid(value.pointer)
+              else ops.invalid(NotContains(count), value.pointer)
+            val validIndices = os.zipWithIndex
+              .filter(_._1.isValid)
+              .map(_._2)
+            o.withAnnotation(EvaluatedIndices(validIndices))
           }
         }
       }

@@ -1201,3 +1201,64 @@ class EvalTest extends FunSuite:
       )
     }
   }
+
+  test("unevaluatedItems with items") {
+    withCompiledSchema("""{ "items": { "type": "boolean" }, "unevaluatedItems": { "type": "string" } }""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""[true, "foo", false]"""),
+            parseJsonValue("""[true, 13, false]""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(true, Seq()),
+          BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
+        )
+      )
+    }
+  }
+
+  test("unevaluatedItems with contains") {
+    withCompiledSchema("""{ "unevaluatedItems": { "type": "string" }, "contains": {"type": "boolean"}  }""") { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""[true, "foo", false]"""),
+            parseJsonValue("""[true, 13, false]""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(true, Seq()),
+          BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
+        )
+      )
+    }
+  }
+
+  test("unevaluatedItems with items and contains") {
+    withCompiledSchema("""|{
+                          |"items": {"type": "array"},
+                          |"unevaluatedItems": { "type": "string" }, 
+                          |"contains": {"type": "boolean"}  
+                          |}""".stripMargin) { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""[true, "foo", false, [13], [14]]"""),
+            parseJsonValue("""[true, 13, false, [13]]""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(true, Seq()),
+          BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
+        )
+      )
+    }
+  }
