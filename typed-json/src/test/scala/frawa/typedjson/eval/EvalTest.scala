@@ -36,7 +36,7 @@ import scala.reflect.TypeTest
 
 class EvalTest extends FunSuite:
 
-  import Util.{*, given}
+  import Util.*
   // import FlagOutput.given
   // import BasicOutput.given
 
