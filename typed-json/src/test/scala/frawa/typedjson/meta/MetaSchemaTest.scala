@@ -25,7 +25,6 @@ import frawa.typedjson.eval.Util.{withCompiledSchemaValue, doApply}
 import frawa.typedjson.eval.BasicOutput
 import frawa.typedjson.eval.MyState.MyR
 import frawa.typedjson.eval.Eval
-// import frawa.typedjson.TypedJson.Validation.output
 
 class MetaSchemaTest extends FunSuite:
 
@@ -39,16 +38,6 @@ class MetaSchemaTest extends FunSuite:
   def withSchemaSpec(name: String)(f: SchemaValue => Unit): Unit =
     val Some(schema) = resolver(base.resolve(name)): @unchecked
     f(schema)
-
-  def validateSpec_(valueName: String, schemaName: String)(f: Result[ValidationOutput] => Unit): Unit =
-    withSchemaSpec(schemaName) { schema =>
-      withSchemaSpec(valueName) { value =>
-        withProcessor[ValidationOutput](schema) { evaluator =>
-          val result = evaluator(InnerValue(value.value))
-          f(result)
-        }
-      }
-    }
 
   def validateSpec(valueName: String, schemaName: String)(f: BasicOutput => Unit): Unit =
     val evalBasic                = Eval[MyR, BasicOutput]
