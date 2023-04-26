@@ -129,6 +129,7 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case MaxItemsKeyword(min)               => verify.verifyMaxItems(min)
       case UniqueItemsKeyword(unique)         => verify.verifyUniqueItems(unique)
       case MinimumKeyword(min, exclude)       => verify.verifyMinimum(min, exclude)
+      case MaximumKeyword(max, exclude)       => verify.verifyMaximum(max, exclude)
       case PatternKeyword(pattern)            => verify.verifyPattern(pattern)
       case PropertyNamesKeyword(ks)           => verify.verifyPropertyNames(compile(ks))
       case FormatKeyword(format)              => verify.verifyFormat(format)

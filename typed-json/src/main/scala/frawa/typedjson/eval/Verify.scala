@@ -258,6 +258,11 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       if exclude then min < v else min <= v
     }
 
+  def verifyMaximum(max: BigDecimal, exclude: Boolean): Fun[R[O]] =
+    verifyNumberValue(MaximumMismatch(max, exclude)) { v =>
+      if exclude then max > v else max >= v
+    }
+
   def verifyPattern(pattern: String): Fun[R[O]] =
     val r = pattern.r
     verifyStringValue(PatternMismatch(pattern)) { v =>
