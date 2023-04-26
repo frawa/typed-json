@@ -143,6 +143,9 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case UnevaluatedItemsKeyword(pushed, unevaluated) =>
         val funs = pushed.keywords.map(_.value).map(compile).toSeq
         verify.verifyUnevaluatedItems(funs, compile(unevaluated))
+      case UnevaluatedPropertiesKeyword(pushed, unevaluated) =>
+        val funs = pushed.keywords.map(_.value).map(compile).toSeq
+        verify.verifyUnevaluatedProperties(funs, compile(unevaluated))
       // ...
       // TODO to be removed, ignore for now
       // case _: LazyParseKeywords => value => summon[OutputOps[O]].valid(value.pointer))
@@ -166,6 +169,12 @@ object OutputOps:
       case EvaluatedIndices(indices) => indices
       case _                         => Seq()
     }.distinct
-    if indices.nonEmpty then Seq(EvaluatedIndices(indices)) else Seq()
+    val properties = es.flatMap {
+      case EvaluatedProperties(properties) => properties
+      case _                               => Set()
+    }.toSet
+    val es1 = if indices.nonEmpty then Seq(EvaluatedIndices(indices)) else Seq()
+    val es2 = if properties.nonEmpty then Seq(EvaluatedProperties(properties)) else Seq()
+    es1 ++ es2
 
 trait ResultOps[R[_]] extends FP.Monad[R]

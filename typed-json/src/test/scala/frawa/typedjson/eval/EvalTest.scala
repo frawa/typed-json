@@ -189,7 +189,7 @@ class EvalTest extends FunSuite:
                            |}
                            |""".stripMargin)
         ),
-        BasicOutput(true)
+        BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("toto", "titi"))))
       )
       assertEquals(
         doApply(fun, parseJsonValue("null")),
@@ -202,7 +202,11 @@ class EvalTest extends FunSuite:
     withCompiledSchema(totoObjectSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("""{"toto": 13,"titi": true}""")),
-        BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / "titi")))
+        BasicOutput(
+          false,
+          Seq(WithPointer(TypeMismatch("string"), Pointer.empty / "titi")),
+          annotations = Seq(EvaluatedProperties(Set("toto")))
+        )
       )
     }
   }
@@ -211,7 +215,7 @@ class EvalTest extends FunSuite:
     withCompiledSchema(totoObjectSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("""{"toto": 13}""")),
-        BasicOutput(true)
+        BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("toto"))))
       )
     }
   }
@@ -228,7 +232,11 @@ class EvalTest extends FunSuite:
                          |""".stripMargin) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("""{"toto": 13}""")),
-        BasicOutput(false, Seq(WithPointer(MissingRequiredProperties(Seq("titi")))))
+        BasicOutput(
+          false,
+          Seq(WithPointer(MissingRequiredProperties(Seq("titi")))),
+          annotations = Seq(EvaluatedProperties(Set("toto")))
+        )
       )
     }
   }
@@ -528,7 +536,7 @@ class EvalTest extends FunSuite:
     withCompiledSchema(refInPropertiesSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("""{ "foo": 13 }""")),
-        BasicOutput(true)
+        BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("foo"))))
       )
       assertEquals(
         doApply(fun, parseJsonValue("""{ "foo": true }""")),
@@ -561,8 +569,8 @@ class EvalTest extends FunSuite:
             )
         ),
         Seq(
-          BasicOutput(true),
-          BasicOutput(true),
+          BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("foo")))),
+          BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("foo")))),
           BasicOutput(
             false,
             Seq(
@@ -607,8 +615,8 @@ class EvalTest extends FunSuite:
             )
         ),
         Seq(
-          BasicOutput(true),
-          BasicOutput(true),
+          BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("$defs")))),
+          BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("$defs")))),
           BasicOutput(
             false,
             Seq(
@@ -1167,7 +1175,7 @@ class EvalTest extends FunSuite:
               WithPointer(FalseSchemaReason(), Pointer.empty / "gnu")
             )
           ),
-          BasicOutput(true)
+          BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("foo"))))
         )
       )
     }
@@ -1304,6 +1312,28 @@ class EvalTest extends FunSuite:
         Seq(
           BasicOutput(true),
           BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
+        )
+      )
+    }
+  }
+
+  test("unevaluatedProperties") {
+    withCompiledSchema("""|{
+                          |"properties": {"foo": {"type": "string"}},
+                          |"unevaluatedProperties": { "type": "number" }
+                          |}""".stripMargin) { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""{"foo":"bar", "gnu":13}"""),
+            parseJsonValue("""{"foo":"bar", "gnu":true}""")
+          ),
+          state => {}
+        ),
+        Seq(
+          BasicOutput(true),
+          BasicOutput(false, Seq(WithPointer(TypeMismatch("number"), Pointer.empty / "gnu")))
         )
       )
     }
