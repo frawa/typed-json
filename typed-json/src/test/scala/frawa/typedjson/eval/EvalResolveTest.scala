@@ -1,7 +1,7 @@
 package frawa.typedjson.eval
 
 import frawa.typedjson.eval.*
-import frawa.typedjson.eval.MyState.{MyR, given}
+import frawa.typedjson.eval.CacheState.{R, given}
 import frawa.typedjson.keywords.*
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser.Value
@@ -11,13 +11,14 @@ import frawa.typedjson.testutil.TestSchemas.*
 import frawa.typedjson.testutil.TestUtil.{*, given}
 import frawa.typedjson.validation.*
 import munit.FunSuite
+import frawa.typedjson.eval.CacheState
 
 class EvalResolveTest extends FunSuite:
 
   import Util.*
 
-  private val evalBasic        = Eval[MyR, BasicOutput]
-  given Eval[MyR, BasicOutput] = evalBasic
+  private val evalBasic      = Eval[R, BasicOutput]
+  given Eval[R, BasicOutput] = evalBasic
 
   test("missing $id/$ref/$def") {
     withCompiledSchema(missingIdRefDefsSchema) { fun =>

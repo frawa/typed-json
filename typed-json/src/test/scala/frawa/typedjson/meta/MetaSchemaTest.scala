@@ -17,13 +17,14 @@
 package frawa.typedjson.meta
 
 import frawa.typedjson.eval.{BasicOutput, Eval}
-import frawa.typedjson.eval.MyState.MyR
+import frawa.typedjson.eval.CacheState.R
 import frawa.typedjson.eval.Util.{doApply, withCompiledSchemaValue}
 import frawa.typedjson.keywords.*
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestUtil.*
 import frawa.typedjson.validation.{ValidationOutput, ValidationProcessing}
 import munit.FunSuite
+import frawa.typedjson.eval.CacheState
 
 class MetaSchemaTest extends FunSuite:
 
@@ -39,8 +40,8 @@ class MetaSchemaTest extends FunSuite:
     f(schema)
 
   def validateSpec(valueName: String, schemaName: String)(f: BasicOutput => Unit): Unit =
-    val evalBasic                = Eval[MyR, BasicOutput]
-    given Eval[MyR, BasicOutput] = evalBasic
+    val evalBasic              = Eval[R, BasicOutput]
+    given Eval[R, BasicOutput] = evalBasic
     withSchemaSpec(schemaName) { schema =>
       withSchemaSpec(valueName) { value =>
         withCompiledSchemaValue(schema) { fun =>

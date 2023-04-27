@@ -1,6 +1,6 @@
 package frawa.typedjson.eval
 
-import frawa.typedjson.eval.MyState.MyR
+import frawa.typedjson.eval.CacheState.R
 import frawa.typedjson.keywords.{EvaluatedIndices, EvaluatedProperties, WithPointer}
 import frawa.typedjson.parser.Value.{BoolValue, NullValue, StringValue}
 import frawa.typedjson.pointer.Pointer
@@ -8,18 +8,19 @@ import frawa.typedjson.testutil.TestSchemas.*
 import frawa.typedjson.testutil.TestUtil.{*, given}
 import frawa.typedjson.validation.*
 import munit.FunSuite
+import frawa.typedjson.eval.CacheState
 
 class EvalCoreTest extends FunSuite:
 
   import Util.*
 
-  private val evalBasic        = Eval[MyR, BasicOutput]
-  given Eval[MyR, BasicOutput] = evalBasic
+  private val evalBasic      = Eval[R, BasicOutput]
+  given Eval[R, BasicOutput] = evalBasic
 
-  private val evalFlag = Eval[MyR, FlagOutput]
+  private val evalFlag = Eval[R, FlagOutput]
 
   test("null") {
-    given Eval[MyR, FlagOutput] = evalFlag
+    given Eval[R, FlagOutput] = evalFlag
 
     withCompiledSchema(nullSchema) { fun =>
       assertEquals(doApply(fun, NullValue), FlagOutput(true))
@@ -28,7 +29,7 @@ class EvalCoreTest extends FunSuite:
   }
 
   test("true") {
-    given Eval[MyR, FlagOutput] = evalFlag
+    given Eval[R, FlagOutput] = evalFlag
 
     withCompiledSchema(trueSchema) { fun =>
       assertEquals(doApply(fun, BoolValue(true)), FlagOutput(true))
@@ -50,7 +51,7 @@ class EvalCoreTest extends FunSuite:
   }
 
   test("false") {
-    given Eval[MyR, FlagOutput] = evalFlag
+    given Eval[R, FlagOutput] = evalFlag
 
     withCompiledSchema(falseSchema) { fun =>
       assertEquals(doApply(fun, BoolValue(true)), FlagOutput(false))
@@ -89,7 +90,7 @@ class EvalCoreTest extends FunSuite:
   }
 
   test("not false") {
-    given Eval[MyR, FlagOutput] = evalFlag
+    given Eval[R, FlagOutput] = evalFlag
 
     withCompiledSchema(notFalseSchema) { fun =>
       assertEquals(doApply(fun, parseJsonValue("null")), FlagOutput(true))

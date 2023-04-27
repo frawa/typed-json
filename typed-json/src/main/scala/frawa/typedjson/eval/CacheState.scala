@@ -1,6 +1,5 @@
 package frawa.typedjson.eval
 
-import frawa.typedjson.eval.MyState.{Cached, MyR}
 import frawa.typedjson.keywords.*
 import frawa.typedjson.parser.Value
 import frawa.typedjson.util.UriUtil
@@ -8,64 +7,62 @@ import frawa.typedjson.validation.CannotResolve
 
 import java.net.URI
 
-// TODO possible?
-// case class MyState[O: OutputOps](resolver: SchemaResolver, count: Int, resolved: Map[String, MyR[Eval.Fun[O]]])
-case class MyState(
+case class CacheState(
     rootResolver: SchemaResolver,
     rootVocabulary: Vocabulary,
     count: Int,
-    cache: Map[String, MyState.Cached],
+    cache: Map[String, CacheState.Cached],
     hits: Map[String, Int]
 )
 
-object MyState:
-  type MyR = [A] =>> MyState => (A, MyState)
+object CacheState:
+  type R = [A] =>> CacheState => (A, CacheState)
 
   type Cached = (SchemaResolution, Either[SchemaProblems, Vocabulary])
 
-  def unit[A](a: A): MyR[A] = s => (a, s)
+  def unit[A](a: A): R[A] = s => (a, s)
 
-  def bind[A, B](a: MyR[A])(f: A => MyR[B]): MyR[B] = s =>
+  def bind[A, B](a: R[A])(f: A => R[B]): R[B] = s =>
     val (a2, s2) = a(s)
     f(a2)(s2.copy(count = s2.count + 1))
 
-  given [O: OutputOps]: TheResultMonad[MyR, O] with
-    def unit[A](a: A): MyR[A] =
-      MyState.unit(a)
+  given [O: OutputOps]: TheResultMonad[R, O] with
+    def unit[A](a: A): R[A] =
+      CacheState.unit(a)
 
-    def bind[A, B](a: MyR[A])(f: A => MyR[B]): MyR[B] =
-      MyState.bind(a)(f)
+    def bind[A, B](a: R[A])(f: A => R[B]): R[B] =
+      CacheState.bind(a)(f)
 
     def resolve(ref: String, base: URI, scope: DynamicScope)(using
-        eval: Eval[MyR, O]
-    ): Eval.Fun[MyR[O]] =
-      MyState.resolve(ref, base, scope)
+        eval: Eval[R, O]
+    ): Eval.Fun[R[O]] =
+      CacheState.resolve(ref, base, scope)
 
     def resolveDynamic(ref: String, base: URI, scope: DynamicScope)(using
-        eval: Eval[MyR, O]
-    ): Eval.Fun[MyR[O]] =
-      MyState.resolveDynamic(ref, base, scope)
+        eval: Eval[R, O]
+    ): Eval.Fun[R[O]] =
+      CacheState.resolveDynamic(ref, base, scope)
 
-  def myZero[O: OutputOps](resolver: SchemaResolver, vocabulary: Vocabulary): MyState =
-    MyState(resolver, vocabulary, 0, Map.empty, Map.empty)
+  def myZero[O: OutputOps](resolver: SchemaResolver, vocabulary: Vocabulary): CacheState =
+    CacheState(resolver, vocabulary, 0, Map.empty, Map.empty)
 
   def resolve[O: OutputOps](ref: String, base: URI, scope: DynamicScope)(using
-      eval: Eval[MyR, O]
-  ): Eval.Fun[MyR[O]] =
+      eval: Eval[R, O]
+  ): Eval.Fun[R[O]] =
     doResolve(ref, base, scope) { (ref, resolver) =>
       resolver.resolveRef(ref)
     }
 
   def resolveDynamic[O: OutputOps](ref: String, base: URI, scope: DynamicScope)(using
-      eval: Eval[MyR, O]
-  ): Eval.Fun[MyR[O]] =
+      eval: Eval[R, O]
+  ): Eval.Fun[R[O]] =
     doResolve(ref, base, scope) { (ref, resolver) => resolver.resolveDynamicRef(ref, scope) }
 
   def doResolve[O: OutputOps](ref: String, base: URI, scope: DynamicScope)(
       resolve: (String, SchemaResolver) => Option[SchemaResolution]
   )(using
-      eval: Eval[MyR, O]
-  ): Eval.Fun[MyR[O]] = value =>
+      eval: Eval[R, O]
+  ): Eval.Fun[R[O]] = value =>
     state =>
       val ops = summon[OutputOps[O]]
       val uri = UriUtil.absolute(ref, base).toString

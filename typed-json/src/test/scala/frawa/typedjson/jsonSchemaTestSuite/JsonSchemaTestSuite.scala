@@ -17,7 +17,7 @@
 package frawa.typedjson.jsonSchemaTestSuite
 
 import frawa.inlinefiles.InlineFiles
-import frawa.typedjson.eval.MyState.MyR
+import frawa.typedjson.eval.CacheState.R
 import frawa.typedjson.eval.*
 import frawa.typedjson.eval.Util.{doApply, withCompiledSchemaValue}
 import frawa.typedjson.keywords.*
@@ -32,6 +32,7 @@ import frawa.typedjson.validation.{ValidationOutput, ValidationProcessing}
 import munit.{FunSuite, Location, TestOptions}
 
 import java.net.URI
+import frawa.typedjson.eval.CacheState
 
 open class JsonSchemaTestSuite extends FunSuite:
   protected val draft202012 = InlineFiles.inlineDeepTextFiles("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
@@ -139,7 +140,7 @@ open class JsonSchemaTestSuite extends FunSuite:
       case _ => fail("invalid test json")
 
   import BasicOutput.given
-  import MyState.given
+  import CacheState.given
 
   private def checkTest(file: String)(testValue: Value): Unit =
     testValue match
@@ -179,8 +180,8 @@ open class JsonSchemaTestSuite extends FunSuite:
 
         val hasIgnoredFailMessage = ignoreFailMessageByDescription.contains(testId)
 
-        val evalBasic                = Eval[MyR, BasicOutput]
-        given Eval[MyR, BasicOutput] = evalBasic
+        val evalBasic              = Eval[R, BasicOutput]
+        given Eval[R, BasicOutput] = evalBasic
 
         if oneTestPerData || hasIgnoredFailMessage then
           val lr                                           = Some(lazyResolver)
@@ -230,7 +231,7 @@ open class JsonSchemaTestSuite extends FunSuite:
   }
 
   private def assertOne[O](
-      fun: (Value => MyR[O]),
+      fun: (Value => R[O]),
       data: TestData
   )(using OutputOps[O])(using SchemaResolver): Unit = {
 

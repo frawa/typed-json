@@ -17,7 +17,7 @@
 package frawa.typedjson.eval
 
 import frawa.typedjson.eval.*
-import frawa.typedjson.eval.MyState.{MyR, given}
+import frawa.typedjson.eval.CacheState.{R, given}
 import frawa.typedjson.keywords.*
 import frawa.typedjson.keywords.SchemaProblems.MissingReference
 import frawa.typedjson.meta.MetaSchemas
@@ -33,13 +33,14 @@ import munit.FunSuite
 
 import java.net.URI
 import scala.reflect.TypeTest
+import frawa.typedjson.eval.CacheState
 
 class EvalKeywordTest extends FunSuite:
 
   import Util.*
 
-  private val evalBasic        = Eval[MyR, BasicOutput]
-  given Eval[MyR, BasicOutput] = evalBasic
+  private val evalBasic      = Eval[R, BasicOutput]
+  given Eval[R, BasicOutput] = evalBasic
 
   test("multipleOf") {
     withCompiledSchema("""{"multipleOf": 2}""") { fun =>
