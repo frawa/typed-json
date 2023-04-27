@@ -5,6 +5,7 @@ import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.validation.ValidationError
 import frawa.typedjson.keywords.SchemaProblems
 import frawa.typedjson.keywords.Evaluated
+import frawa.typedjson.keywords.Keyword
 
 // see https://json-schema.org/draft/2020-12/json-schema-core.html#name-flag
 
@@ -27,3 +28,4 @@ object FlagOutput:
       def isValid: Boolean                                  = o.valid
       def withAnnotation(annotation: Evaluated): FlagOutput = o.copy(annotations = o.annotations :+ annotation)
       def getAnnotations(): Seq[Evaluated]                  = o.annotations
+      def forKeyword(k: Keyword): FlagOutput                = o

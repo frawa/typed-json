@@ -89,7 +89,7 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
     kks.view.mapValues(compile).toMap
 
   private def compileOne(k: Keyword): Fun[R[O]] =
-    k match {
+    val fun = k match {
       case NullTypeKeyword      => verify.verifyType(verify.nullTypeMismatch)
       case TrivialKeyword(v)    => verify.verifyTrivial(v)
       case BooleanTypeKeyword   => verify.verifyType(verify.booleanTypeMismatch)
@@ -151,31 +151,6 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       // TODO to be removed, ignore for now
       // case _: LazyParseKeywords => value => summon[OutputOps[O]].valid(value.pointer))
     }
+    value => fun(value).map(_.forKeyword(k))
 
-trait OutputOps[O]: // extends Monoid[O]:
-  def valid(pointer: Pointer): O
-  def invalid(error: ValidationError, pointer: Pointer): O
-
-  def all(os: Seq[O], pointer: Pointer): O
-
-  extension (o: O)
-    def not(pointer: Pointer): O
-    def isValid: Boolean
-    def withAnnotation(annotation: Evaluated): O
-    def getAnnotations(): Seq[Evaluated]
-
-object OutputOps:
-  def mergeAnnotations(es: Seq[Evaluated]): Seq[Evaluated] =
-    val indices = es.flatMap {
-      case EvaluatedIndices(indices) => indices
-      case _                         => Seq()
-    }.distinct
-    val properties = es.flatMap {
-      case EvaluatedProperties(properties) => properties
-      case _                               => Set()
-    }.toSet
-    val es1 = if indices.nonEmpty then Seq(EvaluatedIndices(indices)) else Seq()
-    val es2 = if properties.nonEmpty then Seq(EvaluatedProperties(properties)) else Seq()
-    es1 ++ es2
-
-trait ResultOps[R[_]] extends FP.Monad[R]
+// trait ResultOps[R[_]] extends FP.Monad[R]

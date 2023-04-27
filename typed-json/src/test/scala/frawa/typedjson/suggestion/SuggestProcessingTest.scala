@@ -25,8 +25,15 @@ import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestSchemas.{numberArraySchema, totoObjectSchema, totoRequiredObjectSchema}
 import frawa.typedjson.testutil.TestUtil.{*, given}
 import munit.FunSuite
+import frawa.typedjson.eval.BasicOutput
+import frawa.typedjson.eval.Eval
+import frawa.typedjson.eval.CacheState.R
+import frawa.typedjson.eval.Util.withCompiledSchemaValue
+import frawa.typedjson.eval.Util.doApply
+import frawa.typedjson.eval.Suggest
+import frawa.typedjson.eval.SuggestOutput
+import frawa.typedjson.eval.OutputOps
 
-@munit.IgnoreSuite
 class SuggestProcessingTest extends FunSuite:
 
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
@@ -40,6 +47,20 @@ class SuggestProcessingTest extends FunSuite:
     given EvaluatorFactory[SchemaValue, SuggestionOutput] = factory(at)
     assertResult[SuggestionOutput](text)(schema) { result =>
       f(result.output.map(_.suggestions).getOrElse(Set()))
+    }
+
+  private def assertSuggest_(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
+      f: Set[Value] => Unit
+  ) =
+    given OutputOps[SuggestOutput] = SuggestOutput.outputOps(at)
+    val evalSuggest                = Eval[R, SuggestOutput]
+    given Eval[R, SuggestOutput]   = evalSuggest
+    val value                      = parseJsonValue(text)
+    withCompiledSchemaValue(schema) { fun =>
+      val suggestFun  = Suggest.suggestAt(at)(fun)
+      val output      = doApply(fun, value)
+      val suggestions = Suggest.suggestions(at, output).toSet
+      f(suggestions)
     }
 
   test("suggest one object per property") {
