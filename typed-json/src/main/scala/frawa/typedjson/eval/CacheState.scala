@@ -43,7 +43,7 @@ object CacheState:
     ): Eval.Fun[R[O]] =
       CacheState.resolveDynamic(ref, base, scope)
 
-  def myZero[O: OutputOps](resolver: SchemaResolver, vocabulary: Vocabulary): CacheState =
+  def empty[O: OutputOps](resolver: SchemaResolver, vocabulary: Vocabulary): CacheState =
     CacheState(resolver, vocabulary, 0, Map.empty, Map.empty)
 
   def resolve[O: OutputOps](ref: String, base: URI, scope: DynamicScope)(using
