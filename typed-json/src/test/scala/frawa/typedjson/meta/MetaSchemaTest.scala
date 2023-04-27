@@ -16,15 +16,14 @@
 
 package frawa.typedjson.meta
 
+import frawa.typedjson.eval.{BasicOutput, Eval}
+import frawa.typedjson.eval.MyState.MyR
+import frawa.typedjson.eval.Util.{doApply, withCompiledSchemaValue}
 import frawa.typedjson.keywords.*
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestUtil.*
-import frawa.typedjson.validation.{ValidationProcessing, ValidationOutput}
+import frawa.typedjson.validation.{ValidationOutput, ValidationProcessing}
 import munit.FunSuite
-import frawa.typedjson.eval.Util.{withCompiledSchemaValue, doApply}
-import frawa.typedjson.eval.BasicOutput
-import frawa.typedjson.eval.MyState.MyR
-import frawa.typedjson.eval.Eval
 
 class MetaSchemaTest extends FunSuite:
 

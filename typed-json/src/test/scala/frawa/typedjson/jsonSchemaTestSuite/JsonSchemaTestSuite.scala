@@ -16,29 +16,22 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import munit.{FunSuite, Location, TestOptions}
-
+import frawa.inlinefiles.InlineFiles
+import frawa.typedjson.eval.MyState.MyR
+import frawa.typedjson.eval.*
+import frawa.typedjson.eval.Util.{doApply, withCompiledSchemaValue}
 import frawa.typedjson.keywords.*
+import frawa.typedjson.macros.Macros
 import frawa.typedjson.meta.MetaSchemas
-import frawa.typedjson.parser.Value.*
 import frawa.typedjson.parser.*
+import frawa.typedjson.parser.Value.*
+import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestUtil.*
-import frawa.typedjson.validation.{ValidationProcessing, ValidationOutput}
-import frawa.typedjson.macros.Macros
-
-import frawa.inlinefiles.InlineFiles
+import frawa.typedjson.validation.{ValidationOutput, ValidationProcessing}
+import munit.{FunSuite, Location, TestOptions}
 
 import java.net.URI
-import frawa.typedjson.eval.Util.withCompiledSchemaValue
-import frawa.typedjson.eval.Eval
-import frawa.typedjson.eval.BasicOutput
-import frawa.typedjson.eval.MyState
-import frawa.typedjson.eval.MyState.MyR
-import frawa.typedjson.eval.TheResultMonad
-import frawa.typedjson.eval.OutputOps
-import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.eval.Util.doApply
 
 open class JsonSchemaTestSuite extends FunSuite:
   protected val draft202012 = InlineFiles.inlineDeepTextFiles("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")

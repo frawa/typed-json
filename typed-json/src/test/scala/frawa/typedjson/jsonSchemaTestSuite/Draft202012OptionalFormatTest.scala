@@ -16,10 +16,9 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import frawa.typedjson.testutil.TestUtil.{given, *}
-import frawa.typedjson.parser.*
-
 import frawa.inlinefiles.InlineFiles.*
+import frawa.typedjson.parser.*
+import frawa.typedjson.testutil.TestUtil.{*, given}
 
 class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
 

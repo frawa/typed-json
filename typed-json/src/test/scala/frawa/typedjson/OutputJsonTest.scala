@@ -16,15 +16,13 @@
 
 package frawa.typedjson
 
-import munit.FunSuite
-
-import frawa.typedjson.parser.Value.*
-import frawa.typedjson.validation.ValidationOutput
 import frawa.typedjson.keywords.Result
 import frawa.typedjson.keywords.Result.OutputCombiner
-import frawa.typedjson.validation.FalseSchemaReason
-import frawa.typedjson.parser.jawn.JawnParser
 import frawa.typedjson.parser.Parser
+import frawa.typedjson.parser.Value.*
+import frawa.typedjson.parser.jawn.JawnParser
+import frawa.typedjson.validation.{FalseSchemaReason, ValidationOutput}
+import munit.FunSuite
 
 class OutputJsonTest extends FunSuite:
 

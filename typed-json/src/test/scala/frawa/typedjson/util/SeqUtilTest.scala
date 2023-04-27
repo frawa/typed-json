@@ -16,9 +16,8 @@
 
 package frawa.typedjson.util
 
+import frawa.typedjson.util.SeqUtil.*
 import munit.FunSuite
-
-import SeqUtil._
 
 class SeqUtilTest extends FunSuite:
 

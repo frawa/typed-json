@@ -17,14 +17,14 @@
 package frawa.typedjson.suggestion
 
 import frawa.typedjson.keywords.{SchemaValue, Vocabulary}
-import frawa.typedjson.parser.Value.*
+import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser.*
+import frawa.typedjson.parser.Value.*
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestSchemas.{numberArraySchema, totoObjectSchema, totoRequiredObjectSchema}
 import frawa.typedjson.testutil.TestUtil.{*, given}
 import munit.FunSuite
-import frawa.typedjson.meta.MetaSchemas
 
 @munit.IgnoreSuite
 class SuggestProcessingTest extends FunSuite:

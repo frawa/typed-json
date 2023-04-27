@@ -1,29 +1,13 @@
 package frawa.typedjson.eval
 
-import munit.FunSuite
-import frawa.typedjson.testutil.TestSchemas.*
-import frawa.typedjson.testutil.TestUtil.{*, given}
-
 import frawa.typedjson.eval.MyState.MyR
 import frawa.typedjson.keywords.{EvaluatedIndices, EvaluatedProperties, WithPointer}
-import frawa.typedjson.parser.Value.{BoolValue, NullValue}
+import frawa.typedjson.parser.Value.{BoolValue, NullValue, StringValue}
 import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.testutil.TestSchemas.{
-  boolSchema,
-  emtpySchema,
-  falseSchema,
-  notFalseSchema,
-  nullSchema,
-  numberArraySchema,
-  numberSchema,
-  stringSchema,
-  totoObjectSchema,
-  trueSchema
-}
-
-import frawa.typedjson.validation.{FalseSchemaReason, NotInvalid, TypeMismatch}
+import frawa.typedjson.testutil.TestSchemas.*
+import frawa.typedjson.testutil.TestUtil.{*, given}
 import frawa.typedjson.validation.*
-import frawa.typedjson.parser.Value.StringValue
+import munit.FunSuite
 
 class EvalCoreTest extends FunSuite:
 

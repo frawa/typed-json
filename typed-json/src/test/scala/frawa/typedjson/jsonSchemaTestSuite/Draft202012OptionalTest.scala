@@ -16,10 +16,9 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import frawa.typedjson.testutil.TestUtil.{*, given}
-import frawa.typedjson.macros.Macros
-
 import frawa.inlinefiles.InlineFiles.*
+import frawa.typedjson.macros.Macros
+import frawa.typedjson.testutil.TestUtil.{*, given}
 
 class Draft202012OptionalTest extends JsonSchemaTestSuite:
   private val draft202012OptionalFiles = draft202012.folder("optional").files()

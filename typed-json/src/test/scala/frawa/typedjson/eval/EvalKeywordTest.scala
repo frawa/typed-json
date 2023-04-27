@@ -16,10 +16,6 @@
 
 package frawa.typedjson.eval
 
-import munit.FunSuite
-import frawa.typedjson.testutil.TestUtil.{*, given}
-import frawa.typedjson.testutil.TestSchemas.*
-
 import frawa.typedjson.eval.*
 import frawa.typedjson.eval.MyState.{MyR, given}
 import frawa.typedjson.keywords.*
