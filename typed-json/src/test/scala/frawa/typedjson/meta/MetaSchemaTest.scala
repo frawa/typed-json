@@ -28,12 +28,8 @@ import frawa.typedjson.eval.CacheState
 
 class MetaSchemaTest extends FunSuite:
 
-  private val resolver                                               = MetaSchemas.lazyResolver
-  private val base                                                   = MetaSchemas.draft202012
-  private val lazyResolver: Some[LoadedSchemasResolver.LazyResolver] = Some(MetaSchemas.lazyResolver)
-
-  given EvaluatorFactory[SchemaValue, ValidationOutput] =
-    EvaluatorFactory.make(ValidationProcessing(), lazyResolver = lazyResolver)
+  private val resolver = MetaSchemas.lazyResolver
+  private val base     = MetaSchemas.draft202012
 
   def withSchemaSpec(name: String)(f: SchemaValue => Unit): Unit =
     val Some(schema) = resolver(base.resolve(name)): @unchecked

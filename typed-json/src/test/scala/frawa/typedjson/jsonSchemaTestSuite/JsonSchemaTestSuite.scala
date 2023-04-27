@@ -70,75 +70,6 @@ open class JsonSchemaTestSuite extends FunSuite:
     )
   )
 
-  private def checkTest_(file: String)(testValue: Value): Unit =
-    testValue match
-      case ObjectValue(properties) =>
-        val StringValue(description: String) = properties("description"): @unchecked
-        val suiteName                        = s"$file - $description"
-
-        val suiteOptions = onlyDescription
-          .filter(description.startsWith)
-          .map(_ => suiteName.only)
-          .orElse(
-            ignoreDescriptionByFile
-              .get(file)
-              .flatMap(_.find(description.startsWith))
-              .map(_ => suiteName.ignore)
-          )
-          .getOrElse(new TestOptions(suiteName))
-
-        val schema            = properties("schema")
-        val ArrayValue(tests) = properties("tests"): @unchecked
-
-        val schemaValue = SchemaValue.root(schema)
-        val id          = SchemaValue.id(schemaValue)
-        val includedOnlyId = onlyId
-          .flatMap { onlyId =>
-            id.map(_ == onlyId)
-          }
-        assume(includedOnlyId.getOrElse(true), s"excluded by onlyId=$onlyId")
-
-        val lazyResolver = (uri: URI) => MetaSchemas.lazyResolver(uri).orElse(Remotes.lazyResolver(uri))
-        val testId       = (file, description)
-
-        val factory: EvaluatorFactory[SchemaValue, ValidationOutput] =
-          EvaluatorFactory.make(ValidationProcessing(), vocabularyForTest, lazyResolver = Some(lazyResolver))
-        val strictFactory: EvaluatorFactory[SchemaValue, ValidationOutput] =
-          factory.mapResult(assertNoIgnoredKeywords)
-
-        val hasIgnoredFailMessage = ignoreFailMessageByDescription.contains(testId)
-
-        if oneTestPerData || hasIgnoredFailMessage then
-          given EvaluatorFactory[SchemaValue, ValidationOutput] = strictFactory
-          withProcessor[ValidationOutput](schemaValue) { evaluator =>
-            tests.foreach { value =>
-              val data     = testData(value)
-              val testName = s"$file | ${data.failMessage} | $description"
-
-              val testOptions = ignoreFailMessageByDescription
-                .get(testId)
-                .find(ignored => ignored.exists(data.failMessage.startsWith))
-                .map(_ => testName.ignore)
-                .getOrElse(new TestOptions(testName))
-
-              test(testOptions) {
-                assertOne_(evaluator)(data)
-              }
-            }
-          }
-        else
-          given EvaluatorFactory[SchemaValue, ValidationOutput] = factory
-          test(suiteOptions) {
-            withProcessor[ValidationOutput](schemaValue) { evaluator =>
-              tests
-                .map(testData)
-                .foreach {
-                  assertOne_(evaluator)
-                }
-            }
-          }
-      case _ => fail("invalid test json")
-
   import BasicOutput.given
   import CacheState.given
 
@@ -172,11 +103,6 @@ open class JsonSchemaTestSuite extends FunSuite:
 
         val lazyResolver = (uri: URI) => MetaSchemas.lazyResolver(uri).orElse(Remotes.lazyResolver(uri))
         val testId       = (file, description)
-
-        val factory: EvaluatorFactory[SchemaValue, ValidationOutput] =
-          EvaluatorFactory.make(ValidationProcessing(), vocabularyForTest, lazyResolver = Some(lazyResolver))
-        val strictFactory: EvaluatorFactory[SchemaValue, ValidationOutput] =
-          factory.mapResult(assertNoIgnoredKeywords)
 
         val hasIgnoredFailMessage = ignoreFailMessageByDescription.contains(testId)
 
@@ -213,22 +139,6 @@ open class JsonSchemaTestSuite extends FunSuite:
             }
           }
       case _ => fail("invalid test json")
-
-  private def assertOne_(evaluator: Evaluator[ValidationOutput]): TestData => Unit = { data =>
-    val result = evaluator(InnerValue(data.data))
-
-    if result.valid != data.expectedValid then
-      given Location = munit.Location.empty
-      if !result.valid then
-        assertEquals(result.problems.errors, Seq(), data.failMessage)
-        assertEquals(result.ignoredKeywords(), Set.empty[String], data.failMessage)
-        assertEquals(result.output, None, data.failMessage)
-      else
-        fail(
-          "unexpected valid",
-          clues(clue[String](data.failMessage), clue[Boolean](data.expectedValid), clue[Result[?]](result))
-        )
-  }
 
   private def assertOne[O](
       fun: (Value => R[O]),
