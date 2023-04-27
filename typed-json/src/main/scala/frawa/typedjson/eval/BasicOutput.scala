@@ -19,7 +19,7 @@ case class BasicOutput(
     annotations: Seq[Evaluated] = Seq.empty
 )
 
-object BasicOutput {
+object BasicOutput:
   type Error = WithPointer[ValidationError]
 
   given OutputOps[BasicOutput] with
@@ -42,4 +42,3 @@ object BasicOutput {
       def isValid: Boolean                                   = o.valid
       def withAnnotation(annotation: Evaluated): BasicOutput = o.copy(annotations = o.annotations :+ annotation)
       def getAnnotations(): Seq[Evaluated]                   = o.annotations
-}
