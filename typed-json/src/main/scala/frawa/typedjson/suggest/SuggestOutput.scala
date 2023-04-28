@@ -1,4 +1,4 @@
-package frawa.typedjson.eval
+package frawa.typedjson.suggest
 
 import frawa.typedjson.keywords.WithPointer
 import frawa.typedjson.validation.ValidationError
@@ -11,6 +11,7 @@ import frawa.typedjson.keywords.Evaluated
 import frawa.typedjson.keywords.Keyword
 import frawa.typedjson.output.BasicOutput
 import frawa.typedjson.output.OutputOps
+import frawa.typedjson.suggest.Suggest
 
 case class SuggestOutput(
     basic: BasicOutput,

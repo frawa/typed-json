@@ -25,8 +25,8 @@ import frawa.typedjson.parser.{Offset, OffsetParser, Value}
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.output.OutputOps
 import frawa.typedjson.output.BasicOutput
-import frawa.typedjson.eval.SuggestOutput
-import frawa.typedjson.eval.Suggest
+import frawa.typedjson.suggest.SuggestOutput
+import frawa.typedjson.suggest.Suggest
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSExport, JSExportAll, JSExportTopLevel}

@@ -35,9 +35,9 @@ import frawa.typedjson.eval.CacheState
 import frawa.typedjson.keywords.LoadedSchemasResolver
 import frawa.typedjson.keywords.SchemaResolver
 import frawa.typedjson.parser.OffsetParser
-import frawa.typedjson.eval.Suggest
+import frawa.typedjson.suggest.Suggest
 import frawa.typedjson.output.OutputOps
-import frawa.typedjson.eval.SuggestOutput
+import frawa.typedjson.suggest.SuggestOutput
 
 // TODO avoid mutation
 class TypedJson(private val keywords: Option[Keywords], private var cache: CacheState = null):

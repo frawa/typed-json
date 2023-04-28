@@ -1,4 +1,4 @@
-package frawa.typedjson.eval
+package frawa.typedjson.suggest
 
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.parser.Value
@@ -7,6 +7,7 @@ import frawa.typedjson.keywords.Keyword
 import frawa.typedjson.keywords.DynamicScope
 import java.net.URI
 import frawa.typedjson.keywords.*
+import frawa.typedjson.suggest.SuggestOutput
 
 object Suggest:
   def suggestAt[R[_], O](at: Pointer)(compiled: Value => R[O]): Value => R[O] =

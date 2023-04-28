@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.eval
+package frawa.typedjson.suggest
 
 import frawa.typedjson.keywords.{SchemaValue, Vocabulary}
 import frawa.typedjson.meta.MetaSchemas
@@ -29,8 +29,8 @@ import frawa.typedjson.eval.Eval
 import frawa.typedjson.eval.CacheState.R
 import frawa.typedjson.eval.Util.withCompiledSchemaValue
 import frawa.typedjson.eval.Util.doApply
-import frawa.typedjson.eval.Suggest
-import frawa.typedjson.eval.SuggestOutput
+import frawa.typedjson.suggest.Suggest
+import frawa.typedjson.suggest.SuggestOutput
 import frawa.typedjson.output.OutputOps
 
 class SuggestTest extends FunSuite:
