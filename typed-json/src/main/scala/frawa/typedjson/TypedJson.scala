@@ -65,6 +65,10 @@ class TypedJson(private val keywords: Option[Keywords], private var cache: Cache
   def eval[O: OutputOps](value: Value): Option[O] =
     doEval(value)
 
+  // TODO bulk
+  def evalBulk[O: OutputOps](values: Seq[Value]): Seq[O] =
+    ???
+
   private def doEval[O: OutputOps](value: Value): Option[O] =
     keywords.map { keywords =>
       val eval: Eval[R, O] = Eval[R, O]
