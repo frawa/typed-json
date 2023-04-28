@@ -105,7 +105,6 @@ case class UnevaluatedPropertiesKeyword(pushed: Keywords, unevaluated: Keywords)
 
 case class Keywords(
     vocabulary: Vocabulary,
-    schema: SchemaValue,
     keywords: Set[Keywords.KeywordWithLocation] = Set(),
     lastKeywords: Seq[Keywords => Keywords] = Seq(),
     ignored: Set[String] = Set.empty
@@ -180,7 +179,7 @@ case class Keywords(
 
       case ("unevaluatedItems", v) =>
         for keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(v)), scope1)
-        yield addLast(pushed => Keywords(vocabulary, schema).add(UnevaluatedItemsKeyword(pushed, keywords)))
+        yield addLast(pushed => Keywords(vocabulary).add(UnevaluatedItemsKeyword(pushed, keywords)))
 
       case ("properties", ObjectValue(properties)) =>
         mapKeywordsFor(properties, resolver, scope1) { keywords =>
@@ -198,7 +197,7 @@ case class Keywords(
 
       case ("unevaluatedProperties", v) =>
         for keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(v)), scope1)
-        yield addLast(pushed => Keywords(vocabulary, schema).add(UnevaluatedPropertiesKeyword(pushed, keywords)))
+        yield addLast(pushed => Keywords(vocabulary).add(UnevaluatedPropertiesKeyword(pushed, keywords)))
 
       case ("required", ArrayValue(values)) =>
         def names = Value.asStrings(values)
@@ -475,9 +474,9 @@ object Keywords:
     given CurrentLocation = scope1.currentLocation
 
     schema.value match
-      case BoolValue(v) => Right(Keywords(vocabulary, schema).add(TrivialKeyword(v)))
+      case BoolValue(v) => Right(Keywords(vocabulary).add(TrivialKeyword(v)))
       case ObjectValue(properties) =>
-        val keywords = Keywords(vocabulary, schema)
+        val keywords = Keywords(vocabulary)
         if properties.isEmpty then Right(keywords.add(TrivialKeyword(true)))
         else
           properties

@@ -108,11 +108,6 @@ class KeywordsTest extends FunSuite:
               NotKeyword(
                 Keywords(
                   vocabularyForTest,
-                  SchemaValue(
-                    value = BoolValue(
-                      value = false
-                    )
-                  ),
                   Set(WithLocation(uri("#/not"), TrivialKeyword(false)))
                 )
               )
@@ -187,7 +182,6 @@ class KeywordsTest extends FunSuite:
                 Some(
                   Keywords(
                     vocabularyForTest,
-                    numberSchemaValue,
                     Set(WithLocation(uri("#/items/type"), NumberTypeKeyword))
                   )
                 )
@@ -208,7 +202,6 @@ class KeywordsTest extends FunSuite:
                 Some(
                   Keywords(
                     vocabularyForTest,
-                    numberSchemaValue,
                     Set(WithLocation(uri("#/items/type"), NumberTypeKeyword))
                   )
                 )
@@ -234,7 +227,6 @@ class KeywordsTest extends FunSuite:
                 Map(
                   "toto" -> Keywords(
                     vocabularyForTest,
-                    numberSchemaValue,
                     keywords = Set(
                       WithLocation(uri("#/properties/toto/type"), NumberTypeKeyword)
                     ),
@@ -242,7 +234,6 @@ class KeywordsTest extends FunSuite:
                   ),
                   "titi" -> Keywords(
                     vocabularyForTest,
-                    stringSchemaValue,
                     keywords = Set(
                       WithLocation(uri("#/properties/titi/type"), StringTypeKeyword)
                     ),
@@ -294,7 +285,6 @@ class KeywordsTest extends FunSuite:
                 Seq(
                   Keywords(
                     vocabularyForTest,
-                    numberSchemaValue,
                     keywords = Set(WithLocation(uri("#/allOf/0/type"), NumberTypeKeyword)),
                     ignored = Set()
                   )
@@ -319,29 +309,11 @@ class KeywordsTest extends FunSuite:
                 Seq(
                   Keywords(
                     vocabularyForTest,
-                    schema = SchemaValue(
-                      value = ObjectValue(
-                        properties = Map(
-                          "type" -> StringValue(
-                            value = "number"
-                          )
-                        )
-                      )
-                    ),
                     keywords = Set(WithLocation(uri("#/anyOf/0/type"), NumberTypeKeyword)),
                     ignored = Set()
                   ),
                   Keywords(
                     vocabularyForTest,
-                    schema = SchemaValue(
-                      value = ObjectValue(
-                        properties = Map(
-                          "type" -> StringValue(
-                            value = "string"
-                          )
-                        )
-                      )
-                    ),
                     keywords = Set(WithLocation(uri("#/anyOf/1/type"), StringTypeKeyword)),
                     ignored = Set()
                   )
@@ -366,13 +338,11 @@ class KeywordsTest extends FunSuite:
                 Seq(
                   Keywords(
                     vocabularyForTest,
-                    numberSchemaValue,
                     keywords = Set(WithLocation(uri("#/oneOf/0/type"), NumberTypeKeyword)),
                     ignored = Set()
                   ),
                   Keywords(
                     vocabularyForTest,
-                    stringSchemaValue,
                     keywords = Set(WithLocation(uri("#/oneOf/1/type"), StringTypeKeyword)),
                     ignored = Set()
                   )
@@ -397,7 +367,6 @@ class KeywordsTest extends FunSuite:
                 Some(
                   Keywords(
                     vocabularyForTest,
-                    numberSchemaValue,
                     Set(WithLocation(uri("#/if/type"), NumberTypeKeyword)),
                     Seq(),
                     Set()
@@ -406,7 +375,6 @@ class KeywordsTest extends FunSuite:
                 Some(
                   Keywords(
                     vocabularyForTest,
-                    numberSchemaValue,
                     Set(WithLocation(uri("#/then/type"), NumberTypeKeyword)),
                     Seq(),
                     Set()
@@ -415,7 +383,6 @@ class KeywordsTest extends FunSuite:
                 Some(
                   Keywords(
                     vocabularyForTest,
-                    stringSchemaValue,
                     Set(WithLocation(uri("#/else/type"), StringTypeKeyword)),
                     Seq(),
                     Set()
