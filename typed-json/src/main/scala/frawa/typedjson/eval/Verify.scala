@@ -16,7 +16,8 @@
 
 package frawa.typedjson.eval
 
-import frawa.typedjson.keywords.{Keyword, WithPointer}
+import frawa.typedjson.keywords.{Keyword}
+import frawa.typedjson.util.WithPointer
 import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.Value.{NullValue, *}
 import frawa.typedjson.pointer.Pointer

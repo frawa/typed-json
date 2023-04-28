@@ -26,6 +26,7 @@ import java.net.URI
 import scala.reflect.TypeTest
 import frawa.typedjson.output.OutputOps
 import frawa.typedjson.util.FP
+import frawa.typedjson.util.WithPointer
 
 trait TheResultMonad[R[_], O: OutputOps] extends FP.Monad[R]:
   def unit[A](a: A): R[A]

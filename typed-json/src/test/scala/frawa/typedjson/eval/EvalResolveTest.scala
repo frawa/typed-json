@@ -14,6 +14,7 @@ import munit.FunSuite
 import frawa.typedjson.eval.CacheState
 import frawa.typedjson.output.BasicOutput
 import frawa.typedjson.output.BasicOutput.given
+import frawa.typedjson.util.WithPointer
 
 class EvalResolveTest extends FunSuite:
 

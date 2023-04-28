@@ -1,6 +1,6 @@
 package frawa.typedjson.suggest
 
-import frawa.typedjson.keywords.WithPointer
+import frawa.typedjson.util.WithPointer
 import frawa.typedjson.validation.ValidationError
 import frawa.typedjson.validation.ValidationAnnotation
 import frawa.typedjson.pointer.Pointer

@@ -1,7 +1,7 @@
 package frawa.typedjson.eval
 
 import frawa.typedjson.eval.CacheState.R
-import frawa.typedjson.keywords.{EvaluatedIndices, EvaluatedProperties, WithPointer}
+import frawa.typedjson.keywords.{EvaluatedIndices, EvaluatedProperties}
 import frawa.typedjson.parser.Value.{BoolValue, NullValue, StringValue}
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.TestSchemas.*
@@ -13,6 +13,7 @@ import frawa.typedjson.output.BasicOutput
 import frawa.typedjson.output.BasicOutput.given
 import frawa.typedjson.output.FlagOutput
 import frawa.typedjson.output.FlagOutput.given
+import frawa.typedjson.util.WithPointer
 
 class EvalCoreTest extends FunSuite:
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.keywords
+package frawa.typedjson.util
 
 import frawa.typedjson.pointer.Pointer
 

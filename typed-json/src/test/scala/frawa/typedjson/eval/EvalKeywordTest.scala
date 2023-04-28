@@ -38,6 +38,7 @@ import munit.FunSuite
 import java.net.URI
 import scala.reflect.TypeTest
 import frawa.typedjson.eval.CacheState
+import frawa.typedjson.util.WithPointer
 
 class EvalKeywordTest extends FunSuite:
 
