@@ -76,10 +76,6 @@ case class UniqueItemsKeyword(unique: Boolean) extends AssertionKeyword
 
 case class PropertyNamesKeyword(keywords: Keywords) extends ApplicatorKeyword
 
-// TODO remove when new Eval is done
-case class LazyParseKeywords(resolved: URI, parse: () => Either[SchemaProblems, Keywords]) extends ApplicatorKeyword
-
-// TODO for new Eval
 case class RefKeyword(ref: String, base: URI, scope: DynamicScope) extends AssertionKeyword
 
 case class DynamicRefKeyword(ref: String, base: URI, scope: DynamicScope) extends AssertionKeyword
@@ -390,17 +386,6 @@ case class Keywords(
 
       case _ =>
         Left(SchemaProblems(UnsupportedKeyword(keyword)))
-
-  private def lazyResolve(
-      vocabulary: Vocabulary,
-      resolution: SchemaResolution,
-      scope: DynamicScope
-  ): LazyParseKeywords =
-    val resolveLater = { () =>
-      Keywords.parseKeywords(vocabulary, resolution, scope)
-    }
-    val resolved = resolution.resolver.base
-    LazyParseKeywords(resolved, resolveLater)
 
   private def mapKeywordsFor(props: Map[String, Value], resolver: SchemaResolver, scope: DynamicScope)(
       f: Map[String, Keywords] => Keywords

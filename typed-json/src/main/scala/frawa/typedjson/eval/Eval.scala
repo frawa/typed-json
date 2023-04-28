@@ -149,9 +149,7 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case UnevaluatedPropertiesKeyword(pushed, unevaluated) =>
         val funs = pushed.keywords.map(_.value).map(compile).toSeq
         verify.verifyUnevaluatedProperties(funs, compile(unevaluated))
-      // ...
-      // TODO to be removed, ignore for now
-      // case _: LazyParseKeywords => value => summon[OutputOps[O]].valid(value.pointer))
+      // TODO ...
     }
     value => fun(value).map(_.forKeyword(k))
 

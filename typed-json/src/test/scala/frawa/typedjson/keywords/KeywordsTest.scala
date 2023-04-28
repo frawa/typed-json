@@ -499,46 +499,6 @@ class KeywordsTest extends FunSuite:
     }
   }
 
-  // TODO obsolete?
-  test("$id/$ref/$def".ignore) {
-    withSchema(idRefDefsSchema) { schema =>
-      assertKeywords(schema) { keywords =>
-        assertEquals(
-          assertable(keywords).keywords,
-          Set(
-            WithLocation(uri("https://example.net/root.json#/type"), ArrayTypeKeyword),
-            WithLocation(
-              uri("https://example.net/root.json#/items"),
-              ArrayItemsKeyword(
-                items = Some(
-                  value = Keywords(
-                    vocabularyForTest,
-                    schema = SchemaValue(
-                      value = ObjectValue(
-                        properties = Map(
-                          "$ref" -> StringValue(
-                            value = "#item"
-                          )
-                        )
-                      )
-                    ),
-                    keywords = Set(
-                      WithLocation(
-                        uri("https://example.net/root.json#/items/$ref"),
-                        LazyParseKeywords(uri("https://example.net/root.json#item"), assertableResolve)
-                      )
-                    ),
-                    ignored = Set()
-                  )
-                )
-              )
-            )
-          )
-        )
-      }
-    }
-  }
-
   test("recursive $ref/$def") {
     // TODO assert more precisely
     withSchema(recursiveRefDefsSchema) { schema =>
