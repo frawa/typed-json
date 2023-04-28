@@ -16,8 +16,6 @@
 
 package frawa.typedjson
 
-import frawa.typedjson.keywords.Result
-import frawa.typedjson.keywords.Result.OutputCombiner
 import frawa.typedjson.parser.Parser
 import frawa.typedjson.parser.Value.*
 import frawa.typedjson.parser.jawn.JawnParser

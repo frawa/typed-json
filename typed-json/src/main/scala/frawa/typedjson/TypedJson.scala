@@ -22,13 +22,10 @@ import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.keywords.Vocabulary
 import frawa.typedjson.keywords.Keywords
 import frawa.typedjson.keywords.SchemaProblems
-import frawa.typedjson.keywords.Evaluator
-import frawa.typedjson.keywords.InnerValue
 import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.Offset
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.validation.ValidationError
-import frawa.typedjson.keywords.Result
 
 import frawa.typedjson.eval.CacheState.R
 import frawa.typedjson.eval.TheResultMonad

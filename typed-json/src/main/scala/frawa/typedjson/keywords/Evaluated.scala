@@ -16,7 +16,9 @@
 
 package frawa.typedjson.keywords
 
-import frawa.typedjson.parser.Value
 import frawa.typedjson.pointer.Pointer
 
-case class InnerValue(value: Value, pointer: Pointer = Pointer.empty)
+sealed trait Evaluated
+case class EvaluatedIndices(indices: Seq[Int])          extends Evaluated
+case class EvaluatedProperties(properties: Set[String]) extends Evaluated
+case class Ignored(keywords: Set[String])               extends Evaluated

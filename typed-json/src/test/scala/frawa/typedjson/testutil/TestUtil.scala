@@ -44,10 +44,8 @@ object TestUtil:
     val resolver = LoadedSchemasResolver(schemas)
     f(resolver)
 
-  def assertNoIgnoredKeywords[R]: Result[R] => Result[R] = { result =>
-    assertEquals(result.ignoredKeywords(), Set.empty[String], "ignored keywords")
-    result
-  }
+  // TODO
+  def assertNoIgnoredKeywords() = ???
 
   def dialect(vocabularyIds: Seq[URI]): Option[Vocabulary] =
     Vocabulary
