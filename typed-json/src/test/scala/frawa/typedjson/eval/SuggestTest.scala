@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.suggestion
+package frawa.typedjson.eval
 
 import frawa.typedjson.keywords.{SchemaValue, Vocabulary}
 import frawa.typedjson.meta.MetaSchemas
