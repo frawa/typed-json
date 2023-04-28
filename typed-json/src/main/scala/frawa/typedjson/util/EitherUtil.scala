@@ -30,8 +30,3 @@ object EitherUtil:
     sequenceAllLefts(as).swap
       .map(_.reduce(combine))
       .swap
-
-  def debugTraceValue[T](title: String): T => T = { v =>
-    printf("%s %s", title, v)
-    v
-  }
