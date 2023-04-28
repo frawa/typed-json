@@ -26,7 +26,6 @@ import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser.*
 import frawa.typedjson.parser.Value.*
 import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestUtil.*
 import frawa.typedjson.validation.{ValidationOutput, ValidationProcessing}
 import munit.{FunSuite, Location, TestOptions}

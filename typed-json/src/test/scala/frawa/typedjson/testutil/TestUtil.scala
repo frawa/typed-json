@@ -22,7 +22,6 @@ import frawa.typedjson.parser.{Parser, Value}
 import munit.Assertions.{assertEquals, clue, clues, fail}
 
 import java.net.URI
-// import frawa.typedjson.eval.Eval
 
 object TestUtil:
   given Parser                                     = new JawnParser
@@ -49,31 +48,6 @@ object TestUtil:
     assertEquals(result.ignoredKeywords(), Set.empty[String], "ignored keywords")
     result
   }
-
-  // def assertResult13[O, R[O]](valueText: String)(schema: SchemaValue)(
-  //     f: R[O] => Unit
-  // )(using evalFactory: EvalFactory[O, R])(using Parser): Unit =
-  //   val eval   = evalFactory.compile(schema)
-  //   val value  = parseJsonValue(valueText)
-  //   val result = eval(InnerValue(value))
-  //   f(result)
-
-  def assertResult[R](valueText: String)(schema: SchemaValue)(
-      f: Result[R] => Unit
-  )(using EvaluatorFactory[SchemaValue, R], Parser): Either[Nothing, Unit] =
-    withProcessor[R](schema) { evaluator =>
-      val value  = parseJsonValue(valueText)
-      val result = evaluator(InnerValue(value))
-      f(result)
-    }
-
-  def withProcessor[R](schema: SchemaValue)(
-      f: Evaluator[R] => Unit
-  )(using factory: EvaluatorFactory[SchemaValue, R]): Either[Nothing, Unit] =
-    val result = factory(schema).map(f)
-    result.swap
-      .map(messages => fail("creating keywords failed", clues(clue[SchemaProblems](messages))))
-      .swap
 
   def dialect(vocabularyIds: Seq[URI]): Option[Vocabulary] =
     Vocabulary
