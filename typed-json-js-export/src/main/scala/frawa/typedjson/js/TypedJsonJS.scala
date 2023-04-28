@@ -156,7 +156,7 @@ object Marker {
     val offset       = offsetAt(error.pointer)
     val (start, end) = offset.map(o => (o.start, o.end)).getOrElse((0, 0))
     // TODO localized messages
-    val message = error.toString
+    val message = error.value.toString
     Marker(start, end, error.pointer.toString, message, "error")
   }
 
