@@ -250,28 +250,10 @@ case class Keywords(
         Right(this)
 
       case ("$ref", StringValue(ref)) =>
-        // TODO later
         Right(add(RefKeyword(ref, resolver.base, scope1)))
-//        for
-//          resolution <- resolver
-//            .resolveRef(ref)
-//            .map(Right(_))
-//            .getOrElse(Left(SchemaProblems(MissingReference(ref))))
-//          vocabulary1 <- SchemaValue.vocabulary(resolution, vocabulary)
-//          keyword = lazyResolve(vocabulary1, resolution, scope1)
-//        yield add(keyword).add(RefKeyword(ref, resolver.base, scope1))
 
       case ("$dynamicRef", StringValue(ref)) =>
-        // TODO later
         Right(add(DynamicRefKeyword(ref, resolver.base, scope1)))
-      // for
-      //   resolution <- resolver
-      //     .resolveDynamicRef(ref, scope)
-      //     .map(Right(_))
-      //     .getOrElse(Left(SchemaProblems(MissingDynamicReference(ref))))
-      //   vocabulary1 <- SchemaValue.vocabulary(resolution, vocabulary)
-      //   keyword = lazyResolve(vocabulary1, resolution, scope1)
-      // yield add(keyword).add(DynamicRefKeyword(ref, resolver.base, scope1))
 
       case ("$comment", StringValue(_)) =>
         // only for schema authors and readers
