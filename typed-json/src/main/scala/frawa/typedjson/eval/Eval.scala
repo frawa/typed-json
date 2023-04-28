@@ -57,7 +57,6 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 
   import Eval.EvalFun
   import Eval.Fun
-  import Keywords.KeywordWithLocation
 
   private val monad = summon[TheResultMonad[R, O]]
 
@@ -67,15 +66,11 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 
   final def compile(keywords: Keywords): Fun[R[O]] =
     val ks  = keywords.keywords.toSeq
-    val fun = compileSeqWith(ks)
+    val fun = compileSeq(ks)
     verify.verifyAllOf(fun)
 
   private final def compile(keyword: Keyword): Fun[R[O]] =
     compileOne(keyword)
-
-  private final def compileSeqWith(kws: Seq[KeywordWithLocation]): Fun[R[Seq[O]]] =
-    val ks = kws.map(_.value)
-    compileSeq(ks)
 
   private final def compileSeq(ks: Seq[Keyword]): Fun[R[Seq[O]]] =
     val funs = ks.map(compile)
@@ -103,7 +98,7 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case StringTypeKeyword    => verify.verifyType(verify.stringTypeMismatch)
       case ArrayTypeKeyword     => verify.verifyType(verify.arrayTypeMismatch)
       case ObjectTypeKeyword    => verify.verifyType(verify.objectTypeMismatch)
-      case UnionTypeKeyword(ks) => verify.verifyUnion(compileSeqWith(ks))
+      case UnionTypeKeyword(ks) => verify.verifyUnion(compileSeq(ks))
       case NotKeyword(kk)       => verify.verifyNot(compile(kk))
       case ArrayItemsKeyword(items, prefixItems) =>
         val funItems       = items.map(compile)
@@ -147,12 +142,14 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case DependentSchemasKeyword(keywords)  => verify.verifyDependentSchemas(compile(keywords))
       case ContainsKeyword(schema, min, max)  => verify.verifyContains(schema.map(compile), min, max)
       case UnevaluatedItemsKeyword(pushed, unevaluated) =>
-        val funs = pushed.keywords.map(_.value).map(compile).toSeq
+        val funs = pushed.keywords.map(compile).toSeq
         verify.verifyUnevaluatedItems(funs, compile(unevaluated))
       case UnevaluatedPropertiesKeyword(pushed, unevaluated) =>
-        val funs = pushed.keywords.map(_.value).map(compile).toSeq
+        val funs = pushed.keywords.map(compile).toSeq
         verify.verifyUnevaluatedProperties(funs, compile(unevaluated))
-      // TODO ...
+      case WithLocation(_, k) =>
+        // TODO use location?!
+        compileOne(k)
     }
     value => fun(value).map(_.forKeyword(k))
 

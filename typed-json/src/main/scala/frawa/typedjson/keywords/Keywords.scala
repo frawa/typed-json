@@ -35,21 +35,21 @@ import scala.reflect.TypeTest
 sealed trait Keyword
 sealed trait TypeKeyword extends Keyword
 
-case class TrivialKeyword(v: Boolean)                                    extends Keyword
-case object NullTypeKeyword                                              extends TypeKeyword
-case object BooleanTypeKeyword                                           extends TypeKeyword
-case object StringTypeKeyword                                            extends TypeKeyword
-case object NumberTypeKeyword                                            extends TypeKeyword
-case object IntegerTypeKeyword                                           extends TypeKeyword
-case object ArrayTypeKeyword                                             extends TypeKeyword
-case object ObjectTypeKeyword                                            extends TypeKeyword
-case class ObjectRequiredKeyword(names: Seq[String])                     extends Keyword
-case class NotKeyword(keywords: Keywords)                                extends Keyword
-case class AllOfKeyword(keywords: Seq[Keywords])                         extends Keyword
-case class AnyOfKeyword(keywords: Seq[Keywords])                         extends Keyword
-case class OneOfKeyword(keywords: Seq[Keywords])                         extends Keyword
-case class UnionTypeKeyword(keywords: Seq[Keywords.KeywordWithLocation]) extends Keyword
-case class EnumKeyword(values: Seq[Value])                               extends Keyword
+case class TrivialKeyword(v: Boolean)                extends Keyword
+case object NullTypeKeyword                          extends TypeKeyword
+case object BooleanTypeKeyword                       extends TypeKeyword
+case object StringTypeKeyword                        extends TypeKeyword
+case object NumberTypeKeyword                        extends TypeKeyword
+case object IntegerTypeKeyword                       extends TypeKeyword
+case object ArrayTypeKeyword                         extends TypeKeyword
+case object ObjectTypeKeyword                        extends TypeKeyword
+case class ObjectRequiredKeyword(names: Seq[String]) extends Keyword
+case class NotKeyword(keywords: Keywords)            extends Keyword
+case class AllOfKeyword(keywords: Seq[Keywords])     extends Keyword
+case class AnyOfKeyword(keywords: Seq[Keywords])     extends Keyword
+case class OneOfKeyword(keywords: Seq[Keywords])     extends Keyword
+case class UnionTypeKeyword(keywords: Seq[Keyword])  extends Keyword
+case class EnumKeyword(values: Seq[Value])           extends Keyword
 case class ArrayItemsKeyword(
     items: Option[Keywords] = None,
     prefixItems: Seq[Keywords] = Seq()
@@ -85,23 +85,27 @@ case class ContainsKeyword(schema: Option[Keywords] = None, min: Option[Int] = N
     extends Keyword
 case class UnevaluatedItemsKeyword(pushed: Keywords, unevaluated: Keywords)      extends Keyword
 case class UnevaluatedPropertiesKeyword(pushed: Keywords, unevaluated: Keywords) extends Keyword
+case class WithLocation(uri: URI, keyword: Keyword)                              extends Keyword
 
 case class Keywords(
     vocabulary: Vocabulary,
-    keywords: Set[Keywords.KeywordWithLocation] = Set(),
+    keywords: Set[Keyword] = Set(),
     lastKeywords: Seq[Keywords => Keywords] = Seq(),
     ignored: Set[String] = Set.empty
 ):
   import Keywords.*
 
-  def map[E](f: KeywordWithLocation => E): Seq[E] =
+  def map[E](f: Keyword => E): Seq[E] =
     keywords.map(f).toSeq
 
-  def flatMap[E](f: KeywordWithLocation => Set[E]): Seq[E] =
+  def flatMap[E](f: Keyword => Set[E]): Seq[E] =
     keywords.flatMap(f).toSeq
 
+  private def withLocation(keyword: Keyword)(using location: CurrentLocation): WithLocation =
+    WithLocation(location.uri, keyword)
+
   private def add(keyword: Keyword)(using location: CurrentLocation): Keywords =
-    this.copy(keywords = keywords + location(keyword))
+    this.copy(keywords = keywords + withLocation(keyword))
 
   private def addLast(push: Keywords => Keywords)(using location: CurrentLocation): Keywords =
     this.copy(lastKeywords = lastKeywords :+ push)
@@ -142,7 +146,7 @@ case class Keywords(
         def typeNames = Value.asStrings(values)
         def keywords = typeNames
           .flatMap(getTypeCheck)
-          .map(location(_))
+          .map(withLocation(_))
 
         Right(add(UnionTypeKeyword(keywords)))
 
@@ -371,16 +375,16 @@ case class Keywords(
   private def updateKeyword[K <: Keyword](
       newKeyword: => K
   )(f: K => K)(using location: CurrentLocation, tt: TypeTest[Keyword, K]): Keywords =
-    val keywords0: Set[KeywordWithLocation] =
+    val keywords0: Set[Keyword] =
       if keywords.exists {
-          case UriUtil.WithLocation(_, _: K) => true
-          case _                             => false
+          case WithLocation(_, _: K) => true
+          case _                     => false
         }
       then keywords
-      else keywords + location(newKeyword)
+      else keywords + withLocation(newKeyword)
     this.copy(keywords = keywords0.map {
-      case UriUtil.WithLocation(uri, keyword: K) => UriUtil.WithLocation(uri, f(keyword))
-      case c @ _                                 => c
+      case WithLocation(uri, keyword: K) => WithLocation(uri, f(keyword))
+      case c @ _                         => c
     })
 
   private def updateKeywordsInside[K <: Keyword](
@@ -410,7 +414,7 @@ case class Keywords(
       case _         => None
 
 object Keywords:
-  type KeywordWithLocation = UriUtil.WithLocation[Keyword]
+  // type KeywordWithLocation = UriUtil.WithLocation[Keyword]
 
   def apply(
       schema: SchemaValue,

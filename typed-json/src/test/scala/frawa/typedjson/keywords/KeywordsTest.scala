@@ -21,7 +21,7 @@ import frawa.typedjson.parser.Value.*
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.TestSchemas.*
 import frawa.typedjson.testutil.TestUtil.{*, given}
-import frawa.typedjson.util.UriUtil.{WithLocation, uri}
+import frawa.typedjson.util.UriUtil.uri
 import munit.FunSuite
 import frawa.typedjson.util.WithPointer
 

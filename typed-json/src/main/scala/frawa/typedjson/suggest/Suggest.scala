@@ -33,45 +33,46 @@ object Suggest:
       case ObjectPropertiesKeyword(properties, _, _) =>
         properties.flatMap { case (prop, keywords) =>
           keywords
-            .flatMap(keyword => suggestFor(keyword.value).toSet)
+            .flatMap(keyword => suggestFor(keyword).toSet)
             .map(v => ObjectValue(Map(prop -> v)))
         }.toSet
       case ObjectRequiredKeyword(required) => Set(ObjectValue(Map.from(required.map((_, NullValue)))))
       case TrivialKeyword(v)               => Set(BoolValue(v))
       case IfThenElseKeyword(ifChecks, thenChecks, elseChecks) =>
         Set(ifChecks, thenChecks, elseChecks).flatten
-          .flatMap(_.flatMap(keyword => suggestFor(keyword.value).toSet))
+          .flatMap(_.flatMap(keyword => suggestFor(keyword).toSet))
       case OneOfKeyword(keywords) =>
         keywords
-          .flatMap(_.flatMap(keyword => suggestFor(keyword.value)))
+          .flatMap(_.flatMap(keyword => suggestFor(keyword)))
           .toSet
       case AnyOfKeyword(keywords) =>
         keywords
-          .flatMap(_.flatMap(keyword => suggestFor(keyword.value)))
+          .flatMap(_.flatMap(keyword => suggestFor(keyword)))
           .toSet
       case AllOfKeyword(keywords) =>
         // TODO intersect?
         keywords
-          .flatMap(_.flatMap(keyword => suggestFor(keyword.value)))
+          .flatMap(_.flatMap(keyword => suggestFor(keyword)))
           .toSet
       case EnumKeyword(values) => values.toSet
       case ArrayItemsKeyword(items, prefixItems) =>
         val itemArrays = Seq(items).flatten
-          .flatMap(_.flatMap(keyword => suggestFor(keyword.value).toSet))
+          .flatMap(_.flatMap(keyword => suggestFor(keyword).toSet))
           .map(v => ArrayValue(Seq(v)))
         // TODO combinations? might explode?
         val tuplesOfHeads = ArrayValue(
           prefixItems
-            .map(_.flatMap(keyword => suggestFor(keyword.value).toSet))
+            .map(_.flatMap(keyword => suggestFor(keyword).toSet))
             .map(_.headOption)
             .map(_.getOrElse(NullValue))
         )
         (itemArrays :+ tuplesOfHeads).toSet
       case UnionTypeKeyword(keywords) =>
         keywords
-          .flatMap(keyword => suggestFor(keyword.value))
+          .flatMap(keyword => suggestFor(keyword))
           .toSet
-      case _ =>
+      case WithLocation(_, keyword) => suggestFor(keyword)
+      case _                        =>
         // useful for debugging:
         // Seq(StringValue(keyword.getClass.getSimpleName))
         Set(NullValue)

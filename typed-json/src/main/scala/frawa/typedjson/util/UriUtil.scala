@@ -54,10 +54,7 @@ object UriUtil:
     !uri.isOpaque() && uri.getScheme() == null && uri.getAuthority() == null && uri.getPath().isEmpty &&
       uri.getFragment() != null
 
-  case class WithLocation[+T](uri: URI, value: T)
-
-  case class CurrentLocation(uri: URI):
-    def apply[T](value: T): WithLocation[T] = WithLocation(uri, value)
+  case class CurrentLocation(uri: URI)
 
   private def escape(value: String): String =
     // this is because the ScalaJS implementation of URI might fail
