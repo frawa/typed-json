@@ -25,6 +25,7 @@ import frawa.typedjson.validation.{TypeMismatch, ValidationAnnotation, Validatio
 import java.net.URI
 import scala.reflect.TypeTest
 import frawa.typedjson.output.OutputOps
+import frawa.typedjson.util.FP
 
 trait TheResultMonad[R[_], O: OutputOps] extends FP.Monad[R]:
   def unit[A](a: A): R[A]
@@ -82,7 +83,7 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
   private final def funSequence(funs: Seq[Fun[R[O]]]): Fun[R[Seq[O]]] =
     value =>
       val ros = funs.map(fun => fun(value))
-      FP.Util.sequence(ros)
+      FP.sequence(ros)
 
   private final def compileSeqKeywords(kks: Seq[Keywords]): Fun[R[Seq[O]]] =
     val funs = kks.map(compile)

@@ -48,6 +48,7 @@ import frawa.typedjson.validation.{
   MinLengthMismatch
 }
 import frawa.typedjson.output.OutputOps
+import frawa.typedjson.util.FP
 
 class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 
@@ -179,7 +180,7 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         ros1 ++ ros2
       }
       .map { ros =>
-        FP.Util.sequence(ros).map { os =>
+        FP.sequence(ros).map { os =>
           val validIndices = os.zipWithIndex
             .filter(_._1.isValid)
             .map(_._2)
@@ -214,8 +215,7 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         }.toSeq
       }
       .map(ros =>
-        FP.Util
-          .sequence(ros)
+        FP.sequence(ros)
           .map(osWithProp =>
             val validProperties = osWithProp
               .filter(_._1.isValid)
@@ -247,7 +247,7 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
             if isValid then
               fThen
                 .map(_(value))
-                .map(fThen => FP.Util.sequence(Seq(condition, fThen)).map(os => ops.all(os, value.pointer)))
+                .map(fThen => FP.sequence(Seq(condition, fThen)).map(os => ops.all(os, value.pointer)))
             else fElse.map(fElse => fElse(value))
           fully.getOrElse(monad.unit(ops.valid(value.pointer)))
         }
@@ -301,7 +301,7 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         }.toSeq
         // val validNames = os.filter(_._2.isValid).map(_._1).toSet
         // TODO annotation EvaluatedProperties() with validNames
-        FP.Util.sequence(ros.map(_._2)).map(os => ops.all(os, value.pointer))
+        FP.sequence(ros.map(_._2)).map(os => ops.all(os, value.pointer))
       }
       .getOrElse(monad.unit(ops.valid(value.pointer)))
 
@@ -381,7 +381,7 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         val required = vs.keySet.flatMap(schemas.get)
         required.map(_(value)).toSeq
       }
-      .map(ros => FP.Util.sequence(ros).map(os => ops.all(os, value.pointer)))
+      .map(ros => FP.sequence(ros).map(os => ops.all(os, value.pointer)))
       .getOrElse(monad.unit(ops.valid(value.pointer)))
 
   def verifyContains(
@@ -397,7 +397,7 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
             WithPointer(v, value.pointer / index)
           }
         schema.map(indexed.map(_)).map { ros =>
-          FP.Util.sequence(ros).map { os =>
+          FP.sequence(ros).map { os =>
             val count = os.count(_.isValid)
             val o =
               if min.getOrElse(1) <= count && !max.exists(count > _) then ops.valid(value.pointer)
@@ -432,7 +432,7 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
               evaluatedIndices
             }
           }
-        val ros1 = FP.Util
+        val ros1 = FP
           .sequence(seqEvaluatedIndices)
           .map(_.flatten.toSet)
           .flatMap { evaluated =>
@@ -446,11 +446,11 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
                 WithPointer(v, value.pointer / index)
               }
             val ros = remainingIndexed.map(unevaluated)
-            FP.Util.sequence(ros).map(os => ops.all(os, value.pointer))
+            FP.sequence(ros).map(os => ops.all(os, value.pointer))
           }
         ros1
       }
-      .getOrElse(FP.Util.sequence(ros).map(os => ops.all(os, value.pointer)))
+      .getOrElse(FP.sequence(ros).map(os => ops.all(os, value.pointer)))
 
   def verifyUnevaluatedProperties(
       pushed: Seq[Fun[R[O]]],
@@ -473,7 +473,7 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
               evaluatedProperties
             }
           }
-        val ros1 = FP.Util
+        val ros1 = FP
           .sequence(seqEvaluatedProperties)
           .map(_.flatten.toSet)
           .flatMap { evaluated =>
@@ -487,8 +487,8 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
                 WithPointer(v, value.pointer / p)
               }
             val ros = remainingValued.map(unevaluated).toSeq
-            FP.Util.sequence(ros).map(os => ops.all(os, value.pointer))
+            FP.sequence(ros).map(os => ops.all(os, value.pointer))
           }
         ros1
       }
-      .getOrElse(FP.Util.sequence(ros).map(os => ops.all(os, value.pointer)))
+      .getOrElse(FP.sequence(ros).map(os => ops.all(os, value.pointer)))

@@ -1,11 +1,10 @@
-package frawa.typedjson.eval
+package frawa.typedjson.util
 
 object FP:
-  object Util:
-    def sequence[A, F[A]](cs: Seq[F[A]])(using monad: Monad[F]): F[Seq[A]] =
-      cs.foldLeft(monad.unit(Seq.empty)) { (acc, c) =>
-        acc.flatMap(cs => c.map(cs :+ _))
-      }
+  def sequence[A, F[A]](cs: Seq[F[A]])(using monad: Monad[F]): F[Seq[A]] =
+    cs.foldLeft(monad.unit(Seq.empty)) { (acc, c) =>
+      acc.flatMap(cs => c.map(cs :+ _))
+    }
 
   trait State[S]: // extends Monad[[A] =>> State[A] => (A, State[A])]:
     type S1[A] = S => (A, S)
