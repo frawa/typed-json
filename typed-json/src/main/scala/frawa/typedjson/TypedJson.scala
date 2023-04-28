@@ -23,8 +23,6 @@ import frawa.typedjson.keywords.Vocabulary
 import frawa.typedjson.keywords.Keywords
 import frawa.typedjson.keywords.SchemaProblems
 import frawa.typedjson.keywords.Evaluator
-import frawa.typedjson.validation.ValidationProcessing
-import frawa.typedjson.validation.ValidationOutput
 import frawa.typedjson.keywords.InnerValue
 import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.Offset

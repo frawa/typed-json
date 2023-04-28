@@ -21,11 +21,32 @@ import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.Value.{NullValue, *}
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.validation.*
-import frawa.typedjson.validation.ValidationProcessing.EvalFun
 
 import scala.reflect.TypeTest
 import frawa.typedjson.keywords.EvaluatedIndices
 import frawa.typedjson.keywords.EvaluatedProperties
+import frawa.typedjson.validation.{
+  FormatMismatch,
+  MaxPropertiesMismatch,
+  NotContains,
+  NotInEnum,
+  MissingRequiredProperties,
+  ValidationError,
+  FalseSchemaReason,
+  NotMultipleOf,
+  MaxItemsMismatch,
+  PatternMismatch,
+  NotOneOf,
+  MaximumMismatch,
+  MinItemsMismatch,
+  MinPropertiesMismatch,
+  MinimumMismatch,
+  DependentRequiredMissing,
+  TypeMismatch,
+  MaxLengthMismatch,
+  ItemsNotUnique,
+  MinLengthMismatch
+}
 
 class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 

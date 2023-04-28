@@ -21,7 +21,7 @@ import frawa.typedjson.keywords.Result.OutputCombiner
 import frawa.typedjson.parser.Parser
 import frawa.typedjson.parser.Value.*
 import frawa.typedjson.parser.jawn.JawnParser
-import frawa.typedjson.validation.{FalseSchemaReason, ValidationOutput}
+import frawa.typedjson.validation.FalseSchemaReason
 import munit.FunSuite
 import frawa.typedjson.eval.BasicOutput
 

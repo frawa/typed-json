@@ -21,7 +21,6 @@ import frawa.typedjson.eval.CacheState.R
 import frawa.typedjson.eval.Util.{doApply, withCompiledSchemaValue}
 import frawa.typedjson.keywords.*
 import frawa.typedjson.testutil.TestUtil.*
-import frawa.typedjson.validation.{ValidationOutput, ValidationProcessing}
 import munit.FunSuite
 import frawa.typedjson.eval.CacheState
 

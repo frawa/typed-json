@@ -3,7 +3,6 @@ package frawa.typedjson.eval
 import frawa.typedjson.parser.Value
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.validation.{FormatMismatch, UnknownFormat}
-import frawa.typedjson.validation.ValidationProcessing.{EvalFun, combiner, validateStringValue}
 
 import java.net.URI
 import java.util.UUID

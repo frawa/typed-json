@@ -27,7 +27,6 @@ import frawa.typedjson.parser.*
 import frawa.typedjson.parser.Value.*
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.TestUtil.*
-import frawa.typedjson.validation.{ValidationOutput, ValidationProcessing}
 import munit.{FunSuite, Location, TestOptions}
 
 import java.net.URI
