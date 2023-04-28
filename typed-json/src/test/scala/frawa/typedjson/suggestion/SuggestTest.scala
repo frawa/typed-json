@@ -33,7 +33,7 @@ import frawa.typedjson.eval.Suggest
 import frawa.typedjson.eval.SuggestOutput
 import frawa.typedjson.eval.OutputOps
 
-class SuggestProcessingTest extends FunSuite:
+class SuggestTest extends FunSuite:
 
   private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
       f: Set[Value] => Unit
