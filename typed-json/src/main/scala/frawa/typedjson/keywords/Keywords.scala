@@ -33,11 +33,9 @@ import java.net.URI
 import scala.reflect.TypeTest
 
 sealed trait Keyword
-sealed trait AssertionKeyword  extends Keyword
-sealed trait ApplicatorKeyword extends Keyword
+sealed trait TypeKeyword extends Keyword
 
-case class TrivialKeyword(v: Boolean)                                    extends AssertionKeyword
-sealed trait TypeKeyword                                                 extends AssertionKeyword
+case class TrivialKeyword(v: Boolean)                                    extends Keyword
 case object NullTypeKeyword                                              extends TypeKeyword
 case object BooleanTypeKeyword                                           extends TypeKeyword
 case object StringTypeKeyword                                            extends TypeKeyword
@@ -45,64 +43,48 @@ case object NumberTypeKeyword                                            extends
 case object IntegerTypeKeyword                                           extends TypeKeyword
 case object ArrayTypeKeyword                                             extends TypeKeyword
 case object ObjectTypeKeyword                                            extends TypeKeyword
-case class ObjectRequiredKeyword(names: Seq[String])                     extends AssertionKeyword
-case class NotKeyword(keywords: Keywords)                                extends ApplicatorKeyword
-case class AllOfKeyword(keywords: Seq[Keywords])                         extends ApplicatorKeyword
-case class AnyOfKeyword(keywords: Seq[Keywords])                         extends ApplicatorKeyword
-case class OneOfKeyword(keywords: Seq[Keywords])                         extends ApplicatorKeyword
-case class UnionTypeKeyword(keywords: Seq[Keywords.KeywordWithLocation]) extends ApplicatorKeyword
-case class EnumKeyword(values: Seq[Value])                               extends AssertionKeyword
+case class ObjectRequiredKeyword(names: Seq[String])                     extends Keyword
+case class NotKeyword(keywords: Keywords)                                extends Keyword
+case class AllOfKeyword(keywords: Seq[Keywords])                         extends Keyword
+case class AnyOfKeyword(keywords: Seq[Keywords])                         extends Keyword
+case class OneOfKeyword(keywords: Seq[Keywords])                         extends Keyword
+case class UnionTypeKeyword(keywords: Seq[Keywords.KeywordWithLocation]) extends Keyword
+case class EnumKeyword(values: Seq[Value])                               extends Keyword
 case class ArrayItemsKeyword(
     items: Option[Keywords] = None,
     prefixItems: Seq[Keywords] = Seq()
-) extends ApplicatorKeyword
+) extends Keyword
 case class ObjectPropertiesKeyword(
     properties: Map[String, Keywords] = Map(),
     patternProperties: Map[String, Keywords] = Map(),
     additionalProperties: Option[Keywords] = None
-) extends ApplicatorKeyword
+) extends Keyword
 case class IfThenElseKeyword(
     ifKeywords: Option[Keywords] = None,
     thenKeywords: Option[Keywords] = None,
     elseKeywords: Option[Keywords] = None
-) extends ApplicatorKeyword
-
-case class PatternKeyword(pattern: String) extends AssertionKeyword
-
-case class FormatKeyword(format: String) extends AssertionKeyword
-
-case class MinimumKeyword(min: BigDecimal, exclude: Boolean = false) extends AssertionKeyword
-
-case class UniqueItemsKeyword(unique: Boolean) extends AssertionKeyword
-
-case class PropertyNamesKeyword(keywords: Keywords) extends ApplicatorKeyword
-
-case class RefKeyword(ref: String, base: URI, scope: DynamicScope) extends AssertionKeyword
-
-case class DynamicRefKeyword(ref: String, base: URI, scope: DynamicScope) extends AssertionKeyword
-
-case class MultipleOfKeyword(n: BigDecimal) extends AssertionKeyword
-
-case class MaximumKeyword(max: BigDecimal, exclude: Boolean = false) extends AssertionKeyword
-
-case class MaxLengthKeyword(max: BigDecimal) extends AssertionKeyword
-
-case class MinLengthKeyword(min: BigDecimal) extends AssertionKeyword
-
-case class MaxItemsKeyword(max: BigDecimal) extends AssertionKeyword
-
-case class MinItemsKeyword(min: BigDecimal) extends AssertionKeyword
-
-case class MaxPropertiesKeyword(max: BigDecimal) extends AssertionKeyword
-
-case class MinPropertiesKeyword(min: BigDecimal) extends AssertionKeyword
-
-case class DependentRequiredKeyword(required: Map[String, Seq[String]]) extends AssertionKeyword
-case class DependentSchemasKeyword(keywords: Map[String, Keywords])     extends ApplicatorKeyword
+) extends Keyword
+case class PatternKeyword(pattern: String)                                extends Keyword
+case class FormatKeyword(format: String)                                  extends Keyword
+case class MinimumKeyword(min: BigDecimal, exclude: Boolean = false)      extends Keyword
+case class UniqueItemsKeyword(unique: Boolean)                            extends Keyword
+case class PropertyNamesKeyword(keywords: Keywords)                       extends Keyword
+case class RefKeyword(ref: String, base: URI, scope: DynamicScope)        extends Keyword
+case class DynamicRefKeyword(ref: String, base: URI, scope: DynamicScope) extends Keyword
+case class MultipleOfKeyword(n: BigDecimal)                               extends Keyword
+case class MaximumKeyword(max: BigDecimal, exclude: Boolean = false)      extends Keyword
+case class MaxLengthKeyword(max: BigDecimal)                              extends Keyword
+case class MinLengthKeyword(min: BigDecimal)                              extends Keyword
+case class MaxItemsKeyword(max: BigDecimal)                               extends Keyword
+case class MinItemsKeyword(min: BigDecimal)                               extends Keyword
+case class MaxPropertiesKeyword(max: BigDecimal)                          extends Keyword
+case class MinPropertiesKeyword(min: BigDecimal)                          extends Keyword
+case class DependentRequiredKeyword(required: Map[String, Seq[String]])   extends Keyword
+case class DependentSchemasKeyword(keywords: Map[String, Keywords])       extends Keyword
 case class ContainsKeyword(schema: Option[Keywords] = None, min: Option[Int] = None, max: Option[Int] = None)
-    extends ApplicatorKeyword
-case class UnevaluatedItemsKeyword(pushed: Keywords, unevaluated: Keywords)      extends ApplicatorKeyword
-case class UnevaluatedPropertiesKeyword(pushed: Keywords, unevaluated: Keywords) extends ApplicatorKeyword
+    extends Keyword
+case class UnevaluatedItemsKeyword(pushed: Keywords, unevaluated: Keywords)      extends Keyword
+case class UnevaluatedPropertiesKeyword(pushed: Keywords, unevaluated: Keywords) extends Keyword
 
 case class Keywords(
     vocabulary: Vocabulary,
