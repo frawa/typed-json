@@ -1,4 +1,4 @@
-package frawa.typedjson.eval
+package frawa.typedjson.output
 
 import frawa.typedjson.validation.ValidationAnnotation
 import frawa.typedjson.pointer.Pointer
@@ -6,6 +6,7 @@ import frawa.typedjson.validation.ValidationError
 import frawa.typedjson.keywords.SchemaProblems
 import frawa.typedjson.keywords.Evaluated
 import frawa.typedjson.keywords.Keyword
+import frawa.typedjson.output.OutputOps
 
 // see https://json-schema.org/draft/2020-12/json-schema-core.html#name-flag
 

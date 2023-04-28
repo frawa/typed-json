@@ -47,6 +47,7 @@ import frawa.typedjson.validation.{
   ItemsNotUnique,
   MinLengthMismatch
 }
+import frawa.typedjson.output.OutputOps
 
 class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 

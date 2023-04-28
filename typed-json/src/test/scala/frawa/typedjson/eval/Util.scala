@@ -9,6 +9,7 @@ import frawa.typedjson.validation.CannotResolve
 
 import java.net.URI
 import frawa.typedjson.eval.CacheState
+import frawa.typedjson.output.OutputOps
 
 object Util:
   val vocabularyForTest: Option[Vocabulary] = dialect(

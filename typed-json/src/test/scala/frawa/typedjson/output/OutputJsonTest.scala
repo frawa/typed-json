@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package frawa.typedjson
+package frawa.typedjson.output
 
 import frawa.typedjson.parser.Parser
 import frawa.typedjson.parser.Value.*
 import frawa.typedjson.parser.jawn.JawnParser
 import frawa.typedjson.validation.FalseSchemaReason
 import munit.FunSuite
-import frawa.typedjson.eval.BasicOutput
+import frawa.typedjson.output.BasicOutput
+import frawa.typedjson.TypedJson
 
 class OutputJsonTest extends FunSuite:
 
@@ -74,7 +75,7 @@ class OutputJsonTest extends FunSuite:
   // }
 
   test("basic sample".ignore) {
-    import frawa.typedjson.eval.BasicOutput.given
+    import BasicOutput.given
     given parser: Parser = new JawnParser()
 
     val typedJson = TypedJson.create(Sample.schema).toOption.get

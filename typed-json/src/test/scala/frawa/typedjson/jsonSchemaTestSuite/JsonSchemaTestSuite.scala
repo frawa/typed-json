@@ -28,6 +28,9 @@ import frawa.typedjson.parser.Value.*
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.TestUtil.*
 import munit.{FunSuite, Location, TestOptions}
+import frawa.typedjson.output.OutputOps
+import frawa.typedjson.output.BasicOutput
+import frawa.typedjson.output.BasicOutput.given
 
 import java.net.URI
 import frawa.typedjson.eval.CacheState

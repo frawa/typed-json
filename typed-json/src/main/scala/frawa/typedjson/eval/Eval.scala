@@ -24,6 +24,7 @@ import frawa.typedjson.validation.{TypeMismatch, ValidationAnnotation, Validatio
 
 import java.net.URI
 import scala.reflect.TypeTest
+import frawa.typedjson.output.OutputOps
 
 trait TheResultMonad[R[_], O: OutputOps] extends FP.Monad[R]:
   def unit[A](a: A): R[A]

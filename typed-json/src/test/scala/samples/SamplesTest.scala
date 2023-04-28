@@ -28,7 +28,7 @@ import frawa.typedjson.keywords.WithPointer
 class SamplesTest extends FunSuite:
   given Parser = new JawnParser()
 
-  import frawa.typedjson.eval.FlagOutput.given
+  import frawa.typedjson.output.FlagOutput.given
 
   test("always valid without a schema") {
     val typedJson = TypedJson.create()
@@ -48,8 +48,8 @@ class SamplesTest extends FunSuite:
   }
 
   test("obtain validation errors") {
-    import frawa.typedjson.eval.BasicOutput
-    import frawa.typedjson.eval.BasicOutput.given
+    import frawa.typedjson.output.BasicOutput
+    import frawa.typedjson.output.BasicOutput.given
 
     val schemaJson = """{"type": "string"}"""
     val typedJson  = TypedJson.create(schemaJson).toOption.get

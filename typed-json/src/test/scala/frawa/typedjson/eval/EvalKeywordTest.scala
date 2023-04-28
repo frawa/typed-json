@@ -29,6 +29,10 @@ import frawa.typedjson.testutil.TestUtil.{*, given}
 import frawa.typedjson.util.UriUtil
 import frawa.typedjson.util.UriUtil.uri
 import frawa.typedjson.validation.*
+import frawa.typedjson.output.BasicOutput
+import frawa.typedjson.output.BasicOutput.given
+import frawa.typedjson.output.FlagOutput
+import frawa.typedjson.output.FlagOutput.given
 import munit.FunSuite
 
 import java.net.URI

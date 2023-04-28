@@ -9,6 +9,8 @@ import frawa.typedjson.validation.NotOneOf
 import frawa.typedjson.validation.NotInvalid
 import frawa.typedjson.keywords.Evaluated
 import frawa.typedjson.keywords.Keyword
+import frawa.typedjson.output.BasicOutput
+import frawa.typedjson.output.OutputOps
 
 case class SuggestOutput(
     basic: BasicOutput,

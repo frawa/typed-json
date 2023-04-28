@@ -9,6 +9,10 @@ import frawa.typedjson.testutil.TestUtil.{*, given}
 import frawa.typedjson.validation.*
 import munit.FunSuite
 import frawa.typedjson.eval.CacheState
+import frawa.typedjson.output.BasicOutput
+import frawa.typedjson.output.BasicOutput.given
+import frawa.typedjson.output.FlagOutput
+import frawa.typedjson.output.FlagOutput.given
 
 class EvalCoreTest extends FunSuite:
 

@@ -16,13 +16,15 @@
 
 package frawa.typedjson.meta
 
-import frawa.typedjson.eval.{BasicOutput, Eval}
+import frawa.typedjson.eval.Eval
 import frawa.typedjson.eval.CacheState.R
 import frawa.typedjson.eval.Util.{doApply, withCompiledSchemaValue}
 import frawa.typedjson.keywords.*
 import frawa.typedjson.testutil.TestUtil.*
 import munit.FunSuite
 import frawa.typedjson.eval.CacheState
+import frawa.typedjson.output.BasicOutput
+import frawa.typedjson.output.BasicOutput.given
 
 class MetaSchemaTest extends FunSuite:
 

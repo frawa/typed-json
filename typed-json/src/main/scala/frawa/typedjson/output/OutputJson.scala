@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package frawa.typedjson
+package frawa.typedjson.output
 
 import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.Value.*
 import frawa.typedjson.validation.ValidationError
-import frawa.typedjson.eval.BasicOutput
+import frawa.typedjson.output.BasicOutput
+import frawa.typedjson.TypedJson
 
 object OutputJson:
 

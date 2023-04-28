@@ -1,4 +1,4 @@
-package frawa.typedjson.eval
+package frawa.typedjson.output
 
 import frawa.typedjson.keywords.WithPointer
 import frawa.typedjson.validation.ValidationError
@@ -9,6 +9,7 @@ import frawa.typedjson.validation.NotOneOf
 import frawa.typedjson.validation.NotInvalid
 import frawa.typedjson.keywords.Evaluated
 import frawa.typedjson.keywords.Keyword
+import frawa.typedjson.output.OutputOps
 
 // TODO this will converge to "basic" output format,
 // see https://json-schema.org/draft/2020-12/json-schema-core.html#name-basic

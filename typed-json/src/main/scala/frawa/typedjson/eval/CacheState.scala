@@ -6,6 +6,7 @@ import frawa.typedjson.util.UriUtil
 import frawa.typedjson.validation.CannotResolve
 
 import java.net.URI
+import frawa.typedjson.output.OutputOps
 
 case class CacheState(
     rootResolver: SchemaResolver,

@@ -23,8 +23,8 @@ import frawa.typedjson.keywords.*
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser.{Offset, OffsetParser, Value}
 import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.eval.OutputOps
-import frawa.typedjson.eval.BasicOutput
+import frawa.typedjson.output.OutputOps
+import frawa.typedjson.output.BasicOutput
 import frawa.typedjson.eval.SuggestOutput
 import frawa.typedjson.eval.Suggest
 

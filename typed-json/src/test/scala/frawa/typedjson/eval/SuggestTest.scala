@@ -24,14 +24,14 @@ import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.TestSchemas.{numberArraySchema, totoObjectSchema, totoRequiredObjectSchema}
 import frawa.typedjson.testutil.TestUtil.{*, given}
 import munit.FunSuite
-import frawa.typedjson.eval.BasicOutput
+import frawa.typedjson.output.BasicOutput
 import frawa.typedjson.eval.Eval
 import frawa.typedjson.eval.CacheState.R
 import frawa.typedjson.eval.Util.withCompiledSchemaValue
 import frawa.typedjson.eval.Util.doApply
 import frawa.typedjson.eval.Suggest
 import frawa.typedjson.eval.SuggestOutput
-import frawa.typedjson.eval.OutputOps
+import frawa.typedjson.output.OutputOps
 
 class SuggestTest extends FunSuite:
 

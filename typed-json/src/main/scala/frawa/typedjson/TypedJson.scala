@@ -30,13 +30,13 @@ import frawa.typedjson.validation.ValidationError
 import frawa.typedjson.eval.CacheState.R
 import frawa.typedjson.eval.TheResultMonad
 import frawa.typedjson.eval.Eval
-import frawa.typedjson.eval.BasicOutput
+import frawa.typedjson.output.BasicOutput
 import frawa.typedjson.eval.CacheState
 import frawa.typedjson.keywords.LoadedSchemasResolver
 import frawa.typedjson.keywords.SchemaResolver
 import frawa.typedjson.parser.OffsetParser
 import frawa.typedjson.eval.Suggest
-import frawa.typedjson.eval.OutputOps
+import frawa.typedjson.output.OutputOps
 import frawa.typedjson.eval.SuggestOutput
 
 // TODO avoid mutation
