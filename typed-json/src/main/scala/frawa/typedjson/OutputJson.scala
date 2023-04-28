@@ -19,22 +19,23 @@ package frawa.typedjson
 import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.Value.*
 import frawa.typedjson.validation.ValidationError
+import frawa.typedjson.eval.BasicOutput
 
 object OutputJson:
 
   def flag(validation: TypedJson.Validation): Value =
     ObjectValue(Map("valid" -> BoolValue(validation.valid)))
 
-  def basic(validation: TypedJson.Validation): Value =
+  def basic(o: BasicOutput): Value =
     val errors =
-      if validation.output.errors.isEmpty then Map()
-      else Map("errors" -> ArrayValue(validation.output.errors.map(toJson)))
-    ObjectValue(Map("valid" -> BoolValue(validation.valid)) ++ errors)
+      if o.errors.isEmpty then Map()
+      else Map("errors" -> ArrayValue(o.errors.map(toJson)))
+    ObjectValue(Map("valid" -> BoolValue(o.isValid)) ++ errors)
 
-  private def toJson(error: TypedJson.Error): Value =
+  private def toJson(error: BasicOutput.Error): Value =
     ObjectValue(
       Map(
-        "error" -> StringValue(toMessage(error.error)),
+        "error" -> StringValue(toMessage(error.value)),
         // "keywordLocation"         -> StringValue(""),
         // "absoluteKeywordLocation" -> StringValue(""),
         "instanceLocation" -> StringValue(error.pointer.toString)

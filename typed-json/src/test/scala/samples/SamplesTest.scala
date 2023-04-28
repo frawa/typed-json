@@ -23,14 +23,17 @@ import frawa.typedjson.parser.jawn.JawnParser
 import frawa.typedjson.validation.TypeMismatch
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.parser.Parser
+import frawa.typedjson.keywords.WithPointer
 
 class SamplesTest extends FunSuite:
   given Parser = new JawnParser()
 
+  import frawa.typedjson.eval.FlagOutput.given
+
   test("always valid without a schema") {
     val typedJson = TypedJson.create()
     val json      = """{"foo":"bar"}"""
-    val result    = typedJson.validate(json)
+    val result    = typedJson.eval(json)
     assertEquals(result.map(_.valid), Right(true))
   }
 
@@ -39,17 +42,20 @@ class SamplesTest extends FunSuite:
     val typedJson  = TypedJson.create(schemaJson).toOption.get
 
     val validJson = """"foo""""
-    assertEquals(typedJson.validate(validJson).map(_.valid), Right(true))
+    assertEquals(typedJson.eval(validJson).map(_.valid), Right(true))
     val invalidJson = """13"""
-    assertEquals(typedJson.validate(invalidJson).map(_.valid), Right(false))
+    assertEquals(typedJson.eval(invalidJson).map(_.valid), Right(false))
   }
 
   test("obtain validation errors") {
+    import frawa.typedjson.eval.BasicOutput
+    import frawa.typedjson.eval.BasicOutput.given
+
     val schemaJson = """{"type": "string"}"""
     val typedJson  = TypedJson.create(schemaJson).toOption.get
 
     val invalidJson = """true"""
-    val validation  = typedJson.validate(invalidJson)
+    val validation  = typedJson.eval(invalidJson)
     assertEquals(validation.map(_.valid), Right(false))
-    assertEquals(validation.map(_.output.errors), Right(Seq(TypedJson.Error(Pointer.empty, TypeMismatch("string")))))
+    assertEquals(validation.map(_.errors), Right(Seq(WithPointer(TypeMismatch("string")))))
   }

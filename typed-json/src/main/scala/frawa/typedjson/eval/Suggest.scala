@@ -17,6 +17,7 @@ object Suggest:
 
   def suggestions(at: Pointer, output: SuggestOutput): Seq[Value] =
     val all = output.keywords.flatMap(suggestFor)
+    // TODO use more precise replaceAt for better suggestions
     if at.isInsideKey then onlyKeys(all)
     else all
 

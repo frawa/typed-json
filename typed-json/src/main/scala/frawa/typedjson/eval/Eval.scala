@@ -46,11 +46,13 @@ trait TheResultMonad[R[_], O: OutputOps] extends FP.Monad[R]:
 end TheResultMonad
 
 object Eval:
-  type Fun[O] = WithPointer[Value] => O
+  type EvalFun[R[_], O] = Value => R[O]
+  type Fun[O]           = WithPointer[Value] => O
   def map[O](fun: Fun[O])(f: O => O): Fun[O] = value => f(fun(value))
 
 class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 
+  import Eval.EvalFun
   import Eval.Fun
   import Keywords.KeywordWithLocation
 
@@ -58,7 +60,7 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 
   private def verify = Verify[R, O]
 
-  final def fun(compiled: Fun[R[O]]): Value => R[O] = value => compiled(WithPointer(value))
+  final def fun(compiled: Fun[R[O]]): EvalFun[R, O] = value => compiled(WithPointer(value))
 
   final def compile(keywords: Keywords): Fun[R[O]] =
     val ks  = keywords.keywords.toSeq
