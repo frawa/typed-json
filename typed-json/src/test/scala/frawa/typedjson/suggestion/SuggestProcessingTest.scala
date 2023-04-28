@@ -36,20 +36,7 @@ import frawa.typedjson.eval.OutputOps
 
 class SuggestProcessingTest extends FunSuite:
 
-  private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
-
-  private def factory(at: Pointer): EvaluatorFactory[SchemaValue, SuggestionOutput] =
-    EvaluatorFactory.make(SuggestionProcessing(at), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
-
   private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
-      f: Set[Value] => Unit
-  ) =
-    given EvaluatorFactory[SchemaValue, SuggestionOutput] = factory(at)
-    assertResult[SuggestionOutput](text)(schema) { result =>
-      f(result.output.map(_.suggestions).getOrElse(Set()))
-    }
-
-  private def assertSuggest_(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
       f: Set[Value] => Unit
   ) =
     given OutputOps[SuggestOutput] = SuggestOutput.outputOps(at)
@@ -57,6 +44,22 @@ class SuggestProcessingTest extends FunSuite:
     given Eval[R, SuggestOutput]   = evalSuggest
     val value                      = parseJsonValue(text)
     withCompiledSchemaValue(schema) { fun =>
+      val suggestFun  = Suggest.suggestAt(at)(fun)
+      val output      = doApply(fun, value)
+      val suggestions = Suggest.suggestions(at, output).toSet
+      f(suggestions)
+    }
+
+  private def assertSuggestForSchema(text: String, at: Pointer)(f: Set[Value] => Unit): Unit =
+    val lazyResolver = MetaSchemas.lazyResolver
+    val base         = MetaSchemas.draft202012
+    val Some(schema) = lazyResolver(base.resolve("schema")): @unchecked
+
+    given OutputOps[SuggestOutput] = SuggestOutput.outputOps(at)
+    val evalSuggest                = Eval[R, SuggestOutput]
+    given Eval[R, SuggestOutput]   = evalSuggest
+    val value                      = parseJsonValue(text)
+    withCompiledSchemaValue(schema, Some(lazyResolver)) { fun =>
       val suggestFun  = Suggest.suggestAt(at)(fun)
       val output      = doApply(fun, value)
       val suggestions = Suggest.suggestions(at, output).toSet
@@ -579,16 +582,3 @@ class SuggestProcessingTest extends FunSuite:
       assertEquals(unknown, Set.empty[String], "suggested unknown keywords")
     }
   }
-
-  private def assertSuggestForSchema(json: String, at: Pointer)(f: Set[Value] => Unit): Unit =
-    val resolver     = MetaSchemas.lazyResolver
-    val base         = MetaSchemas.draft202012
-    val Some(schema) = resolver(base.resolve("schema")): @unchecked
-
-    def factory(at: Pointer): EvaluatorFactory[SchemaValue, SuggestionOutput] =
-      EvaluatorFactory.make(SuggestionProcessing(at), None, Some(resolver)).mapResult(assertNoIgnoredKeywords)
-
-    given EvaluatorFactory[SchemaValue, SuggestionOutput] = factory(at)
-    assertResult[SuggestionOutput](json)(schema) { result =>
-      f(result.output.map(_.suggestions).getOrElse(Set()))
-    }
