@@ -16,10 +16,10 @@
 
 package frawa.typedjson.util
 
-import frawa.typedjson.util.SeqUtil.*
+import frawa.typedjson.util.EitherUtil.*
 import munit.FunSuite
 
-class SeqUtilTest extends FunSuite:
+class EitherUtilTest extends FunSuite:
 
   test("sequence all rights") {
     assertEquals(

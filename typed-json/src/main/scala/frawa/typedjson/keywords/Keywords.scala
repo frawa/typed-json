@@ -27,6 +27,7 @@ import frawa.typedjson.parser.Value.*
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.util.UriUtil
 import frawa.typedjson.util.UriUtil.CurrentLocation
+import frawa.typedjson.util.EitherUtil.*
 
 import java.net.URI
 import scala.reflect.TypeTest
@@ -110,7 +111,6 @@ case class Keywords(
     ignored: Set[String] = Set.empty
 ):
   import Keywords.*
-  import frawa.typedjson.util.SeqUtil.*
 
   def map[E](f: KeywordWithLocation => E): Seq[E] =
     keywords.map(f).toSeq

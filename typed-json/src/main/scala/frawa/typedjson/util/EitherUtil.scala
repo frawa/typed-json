@@ -16,7 +16,7 @@
 
 package frawa.typedjson.util
 
-object SeqUtil:
+object EitherUtil:
 
   def sequenceAllLefts[E, V](as: Seq[Either[E, V]]): Either[Seq[E], Seq[V]] =
     as.foldLeft[Either[Seq[E], Seq[V]]](Right(Seq.empty[V])) {
