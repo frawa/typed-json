@@ -15,6 +15,7 @@
         </div>
         <div class="column">
             <h1>Schema Editor</h1>
+            <div class="monaco-container" id=editorSchema></div>
             <label for="sample-schema">Try one of these:</label>
             <select name="sample-schema" id="sample-schema">
                 <option value=""></option>
@@ -22,7 +23,6 @@
                 <option value="if-then-else">If/Then/Else</option>
                 <option value="all-of">All Of</option>
             </select>
-            <div class="monaco-container" id=editorSchema></div>
         </div>
     </div>
     <%= htmlWebpackPlugin.tags.bodyTags %>
