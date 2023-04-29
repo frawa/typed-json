@@ -21,7 +21,7 @@ object FlagOutput:
       FlagOutput(
         os.forall(_.valid),
         pointer,
-        OutputOps.mergeAnnotations(os.filter(_.pointer == pointer).flatMap(_.annotations))
+        OutputOps.mergeEvaluatedAnnotations(os.filter(_.pointer == pointer).flatMap(_.annotations))
       )
 
     extension (o: FlagOutput)

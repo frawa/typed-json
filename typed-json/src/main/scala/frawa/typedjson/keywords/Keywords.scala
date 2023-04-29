@@ -86,6 +86,7 @@ case class ContainsKeyword(schema: Option[Keywords] = None, min: Option[Int] = N
 case class UnevaluatedItemsKeyword(pushed: Keywords, unevaluated: Keywords)      extends Keyword
 case class UnevaluatedPropertiesKeyword(pushed: Keywords, unevaluated: Keywords) extends Keyword
 case class WithLocation(uri: URI, keyword: Keyword)                              extends Keyword
+case class IgnoredKeyword(keyword: String)                                       extends Keyword
 
 case class Keywords(
     vocabulary: Vocabulary,
@@ -461,8 +462,7 @@ object Keywords:
                         .map(_.prefix(prefix))
                         .swap
                     } else {
-                      // println(s"FW ignored ${keyword}")
-                      Right(keywords.withIgnored(keyword))
+                      Right(keywords.add(IgnoredKeyword(keyword)).withIgnored(keyword))
                     }
                   }
               )

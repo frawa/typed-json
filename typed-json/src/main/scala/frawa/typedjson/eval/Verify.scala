@@ -50,6 +50,7 @@ import frawa.typedjson.validation.{
 }
 import frawa.typedjson.output.OutputOps
 import frawa.typedjson.util.FP
+import frawa.typedjson.keywords.Ignored
 
 class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 
@@ -493,3 +494,6 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         ros1
       }
       .getOrElse(FP.sequence(ros).map(os => ops.all(os, value.pointer)))
+
+  def verifyIgnored(keyword: String): Fun[R[O]] =
+    funUnit(value => ops.valid(value.pointer).withAnnotation(Ignored(Set(keyword))))

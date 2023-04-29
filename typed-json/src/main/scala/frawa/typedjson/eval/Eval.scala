@@ -150,6 +150,7 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case WithLocation(_, k) =>
         // TODO use location?!
         compileOne(k)
+      case IgnoredKeyword(keyword) => verify.verifyIgnored(keyword)
     }
     value => fun(value).map(_.forKeyword(k))
 

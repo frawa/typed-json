@@ -6,6 +6,7 @@ import frawa.typedjson.keywords.Evaluated
 import frawa.typedjson.keywords.EvaluatedIndices
 import frawa.typedjson.keywords.EvaluatedProperties
 import frawa.typedjson.keywords.Keyword
+import frawa.typedjson.keywords.Ignored
 
 trait OutputOps[O]: // extends Monoid[O]:
   def valid(pointer: Pointer): O
@@ -21,7 +22,7 @@ trait OutputOps[O]: // extends Monoid[O]:
     def forKeyword(k: Keyword): O
 
 object OutputOps:
-  def mergeAnnotations(es: Seq[Evaluated]): Seq[Evaluated] =
+  def mergeEvaluatedAnnotations(es: Seq[Evaluated]): Seq[Evaluated] =
     val indices = es.flatMap {
       case EvaluatedIndices(indices) => indices
       case _                         => Seq()
@@ -33,3 +34,15 @@ object OutputOps:
     val es1 = if indices.nonEmpty then Seq(EvaluatedIndices(indices)) else Seq()
     val es2 = if properties.nonEmpty then Seq(EvaluatedProperties(properties)) else Seq()
     es1 ++ es2
+
+  def mergeAnnotations(es: Seq[Evaluated]): Seq[Evaluated] =
+    val es1     = mergeEvaluatedAnnotations(es)
+    val ignored = ignoredKeywords(es)
+    val es2     = if ignored.nonEmpty then Seq(Ignored(ignored)) else Seq()
+    es1 ++ es2
+
+  def ignoredKeywords(es: Seq[Evaluated]): Set[String] =
+    es.flatMap {
+      case Ignored(keywords) => keywords
+      case _                 => Set()
+    }.toSet
