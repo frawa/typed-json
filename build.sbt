@@ -180,6 +180,12 @@ lazy val macros = project
   .dependsOn(parser.jvm(scalaVersion3))
   .dependsOn(parserJawn.jvm(scalaVersion3))
 
+lazy val ESVersion = org.scalajs.linker.interface.ESVersion
+lazy val jsSettingsTypeJson = Seq(
+  // fixes regex error: Look-behind group is not supported because it requires RegExp features of ECMAScript 2018.
+  scalaJSLinkerConfig ~= { _.withESFeatures(_.withESVersion(ESVersion.ES2018)) }
+)
+
 lazy val typedJson =
   projectMatrix
     .in(file("typed-json"))
@@ -197,7 +203,7 @@ lazy val typedJson =
     .settings(strictScalacSettings)
     .settings(sharedTestSettings)
     .jvmPlatform(sharedPlatformSettings)
-    .jsPlatform(sharedPlatformSettings)
+    .jsPlatform(sharedPlatformSettings, jsSettingsTypeJson)
     .dependsOn(parser)
     .configure(p => p.dependsOn(macros))
     .dependsOn(parserJawn % "test")
