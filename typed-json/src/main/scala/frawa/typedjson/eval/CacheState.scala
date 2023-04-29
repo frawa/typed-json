@@ -11,10 +11,9 @@ import frawa.typedjson.output.OutputOps
 case class CacheState(
     rootResolver: SchemaResolver,
     rootVocabulary: Vocabulary,
-    count: Int,
+    countBind: Int,
     cache: Map[String, CacheState.Cached],
-    hits: Map[String, Int],
-    ignoredKeywords: Set[String]
+    hits: Map[String, Int]
 ) {
   def stats: CacheState.Stats =
     CacheState.stats(this)
@@ -25,16 +24,16 @@ object CacheState:
 
   type Cached = (SchemaResolution, Either[SchemaProblems, Vocabulary])
 
-  case class Stats(ignoredKeywords: Set[String])
+  case class Stats(binds: Int, hits: Int, cached: Int)
 
   def stats(state: CacheState): Stats =
-    Stats(state.ignoredKeywords)
+    Stats(binds = state.countBind, hits = state.hits.map(_._2).sum, cached = state.cache.keySet.size)
 
   def unit[A](a: A): R[A] = s => (a, s)
 
   def bind[A, B](a: R[A])(f: A => R[B]): R[B] = s =>
     val (a2, s2) = a(s)
-    f(a2)(s2.copy(count = s2.count + 1))
+    f(a2)(s2.copy(countBind = s2.countBind + 1))
 
   given [O: OutputOps]: TheResultMonad[R, O] with
     def unit[A](a: A): R[A] =
@@ -54,7 +53,7 @@ object CacheState:
       CacheState.resolveDynamic(ref, base, scope)
 
   def empty(resolver: SchemaResolver, vocabulary: Vocabulary): CacheState =
-    CacheState(resolver, vocabulary, 0, Map.empty, Map.empty, Set.empty)
+    CacheState(resolver, vocabulary, 0, Map.empty, Map.empty)
 
   def resolve[O: OutputOps](ref: String, base: URI, scope: DynamicScope)(using
       eval: Eval[R, O]
@@ -108,8 +107,7 @@ object CacheState:
                 (ops.invalid(CannotResolve(ref, Some(problems)), value.pointer), state)
               },
               { ks =>
-                val state1 = state.copy(ignoredKeywords = state.ignoredKeywords ++ ks.ignored)
-                eval.compile(ks)(value)(state1)
+                eval.compile(ks)(value)(state)
               }
             )
         }

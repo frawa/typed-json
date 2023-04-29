@@ -64,10 +64,13 @@ class MetaSchemaTest extends FunSuite:
         )
       },
       { stats =>
-        // assertEquals(result.count, 22)
         assertEquals(
-          stats.ignoredKeywords,
-          Set.empty[String]
+          stats,
+          CacheState.Stats(
+            binds = 13,
+            hits = 0,
+            cached = 0
+          )
         )
       }
     )
@@ -85,11 +88,13 @@ class MetaSchemaTest extends FunSuite:
         )
       },
       { stats =>
-        // assertEquals(result.count, 22)
-        // assertEquals(result.count, 12)
         assertEquals(
-          stats.ignoredKeywords,
-          Set.empty[String]
+          stats,
+          CacheState.Stats(
+            binds = 22,
+            hits = 0,
+            cached = 0
+          )
         )
       }
     )
@@ -107,15 +112,12 @@ class MetaSchemaTest extends FunSuite:
         )
       },
       { stats =>
-        // assertEquals(result.count, 84)
-        // assertEquals(result.count, 48)
-        // assertEquals(result.count, 18)
         assertEquals(
-          stats.ignoredKeywords,
-          Set(
-            "type",
-            "default",
-            "title"
+          stats,
+          CacheState.Stats(
+            binds = 295,
+            hits = 11,
+            cached = 1
           )
         )
       }
@@ -135,12 +137,13 @@ class MetaSchemaTest extends FunSuite:
         )
       },
       { stats =>
-        // assertEquals(result.count, 65)
-        // assertEquals(result.count, 44)
-        // assertEquals(result.count, 23)
         assertEquals(
-          stats.ignoredKeywords,
-          Set.empty[String]
+          stats,
+          CacheState.Stats(
+            binds = 13,
+            hits = 0,
+            cached = 0
+          )
         )
       }
     )
@@ -158,11 +161,13 @@ class MetaSchemaTest extends FunSuite:
         )
       },
       { stats =>
-        // assertEquals(result.count, 22)
-        // assertEquals(result.count, 12)
         assertEquals(
-          stats.ignoredKeywords,
-          Set.empty[String]
+          stats,
+          CacheState.Stats(
+            binds = 22,
+            hits = 0,
+            cached = 0
+          )
         )
       }
     )
@@ -180,16 +185,12 @@ class MetaSchemaTest extends FunSuite:
         )
       },
       { stats =>
-        // assertEquals(result.count, 168)
-        // assertEquals(result.count, 91)
-        // assertEquals(result.count, 32)
         assertEquals(
-          stats.ignoredKeywords,
-          Set(
-            "type",
-            "default",
-            "title",
-            "minItems"
+          stats,
+          CacheState.Stats(
+            binds = 599,
+            hits = 24,
+            cached = 2
           )
         )
       }
