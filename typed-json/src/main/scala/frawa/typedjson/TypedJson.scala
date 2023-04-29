@@ -39,20 +39,8 @@ import frawa.typedjson.suggest.Suggest
 import frawa.typedjson.output.OutputOps
 import frawa.typedjson.suggest.SuggestOutput
 
-// TODO avoid mutation
 case class TypedJson(private val state: Option[(Keywords, CacheState)]):
   import TypedJson.*
-
-  // def eval[O: OutputOps](json: String)(using parser: Parser): Either[InputError, O] =
-  //   parser
-  //     .parse(json)
-  //     .swap
-  //     .map(JsonError(_))
-  //     .swap
-  //     .map { value =>
-  //       val ops = summon[OutputOps[O]]
-  //       eval(value).getOrElse(ops.valid(Pointer.empty))
-  //     }
 
   def eval[O: OutputOps](value: Offset.Value): (Option[O], TypedJson) =
     doEval(Offset.withoutOffset(value))
@@ -60,9 +48,23 @@ case class TypedJson(private val state: Option[(Keywords, CacheState)]):
   def eval[O: OutputOps](value: Value): (Option[O], TypedJson) =
     doEval(value)
 
-  // TODO bulk
-  def evalBulk[O: OutputOps](values: Seq[Value]): (Option[O], TypedJson) =
-    ???
+  def evalBulk[O: OutputOps](values: Seq[Value]): (Seq[O], TypedJson) =
+    state
+      .map { (keywords, cache) =>
+        val eval: Eval[R, O] = Eval[R, O]
+        val compiled         = eval.compile(keywords)
+        val fun              = eval.fun(compiled)
+
+        val (os, cache1) = values.foldLeft((Seq.empty[O], cache)) { case ((os, cache), value) =>
+          val (o, cache1) = fun(value)(cache)
+          (os :+ o, cache1)
+        }
+        (os, cache1)
+      }
+      .map { (os, cache) =>
+        (os, copy(state = state.map { (k, _) => (k, cache) }))
+      }
+      .getOrElse((Seq(), this))
 
   private def doEval[O: OutputOps](value: Value): (Option[O], TypedJson) =
     state

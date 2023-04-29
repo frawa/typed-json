@@ -42,12 +42,23 @@ class SamplesTest extends FunSuite:
     val schemaJson = """{"type": "string"}"""
     val typedJson  = TypedJson.create(schemaJson).toOption.get
 
-    val validJson = parseJsonValue(""""foo"""")
-    val (o, _)    = typedJson.eval(validJson)
+    val validJson       = parseJsonValue(""""foo"""")
+    val (o, typedJson1) = typedJson.eval(validJson)
     assertEquals(o.map(_.valid), Some(true))
     val invalidJson = parseJsonValue("""13""")
-    val (o2, _)     = typedJson.eval(invalidJson)
+    val (o2, _)     = typedJson1.eval(invalidJson)
     assertEquals(o2.map(_.valid), Some(false))
+  }
+
+  test("use schema to validate several values at once") {
+    val schemaJson = """{"type": "string"}"""
+    val typedJson  = TypedJson.create(schemaJson).toOption.get
+
+    val validJson   = parseJsonValue(""""foo"""")
+    val invalidJson = parseJsonValue("""13""")
+
+    val (os, _) = typedJson.evalBulk(Seq(validJson, invalidJson))
+    assertEquals(os.map(_.valid), Seq(true, false))
   }
 
   test("obtain validation errors") {
