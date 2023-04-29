@@ -49,6 +49,12 @@ object Util:
 
   import frawa.typedjson.eval.CacheState.{*, given}
 
+  def doApplyWithStats[O: OutputOps](fun: Value => R[O], value: Value)(using
+      resolver: SchemaResolver
+  ): (O, CacheState.Stats) =
+    val (o, s) = fun(value)(empty(resolver, vocabularyForTest.get))
+    (o, s.stats)
+
   def doApply[O: OutputOps](fun: Value => R[O], value: Value)(using resolver: SchemaResolver): O =
     val (o, s) = fun(value)(empty(resolver, vocabularyForTest.get))
     // println(s"counted ${s.count} binds")

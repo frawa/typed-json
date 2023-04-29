@@ -25,6 +25,7 @@ import munit.FunSuite
 import frawa.typedjson.eval.CacheState
 import frawa.typedjson.output.BasicOutput
 import frawa.typedjson.output.BasicOutput.given
+import frawa.typedjson.eval.Util.doApplyWithStats
 
 class MetaSchemaTest extends FunSuite:
 
@@ -35,105 +36,92 @@ class MetaSchemaTest extends FunSuite:
     val Some(schema) = resolver(base.resolve(name)): @unchecked
     f(schema)
 
-  def validateSpec(valueName: String, schemaName: String)(f: BasicOutput => Unit): Unit =
+  def validateSpec(valueName: String, schemaName: String)(f: CacheState.Stats => Unit): Unit =
     val evalBasic              = Eval[R, BasicOutput]
     given Eval[R, BasicOutput] = evalBasic
     withSchemaSpec(schemaName) { schema =>
       withSchemaSpec(valueName) { value =>
         withCompiledSchemaValue(schema) { fun =>
-          val output = doApply(fun, value.value)
-          f(output)
+          val (output, stats) = doApplyWithStats(fun, value.value)
+          assertEquals(output.isValid, true)
+          f(stats)
         }
       }
     }
 
   test("validate core against core") {
-    validateSpec("meta/core", "meta/core") { output =>
-      assertEquals(output.valid, true)
-    // assertEquals(result.count, 22)
-    // assertEquals(
-    //   result.ignoredKeywords(),
-    //   Set(
-    //     "properties",
-    //     "title",
-    //     "type"
-    //   )
-    // )
+    validateSpec("meta/core", "meta/core") { stats =>
+      // assertEquals(result.count, 22)
+      assertEquals(
+        stats.ignoredKeywords,
+        Set.empty[String]
+      )
     }
   }
 
   test("validate core against validation") {
-    validateSpec("meta/core", "meta/validation") { output =>
-      assertEquals(output.valid, true)
-    // assertEquals(result.count, 22)
-    // assertEquals(result.count, 12)
-    // assertEquals(
-    //   result.ignoredKeywords(),
-    //   Set.empty[String]
-    // )
+    validateSpec("meta/core", "meta/validation") { stats =>
+      // assertEquals(result.count, 22)
+      // assertEquals(result.count, 12)
+      assertEquals(
+        stats.ignoredKeywords,
+        Set.empty[String]
+      )
     }
   }
 
   test("validate core against applicator") {
-    validateSpec("meta/core", "meta/applicator") { output =>
-      assertEquals(output.valid, true)
-    // assertEquals(result.count, 84)
-    // assertEquals(result.count, 48)
-    // assertEquals(result.count, 18)
-    // assertEquals(
-    //   result.ignoredKeywords(),
-    //   Set(
-    //     "type",
-    //     "default",
-    //     "title"
-    //   )
-    // )
+    validateSpec("meta/core", "meta/applicator") { stats =>
+      // assertEquals(result.count, 84)
+      // assertEquals(result.count, 48)
+      // assertEquals(result.count, 18)
+      assertEquals(
+        stats.ignoredKeywords,
+        Set(
+          "type",
+          "default",
+          "title"
+        )
+      )
     }
   }
 
   test("validate validation against core") {
-    validateSpec("meta/validation", "meta/core") { output =>
-      assertEquals(output.valid, true)
-    // assertEquals(result.count, 65)
-    // assertEquals(result.count, 44)
-    // assertEquals(result.count, 23)
-    // assertEquals(
-    //   result.ignoredKeywords(),
-    //   Set(
-    //     "properties",
-    //     "title",
-    //     "type"
-    //   )
-    // )
+    validateSpec("meta/validation", "meta/core") { stats =>
+      // assertEquals(result.count, 65)
+      // assertEquals(result.count, 44)
+      // assertEquals(result.count, 23)
+      assertEquals(
+        stats.ignoredKeywords,
+        Set.empty[String]
+      )
     }
   }
 
   test("validate validation against validation") {
-    validateSpec("meta/validation", "meta/validation") { output =>
-      assertEquals(output.valid, true)
-    // assertEquals(result.count, 22)
-    // assertEquals(result.count, 12)
-    // assertEquals(
-    //   result.ignoredKeywords(),
-    //   Set.empty[String]
-    // )
+    validateSpec("meta/validation", "meta/validation") { stats =>
+      // assertEquals(result.count, 22)
+      // assertEquals(result.count, 12)
+      assertEquals(
+        stats.ignoredKeywords,
+        Set.empty[String]
+      )
     }
   }
 
   test("validate validation against applicator") {
-    validateSpec("meta/validation", "meta/applicator") { output =>
-      assertEquals(output.valid, true)
-    // assertEquals(result.count, 168)
-    // assertEquals(result.count, 91)
-    // assertEquals(result.count, 32)
-    // assertEquals(
-    //   result.ignoredKeywords(),
-    //   Set(
-    //     "type",
-    //     "default",
-    //     "title",
-    //     "minItems"
-    //   )
-    // )
+    validateSpec("meta/validation", "meta/applicator") { stats =>
+      // assertEquals(result.count, 168)
+      // assertEquals(result.count, 91)
+      // assertEquals(result.count, 32)
+      assertEquals(
+        stats.ignoredKeywords,
+        Set(
+          "type",
+          "default",
+          "title",
+          "minItems"
+        )
+      )
     }
   }

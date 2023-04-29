@@ -13,13 +13,22 @@ case class CacheState(
     rootVocabulary: Vocabulary,
     count: Int,
     cache: Map[String, CacheState.Cached],
-    hits: Map[String, Int]
-)
+    hits: Map[String, Int],
+    ignoredKeywords: Set[String]
+) {
+  def stats: CacheState.Stats =
+    CacheState.stats(this)
+}
 
 object CacheState:
   type R = [A] =>> CacheState => (A, CacheState)
 
   type Cached = (SchemaResolution, Either[SchemaProblems, Vocabulary])
+
+  case class Stats(ignoredKeywords: Set[String])
+
+  def stats(state: CacheState): Stats =
+    Stats(state.ignoredKeywords)
 
   def unit[A](a: A): R[A] = s => (a, s)
 
@@ -45,7 +54,7 @@ object CacheState:
       CacheState.resolveDynamic(ref, base, scope)
 
   def empty(resolver: SchemaResolver, vocabulary: Vocabulary): CacheState =
-    CacheState(resolver, vocabulary, 0, Map.empty, Map.empty)
+    CacheState(resolver, vocabulary, 0, Map.empty, Map.empty, Set.empty)
 
   def resolve[O: OutputOps](ref: String, base: URI, scope: DynamicScope)(using
       eval: Eval[R, O]
@@ -99,7 +108,8 @@ object CacheState:
                 (ops.invalid(CannotResolve(ref, Some(problems)), value.pointer), state)
               },
               { ks =>
-                eval.compile(ks)(value)(state)
+                val state1 = state.copy(ignoredKeywords = state.ignoredKeywords ++ ks.ignored)
+                eval.compile(ks)(value)(state1)
               }
             )
         }
