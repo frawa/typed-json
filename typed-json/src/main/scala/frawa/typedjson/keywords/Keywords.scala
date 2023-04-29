@@ -91,8 +91,7 @@ case class IgnoredKeyword(keyword: String)                                      
 case class Keywords(
     vocabulary: Vocabulary,
     keywords: Set[Keyword] = Set(),
-    lastKeywords: Seq[Keywords => Keywords] = Seq(),
-    ignored: Set[String] = Set.empty
+    lastKeywords: Seq[Keywords => Keywords] = Seq()
 ):
   import Keywords.*
 
@@ -119,7 +118,7 @@ case class Keywords(
     }
     given CurrentLocation = scope.currentLocation
     for keywords <- combineAllLefts(keywords0)(SchemaProblems.combine)
-    yield add(f(keywords)).withIgnored(keywords.flatMap(_.ignored).toSet)
+    yield add(f(keywords))
 
   private def doneParsing(): Keywords =
     lastKeywords.foldLeft(this) { (acc, push) =>
@@ -140,7 +139,7 @@ case class Keywords(
         Right(
           getTypeCheck(typeName)
             .map(add(_))
-            .getOrElse(withIgnored(s"$keyword-$typeName"))
+            .getOrElse(this)
         )
 
       case ("type", ArrayValue(values)) =>
@@ -370,8 +369,7 @@ case class Keywords(
     for
       propKeywords <- combineAllLefts(propKeywords0)(SchemaProblems.combine)
       keywords = Map.from(propKeywords)
-      ignored  = keywords.values.flatMap(_.ignored).toSet
-    yield f(keywords).withIgnored(ignored)
+    yield f(keywords)
 
   private def updateKeyword[K <: Keyword](
       newKeyword: => K
@@ -396,12 +394,6 @@ case class Keywords(
   )(f: (Keywords, K) => K)(using CurrentLocation, TypeTest[Keyword, K]): Either[SchemaProblems, Keywords] =
     for keywords <- Keywords.parseKeywords(vocabulary, resolution, scope)
     yield updateKeyword(newKeyword)(f(keywords, _))
-
-  private def withIgnored(keyword: String): Keywords =
-    this.copy(ignored = ignored + keyword)
-
-  private def withIgnored(ignored: Set[String]): Keywords =
-    this.copy(ignored = ignored.concat(ignored))
 
   private def getTypeCheck(typeName: String): Option[TypeKeyword] =
     typeName match
@@ -462,7 +454,7 @@ object Keywords:
                         .map(_.prefix(prefix))
                         .swap
                     } else {
-                      Right(keywords.add(IgnoredKeyword(keyword)).withIgnored(keyword))
+                      Right(keywords.add(IgnoredKeyword(keyword)))
                     }
                   }
               )

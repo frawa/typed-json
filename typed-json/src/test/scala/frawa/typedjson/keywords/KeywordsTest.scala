@@ -28,26 +28,17 @@ import frawa.typedjson.util.WithPointer
 class KeywordsTest extends FunSuite:
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId)).get
 
-  private def assertKeywords(schema: SchemaValue, allowIgnored: Boolean = false)(
+  private def assertKeywords(schema: SchemaValue)(
       f: Keywords => Unit
   ): Either[Nothing, Unit] =
     val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema)
     val scope                           = DynamicScope.empty
     val withParsed =
       for keywords <- Keywords.parseKeywords(vocabularyForTest, resolver.push(schema), scope)
-      yield
-        if !allowIgnored then
-          assertEquals(
-            keywords.ignored,
-            Set.empty[String],
-            clue("unexpected ignored keywords")
-          )
-        f(keywords)
+      yield f(keywords)
     withParsed.swap
       .map(messages => fail("parsing keywords failed", clues(clue[SchemaProblems](messages))))
       .swap
-
-  private def assertKeywordsWithIgnored(schema: SchemaValue) = assertKeywords(schema, allowIgnored = true)
 
   private def assertSchemaProblems(schema: SchemaValue)(
       f: SchemaProblems => Unit
@@ -86,14 +77,6 @@ class KeywordsTest extends FunSuite:
     withSchema(falseSchema) { schema =>
       assertKeywords(schema) { keywords =>
         assertEquals(keywords.keywords, Set(WithLocation(uri("#"), TrivialKeyword(false))))
-      }
-    }
-  }
-
-  test("ignored keyword") {
-    withSchema("""{"ignored": false}""") { schema =>
-      assertKeywordsWithIgnored(schema) { keywords =>
-        assertEquals(keywords.ignored, Set("ignored"))
       }
     }
   }
@@ -230,15 +213,13 @@ class KeywordsTest extends FunSuite:
                     vocabularyForTest,
                     keywords = Set(
                       WithLocation(uri("#/properties/toto/type"), NumberTypeKeyword)
-                    ),
-                    ignored = Set()
+                    )
                   ),
                   "titi" -> Keywords(
                     vocabularyForTest,
                     keywords = Set(
                       WithLocation(uri("#/properties/titi/type"), StringTypeKeyword)
-                    ),
-                    ignored = Set()
+                    )
                   )
                 )
               )
@@ -286,8 +267,7 @@ class KeywordsTest extends FunSuite:
                 Seq(
                   Keywords(
                     vocabularyForTest,
-                    keywords = Set(WithLocation(uri("#/allOf/0/type"), NumberTypeKeyword)),
-                    ignored = Set()
+                    keywords = Set(WithLocation(uri("#/allOf/0/type"), NumberTypeKeyword))
                   )
                 )
               )
@@ -310,13 +290,11 @@ class KeywordsTest extends FunSuite:
                 Seq(
                   Keywords(
                     vocabularyForTest,
-                    keywords = Set(WithLocation(uri("#/anyOf/0/type"), NumberTypeKeyword)),
-                    ignored = Set()
+                    keywords = Set(WithLocation(uri("#/anyOf/0/type"), NumberTypeKeyword))
                   ),
                   Keywords(
                     vocabularyForTest,
-                    keywords = Set(WithLocation(uri("#/anyOf/1/type"), StringTypeKeyword)),
-                    ignored = Set()
+                    keywords = Set(WithLocation(uri("#/anyOf/1/type"), StringTypeKeyword))
                   )
                 )
               )
@@ -339,13 +317,11 @@ class KeywordsTest extends FunSuite:
                 Seq(
                   Keywords(
                     vocabularyForTest,
-                    keywords = Set(WithLocation(uri("#/oneOf/0/type"), NumberTypeKeyword)),
-                    ignored = Set()
+                    keywords = Set(WithLocation(uri("#/oneOf/0/type"), NumberTypeKeyword))
                   ),
                   Keywords(
                     vocabularyForTest,
-                    keywords = Set(WithLocation(uri("#/oneOf/1/type"), StringTypeKeyword)),
-                    ignored = Set()
+                    keywords = Set(WithLocation(uri("#/oneOf/1/type"), StringTypeKeyword))
                   )
                 )
               )
@@ -369,24 +345,21 @@ class KeywordsTest extends FunSuite:
                   Keywords(
                     vocabularyForTest,
                     Set(WithLocation(uri("#/if/type"), NumberTypeKeyword)),
-                    Seq(),
-                    Set()
+                    Seq()
                   )
                 ),
                 Some(
                   Keywords(
                     vocabularyForTest,
                     Set(WithLocation(uri("#/then/type"), NumberTypeKeyword)),
-                    Seq(),
-                    Set()
+                    Seq()
                   )
                 ),
                 Some(
                   Keywords(
                     vocabularyForTest,
                     Set(WithLocation(uri("#/else/type"), StringTypeKeyword)),
-                    Seq(),
-                    Set()
+                    Seq()
                   )
                 )
               )
