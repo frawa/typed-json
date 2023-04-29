@@ -24,27 +24,30 @@ import frawa.typedjson.validation.TypeMismatch
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.parser.Parser
 import frawa.typedjson.util.WithPointer
+import frawa.typedjson.macros.JsonUtils.parseJsonValue
 
 class SamplesTest extends FunSuite:
   given Parser = new JawnParser()
 
   import frawa.typedjson.output.FlagOutput.given
 
-  test("always valid without a schema") {
+  test("no output without a schema") {
     val typedJson = TypedJson.create()
-    val json      = """{"foo":"bar"}"""
-    val result    = typedJson.eval(json)
-    assertEquals(result.map(_.valid), Right(true))
+    val json      = parseJsonValue("""{"foo":"bar"}""")
+    val (o, _)    = typedJson.eval(json)
+    assertEquals(o, None)
   }
 
   test("use schema to validate several values") {
     val schemaJson = """{"type": "string"}"""
     val typedJson  = TypedJson.create(schemaJson).toOption.get
 
-    val validJson = """"foo""""
-    assertEquals(typedJson.eval(validJson).map(_.valid), Right(true))
-    val invalidJson = """13"""
-    assertEquals(typedJson.eval(invalidJson).map(_.valid), Right(false))
+    val validJson = parseJsonValue(""""foo"""")
+    val (o, _)    = typedJson.eval(validJson)
+    assertEquals(o.map(_.valid), Some(true))
+    val invalidJson = parseJsonValue("""13""")
+    val (o2, _)     = typedJson.eval(invalidJson)
+    assertEquals(o2.map(_.valid), Some(false))
   }
 
   test("obtain validation errors") {
@@ -54,8 +57,8 @@ class SamplesTest extends FunSuite:
     val schemaJson = """{"type": "string"}"""
     val typedJson  = TypedJson.create(schemaJson).toOption.get
 
-    val invalidJson = """true"""
-    val validation  = typedJson.eval(invalidJson)
-    assertEquals(validation.map(_.valid), Right(false))
-    assertEquals(validation.map(_.errors), Right(Seq(WithPointer(TypeMismatch("string")))))
+    val invalidJson = parseJsonValue("""true""")
+    val (o, _)      = typedJson.eval(invalidJson)
+    assertEquals(o.map(_.valid), Some(false))
+    assertEquals(o.map(_.errors), Some(Seq(WithPointer(TypeMismatch("string")))))
   }

@@ -40,45 +40,46 @@ import frawa.typedjson.output.OutputOps
 import frawa.typedjson.suggest.SuggestOutput
 
 // TODO avoid mutation
-class TypedJson(private val keywords: Option[Keywords], private var cache: CacheState = null):
+case class TypedJson(private val state: Option[(Keywords, CacheState)]):
   import TypedJson.*
 
-  def eval[O: OutputOps](json: String)(using parser: Parser): Either[InputError, O] =
-    parser
-      .parse(json)
-      .swap
-      .map(JsonError(_))
-      .swap
-      .map { value =>
-        val ops = summon[OutputOps[O]]
-        eval(value).getOrElse(ops.valid(Pointer.empty))
-      }
+  // def eval[O: OutputOps](json: String)(using parser: Parser): Either[InputError, O] =
+  //   parser
+  //     .parse(json)
+  //     .swap
+  //     .map(JsonError(_))
+  //     .swap
+  //     .map { value =>
+  //       val ops = summon[OutputOps[O]]
+  //       eval(value).getOrElse(ops.valid(Pointer.empty))
+  //     }
 
-  def eval[O: OutputOps](value: Offset.Value): Option[O] =
+  def eval[O: OutputOps](value: Offset.Value): (Option[O], TypedJson) =
     doEval(Offset.withoutOffset(value))
 
-  def eval[O: OutputOps](value: Value): Option[O] =
+  def eval[O: OutputOps](value: Value): (Option[O], TypedJson) =
     doEval(value)
 
   // TODO bulk
-  def evalBulk[O: OutputOps](values: Seq[Value]): Seq[O] =
+  def evalBulk[O: OutputOps](values: Seq[Value]): (Option[O], TypedJson) =
     ???
 
-  private def doEval[O: OutputOps](value: Value): Option[O] =
-    keywords.map { keywords =>
-      val eval: Eval[R, O] = Eval[R, O]
-      val compiled         = eval.compile(keywords)
-      val fun              = eval.fun(compiled)
+  private def doEval[O: OutputOps](value: Value): (Option[O], TypedJson) =
+    state
+      .map { (keywords, cache) =>
+        val eval: Eval[R, O] = Eval[R, O]
+        val compiled         = eval.compile(keywords)
+        val fun              = eval.fun(compiled)
 
-      if cache == null then throw new IllegalStateException("boom: no cache")
-      val (o, cache1) = fun(value)(cache)
-      // TODO log stats?
+        val (o, cache1) = fun(value)(cache)
+        // TODO log stats?
 
-      // TODO avoid mutation:
-      this.cache = cache1
-
-      o
-    }
+        (o, cache1)
+      }
+      .map { (o, cache) =>
+        (Some(o), copy(state = state.map { (k, _) => (k, cache) }))
+      }
+      .getOrElse((None, this))
 
 object TypedJson:
   type EvalFun[O] = Eval.EvalFun[R, O]
@@ -125,7 +126,7 @@ object TypedJson:
       .swap
       .map { keywords =>
         val cache = CacheState.empty(schemaResolver, keywords.vocabulary)
-        new TypedJson(Some(keywords), cache)
+        new TypedJson(Some(keywords, cache))
       }
 
   private def compile[R[_], O](keywords: Keywords)(using eval: Eval[R, O])(using

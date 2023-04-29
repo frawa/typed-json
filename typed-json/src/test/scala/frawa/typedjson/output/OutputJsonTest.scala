@@ -23,6 +23,7 @@ import frawa.typedjson.validation.FalseSchemaReason
 import munit.FunSuite
 import frawa.typedjson.output.BasicOutput
 import frawa.typedjson.TypedJson
+import frawa.typedjson.testutil.TestUtil.parseJsonValue
 
 class OutputJsonTest extends FunSuite:
 
@@ -78,9 +79,9 @@ class OutputJsonTest extends FunSuite:
     import BasicOutput.given
     given parser: Parser = new JawnParser()
 
-    val typedJson = TypedJson.create(Sample.schema).toOption.get
-    val output    = typedJson.eval(Sample.value)
-    val basic     = output.map(OutputJson.basic).toOption
+    val typedJson   = TypedJson.create(Sample.schema).toOption.get
+    val (output, _) = typedJson.eval(parseJsonValue(Sample.value))
+    val basic       = output.map(OutputJson.basic)
 
     val expected = parser.parse(Sample.expectedBasic).toOption
     assertEquals(basic, expected)

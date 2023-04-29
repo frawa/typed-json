@@ -35,15 +35,6 @@ import scala.scalajs.js.annotation.{JSExport, JSExportAll, JSExportTopLevel}
 object TypedJsonFactory {
   private val parser = new JawnParser
 
-  // import frawa.typedjson.eval.Eval
-  // import frawa.typedjson.eval.SuggestOutput
-  // import frawa.typedjson.eval.SuggestOutput.given
-  // import frawa.typedjson.eval.CacheState.{R, given}
-
-  // private val eval             = SuggestOutput
-
-  // given Eval[R, SuggestOutput] = Eval[R, SuggestOutput]
-
   @JSExport
   def create(): TypedJsonJS = {
     TypedJsonJS(TypedJson.create())
@@ -71,7 +62,6 @@ case class TypedJsonJS(
     typedJson: TypedJson,
     value: Option[Offset.Value] = None,
     _markers: Seq[Marker] = Seq()
-    // result: Option[Either[OffsetParser.ParseError, Validation]] = None
 ) {
   @JSExport
   def withSchema(schema: TypedJsonJS): TypedJsonJS = {
@@ -104,9 +94,10 @@ case class TypedJsonJS(
     value
       .flatMap { value =>
         import BasicOutput.given
-        this.typedJson.eval(value).map { o =>
+        val (o, typedJson) = this.typedJson.eval(value)
+        o.map { o =>
           val offsetAt = pointer => TypedJsonFactory.offsetAt(pointer, value)
-          copy(_markers = o.errors.map(Marker.fromError(offsetAt)))
+          copy(_markers = o.errors.map(Marker.fromError(offsetAt)), typedJson = typedJson)
         }
       }
       .getOrElse(this)
@@ -122,7 +113,8 @@ case class TypedJsonJS(
       .flatMap { value =>
         val at                         = TypedJsonFactory.pointerAt(value, offset)
         given OutputOps[SuggestOutput] = SuggestOutput.outputOps(at)
-        this.typedJson.eval(value).map { o =>
+        val (o, _)                     = this.typedJson.eval(value)
+        o.map { o =>
           val suggestions = Suggest.suggestions(at, o)
           val offsetAt    = pointer => TypedJsonFactory.offsetAt(pointer, value)
           Suggestions(offsetAt)(at, suggestions)
