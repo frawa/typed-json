@@ -24,7 +24,7 @@ import frawa.typedjson.validation.TypeMismatch
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.parser.Parser
 import frawa.typedjson.util.WithPointer
-import frawa.typedjson.macros.JsonUtils.parseJsonValue
+import frawa.typedjson.testutil.TestUtil.parseJsonValue
 
 class SamplesTest extends FunSuite:
   given Parser = new JawnParser()
