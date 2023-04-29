@@ -17,7 +17,7 @@ object Suggest:
   def isAt(at: Pointer): Pointer => Boolean = pointer => (at.isInsideKey && at.outer == pointer) || at == pointer
 
   def suggestions(at: Pointer, output: SuggestOutput): Seq[Value] =
-    val all = output.keywords.flatMap(suggestFor)
+    val all = output.keywords.flatMap(suggestFor).distinct
     // TODO use more precise replaceAt for better suggestions
     if at.isInsideKey then onlyKeys(all)
     else all
