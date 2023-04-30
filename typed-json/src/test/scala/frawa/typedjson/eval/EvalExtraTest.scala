@@ -214,12 +214,58 @@ class EvalExtraTest extends FunSuite:
       assertEquals(
         doApply(
           fun,
-          parseJsonValue("""["foo", 42, true]""".stripMargin)
+          parseJsonValue("""["foo", 42, true]""")
         ),
         BasicOutput(
           true,
           annotations = Seq(
             EvaluatedIndices(Seq(0, 1, 2))
+          )
+        )
+      )
+    }
+  }
+
+  test("unevaluatedProperties with not") {
+    withCompiledSchema("""|{
+                          |            "$schema": "https://json-schema.org/draft/2020-12/schema",
+                          |            "type": "object",
+                          |            "properties": {
+                          |                "foo": { "type": "string" }
+                          |            },
+                          |            "not": {
+                          |                "not": {
+                          |                    "properties": {
+                          |                        "bar": { "const": "bar" }
+                          |                    },
+                          |                    "required": ["bar"]
+                          |                }
+                          |            },
+                          |            "unevaluatedProperties": false
+                          |}""".stripMargin) { fun =>
+      assertEquals(
+        doApply(
+          fun,
+          parseJsonValue("""|{
+                            |                    "foo": "foo",
+                            |                    "bar": "bar"
+                            |}""".stripMargin)
+        ),
+        BasicOutput(
+          false,
+          errors = List(
+            WithPointer(
+              value = FalseSchemaReason(),
+              Pointer.empty / "bar"
+            )
+          ),
+          annotations = List(
+            EvaluatedProperties(
+              Set(
+                "foo",
+                "bar"
+              )
+            )
           )
         )
       )

@@ -39,7 +39,7 @@ object BasicOutput:
 
     extension (o: BasicOutput)
       def not(pointer: Pointer): BasicOutput =
-        if o.valid then o.copy(valid = false, errors = Seq(WithPointer(NotInvalid(), pointer)))
+        if o.valid then o.copy(valid = false, errors = Seq(WithPointer(NotInvalid(), pointer)), annotations = Seq())
         else o.copy(valid = true, errors = Seq())
       def isValid: Boolean                                          = o.valid
       def withAnnotations(annotations: Seq[Evaluated]): BasicOutput = o.copy(annotations = o.annotations ++ annotations)

@@ -25,7 +25,7 @@ object FlagOutput:
       )
 
     extension (o: FlagOutput)
-      def not(pointer: Pointer): FlagOutput                        = o.copy(valid = !o.valid)
+      def not(pointer: Pointer): FlagOutput                        = o.copy(valid = !o.valid, annotations = Seq())
       def isValid: Boolean                                         = o.valid
       def withAnnotations(annotations: Seq[Evaluated]): FlagOutput = o.copy(annotations = o.annotations ++ annotations)
       def getAnnotations(): Seq[Evaluated]                         = o.annotations
