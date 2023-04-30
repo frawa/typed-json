@@ -324,10 +324,12 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
     // ops.invalid(UnknownFormat(format), value.pointer)
     }
 
-  def verifyInteger(): Fun[R[O]] =
-    verifyNumberValue(TypeMismatch[NumberValue]("integer")) { v =>
-      v.isWhole
-    }
+  def verifyInteger(): Fun[R[O]] = value =>
+    Value
+      .asNumber(value.value)
+      .filter(_.isWhole)
+      .map(_ => monad.unit(ops.valid(value.pointer)))
+      .getOrElse(monad.unit(ops.invalid(TypeMismatch[NumberValue]("integer"), value.pointer)))
 
   def verifyMultiple(n: BigDecimal): Fun[R[O]] =
     verifyNumberValue(NotMultipleOf(n)) { v =>
