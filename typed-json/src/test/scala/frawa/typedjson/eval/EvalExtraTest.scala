@@ -55,3 +55,51 @@ class EvalExtraTest extends FunSuite:
       )
     }
   }
+
+  test("an invalid due to the other is invalid") {
+    withCompiledSchema("""|{
+                          |            "$schema": "https://json-schema.org/draft/2020-12/schema",
+                          |            "patternProperties": {
+                          |                "a*": {"type": "integer"},
+                          |                "aaa*": {"maximum": 20}
+                          |            }
+        }""".stripMargin) { fun =>
+      assertEquals(
+        doApply(fun, parseJsonValue("""{"aaaa": 31}""")),
+        BasicOutput(
+          false,
+          Seq(
+            WithPointer(
+              value = MaximumMismatch(20, false),
+              Pointer.empty / "aaaa"
+            )
+          )
+        )
+      )
+    }
+  }
+
+  test("patternProperty invalidates property") {
+    withCompiledSchema("""|{
+                          |            "$schema": "https://json-schema.org/draft/2020-12/schema",
+                          |            "properties": {
+                          |                "foo": {"type": "array", "maxItems": 3},
+                          |                "bar": {"type": "array"}
+                          |            },
+                          |            "patternProperties": {"f.o": {"minItems": 2}},
+                          |            "additionalProperties": {"type": "integer"}
+        }""".stripMargin) { fun =>
+      assertEquals(
+        doApply(fun, parseJsonValue("""{"foo": []}""")),
+        BasicOutput(
+          false,
+          Seq(
+            WithPointer(
+              value = MinItemsMismatch(2),
+              Pointer.empty / "foo"
+            )
+          )
+        )
+      )
+    }
+  }

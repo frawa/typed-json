@@ -74,6 +74,10 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
   private def funUnit2(f: Fun[Option[O]]): Fun[R[O]] =
     value => monad.unit(f(value).getOrElse(ops.valid(value.pointer)))
 
+  private def funAll(fs: Seq[Fun[R[O]]]): Fun[R[O]] = value =>
+    val ros = fs.map(f => f(value))
+    FP.sequence(ros).map(os => ops.all(os, value.pointer))
+
   private def funMap[A, B](fun: Fun[R[A]])(f: (A, Pointer) => B): Fun[R[B]] =
     value => fun(value).map(a => f(a, value.pointer))
 
@@ -200,19 +204,21 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       .asObject(value.value)
       .map { vs =>
         vs.flatMap { (p, v) =>
-          val f = properties
+          val funProperties = properties
             .get(p)
-            .orElse {
-              patternProperties
-                .find { (regex, f) =>
-                  val r = regex.r
-                  r.findFirstIn(p).isDefined
-                }
-                .map(_._2)
+            .toSeq
+          val funsPattern = patternProperties
+            .filter { (regex, f) =>
+              val r = regex.r
+              r.findFirstIn(p).isDefined
             }
-            .orElse {
-              additionalProperties
-            }
+            .map(_._2)
+            .toSeq
+          val funs = funProperties ++ funsPattern
+          val f =
+            if funs.isEmpty then additionalProperties
+            else if funs.size == 1 then Some(funs(0))
+            else Some(funAll(funs))
           f.map(f => f(WithPointer(v, value.pointer / p)).map((_, p)))
         }.toSeq
       }
