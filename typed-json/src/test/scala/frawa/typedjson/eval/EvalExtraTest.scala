@@ -197,3 +197,31 @@ class EvalExtraTest extends FunSuite:
       )
     }
   }
+
+  test("unevaluatedItems with nested unevaluatedItems") {
+    withCompiledSchema("""|{
+                          |            "$schema": "https://json-schema.org/draft/2020-12/schema",
+                          |            "allOf": [
+                          |                {
+                          |                    "prefixItems": [
+                          |                        { "type": "string" }
+                          |                    ]
+                          |                },
+                          |                { "unevaluatedItems": true }
+                          |            ],
+                          |            "unevaluatedItems": false
+                          |}""".stripMargin) { fun =>
+      assertEquals(
+        doApply(
+          fun,
+          parseJsonValue("""["foo", 42, true]""".stripMargin)
+        ),
+        BasicOutput(
+          true,
+          annotations = Seq(
+            EvaluatedIndices(Seq(0, 1, 2))
+          )
+        )
+      )
+    }
+  }

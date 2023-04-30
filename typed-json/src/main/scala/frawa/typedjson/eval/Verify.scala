@@ -457,8 +457,9 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
               .map { case (v, index) =>
                 WithPointer(v, value.pointer / index)
               }
-            val ros = remainingIndexed.map(unevaluated)
-            FP.sequence(ros).map(os => ops.all(os, value.pointer))
+            val ros          = remainingIndexed.map(unevaluated)
+            val allEvaluated = EvaluatedIndices((evaluated ++ remaining).toSeq)
+            FP.sequence(ros).map(os => ops.all(os, value.pointer).withAnnotation(allEvaluated))
           }
         ros1
       }
