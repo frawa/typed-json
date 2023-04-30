@@ -41,7 +41,7 @@ object BasicOutput:
       def not(pointer: Pointer): BasicOutput =
         if o.valid then o.copy(valid = false, errors = Seq(WithPointer(NotInvalid(), pointer)))
         else o.copy(valid = true, errors = Seq())
-      def isValid: Boolean                                   = o.valid
-      def withAnnotation(annotation: Evaluated): BasicOutput = o.copy(annotations = o.annotations :+ annotation)
-      def getAnnotations(): Seq[Evaluated]                   = o.annotations
-      def forKeyword(k: Keyword): BasicOutput                = o
+      def isValid: Boolean                                          = o.valid
+      def withAnnotations(annotations: Seq[Evaluated]): BasicOutput = o.copy(annotations = o.annotations ++ annotations)
+      def getAnnotations(): Seq[Evaluated]                          = o.annotations
+      def forKeyword(k: Keyword): BasicOutput                       = o

@@ -25,8 +25,8 @@ object FlagOutput:
       )
 
     extension (o: FlagOutput)
-      def not(pointer: Pointer): FlagOutput                 = o.copy(valid = !o.valid)
-      def isValid: Boolean                                  = o.valid
-      def withAnnotation(annotation: Evaluated): FlagOutput = o.copy(annotations = o.annotations :+ annotation)
-      def getAnnotations(): Seq[Evaluated]                  = o.annotations
-      def forKeyword(k: Keyword): FlagOutput                = o
+      def not(pointer: Pointer): FlagOutput                        = o.copy(valid = !o.valid)
+      def isValid: Boolean                                         = o.valid
+      def withAnnotations(annotations: Seq[Evaluated]): FlagOutput = o.copy(annotations = o.annotations ++ annotations)
+      def getAnnotations(): Seq[Evaluated]                         = o.annotations
+      def forKeyword(k: Keyword): FlagOutput                       = o

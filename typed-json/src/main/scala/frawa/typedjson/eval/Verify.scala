@@ -88,14 +88,16 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
     o.not(pointer)
 
   private def verifyOneOf(os: Seq[O], pointer: Pointer): O =
-    val count = os.count(_.isValid)
-    if count == 1 then ops.valid(pointer)
+    val count       = os.count(_.isValid)
+    val annotations = OutputOps.mergeEvaluatedAnnotations(os.filter(_.isValid).flatMap(_.getAnnotations()))
+    if count == 1 then ops.valid(pointer).withAnnotations(annotations)
     else if count == 0 then ops.all(os, pointer) // TODO new error NoneOf?
     else ops.invalid(NotOneOf(count), pointer)
 
   private def verifyAnyOf(os: Seq[O], pointer: Pointer): O =
-    val valid = os.exists(_.isValid)
-    if valid then ops.valid(pointer)
+    val valid       = os.exists(_.isValid)
+    val annotations = OutputOps.mergeEvaluatedAnnotations(os.filter(_.isValid).flatMap(_.getAnnotations()))
+    if valid then ops.valid(pointer).withAnnotations(annotations)
     else ops.all(os, pointer) // TODO new error NoneOf?
 
   private def verifyNumberValue(error: => ValidationError)(validate: BigDecimal => Boolean): Fun[R[O]] =

@@ -42,7 +42,7 @@ class EvalExtraTest extends FunSuite:
                           |                    "required": ["foo"]
                           |                }
                           |            ]
-        }""".stripMargin) { fun =>
+                          |}""".stripMargin) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("""{"foo": 2, "bar": "quux"}""")),
         BasicOutput(
@@ -63,7 +63,7 @@ class EvalExtraTest extends FunSuite:
                           |                "a*": {"type": "integer"},
                           |                "aaa*": {"maximum": 20}
                           |            }
-        }""".stripMargin) { fun =>
+                          |}""".stripMargin) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("""{"aaaa": 31}""")),
         BasicOutput(
@@ -88,7 +88,7 @@ class EvalExtraTest extends FunSuite:
                           |            },
                           |            "patternProperties": {"f.o": {"minItems": 2}},
                           |            "additionalProperties": {"type": "integer"}
-        }""".stripMargin) { fun =>
+                          |}""".stripMargin) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("""{"foo": []}""")),
         BasicOutput(
@@ -135,6 +135,60 @@ class EvalExtraTest extends FunSuite:
             EvaluatedProperties(
               properties = Set(
                 "bar",
+                "foo"
+              )
+            )
+          )
+        )
+      )
+    }
+  }
+
+  test("when two match and has no unevaluated properties") {
+    withCompiledSchema("""|{
+                          |            "$schema": "https://json-schema.org/draft/2020-12/schema",
+                          |            "type": "object",
+                          |            "properties": {
+                          |                "foo": { "type": "string" }
+                          |            },
+                          |            "anyOf": [
+                          |                {
+                          |                    "properties": {
+                          |                        "bar": { "const": "bar" }
+                          |                    },
+                          |                    "required": ["bar"]
+                          |                },
+                          |                {
+                          |                    "properties": {
+                          |                        "baz": { "const": "baz" }
+                          |                    },
+                          |                    "required": ["baz"]
+                          |                },
+                          |                {
+                          |                    "properties": {
+                          |                        "quux": { "const": "quux" }
+                          |                    },
+                          |                    "required": ["quux"]
+                          |                }
+                          |            ],
+                          |            "unevaluatedProperties": false
+                          |}""".stripMargin) { fun =>
+      assertEquals(
+        doApply(
+          fun,
+          parseJsonValue("""|{
+                            |                    "foo": "foo",
+                            |                    "bar": "bar",
+                            |                    "baz": "baz"
+                            |}""".stripMargin)
+        ),
+        BasicOutput(
+          true,
+          annotations = Seq(
+            EvaluatedProperties(
+              properties = Set(
+                "bar",
+                "baz",
                 "foo"
               )
             )

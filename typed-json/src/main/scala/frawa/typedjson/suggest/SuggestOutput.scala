@@ -41,10 +41,11 @@ object SuggestOutput:
       )
 
     extension (o: SuggestOutput)
-      def not(pointer: Pointer): SuggestOutput                 = o.copy(basic = o.basic.not(pointer))
-      def isValid: Boolean                                     = o.basic.valid
-      def withAnnotation(annotation: Evaluated): SuggestOutput = o.copy(basic = o.basic.withAnnotation(annotation))
-      def getAnnotations(): Seq[Evaluated]                     = o.basic.annotations
+      def not(pointer: Pointer): SuggestOutput = o.copy(basic = o.basic.not(pointer))
+      def isValid: Boolean                     = o.basic.valid
+      def withAnnotations(annotations: Seq[Evaluated]): SuggestOutput =
+        o.copy(basic = o.basic.withAnnotations(annotations))
+      def getAnnotations(): Seq[Evaluated] = o.basic.annotations
       def forKeyword(k: Keyword): SuggestOutput =
         if isAt(o.basic.pointer) then o.copy(keywords = o.keywords :+ k)
         else o

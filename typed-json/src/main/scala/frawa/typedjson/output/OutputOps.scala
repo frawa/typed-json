@@ -17,7 +17,8 @@ trait OutputOps[O]: // extends Monoid[O]:
   extension (o: O)
     def not(pointer: Pointer): O
     def isValid: Boolean
-    def withAnnotation(annotation: Evaluated): O
+    def withAnnotation(annotation: Evaluated): O = withAnnotations(Seq(annotation))
+    def withAnnotations(annotations: Seq[Evaluated]): O
     def getAnnotations(): Seq[Evaluated]
     def forKeyword(k: Keyword): O
 
