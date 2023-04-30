@@ -34,30 +34,22 @@ import frawa.typedjson.output.BasicOutput.given
 
 import java.net.URI
 import frawa.typedjson.eval.CacheState
+import frawa.typedjson.eval.Util.doApplyBulk
 
 open class JsonSchemaTestSuite extends FunSuite:
   protected val draft202012 = InlineFiles.inlineDeepTextFiles("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
 
-  protected val ignore: Set[String] = Set()
+  protected val ignoreFiles: Seq[String] = Seq()
 
-  protected val ignoreDescriptionByFile: Map[String, Set[String]] = Map()
+  protected val ignoreByFile: Map[String, Seq[String]] = Map()
+
   protected type TestId = (String, String) // (file,description)
-  protected val ignoreFailMessageByDescription: Map[TestId, Set[String]] = Map()
+  protected val ignoreByExpectation: Map[TestId, Seq[String]] = Map()
 
-  protected val only: Option[String]            = None
-  protected val onlyId: Option[String]          = None
+  // test name ends with ...
   protected val onlyDescription: Option[String] = None
 
-  private case class TestData(data: Value, description: String, expectedValid: Boolean)
-
-  private def check(fileAndContent: (String, Value)): Unit =
-    val (file, content) = fileAndContent
-    checkSuite(file)(content)
-
-  private def checkSuite(file: String)(testSuiteValue: Value): Unit =
-    testSuiteValue match
-      case ArrayValue(tests) => tests.foreach(checkTest(file))
-      case _                 => fail("invalid test json suite")
+  private case class Expectation(description: String, data: Value, valid: Boolean)
 
   private val vocabularyForTest = dialect(
     Seq(
@@ -70,118 +62,82 @@ open class JsonSchemaTestSuite extends FunSuite:
     )
   )
 
-  import BasicOutput.given
-  import CacheState.given
+  protected def checkFiles[T](files: Map[String, T])(f: T => Value): Unit =
+    files
+      .map(t => (t._1, f(t._2)))
+      .foreach { (file, suiteValue) => checkSuite(file, suiteValue) }
 
-  private def checkTest(file: String)(testValue: Value): Unit =
+  private def checkSuite(file: String, testSuiteValue: Value): Unit =
+    testSuiteValue match
+      case ArrayValue(tests) =>
+        if ignoreFiles.contains(file) then test(TestOptions(file).ignore) {}
+        else tests.foreach(checkTest(file, _))
+      case _ => fail("invalid test json suite")
+
+  private def checkTest(file: String, testValue: Value): Unit =
+    import BasicOutput.given
+    import CacheState.given
+
     testValue match
       case ObjectValue(properties) =>
         val StringValue(description: String) = properties("description"): @unchecked
-        val suiteName                        = s"$file - $description"
+        val testId                           = (file, description)
+        val testName                         = s"$file - $description"
+        val schema                           = properties("schema")
+        val ArrayValue(testValues)           = properties("tests"): @unchecked
+        val expectations                     = testValues.map(expactation)
 
-        val suiteOptions = onlyDescription
-          .filter(description.startsWith)
-          .map(_ => suiteName.only)
-          .orElse(
-            ignoreDescriptionByFile
-              .get(file)
-              .flatMap(_.find(description.startsWith))
-              .map(_ => suiteName.ignore)
-          )
-          .getOrElse(new TestOptions(suiteName))
+        val isIgnoredTest = ignoreByFile.get(file).flatMap(identity).exists(description.startsWith)
 
-        val schema            = properties("schema")
-        val ArrayValue(tests) = properties("tests"): @unchecked
-
-        val schemaValue = SchemaValue.root(schema)
-        val id          = SchemaValue.id(schemaValue)
-        val includedOnlyId = onlyId
-          .flatMap { onlyId =>
-            id.map(_ == onlyId)
-          }
-        assume(includedOnlyId.getOrElse(true), s"excluded by onlyId=$onlyId")
-
-        val lazyResolver = (uri: URI) => MetaSchemas.lazyResolver(uri).orElse(Remotes.lazyResolver(uri))
-        val testId       = (file, description)
-
-        val hasIgnoredFailMessage = ignoreFailMessageByDescription.contains(testId)
-
-        val evalBasic              = Eval[R, BasicOutput]
-        given Eval[R, BasicOutput] = evalBasic
-
-        if hasIgnoredFailMessage then
-          val lr                                           = Some(lazyResolver)
-          given Option[LoadedSchemasResolver.LazyResolver] = lr
-          withCompiledSchemaValue(schemaValue, lr) { fun =>
-            tests.foreach { value =>
-              val data     = testData(value)
-              val testName = s"$file | ${data.description} | $description"
-
-              val testOptions = ignoreFailMessageByDescription
-                .get(testId)
-                .find(ignored => ignored.exists(data.description.startsWith))
-                .map(_ => testName.ignore)
-                .getOrElse(new TestOptions(testName))
-
-              test(testOptions) {
-                assertOne(fun, data)
-              }
-            }
-          }
+        if isIgnoredTest then test(TestOptions(testName).ignore) {}
         else
-          withCompiledSchemaValue(schemaValue, Some(lazyResolver)) { fun =>
-            test(suiteOptions) {
-              tests
-                .map(testData)
-                .foreach {
-                  assertOne(fun, _)
-                }
-            }
+          val allIgnoredExpectations = ignoreByExpectation.get(testId).flatMap(identity)
+          val isIgnored: Expectation => Boolean = expectation =>
+            allIgnoredExpectations.exists(expectation.description.startsWith)
+
+          val testOptions =
+            if onlyDescription.exists(testName.endsWith) then TestOptions(testName).only
+            else TestOptions(testName)
+
+          test(testOptions) {
+            val schemaValue = SchemaValue.root(schema)
+            expectAll(schemaValue, expectations.filterNot(isIgnored))
           }
+
+          val ignoredExpectations = expectations.filter(isIgnored)
+          ignoredExpectations.foreach { expectation =>
+            val ignoredName = s"$testName | ${expectation.description}"
+            test(TestOptions(ignoredName).ignore) {}
+          }
+
       case _ => fail("invalid test json")
 
-  // TODO re-use cache
-  private def assertOne[O](
-      fun: (Value => R[O]),
-      data: TestData
-  )(using OutputOps[O])(using SchemaResolver): Unit = {
+  private def expectAll(schemaValue: SchemaValue, expactations: Seq[Expectation]): Unit =
+    val lazyResolver = (uri: URI) => MetaSchemas.lazyResolver(uri).orElse(Remotes.lazyResolver(uri))
+    val lr           = Some(lazyResolver)
+    val evalBasic    = Eval[R, BasicOutput]
 
-    val ro  = fun(data.data)
-    val ro1 = doApply(fun, data.data)
+    given Eval[R, BasicOutput]                       = evalBasic
+    given Option[LoadedSchemasResolver.LazyResolver] = lr
+    withCompiledSchemaValue(schemaValue, lr) { fun =>
 
-    ro.map { o =>
-      if o.isValid != data.expectedValid then
-        given Location = munit.Location.empty
-        if !o.isValid then
-          val ops = summon[OutputOps[O]]
-          assertEquals(o, ops.valid(Pointer.empty), data.description)
-          // assertEquals(result.ignoredKeywords(), Set.empty[String], data.failMessage)
-          // assertEquals(result.output, None, data.failMessage)
-        else
-          fail(
-            "unexpected valid",
-            clues(clue[String](data.description), clue[Boolean](data.expectedValid), clue[O](o))
-          )
+      val values = expactations.map(_.data)
+      val os     = doApplyBulk(fun, values, { _ => })
+      // val os = values.map(value => doApply(fun, value))
+
+      given Location = munit.Location.empty
+      expactations.zip(os).foreach { (expectation, o) =>
+        assertEquals(
+          s"'${expectation.description}'' is ${o.isValid}",
+          s"'${expectation.description}'' is ${expectation.valid}",
+          clues(clue[String](expectation.description), clue[Seq[BasicOutput.Error]](o.errors))
+        )
+      }
     }
-  }
 
-  protected def checkFiles[T](files: Map[String, T])(f: T => Value): Unit =
-    files
-      .filterNot { case (file, _) =>
-        ignore
-          .contains(file)
-      }
-      .filter { case (file, _) =>
-        only.forall(_ == file)
-      }
-      .map(t => (t._1, f(t._2)))
-      .foreach(check)
-
-  protected def checkFiles(files: Map[String, Value]): Unit = checkFiles[Value](files)(identity)
-
-  private def testData(value: Value): TestData =
+  private def expactation(value: Value): Expectation =
     val ObjectValue(properties)  = value: @unchecked
     val data                     = properties("data")
     val StringValue(description) = properties("description"): @unchecked
-    val BoolValue(expected)      = properties("valid"): @unchecked
-    TestData(data, description, expected)
+    val BoolValue(valid)         = properties("valid"): @unchecked
+    Expectation(description, data, valid)
