@@ -496,8 +496,9 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
               .map { case (p, v) =>
                 WithPointer(v, value.pointer / p)
               }
-            val ros = remainingValued.map(unevaluated).toSeq
-            FP.sequence(ros).map(os => ops.all(os, value.pointer))
+            val ros          = remainingValued.map(unevaluated).toSeq
+            val allEvaluated = EvaluatedProperties(evaluated ++ remaining)
+            FP.sequence(ros).map(os => ops.all(os, value.pointer).withAnnotation(allEvaluated))
           }
         ros1
       }

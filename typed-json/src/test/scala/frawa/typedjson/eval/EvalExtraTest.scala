@@ -103,3 +103,43 @@ class EvalExtraTest extends FunSuite:
       )
     }
   }
+
+  test("with nested unevaluated properties") {
+    withCompiledSchema("""|{
+                          |            "$schema": "https://json-schema.org/draft/2020-12/schema",
+                          |            "type": "object",
+                          |            "properties": {
+                          |                "foo": { "type": "string" }
+                          |            },
+                          |            "allOf": [
+                          |                {
+                          |                    "unevaluatedProperties": true
+                          |                }
+                          |            ],
+                          |            "unevaluatedProperties": {
+                          |                "type": "string",
+                          |                "maxLength": 2
+                          |            }
+        }""".stripMargin) { fun =>
+      assertEquals(
+        doApply(
+          fun,
+          parseJsonValue("""|{
+                            |    "foo": "foo",
+                            |    "bar": "bar"
+                            |}""".stripMargin)
+        ),
+        BasicOutput(
+          true,
+          annotations = Seq(
+            EvaluatedProperties(
+              properties = Set(
+                "bar",
+                "foo"
+              )
+            )
+          )
+        )
+      )
+    }
+  }
