@@ -38,7 +38,6 @@ import frawa.typedjson.eval.CacheState
 open class JsonSchemaTestSuite extends FunSuite:
   protected val draft202012 = InlineFiles.inlineDeepTextFiles("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
 
-  protected val oneTestPerData      = false
   protected val ignore: Set[String] = Set()
 
   protected val ignoreDescriptionByFile: Map[String, Set[String]] = Map()
@@ -49,7 +48,7 @@ open class JsonSchemaTestSuite extends FunSuite:
   protected val onlyId: Option[String]          = None
   protected val onlyDescription: Option[String] = None
 
-  private case class TestData(data: Value, failMessage: String, expectedValid: Boolean)
+  private case class TestData(data: Value, description: String, expectedValid: Boolean)
 
   private def check(fileAndContent: (String, Value)): Unit =
     val (file, content) = fileAndContent
@@ -110,17 +109,17 @@ open class JsonSchemaTestSuite extends FunSuite:
         val evalBasic              = Eval[R, BasicOutput]
         given Eval[R, BasicOutput] = evalBasic
 
-        if oneTestPerData || hasIgnoredFailMessage then
+        if hasIgnoredFailMessage then
           val lr                                           = Some(lazyResolver)
           given Option[LoadedSchemasResolver.LazyResolver] = lr
           withCompiledSchemaValue(schemaValue, lr) { fun =>
             tests.foreach { value =>
               val data     = testData(value)
-              val testName = s"$file | ${data.failMessage} | $description"
+              val testName = s"$file | ${data.description} | $description"
 
               val testOptions = ignoreFailMessageByDescription
                 .get(testId)
-                .find(ignored => ignored.exists(data.failMessage.startsWith))
+                .find(ignored => ignored.exists(data.description.startsWith))
                 .map(_ => testName.ignore)
                 .getOrElse(new TestOptions(testName))
 
@@ -141,6 +140,7 @@ open class JsonSchemaTestSuite extends FunSuite:
           }
       case _ => fail("invalid test json")
 
+  // TODO re-use cache
   private def assertOne[O](
       fun: (Value => R[O]),
       data: TestData
@@ -154,13 +154,13 @@ open class JsonSchemaTestSuite extends FunSuite:
         given Location = munit.Location.empty
         if !o.isValid then
           val ops = summon[OutputOps[O]]
-          assertEquals(o, ops.valid(Pointer.empty), data.failMessage)
+          assertEquals(o, ops.valid(Pointer.empty), data.description)
           // assertEquals(result.ignoredKeywords(), Set.empty[String], data.failMessage)
           // assertEquals(result.output, None, data.failMessage)
         else
           fail(
             "unexpected valid",
-            clues(clue[String](data.failMessage), clue[Boolean](data.expectedValid), clue[O](o))
+            clues(clue[String](data.description), clue[Boolean](data.expectedValid), clue[O](o))
           )
     }
   }
@@ -182,6 +182,6 @@ open class JsonSchemaTestSuite extends FunSuite:
   private def testData(value: Value): TestData =
     val ObjectValue(properties)  = value: @unchecked
     val data                     = properties("data")
-    val StringValue(failMessage) = properties("description"): @unchecked
+    val StringValue(description) = properties("description"): @unchecked
     val BoolValue(expected)      = properties("valid"): @unchecked
-    TestData(data, failMessage, expected)
+    TestData(data, description, expected)
