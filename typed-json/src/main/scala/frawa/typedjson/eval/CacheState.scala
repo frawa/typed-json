@@ -87,7 +87,7 @@ object CacheState:
           .map(rv => (rv._1.resolver, rv._2.getOrElse(state.rootVocabulary)))
           .getOrElse((state.rootResolver, state.rootVocabulary))
 
-      lazy val newlyCached = resolve(ref, resolver)
+      lazy val newlyCached = resolve(uri, resolver)
         .map { r =>
           val v = SchemaValue.vocabulary(r, vocabulary)
           (r, v)
