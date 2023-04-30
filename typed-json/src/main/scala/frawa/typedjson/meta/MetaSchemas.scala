@@ -29,7 +29,7 @@ object MetaSchemas:
   def lazyResolver: LoadedSchemasResolver.LazyResolver = { uri =>
     if uri.getSchemeSpecificPart.startsWith(draft202012.getSchemeSpecificPart) then
       resolve202012(draft202012.relativize(uri))
-    else { None }
+    else None
   }
 
   private def resolve202012(relative: URI): Option[RootSchemaValue] =
