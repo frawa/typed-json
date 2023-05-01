@@ -121,9 +121,11 @@ case class Keywords(
     yield add(f(keywords))
 
   private def doneParsing(): Keywords =
-    lastKeywords.foldLeft(this) { (acc, push) =>
-      push(acc)
-    }
+    lastKeywords
+      .foldLeft(this) { (acc, push) =>
+        push(acc)
+      }
+      .copy(lastKeywords = Seq())
 
   private def withKeyword(
       keyword: String,
