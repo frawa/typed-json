@@ -497,18 +497,16 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
           .flatMap { evaluated =>
             lazy val all  = vs.keySet
             val remaining = if evaluated.isEmpty then all else all.filterNot(evaluated.contains)
-            val ros1 =
-              if remaining.isEmpty then ros
-              else
-                val remainingValued = vs
-                  .filter { (p, _) =>
-                    remaining.contains(p)
-                  }
-                  .map { case (p, v) =>
-                    WithPointer(v, value.pointer / p)
-                  }
-                remainingValued.map(unevaluated).toSeq
-            val ro = FP.sequence(ros1).map(os => ops.all(os, value.pointer))
+            val remainingValued = vs
+              .filter { (p, _) =>
+                remaining.contains(p)
+              }
+              .map { case (p, v) =>
+                WithPointer(v, value.pointer / p)
+              }
+            val rosRemaining = remainingValued.map(unevaluated).toSeq
+            val ros1         = ros ++ rosRemaining
+            val ro           = FP.sequence(ros1).map(os => ops.all(os, value.pointer))
             ro.map { o =>
               lazy val allEvaluated = EvaluatedProperties(evaluated ++ remaining)
               if o.isValid then o.withAnnotation(allEvaluated)

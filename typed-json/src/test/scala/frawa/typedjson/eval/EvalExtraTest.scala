@@ -279,18 +279,40 @@ class EvalExtraTest extends FunSuite:
                           |            "unevaluatedProperties": true
                           |}""".stripMargin) { fun =>
       assertEquals(
-        doApply(
+        doApplyBulk(
           fun,
-          parseJsonValue("""|{
-                            |                    "foo": "foo"
-                            |}""".stripMargin)
+          Seq(
+            parseJsonValue("""|{
+                              |                    "foo": "foo"
+                              |}""".stripMargin),
+            parseJsonValue("""|{
+                              |                    "foo": "foo",
+                              |                    "bar": "bar"
+                              |}""".stripMargin)
+          ),
+          { _ => }
         ),
-        BasicOutput(
-          false,
-          errors = Seq(
-            WithPointer(
-              FalseSchemaReason(),
-              Pointer.empty / "foo"
+        Seq(
+          BasicOutput(
+            false,
+            errors = Seq(
+              WithPointer(
+                FalseSchemaReason(),
+                Pointer.empty / "foo"
+              )
+            )
+          ),
+          BasicOutput(
+            false,
+            errors = Seq(
+              WithPointer(
+                FalseSchemaReason(),
+                Pointer.empty / "bar"
+              ),
+              WithPointer(
+                FalseSchemaReason(),
+                Pointer.empty / "foo"
+              )
             )
           )
         )
