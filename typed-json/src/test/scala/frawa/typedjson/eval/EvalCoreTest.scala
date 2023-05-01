@@ -136,7 +136,7 @@ class EvalCoreTest extends FunSuite:
 
   test("array") {
     withCompiledSchema(numberArraySchema) { fun =>
-      assertEquals(doApply(fun, parseJsonValue("[13]")), BasicOutput(true, annotations = Seq(EvaluatedIndices(Seq(0)))))
+      assertEquals(doApply(fun, parseJsonValue("[13]")), BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0)))))
       assertEquals(
         doApply(fun, parseJsonValue("null")),
         BasicOutput(false, Seq(WithPointer(TypeMismatch("array"))))
@@ -150,7 +150,7 @@ class EvalCoreTest extends FunSuite:
         doApply(fun, parseJsonValue("null")),
         BasicOutput(false, Seq(WithPointer(TypeMismatch("array"))))
       )
-      assertEquals(doApply(fun, parseJsonValue("[13]")), BasicOutput(true, annotations = Seq(EvaluatedIndices(Seq(0)))))
+      assertEquals(doApply(fun, parseJsonValue("[13]")), BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0)))))
       assertEquals(
         doApply(fun, parseJsonValue("[true]")),
         BasicOutput(

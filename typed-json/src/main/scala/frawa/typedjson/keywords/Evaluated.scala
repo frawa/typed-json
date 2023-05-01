@@ -19,6 +19,6 @@ package frawa.typedjson.keywords
 import frawa.typedjson.pointer.Pointer
 
 sealed trait Evaluated
-case class EvaluatedIndices(indices: Seq[Int])          extends Evaluated
+case class EvaluatedIndices(indices: Set[Int])          extends Evaluated
 case class EvaluatedProperties(properties: Set[String]) extends Evaluated
 case class Ignored(keywords: Set[String])               extends Evaluated

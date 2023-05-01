@@ -26,8 +26,8 @@ object OutputOps:
   def mergeEvaluatedAnnotations(es: Seq[Evaluated]): Seq[Evaluated] =
     val indices = es.flatMap {
       case EvaluatedIndices(indices) => indices
-      case _                         => Seq()
-    }.distinct
+      case _                         => Set()
+    }.toSet
     val properties = es.flatMap {
       case EvaluatedProperties(properties) => properties
       case _                               => Set()

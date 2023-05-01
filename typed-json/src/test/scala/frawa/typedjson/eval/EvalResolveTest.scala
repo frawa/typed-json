@@ -39,7 +39,7 @@ class EvalResolveTest extends FunSuite:
     withCompiledSchema(idRefDefsSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("[1313]")),
-        BasicOutput(true, Seq(), annotations = Seq(EvaluatedIndices(Seq(0))))
+        BasicOutput(true, Seq(), annotations = Seq(EvaluatedIndices(Set(0))))
       )
       assertEquals(
         doApply(fun, parseJsonValue("""["hello"]""")),
@@ -62,7 +62,7 @@ class EvalResolveTest extends FunSuite:
             assertEquals(state.hits, Map("https://example.net/root.json#item" -> 1))
         ),
         Seq(
-          BasicOutput(true, Seq(), annotations = Seq(EvaluatedIndices(Seq(0)))),
+          BasicOutput(true, Seq(), annotations = Seq(EvaluatedIndices(Set(0)))),
           BasicOutput(
             false,
             Seq(WithPointer(TypeMismatch("number"), Pointer.empty / 0))

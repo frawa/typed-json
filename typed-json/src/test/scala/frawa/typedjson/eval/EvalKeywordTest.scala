@@ -392,7 +392,7 @@ class EvalKeywordTest extends FunSuite:
               WithPointer(TypeMismatch("number"), Pointer.empty / 0)
             )
           ),
-          BasicOutput(true, annotations = List(EvaluatedIndices(Seq(0, 1))))
+          BasicOutput(true, annotations = List(EvaluatedIndices(Set(0, 1))))
         )
       )
     }
@@ -416,10 +416,9 @@ class EvalKeywordTest extends FunSuite:
             false,
             Seq(
               WithPointer(TypeMismatch("boolean"), Pointer.empty / 2)
-            ),
-            annotations = Seq(EvaluatedIndices(Seq(0, 1)))
+            )
           ),
-          BasicOutput(true, annotations = Seq(EvaluatedIndices(Seq(0, 1, 2))))
+          BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1, 2))))
         )
       )
     }
@@ -444,8 +443,8 @@ class EvalKeywordTest extends FunSuite:
               WithPointer(NotContains(0))
             )
           ),
-          BasicOutput(true, annotations = List(EvaluatedIndices(Seq(0)))),
-          BasicOutput(true, annotations = List(EvaluatedIndices(Seq(0, 1))))
+          BasicOutput(true, annotations = List(EvaluatedIndices(Set(0)))),
+          BasicOutput(true, annotations = List(EvaluatedIndices(Set(0, 1))))
         )
       )
     }
@@ -470,9 +469,9 @@ class EvalKeywordTest extends FunSuite:
             Seq(
               WithPointer(NotContains(1))
             ),
-            annotations = Seq(EvaluatedIndices(Seq(0)))
+            annotations = Seq(EvaluatedIndices(Set(0)))
           ),
-          BasicOutput(true, annotations = Seq(EvaluatedIndices(Seq(0, 1))))
+          BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1))))
         )
       )
     }
@@ -498,7 +497,7 @@ class EvalKeywordTest extends FunSuite:
             Seq(
               WithPointer(NotContains(3))
             ),
-            annotations = Seq(EvaluatedIndices(Seq(0, 1, 2)))
+            annotations = Seq(EvaluatedIndices(Set(0, 1, 2)))
           ),
           BasicOutput(
             false,
@@ -506,7 +505,7 @@ class EvalKeywordTest extends FunSuite:
               WithPointer(NotContains(0))
             )
           ),
-          BasicOutput(true, annotations = Seq(EvaluatedIndices(Seq(0, 1))))
+          BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1))))
         )
       )
     }
@@ -623,29 +622,30 @@ class EvalKeywordTest extends FunSuite:
         ),
         Seq(
           BasicOutput(true),
-          BasicOutput(true),
+          BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0)))),
           BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 0)))
         )
       )
     }
   }
 
-  test("unevaluatedItems with items") {
-    withCompiledSchema("""{ "items": { "type": "boolean" }, "unevaluatedItems": { "type": "string" } }""") { fun =>
-      assertEquals(
-        doApplyBulk(
-          fun,
-          Seq(
-            parseJsonValue("""[true, "foo", false]"""),
-            parseJsonValue("""[true, 13, false]""")
+  test("unevaluatedItems with prefixItems") {
+    withCompiledSchema("""{ "prefixItems": [{ "type": "boolean" }], "unevaluatedItems": { "type": "string" } }""") {
+      fun =>
+        assertEquals(
+          doApplyBulk(
+            fun,
+            Seq(
+              parseJsonValue("""[true, "foo"]"""),
+              parseJsonValue("""[true, 13]""")
+            ),
+            state => {}
           ),
-          state => {}
-        ),
-        Seq(
-          BasicOutput(true),
-          BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
+          Seq(
+            BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1)))),
+            BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
+          )
         )
-      )
     }
   }
 
@@ -661,39 +661,39 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(true),
+          BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1, 2)))),
           BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
         )
       )
     }
   }
 
-  test("unevaluatedItems with items and contains") {
+  test("unevaluatedItems with prefixItems and contains") {
     withCompiledSchema("""|{
-                          |"items": {"type": "array"},
+                          |"prefixItems": [{"type": "boolean"}],
                           |"unevaluatedItems": { "type": "string" }, 
-                          |"contains": {"type": "boolean"}  
+                          |"contains": {"type": "array"}  
                           |}""".stripMargin) { fun =>
       assertEquals(
         doApplyBulk(
           fun,
           Seq(
-            parseJsonValue("""[true, "foo", false, [13], [14]]"""),
-            parseJsonValue("""[true, 13, false, [13]]""")
+            parseJsonValue("""[true, "foo", [13], [14]]"""),
+            parseJsonValue("""[true, 13, [13]]""")
           ),
           state => {}
         ),
         Seq(
-          BasicOutput(true),
+          BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1, 2, 3)))),
           BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
         )
       )
     }
   }
 
-  test("unevaluatedItems with nested items") {
+  test("unevaluatedItems with nested contains") {
     withCompiledSchema("""|{
-                          |"allOf": [{"items": {"type": "boolean"}}],
+                          |"allOf": [{"contains": {"type": "boolean"}}],
                           |"unevaluatedItems": { "type": "string" }
                           |}""".stripMargin) { fun =>
       assertEquals(
@@ -706,7 +706,7 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(true),
+          BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 2, 1)))),
           BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
         )
       )
@@ -728,7 +728,7 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(true),
+          BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("foo", "gnu")))),
           BasicOutput(false, Seq(WithPointer(TypeMismatch("number"), Pointer.empty / "gnu")))
         )
       )

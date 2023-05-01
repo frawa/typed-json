@@ -189,10 +189,9 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       }
       .map { ros =>
         FP.sequence(ros).map { os =>
-          val validIndices = os.zipWithIndex
-            .filter(_._1.isValid)
-            .map(_._2)
-          ops.all(os, value.pointer).withAnnotation(EvaluatedIndices(validIndices))
+          val o = ops.all(os, value.pointer)
+          if o.isValid then o.withAnnotation(EvaluatedIndices(Seq.range(0, os.size).toSet))
+          else o
         }
       }
       .getOrElse { monad.unit(ops.valid(value.pointer)) }
@@ -417,6 +416,7 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
             val validIndices = os.zipWithIndex
               .filter(_._1.isValid)
               .map(_._2)
+              .toSet
             o.withAnnotation(EvaluatedIndices(validIndices))
           }
         }
@@ -457,9 +457,12 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
               .map { case (v, index) =>
                 WithPointer(v, value.pointer / index)
               }
-            val ros          = remainingIndexed.map(unevaluated)
-            val allEvaluated = EvaluatedIndices((evaluated ++ remaining).toSeq)
-            FP.sequence(ros).map(os => ops.all(os, value.pointer).withAnnotation(allEvaluated))
+            val ros = remainingIndexed.map(unevaluated)
+            FP.sequence(ros).map { os =>
+              val o = ops.all(os, value.pointer)
+              if o.isValid then o.withAnnotation(EvaluatedIndices(all))
+              else o
+            }
           }
         ros1
       }
@@ -501,7 +504,11 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
               }
             val ros          = remainingValued.map(unevaluated).toSeq
             val allEvaluated = EvaluatedProperties(evaluated ++ remaining)
-            FP.sequence(ros).map(os => ops.all(os, value.pointer).withAnnotation(allEvaluated))
+            val ro           = FP.sequence(ros).map(os => ops.all(os, value.pointer))
+            ro.map { o =>
+              if o.isValid then o.withAnnotation(allEvaluated)
+              else o.withAnnotations(Seq())
+            }
           }
         ros1
       }
