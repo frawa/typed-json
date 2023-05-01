@@ -100,7 +100,9 @@ object CacheState:
         .orElse(newlyCached)
         .map { case ((resolution, vocabulary), state) =>
           vocabulary
-            .flatMap(vocabulary => Keywords.parseKeywords(vocabulary, resolution, scope))
+            .flatMap { vocabulary =>
+              Keywords.parseKeywords(vocabulary, resolution, scope)
+            }
             .fold(
               { problems =>
                 val ref = resolution.resolver.base.toString

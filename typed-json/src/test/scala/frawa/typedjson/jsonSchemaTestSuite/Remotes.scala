@@ -28,7 +28,7 @@ object Remotes:
   def lazyResolver: LoadedSchemasResolver.LazyResolver = { uri =>
     if uri.getSchemeSpecificPart.startsWith(remotesUri.getSchemeSpecificPart) then
       resolveRemotes(remotesUri.relativize(uri))
-    else { None }
+    else None
   }
 
   private def resolveRemotes(relative: URI): Option[RootSchemaValue] =
