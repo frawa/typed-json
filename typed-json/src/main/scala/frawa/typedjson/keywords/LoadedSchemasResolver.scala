@@ -129,7 +129,12 @@ case class LoadedSchemasResolver(
         .map { schema =>
           val loaded1 = this.add(uri, schema).withBase(uri)
           val loaded2 = LoadedSchemasResolver.loadSchemas(schema.value, loaded1)
-          SchemaResolution(schema, loaded2)
+          // TODO cleanup
+          if UriUtil.withoutFragement(uri) == uri then SchemaResolution(schema, loaded2)
+          else
+            loaded2
+              .resolve(uri)
+              .getOrElse(SchemaResolution(schema, loaded2))
         }
     )
 
@@ -139,6 +144,8 @@ case class LoadedSchemasResolver(
     this.copy(lazyResolver = Some(lazyResolver))
 
   private def add(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
+    // TODO?
+    // if (schemas.contains(uri)) then throw new IllegalStateException(s"schema ${uri} already loaded")r
     this.copy(schemas = schemas + ((uri, schema)))
 
   private def addAll(other: LoadedSchemasResolver): LoadedSchemasResolver = this.copy(

@@ -15,6 +15,9 @@ import frawa.typedjson.output.FlagOutput
 import frawa.typedjson.output.FlagOutput.given
 import frawa.typedjson.util.WithPointer
 import frawa.typedjson.pointer.Pointer.parse
+import java.net.URI
+import frawa.typedjson.meta.MetaSchemas
+import frawa.typedjson.jsonSchemaTestSuite.Remotes
 
 class EvalSpecDetailsTest extends FunSuite:
 
@@ -355,6 +358,37 @@ class EvalSpecDetailsTest extends FunSuite:
           BasicOutput(
             true,
             annotations = Seq(EvaluatedIndices(Set(0, 1, 2, 3, 4, 5)))
+          )
+        )
+      )
+    }
+  }
+
+  test("Location-independent identifier in remote ref") {
+    val lazyResolver = (uri: URI) => MetaSchemas.lazyResolver(uri).orElse(Remotes.lazyResolver(uri))
+    withCompiledSchema(
+      """|{
+         |            "$schema": "https://json-schema.org/draft/2020-12/schema",
+         |            "$ref": "http://localhost:1234/draft2020-12/locationIndependentIdentifier.json#/$defs/refToInteger"
+         |}""".stripMargin,
+      Some(lazyResolver)
+    ) { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""1"""),
+            parseJsonValue(""""foo"""")
+          ),
+          { _ => }
+        ),
+        Seq(
+          BasicOutput(
+            true
+          ),
+          BasicOutput(
+            false,
+            Seq(WithPointer(TypeMismatch("integer")))
           )
         )
       )
