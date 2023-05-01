@@ -319,3 +319,44 @@ class EvalExtraTest extends FunSuite:
       )
     }
   }
+
+  test("unevaluatedItems and contains interact to control item dependency relationship") {
+    withCompiledSchema("""|{
+                          |            "$schema": "https://json-schema.org/draft/2020-12/schema",
+                          |            "if": {
+                          |                "contains": {"const": "a"}
+                          |            },
+                          |            "then": {
+                          |                "if": {
+                          |                    "contains": {"const": "b"}
+                          |                },
+                          |                "then": {
+                          |                    "if": {
+                          |                        "contains": {"const": "c"}
+                          |                    }
+                          |                }
+                          |            },
+                          |            "unevaluatedItems": false
+                          |}""".stripMargin) { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""[ "a", "b", "a", "b", "a" ]"""),
+            parseJsonValue("""[ "c", "a", "c", "c", "b", "a" ]""")
+          ),
+          { _ => }
+        ),
+        Seq(
+          BasicOutput(
+            true,
+            annotations = Seq(EvaluatedIndices(Set(0, 1, 2, 3, 4)))
+          ),
+          BasicOutput(
+            true,
+            annotations = Seq(EvaluatedIndices(Set(0, 1, 2, 3, 4, 5)))
+          )
+        )
+      )
+    }
+  }
