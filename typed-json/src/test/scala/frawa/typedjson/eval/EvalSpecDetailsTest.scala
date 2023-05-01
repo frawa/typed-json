@@ -16,7 +16,7 @@ import frawa.typedjson.output.FlagOutput.given
 import frawa.typedjson.util.WithPointer
 import frawa.typedjson.pointer.Pointer.parse
 
-class EvalExtraTest extends FunSuite:
+class EvalSpecDetailsTest extends FunSuite:
 
   import Util.*
 
