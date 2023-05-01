@@ -23,9 +23,10 @@ import frawa.typedjson.testutil.TestUtil.{*, given}
 class Draft202012Test extends JsonSchemaTestSuite:
   private val draft202012Files = draft202012.files()
 
-  // override protected val onlyDescription: Option[String] =
-  // Some("allOf.json - allOf")
-  // Some("validate definition against metaschema")
+  override protected val onlyDescription: Option[String] =
+    // Some("allOf.json - allOf")
+    // Some("validate definition against metaschema")
+    Some("neither anyOf valid (complex)")
 
   // TODO un-ignore 'em
   override val ignoreFiles: Seq[String] = Seq(

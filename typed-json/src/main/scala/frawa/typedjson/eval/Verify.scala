@@ -82,9 +82,6 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
     value => fun(value).map(a => f(a, value.pointer))
 
   private def verifyAllOf(os: Seq[O], pointer: Pointer): O =
-    // val o = ops.all(os, pointer)
-    // if o.isValid then o
-    // else o.withAnnotations(Seq())
     ops.all(os, pointer)
 
   private def verifyNot(o: O, pointer: Pointer): O =
@@ -515,18 +512,14 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
             ro.map { o =>
               lazy val allEvaluated = EvaluatedProperties(evaluated ++ remaining)
               if o.isValid then o.withAnnotation(allEvaluated)
-              else o // .withAnnotations(Seq())
+              else o
             }
           }
         ro1
       }
       .getOrElse(
         FP.sequence(ros)
-          .map(os =>
-            ops
-              .all(os, value.pointer)
-            // .withAnnotations(Seq())
-          )
+          .map(os => ops.all(os, value.pointer))
       )
 
   def verifyIgnored(keyword: String): Fun[R[O]] =
