@@ -187,8 +187,7 @@ class EvalCoreTest extends FunSuite:
         doApply(fun, parseJsonValue("""{"toto": 13,"titi": true}""")),
         BasicOutput(
           false,
-          Seq(WithPointer(TypeMismatch("string"), Pointer.empty / "titi")),
-          annotations = Seq(EvaluatedProperties(Set("toto")))
+          Seq(WithPointer(TypeMismatch("string"), Pointer.empty / "titi"))
         )
       )
     }
@@ -217,8 +216,7 @@ class EvalCoreTest extends FunSuite:
         doApply(fun, parseJsonValue("""{"toto": 13}""")),
         BasicOutput(
           false,
-          Seq(WithPointer(MissingRequiredProperties(Seq("titi")))),
-          annotations = Seq(EvaluatedProperties(Set("toto")))
+          Seq(WithPointer(MissingRequiredProperties(Seq("titi"))))
         )
       )
     }

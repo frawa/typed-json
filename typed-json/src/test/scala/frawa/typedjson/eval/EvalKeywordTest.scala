@@ -468,8 +468,7 @@ class EvalKeywordTest extends FunSuite:
             false,
             Seq(
               WithPointer(NotContains(1))
-            ),
-            annotations = Seq(EvaluatedIndices(Set(0)))
+            )
           ),
           BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1))))
         )
@@ -496,8 +495,7 @@ class EvalKeywordTest extends FunSuite:
             false,
             Seq(
               WithPointer(NotContains(3))
-            ),
-            annotations = Seq(EvaluatedIndices(Set(0, 1, 2)))
+            )
           ),
           BasicOutput(
             false,

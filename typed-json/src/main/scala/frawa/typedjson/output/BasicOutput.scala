@@ -30,11 +30,15 @@ object BasicOutput:
       BasicOutput(false, Seq(WithPointer(error, pointer)), pointer)
 
     def all(os: Seq[BasicOutput], pointer: Pointer): BasicOutput =
+      val valid = os.forall(_.valid)
+      val annotations =
+        if valid then OutputOps.mergeAnnotations(os.filter(_.pointer == pointer).flatMap(_.annotations))
+        else Seq()
       BasicOutput(
-        os.forall(_.valid),
+        valid,
         os.flatMap(_.errors),
         pointer,
-        OutputOps.mergeAnnotations(os.filter(_.pointer == pointer).flatMap(_.annotations))
+        annotations
       )
 
     extension (o: BasicOutput)

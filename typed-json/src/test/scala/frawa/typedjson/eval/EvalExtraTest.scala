@@ -219,7 +219,7 @@ class EvalExtraTest extends FunSuite:
         BasicOutput(
           true,
           annotations = Seq(
-            EvaluatedIndices(Seq(0, 1, 2))
+            EvaluatedIndices(Set(0, 1, 2))
           )
         )
       )
@@ -258,13 +258,39 @@ class EvalExtraTest extends FunSuite:
               value = FalseSchemaReason(),
               Pointer.empty / "bar"
             )
-          ),
-          annotations = List(
-            EvaluatedProperties(
-              Set(
-                "foo",
-                "bar"
-              )
+          )
+        )
+      )
+    }
+  }
+
+  test("nested unevaluatedProperties, outer true, inner false, properties outside") {
+    withCompiledSchema("""|{
+                          |            "$schema": "https://json-schema.org/draft/2020-12/schema",
+                          |            "type": "object",
+                          |            "properties": {
+                          |                "foo": { "type": "string" }
+                          |            },
+                          |            "allOf": [
+                          |                {
+                          |                    "unevaluatedProperties": false
+                          |                }
+                          |            ],
+                          |            "unevaluatedProperties": true
+                          |}""".stripMargin) { fun =>
+      assertEquals(
+        doApply(
+          fun,
+          parseJsonValue("""|{
+                            |                    "foo": "foo"
+                            |}""".stripMargin)
+        ),
+        BasicOutput(
+          false,
+          errors = Seq(
+            WithPointer(
+              FalseSchemaReason(),
+              Pointer.empty / "foo"
             )
           )
         )

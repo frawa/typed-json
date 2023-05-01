@@ -82,6 +82,9 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
     value => fun(value).map(a => f(a, value.pointer))
 
   private def verifyAllOf(os: Seq[O], pointer: Pointer): O =
+    // val o = ops.all(os, pointer)
+    // if o.isValid then o
+    // else o.withAnnotations(Seq())
     ops.all(os, pointer)
 
   private def verifyNot(o: O, pointer: Pointer): O =
@@ -231,7 +234,9 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
               .map(_._2)
               .toSet
             val os = osWithProp.map(_._1)
-            ops.all(os, value.pointer).withAnnotation(EvaluatedProperties(validProperties))
+            val o  = ops.all(os, value.pointer)
+            if o.isValid then o.withAnnotation(EvaluatedProperties(validProperties))
+            else o
           )
       )
       .getOrElse(monad.unit(ops.valid(value.pointer)))
@@ -489,30 +494,40 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
               evaluatedProperties
             }
           }
-        val ros1 = FP
+        val ro1 = FP
           .sequence(seqEvaluatedProperties)
           .map(_.flatten.toSet)
           .flatMap { evaluated =>
-            val all       = vs.keySet
+            lazy val all  = vs.keySet
             val remaining = if evaluated.isEmpty then all else all.filterNot(evaluated.contains)
-            val remainingValued = vs
-              .filter { (p, _) =>
-                remaining.contains(p)
-              }
-              .map { case (p, v) =>
-                WithPointer(v, value.pointer / p)
-              }
-            val ros          = remainingValued.map(unevaluated).toSeq
-            val allEvaluated = EvaluatedProperties(evaluated ++ remaining)
-            val ro           = FP.sequence(ros).map(os => ops.all(os, value.pointer))
+            val ros1 =
+              if remaining.isEmpty then ros
+              else
+                val remainingValued = vs
+                  .filter { (p, _) =>
+                    remaining.contains(p)
+                  }
+                  .map { case (p, v) =>
+                    WithPointer(v, value.pointer / p)
+                  }
+                remainingValued.map(unevaluated).toSeq
+            val ro = FP.sequence(ros1).map(os => ops.all(os, value.pointer))
             ro.map { o =>
+              lazy val allEvaluated = EvaluatedProperties(evaluated ++ remaining)
               if o.isValid then o.withAnnotation(allEvaluated)
-              else o.withAnnotations(Seq())
+              else o // .withAnnotations(Seq())
             }
           }
-        ros1
+        ro1
       }
-      .getOrElse(FP.sequence(ros).map(os => ops.all(os, value.pointer)))
+      .getOrElse(
+        FP.sequence(ros)
+          .map(os =>
+            ops
+              .all(os, value.pointer)
+            // .withAnnotations(Seq())
+          )
+      )
 
   def verifyIgnored(keyword: String): Fun[R[O]] =
     funUnit(value => ops.valid(value.pointer).withAnnotation(Ignored(Set(keyword))))
