@@ -483,3 +483,39 @@ class EvalSpecDetailsTest extends FunSuite:
       )
     }
   }
+
+  test("root ref in remote ref") {
+    val lazyResolver = (uri: URI) => Remotes.lazyResolver(uri)
+    withCompiledSchema(
+      """|{
+         |            "$schema": "https://json-schema.org/draft/2020-12/schema",
+         |            "$id": "http://localhost:1234/draft2020-12/object",
+         |            "type": "object",
+         |            "properties": {
+         |                "name": {"$ref": "name-defs.json#/$defs/orNull"}
+         |            }
+         |}""".stripMargin,
+      Some(lazyResolver)
+    ) { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""{ "name": "foo" }"""),
+            parseJsonValue("""{ "name": { "name": null } }""")
+          ),
+          { _ => }
+        ),
+        Seq(
+          BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("name")))),
+          BasicOutput(
+            false,
+            errors = Seq(
+              WithPointer(TypeMismatch("null"), Pointer.empty / "name"),
+              WithPointer(TypeMismatch("string"), Pointer.empty / "name")
+            )
+          )
+        )
+      )
+    }
+  }

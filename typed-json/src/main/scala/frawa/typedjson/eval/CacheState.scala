@@ -7,12 +7,15 @@ import frawa.typedjson.validation.CannotResolve
 
 import java.net.URI
 import frawa.typedjson.output.OutputOps
+import frawa.typedjson.validation.TypeMismatch
+import frawa.typedjson.pointer.Pointer
 
 case class CacheState(
     rootResolver: SchemaResolver,
     rootVocabulary: Vocabulary,
     countBind: Int,
     cache: Map[String, CacheState.Cached],
+    stack: Seq[(String, Pointer)],
     hits: Map[String, Int]
 ) {
   def stats: CacheState.Stats =
@@ -53,7 +56,7 @@ object CacheState:
       CacheState.resolveDynamic(ref, base, scope)
 
   def empty(resolver: SchemaResolver, vocabulary: Vocabulary): CacheState =
-    CacheState(resolver, vocabulary, 0, Map.empty, Map.empty)
+    CacheState(resolver, vocabulary, 0, Map.empty, Seq(), Map.empty)
 
   def resolve[O: OutputOps](ref: String, base: URI, scope: DynamicScope)(using
       eval: Eval[R, O]
@@ -65,7 +68,9 @@ object CacheState:
   def resolveDynamic[O: OutputOps](ref: String, base: URI, scope: DynamicScope)(using
       eval: Eval[R, O]
   ): Eval.Fun[R[O]] =
-    doResolve(ref, base, scope, cacheIt = false) { (ref, resolver) => resolver.resolveDynamicRef(ref, scope) }
+    doResolve(ref, base, scope, cacheIt = false) { (ref, resolver) =>
+      resolver.resolveDynamicRef(ref, scope)
+    }
 
   def doResolve[O: OutputOps](ref: String, base: URI, scope: DynamicScope, cacheIt: Boolean)(
       resolve: (String, SchemaResolver) => Option[SchemaResolution]
@@ -73,8 +78,9 @@ object CacheState:
       eval: Eval[R, O]
   ): Eval.Fun[R[O]] = value =>
     state =>
-      val ops = summon[OutputOps[O]]
-      val uri = UriUtil.absolute(ref, base).toString
+      val ops  = summon[OutputOps[O]]
+      val uri0 = UriUtil.absolute(ref, base)
+      val uri  = uri0.toString
       val alreadyCached = state.cache
         .get(uri)
         .map { cached =>
@@ -124,7 +130,15 @@ object CacheState:
                 (ops.invalid(CannotResolve(ref, Some(problems)), value.pointer), state)
               },
               { ks =>
-                eval.compile(ks)(value)(state)
+                val push = (uri, value.pointer)
+                if state.stack.contains(push) then
+                  // stop recursion
+                  (ops.valid(value.pointer), state)
+                else
+                  val state1      = state.copy(stack = push +: state.stack)
+                  val (o, state2) = eval.compile(ks)(value)(state1)
+                  val state3      = state2.copy(stack = state.stack)
+                  (o, state3)
               }
             )
         }

@@ -100,8 +100,7 @@ class EvalResolveTest extends FunSuite:
               state.cache.keySet,
               Set(
                 "https://example.net/root.json#object",
-                "https://example.net/root.json#/$defs/numberType",
-                "https://example.net/root.json"
+                "https://example.net/root.json#/$defs/numberType"
               )
             )
             assertEquals(

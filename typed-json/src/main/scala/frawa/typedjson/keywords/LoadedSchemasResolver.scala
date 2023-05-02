@@ -152,6 +152,11 @@ case class LoadedSchemasResolver(
     this.copy(schemas = schemas + ((uri, schema)))
 
   private def addAll(other: LoadedSchemasResolver): LoadedSchemasResolver =
+    // TODO how come?
+    // val fw = schemas.keySet -- other.schemas.keySet
+    // if fw.nonEmpty then {
+    //   println(s"FW exists ${fw}")
+    // }
     this.copy(
       schemas = schemas.concat(other.schemas.toSeq),
       dynamicSchemas = dynamicSchemas.concat(other.dynamicSchemas.toSeq)
