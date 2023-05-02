@@ -101,17 +101,11 @@ object CacheState:
         .map { rv =>
           val key  = uri
           val key2 = rv._1.resolver.base.toString
-          // TODO
-          // if state.cache.contains(key) then {
-          //   println(s"FW already cached ${key}")
-          // }
           lazy val newCache =
-            if state.cache.contains(key2) then {
-              // TODO how come?
-              // val same = state.cache.get(key).contains(rv)
-              // println(s"FW already cached alias ${key2} same ${same}")
+            if key == key2 then {
               state.cache + (key -> rv)
             } else {
+              // alias, aka resolved files with different $id
               state.cache + (key -> rv) + (key2 -> rv)
             }
           val state1 = if cacheIt then state.copy(cache = newCache) else state
