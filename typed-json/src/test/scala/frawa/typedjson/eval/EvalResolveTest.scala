@@ -98,7 +98,11 @@ class EvalResolveTest extends FunSuite:
           state =>
             assertEquals(
               state.cache.keySet,
-              Set("https://example.net/root.json#object", "https://example.net/root.json#/$defs/numberType")
+              Set(
+                "https://example.net/root.json#object",
+                "https://example.net/root.json#/$defs/numberType",
+                "https://example.net/root.json"
+              )
             )
             assertEquals(
               state.hits,
@@ -134,25 +138,28 @@ class EvalResolveTest extends FunSuite:
             parseJsonValue("""{ "$defs": { "foo": { "type": ["boolean"] } } }"""),
             parseJsonValue("""{ "$defs": { "foo": { "type": 13 } } }""")
           ),
-          state =>
+          { state =>
             assertEquals(
               state.cache.keySet,
               Set(
                 "https://json-schema.org/draft/2020-12/meta/core",
                 "https://json-schema.org/draft/2020-12/meta/core#meta",
                 "https://json-schema.org/draft/2020-12/meta/validation",
-                "https://json-schema.org/draft/2020-12/meta/validation#/$defs/simpleTypes"
+                "https://json-schema.org/draft/2020-12/meta/validation#/$defs/simpleTypes",
+                "https://json-schema.org/draft/2020-12/meta/core",
+                "https://json-schema.org/draft/2020-12/partial#meta"
               )
             )
             assertEquals(
               state.hits,
               Map(
-                "https://json-schema.org/draft/2020-12/meta/core"                          -> 5,
                 "https://json-schema.org/draft/2020-12/meta/validation"                    -> 5,
+                "https://json-schema.org/draft/2020-12/meta/core"                          -> 5,
                 "https://json-schema.org/draft/2020-12/meta/core#meta"                     -> 2,
                 "https://json-schema.org/draft/2020-12/meta/validation#/$defs/simpleTypes" -> 3
               )
             )
+          }
         ),
         Seq(
           BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("$defs")))),

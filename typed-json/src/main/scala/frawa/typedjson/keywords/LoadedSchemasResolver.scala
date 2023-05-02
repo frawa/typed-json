@@ -22,6 +22,7 @@ import frawa.typedjson.util.UriUtil
 import frawa.typedjson.util.UriUtil.*
 
 import java.net.URI
+import frawa.typedjson.util.Debug
 
 object LoadedSchemasResolver:
   type LazyResolver = URI => Option[RootSchemaValue]
@@ -45,15 +46,15 @@ object LoadedSchemasResolver:
       resolver.addAll(apply(schema))
     }
 
-  private def loadSchemas(value: Value, loaded: LoadedSchemasResolver): LoadedSchemasResolver =
+  private def loadSchemas(value: Value, loaded0: LoadedSchemasResolver): LoadedSchemasResolver =
     value match
       case ObjectValue(properties) =>
         val loaded1 = properties
           .get("$id")
           .flatMap(Value.asString)
-          .map(loaded.absolute)
-          .map(uri => loaded.add(uri, SchemaValue(value)).withBase(UriUtil.withoutFragement(uri)))
-          .getOrElse(loaded)
+          .map(loaded0.absolute)
+          .map(uri => loaded0.add(uri, SchemaValue(value)).withBase(UriUtil.withoutFragement(uri)))
+          .getOrElse(loaded0)
         properties
           .foldLeft(loaded1) { case (loaded, (property, propertyValue)) =>
             (property, propertyValue) match
@@ -68,7 +69,7 @@ object LoadedSchemasResolver:
                 loaded.addDynamic(uri, SchemaValue(value))
               case _ => loadNestedSchemaValues(property, propertyValue, loaded)
           }
-      case _ => loaded
+      case _ => loaded0
 
   private val getterByKeyword: Map[String, NestedSchemaGetter] = Map(
     "not"                   -> selfSchema,
@@ -118,7 +119,8 @@ case class LoadedSchemasResolver(
     lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
 ) extends SchemaResolver:
 
-  override def withBase(uri: URI): LoadedSchemasResolver = this.copy(base = uri)
+  override def withBase(uri: URI): LoadedSchemasResolver =
+    this.copy(base = uri)
 
   override protected def resolve(uri: URI): Option[SchemaResolution] = schemas
     .get(uri)
@@ -129,12 +131,11 @@ case class LoadedSchemasResolver(
         .map { schema =>
           val loaded1 = this.add(uri, schema).withBase(uri)
           val loaded2 = LoadedSchemasResolver.loadSchemas(schema.value, loaded1)
-          // TODO cleanup
-          if UriUtil.withoutFragement(uri) == uri then SchemaResolution(schema, loaded2)
-          else
-            loaded2
-              .resolve(uri)
-              .getOrElse(SchemaResolution(schema, loaded2))
+          if loaded1.base != loaded2.base then {
+            // TODO how to handle?
+            // println(s"FW alias ${loaded1.base} ${loaded2.base}")
+          }
+          SchemaResolution(schema, loaded2)
         }
     )
 
@@ -144,14 +145,17 @@ case class LoadedSchemasResolver(
     this.copy(lazyResolver = Some(lazyResolver))
 
   private def add(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
-    // TODO?
-    // if (schemas.contains(uri)) then throw new IllegalStateException(s"schema ${uri} already loaded")r
+    // TODO how come?
+    // if schemas.contains(uri) then {
+    //   println(s"FW exists ${uri}")
+    // }
     this.copy(schemas = schemas + ((uri, schema)))
 
-  private def addAll(other: LoadedSchemasResolver): LoadedSchemasResolver = this.copy(
-    schemas = schemas.concat(other.schemas.toSeq),
-    dynamicSchemas = dynamicSchemas.concat(other.dynamicSchemas.toSeq)
-  )
+  private def addAll(other: LoadedSchemasResolver): LoadedSchemasResolver =
+    this.copy(
+      schemas = schemas.concat(other.schemas.toSeq),
+      dynamicSchemas = dynamicSchemas.concat(other.dynamicSchemas.toSeq)
+    )
 
   private def addDynamic(uri: URI, schema: SchemaValue): LoadedSchemasResolver =
     add(uri, schema).copy(dynamicSchemas = dynamicSchemas + uri)

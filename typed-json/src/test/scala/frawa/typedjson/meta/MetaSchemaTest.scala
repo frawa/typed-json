@@ -190,7 +190,7 @@ class MetaSchemaTest extends FunSuite:
           CacheState.Stats(
             binds = 599,
             hits = 24,
-            cached = 2
+            cached = 3
           )
         )
       }

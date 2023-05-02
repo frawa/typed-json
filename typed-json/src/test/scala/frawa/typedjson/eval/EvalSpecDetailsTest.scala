@@ -394,3 +394,31 @@ class EvalSpecDetailsTest extends FunSuite:
       )
     }
   }
+
+  test("remote HTTP ref with different $id") {
+    val lazyResolver = (uri: URI) => Remotes.lazyResolver(uri)
+    withCompiledSchema(
+      """{"$ref": "http://localhost:1234/different-id-ref-string.json"}""",
+      Some(lazyResolver)
+    ) { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""1"""),
+            parseJsonValue(""""foo"""")
+          ),
+          { _ => }
+        ),
+        Seq(
+          BasicOutput(
+            false,
+            Seq(WithPointer(TypeMismatch("string")))
+          ),
+          BasicOutput(
+            true
+          )
+        )
+      )
+    }
+  }

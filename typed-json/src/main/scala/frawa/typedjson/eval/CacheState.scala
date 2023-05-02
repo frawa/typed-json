@@ -93,7 +93,22 @@ object CacheState:
           (r, v)
         }
         .map { rv =>
-          val state1 = state.copy(cache = state.cache + (uri -> rv))
+          val key  = uri
+          val key2 = rv._1.resolver.base.toString
+          // TODO
+          // if state.cache.contains(key) then {
+          //   println(s"FW already cached ${key}")
+          // }
+          val newCache =
+            if state.cache.contains(key2) then {
+              // TODO how come?
+              // val same = state.cache.get(key).contains(rv)
+              // println(s"FW already cached alias ${key2} same ${same}")
+              state.cache + (key -> rv)
+            } else {
+              state.cache + (key -> rv) + (key2 -> rv)
+            }
+          val state1 = state.copy(cache = newCache)
           (rv, state1)
         }
       val compiled = alreadyCached
