@@ -26,18 +26,12 @@ class Draft202012Test extends JsonSchemaTestSuite:
   override protected val onlyDescription: Option[String] =
     // Some("allOf.json - allOf")
     // Some("validate definition against metaschema")
-    Some("neither anyOf valid (complex)")
+    // Some("neither anyOf valid (complex)")
+    None
 
   // TODO un-ignore 'em
   override val ignoreFiles: Seq[String] = Seq(
     "content.json" // TODO keywords contentMediaType, contentEncoding, contentSchema
-  )
-
-  // TODO un-ignore 'em
-  override val ignoreByFile: Map[String, Seq[String]] = Map(
-    "id.json" -> Seq(
-      "Invalid use of fragments in location-independent $id" // TODO format "uri-reference"
-    )
   )
 
   checkFiles(draft202012Files)(parseJsonValue)
