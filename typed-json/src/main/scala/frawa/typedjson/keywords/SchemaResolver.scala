@@ -72,4 +72,5 @@ trait SchemaResolver:
 
   private def resolvePointer(resolution: SchemaResolution, pointer: Pointer): Option[SchemaResolution] =
     val SchemaResolution(schema, resolver) = resolution
-    pointer(schema.value).map(SchemaValue(_)).map(SchemaResolution(_, resolver))
+    val resolver1                          = resolver.withBase(UriUtil.withFragment(resolver.base, pointer))
+    pointer(schema.value).map(SchemaValue(_)).map(SchemaResolution(_, resolver1))
