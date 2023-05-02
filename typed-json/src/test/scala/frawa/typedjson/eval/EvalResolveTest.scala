@@ -142,12 +142,9 @@ class EvalResolveTest extends FunSuite:
             assertEquals(
               state.cache.keySet,
               Set(
-                "https://json-schema.org/draft/2020-12/meta/core",
-                "https://json-schema.org/draft/2020-12/meta/core#meta",
                 "https://json-schema.org/draft/2020-12/meta/validation",
-                "https://json-schema.org/draft/2020-12/meta/validation#/$defs/simpleTypes",
                 "https://json-schema.org/draft/2020-12/meta/core",
-                "https://json-schema.org/draft/2020-12/partial#meta"
+                "https://json-schema.org/draft/2020-12/meta/validation#/$defs/simpleTypes"
               )
             )
             assertEquals(
@@ -155,7 +152,6 @@ class EvalResolveTest extends FunSuite:
               Map(
                 "https://json-schema.org/draft/2020-12/meta/validation"                    -> 5,
                 "https://json-schema.org/draft/2020-12/meta/core"                          -> 5,
-                "https://json-schema.org/draft/2020-12/meta/core#meta"                     -> 2,
                 "https://json-schema.org/draft/2020-12/meta/validation#/$defs/simpleTypes" -> 3
               )
             )

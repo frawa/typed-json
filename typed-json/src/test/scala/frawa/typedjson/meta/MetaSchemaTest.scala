@@ -116,8 +116,8 @@ class MetaSchemaTest extends FunSuite:
           stats,
           CacheState.Stats(
             binds = 295,
-            hits = 11,
-            cached = 1
+            hits = 0,
+            cached = 0
           )
         )
       }
@@ -189,8 +189,8 @@ class MetaSchemaTest extends FunSuite:
           stats,
           CacheState.Stats(
             binds = 599,
-            hits = 24,
-            cached = 3
+            hits = 0,
+            cached = 2
           )
         )
       }

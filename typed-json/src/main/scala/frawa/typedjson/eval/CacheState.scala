@@ -58,16 +58,16 @@ object CacheState:
   def resolve[O: OutputOps](ref: String, base: URI, scope: DynamicScope)(using
       eval: Eval[R, O]
   ): Eval.Fun[R[O]] =
-    doResolve(ref, base, scope) { (ref, resolver) =>
+    doResolve(ref, base, scope, cacheIt = true) { (ref, resolver) =>
       resolver.resolveRef(ref)
     }
 
   def resolveDynamic[O: OutputOps](ref: String, base: URI, scope: DynamicScope)(using
       eval: Eval[R, O]
   ): Eval.Fun[R[O]] =
-    doResolve(ref, base, scope) { (ref, resolver) => resolver.resolveDynamicRef(ref, scope) }
+    doResolve(ref, base, scope, cacheIt = false) { (ref, resolver) => resolver.resolveDynamicRef(ref, scope) }
 
-  def doResolve[O: OutputOps](ref: String, base: URI, scope: DynamicScope)(
+  def doResolve[O: OutputOps](ref: String, base: URI, scope: DynamicScope, cacheIt: Boolean)(
       resolve: (String, SchemaResolver) => Option[SchemaResolution]
   )(using
       eval: Eval[R, O]
@@ -99,7 +99,7 @@ object CacheState:
           // if state.cache.contains(key) then {
           //   println(s"FW already cached ${key}")
           // }
-          val newCache =
+          lazy val newCache =
             if state.cache.contains(key2) then {
               // TODO how come?
               // val same = state.cache.get(key).contains(rv)
@@ -108,7 +108,7 @@ object CacheState:
             } else {
               state.cache + (key -> rv) + (key2 -> rv)
             }
-          val state1 = state.copy(cache = newCache)
+          val state1 = if cacheIt then state.copy(cache = newCache) else state
           (rv, state1)
         }
       val compiled = alreadyCached

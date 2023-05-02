@@ -18,6 +18,7 @@ import frawa.typedjson.pointer.Pointer.parse
 import java.net.URI
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.jsonSchemaTestSuite.Remotes
+import frawa.typedjson.keywords.Ignored
 
 class EvalSpecDetailsTest extends FunSuite:
 
@@ -417,6 +418,66 @@ class EvalSpecDetailsTest extends FunSuite:
           ),
           BasicOutput(
             true
+          )
+        )
+      )
+    }
+  }
+
+  test("multiple dynamic paths to the $dynamicRef keyword") {
+    val lazyResolver = (uri: URI) => Remotes.lazyResolver(uri)
+    withCompiledSchema(
+      """|{
+         |            "$schema": "https://json-schema.org/draft/2020-12/schema",
+         |            "$id": "https://test.json-schema.org/dynamic-ref-with-multiple-paths/main",
+         |            "$defs": {
+         |                "inner": {
+         |                    "$id": "inner",
+         |                    "$dynamicAnchor": "foo",
+         |                    "title": "inner",
+         |                    "additionalProperties": {
+         |                        "$dynamicRef": "#foo"
+         |                    }
+         |                }
+         |            },
+         |            "if": {
+         |                "propertyNames": {
+         |                    "pattern": "^[a-m]"
+         |                }
+         |            },
+         |            "then": {
+         |                "title": "any type of node",
+         |                "$id": "anyLeafNode",
+         |                "$dynamicAnchor": "foo",
+         |                "$ref": "inner"
+         |            },
+         |            "else": {
+         |                "title": "integer node",
+         |                "$id": "integerNode",
+         |                "$dynamicAnchor": "foo",
+         |                "type": [ "object", "integer" ],
+         |                "$ref": "inner"
+         |            }
+         |}""".stripMargin,
+      Some(lazyResolver)
+    ) { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""{ "alpha": 1.1 }"""),
+            parseJsonValue("""{ "november": 1.1 }""")
+          ),
+          { _ => }
+        ),
+        Seq(
+          BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("alpha")), Ignored(Set("title")))),
+          BasicOutput(
+            false,
+            errors = Seq(
+              WithPointer(TypeMismatch("object"), Pointer.empty / "november"),
+              WithPointer(TypeMismatch("integer"), Pointer.empty / "november")
+            )
           )
         )
       )
