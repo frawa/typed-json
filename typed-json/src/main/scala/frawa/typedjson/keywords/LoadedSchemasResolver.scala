@@ -132,7 +132,7 @@ case class LoadedSchemasResolver(
           val loaded1 = this.add(uri, schema).withBase(uri)
           val loaded2 = LoadedSchemasResolver.loadSchemas(schema.value, loaded1)
           if loaded1.base != loaded2.base then {
-            // TODO how to handle?
+            // TODO handle here or in CacheState?
             // println(s"FW alias ${loaded1.base} ${loaded2.base}")
           }
           SchemaResolution(schema, loaded2)
@@ -155,7 +155,7 @@ case class LoadedSchemasResolver(
     // TODO how come?
     // val fw = schemas.keySet -- other.schemas.keySet
     // if fw.nonEmpty then {
-    //   println(s"FW exists ${fw}")
+    //   println(s"FW exists all ${fw}")
     // }
     this.copy(
       schemas = schemas.concat(other.schemas.toSeq),
