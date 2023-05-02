@@ -184,6 +184,9 @@ lazy val ESVersion = org.scalajs.linker.interface.ESVersion
 lazy val jsSettingsTypeJson = Seq(
   // fixes regex error: Look-behind group is not supported because it requires RegExp features of ECMAScript 2018.
   scalaJSLinkerConfig ~= { _.withESFeatures(_.withESVersion(ESVersion.ES2018)) }
+  // jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(
+  //   org.scalajs.jsenv.nodejs.NodeJSEnv.Config().withArgs(List("--stack-size=2013"))
+  // )
 )
 
 lazy val typedJson =
