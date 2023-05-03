@@ -29,8 +29,8 @@ import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.TestUtil.*
 import munit.{FunSuite, Location, TestOptions}
 import frawa.typedjson.output.OutputOps
-import frawa.typedjson.output.BasicOutput
-import frawa.typedjson.output.BasicOutput.given
+import frawa.typedjson.output.SimpleOutput
+import frawa.typedjson.output.SimpleOutput.given
 
 import java.net.URI
 import frawa.typedjson.eval.CacheState
@@ -75,7 +75,7 @@ open class JsonSchemaTestSuite extends FunSuite:
       case _ => fail("invalid test json suite")
 
   private def checkTest(file: String, testValue: Value): Unit =
-    import BasicOutput.given
+    import SimpleOutput.given
     import CacheState.given
 
     testValue match
@@ -115,9 +115,9 @@ open class JsonSchemaTestSuite extends FunSuite:
   private def expectAll(schemaValue: SchemaValue, expactations: Seq[Expectation]): Unit =
     val lazyResolver = (uri: URI) => MetaSchemas.lazyResolver(uri).orElse(Remotes.lazyResolver(uri))
     val lr           = Some(lazyResolver)
-    val evalBasic    = Eval[R, BasicOutput]
+    val evalBasic    = Eval[R, SimpleOutput]
 
-    given Eval[R, BasicOutput]                       = evalBasic
+    given Eval[R, SimpleOutput]                      = evalBasic
     given Option[LoadedSchemasResolver.LazyResolver] = lr
     withCompiledSchemaValue(schemaValue, lr) { fun =>
 
@@ -130,7 +130,7 @@ open class JsonSchemaTestSuite extends FunSuite:
         assertEquals(
           s"'${expectation.description}'' is ${o.isValid}",
           s"'${expectation.description}'' is ${expectation.valid}",
-          clues(clue[String](expectation.description), clue[Seq[BasicOutput.Error]](o.errors))
+          clues(clue[String](expectation.description), clue[Seq[SimpleOutput.Error]](o.errors))
         )
       }
     }

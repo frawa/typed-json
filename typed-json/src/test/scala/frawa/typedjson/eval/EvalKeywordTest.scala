@@ -29,8 +29,8 @@ import frawa.typedjson.testutil.TestUtil.{*, given}
 import frawa.typedjson.util.UriUtil
 import frawa.typedjson.util.UriUtil.uri
 import frawa.typedjson.validation.*
-import frawa.typedjson.output.BasicOutput
-import frawa.typedjson.output.BasicOutput.given
+import frawa.typedjson.output.SimpleOutput
+import frawa.typedjson.output.SimpleOutput.given
 import frawa.typedjson.output.FlagOutput
 import frawa.typedjson.output.FlagOutput.given
 import munit.FunSuite
@@ -44,8 +44,8 @@ class EvalKeywordTest extends FunSuite:
 
   import Util.*
 
-  private val evalBasic      = Eval[R, BasicOutput]
-  given Eval[R, BasicOutput] = evalBasic
+  private val evalBasic       = Eval[R, SimpleOutput]
+  given Eval[R, SimpleOutput] = evalBasic
 
   test("multipleOf") {
     withCompiledSchema("""{"multipleOf": 2}""") { fun =>
@@ -56,13 +56,13 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(NotMultipleOf(2))
             )
           ),
-          BasicOutput(true)
+          SimpleOutput(true)
         )
       )
     }
@@ -77,13 +77,13 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(MinimumMismatch(13, exclude = false))
             )
           ),
-          BasicOutput(true)
+          SimpleOutput(true)
         )
       )
     }
@@ -98,13 +98,13 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(MinimumMismatch(13, exclude = true))
             )
           ),
-          BasicOutput(true)
+          SimpleOutput(true)
         )
       )
     }
@@ -122,13 +122,13 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(MaxLengthMismatch(3))
             )
           ),
-          BasicOutput(true)
+          SimpleOutput(true)
         )
       )
     }
@@ -146,13 +146,13 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(MinLengthMismatch(4))
             )
           ),
-          BasicOutput(true)
+          SimpleOutput(true)
         )
       )
     }
@@ -170,13 +170,13 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(PatternMismatch("foo\\d\\d"))
             )
           ),
-          BasicOutput(true)
+          SimpleOutput(true)
         )
       )
     }
@@ -194,13 +194,13 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(MinItemsMismatch(3))
             )
           ),
-          BasicOutput(true)
+          SimpleOutput(true)
         )
       )
     }
@@ -218,13 +218,13 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(MaxItemsMismatch(2))
             )
           ),
-          BasicOutput(true)
+          SimpleOutput(true)
         )
       )
     }
@@ -242,13 +242,13 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(ItemsNotUnique())
             )
           ),
-          BasicOutput(true)
+          SimpleOutput(true)
         )
       )
     }
@@ -266,13 +266,13 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(MaxPropertiesMismatch(2))
             )
           ),
-          BasicOutput(true)
+          SimpleOutput(true)
         )
       )
     }
@@ -290,13 +290,13 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(MinPropertiesMismatch(3))
             )
           ),
-          BasicOutput(true)
+          SimpleOutput(true)
         )
       )
     }
@@ -314,13 +314,13 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(MissingRequiredProperties(Seq("foo")))
             )
           ),
-          BasicOutput(true)
+          SimpleOutput(true)
         )
       )
     }
@@ -338,13 +338,13 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(DependentRequiredMissing(Map("foo" -> Seq("gnu"))))
             )
           ),
-          BasicOutput(true)
+          SimpleOutput(true)
         )
       )
     }
@@ -362,13 +362,13 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(FalseSchemaReason())
             )
           ),
-          BasicOutput(true)
+          SimpleOutput(true)
         )
       )
     }
@@ -386,13 +386,13 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(TypeMismatch("number"), Pointer.empty / 0)
             )
           ),
-          BasicOutput(true, annotations = List(EvaluatedIndices(Set(0, 1))))
+          SimpleOutput(true, annotations = List(EvaluatedIndices(Set(0, 1))))
         )
       )
     }
@@ -412,13 +412,13 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(TypeMismatch("boolean"), Pointer.empty / 2)
             )
           ),
-          BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1, 2))))
+          SimpleOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1, 2))))
         )
       )
     }
@@ -437,14 +437,14 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(NotContains(0))
             )
           ),
-          BasicOutput(true, annotations = List(EvaluatedIndices(Set(0)))),
-          BasicOutput(true, annotations = List(EvaluatedIndices(Set(0, 1))))
+          SimpleOutput(true, annotations = List(EvaluatedIndices(Set(0)))),
+          SimpleOutput(true, annotations = List(EvaluatedIndices(Set(0, 1))))
         )
       )
     }
@@ -464,13 +464,13 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(NotContains(1))
             )
           ),
-          BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1))))
+          SimpleOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1))))
         )
       )
     }
@@ -491,19 +491,19 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(NotContains(3))
             )
           ),
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(NotContains(0))
             )
           ),
-          BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1))))
+          SimpleOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1))))
         )
       )
     }
@@ -521,8 +521,8 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(true),
-          BasicOutput(true)
+          SimpleOutput(true),
+          SimpleOutput(true)
         )
       )
     }
@@ -540,8 +540,8 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(true),
-          BasicOutput(true)
+          SimpleOutput(true),
+          SimpleOutput(true)
         )
       )
     }
@@ -561,14 +561,14 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(FalseSchemaReason(), Pointer.empty / "bar"),
               WithPointer(FalseSchemaReason(), Pointer.empty / "gnu")
             )
           ),
-          BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("foo"))))
+          SimpleOutput(true, annotations = Seq(EvaluatedProperties(Set("foo"))))
         )
       )
     }
@@ -595,7 +595,7 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(
               WithPointer(CannotResolve("missing.json", None), Pointer.empty / 0)
@@ -619,9 +619,9 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(true),
-          BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0)))),
-          BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 0)))
+          SimpleOutput(true),
+          SimpleOutput(true, annotations = Seq(EvaluatedIndices(Set(0)))),
+          SimpleOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 0)))
         )
       )
     }
@@ -640,8 +640,8 @@ class EvalKeywordTest extends FunSuite:
             state => {}
           ),
           Seq(
-            BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1)))),
-            BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
+            SimpleOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1)))),
+            SimpleOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
           )
         )
     }
@@ -659,8 +659,8 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1, 2)))),
-          BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
+          SimpleOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1, 2)))),
+          SimpleOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
         )
       )
     }
@@ -682,8 +682,8 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1, 2, 3)))),
-          BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
+          SimpleOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1, 2, 3)))),
+          SimpleOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
         )
       )
     }
@@ -704,8 +704,8 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 2, 1)))),
-          BasicOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
+          SimpleOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 2, 1)))),
+          SimpleOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
         )
       )
     }
@@ -726,8 +726,8 @@ class EvalKeywordTest extends FunSuite:
           state => {}
         ),
         Seq(
-          BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("foo", "gnu")))),
-          BasicOutput(false, Seq(WithPointer(TypeMismatch("number"), Pointer.empty / "gnu")))
+          SimpleOutput(true, annotations = Seq(EvaluatedProperties(Set("foo", "gnu")))),
+          SimpleOutput(false, Seq(WithPointer(TypeMismatch("number"), Pointer.empty / "gnu")))
         )
       )
     }

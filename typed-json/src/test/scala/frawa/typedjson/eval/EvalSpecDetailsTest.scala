@@ -9,8 +9,8 @@ import frawa.typedjson.testutil.TestUtil.{*, given}
 import frawa.typedjson.validation.*
 import munit.FunSuite
 import frawa.typedjson.eval.CacheState
-import frawa.typedjson.output.BasicOutput
-import frawa.typedjson.output.BasicOutput.given
+import frawa.typedjson.output.SimpleOutput
+import frawa.typedjson.output.SimpleOutput.given
 import frawa.typedjson.output.FlagOutput
 import frawa.typedjson.output.FlagOutput.given
 import frawa.typedjson.util.WithPointer
@@ -24,8 +24,8 @@ class EvalSpecDetailsTest extends FunSuite:
 
   import Util.*
 
-  private val evalBasic      = Eval[R, BasicOutput]
-  given Eval[R, BasicOutput] = evalBasic
+  private val evalBasic       = Eval[R, SimpleOutput]
+  given Eval[R, SimpleOutput] = evalBasic
 
   private val evalFlag = Eval[R, FlagOutput]
 
@@ -49,7 +49,7 @@ class EvalSpecDetailsTest extends FunSuite:
                           |}""".stripMargin) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("""{"foo": 2, "bar": "quux"}""")),
-        BasicOutput(
+        SimpleOutput(
           false,
           Seq(
             WithPointer(TypeMismatch("integer"), Pointer.empty / "bar"),
@@ -70,7 +70,7 @@ class EvalSpecDetailsTest extends FunSuite:
                           |}""".stripMargin) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("""{"aaaa": 31}""")),
-        BasicOutput(
+        SimpleOutput(
           false,
           Seq(
             WithPointer(
@@ -95,7 +95,7 @@ class EvalSpecDetailsTest extends FunSuite:
                           |}""".stripMargin) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("""{"foo": []}""")),
-        BasicOutput(
+        SimpleOutput(
           false,
           Seq(
             WithPointer(
@@ -133,7 +133,7 @@ class EvalSpecDetailsTest extends FunSuite:
                             |    "bar": "bar"
                             |}""".stripMargin)
         ),
-        BasicOutput(
+        SimpleOutput(
           true,
           annotations = Seq(
             EvaluatedProperties(
@@ -186,7 +186,7 @@ class EvalSpecDetailsTest extends FunSuite:
                             |                    "baz": "baz"
                             |}""".stripMargin)
         ),
-        BasicOutput(
+        SimpleOutput(
           true,
           annotations = Seq(
             EvaluatedProperties(
@@ -220,7 +220,7 @@ class EvalSpecDetailsTest extends FunSuite:
           fun,
           parseJsonValue("""["foo", 42, true]""")
         ),
-        BasicOutput(
+        SimpleOutput(
           true,
           annotations = Seq(
             EvaluatedIndices(Set(0, 1, 2))
@@ -255,7 +255,7 @@ class EvalSpecDetailsTest extends FunSuite:
                             |                    "bar": "bar"
                             |}""".stripMargin)
         ),
-        BasicOutput(
+        SimpleOutput(
           false,
           errors = List(
             WithPointer(
@@ -297,7 +297,7 @@ class EvalSpecDetailsTest extends FunSuite:
           { _ => }
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             errors = Seq(
               WithPointer(
@@ -306,7 +306,7 @@ class EvalSpecDetailsTest extends FunSuite:
               )
             )
           ),
-          BasicOutput(
+          SimpleOutput(
             false,
             errors = Seq(
               WithPointer(
@@ -352,11 +352,11 @@ class EvalSpecDetailsTest extends FunSuite:
           { _ => }
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             true,
             annotations = Seq(EvaluatedIndices(Set(0, 1, 2, 3, 4)))
           ),
-          BasicOutput(
+          SimpleOutput(
             true,
             annotations = Seq(EvaluatedIndices(Set(0, 1, 2, 3, 4, 5)))
           )
@@ -384,10 +384,10 @@ class EvalSpecDetailsTest extends FunSuite:
           { _ => }
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             true
           ),
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(WithPointer(TypeMismatch("integer")))
           )
@@ -412,11 +412,11 @@ class EvalSpecDetailsTest extends FunSuite:
           { _ => }
         ),
         Seq(
-          BasicOutput(
+          SimpleOutput(
             false,
             Seq(WithPointer(TypeMismatch("string")))
           ),
-          BasicOutput(
+          SimpleOutput(
             true
           )
         )
@@ -471,8 +471,8 @@ class EvalSpecDetailsTest extends FunSuite:
           { _ => }
         ),
         Seq(
-          BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("alpha")), Ignored(Set("title")))),
-          BasicOutput(
+          SimpleOutput(true, annotations = Seq(EvaluatedProperties(Set("alpha")), Ignored(Set("title")))),
+          SimpleOutput(
             false,
             errors = Seq(
               WithPointer(TypeMismatch("object"), Pointer.empty / "november"),
@@ -507,8 +507,8 @@ class EvalSpecDetailsTest extends FunSuite:
           { _ => }
         ),
         Seq(
-          BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("name")))),
-          BasicOutput(
+          SimpleOutput(true, annotations = Seq(EvaluatedProperties(Set("name")))),
+          SimpleOutput(
             false,
             errors = Seq(
               WithPointer(TypeMismatch("null"), Pointer.empty / "name"),

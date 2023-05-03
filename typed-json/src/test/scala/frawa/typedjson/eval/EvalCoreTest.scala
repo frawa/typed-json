@@ -9,8 +9,8 @@ import frawa.typedjson.testutil.TestUtil.{*, given}
 import frawa.typedjson.validation.*
 import munit.FunSuite
 import frawa.typedjson.eval.CacheState
-import frawa.typedjson.output.BasicOutput
-import frawa.typedjson.output.BasicOutput.given
+import frawa.typedjson.output.SimpleOutput
+import frawa.typedjson.output.SimpleOutput.given
 import frawa.typedjson.output.FlagOutput
 import frawa.typedjson.output.FlagOutput.given
 import frawa.typedjson.util.WithPointer
@@ -19,8 +19,8 @@ class EvalCoreTest extends FunSuite:
 
   import Util.*
 
-  private val evalBasic      = Eval[R, BasicOutput]
-  given Eval[R, BasicOutput] = evalBasic
+  private val evalBasic       = Eval[R, SimpleOutput]
+  given Eval[R, SimpleOutput] = evalBasic
 
   private val evalFlag = Eval[R, FlagOutput]
 
@@ -44,10 +44,10 @@ class EvalCoreTest extends FunSuite:
 
   test("null with errors") {
     withCompiledSchema(nullSchema) { fun =>
-      assertEquals(doApply(fun, NullValue), BasicOutput(true))
+      assertEquals(doApply(fun, NullValue), SimpleOutput(true))
       assertEquals(
         doApply(fun, BoolValue(true)),
-        BasicOutput(
+        SimpleOutput(
           false,
           Seq(WithPointer(TypeMismatch("null")))
         )
@@ -67,30 +67,30 @@ class EvalCoreTest extends FunSuite:
 
   test("false with errors") {
     withCompiledSchema(falseSchema) { fun =>
-      assertEquals(doApply(fun, parseJsonValue("{}")), BasicOutput(false, Seq(WithPointer(FalseSchemaReason()))))
+      assertEquals(doApply(fun, parseJsonValue("{}")), SimpleOutput(false, Seq(WithPointer(FalseSchemaReason()))))
     }
   }
 
   test("boolean") {
     withCompiledSchema(boolSchema) { fun =>
-      assertEquals(doApply(fun, parseJsonValue("true")), BasicOutput(true))
-      assertEquals(doApply(fun, parseJsonValue("13")), BasicOutput(false, Seq(WithPointer(TypeMismatch("boolean")))))
+      assertEquals(doApply(fun, parseJsonValue("true")), SimpleOutput(true))
+      assertEquals(doApply(fun, parseJsonValue("13")), SimpleOutput(false, Seq(WithPointer(TypeMismatch("boolean")))))
     }
   }
 
   test("true schema") {
     withCompiledSchema(trueSchema) { fun =>
-      assertEquals(doApply(fun, parseJsonValue("null")), BasicOutput(true))
-      assertEquals(doApply(fun, parseJsonValue("13")), BasicOutput(true))
-      assertEquals(doApply(fun, parseJsonValue("{}")), BasicOutput(true))
+      assertEquals(doApply(fun, parseJsonValue("null")), SimpleOutput(true))
+      assertEquals(doApply(fun, parseJsonValue("13")), SimpleOutput(true))
+      assertEquals(doApply(fun, parseJsonValue("{}")), SimpleOutput(true))
     }
   }
 
   test("false schema") {
     withCompiledSchema(falseSchema) { fun =>
-      assertEquals(doApply(fun, parseJsonValue("null")), BasicOutput(false, Seq(WithPointer(FalseSchemaReason()))))
-      assertEquals(doApply(fun, parseJsonValue("13")), BasicOutput(false, Seq(WithPointer(FalseSchemaReason()))))
-      assertEquals(doApply(fun, parseJsonValue("{}")), BasicOutput(false, Seq(WithPointer(FalseSchemaReason()))))
+      assertEquals(doApply(fun, parseJsonValue("null")), SimpleOutput(false, Seq(WithPointer(FalseSchemaReason()))))
+      assertEquals(doApply(fun, parseJsonValue("13")), SimpleOutput(false, Seq(WithPointer(FalseSchemaReason()))))
+      assertEquals(doApply(fun, parseJsonValue("{}")), SimpleOutput(false, Seq(WithPointer(FalseSchemaReason()))))
     }
   }
 
@@ -106,40 +106,43 @@ class EvalCoreTest extends FunSuite:
 
   test("empty schema") {
     withCompiledSchema(emtpySchema) { fun =>
-      assertEquals(doApply(fun, parseJsonValue("null")), BasicOutput(true))
-      assertEquals(doApply(fun, parseJsonValue("13")), BasicOutput(true))
-      assertEquals(doApply(fun, parseJsonValue("{}")), BasicOutput(true))
+      assertEquals(doApply(fun, parseJsonValue("null")), SimpleOutput(true))
+      assertEquals(doApply(fun, parseJsonValue("13")), SimpleOutput(true))
+      assertEquals(doApply(fun, parseJsonValue("{}")), SimpleOutput(true))
     }
   }
 
   test("not empty schema") {
     withCompiledSchema("""{"not": {}}""") { fun =>
-      assertEquals(doApply(fun, parseJsonValue("null")), BasicOutput(false, Seq(WithPointer(NotInvalid()))))
-      assertEquals(doApply(fun, parseJsonValue("13")), BasicOutput(false, Seq(WithPointer(NotInvalid()))))
-      assertEquals(doApply(fun, parseJsonValue("{}")), BasicOutput(false, Seq(WithPointer(NotInvalid()))))
+      assertEquals(doApply(fun, parseJsonValue("null")), SimpleOutput(false, Seq(WithPointer(NotInvalid()))))
+      assertEquals(doApply(fun, parseJsonValue("13")), SimpleOutput(false, Seq(WithPointer(NotInvalid()))))
+      assertEquals(doApply(fun, parseJsonValue("{}")), SimpleOutput(false, Seq(WithPointer(NotInvalid()))))
     }
   }
 
   test("string") {
     withCompiledSchema(stringSchema) { fun =>
-      assertEquals(doApply(fun, parseJsonValue(""""hello"""")), BasicOutput(true))
-      assertEquals(doApply(fun, parseJsonValue("13")), BasicOutput(false, Seq(WithPointer(TypeMismatch("string")))))
+      assertEquals(doApply(fun, parseJsonValue(""""hello"""")), SimpleOutput(true))
+      assertEquals(doApply(fun, parseJsonValue("13")), SimpleOutput(false, Seq(WithPointer(TypeMismatch("string")))))
     }
   }
 
   test("number") {
     withCompiledSchema(numberSchema) { fun =>
-      assertEquals(doApply(fun, parseJsonValue("13")), BasicOutput(true))
-      assertEquals(doApply(fun, parseJsonValue("null")), BasicOutput(false, Seq(WithPointer(TypeMismatch("number")))))
+      assertEquals(doApply(fun, parseJsonValue("13")), SimpleOutput(true))
+      assertEquals(doApply(fun, parseJsonValue("null")), SimpleOutput(false, Seq(WithPointer(TypeMismatch("number")))))
     }
   }
 
   test("array") {
     withCompiledSchema(numberArraySchema) { fun =>
-      assertEquals(doApply(fun, parseJsonValue("[13]")), BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0)))))
+      assertEquals(
+        doApply(fun, parseJsonValue("[13]")),
+        SimpleOutput(true, annotations = Seq(EvaluatedIndices(Set(0))))
+      )
       assertEquals(
         doApply(fun, parseJsonValue("null")),
-        BasicOutput(false, Seq(WithPointer(TypeMismatch("array"))))
+        SimpleOutput(false, Seq(WithPointer(TypeMismatch("array"))))
       )
     }
   }
@@ -148,12 +151,15 @@ class EvalCoreTest extends FunSuite:
     withCompiledSchema(numberArraySchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("null")),
-        BasicOutput(false, Seq(WithPointer(TypeMismatch("array"))))
+        SimpleOutput(false, Seq(WithPointer(TypeMismatch("array"))))
       )
-      assertEquals(doApply(fun, parseJsonValue("[13]")), BasicOutput(true, annotations = Seq(EvaluatedIndices(Set(0)))))
+      assertEquals(
+        doApply(fun, parseJsonValue("[13]")),
+        SimpleOutput(true, annotations = Seq(EvaluatedIndices(Set(0))))
+      )
       assertEquals(
         doApply(fun, parseJsonValue("[true]")),
-        BasicOutput(
+        SimpleOutput(
           false,
           Seq(WithPointer(TypeMismatch("number"), Pointer.empty / 0))
         )
@@ -172,11 +178,11 @@ class EvalCoreTest extends FunSuite:
                            |}
                            |""".stripMargin)
         ),
-        BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("toto", "titi"))))
+        SimpleOutput(true, annotations = Seq(EvaluatedProperties(Set("toto", "titi"))))
       )
       assertEquals(
         doApply(fun, parseJsonValue("null")),
-        BasicOutput(false, Seq(WithPointer(TypeMismatch("object"))))
+        SimpleOutput(false, Seq(WithPointer(TypeMismatch("object"))))
       )
     }
   }
@@ -185,7 +191,7 @@ class EvalCoreTest extends FunSuite:
     withCompiledSchema(totoObjectSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("""{"toto": 13,"titi": true}""")),
-        BasicOutput(
+        SimpleOutput(
           false,
           Seq(WithPointer(TypeMismatch("string"), Pointer.empty / "titi"))
         )
@@ -197,7 +203,7 @@ class EvalCoreTest extends FunSuite:
     withCompiledSchema(totoObjectSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("""{"toto": 13}""")),
-        BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("toto"))))
+        SimpleOutput(true, annotations = Seq(EvaluatedProperties(Set("toto"))))
       )
     }
   }
@@ -214,7 +220,7 @@ class EvalCoreTest extends FunSuite:
                          |""".stripMargin) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("""{"toto": 13}""")),
-        BasicOutput(
+        SimpleOutput(
           false,
           Seq(WithPointer(MissingRequiredProperties(Seq("titi"))))
         )
@@ -226,7 +232,7 @@ class EvalCoreTest extends FunSuite:
     withCompiledSchema(allOfSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("13")),
-        BasicOutput(true)
+        SimpleOutput(true)
       )
     }
   }
@@ -241,7 +247,7 @@ class EvalCoreTest extends FunSuite:
                          |""".stripMargin) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("1313")),
-        BasicOutput(false, Seq(WithPointer(TypeMismatch("string"))))
+        SimpleOutput(false, Seq(WithPointer(TypeMismatch("string"))))
       )
     }
   }
@@ -250,11 +256,11 @@ class EvalCoreTest extends FunSuite:
     withCompiledSchema(anyOfSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("1313")),
-        BasicOutput(true)
+        SimpleOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue("true")),
-        BasicOutput(
+        SimpleOutput(
           false,
           Seq(
             WithPointer(TypeMismatch("number")),
@@ -269,7 +275,7 @@ class EvalCoreTest extends FunSuite:
     withCompiledSchema(oneOfSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("1313")),
-        BasicOutput(true)
+        SimpleOutput(true)
       )
     }
   }
@@ -284,7 +290,7 @@ class EvalCoreTest extends FunSuite:
                          |""".stripMargin) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("1313")),
-        BasicOutput(false, Seq(WithPointer(TypeMismatch("string")), WithPointer(TypeMismatch("boolean"))))
+        SimpleOutput(false, Seq(WithPointer(TypeMismatch("string")), WithPointer(TypeMismatch("boolean"))))
       )
     }
   }
@@ -299,7 +305,7 @@ class EvalCoreTest extends FunSuite:
                          |""".stripMargin) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("1313")),
-        BasicOutput(false, Seq(WithPointer(NotOneOf(2))))
+        SimpleOutput(false, Seq(WithPointer(NotOneOf(2))))
       )
     }
   }
@@ -308,11 +314,11 @@ class EvalCoreTest extends FunSuite:
     withCompiledSchema("""{"not": { "type": "number" }}""") { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("true")),
-        BasicOutput(true)
+        SimpleOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue("1313")),
-        BasicOutput(false, Seq(WithPointer(NotInvalid())))
+        SimpleOutput(false, Seq(WithPointer(NotInvalid())))
       )
     }
   }
@@ -321,15 +327,15 @@ class EvalCoreTest extends FunSuite:
     withCompiledSchema(ifThenElseSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("1313")),
-        BasicOutput(true)
+        SimpleOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue(""""string"""")),
-        BasicOutput(true)
+        SimpleOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue("null")),
-        BasicOutput(false, Seq(WithPointer(TypeMismatch("string"))))
+        SimpleOutput(false, Seq(WithPointer(TypeMismatch("string"))))
       )
     }
   }
@@ -342,15 +348,15 @@ class EvalCoreTest extends FunSuite:
                          |""".stripMargin) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("1313")),
-        BasicOutput(true)
+        SimpleOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue(""""string"""")),
-        BasicOutput(true)
+        SimpleOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue("null")),
-        BasicOutput(false, Seq(WithPointer(TypeMismatch("string"))))
+        SimpleOutput(false, Seq(WithPointer(TypeMismatch("string"))))
       )
     }
   }
@@ -363,15 +369,15 @@ class EvalCoreTest extends FunSuite:
                          |""".stripMargin) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("1313")),
-        BasicOutput(true)
+        SimpleOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue(""""string"""")),
-        BasicOutput(true)
+        SimpleOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue("null")),
-        BasicOutput(true)
+        SimpleOutput(true)
       )
     }
   }
@@ -384,15 +390,15 @@ class EvalCoreTest extends FunSuite:
                          |""".stripMargin) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("1313")),
-        BasicOutput(true)
+        SimpleOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue(""""string"""")),
-        BasicOutput(true)
+        SimpleOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue("null")),
-        BasicOutput(true)
+        SimpleOutput(true)
       )
     }
   }
@@ -401,15 +407,15 @@ class EvalCoreTest extends FunSuite:
     withCompiledSchema(nullOrStringSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("null")),
-        BasicOutput(true)
+        SimpleOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue(""""hello"""")),
-        BasicOutput(true)
+        SimpleOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue("13")),
-        BasicOutput(false, Seq(WithPointer(TypeMismatch("null")), WithPointer(TypeMismatch("string"))))
+        SimpleOutput(false, Seq(WithPointer(TypeMismatch("null")), WithPointer(TypeMismatch("string"))))
       )
     }
   }
@@ -418,15 +424,15 @@ class EvalCoreTest extends FunSuite:
     withCompiledSchema(enumSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue(""""foo"""")),
-        BasicOutput(true)
+        SimpleOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue(""""bar"""")),
-        BasicOutput(true)
+        SimpleOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue(""""hello"""")),
-        BasicOutput(
+        SimpleOutput(
           false,
           Seq(
             WithPointer(NotInEnum(Seq(StringValue("foo"), StringValue("bar"))))
@@ -440,11 +446,11 @@ class EvalCoreTest extends FunSuite:
     withCompiledSchema(constSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue(""""first"""")),
-        BasicOutput(true)
+        SimpleOutput(true)
       )
       assertEquals(
         doApply(fun, parseJsonValue("{}")),
-        BasicOutput(
+        SimpleOutput(
           false,
           Seq(
             WithPointer(NotInEnum(Seq(StringValue("first")))),
@@ -454,7 +460,7 @@ class EvalCoreTest extends FunSuite:
       )
       assertEquals(
         doApply(fun, parseJsonValue(""""second"""")),
-        BasicOutput(
+        SimpleOutput(
           false,
           Seq(
             WithPointer(NotInEnum(Seq(StringValue("first"))))

@@ -24,7 +24,7 @@ import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.TestSchemas.{numberArraySchema, totoObjectSchema, totoRequiredObjectSchema}
 import frawa.typedjson.testutil.TestUtil.{*, given}
 import munit.FunSuite
-import frawa.typedjson.output.BasicOutput
+import frawa.typedjson.output.SimpleOutput
 import frawa.typedjson.eval.Eval
 import frawa.typedjson.eval.CacheState.R
 import frawa.typedjson.eval.Util.withCompiledSchemaValue

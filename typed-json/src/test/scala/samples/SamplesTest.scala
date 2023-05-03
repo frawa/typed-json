@@ -62,8 +62,8 @@ class SamplesTest extends FunSuite:
   }
 
   test("obtain validation errors") {
-    import frawa.typedjson.output.BasicOutput
-    import frawa.typedjson.output.BasicOutput.given
+    import frawa.typedjson.output.SimpleOutput
+    import frawa.typedjson.output.SimpleOutput.given
 
     val schemaJson = """{"type": "string"}"""
     val typedJson  = TypedJson.create(schemaJson).toOption.get

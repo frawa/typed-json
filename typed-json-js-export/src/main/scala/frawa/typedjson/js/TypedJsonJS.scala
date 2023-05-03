@@ -24,7 +24,7 @@ import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser.{Offset, OffsetParser, Value}
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.output.OutputOps
-import frawa.typedjson.output.BasicOutput
+import frawa.typedjson.output.SimpleOutput
 import frawa.typedjson.suggest.SuggestOutput
 import frawa.typedjson.suggest.Suggest
 
@@ -93,7 +93,7 @@ case class TypedJsonJS(
   private def validate(): TypedJsonJS =
     value
       .flatMap { value =>
-        import BasicOutput.given
+        import SimpleOutput.given
         val (o, typedJson) = this.typedJson.eval(value)
         o.map { o =>
           val offsetAt = pointer => TypedJsonFactory.offsetAt(pointer, value)
@@ -143,7 +143,7 @@ object Marker {
     Marker(0, 0, error.pointer.toString, message, "error")
   }
 
-  def fromError(offsetAt: Pointer => Option[Offset])(error: BasicOutput.Error): Marker = {
+  def fromError(offsetAt: Pointer => Option[Offset])(error: SimpleOutput.Error): Marker = {
     val offset       = offsetAt(error.pointer)
     val (start, end) = offset.map(o => (o.start, o.end)).getOrElse((0, 0))
     // TODO localized messages

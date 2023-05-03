@@ -30,7 +30,7 @@ import frawa.typedjson.validation.ValidationError
 import frawa.typedjson.eval.CacheState.R
 import frawa.typedjson.eval.TheResultMonad
 import frawa.typedjson.eval.Eval
-import frawa.typedjson.output.BasicOutput
+import frawa.typedjson.output.SimpleOutput
 import frawa.typedjson.eval.CacheState
 import frawa.typedjson.keywords.LoadedSchemasResolver
 import frawa.typedjson.keywords.SchemaResolver
@@ -140,7 +140,7 @@ object TypedJson:
   object Output:
     val empty: Output = Output(Seq.empty)
 
-    def apply(o: BasicOutput): Output =
+    def apply(o: SimpleOutput): Output =
       val errors =
         o.errors.map(error => Error(error.pointer, error.value))
       Output(errors)

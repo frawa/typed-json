@@ -12,22 +12,22 @@ import frawa.typedjson.testutil.TestUtil.{*, given}
 import frawa.typedjson.validation.*
 import munit.FunSuite
 import frawa.typedjson.eval.CacheState
-import frawa.typedjson.output.BasicOutput
-import frawa.typedjson.output.BasicOutput.given
+import frawa.typedjson.output.SimpleOutput
+import frawa.typedjson.output.SimpleOutput.given
 import frawa.typedjson.util.WithPointer
 
 class EvalResolveTest extends FunSuite:
 
   import Util.*
 
-  private val evalBasic      = Eval[R, BasicOutput]
-  given Eval[R, BasicOutput] = evalBasic
+  private val evalBasic       = Eval[R, SimpleOutput]
+  given Eval[R, SimpleOutput] = evalBasic
 
   test("missing $id/$ref/$def") {
     withCompiledSchema(missingIdRefDefsSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("[1313]")),
-        BasicOutput(
+        SimpleOutput(
           false,
           Seq(WithPointer(CannotResolve("#missing", None), Pointer.empty / 0))
         )
@@ -39,11 +39,11 @@ class EvalResolveTest extends FunSuite:
     withCompiledSchema(idRefDefsSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("[1313]")),
-        BasicOutput(true, Seq(), annotations = Seq(EvaluatedIndices(Set(0))))
+        SimpleOutput(true, Seq(), annotations = Seq(EvaluatedIndices(Set(0))))
       )
       assertEquals(
         doApply(fun, parseJsonValue("""["hello"]""")),
-        BasicOutput(
+        SimpleOutput(
           false,
           Seq(WithPointer(TypeMismatch("number"), Pointer.empty / 0))
         )
@@ -62,8 +62,8 @@ class EvalResolveTest extends FunSuite:
             assertEquals(state.hits, Map("https://example.net/root.json#item" -> 1))
         ),
         Seq(
-          BasicOutput(true, Seq(), annotations = Seq(EvaluatedIndices(Set(0)))),
-          BasicOutput(
+          SimpleOutput(true, Seq(), annotations = Seq(EvaluatedIndices(Set(0)))),
+          SimpleOutput(
             false,
             Seq(WithPointer(TypeMismatch("number"), Pointer.empty / 0))
           )
@@ -76,11 +76,11 @@ class EvalResolveTest extends FunSuite:
     withCompiledSchema(refInPropertiesSchema) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("""{ "foo": 13 }""")),
-        BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("foo"))))
+        SimpleOutput(true, annotations = Seq(EvaluatedProperties(Set("foo"))))
       )
       assertEquals(
         doApply(fun, parseJsonValue("""{ "foo": true }""")),
-        BasicOutput(false, Seq(WithPointer(TypeMismatch("number"), Pointer.empty / "foo")))
+        SimpleOutput(false, Seq(WithPointer(TypeMismatch("number"), Pointer.empty / "foo")))
       )
     }
   }
@@ -112,9 +112,9 @@ class EvalResolveTest extends FunSuite:
             )
         ),
         Seq(
-          BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("foo")))),
-          BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("foo")))),
-          BasicOutput(
+          SimpleOutput(true, annotations = Seq(EvaluatedProperties(Set("foo")))),
+          SimpleOutput(true, annotations = Seq(EvaluatedProperties(Set("foo")))),
+          SimpleOutput(
             false,
             Seq(
               WithPointer(TypeMismatch("number"), Pointer.empty / "foo"),
@@ -157,9 +157,9 @@ class EvalResolveTest extends FunSuite:
           }
         ),
         Seq(
-          BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("$defs")))),
-          BasicOutput(true, annotations = Seq(EvaluatedProperties(Set("$defs")))),
-          BasicOutput(
+          SimpleOutput(true, annotations = Seq(EvaluatedProperties(Set("$defs")))),
+          SimpleOutput(true, annotations = Seq(EvaluatedProperties(Set("$defs")))),
+          SimpleOutput(
             false,
             Seq(
               WithPointer(

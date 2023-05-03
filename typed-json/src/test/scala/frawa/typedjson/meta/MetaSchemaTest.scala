@@ -23,8 +23,8 @@ import frawa.typedjson.keywords.*
 import frawa.typedjson.testutil.TestUtil.*
 import munit.FunSuite
 import frawa.typedjson.eval.CacheState
-import frawa.typedjson.output.BasicOutput
-import frawa.typedjson.output.BasicOutput.given
+import frawa.typedjson.output.SimpleOutput
+import frawa.typedjson.output.SimpleOutput.given
 import frawa.typedjson.eval.Util.doApplyWithStats
 import frawa.typedjson.output.OutputOps
 
@@ -37,9 +37,9 @@ class MetaSchemaTest extends FunSuite:
     val Some(schema) = resolver(base.resolve(name)): @unchecked
     f(schema)
 
-  def validateSpec(valueName: String, schemaName: String)(f: BasicOutput => Unit, g: CacheState.Stats => Unit): Unit =
-    val evalBasic              = Eval[R, BasicOutput]
-    given Eval[R, BasicOutput] = evalBasic
+  def validateSpec(valueName: String, schemaName: String)(f: SimpleOutput => Unit, g: CacheState.Stats => Unit): Unit =
+    val evalBasic               = Eval[R, SimpleOutput]
+    given Eval[R, SimpleOutput] = evalBasic
     withSchemaSpec(schemaName) { schema =>
       withSchemaSpec(valueName) { value =>
         withCompiledSchemaValue(schema) { fun =>
