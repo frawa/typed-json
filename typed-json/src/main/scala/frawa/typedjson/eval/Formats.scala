@@ -143,18 +143,18 @@ object Formats {
         None
 
 }
-{`dur-minute`})?"
-        val `dur-day`    = "\\d+D"
-        val `dur-time`   = s"T(${`dur-hour`}|${`dur-minute`}|${`dur-second`})"
-        val `dur-week`   = "\\d+W"
-        val `dur-month`  = s"\\d+M(${`dur-day`})?"
-        val `dur-year`   = s"\\d+Y(${`dur-month`})?"
-        val `dur-date`   = s"(${`dur-day`}|${`dur-month`}|${`dur-year`})(${`dur-time`})?"
-        val duration     = s"P(${`dur-date`}|${`dur-time`}|${`dur-week`})"
-        Some(v => duration.r.matches(v))
-      case _ =>
-        // TODO
-//        value => combiner.valid(UnknownFormat(format), value.pointer)
-        None
+// {`dur-minute`})?"
+//         val `dur-day`    = "\\d+D"
+//         val `dur-time`   = s"T(${`dur-hour`}|${`dur-minute`}|${`dur-second`})"
+//         val `dur-week`   = "\\d+W"
+//         val `dur-month`  = s"\\d+M(${`dur-day`})?"
+//         val `dur-year`   = s"\\d+Y(${`dur-month`})?"
+//         val `dur-date`   = s"(${`dur-day`}|${`dur-month`}|${`dur-year`})(${`dur-time`})?"
+//         val duration     = s"P(${`dur-date`}|${`dur-time`}|${`dur-week`})"
+//         Some(v => duration.r.matches(v))
+//       case _ =>
+//         // TODO
+// //        value => combiner.valid(UnknownFormat(format), value.pointer)
+//         None
 
-}
+// }
