@@ -21,6 +21,7 @@ import frawa.typedjson.parser.Value.*
 import frawa.typedjson.validation.ValidationError
 import frawa.typedjson.output.BasicOutput
 import frawa.typedjson.TypedJson
+import frawa.typedjson.keywords.KeywordLocation.{Local, Dereferenced}
 
 object OutputJson:
 
@@ -34,14 +35,26 @@ object OutputJson:
     ObjectValue(Map("valid" -> BoolValue(o.isValid)) ++ errors)
 
   private def toJson(error: BasicOutput.Error): Value =
-    ObjectValue(
-      Map(
-        "error" -> StringValue(toMessage(error.value)),
-        // "keywordLocation"         -> StringValue(""),
-        // "absoluteKeywordLocation" -> StringValue(""),
-        "instanceLocation" -> StringValue(error.pointer.toString)
-      )
-    )
+    error.keywordLocation match {
+      case Local(relative) =>
+        ObjectValue(
+          Map(
+            "error"            -> StringValue(toMessage(error.error)),
+            "keywordLocation"  -> StringValue(relative.toString),
+            "instanceLocation" -> StringValue(error.instanceLocation.toString)
+          )
+        )
+      case Dereferenced(relative, absolute) =>
+        ObjectValue(
+          Map(
+            "error"                   -> StringValue(toMessage(error.error)),
+            "keywordLocation"         -> StringValue(relative.toString),
+            "absoluteKeywordLocation" -> StringValue(absolute.toString),
+            "instanceLocation"        -> StringValue(error.instanceLocation.toString)
+          )
+        )
+    }
 
   private def toMessage(error: ValidationError): String =
+    // TODO human messages
     error.toString
