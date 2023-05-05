@@ -25,18 +25,21 @@ object Pointer:
   def apply(index: Int): Pointer    = Pointer.empty / index
   def apply(field: String): Pointer = Pointer.empty / field
 
-  def parse(spec: String): Pointer = Pointer(
-    spec
-      .split("/", -1)
-      .toIndexedSeq
-      .map(field =>
-        field
-          .replace("~1", "/")
-          .replace("~0", "~")
+  def parse(spec: String): Pointer =
+    if spec == null then Pointer.empty
+    else
+      Pointer(
+        spec
+          .split("/", -1)
+          .toIndexedSeq
+          .map(field =>
+            field
+              .replace("~1", "/")
+              .replace("~0", "~")
+          )
+          .drop(1)
+          .map(t => t.toIntOption.map(ArrayIndexToken.apply).getOrElse(FieldToken(t)))
       )
-      .drop(1)
-      .map(t => t.toIntOption.map(ArrayIndexToken.apply).getOrElse(FieldToken(t)))
-  )
 
 case class Pointer(segments: Seq[Token], isInsideKey: Boolean = false):
   override def toString: String =
