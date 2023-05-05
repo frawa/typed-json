@@ -24,6 +24,12 @@ import munit.FunSuite
 import frawa.typedjson.output.BasicOutput
 import frawa.typedjson.TypedJson
 import frawa.typedjson.testutil.TestUtil.parseJsonValue
+import frawa.typedjson.util.WithPointer
+import frawa.typedjson.pointer.Pointer
+import frawa.typedjson.validation.MissingRequiredProperties
+import frawa.typedjson.validation.MinItemsMismatch
+import frawa.typedjson.keywords.KeywordLocation
+import frawa.typedjson.parser.Value
 
 class OutputJsonTest extends FunSuite:
 
@@ -48,33 +54,6 @@ class OutputJsonTest extends FunSuite:
     )
   }
 
-  // test("basic errors") {
-  //   given OutputCombiner[ValidationOutput] = ValidationOutput.add
-  //   assertEquals(
-  //     OutputJson.basic(
-  //       TypedJson.Validation(
-  //         false,
-  //         TypedJson.Output(Result.valid(ValidationOutput.invalid(FalseSchemaReason())))
-  //       )
-  //     ),
-  //     ObjectValue(
-  //       Map(
-  //         "valid" -> BoolValue(false),
-  //         "errors" -> ArrayValue(
-  //           Seq(
-  //             ObjectValue(
-  //               properties = Map(
-  //                 "error"            -> StringValue("FalseSchemaReason()"),
-  //                 "instanceLocation" -> StringValue("")
-  //               )
-  //             )
-  //           )
-  //         )
-  //       )
-  //     )
-  //   )
-  // }
-
   test("basic sample".ignore) {
     import BasicOutput.given
     given parser: Parser = new JawnParser()
@@ -85,6 +64,71 @@ class OutputJsonTest extends FunSuite:
 
     val expected = parser.parse(Sample.expectedBasic).toOption
     assertEquals(basic, expected)
+  }
+
+  private def prettyPrint(v: Value): String =
+    v match {
+      case NullValue         => "null"
+      case StringValue(v)    => s"'${v}'"
+      case NumberValue(v)    => s"${v}"
+      case BoolValue(v)      => s"${v}"
+      case ArrayValue(items) => s"[${items.map(prettyPrint).mkString("\n\t,")}\n]"
+      case ObjectValue(properties) =>
+        s"{${properties.toSeq.sortBy(_._1).map { (p, v) => s"${p}:${prettyPrint(v)}" }.mkString("\n\t,")}\n}"
+    }
+
+  test("first basic sample") {
+    import BasicOutput.given
+
+    given parser: Parser = new JawnParser()
+
+    val typedJson   = TypedJson.create(Sample.schema).toOption.get
+    val (output, _) = typedJson.eval(parseJsonValue(Sample.value))
+
+    // println(s"FW ${munitPrint(output)}")
+    val expected =
+      BasicOutput(
+        false,
+        error = None,
+        instanceLocation = Pointer.empty,
+        keywordLocation = None,
+        errors = Seq(
+          // TODO 1: failed at Pointer.empty, "keywordLocation": """, "instanceLocation": "",
+          // TODO 2: failed at Pointer.empty / 1, "keywordLocation": "/items/$ref", "absoluteKeywordLocation": "https://example.com/polygon#/$defs/point",
+          BasicOutput.Error(
+            FalseSchemaReason(), // TODO additional property?
+            Pointer.empty / 1 / "z",
+            KeywordLocation(
+              "/items/$ref/additionalProperties",
+              "https://example.com/polygon#/$defs/point/additionalProperties"
+            )
+          ),
+          BasicOutput.Error(
+            MissingRequiredProperties(Seq("y")),
+            Pointer.empty / 1,
+            KeywordLocation("/items/$ref/required", "https://example.com/polygon#/$defs/point/required")
+          ),
+          BasicOutput.Error(
+            MinItemsMismatch(3),
+            Pointer.empty,
+            KeywordLocation("/minItems")
+          )
+        ),
+        annotations = Seq()
+      )
+    assertEquals(Some(expected), output)
+
+    // TODO
+
+    // val basicJson            = output.map(OutputJson.basic)
+    // val expectedJson         = parser.parse(Sample.expectedBasic).toOption
+    // val basicJsonString      = basicJson.map(prettyPrint)
+    // val expectetedJsonString = expectedJson.map(prettyPrint)
+
+    // // assertEquals(basicJson, expectedJson)
+
+    // // println(s"FW ${munitPrint(basicJsonString)}")
+    // assertEquals(basicJsonString, expectetedJsonString)
   }
 
 object Sample:
@@ -124,6 +168,11 @@ object Sample:
                                  |  "valid": false,
                                  |  "errors": [
                                  |    {
+                                 |      "keywordLocation": "/minItems",
+                                 |      "instanceLocation": "",
+                                 |      "error": "Expected at least 3 items but found 2"
+                                 |    },                               
+                                 |    {
                                  |      "keywordLocation": "",
                                  |      "instanceLocation": "",
                                  |      "error": "A subschema had errors."
@@ -148,12 +197,7 @@ object Sample:
                                  |        "https://example.com/polygon#/$defs/point/additionalProperties",
                                  |      "instanceLocation": "/1/z",
                                  |      "error": "Additional property 'z' found but was invalid."
-                                 |    },
-                                 |    {
-                                 |      "keywordLocation": "/minItems",
-                                 |      "instanceLocation": "",
-                                 |      "error": "Expected at least 3 items but found 2"
-                                 |    }
+                                 |    }                                 
                                  |  ]
                                  |}
                                  |""".stripMargin

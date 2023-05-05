@@ -23,6 +23,7 @@ import frawa.typedjson.keywords.EvaluatedIndices
 import frawa.typedjson.keywords.EvaluatedProperties
 import frawa.typedjson.keywords.Keyword
 import frawa.typedjson.keywords.Ignored
+import frawa.typedjson.keywords.KeywordLocation
 
 trait OutputOps[O]: // extends Monoid[O]:
   def valid(pointer: Pointer): O
@@ -36,7 +37,7 @@ trait OutputOps[O]: // extends Monoid[O]:
     def withAnnotation(annotation: Evaluated): O = withAnnotations(Seq(annotation))
     def withAnnotations(annotations: Seq[Evaluated]): O
     def getAnnotations(): Seq[Evaluated]
-    def forKeyword(k: Keyword): O
+    def forKeyword(k: Keyword, kl: Option[KeywordLocation]): O
 
 object OutputOps:
   def mergeEvaluatedAnnotations(es: Seq[Evaluated]): Seq[Evaluated] =

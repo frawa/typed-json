@@ -64,16 +64,16 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 
   final def fun(compiled: Fun[R[O]]): EvalFun[R, O] = value => compiled(WithPointer(value))
 
-  final def compile(keywords: Keywords): Fun[R[O]] =
+  final def compile(keywords: Keywords, kl: Option[KeywordLocation]): Fun[R[O]] =
     val ks  = keywords.keywords.toSeq
-    val fun = compileSeq(ks)
+    val fun = compileSeq(ks, kl)
     verify.verifyAllOf(fun)
 
-  private final def compile(keyword: Keyword): Fun[R[O]] =
-    compileOne(keyword)
+  private final def compile(keyword: Keyword, kl: Option[KeywordLocation]): Fun[R[O]] =
+    compileOne(keyword, kl)
 
-  private final def compileSeq(ks: Seq[Keyword]): Fun[R[Seq[O]]] =
-    val funs = ks.map(compile)
+  private final def compileSeq(ks: Seq[Keyword], kl: Option[KeywordLocation]): Fun[R[Seq[O]]] =
+    val funs = ks.map(compile(_, kl))
     funSequence(funs)
 
   private final def funSequence(funs: Seq[Fun[R[O]]]): Fun[R[Seq[O]]] =
@@ -81,14 +81,14 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       val ros = funs.map(fun => fun(value))
       FP.sequence(ros)
 
-  private final def compileSeqKeywords(kks: Seq[Keywords]): Fun[R[Seq[O]]] =
-    val funs = kks.map(compile)
+  private final def compileSeqKeywords(kks: Seq[Keywords], kl: Option[KeywordLocation]): Fun[R[Seq[O]]] =
+    val funs = kks.map(compile(_, kl))
     funSequence(funs)
 
-  private final def compile(kks: Map[String, Keywords]): Map[String, Fun[R[O]]] =
-    kks.view.mapValues(compile).toMap
+  private final def compile(kks: Map[String, Keywords], kl: Option[KeywordLocation]): Map[String, Fun[R[O]]] =
+    kks.view.mapValues(compile(_, kl)).toMap
 
-  private def compileOne(k: Keyword): Fun[R[O]] =
+  private def compileOne(k: Keyword, kl: Option[KeywordLocation]): Fun[R[O]] =
     val fun = k match {
       case NullTypeKeyword      => verify.verifyType(verify.nullTypeMismatch)
       case TrivialKeyword(v)    => verify.verifyTrivial(v)
@@ -98,25 +98,25 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case StringTypeKeyword    => verify.verifyType(verify.stringTypeMismatch)
       case ArrayTypeKeyword     => verify.verifyType(verify.arrayTypeMismatch)
       case ObjectTypeKeyword    => verify.verifyType(verify.objectTypeMismatch)
-      case UnionTypeKeyword(ks) => verify.verifyUnion(compileSeq(ks))
-      case NotKeyword(kk)       => verify.verifyNot(compile(kk))
+      case UnionTypeKeyword(ks) => verify.verifyUnion(compileSeq(ks, kl))
+      case NotKeyword(kk)       => verify.verifyNot(compile(kk, kl))
       case ArrayItemsKeyword(items, prefixItems) =>
-        val funItems       = items.map(compile)
-        val funPrefixItems = prefixItems.map(compile)
+        val funItems       = items.map(compile(_, kl))
+        val funPrefixItems = prefixItems.map(compile(_, kl))
         verify.verifyArrayItems(funItems, funPrefixItems)
       case ObjectPropertiesKeyword(properties, patternProperties, additionalProperties) =>
-        val funProperties           = compile(properties)
-        val funPatternProperties    = compile(patternProperties)
-        val funAdditionalProperties = additionalProperties.map(compile)
+        val funProperties           = compile(properties, kl)
+        val funPatternProperties    = compile(patternProperties, kl)
+        val funAdditionalProperties = additionalProperties.map(compile(_, kl))
         verify.verfyObjectProperties(funProperties, funPatternProperties, funAdditionalProperties)
       case ObjectRequiredKeyword(names) => verify.verifyObjectRequired(names)
-      case AllOfKeyword(kks)            => verify.verifyAllOf(compileSeqKeywords(kks))
-      case AnyOfKeyword(kks)            => verify.verifyAnyOf(compileSeqKeywords(kks))
-      case OneOfKeyword(kks)            => verify.verifyOneOf(compileSeqKeywords(kks))
+      case AllOfKeyword(kks)            => verify.verifyAllOf(compileSeqKeywords(kks, kl))
+      case AnyOfKeyword(kks)            => verify.verifyAnyOf(compileSeqKeywords(kks, kl))
+      case OneOfKeyword(kks)            => verify.verifyOneOf(compileSeqKeywords(kks, kl))
       case IfThenElseKeyword(ksIf, ksThen, ksElse) =>
-        val funIf   = ksIf.map(compile)
-        val funThen = ksThen.map(compile)
-        val funElse = ksElse.map(compile)
+        val funIf   = ksIf.map(compile(_, kl))
+        val funThen = ksThen.map(compile(_, kl))
+        val funElse = ksElse.map(compile(_, kl))
         verify.verfyIfThenElse(funIf, funThen, funElse)
       case EnumKeyword(vs) => verify.verifyEnum(vs)
       case RefKeyword(ref, base, scope) =>
@@ -131,7 +131,7 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case MinimumKeyword(min, exclude)       => verify.verifyMinimum(min, exclude)
       case MaximumKeyword(max, exclude)       => verify.verifyMaximum(max, exclude)
       case PatternKeyword(pattern)            => verify.verifyPattern(pattern)
-      case PropertyNamesKeyword(ks)           => verify.verifyPropertyNames(compile(ks))
+      case PropertyNamesKeyword(ks)           => verify.verifyPropertyNames(compile(ks, kl))
       case FormatKeyword(format)              => verify.verifyFormat(format)
       case MultipleOfKeyword(n)               => verify.verifyMultiple(n)
       case MaxLengthKeyword(n)                => verify.verifyMaxLength(n)
@@ -139,19 +139,17 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case MaxPropertiesKeyword(max)          => verify.verifyMaxProperties(max)
       case MinPropertiesKeyword(max)          => verify.verifyMinProperties(max)
       case DependentRequiredKeyword(required) => verify.verifyDependentRequired(required)
-      case DependentSchemasKeyword(keywords)  => verify.verifyDependentSchemas(compile(keywords))
-      case ContainsKeyword(schema, min, max)  => verify.verifyContains(schema.map(compile), min, max)
+      case DependentSchemasKeyword(keywords)  => verify.verifyDependentSchemas(compile(keywords, kl))
+      case ContainsKeyword(schema, min, max)  => verify.verifyContains(schema.map(compile(_, kl)), min, max)
       case UnevaluatedItemsKeyword(pushed, unevaluated) =>
-        val funs = pushed.keywords.map(compile).toSeq
-        verify.verifyUnevaluatedItems(funs, compile(unevaluated))
+        val funs = pushed.keywords.map(compile(_, kl)).toSeq
+        verify.verifyUnevaluatedItems(funs, compile(unevaluated, kl))
       case UnevaluatedPropertiesKeyword(pushed, unevaluated) =>
-        val funs = pushed.keywords.map(compile).toSeq
-        verify.verifyUnevaluatedProperties(funs, compile(unevaluated))
-      case WithLocation(_, k) =>
+        val funs = pushed.keywords.map(compile(_, kl)).toSeq
+        verify.verifyUnevaluatedProperties(funs, compile(unevaluated, kl))
+      case WithLocation(_, k, kl) =>
         // TODO use location?!
-        compileOne(k)
+        compileOne(k, Some(kl))
       case IgnoredKeyword(keyword) => verify.verifyIgnored(keyword)
     }
-    value => fun(value).map(_.forKeyword(k))
-
-// trait ResultOps[R[_]] extends FP.Monad[R]
+    value => fun(value).map(_.forKeyword(k, kl))

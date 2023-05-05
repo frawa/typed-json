@@ -22,6 +22,9 @@ import frawa.typedjson.validation.ValidationError
 import frawa.typedjson.output.BasicOutput
 import frawa.typedjson.TypedJson
 import frawa.typedjson.keywords.KeywordLocation.{Local, Dereferenced}
+import frawa.typedjson.pointer.Pointer
+import java.net.URI
+import frawa.typedjson.keywords.KeywordLocation
 
 object OutputJson:
 
@@ -29,28 +32,55 @@ object OutputJson:
     ObjectValue(Map("valid" -> BoolValue(validation.valid)))
 
   def basic(o: BasicOutput): Value =
-    val errors =
-      if o.errors.isEmpty then Map()
-      else Map("errors" -> ArrayValue(o.errors.map(toJson)))
-    ObjectValue(Map("valid" -> BoolValue(o.isValid)) ++ errors)
+    val error =
+      o.error.map { error =>
+        BasicOutput.Error(error, o.instanceLocation, o.keywordLocation.getOrElse(KeywordLocation.empty))
+      }
+    val errors = (error.toSeq ++ o.errors)
+    val es =
+      if errors.isEmpty then Map.empty
+      else if errors.size == 1 then Map("error" -> error.map(toJson).get)
+      else Map("errors"                         -> ArrayValue(errors.map(toJson)))
+    ObjectValue(Map("valid" -> BoolValue(o.isValid)) ++ es)
+
+  // private case class BasicError(
+  //     error: ValidationError,
+  //     instanceLocation: Pointer,
+  //     keywordLocation: KeywordLocation
+  // )
+
+  // private def toBasicError(o: BasicOutput): Seq[BasicError] =
+  //   // given Ordering[KeywordLocation] with
+  //   //   def compare(x: KeywordLocation, y: KeywordLocation): Int =
+  //   //     toString(x).compare(toString(y))
+
+  //   //   private def toString(kl: KeywordLocation): String = kl match {
+  //   //     case Local(relative)           => relative.toString
+  //   //     case Dereferenced(relative, _) => relative.toString
+  //   //   }
+
+  //   val error = o.error.map { error =>
+  //     BasicOutput.Error(error, o.instanceLocation, o.keywordLocation)
+  //   }.toSeq
+  //   (error ++ o.errors).sortBy(_.instanceLocation.toString)
 
   private def toJson(error: BasicOutput.Error): Value =
     error.keywordLocation match {
-      case Local(relative) =>
-        ObjectValue(
-          Map(
-            "error"            -> StringValue(toMessage(error.error)),
-            "keywordLocation"  -> StringValue(relative.toString),
-            "instanceLocation" -> StringValue(error.instanceLocation.toString)
-          )
-        )
       case Dereferenced(relative, absolute) =>
         ObjectValue(
           Map(
-            "error"                   -> StringValue(toMessage(error.error)),
             "keywordLocation"         -> StringValue(relative.toString),
             "absoluteKeywordLocation" -> StringValue(absolute.toString),
-            "instanceLocation"        -> StringValue(error.instanceLocation.toString)
+            "instanceLocation"        -> StringValue(error.instanceLocation.toString),
+            "error"                   -> StringValue(toMessage(error.error))
+          )
+        )
+      case Local(relative) =>
+        ObjectValue(
+          Map(
+            "keywordLocation"  -> StringValue(relative.toString),
+            "instanceLocation" -> StringValue(error.instanceLocation.toString),
+            "error"            -> StringValue(toMessage(error.error))
           )
         )
     }

@@ -27,6 +27,7 @@ import frawa.typedjson.keywords.Evaluated
 import frawa.typedjson.keywords.Keyword
 import frawa.typedjson.output.OutputOps
 import frawa.typedjson.keywords.KeywordLocation
+import java.awt.event.KeyListener
 
 // TODO this will converge to "basic" output format,
 // see https://json-schema.org/draft/2020-12/json-schema-core.html#name-basic
@@ -34,8 +35,11 @@ import frawa.typedjson.keywords.KeywordLocation
 case class BasicOutput(
     valid: Boolean,
     annotations: Seq[Evaluated] = Seq.empty,
+    error: Option[ValidationError] = None,
     errors: Seq[BasicOutput.Error] = Seq(),
-    instanceLocation: Pointer = Pointer.empty
+    // subs: Seq[BasicOutput] = Seq(),
+    instanceLocation: Pointer = Pointer.empty,
+    keywordLocation: Option[KeywordLocation] = None
 )
 
 object BasicOutput:
@@ -48,25 +52,38 @@ object BasicOutput:
   given OutputOps[BasicOutput] with
     def valid(pointer: Pointer): BasicOutput = BasicOutput(true, instanceLocation = pointer)
     def invalid(error: ValidationError, pointer: Pointer): BasicOutput =
-      BasicOutput(false, errors = Seq(Error(error, pointer)), instanceLocation = pointer)
+      BasicOutput(false, error = Some(error), instanceLocation = pointer)
 
     def all(os: Seq[BasicOutput], pointer: Pointer): BasicOutput =
       val valid = os.forall(_.valid)
       val annotations =
         if valid then OutputOps.mergeAnnotations(os.filter(_.instanceLocation == pointer).flatMap(_.annotations))
         else Seq()
+      val errors = os.flatMap { o =>
+        val self = o.error.map { error =>
+          Error(error, o.instanceLocation, o.keywordLocation.getOrElse(KeywordLocation.empty))
+        }.toSeq
+        self ++ o.errors
+      }
       BasicOutput(
         valid,
         annotations,
-        errors = os.flatMap(_.errors),
+        errors = errors,
         instanceLocation = pointer
       )
 
     extension (o: BasicOutput)
       def not(pointer: Pointer): BasicOutput =
-        if o.valid then o.copy(valid = false, errors = Seq(Error(NotInvalid(), pointer)))
-        else o.copy(valid = true, errors = Seq())
+        if o.valid then BasicOutput(valid = false, error = Some(NotInvalid()), instanceLocation = pointer)
+        else BasicOutput(valid = true, instanceLocation = pointer)
       def isValid: Boolean                                          = o.valid
       def withAnnotations(annotations: Seq[Evaluated]): BasicOutput = o.copy(annotations = o.annotations ++ annotations)
       def getAnnotations(): Seq[Evaluated]                          = o.annotations
-      def forKeyword(k: Keyword): BasicOutput                       = o
+      def forKeyword(k: Keyword, kl: Option[KeywordLocation]): BasicOutput =
+        // if (kl.isEmpty) then
+        // new RuntimeException("?").printStackTrace()
+        // if (kl.isDefined && o.keywordLocation.isDefined) then new RuntimeException("??").printStackTrace()
+        // TODO avoid!
+        if (kl.isEmpty && o.keywordLocation.isDefined) then o
+        // new RuntimeException("???").printStackTrace()
+        else o.copy(keywordLocation = kl)

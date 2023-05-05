@@ -38,6 +38,7 @@ import frawa.typedjson.parser.OffsetParser
 import frawa.typedjson.suggest.Suggest
 import frawa.typedjson.output.OutputOps
 import frawa.typedjson.suggest.SuggestOutput
+import frawa.typedjson.keywords.KeywordLocation
 
 case class TypedJson(private val state: Option[(Keywords, CacheState)]):
   import TypedJson.*
@@ -52,7 +53,7 @@ case class TypedJson(private val state: Option[(Keywords, CacheState)]):
     state
       .map { (keywords, cache) =>
         val eval: Eval[R, O] = Eval[R, O]
-        val compiled         = eval.compile(keywords)
+        val compiled         = eval.compile(keywords, None)
         val fun              = eval.fun(compiled)
 
         val (os, cache1) = values.foldLeft((Seq.empty[O], cache)) { case ((os, cache), value) =>
@@ -70,7 +71,7 @@ case class TypedJson(private val state: Option[(Keywords, CacheState)]):
     state
       .map { (keywords, cache) =>
         val eval: Eval[R, O] = Eval[R, O]
-        val compiled         = eval.compile(keywords)
+        val compiled         = eval.compile(keywords, None)
         val fun              = eval.fun(compiled)
 
         val (o, cache1) = fun(value)(cache)
@@ -134,7 +135,7 @@ object TypedJson:
   private def compile[R[_], O](keywords: Keywords)(using eval: Eval[R, O])(using
       TheResultMonad[R, O]
   ): Eval.EvalFun[R, O] =
-    val compiled = eval.compile(keywords)
+    val compiled = eval.compile(keywords, None)
     eval.fun(compiled)
 
   object Output:

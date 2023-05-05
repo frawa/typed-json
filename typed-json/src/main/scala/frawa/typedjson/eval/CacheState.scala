@@ -132,7 +132,8 @@ object CacheState:
         .map { case ((resolution, vocabulary), state) =>
           vocabulary
             .flatMap { vocabulary =>
-              Keywords.parseKeywords(vocabulary, resolution, scope)
+              val scope1 = scope.resolved(resolution.resolver.base)
+              Keywords.parseKeywords(vocabulary, resolution, scope1)
             }
             .fold(
               { problems =>
@@ -146,7 +147,7 @@ object CacheState:
                   (ops.valid(value.pointer), state)
                 else
                   val state1      = state.copy(stack = push +: state.stack)
-                  val (o, state2) = eval.compile(ks)(value)(state1)
+                  val (o, state2) = eval.compile(ks, None)(value)(state1)
                   val state3      = state2.copy(stack = state.stack)
                   (o, state3)
               }

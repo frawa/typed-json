@@ -87,8 +87,8 @@ object Suggest:
         keywords
           .flatMap(keyword => suggestFor(keyword))
           .toSet
-      case WithLocation(_, keyword) => suggestFor(keyword)
-      case _                        =>
+      case WithLocation(_, keyword, _) => suggestFor(keyword)
+      case _                           =>
         // useful for debugging:
         // Seq(StringValue(keyword.getClass.getSimpleName))
         Set(NullValue)

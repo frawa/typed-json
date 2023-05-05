@@ -27,6 +27,7 @@ import frawa.typedjson.keywords.Evaluated
 import frawa.typedjson.keywords.Keyword
 import frawa.typedjson.output.OutputOps
 import frawa.typedjson.output.SimpleOutput
+import frawa.typedjson.keywords.KeywordLocation
 
 // TODO this will converge to "basic" output format,
 // see https://json-schema.org/draft/2020-12/json-schema-core.html#name-basic
@@ -65,5 +66,5 @@ object SimpleOutput:
       def isValid: Boolean = o.valid
       def withAnnotations(annotations: Seq[Evaluated]): SimpleOutput =
         o.copy(annotations = o.annotations ++ annotations)
-      def getAnnotations(): Seq[Evaluated]     = o.annotations
-      def forKeyword(k: Keyword): SimpleOutput = o
+      def getAnnotations(): Seq[Evaluated]                                  = o.annotations
+      def forKeyword(k: Keyword, kl: Option[KeywordLocation]): SimpleOutput = o

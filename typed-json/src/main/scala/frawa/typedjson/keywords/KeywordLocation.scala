@@ -24,6 +24,16 @@ enum KeywordLocation:
   case Local(relative: Pointer)
   case Dereferenced(relative: Pointer, absolute: URI)
 
+  def push(pushFun: Pointer => Pointer): KeywordLocation = this match {
+    case Local(relative)                  => Local(pushFun(relative))
+    case Dereferenced(relative, absolute) => Dereferenced(pushFun(relative), UriUtil.push(absolute, pushFun))
+  }
+
+  def resolved(base: URI): KeywordLocation = this match {
+    case Local(relative)                  => Dereferenced(relative, base)
+    case Dereferenced(relative, absolute) => Dereferenced(relative, base)
+  }
+
 object KeywordLocation:
   def empty: KeywordLocation =
     Local(Pointer.empty)

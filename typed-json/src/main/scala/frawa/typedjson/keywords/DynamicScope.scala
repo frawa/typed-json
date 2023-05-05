@@ -20,7 +20,7 @@ import frawa.typedjson.pointer.Pointer
 
 import java.net.URI
 
-case class DynamicScope(uris: Seq[URI]):
+case class DynamicScope(uris: Seq[URI], kl: KeywordLocation = KeywordLocation.empty):
 
   import frawa.typedjson.util.UriUtil.*
 
@@ -28,8 +28,8 @@ case class DynamicScope(uris: Seq[URI]):
     .map(withoutFragement)
     .distinct
 
-  def parent(): DynamicScope =
-    this.copy(uris = uris.dropRight(1))
+  // def parent(): DynamicScope =
+  //   this.copy(uris = uris.dropRight(1))
 
   def push(segment: String): DynamicScope =
     push(_ / segment)
@@ -40,6 +40,9 @@ case class DynamicScope(uris: Seq[URI]):
   def push(next: URI): DynamicScope =
     this.copy(uris = uris :+ next)
 
+  def resolved(base: URI): DynamicScope =
+    copy(kl = kl.resolved(base))
+
   private def push(pushFun: Pointer => Pointer): DynamicScope =
     val uri1 = uris.lastOption.getOrElse(uri(""))
     val pointer = uris.lastOption
@@ -49,10 +52,10 @@ case class DynamicScope(uris: Seq[URI]):
       .getOrElse(Pointer.empty)
     val pushPointer = pushFun(pointer)
     val next        = withFragment(uri1, pushPointer)
-    push(next)
+    push(next).copy(kl = kl.push(pushFun))
 
   def currentLocation: CurrentLocation =
-    CurrentLocation(uris.lastOption.getOrElse(uri("#")))
+    CurrentLocation(uris.lastOption.getOrElse(uri("#")), kl)
 
 object DynamicScope:
   def empty: DynamicScope = DynamicScope(Seq())
