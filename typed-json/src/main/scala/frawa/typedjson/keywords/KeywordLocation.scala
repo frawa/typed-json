@@ -42,4 +42,7 @@ object KeywordLocation:
     Dereferenced(Pointer.parse(relative), UriUtil.uri(absolute))
 
   def apply(relative: String): KeywordLocation =
-    Local(Pointer.parse(relative))
+    apply(Pointer.parse(relative))
+
+  def apply(relative: Pointer): KeywordLocation =
+    Local(relative)
