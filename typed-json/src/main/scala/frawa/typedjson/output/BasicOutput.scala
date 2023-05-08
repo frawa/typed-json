@@ -28,6 +28,7 @@ import frawa.typedjson.keywords.Keyword
 import frawa.typedjson.output.OutputOps
 import frawa.typedjson.keywords.KeywordLocation
 import java.awt.event.KeyListener
+import frawa.typedjson.output.BasicOutput
 
 // TODO this will converge to "basic" output format,
 // see https://json-schema.org/draft/2020-12/json-schema-core.html#name-basic
