@@ -77,17 +77,9 @@ object DetailedOutput:
         o.copy(annotations = o.annotations ++ annotations)
       def getAnnotations(): Seq[Evaluated] = o.annotations
       def forKeyword(k: Keyword, kl: Option[KeywordLocation]): DetailedOutput =
-        // println(s"forKeyword ${kl} ${k.getClass().getSimpleName()}")
-        // k match {
-        //   case _: WithLocation => o.copy(keywordLocation = None)
-        //   case _               => o.copy(keywordLocation = kl)
-        // }
-        // if kl == Some(KeywordLocation("/items")) then new RuntimeException("FW").printStackTrace()
-        // // if (kl.isEmpty) then
-        // // new RuntimeException("?").printStackTrace()
-//        if (kl.isDefined && o.keywordLocation.isDefined) then new RuntimeException("??").printStackTrace()
-        // // TODO avoid!
-        // if (kl.isEmpty && o.keywordLocation.isDefined) then o
-        // // new RuntimeException("???").printStackTrace()
-        // else o.copy(keywordLocation = kl)
-        o.copy(keywordLocation = kl)
+        // println(s"FW forKeyword ${kl} ${k.getClass().getSimpleName()}")
+        if (kl.isDefined && o.keywordLocation.isDefined) then
+          // TODO avoid this situation
+          // println(s"FW do not ovewrite ${o.keywordLocation}, by ${kl}")
+          o
+        else o.copy(keywordLocation = kl)

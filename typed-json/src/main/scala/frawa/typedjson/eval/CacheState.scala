@@ -133,21 +133,23 @@ object CacheState:
           vocabulary
             .flatMap { vocabulary =>
               val scope1 = scope.resolved(resolution.resolver.base)
-              Keywords.parseKeywords(vocabulary, resolution, scope1)
+              Keywords.parseKeywords(vocabulary, resolution, scope1).map { ks =>
+                (ks, scope1.currentLocation.kl)
+              }
             }
             .fold(
               { problems =>
                 val ref = resolution.resolver.base.toString
                 (ops.invalid(CannotResolve(ref, Some(problems)), value.pointer), state)
               },
-              { ks =>
+              { (ks, kl) =>
                 val push = (uri, value.pointer)
                 if state.stack.contains(push) then
                   // stop recursion
                   (ops.valid(value.pointer), state)
                 else
                   val state1      = state.copy(stack = push +: state.stack)
-                  val (o, state2) = eval.compile(ks, None)(value)(state1)
+                  val (o, state2) = eval.compile(ks, Some(kl))(value)(state1)
                   val state3      = state2.copy(stack = state.stack)
                   (o, state3)
               }

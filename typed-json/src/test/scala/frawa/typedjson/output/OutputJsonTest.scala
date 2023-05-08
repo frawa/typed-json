@@ -170,7 +170,7 @@ class OutputJsonTest extends FunSuite:
     val typedJson   = TypedJson.create(Sample.schema).toOption.get
     val (output, _) = typedJson.eval(parseJsonValue(Sample.value))
 
-    println(s"FW ${munitPrint(output)}")
+    // println(s"FW ${munitPrint(output)}")
     val expected =
       DetailedOutput(
         false,
@@ -213,23 +213,18 @@ class OutputJsonTest extends FunSuite:
         ),
         annotations = Seq()
       )
-    // assertEquals(
-    //   output.map(_.errors.map(_.keywordLocation.toString)),
-    //   Some(expected).map(_.errors.map(_.keywordLocation.toString))
-    // )
-//    assertEquals(output, Some(expected))
+    assertEquals(output, Some(expected))
 
-    // TODO
+    val detailedJson = output.map(OutputJson.detailed)
+    val expectedJson = parser.parse(Sample.expectedDetailed).toOption
+    // TODO maybe?
+    // assertEquals(detailedJson, expectedJson)
 
-    val detailedJson         = output.map(OutputJson.detailed)
-    val expectedJson         = parser.parse(Sample.expectedDetailed).toOption
     val detailedJsonString   = detailedJson.map(prettyPrint(0))
     val expectetedJsonString = expectedJson.map(prettyPrint(0))
 
-    // assertEquals(detailedJson, expectedJson)
-
-    println(s"FW detailed ${munitPrint(detailedJsonString)}")
-    println(s"FW expected ${munitPrint(expectetedJsonString)}")
+    // println(s"FW detailed ${munitPrint(detailedJsonString)}")
+    // println(s"FW expected ${munitPrint(expectetedJsonString)}")
     assertEquals(detailedJsonString, expectetedJsonString)
   }
 
