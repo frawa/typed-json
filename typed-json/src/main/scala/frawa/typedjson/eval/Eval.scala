@@ -67,7 +67,7 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
   final def compile(keywords: Keywords, kl: Option[KeywordLocation]): Fun[R[O]] =
     val ks  = keywords.keywords.toSeq
     val fun = compileSeq(ks, kl)
-    verify.verifyAllOf(fun)
+    value => verify.verifyAllOf(fun)(value).map(_.forKeyword(AllOfKeyword(Seq()), kl))
 
   private final def compile(keyword: Keyword, kl: Option[KeywordLocation]): Fun[R[O]] =
     compileOne(keyword, kl)
@@ -147,9 +147,12 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case UnevaluatedPropertiesKeyword(pushed, unevaluated) =>
         val funs = pushed.keywords.map(compile(_, kl)).toSeq
         verify.verifyUnevaluatedProperties(funs, compile(unevaluated, kl))
-      case WithLocation(_, k, kl) =>
-        // TODO use location?!
-        compileOne(k, Some(kl))
+      case WithLocation(_, k, kl)  => compileOne(k, Some(kl))
       case IgnoredKeyword(keyword) => verify.verifyIgnored(keyword)
     }
-    value => fun(value).map(_.forKeyword(k, kl))
+    k match {
+      case _: WithLocation      => fun
+      case _: RefKeyword        => fun
+      case _: DynamicRefKeyword => fun
+      case _                    => value => fun(value).map(_.forKeyword(k, kl))
+    }
