@@ -32,56 +32,63 @@ object OutputJson:
     ObjectValue(Map("valid" -> BoolValue(validation.valid)))
 
   def basic(o: BasicOutput): Value =
-    val error =
-      o.error.map { error =>
-        BasicOutput.Error(error, o.instanceLocation, o.keywordLocation.getOrElse(KeywordLocation.empty))
+    if o.isValid then
+      val props = Seq("valid" -> BoolValue(o.isValid))
+      ObjectValue(Map.from(props))
+    else
+      val error = o.error
+        .map { error =>
+          Seq(toJson(error), toJson(o.instanceLocation)) ++
+            toJson(o.keywordLocation.getOrElse(KeywordLocation.empty))
+        }
+        .map(props => ObjectValue(Map.from(props)))
+      val errors = o.errors.map { error =>
+        val props = Seq(toJson(error.error), toJson(error.instanceLocation)) ++ toJson(error.keywordLocation)
+        ObjectValue(Map.from(props))
       }
-    val errors = (error.toSeq ++ o.errors)
-    val es =
-      if errors.isEmpty then Map.empty
-      else if errors.size == 1 then Map("error" -> error.map(toJson).get)
-      else Map("errors"                         -> ArrayValue(errors.map(toJson)))
-    ObjectValue(Map("valid" -> BoolValue(o.isValid)) ++ es)
 
-  // private case class BasicError(
-  //     error: ValidationError,
-  //     instanceLocation: Pointer,
-  //     keywordLocation: KeywordLocation
-  // )
+      val props = Seq("valid" -> BoolValue(o.isValid), "errors" -> ArrayValue(error.toSeq ++ errors))
+      ObjectValue(Map.from(props))
 
-  // private def toBasicError(o: BasicOutput): Seq[BasicError] =
-  //   // given Ordering[KeywordLocation] with
-  //   //   def compare(x: KeywordLocation, y: KeywordLocation): Int =
-  //   //     toString(x).compare(toString(y))
+  def detailed(o: DetailedOutput): Value =
+    def toErrorOrErrors(o: DetailedOutput): Seq[(String, Value)] =
+      o.error
+        .map { error =>
+          Seq(toJson(error), toJson(o.instanceLocation)) ++
+            toJson(o.keywordLocation.getOrElse(KeywordLocation.empty))
+        }
+        .getOrElse {
+          val errors = o.errors
+            .filterNot(_.isValid)
+            .map { error =>
+              ("valid" -> BoolValue(false)) +:
+                toErrorOrErrors(error)
+            }
+            .map(Map.from(_))
+            .map(ObjectValue(_))
+          Seq(("errors" -> ArrayValue(errors)), toJson(o.instanceLocation)) ++
+            toJson(o.keywordLocation.getOrElse(KeywordLocation.empty))
+        }
 
-  //   //   private def toString(kl: KeywordLocation): String = kl match {
-  //   //     case Local(relative)           => relative.toString
-  //   //     case Dereferenced(relative, _) => relative.toString
-  //   //   }
+    val errorOrErrors = toErrorOrErrors(o)
+    ObjectValue(Map.from(("valid" -> BoolValue(o.isValid)) +: errorOrErrors))
 
-  //   val error = o.error.map { error =>
-  //     BasicOutput.Error(error, o.instanceLocation, o.keywordLocation)
-  //   }.toSeq
-  //   (error ++ o.errors).sortBy(_.instanceLocation.toString)
+  private def toJson(error: ValidationError): (String, Value) =
+    "error" -> StringValue(toMessage(error))
 
-  private def toJson(error: BasicOutput.Error): Value =
-    error.keywordLocation match {
+  private def toJson(instanceLocation: Pointer): (String, Value) =
+    "instanceLocation" -> StringValue(instanceLocation.toString)
+
+  private def toJson(keywordLocation: KeywordLocation): Seq[(String, Value)] =
+    keywordLocation match {
       case Dereferenced(relative, absolute) =>
-        ObjectValue(
-          Map(
-            "keywordLocation"         -> StringValue(relative.toString),
-            "absoluteKeywordLocation" -> StringValue(absolute.toString),
-            "instanceLocation"        -> StringValue(error.instanceLocation.toString),
-            "error"                   -> StringValue(toMessage(error.error))
-          )
+        Seq(
+          "keywordLocation"         -> StringValue(relative.toString),
+          "absoluteKeywordLocation" -> StringValue(absolute.toString)
         )
       case Local(relative) =>
-        ObjectValue(
-          Map(
-            "keywordLocation"  -> StringValue(relative.toString),
-            "instanceLocation" -> StringValue(error.instanceLocation.toString),
-            "error"            -> StringValue(toMessage(error.error))
-          )
+        Seq(
+          "keywordLocation" -> StringValue(relative.toString)
         )
     }
 
