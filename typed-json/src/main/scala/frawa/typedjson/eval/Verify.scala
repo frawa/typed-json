@@ -217,7 +217,13 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
             .toSeq
           val funs = funProperties ++ funsPattern
           val f =
-            if funs.isEmpty then additionalProperties
+            if funs.isEmpty then
+              additionalProperties.map(f =>
+                funMap(f) { (o, pointer) =>
+                  if o.isValid then o
+                  else ops.invalid(AdditionalPropertyInvalid(p), pointer)
+                }
+              )
             else if funs.size == 1 then Some(funs(0))
             else Some(funAll(funs))
           f.map(f => f(WithPointer(v, value.pointer / p)).map((_, p)))

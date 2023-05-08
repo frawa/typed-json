@@ -27,6 +27,7 @@ import java.net.URI
 import frawa.typedjson.keywords.KeywordLocation
 import frawa.typedjson.validation.MissingRequiredProperties
 import frawa.typedjson.validation.MinItemsMismatch
+import frawa.typedjson.validation.AdditionalPropertyInvalid
 
 object OutputJson:
 
@@ -94,10 +95,11 @@ object OutputJson:
         )
     }
 
-  private def toMessage(error: ValidationError): String =
-    error match {
-      case MissingRequiredProperties(Seq(p)) => s"Required property '$p' not found."
-      case MinItemsMismatch(min, found)      => s"Expected at least ${min} items but found ${found}."
-      // TODO more!
-      case _ => error.toString
-    }
+private def toMessage(error: ValidationError): String =
+  error match {
+    case MissingRequiredProperties(Seq(p)) => s"Required property '${p}' not found."
+    case MinItemsMismatch(min, found)      => s"Expected at least ${min} items but found ${found}."
+    case AdditionalPropertyInvalid(p)      => s"Additional property '${p}' found but was invalid."
+    // TODO more!
+    case _ => error.toString
+  }

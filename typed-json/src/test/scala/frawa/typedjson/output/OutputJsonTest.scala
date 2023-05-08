@@ -30,6 +30,7 @@ import frawa.typedjson.validation.MissingRequiredProperties
 import frawa.typedjson.validation.MinItemsMismatch
 import frawa.typedjson.keywords.KeywordLocation
 import frawa.typedjson.parser.Value
+import frawa.typedjson.validation.AdditionalPropertyInvalid
 
 class OutputJsonTest extends FunSuite:
 
@@ -125,7 +126,7 @@ class OutputJsonTest extends FunSuite:
           // TODO 1: failed at Pointer.empty, "keywordLocation": """, "instanceLocation": "",
           // TODO 2: failed at Pointer.empty / 1, "keywordLocation": "/items/$ref", "absoluteKeywordLocation": "https://example.com/polygon#/$defs/point",
           BasicOutput.Error(
-            FalseSchemaReason(), // TODO additional property?
+            AdditionalPropertyInvalid("z"),
             Pointer.empty / 1 / "z",
             KeywordLocation(
               "/items/$ref/additionalProperties",
@@ -138,26 +139,23 @@ class OutputJsonTest extends FunSuite:
             KeywordLocation("/items/$ref/required", "https://example.com/polygon#/$defs/point/required")
           ),
           BasicOutput.Error(
-            MinItemsMismatch(3, 0),
+            MinItemsMismatch(3, 2),
             Pointer.empty,
             KeywordLocation("/minItems")
           )
         ),
         annotations = Seq()
       )
-    assertEquals(Some(expected), output)
+    // assertEquals(Some(expected), output)
 
-    // TODO
+    val basicJson    = output.map(OutputJson.basic)
+    val expectedJson = parser.parse(Sample.expectedBasic).toOption
+    // TODO maybe?
+    // assertEquals(basicJson, expectedJson)
 
-    // val basicJson            = output.map(OutputJson.basic)
-    // val expectedJson         = parser.parse(Sample.expectedBasic).toOption
-    // val basicJsonString      = basicJson.map(prettyPrint)
-    // val expectetedJsonString = expectedJson.map(prettyPrint)
-
-    // // assertEquals(basicJson, expectedJson)
-
-    // // println(s"FW ${munitPrint(basicJsonString)}")
-    // assertEquals(basicJsonString, expectetedJsonString)
+    val basicJsonString      = basicJson.map(prettyPrint(0))
+    val expectetedJsonString = expectedJson.map(prettyPrint(0))
+    assertEquals(basicJsonString, expectetedJsonString)
   }
 
   test("validate basic output".ignore) {}
@@ -186,7 +184,7 @@ class OutputJsonTest extends FunSuite:
             errors = Seq(
               DetailedOutput(
                 valid = false,
-                error = Some(FalseSchemaReason()), // TODO additional property?
+                error = Some(AdditionalPropertyInvalid("z")),
                 instanceLocation = Pointer.empty / 1 / "z",
                 keywordLocation = Some(
                   KeywordLocation(
