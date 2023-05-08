@@ -138,7 +138,7 @@ class OutputJsonTest extends FunSuite:
             KeywordLocation("/items/$ref/required", "https://example.com/polygon#/$defs/point/required")
           ),
           BasicOutput.Error(
-            MinItemsMismatch(3),
+            MinItemsMismatch(3, 0),
             Pointer.empty,
             KeywordLocation("/minItems")
           )
@@ -206,7 +206,7 @@ class OutputJsonTest extends FunSuite:
           ),
           DetailedOutput(
             valid = false,
-            error = Some(MinItemsMismatch(3)),
+            error = Some(MinItemsMismatch(3, 2)),
             instanceLocation = Pointer.empty,
             keywordLocation = Some(KeywordLocation("/minItems"))
           )
@@ -333,7 +333,7 @@ object Sample:
                             |      "valid": false,
                             |      "keywordLocation": "/minItems",
                             |      "instanceLocation": "",
-                            |      "error": "Expected at least 3 items but found 2"
+                            |      "error": "Expected at least 3 items but found 2."
                             |    }
                             |  ]
                             |}""".stripMargin

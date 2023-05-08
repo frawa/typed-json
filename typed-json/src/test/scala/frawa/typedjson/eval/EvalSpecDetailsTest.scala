@@ -115,7 +115,7 @@ class EvalSpecDetailsTest extends FunSuite:
           false,
           Seq(
             WithPointer(
-              value = MinItemsMismatch(2),
+              value = MinItemsMismatch(2, 0),
               Pointer.empty / "foo"
             )
           )

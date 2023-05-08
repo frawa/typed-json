@@ -44,7 +44,7 @@ case class MaximumMismatch(max: BigDecimal, exclude: Boolean)          extends V
 case class MaxLengthMismatch(max: BigDecimal)                          extends ValidationError
 case class MinLengthMismatch(min: BigDecimal)                          extends ValidationError
 case class MaxItemsMismatch(max: BigDecimal)                           extends ValidationError
-case class MinItemsMismatch(min: BigDecimal)                           extends ValidationError
+case class MinItemsMismatch(min: BigDecimal, found: BigDecimal)        extends ValidationError
 case class MaxPropertiesMismatch(max: BigDecimal)                      extends ValidationError
 case class MinPropertiesMismatch(min: BigDecimal)                      extends ValidationError
 case class DependentRequiredMissing(missing: Map[String, Seq[String]]) extends ValidationError

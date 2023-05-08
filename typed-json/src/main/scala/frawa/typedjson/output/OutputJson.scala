@@ -25,6 +25,8 @@ import frawa.typedjson.keywords.KeywordLocation.{Local, Dereferenced}
 import frawa.typedjson.pointer.Pointer
 import java.net.URI
 import frawa.typedjson.keywords.KeywordLocation
+import frawa.typedjson.validation.MissingRequiredProperties
+import frawa.typedjson.validation.MinItemsMismatch
 
 object OutputJson:
 
@@ -93,5 +95,9 @@ object OutputJson:
     }
 
   private def toMessage(error: ValidationError): String =
-    // TODO human messages
-    error.toString
+    error match {
+      case MissingRequiredProperties(Seq(p)) => s"Required property '$p' not found."
+      case MinItemsMismatch(min, found)      => s"Expected at least ${min} items but found ${found}."
+      // TODO more!
+      case _ => error.toString
+    }

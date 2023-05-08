@@ -120,13 +120,13 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         }
     }
 
-  private def verifyArrayValue(error: => ValidationError)(validate: Seq[Value] => Boolean): Fun[R[O]] =
+  private def verifyArrayValue(error: => Seq[Value] => ValidationError)(validate: Seq[Value] => Boolean): Fun[R[O]] =
     funUnit2 { value =>
       Value
         .asArray(value.value)
-        .map { v =>
-          if validate(v) then ops.valid(value.pointer)
-          else ops.invalid(error, value.pointer)
+        .map { vs =>
+          if validate(vs) then ops.valid(value.pointer)
+          else ops.invalid(error(vs), value.pointer)
         }
     }
 
@@ -278,17 +278,17 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
     }
 
   def verifyMinItems(min: BigDecimal): Fun[R[O]] =
-    verifyArrayValue(MinItemsMismatch(min)) { vs =>
+    verifyArrayValue(vs => MinItemsMismatch(min, vs.length)) { vs =>
       min <= vs.length
     }
 
   def verifyMaxItems(max: BigDecimal): Fun[R[O]] =
-    verifyArrayValue(MaxItemsMismatch(max)) { vs =>
+    verifyArrayValue(_ => MaxItemsMismatch(max)) { vs =>
       max >= vs.length
     }
 
   def verifyUniqueItems(unique: Boolean): Fun[R[O]] =
-    verifyArrayValue(ItemsNotUnique()) { vs =>
+    verifyArrayValue(_ => ItemsNotUnique()) { vs =>
       !unique || vs.distinct.length == vs.length
     }
 

@@ -197,7 +197,7 @@ class EvalKeywordTest extends FunSuite:
           SimpleOutput(
             false,
             Seq(
-              WithPointer(MinItemsMismatch(3))
+              WithPointer(MinItemsMismatch(3, 2))
             )
           ),
           SimpleOutput(true)
