@@ -67,7 +67,7 @@ class MetaSchemaTest extends FunSuite:
         assertEquals(
           stats,
           CacheState.Stats(
-            binds = 13,
+            binds = 11,
             hits = 0,
             cached = 0
           )
@@ -91,7 +91,7 @@ class MetaSchemaTest extends FunSuite:
         assertEquals(
           stats,
           CacheState.Stats(
-            binds = 22,
+            binds = 18,
             hits = 0,
             cached = 0
           )
@@ -115,7 +115,7 @@ class MetaSchemaTest extends FunSuite:
         assertEquals(
           stats,
           CacheState.Stats(
-            binds = 295,
+            binds = 255,
             hits = 0,
             cached = 0
           )
@@ -140,7 +140,7 @@ class MetaSchemaTest extends FunSuite:
         assertEquals(
           stats,
           CacheState.Stats(
-            binds = 13,
+            binds = 11,
             hits = 0,
             cached = 0
           )
@@ -164,7 +164,7 @@ class MetaSchemaTest extends FunSuite:
         assertEquals(
           stats,
           CacheState.Stats(
-            binds = 22,
+            binds = 18,
             hits = 0,
             cached = 0
           )
@@ -188,7 +188,7 @@ class MetaSchemaTest extends FunSuite:
         assertEquals(
           stats,
           CacheState.Stats(
-            binds = 599,
+            binds = 517,
             hits = 0,
             cached = 1
           )
