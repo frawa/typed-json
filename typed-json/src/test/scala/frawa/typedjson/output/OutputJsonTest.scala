@@ -265,7 +265,7 @@ object Sample:
                                  |    {
                                  |      "keywordLocation": "/minItems",
                                  |      "instanceLocation": "",
-                                 |      "error": "Expected at least 3 items but found 2"
+                                 |      "error": "Expected at least 3 items but found 2."
                                  |    },                               
                                  |    {
                                  |      "keywordLocation": "",
