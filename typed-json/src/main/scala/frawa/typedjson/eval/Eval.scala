@@ -69,11 +69,8 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
     val fun = compileSeq(ks, kl)
     value => verify.verifyAllOf(fun)(value).map(_.forKeyword(AllOfKeyword(Seq()), kl))
 
-  private final def compile(keyword: Keyword, kl: Option[KeywordLocation]): Fun[R[O]] =
-    compileOne(keyword, kl)
-
   private final def compileSeq(ks: Seq[Keyword], kl: Option[KeywordLocation]): Fun[R[Seq[O]]] =
-    val funs = ks.map(compile(_, kl))
+    val funs = ks.map(compileOne(_, kl))
     funSequence(funs)
 
   private final def funSequence(funs: Seq[Fun[R[O]]]): Fun[R[Seq[O]]] =
@@ -144,10 +141,10 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case DependentSchemasKeyword(keywords)  => verify.verifyDependentSchemas(compile(keywords, kl))
       case ContainsKeyword(schema, min, max)  => verify.verifyContains(schema.map(compile(_, kl)), min, max)
       case UnevaluatedItemsKeyword(pushed, unevaluated) =>
-        val funs = pushed.keywords.map(compile(_, kl)).toSeq
+        val funs = pushed.keywords.map(compileOne(_, kl)).toSeq
         verify.verifyUnevaluatedItems(funs, compile(unevaluated, kl))
       case UnevaluatedPropertiesKeyword(pushed, unevaluated) =>
-        val funs = pushed.keywords.map(compile(_, kl)).toSeq
+        val funs = pushed.keywords.map(compileOne(_, kl)).toSeq
         verify.verifyUnevaluatedProperties(funs, compile(unevaluated, kl))
       case WithLocation(_, k, kl)  => compileOne(k, Some(kl))
       case IgnoredKeyword(keyword) => verify.verifyIgnored(keyword)
