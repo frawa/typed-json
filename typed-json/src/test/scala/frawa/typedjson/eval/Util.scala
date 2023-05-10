@@ -57,7 +57,7 @@ object Util:
       lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
   )(using eval: Eval[R, O])(using TheResultMonad[R, O])(f: AssertingFun[R, O]): Unit =
     withKeywords(schema, lazyResolver) { keywords =>
-      val compiled         = eval.compile(keywords, None)
+      val compiled         = eval.compile(keywords, KeywordLocation.empty)
       val fun              = eval.fun(compiled)
       given SchemaResolver = LoadedSchemasResolver(schema, lazyResolver)
       f(fun)

@@ -53,7 +53,7 @@ case class TypedJson(private val state: Option[(Keywords, CacheState)]):
     state
       .map { (keywords, cache) =>
         val eval: Eval[R, O] = Eval[R, O]
-        val compiled         = eval.compile(keywords, None)
+        val compiled         = eval.compile(keywords, KeywordLocation.empty)
         val fun              = eval.fun(compiled)
 
         val (os, cache1) = values.foldLeft((Seq.empty[O], cache)) { case ((os, cache), value) =>
@@ -71,7 +71,7 @@ case class TypedJson(private val state: Option[(Keywords, CacheState)]):
     state
       .map { (keywords, cache) =>
         val eval: Eval[R, O] = Eval[R, O]
-        val compiled         = eval.compile(keywords, None)
+        val compiled         = eval.compile(keywords, KeywordLocation.empty)
         val fun              = eval.fun(compiled)
 
         val (o, cache1) = fun(value)(cache)
@@ -135,7 +135,7 @@ object TypedJson:
   private def compile[R[_], O](keywords: Keywords)(using eval: Eval[R, O])(using
       TheResultMonad[R, O]
   ): Eval.EvalFun[R, O] =
-    val compiled = eval.compile(keywords, None)
+    val compiled = eval.compile(keywords, KeywordLocation.empty)
     eval.fun(compiled)
 
   object Output:

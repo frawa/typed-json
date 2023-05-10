@@ -149,7 +149,7 @@ object CacheState:
                   (ops.valid(value.pointer), state)
                 else
                   val state1      = state.copy(stack = push +: state.stack)
-                  val (o, state2) = eval.compile(ks, Some(kl))(value)(state1)
+                  val (o, state2) = eval.compile(ks, kl)(value)(state1)
                   val state3      = state2.copy(stack = state.stack)
                   (o, state3)
               }

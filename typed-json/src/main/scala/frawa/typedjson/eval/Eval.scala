@@ -64,12 +64,12 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 
   final def fun(compiled: Fun[R[O]]): EvalFun[R, O] = value => compiled(WithPointer(value))
 
-  final def compile(keywords: Keywords, kl: Option[KeywordLocation]): Fun[R[O]] =
+  final def compile(keywords: Keywords, kl: KeywordLocation): Fun[R[O]] =
     val ks  = keywords.keywords.toSeq
     val fun = compileSeq(ks, kl)
     value => verify.verifyAllOf(fun)(value).map(_.forKeyword(AllOfKeyword(Seq()), kl))
 
-  private final def compileSeq(ks: Seq[Keyword], kl: Option[KeywordLocation]): Fun[R[Seq[O]]] =
+  private final def compileSeq(ks: Seq[Keyword], kl: KeywordLocation): Fun[R[Seq[O]]] =
     val funs = ks.map(compileOne(_, kl))
     funSequence(funs)
 
@@ -78,14 +78,14 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       val ros = funs.map(fun => fun(value))
       FP.sequence(ros)
 
-  private final def compileSeqKeywords(kks: Seq[Keywords], kl: Option[KeywordLocation]): Fun[R[Seq[O]]] =
+  private final def compileSeqKeywords(kks: Seq[Keywords], kl: KeywordLocation): Fun[R[Seq[O]]] =
     val funs = kks.map(compile(_, kl))
     funSequence(funs)
 
-  private final def compile(kks: Map[String, Keywords], kl: Option[KeywordLocation]): Map[String, Fun[R[O]]] =
+  private final def compile(kks: Map[String, Keywords], kl: KeywordLocation): Map[String, Fun[R[O]]] =
     kks.view.mapValues(compile(_, kl)).toMap
 
-  private def compileOne(k: Keyword, kl: Option[KeywordLocation]): Fun[R[O]] =
+  private def compileOne(k: Keyword, kl: KeywordLocation): Fun[R[O]] =
     val fun = k match {
       case NullTypeKeyword      => verify.verifyType(verify.nullTypeMismatch)
       case TrivialKeyword(v)    => verify.verifyTrivial(v)
@@ -146,7 +146,7 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case UnevaluatedPropertiesKeyword(pushed, unevaluated) =>
         val funs = pushed.keywords.map(compileOne(_, kl)).toSeq
         verify.verifyUnevaluatedProperties(funs, compile(unevaluated, kl))
-      case WithLocation(_, k, kl)  => compileOne(k, Some(kl))
+      case WithLocation(_, k, kl)  => compileOne(k, kl)
       case IgnoredKeyword(keyword) => verify.verifyIgnored(keyword)
     }
     k match {

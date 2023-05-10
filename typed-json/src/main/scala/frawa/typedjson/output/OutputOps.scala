@@ -37,7 +37,7 @@ trait OutputOps[O]: // extends Monoid[O]:
     def withAnnotation(annotation: Evaluated): O = withAnnotations(Seq(annotation))
     def withAnnotations(annotations: Seq[Evaluated]): O
     def getAnnotations(): Seq[Evaluated]
-    def forKeyword(k: Keyword, kl: Option[KeywordLocation]): O
+    def forKeyword(k: Keyword, kl: KeywordLocation): O
 
 object OutputOps:
   def mergeEvaluatedAnnotations(es: Seq[Evaluated]): Seq[Evaluated] =

@@ -63,6 +63,6 @@ object SuggestOutput:
       def withAnnotations(annotations: Seq[Evaluated]): SuggestOutput =
         o.copy(simple = o.simple.withAnnotations(annotations))
       def getAnnotations(): Seq[Evaluated] = o.simple.annotations
-      def forKeyword(k: Keyword, kl: Option[KeywordLocation]): SuggestOutput =
+      def forKeyword(k: Keyword, kl: KeywordLocation): SuggestOutput =
         if isAt(o.simple.pointer) then o.copy(keywords = o.keywords :+ k)
         else o

@@ -66,5 +66,5 @@ object SimpleOutput:
       def isValid: Boolean = o.valid
       def withAnnotations(annotations: Seq[Evaluated]): SimpleOutput =
         o.copy(annotations = o.annotations ++ annotations)
-      def getAnnotations(): Seq[Evaluated]                                  = o.annotations
-      def forKeyword(k: Keyword, kl: Option[KeywordLocation]): SimpleOutput = o
+      def getAnnotations(): Seq[Evaluated]                          = o.annotations
+      def forKeyword(k: Keyword, kl: KeywordLocation): SimpleOutput = o
