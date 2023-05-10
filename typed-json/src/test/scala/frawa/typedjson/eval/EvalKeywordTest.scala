@@ -564,7 +564,9 @@ class EvalKeywordTest extends FunSuite:
           SimpleOutput(
             false,
             Seq(
+              WithPointer(AdditionalPropertyInvalid("bar"), Pointer.empty / "bar"),
               WithPointer(FalseSchemaReason(), Pointer.empty / "bar"),
+              WithPointer(AdditionalPropertyInvalid("gnu"), Pointer.empty / "gnu"),
               WithPointer(FalseSchemaReason(), Pointer.empty / "gnu")
             )
           ),

@@ -105,9 +105,11 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         val funPrefixItems = prefixItems.map(compile(_, kl))
         verify.verifyArrayItems(funItems, funPrefixItems)
       case ObjectPropertiesKeyword(properties, patternProperties, additionalProperties) =>
-        val funProperties           = compile(properties, kl)
-        val funPatternProperties    = compile(patternProperties, kl)
-        val funAdditionalProperties = additionalProperties.map(compile(_, kl))
+        val funProperties        = compile(properties, kl)
+        val funPatternProperties = compile(patternProperties, kl)
+        val funAdditionalProperties = additionalProperties.map(additionalProperties =>
+          verify.verifyAdditionalProperties((compile(additionalProperties, kl)))
+        )
         verify.verfyObjectProperties(funProperties, funPatternProperties, funAdditionalProperties)
       case ObjectRequiredKeyword(names) => verify.verifyObjectRequired(names)
       case AllOfKeyword(kks)            => verify.verifyAllOf(compileSeqKeywords(kks, kl))

@@ -51,9 +51,9 @@ object SuggestOutput:
     def invalid(error: ValidationError, pointer: Pointer): SuggestOutput =
       SuggestOutput(bops.invalid(error, pointer))
 
-    def all(os: Seq[SuggestOutput], pointer: Pointer): SuggestOutput =
+    def all(os: Seq[SuggestOutput], error: Option[ValidationError], pointer: Pointer): SuggestOutput =
       SuggestOutput(
-        bops.all(os.map(_.simple), pointer),
+        bops.all(os.map(_.simple), error, pointer),
         os.flatMap(_.keywords)
       )
 

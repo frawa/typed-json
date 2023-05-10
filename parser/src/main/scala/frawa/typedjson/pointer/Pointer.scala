@@ -98,6 +98,12 @@ case class Pointer(segments: Seq[Token], isInsideKey: Boolean = false):
     )
   }
 
+  def targetField: Option[String] =
+    segments.lastOption match {
+      case Some(FieldToken(field)) => Some(field)
+      case _                       => None
+    }
+
 trait Token
 
 case class ArrayIndexToken(index: Int) extends Token:

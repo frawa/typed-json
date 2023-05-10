@@ -179,6 +179,10 @@ class EvalResolveTest extends FunSuite:
             false,
             Seq(
               WithPointer(
+                AdditionalPropertyInvalid("foo"),
+                pointer = Pointer.parse("/$defs/foo")
+              ),
+              WithPointer(
                 NotInEnum(
                   values = Seq(
                     "array",

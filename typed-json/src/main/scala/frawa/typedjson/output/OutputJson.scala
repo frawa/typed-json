@@ -28,6 +28,8 @@ import frawa.typedjson.keywords.KeywordLocation
 import frawa.typedjson.validation.MissingRequiredProperties
 import frawa.typedjson.validation.MinItemsMismatch
 import frawa.typedjson.validation.AdditionalPropertyInvalid
+import frawa.typedjson.validation.FalseSchemaReason
+import frawa.typedjson.validation.SubSchemaFailed
 
 object OutputJson:
 
@@ -39,41 +41,41 @@ object OutputJson:
       val props = Seq("valid" -> BoolValue(o.isValid))
       ObjectValue(Map.from(props))
     else
-      val error = o.error
-        .map { error =>
-          Seq(toJson(error), toJson(o.instanceLocation)) ++
+      val error = ObjectValue(
+        Map.from(
+          Seq(
+            toJson(o.error.getOrElse(SubSchemaFailed())),
+            toJson(o.instanceLocation)
+          ) ++
             toJson(o.keywordLocation.getOrElse(KeywordLocation.empty))
-        }
-        .map(props => ObjectValue(Map.from(props)))
+        )
+      )
       val errors = o.errors.map { error =>
         val props = Seq(toJson(error.error), toJson(error.instanceLocation)) ++ toJson(error.keywordLocation)
         ObjectValue(Map.from(props))
       }
-
-      val props = Seq("valid" -> BoolValue(o.isValid), "errors" -> ArrayValue(error.toSeq ++ errors))
+      val props = Seq("valid" -> BoolValue(o.isValid), "errors" -> ArrayValue(error +: errors))
       ObjectValue(Map.from(props))
 
   def detailed(o: DetailedOutput): Value =
-    def toErrorOrErrors(o: DetailedOutput): Seq[(String, Value)] =
-      o.error
+    def toErrorAndErrors(o: DetailedOutput): Seq[(String, Value)] =
+      val error =
+        o.error.map(toJson(_)).toSeq ++
+          Seq(toJson(o.instanceLocation)) ++
+          toJson(o.keywordLocation.getOrElse(KeywordLocation.empty))
+      val errors = o.errors
+        .filterNot(_.isValid)
         .map { error =>
-          Seq(toJson(error), toJson(o.instanceLocation)) ++
-            toJson(o.keywordLocation.getOrElse(KeywordLocation.empty))
+          ("valid" -> BoolValue(false)) +:
+            toErrorAndErrors(error)
         }
-        .getOrElse {
-          val errors = o.errors
-            .filterNot(_.isValid)
-            .map { error =>
-              ("valid" -> BoolValue(false)) +:
-                toErrorOrErrors(error)
-            }
-            .map(Map.from(_))
-            .map(ObjectValue(_))
-          Seq(("errors" -> ArrayValue(errors)), toJson(o.instanceLocation)) ++
-            toJson(o.keywordLocation.getOrElse(KeywordLocation.empty))
-        }
+        .map(Map.from(_))
+        .map(ObjectValue(_))
+      error ++ (if errors.nonEmpty
+                then Seq(("errors" -> ArrayValue(errors)))
+                else Seq())
 
-    val errorOrErrors = toErrorOrErrors(o)
+    val errorOrErrors = toErrorAndErrors(o)
     ObjectValue(Map.from(("valid" -> BoolValue(o.isValid)) +: errorOrErrors))
 
   private def toJson(error: ValidationError): (String, Value) =
@@ -97,9 +99,11 @@ object OutputJson:
 
 private def toMessage(error: ValidationError): String =
   error match {
+    case SubSchemaFailed()                 => "A subschema had errors."
     case MissingRequiredProperties(Seq(p)) => s"Required property '${p}' not found."
     case MinItemsMismatch(min, found)      => s"Expected at least ${min} items but found ${found}."
     case AdditionalPropertyInvalid(p)      => s"Additional property '${p}' found but was invalid."
+    case FalseSchemaReason()               => "Always invalid."
     // TODO more!
     case _ => error.toString
   }

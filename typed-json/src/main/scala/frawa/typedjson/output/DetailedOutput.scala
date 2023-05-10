@@ -49,7 +49,7 @@ object DetailedOutput:
     def invalid(error: ValidationError, pointer: Pointer): DetailedOutput =
       DetailedOutput(false, error = Some(error), instanceLocation = pointer)
 
-    def all(os: Seq[DetailedOutput], pointer: Pointer): DetailedOutput =
+    def all(os: Seq[DetailedOutput], error: Option[ValidationError], pointer: Pointer): DetailedOutput =
       val valid = os.forall(_.valid)
       val annotations =
         if valid then OutputOps.mergeAnnotations(os.filter(_.instanceLocation == pointer).flatMap(_.annotations))
@@ -57,12 +57,13 @@ object DetailedOutput:
       val errors =
         if valid then Seq()
         else os.filterNot(_.valid)
-      if errors.size == 1 then
+      if errors.size == 1 && error.isEmpty then
         // TODO really?
         errors(0)
       else
         DetailedOutput(
           valid,
+          error = error,
           errors = errors,
           instanceLocation = pointer,
           annotations = annotations
@@ -77,9 +78,7 @@ object DetailedOutput:
         o.copy(annotations = o.annotations ++ annotations)
       def getAnnotations(): Seq[Evaluated] = o.annotations
       def forKeyword(k: Keyword, kl: Option[KeywordLocation]): DetailedOutput =
-        // println(s"FW forKeyword ${kl} ${k.getClass().getSimpleName()}")
         if (kl.isDefined && o.keywordLocation.isDefined) then
           // TODO avoid this situation
-          // println(s"FW do not ovewrite ${o.keywordLocation}, by ${kl}")
           o
         else o.copy(keywordLocation = kl)

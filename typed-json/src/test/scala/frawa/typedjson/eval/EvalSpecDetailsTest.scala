@@ -491,6 +491,7 @@ class EvalSpecDetailsTest extends FunSuite:
           SimpleOutput(
             false,
             errors = Seq(
+              WithPointer(AdditionalPropertyInvalid("november"), Pointer.empty / "november"),
               WithPointer(TypeMismatch("object"), Pointer.empty / "november"),
               WithPointer(TypeMismatch("integer"), Pointer.empty / "november")
             )

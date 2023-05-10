@@ -29,6 +29,7 @@ import frawa.typedjson.output.OutputOps
 import frawa.typedjson.keywords.KeywordLocation
 import java.awt.event.KeyListener
 import frawa.typedjson.output.BasicOutput
+import frawa.typedjson.validation.SubSchemaFailed
 
 // TODO this will converge to "basic" output format,
 // see https://json-schema.org/draft/2020-12/json-schema-core.html#name-basic
@@ -38,7 +39,6 @@ case class BasicOutput(
     annotations: Seq[Evaluated] = Seq.empty,
     error: Option[ValidationError] = None,
     errors: Seq[BasicOutput.Error] = Seq(),
-    // subs: Seq[BasicOutput] = Seq(),
     instanceLocation: Pointer = Pointer.empty,
     keywordLocation: Option[KeywordLocation] = None
 )
@@ -55,23 +55,40 @@ object BasicOutput:
     def invalid(error: ValidationError, pointer: Pointer): BasicOutput =
       BasicOutput(false, error = Some(error), instanceLocation = pointer)
 
-    def all(os: Seq[BasicOutput], pointer: Pointer): BasicOutput =
+    def all(os: Seq[BasicOutput], error: Option[ValidationError], pointer: Pointer): BasicOutput =
       val valid = os.forall(_.valid)
       val annotations =
         if valid then OutputOps.mergeAnnotations(os.filter(_.instanceLocation == pointer).flatMap(_.annotations))
         else Seq()
-      val errors = os.flatMap { o =>
-        val self = o.error.map { error =>
-          Error(error, o.instanceLocation, o.keywordLocation.getOrElse(KeywordLocation.empty))
-        }.toSeq
-        self ++ o.errors
-      }
-      BasicOutput(
-        valid,
-        annotations,
-        errors = errors,
-        instanceLocation = pointer
-      )
+      val errors =
+        if valid then Seq()
+        else
+          os.filterNot(_.isValid).flatMap { o =>
+            val self =
+              Error(
+                o.error.getOrElse(SubSchemaFailed()),
+                o.instanceLocation,
+                o.keywordLocation.getOrElse(KeywordLocation.empty)
+              )
+            self +: o.errors
+          }
+      if errors.size == 1 && error.isEmpty then
+        // TODO realy?
+        BasicOutput(
+          valid,
+          annotations,
+          error = Some(errors(0).error),
+          instanceLocation = errors(0).instanceLocation,
+          keywordLocation = Some(errors(0).keywordLocation)
+        )
+      else
+        BasicOutput(
+          valid,
+          annotations,
+          error = error.filterNot(_ => valid),
+          errors = errors,
+          instanceLocation = pointer
+        )
 
     extension (o: BasicOutput)
       def not(pointer: Pointer): BasicOutput =
@@ -81,10 +98,7 @@ object BasicOutput:
       def withAnnotations(annotations: Seq[Evaluated]): BasicOutput = o.copy(annotations = o.annotations ++ annotations)
       def getAnnotations(): Seq[Evaluated]                          = o.annotations
       def forKeyword(k: Keyword, kl: Option[KeywordLocation]): BasicOutput =
-        // if (kl.isEmpty) then
-        // new RuntimeException("?").printStackTrace()
-        // if (kl.isDefined && o.keywordLocation.isDefined) then new RuntimeException("??").printStackTrace()
-        // TODO avoid!
-        if (kl.isEmpty && o.keywordLocation.isDefined) then o
-        // new RuntimeException("???").printStackTrace()
+        if kl.isDefined && o.keywordLocation.isDefined then
+          // TODO avoid this situation
+          o
         else o.copy(keywordLocation = kl)

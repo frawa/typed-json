@@ -47,14 +47,14 @@ object SimpleOutput:
     def invalid(error: ValidationError, pointer: Pointer): SimpleOutput =
       SimpleOutput(false, Seq(WithPointer(error, pointer)), pointer)
 
-    def all(os: Seq[SimpleOutput], pointer: Pointer): SimpleOutput =
+    def all(os: Seq[SimpleOutput], error: Option[ValidationError], pointer: Pointer): SimpleOutput =
       val valid = os.forall(_.valid)
       val annotations =
         if valid then OutputOps.mergeAnnotations(os.filter(_.pointer == pointer).flatMap(_.annotations))
         else Seq()
       SimpleOutput(
         valid,
-        os.flatMap(_.errors),
+        error.map(WithPointer(_, pointer)).toSeq ++ os.flatMap(_.errors),
         pointer,
         annotations
       )

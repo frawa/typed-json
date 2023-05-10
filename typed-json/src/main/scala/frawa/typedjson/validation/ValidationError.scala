@@ -28,6 +28,7 @@ import scala.reflect.TypeTest
 import scala.util.Try
 
 sealed trait ValidationError
+case class SubSchemaFailed()                                            extends ValidationError
 case class FalseSchemaReason()                                          extends ValidationError
 case class TypeMismatch[T <: Value](expected: String)                   extends ValidationError
 case class NotOneOf(valid: Int)                                         extends ValidationError
