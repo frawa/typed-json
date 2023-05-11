@@ -16,60 +16,59 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import frawa.typedjson.testutil.TestUtil.{given, *}
-import frawa.typedjson.parser.*
-
 import frawa.inlinefiles.InlineFiles.*
+import frawa.typedjson.parser.*
+import frawa.typedjson.testutil.TestUtil.{*, given}
 
 class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
 
   private val draft202012OptionalFormatFiles = draft202012.folder("optional/format").files()
 
   // TODO un-ignore 'em
-  override val ignore: Set[String] = Set(
+  override val ignoreFiles: Seq[String] = Seq(
     "date-time.json",
     "date.json",
     "idn-hostname.json",
     "uri-template.json"
   )
 
-  override protected val ignoreFailMessageByDescription: Map[TestId, Set[String]] = Map(
-    ("hostname.json", "validation of host names") -> Set(
+  override protected val ignoreByExpectation: Map[TestId, Seq[String]] = Map(
+    ("hostname.json", "validation of host names") -> Seq(
       "a valid punycoded IDN hostname",
       "a host name with a component too long",
       "exceeds maximum label length"
     ),
-    ("idn-email.json", "validation of an internationalized e-mail addresses") -> Set(
+    ("idn-email.json", "validation of an internationalized e-mail addresses") -> Seq(
       "a valid idn e-mail (example@example.test in Hangul)"
     ),
-    ("ipv6.json", "validation of IPv6 addresses") -> Set(
+    ("ipv6.json", "validation of IPv6 addresses") -> Seq(
       "mixed format with the ipv4 section as decimal octets",
       "zone id is not a part of ipv6 address",
       "a long valid ipv6"
     ),
-    ("iri.json", "validation of IRIs") -> Set(
+    ("iri.json", "validation of IRIs") -> Seq(
       "an invalid IRI based on IPv6"
     ),
-    ("iri-reference.json", "validation of IRI References") -> Set(
+    ("iri-reference.json", "validation of IRI References") -> Seq(
       "a valid IRI Reference" // TODO fails on JS, passes on JVM
     ),
-    ("relative-json-pointer.json", "validation of Relative JSON Pointers (RJP)") -> Set(
+    ("relative-json-pointer.json", "validation of Relative JSON Pointers (RJP)") -> Seq(
       "negative prefix",
       "## is not a valid json-pointer",
       "zero cannot be followed by other digits, plus octothorpe"
     ),
-    ("uri.json", "validation of URIs") -> Set(
+    ("uri.json", "validation of URIs") -> Seq(
       "an invalid URI with comma in scheme" // TODO fails on JS, passes on JVM
     ),
-    ("uuid.json", "uuid format") -> Set(
+    ("uuid.json", "uuid format") -> Seq(
       "wrong length"
     ),
-    ("email.json", "validation of e-mail addresses") -> Set(
+    ("email.json", "validation of e-mail addresses") -> Seq(
       "a quoted string with a space in the local part is valid",
       "an IPv4-address-literal after the @ is valid",
       "an IPv6-address-literal after the @ is valid"
     ),
-    ("time.json", "validation of time strings") -> Set(
+    ("time.json", "validation of time strings") -> Seq(
       "a valid time string with leap second, Zulu",
       "valid leap second, zero time-offset",
       "valid leap second, positive time-offset",

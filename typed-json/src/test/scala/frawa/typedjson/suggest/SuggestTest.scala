@@ -14,31 +14,55 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.suggestion
+package frawa.typedjson.suggest
 
 import frawa.typedjson.keywords.{SchemaValue, Vocabulary}
-import frawa.typedjson.parser.Value.*
+import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser.*
+import frawa.typedjson.parser.Value.*
 import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.testutil.EvaluatorFactory
 import frawa.typedjson.testutil.TestSchemas.{numberArraySchema, totoObjectSchema, totoRequiredObjectSchema}
 import frawa.typedjson.testutil.TestUtil.{*, given}
 import munit.FunSuite
-import frawa.typedjson.meta.MetaSchemas
+import frawa.typedjson.output.SimpleOutput
+import frawa.typedjson.eval.Eval
+import frawa.typedjson.eval.CacheState.R
+import frawa.typedjson.eval.Util.withCompiledSchemaValue
+import frawa.typedjson.eval.Util.doApply
+import frawa.typedjson.suggest.Suggest
+import frawa.typedjson.suggest.SuggestOutput
+import frawa.typedjson.output.OutputOps
 
-class SuggestProcessingTest extends FunSuite:
-
-  private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId))
-
-  private def factory(at: Pointer): EvaluatorFactory[SchemaValue, SuggestionOutput] =
-    EvaluatorFactory.make(SuggestionProcessing(at), vocabularyForTest).mapResult(assertNoIgnoredKeywords)
+class SuggestTest extends FunSuite:
 
   private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
       f: Set[Value] => Unit
   ) =
-    given EvaluatorFactory[SchemaValue, SuggestionOutput] = factory(at)
-    assertResult[SuggestionOutput](text)(schema) { result =>
-      f(result.output.map(_.suggestions).getOrElse(Set()))
+    given OutputOps[SuggestOutput] = SuggestOutput.outputOps(at)
+    val evalSuggest                = Eval[R, SuggestOutput]
+    given Eval[R, SuggestOutput]   = evalSuggest
+    val value                      = parseJsonValue(text)
+    withCompiledSchemaValue(schema) { fun =>
+      val suggestFun  = Suggest.suggestAt(at)(fun)
+      val output      = doApply(fun, value)
+      val suggestions = Suggest.suggestions(at, output).toSet
+      f(suggestions)
+    }
+
+  private def assertSuggestForSchema(text: String, at: Pointer)(f: Set[Value] => Unit): Unit =
+    val lazyResolver = MetaSchemas.lazyResolver
+    val base         = MetaSchemas.draft202012
+    val Some(schema) = lazyResolver(base.resolve("schema")): @unchecked
+
+    given OutputOps[SuggestOutput] = SuggestOutput.outputOps(at)
+    val evalSuggest                = Eval[R, SuggestOutput]
+    given Eval[R, SuggestOutput]   = evalSuggest
+    val value                      = parseJsonValue(text)
+    withCompiledSchemaValue(schema, Some(lazyResolver)) { fun =>
+      val suggestFun  = Suggest.suggestAt(at)(fun)
+      val output      = doApply(fun, value)
+      val suggestions = Suggest.suggestions(at, output).toSet
+      f(suggestions)
     }
 
   test("suggest one object per property") {
@@ -557,16 +581,3 @@ class SuggestProcessingTest extends FunSuite:
       assertEquals(unknown, Set.empty[String], "suggested unknown keywords")
     }
   }
-
-  private def assertSuggestForSchema(json: String, at: Pointer)(f: Set[Value] => Unit): Unit =
-    val resolver     = MetaSchemas.lazyResolver
-    val base         = MetaSchemas.draft202012
-    val Some(schema) = resolver(base.resolve("schema")): @unchecked
-
-    def factory(at: Pointer): EvaluatorFactory[SchemaValue, SuggestionOutput] =
-      EvaluatorFactory.make(SuggestionProcessing(at), None, Some(resolver)).mapResult(assertNoIgnoredKeywords)
-
-    given EvaluatorFactory[SchemaValue, SuggestionOutput] = factory(at)
-    assertResult[SuggestionOutput](json)(schema) { result =>
-      f(result.output.map(_.suggestions).getOrElse(Set()))
-    }

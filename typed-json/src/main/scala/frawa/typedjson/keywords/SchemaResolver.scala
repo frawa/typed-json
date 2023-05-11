@@ -41,12 +41,7 @@ trait SchemaResolver:
     SchemaResolution(schema, resolver)
 
   def absolute(ref: String): URI =
-    val uri1 = uri(ref)
-    withoutEmptyFragment(
-      Some(uri1)
-        .filter(_.isAbsolute())
-        .getOrElse(UriUtil.resolve(base, uri1))
-    )
+    UriUtil.absolute(ref, base)
 
   def resolveDynamicRef(ref: String, scope: DynamicScope): Option[SchemaResolution] =
     resolveDynamicRef(absolute(ref), scope)
@@ -68,13 +63,8 @@ trait SchemaResolver:
         .orElse(resolved)
     else resolved
 
-  private def withoutEmptyFragment(uri: URI): URI =
-    val fragment = uri.getFragment
-    if fragment != null && fragment.isEmpty then UriUtil.withoutFragement(uri)
-    else uri
-
   def resolveRef(uri: URI): Option[SchemaResolution] =
-    if uri.getFragment != null && uri.getFragment.startsWith("/") then
+    if uri.getFragment() != null && uri.getFragment().startsWith("/") then
       val pointer = Pointer.parse(uri.getFragment)
       resolve(UriUtil.withoutFragement(uri))
         .flatMap(resolvePointer(_, pointer))
@@ -82,4 +72,5 @@ trait SchemaResolver:
 
   private def resolvePointer(resolution: SchemaResolution, pointer: Pointer): Option[SchemaResolution] =
     val SchemaResolution(schema, resolver) = resolution
-    pointer(schema.value).map(SchemaValue(_)).map(SchemaResolution(_, resolver))
+    val resolver1                          = resolver.withBase(UriUtil.withFragment(resolver.base, pointer))
+    pointer(schema.value).map(SchemaValue(_)).map(SchemaResolution(_, resolver1))

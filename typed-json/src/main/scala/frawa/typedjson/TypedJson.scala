@@ -22,17 +22,71 @@ import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.keywords.Vocabulary
 import frawa.typedjson.keywords.Keywords
 import frawa.typedjson.keywords.SchemaProblems
-import frawa.typedjson.keywords.Evaluator
-import frawa.typedjson.validation.ValidationProcessing
-import frawa.typedjson.validation.ValidationOutput
-import frawa.typedjson.keywords.InnerValue
 import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.Offset
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.validation.ValidationError
-import frawa.typedjson.keywords.Result
+
+import frawa.typedjson.eval.CacheState.R
+import frawa.typedjson.eval.TheResultMonad
+import frawa.typedjson.eval.Eval
+import frawa.typedjson.output.SimpleOutput
+import frawa.typedjson.eval.CacheState
+import frawa.typedjson.keywords.LoadedSchemasResolver
+import frawa.typedjson.keywords.SchemaResolver
+import frawa.typedjson.parser.OffsetParser
+import frawa.typedjson.suggest.Suggest
+import frawa.typedjson.output.OutputOps
+import frawa.typedjson.suggest.SuggestOutput
+import frawa.typedjson.keywords.KeywordLocation
+
+case class TypedJson(private val state: Option[(Keywords, CacheState)]):
+  import TypedJson.*
+
+  def eval[O: OutputOps](value: Offset.Value): (Option[O], TypedJson) =
+    doEval(Offset.withoutOffset(value))
+
+  def eval[O: OutputOps](value: Value): (Option[O], TypedJson) =
+    doEval(value)
+
+  def evalBulk[O: OutputOps](values: Seq[Value]): (Seq[O], TypedJson) =
+    state
+      .map { (keywords, cache) =>
+        val eval: Eval[R, O] = Eval[R, O]
+        val compiled         = eval.compile(keywords, KeywordLocation.empty)
+        val fun              = eval.fun(compiled)
+
+        val (os, cache1) = values.foldLeft((Seq.empty[O], cache)) { case ((os, cache), value) =>
+          val (o, cache1) = fun(value)(cache)
+          (os :+ o, cache1)
+        }
+        (os, cache1)
+      }
+      .map { (os, cache) =>
+        (os, copy(state = state.map { (k, _) => (k, cache) }))
+      }
+      .getOrElse((Seq(), this))
+
+  private def doEval[O: OutputOps](value: Value): (Option[O], TypedJson) =
+    state
+      .map { (keywords, cache) =>
+        val eval: Eval[R, O] = Eval[R, O]
+        val compiled         = eval.compile(keywords, KeywordLocation.empty)
+        val fun              = eval.fun(compiled)
+
+        val (o, cache1) = fun(value)(cache)
+        // TODO log stats?
+
+        (o, cache1)
+      }
+      .map { (o, cache) =>
+        (Some(o), copy(state = state.map { (k, _) => (k, cache) }))
+      }
+      .getOrElse((None, this))
 
 object TypedJson:
+  type EvalFun[O] = Eval.EvalFun[R, O]
+
   case class Validation(valid: Boolean, output: Output)
   case class Output(errors: Seq[Error]) // TODO add annotations
   case class Error(pointer: Pointer, error: ValidationError)
@@ -43,7 +97,9 @@ object TypedJson:
 
   def create(): TypedJson = new TypedJson(None)
 
-  def create(schemaJson: String)(using parser: Parser): Either[InputError, TypedJson] =
+  def create(
+      schemaJson: String
+  )(using parser: Parser): Either[InputError, TypedJson] =
     parser
       .parse(schemaJson)
       .swap
@@ -52,55 +108,40 @@ object TypedJson:
       .flatMap(create(_))
 
   def create(schema: Value): Either[InputError, TypedJson] =
-    withSchema(SchemaValue.root(schema))
+    createWithSchema(SchemaValue.root(schema))
 
   def create(schema: Offset.Value): Either[InputError, TypedJson] =
-    withSchema(SchemaValue.root(Offset.withoutOffset(schema)))
+    createWithSchema(SchemaValue.root(Offset.withoutOffset(schema)))
 
-  private def withSchema(schema: SchemaValue): Either[InputError, TypedJson] =
-    val resolver   = MetaSchemas.lazyResolver
-    val vocabulary = Vocabulary.specDialect()
-    val keywords   = Keywords(schema, Some(vocabulary), Some(resolver))
+  def createWithMetaSchemas(): TypedJson =
+    val lazyResolver = MetaSchemas.lazyResolver
+    val base         = MetaSchemas.draft202012
+    val Some(schema) = lazyResolver(base.resolve("schema")): @unchecked
+    createWithSchema(schema).getOrElse(throw new IllegalStateException("broken meta schemas"))
+
+  def createWithSchema(schema: SchemaValue): Either[InputError, TypedJson] =
+    val lazyResolver                   = MetaSchemas.lazyResolver
+    val vocabulary                     = Vocabulary.specDialect()
+    val keywords                       = Keywords(schema, Some(vocabulary), Some(lazyResolver))
+    val schemaResolver: SchemaResolver = LoadedSchemasResolver(schema, Some(lazyResolver))
     keywords.swap
       .map(SchemaErrors(_))
       .swap
-      .map(keywords => new TypedJson(Some(keywords)))
+      .map { keywords =>
+        val cache = CacheState.empty(schemaResolver, keywords.vocabulary)
+        new TypedJson(Some(keywords, cache))
+      }
+
+  private def compile[R[_], O](keywords: Keywords)(using eval: Eval[R, O])(using
+      TheResultMonad[R, O]
+  ): Eval.EvalFun[R, O] =
+    val compiled = eval.compile(keywords, KeywordLocation.empty)
+    eval.fun(compiled)
 
   object Output:
     val empty: Output = Output(Seq.empty)
 
-    def apply(result: Result[ValidationOutput]): Output =
+    def apply(o: SimpleOutput): Output =
       val errors =
-        result.output
-          .map(_.errors)
-          .getOrElse(Seq())
-          .map(error => Error(error.pointer, error.result))
+        o.errors.map(error => Error(error.pointer, error.value))
       Output(errors)
-
-class TypedJson(private val keywords: Option[Keywords]):
-  import TypedJson.*
-
-  def validate(json: String)(using parser: Parser): Either[InputError, Validation] =
-    parser
-      .parse(json)
-      .swap
-      .map(JsonError(_))
-      .swap
-      .map { value =>
-        validate(value).getOrElse(Validation(true, Output.empty))
-      }
-
-  def validate(value: Value): Option[Validation] =
-    keywords
-      .map(validator)
-      .map { validator => validator(InnerValue(value)) }
-      .map { result => Validation(result.valid, Output(result)) }
-
-  def validate(value: Offset.Value): Option[Validation] =
-    keywords
-      .map(validator)
-      .map { validator => validator(InnerValue(Offset.withoutOffset(value))) }
-      .map { result => Validation(result.valid, Output(result)) }
-
-  def validator(keywords: Keywords): Evaluator[ValidationOutput] =
-    Evaluator(keywords, ValidationProcessing())

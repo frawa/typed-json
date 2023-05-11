@@ -18,7 +18,7 @@ package frawa.typedjson.keywords
 
 import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.Value.*
-import frawa.typedjson.util.SeqUtil
+import frawa.typedjson.util.EitherUtil
 import frawa.typedjson.util.UriUtil.uri
 
 import java.net.URI
@@ -177,7 +177,7 @@ object Vocabulary:
           .getOrElse(Left(SchemaProblems(SchemaProblems.UnknownRequiredVocabulary(id))))
       }
       .toSeq
-    SeqUtil
+    EitherUtil
       .sequenceAllLefts(vocabularies)
       .map(_.foldLeft(specVocabularies(coreId))(_.combine(_)))
       .swap

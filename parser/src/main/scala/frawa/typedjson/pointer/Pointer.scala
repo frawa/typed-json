@@ -25,18 +25,21 @@ object Pointer:
   def apply(index: Int): Pointer    = Pointer.empty / index
   def apply(field: String): Pointer = Pointer.empty / field
 
-  def parse(spec: String): Pointer = Pointer(
-    spec
-      .split("/", -1)
-      .toIndexedSeq
-      .map(field =>
-        field
-          .replace("~1", "/")
-          .replace("~0", "~")
+  def parse(spec: String): Pointer =
+    if spec == null then Pointer.empty
+    else
+      Pointer(
+        spec
+          .split("/", -1)
+          .toIndexedSeq
+          .map(field =>
+            field
+              .replace("~1", "/")
+              .replace("~0", "~")
+          )
+          .drop(1)
+          .map(t => t.toIntOption.map(ArrayIndexToken.apply).getOrElse(FieldToken(t)))
       )
-      .drop(1)
-      .map(t => t.toIntOption.map(ArrayIndexToken.apply).getOrElse(FieldToken(t)))
-  )
 
 case class Pointer(segments: Seq[Token], isInsideKey: Boolean = false):
   override def toString: String =
@@ -44,17 +47,17 @@ case class Pointer(segments: Seq[Token], isInsideKey: Boolean = false):
     else "/" + this.segments.mkString("/")
 
   def /(index: Int): Pointer =
-    new Pointer(segments :+ ArrayIndexToken(index))
+    Pointer(segments :+ ArrayIndexToken(index))
   def /(field: String): Pointer =
-    new Pointer(segments :+ FieldToken(field))
+    Pointer(segments :+ FieldToken(field))
   def /(pointer: Pointer): Pointer =
-    new Pointer(segments ++ pointer.segments, isInsideKey = pointer.isInsideKey)
+    Pointer(segments ++ pointer.segments, isInsideKey = pointer.isInsideKey)
 
   def insideKey: Pointer =
     copy(isInsideKey = true)
 
   def outer: Pointer =
-    new Pointer(segments.dropRight(1))
+    Pointer(segments.dropRight(1))
 
   def apply(value: Value): Option[Value] = segments.foldLeft(Option(value)) { case (v, segment) =>
     v.flatMap(v =>
@@ -94,6 +97,12 @@ case class Pointer(segments: Seq[Token], isInsideKey: Boolean = false):
       }
     )
   }
+
+  def targetField: Option[String] =
+    segments.lastOption match {
+      case Some(FieldToken(field)) => Some(field)
+      case _                       => None
+    }
 
 trait Token
 

@@ -16,7 +16,9 @@
 
 package frawa.typedjson.keywords
 
-case class Processing[R](
-    simple: AssertionKeyword => Evaluator.EvalFun[R],
-    nested: ApplicatorKeyword => Evaluator.AggregateFun[R]
-)
+import frawa.typedjson.pointer.Pointer
+
+sealed trait Evaluated
+case class EvaluatedIndices(indices: Set[Int])          extends Evaluated
+case class EvaluatedProperties(properties: Set[String]) extends Evaluated
+case class Ignored(keywords: Set[String])               extends Evaluated

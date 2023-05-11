@@ -19,11 +19,25 @@ package frawa.typedjson.util
 import frawa.typedjson.pointer.Pointer
 
 import java.net.URI
+import frawa.typedjson.keywords.KeywordLocation
 
 object UriUtil:
 
   def uri(value: String): URI =
     URI.create(escape(value))
+
+  def absolute(ref: String, base: URI): URI =
+    val uri1 = uri(ref)
+    withoutEmptyFragment(
+      Some(uri1)
+        .filter(_.isAbsolute())
+        .getOrElse(UriUtil.resolve(base, uri1))
+    )
+
+  private def withoutEmptyFragment(uri: URI): URI =
+    val fragment = uri.getFragment
+    if fragment != null && fragment.isEmpty then withoutFragement(uri)
+    else uri
 
   def withoutFragement(uri: URI): URI = new URI(uri.getScheme, uri.getSchemeSpecificPart, null)
 
@@ -41,11 +55,11 @@ object UriUtil:
     !uri.isOpaque() && uri.getScheme() == null && uri.getAuthority() == null && uri.getPath().isEmpty &&
       uri.getFragment() != null
 
-  case class WithLocation[+T](uri: URI, value: T)
-
-  case class CurrentLocation(uri: URI):
-    def apply[T](value: T): WithLocation[T] = WithLocation(uri, value)
+  case class CurrentLocation(kl: KeywordLocation)
 
   private def escape(value: String): String =
     // this is because the ScalaJS implementation of URI might fail
     value.replace("\\", "_")
+
+  def push(uri: URI, pushFun: Pointer => Pointer): URI =
+    withFragment(uri, pushFun(Pointer.parse(uri.getFragment)))

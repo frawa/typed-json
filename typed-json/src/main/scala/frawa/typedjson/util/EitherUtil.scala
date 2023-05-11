@@ -16,29 +16,17 @@
 
 package frawa.typedjson.util
 
-import munit.FunSuite
+object EitherUtil:
 
-import SeqUtil._
+  def sequenceAllLefts[E, V](as: Seq[Either[E, V]]): Either[Seq[E], Seq[V]] =
+    as.foldLeft[Either[Seq[E], Seq[V]]](Right(Seq.empty[V])) {
+      case (Right(acc), Right(v))   => Right(acc :+ v)
+      case (Right(_), Left(error))  => Left(Seq(error))
+      case (Left(acc), Left(error)) => Left(acc :+ error)
+      case (Left(acc), _)           => Left(acc)
+    }
 
-class SeqUtilTest extends FunSuite:
-
-  test("sequence all rights") {
-    assertEquals(
-      sequenceAllLefts[String, Integer](Seq(Right(1), Right(2))),
-      Right[Seq[String], Seq[Integer]](Seq(1, 2))
-    )
-  }
-
-  test("sequence only lefts") {
-    assertEquals(
-      sequenceAllLefts[String, Integer](Seq(Left("foo"), Right(2), Left("bar"))),
-      Left(Seq("foo", "bar"))
-    )
-  }
-
-  test("sequence all mixed lefts") {
-    assertEquals(
-      sequenceAllLefts[String, Integer](Seq(Right(1), Left("foo"), Right(2), Left("bar"))),
-      Left(Seq("foo", "bar"))
-    )
-  }
+  def combineAllLefts[E, V](as: Seq[Either[E, V]])(combine: (E, E) => E): Either[E, Seq[V]] =
+    sequenceAllLefts(as).swap
+      .map(_.reduce(combine))
+      .swap

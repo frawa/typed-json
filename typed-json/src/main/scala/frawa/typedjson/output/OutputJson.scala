@@ -1,0 +1,109 @@
+/*
+ * Copyright 2021 Frank Wagner
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package frawa.typedjson.output
+
+import frawa.typedjson.parser.Value
+import frawa.typedjson.parser.Value.*
+import frawa.typedjson.validation.ValidationError
+import frawa.typedjson.output.BasicOutput
+import frawa.typedjson.TypedJson
+import frawa.typedjson.keywords.KeywordLocation.{Local, Dereferenced}
+import frawa.typedjson.pointer.Pointer
+import java.net.URI
+import frawa.typedjson.keywords.KeywordLocation
+import frawa.typedjson.validation.MissingRequiredProperties
+import frawa.typedjson.validation.MinItemsMismatch
+import frawa.typedjson.validation.AdditionalPropertyInvalid
+import frawa.typedjson.validation.FalseSchemaReason
+import frawa.typedjson.validation.SubSchemaFailed
+
+object OutputJson:
+
+  def flag(validation: TypedJson.Validation): Value =
+    ObjectValue(Map("valid" -> BoolValue(validation.valid)))
+
+  def basic(o: BasicOutput): Value =
+    if o.isValid then
+      val props = Seq("valid" -> BoolValue(o.isValid))
+      ObjectValue(Map.from(props))
+    else
+      val error = ObjectValue(
+        Map.from(
+          Seq(
+            toJson(o.error.getOrElse(SubSchemaFailed())),
+            toJson(o.instanceLocation)
+          ) ++
+            toJson(o.keywordLocation.getOrElse(KeywordLocation.empty))
+        )
+      )
+      val errors = o.errors.map { error =>
+        val props = Seq(toJson(error.error), toJson(error.instanceLocation)) ++ toJson(error.keywordLocation)
+        ObjectValue(Map.from(props))
+      }
+      val props = Seq("valid" -> BoolValue(o.isValid), "errors" -> ArrayValue(error +: errors))
+      ObjectValue(Map.from(props))
+
+  def detailed(o: DetailedOutput): Value =
+    def toErrorAndErrors(o: DetailedOutput): Seq[(String, Value)] =
+      val error =
+        o.error.map(toJson(_)).toSeq ++
+          Seq(toJson(o.instanceLocation)) ++
+          toJson(o.keywordLocation.getOrElse(KeywordLocation.empty))
+      val errors = o.errors
+        .filterNot(_.isValid)
+        .map { error =>
+          ("valid" -> BoolValue(false)) +:
+            toErrorAndErrors(error)
+        }
+        .map(Map.from(_))
+        .map(ObjectValue(_))
+      error ++ (if errors.nonEmpty
+                then Seq(("errors" -> ArrayValue(errors)))
+                else Seq())
+
+    val errorOrErrors = toErrorAndErrors(o)
+    ObjectValue(Map.from(("valid" -> BoolValue(o.isValid)) +: errorOrErrors))
+
+  private def toJson(error: ValidationError): (String, Value) =
+    "error" -> StringValue(toMessage(error))
+
+  private def toJson(instanceLocation: Pointer): (String, Value) =
+    "instanceLocation" -> StringValue(instanceLocation.toString)
+
+  private def toJson(keywordLocation: KeywordLocation): Seq[(String, Value)] =
+    keywordLocation match {
+      case Dereferenced(relative, absolute) =>
+        Seq(
+          "keywordLocation"         -> StringValue(relative.toString),
+          "absoluteKeywordLocation" -> StringValue(absolute.toString)
+        )
+      case Local(relative) =>
+        Seq(
+          "keywordLocation" -> StringValue(relative.toString)
+        )
+    }
+
+private def toMessage(error: ValidationError): String =
+  error match {
+    case SubSchemaFailed()                 => "A subschema had errors."
+    case MissingRequiredProperties(Seq(p)) => s"Required property '${p}' not found."
+    case MinItemsMismatch(min, found)      => s"Expected at least ${min} items but found ${found}."
+    case AdditionalPropertyInvalid(p)      => s"Additional property '${p}' found but was invalid."
+    case FalseSchemaReason()               => "Always invalid."
+    // TODO more!
+    case _ => error.toString
+  }

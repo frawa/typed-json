@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.keywords
+package frawa.typedjson.util
 
-import frawa.typedjson.parser.Value
-import frawa.typedjson.pointer.Pointer
-
-case class InnerValue(value: Value, pointer: Pointer = Pointer.empty)
+object Debug:
+  def debugTraceValue[T](title: String): T => T = v =>
+    println(s"${title}: ${v}")
+    v

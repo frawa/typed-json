@@ -16,8 +16,8 @@
 
 package frawa.typedjson.testutil
 
-import frawa.typedjson.parser.jawn.JawnParser
 import frawa.typedjson.keywords.*
+import frawa.typedjson.parser.jawn.JawnParser
 import frawa.typedjson.parser.{Parser, Value}
 import munit.Assertions.{assertEquals, clue, clues, fail}
 
@@ -44,27 +44,8 @@ object TestUtil:
     val resolver = LoadedSchemasResolver(schemas)
     f(resolver)
 
-  def assertNoIgnoredKeywords[R]: Result[R] => Result[R] = { result =>
-    assertEquals(result.ignoredKeywords(), Set.empty[String], "ignored keywords")
-    result
-  }
-
-  def assertResult[R](valueText: String)(schema: SchemaValue)(
-      f: Result[R] => Unit
-  )(using EvaluatorFactory[SchemaValue, R], Parser): Either[Nothing, Unit] =
-    withProcessor[R](schema) { evaluator =>
-      val value  = parseJsonValue(valueText)
-      val result = evaluator(InnerValue(value))
-      f(result)
-    }
-
-  def withProcessor[R](schema: SchemaValue)(
-      f: Evaluator[R] => Unit
-  )(using factory: EvaluatorFactory[SchemaValue, R]): Either[Nothing, Unit] =
-    val result = factory(schema).map(f)
-    result.swap
-      .map(messages => fail("creating keywords failed", clues(clue[SchemaProblems](messages))))
-      .swap
+  // TODO
+  def assertNoIgnoredKeywords() = ???
 
   def dialect(vocabularyIds: Seq[URI]): Option[Vocabulary] =
     Vocabulary
@@ -73,19 +54,3 @@ object TestUtil:
       .map(problems => throw new IllegalStateException(problems.dump()))
       .swap
       .toOption
-
-  def assertable(keywords: Keywords): Keywords = keywords.copy(keywords = keywords.keywords.map(assertable))
-
-  val assertableResolve: () => Either[SchemaProblems, Keywords] = () => Left(SchemaProblems.empty)
-
-  private def assertable(keyword: Keywords.KeywordWithLocation): Keywords.KeywordWithLocation =
-    keyword.copy(value = assertable(keyword.value))
-
-  private def assertable(keyword: Keyword): Keyword = keyword match
-    case ArrayItemsKeyword(items, prefixItems) =>
-      ArrayItemsKeyword(
-        items.map(assertable),
-        prefixItems.map(assertable)
-      )
-    case LazyParseKeywords(resolved, _) => LazyParseKeywords(resolved, assertableResolve)
-    case _                              => keyword

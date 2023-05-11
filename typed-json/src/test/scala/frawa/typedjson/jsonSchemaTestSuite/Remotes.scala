@@ -17,8 +17,8 @@
 package frawa.typedjson.jsonSchemaTestSuite
 
 import frawa.typedjson.keywords.{LoadedSchemasResolver, RootSchemaValue, SchemaValue}
-import frawa.typedjson.util.UriUtil
 import frawa.typedjson.parser.*
+import frawa.typedjson.util.UriUtil
 
 import java.net.URI
 
@@ -28,7 +28,7 @@ object Remotes:
   def lazyResolver: LoadedSchemasResolver.LazyResolver = { uri =>
     if uri.getSchemeSpecificPart.startsWith(remotesUri.getSchemeSpecificPart) then
       resolveRemotes(remotesUri.relativize(uri))
-    else { None }
+    else None
   }
 
   private def resolveRemotes(relative: URI): Option[RootSchemaValue] =

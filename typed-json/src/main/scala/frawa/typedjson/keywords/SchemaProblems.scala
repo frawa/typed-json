@@ -20,6 +20,7 @@ import frawa.typedjson.parser.Value
 import frawa.typedjson.pointer.Pointer
 
 import java.net.URI
+import frawa.typedjson.util.WithPointer
 
 case class SchemaProblems(
     errors: Seq[SchemaProblems.SchemaError]

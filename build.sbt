@@ -6,10 +6,6 @@ addCommandAlias("fixCheck", "scalafixAll --check")
 addCommandAlias("fixFix", "scalafixAll")
 addCommandAlias("npmAll", "npmCI;npmRunCI")
 
-// dev convenience
-addCommandAlias("testJs", "allJsJS/test")
-addCommandAlias("testJvm", "allJvm/test")
-
 lazy val npmCI    = taskKey[Unit]("npm ci")
 lazy val npmRunCI = taskKey[Unit]("npm run ci")
 
@@ -184,6 +180,15 @@ lazy val macros = project
   .dependsOn(parser.jvm(scalaVersion3))
   .dependsOn(parserJawn.jvm(scalaVersion3))
 
+lazy val ESVersion = org.scalajs.linker.interface.ESVersion
+lazy val jsSettingsTypeJson = Seq(
+  // fixes regex error: Look-behind group is not supported because it requires RegExp features of ECMAScript 2018.
+  scalaJSLinkerConfig ~= { _.withESFeatures(_.withESVersion(ESVersion.ES2018)) }
+  // jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(
+  //   org.scalajs.jsenv.nodejs.NodeJSEnv.Config().withArgs(List("--stack-size=2013"))
+  // )
+)
+
 lazy val typedJson =
   projectMatrix
     .in(file("typed-json"))
@@ -193,12 +198,15 @@ lazy val typedJson =
     .settings(
       libraryDependencies += "io.github.frawa" %%% "inline-files" % "0.5.2" % Test
     )
+    .settings(
+      unmanagedSources / excludeFilter := "*/suggestion/*" || "*/validation/*"
+    )
     .settings(sharedSettings)
     .settings(sharedScalacSettings)
     .settings(strictScalacSettings)
     .settings(sharedTestSettings)
     .jvmPlatform(sharedPlatformSettings)
-    .jsPlatform(sharedPlatformSettings)
+    .jsPlatform(sharedPlatformSettings, jsSettingsTypeJson)
     .dependsOn(parser)
     .configure(p => p.dependsOn(macros))
     .dependsOn(parserJawn % "test")

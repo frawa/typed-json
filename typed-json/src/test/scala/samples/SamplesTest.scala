@@ -23,33 +23,53 @@ import frawa.typedjson.parser.jawn.JawnParser
 import frawa.typedjson.validation.TypeMismatch
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.parser.Parser
+import frawa.typedjson.util.WithPointer
+import frawa.typedjson.testutil.TestUtil.parseJsonValue
 
 class SamplesTest extends FunSuite:
   given Parser = new JawnParser()
 
-  test("always valid without a schema") {
+  import frawa.typedjson.output.FlagOutput.given
+
+  test("no output without a schema") {
     val typedJson = TypedJson.create()
-    val json      = """{"foo":"bar"}"""
-    val result    = typedJson.validate(json)
-    assertEquals(result.map(_.valid), Right(true))
+    val json      = parseJsonValue("""{"foo":"bar"}""")
+    val (o, _)    = typedJson.eval(json)
+    assertEquals(o, None)
   }
 
   test("use schema to validate several values") {
     val schemaJson = """{"type": "string"}"""
     val typedJson  = TypedJson.create(schemaJson).toOption.get
 
-    val validJson = """"foo""""
-    assertEquals(typedJson.validate(validJson).map(_.valid), Right(true))
-    val invalidJson = """13"""
-    assertEquals(typedJson.validate(invalidJson).map(_.valid), Right(false))
+    val validJson       = parseJsonValue(""""foo"""")
+    val (o, typedJson1) = typedJson.eval(validJson)
+    assertEquals(o.map(_.valid), Some(true))
+    val invalidJson = parseJsonValue("""13""")
+    val (o2, _)     = typedJson1.eval(invalidJson)
+    assertEquals(o2.map(_.valid), Some(false))
   }
 
-  test("obtain validation errors") {
+  test("use schema to validate several values at once") {
     val schemaJson = """{"type": "string"}"""
     val typedJson  = TypedJson.create(schemaJson).toOption.get
 
-    val invalidJson = """true"""
-    val validation  = typedJson.validate(invalidJson)
-    assertEquals(validation.map(_.valid), Right(false))
-    assertEquals(validation.map(_.output.errors), Right(Seq(TypedJson.Error(Pointer.empty, TypeMismatch("string")))))
+    val validJson   = parseJsonValue(""""foo"""")
+    val invalidJson = parseJsonValue("""13""")
+
+    val (os, _) = typedJson.evalBulk(Seq(validJson, invalidJson))
+    assertEquals(os.map(_.valid), Seq(true, false))
+  }
+
+  test("obtain validation errors") {
+    import frawa.typedjson.output.SimpleOutput
+    import frawa.typedjson.output.SimpleOutput.given
+
+    val schemaJson = """{"type": "string"}"""
+    val typedJson  = TypedJson.create(schemaJson).toOption.get
+
+    val invalidJson = parseJsonValue("""true""")
+    val (o, _)      = typedJson.eval(invalidJson)
+    assertEquals(o.map(_.valid), Some(false))
+    assertEquals(o.map(_.errors), Some(Seq(WithPointer(TypeMismatch("string")))))
   }

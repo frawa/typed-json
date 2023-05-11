@@ -16,26 +16,22 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import frawa.typedjson.testutil.TestUtil.{*, given}
-import frawa.typedjson.macros.Macros
-
 import frawa.inlinefiles.InlineFiles.*
+import frawa.typedjson.macros.Macros
+import frawa.typedjson.testutil.TestUtil.{*, given}
 
 class Draft202012Test extends JsonSchemaTestSuite:
   private val draft202012Files = draft202012.files()
 
-  // override protected val onlyDescription: Option[String] = Some("unevaluatedItems with nested items")
+  override protected val onlyDescription: Option[String] =
+    // Some("allOf.json - allOf")
+    // Some("validate definition against metaschema")
+    // Some("neither anyOf valid (complex)")
+    None
 
   // TODO un-ignore 'em
-  override val ignore: Set[String] = Set(
+  override val ignoreFiles: Seq[String] = Seq(
     "content.json" // TODO keywords contentMediaType, contentEncoding, contentSchema
-  )
-
-  // TODO un-ignore 'em
-  override val ignoreDescriptionByFile: Map[String, Set[String]] = Map(
-    "id.json" -> Set(
-      "Invalid use of fragments in location-independent $id" // TODO format "uri-reference"
-    )
   )
 
   checkFiles(draft202012Files)(parseJsonValue)

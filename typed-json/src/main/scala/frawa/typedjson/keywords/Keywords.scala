@@ -22,88 +22,90 @@ import frawa.typedjson.keywords.SchemaProblems.{
   MissingReference,
   UnsupportedKeyword
 }
-import frawa.typedjson.parser.Value.*
 import frawa.typedjson.parser.*
+import frawa.typedjson.parser.Value.*
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.util.UriUtil
 import frawa.typedjson.util.UriUtil.CurrentLocation
+import frawa.typedjson.util.EitherUtil.*
 
 import java.net.URI
 import scala.reflect.TypeTest
 
 sealed trait Keyword
-sealed trait AssertionKeyword  extends Keyword
-sealed trait ApplicatorKeyword extends Keyword
+sealed trait TypeKeyword extends Keyword
 
-case class TrivialKeyword(v: Boolean)                                    extends AssertionKeyword
-sealed trait TypeKeyword                                                 extends AssertionKeyword
-case object NullTypeKeyword                                              extends TypeKeyword
-case object BooleanTypeKeyword                                           extends TypeKeyword
-case object StringTypeKeyword                                            extends TypeKeyword
-case object NumberTypeKeyword                                            extends TypeKeyword
-case object IntegerTypeKeyword                                           extends TypeKeyword
-case object ArrayTypeKeyword                                             extends TypeKeyword
-case object ObjectTypeKeyword                                            extends TypeKeyword
-case class ObjectRequiredKeyword(names: Seq[String])                     extends AssertionKeyword
-case class NotKeyword(keywords: Keywords)                                extends ApplicatorKeyword
-case class AllOfKeyword(keywords: Seq[Keywords])                         extends ApplicatorKeyword
-case class AnyOfKeyword(keywords: Seq[Keywords])                         extends ApplicatorKeyword
-case class OneOfKeyword(keywords: Seq[Keywords])                         extends ApplicatorKeyword
-case class UnionTypeKeyword(keywords: Seq[Keywords.KeywordWithLocation]) extends ApplicatorKeyword
-case class EnumKeyword(values: Seq[Value])                               extends AssertionKeyword
+case class TrivialKeyword(v: Boolean)                extends Keyword
+case object NullTypeKeyword                          extends TypeKeyword
+case object BooleanTypeKeyword                       extends TypeKeyword
+case object StringTypeKeyword                        extends TypeKeyword
+case object NumberTypeKeyword                        extends TypeKeyword
+case object IntegerTypeKeyword                       extends TypeKeyword
+case object ArrayTypeKeyword                         extends TypeKeyword
+case object ObjectTypeKeyword                        extends TypeKeyword
+case class ObjectRequiredKeyword(names: Seq[String]) extends Keyword
+case class NotKeyword(keywords: Keywords)            extends Keyword
+case class AllOfKeyword(keywords: Seq[Keywords])     extends Keyword
+case class AnyOfKeyword(keywords: Seq[Keywords])     extends Keyword
+case class OneOfKeyword(keywords: Seq[Keywords])     extends Keyword
+case class UnionTypeKeyword(keywords: Seq[Keyword])  extends Keyword
+case class EnumKeyword(values: Seq[Value])           extends Keyword
 case class ArrayItemsKeyword(
     items: Option[Keywords] = None,
     prefixItems: Seq[Keywords] = Seq()
-) extends ApplicatorKeyword
+) extends Keyword
 case class ObjectPropertiesKeyword(
     properties: Map[String, Keywords] = Map(),
     patternProperties: Map[String, Keywords] = Map(),
     additionalProperties: Option[Keywords] = None
-) extends ApplicatorKeyword
+) extends Keyword
 case class IfThenElseKeyword(
     ifKeywords: Option[Keywords] = None,
     thenKeywords: Option[Keywords] = None,
     elseKeywords: Option[Keywords] = None
-) extends ApplicatorKeyword
-case class PatternKeyword(pattern: String)                                                 extends AssertionKeyword
-case class FormatKeyword(format: String)                                                   extends AssertionKeyword
-case class MinimumKeyword(min: BigDecimal, exclude: Boolean = false)                       extends AssertionKeyword
-case class UniqueItemsKeyword(unique: Boolean)                                             extends AssertionKeyword
-case class PropertyNamesKeyword(keywords: Keywords)                                        extends ApplicatorKeyword
-case class LazyParseKeywords(resolved: URI, parse: () => Either[SchemaProblems, Keywords]) extends ApplicatorKeyword
-case class MultipleOfKeyword(n: BigDecimal)                                                extends AssertionKeyword
-case class MaximumKeyword(max: BigDecimal, exclude: Boolean = false)                       extends AssertionKeyword
-case class MaxLengthKeyword(max: BigDecimal)                                               extends AssertionKeyword
-case class MinLengthKeyword(min: BigDecimal)                                               extends AssertionKeyword
-case class MaxItemsKeyword(max: BigDecimal)                                                extends AssertionKeyword
-case class MinItemsKeyword(min: BigDecimal)                                                extends AssertionKeyword
-case class MaxPropertiesKeyword(max: BigDecimal)                                           extends AssertionKeyword
-case class MinPropertiesKeyword(min: BigDecimal)                                           extends AssertionKeyword
-case class DependentRequiredKeyword(required: Map[String, Seq[String]])                    extends AssertionKeyword
-case class DependentSchemasKeyword(keywords: Map[String, Keywords])                        extends ApplicatorKeyword
+) extends Keyword
+case class PatternKeyword(pattern: String)                                extends Keyword
+case class FormatKeyword(format: String)                                  extends Keyword
+case class MinimumKeyword(min: BigDecimal, exclude: Boolean = false)      extends Keyword
+case class UniqueItemsKeyword(unique: Boolean)                            extends Keyword
+case class PropertyNamesKeyword(keywords: Keywords)                       extends Keyword
+case class RefKeyword(ref: String, base: URI, scope: DynamicScope)        extends Keyword
+case class DynamicRefKeyword(ref: String, base: URI, scope: DynamicScope) extends Keyword
+case class MultipleOfKeyword(n: BigDecimal)                               extends Keyword
+case class MaximumKeyword(max: BigDecimal, exclude: Boolean = false)      extends Keyword
+case class MaxLengthKeyword(max: BigDecimal)                              extends Keyword
+case class MinLengthKeyword(min: BigDecimal)                              extends Keyword
+case class MaxItemsKeyword(max: BigDecimal)                               extends Keyword
+case class MinItemsKeyword(min: BigDecimal)                               extends Keyword
+case class MaxPropertiesKeyword(max: BigDecimal)                          extends Keyword
+case class MinPropertiesKeyword(min: BigDecimal)                          extends Keyword
+case class DependentRequiredKeyword(required: Map[String, Seq[String]])   extends Keyword
+case class DependentSchemasKeyword(keywords: Map[String, Keywords])       extends Keyword
 case class ContainsKeyword(schema: Option[Keywords] = None, min: Option[Int] = None, max: Option[Int] = None)
-    extends ApplicatorKeyword
-case class UnevaluatedItemsKeyword(pushed: Keywords, unevaluated: Keywords)      extends ApplicatorKeyword
-case class UnevaluatedPropertiesKeyword(pushed: Keywords, unevaluated: Keywords) extends ApplicatorKeyword
+    extends Keyword
+case class UnevaluatedItemsKeyword(pushed: Keywords, unevaluated: Keywords)            extends Keyword
+case class UnevaluatedPropertiesKeyword(pushed: Keywords, unevaluated: Keywords)       extends Keyword
+case class WithLocation(keyword: Keyword, kl: KeywordLocation = KeywordLocation.empty) extends Keyword
+case class IgnoredKeyword(keyword: String)                                             extends Keyword
 
 case class Keywords(
     vocabulary: Vocabulary,
-    schema: SchemaValue,
-    keywords: Set[Keywords.KeywordWithLocation] = Set(),
-    lastKeywords: Seq[Keywords => Keywords] = Seq(),
-    ignored: Set[String] = Set.empty
+    keywords: Set[Keyword] = Set(),
+    lastKeywords: Seq[Keywords => Keywords] = Seq()
 ):
   import Keywords.*
-  import frawa.typedjson.util.SeqUtil.*
 
-  def map[E](f: KeywordWithLocation => E): Seq[E] =
+  def map[E](f: Keyword => E): Seq[E] =
     keywords.map(f).toSeq
 
-  def flatMap[E](f: KeywordWithLocation => Set[E]): Seq[E] =
+  def flatMap[E](f: Keyword => Set[E]): Seq[E] =
     keywords.flatMap(f).toSeq
 
+  private def withLocation(keyword: Keyword)(using location: CurrentLocation): WithLocation =
+    WithLocation(keyword, location.kl)
+
   private def add(keyword: Keyword)(using location: CurrentLocation): Keywords =
-    this.copy(keywords = keywords + location(keyword))
+    this.copy(keywords = keywords + withLocation(keyword))
 
   private def addLast(push: Keywords => Keywords)(using location: CurrentLocation): Keywords =
     this.copy(lastKeywords = lastKeywords :+ push)
@@ -116,12 +118,14 @@ case class Keywords(
     }
     given CurrentLocation = scope.currentLocation
     for keywords <- combineAllLefts(keywords0)(SchemaProblems.combine)
-    yield add(f(keywords)).withIgnored(keywords.flatMap(_.ignored).toSet)
+    yield add(f(keywords))
 
   private def doneParsing(): Keywords =
-    lastKeywords.foldLeft(this) { (acc, push) =>
-      push(acc)
-    }
+    lastKeywords
+      .foldLeft(this) { (acc, push) =>
+        push(acc)
+      }
+      .copy(lastKeywords = Seq())
 
   private def withKeyword(
       keyword: String,
@@ -137,14 +141,14 @@ case class Keywords(
         Right(
           getTypeCheck(typeName)
             .map(add(_))
-            .getOrElse(withIgnored(s"$keyword-$typeName"))
+            .getOrElse(this)
         )
 
       case ("type", ArrayValue(values)) =>
         def typeNames = Value.asStrings(values)
         def keywords = typeNames
           .flatMap(getTypeCheck)
-          .map(location(_))
+          .map(withLocation(_))
 
         Right(add(UnionTypeKeyword(keywords)))
 
@@ -163,7 +167,7 @@ case class Keywords(
 
       case ("unevaluatedItems", v) =>
         for keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(v)), scope1)
-        yield addLast(pushed => Keywords(vocabulary, schema).add(UnevaluatedItemsKeyword(pushed, keywords)))
+        yield addLast(pushed => Keywords(vocabulary).add(UnevaluatedItemsKeyword(pushed, keywords)))
 
       case ("properties", ObjectValue(properties)) =>
         mapKeywordsFor(properties, resolver, scope1) { keywords =>
@@ -181,7 +185,7 @@ case class Keywords(
 
       case ("unevaluatedProperties", v) =>
         for keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(v)), scope1)
-        yield addLast(pushed => Keywords(vocabulary, schema).add(UnevaluatedPropertiesKeyword(pushed, keywords)))
+        yield addLast(pushed => Keywords(vocabulary).add(UnevaluatedPropertiesKeyword(pushed, keywords)))
 
       case ("required", ArrayValue(values)) =>
         def names = Value.asStrings(values)
@@ -234,24 +238,10 @@ case class Keywords(
         Right(this)
 
       case ("$ref", StringValue(ref)) =>
-        for
-          resolution <- resolver
-            .resolveRef(ref)
-            .map(Right(_))
-            .getOrElse(Left(SchemaProblems(MissingReference(ref))))
-          vocabulary1 <- SchemaValue.vocabulary(resolution, vocabulary)
-          keyword = lazyResolve(vocabulary1, resolution, scope1)
-        yield add(keyword)
+        Right(add(RefKeyword(ref, resolver.base, scope1)))
 
       case ("$dynamicRef", StringValue(ref)) =>
-        for
-          resolution <- resolver
-            .resolveDynamicRef(ref, scope)
-            .map(Right(_))
-            .getOrElse(Left(SchemaProblems(MissingDynamicReference(ref))))
-          vocabulary1 <- SchemaValue.vocabulary(resolution, vocabulary)
-          keyword = lazyResolve(vocabulary1, resolution, scope1)
-        yield add(keyword)
+        Right(add(DynamicRefKeyword(ref, resolver.base, scope1)))
 
       case ("$comment", StringValue(_)) =>
         // only for schema authors and readers
@@ -363,18 +353,8 @@ case class Keywords(
       //   Right(this)
       // }
 
-      case _ => Left(SchemaProblems(UnsupportedKeyword(keyword)))
-
-  private def lazyResolve(
-      vocabulary: Vocabulary,
-      resolution: SchemaResolution,
-      scope: DynamicScope
-  ): LazyParseKeywords =
-    val resolveLater = { () =>
-      Keywords.parseKeywords(vocabulary, resolution, scope)
-    }
-    val resolved = resolution.resolver.base
-    LazyParseKeywords(resolved, resolveLater)
+      case _ =>
+        Left(SchemaProblems(UnsupportedKeyword(keyword)))
 
   private def mapKeywordsFor(props: Map[String, Value], resolver: SchemaResolver, scope: DynamicScope)(
       f: Map[String, Keywords] => Keywords
@@ -391,22 +371,21 @@ case class Keywords(
     for
       propKeywords <- combineAllLefts(propKeywords0)(SchemaProblems.combine)
       keywords = Map.from(propKeywords)
-      ignored  = keywords.values.flatMap(_.ignored).toSet
-    yield f(keywords).withIgnored(ignored)
+    yield f(keywords)
 
   private def updateKeyword[K <: Keyword](
       newKeyword: => K
   )(f: K => K)(using location: CurrentLocation, tt: TypeTest[Keyword, K]): Keywords =
-    val keywords0: Set[KeywordWithLocation] =
+    val keywords0: Set[Keyword] =
       if keywords.exists {
-          case UriUtil.WithLocation(_, _: K) => true
-          case _                             => false
+          case WithLocation(_: K, _) => true
+          case _                     => false
         }
       then keywords
-      else keywords + location(newKeyword)
+      else keywords + withLocation(newKeyword)
     this.copy(keywords = keywords0.map {
-      case UriUtil.WithLocation(uri, keyword: K) => UriUtil.WithLocation(uri, f(keyword))
-      case c @ _                                 => c
+      case WithLocation(keyword: K, kl) => WithLocation(f(keyword), kl)
+      case c @ _                        => c
     })
 
   private def updateKeywordsInside[K <: Keyword](
@@ -417,12 +396,6 @@ case class Keywords(
   )(f: (Keywords, K) => K)(using CurrentLocation, TypeTest[Keyword, K]): Either[SchemaProblems, Keywords] =
     for keywords <- Keywords.parseKeywords(vocabulary, resolution, scope)
     yield updateKeyword(newKeyword)(f(keywords, _))
-
-  private def withIgnored(keyword: String): Keywords =
-    this.copy(ignored = ignored + keyword)
-
-  private def withIgnored(ignored: Set[String]): Keywords =
-    this.copy(ignored = ignored.concat(ignored))
 
   private def getTypeCheck(typeName: String): Option[TypeKeyword] =
     typeName match
@@ -436,7 +409,7 @@ case class Keywords(
       case _         => None
 
 object Keywords:
-  type KeywordWithLocation = UriUtil.WithLocation[Keyword]
+  // type KeywordWithLocation = UriUtil.WithLocation[Keyword]
 
   def apply(
       schema: SchemaValue,
@@ -464,9 +437,9 @@ object Keywords:
     given CurrentLocation = scope1.currentLocation
 
     schema.value match
-      case BoolValue(v) => Right(Keywords(vocabulary, schema).add(TrivialKeyword(v)))
+      case BoolValue(v) => Right(Keywords(vocabulary).add(TrivialKeyword(v)))
       case ObjectValue(properties) =>
-        val keywords = Keywords(vocabulary, schema)
+        val keywords = Keywords(vocabulary)
         if properties.isEmpty then Right(keywords.add(TrivialKeyword(true)))
         else
           properties
@@ -483,7 +456,7 @@ object Keywords:
                         .map(_.prefix(prefix))
                         .swap
                     } else {
-                      Right(keywords.withIgnored(keyword))
+                      Right(keywords.add(IgnoredKeyword(keyword)))
                     }
                   }
               )

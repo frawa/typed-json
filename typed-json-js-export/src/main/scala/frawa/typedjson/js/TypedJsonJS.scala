@@ -16,36 +16,33 @@
 
 package frawa.typedjson.js
 
+import frawa.typedjson.{TypedJson}
+import frawa.typedjson.TypedJson.Validation
 import frawa.typedjson.parser.jawn.JawnParser
 import frawa.typedjson.keywords.*
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.parser.{Offset, OffsetParser, Value}
 import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.suggestion.{SuggestionProcessing}
-import frawa.typedjson.validation.{ValidationProcessing, ValidationOutput}
+import frawa.typedjson.output.OutputOps
+import frawa.typedjson.output.SimpleOutput
+import frawa.typedjson.suggest.SuggestOutput
+import frawa.typedjson.suggest.Suggest
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSExport, JSExportAll, JSExportTopLevel}
-import frawa.typedjson.suggestion.SuggestionOutput
 
 @JSExportTopLevel("TypedJsonFactory")
 object TypedJsonFactory {
   private val parser = new JawnParser
 
   @JSExport
-  def create(): TypedJson = {
-    TypedJson(None)
+  def create(): TypedJsonJS = {
+    TypedJsonJS(TypedJson.create())
   }
 
   @JSExport
-  def withMetaSchema(): TypedJson = {
-    val resolver     = MetaSchemas.lazyResolver
-    val base         = MetaSchemas.draft202012
-    val Some(schema) = resolver(base.resolve("schema")): @unchecked
-    val vocabulary   = Vocabulary.specDialect()
-    val keywords     = Keywords(schema, Some(vocabulary), Some(resolver))
-    TypedJson(Some(keywords))
-  }
+  def withMetaSchema(): TypedJsonJS =
+    TypedJsonJS(TypedJson.createWithMetaSchemas())
 
   def parseJsonOffsetValue(json: String): Either[OffsetParser.ParseError, Offset.Value] = {
     parser.parseWithOffset(json)
@@ -61,79 +58,70 @@ object TypedJsonFactory {
 }
 
 @JSExportTopLevel("TypedJson")
-case class TypedJson(
-    keywords: Option[Either[SchemaProblems, Keywords]],
+case class TypedJsonJS(
+    typedJson: TypedJson,
     value: Option[Offset.Value] = None,
-    result: Option[Either[OffsetParser.ParseError, Result[ValidationOutput]]] = None
+    _markers: Seq[Marker] = Seq()
 ) {
   @JSExport
-  def withSchema(schema: TypedJson): TypedJson = {
-    val resolver    = MetaSchemas.lazyResolver
-    val schemaValue = schema.value.map(Offset.withoutOffset).map(SchemaValue.root)
-    val vocabulary  = Vocabulary.specDialect()
-    val keywords    = schemaValue.map(Keywords(_, Some(vocabulary), Some(resolver)))
-    this.copy(keywords = keywords).validate()
+  def withSchema(schema: TypedJsonJS): TypedJsonJS = {
+    schema.value
+      .map(Offset.withoutOffset)
+      .map(SchemaValue.root)
+      .flatMap { schemaValue =>
+        val created = TypedJson.createWithSchema(schemaValue)
+        // TODO report errors
+        created.toOption
+      }
+      .map { typedJson =>
+        this.copy(typedJson = typedJson)
+      }
+      .getOrElse(this)
   }
 
   @JSExport
-  def forValue(json: String): TypedJson = {
+  def forValue(json: String): TypedJsonJS = {
     val parsed = TypedJsonFactory.parseJsonOffsetValue(json)
     parsed match {
       case Right(value) =>
-        this.copy(value = Some(value), result = None).validate()
+        this.copy(value = Some(value)).validate()
       case Left(error) =>
-        this.copy(value = error.recoveredValue, result = Some(Left(error)))
+        this.copy(value = error.recoveredValue, Seq(Marker.fromParsingError(error)))
     }
   }
 
-  private def validate(): TypedJson = {
-    keywords match {
-      case Some(Right(keywords)) =>
-        value match {
-          case Some(value) =>
-            val evaluator = Evaluator(keywords, ValidationProcessing())
-            val result    = evaluator(InnerValue(Offset.withoutOffset(value)))
-            this.copy(result = Some(Right(result)))
-          case None =>
-            this
+  private def validate(): TypedJsonJS =
+    value
+      .flatMap { value =>
+        import SimpleOutput.given
+        val (o, typedJson) = this.typedJson.eval(value)
+        o.map { o =>
+          val offsetAt = pointer => TypedJsonFactory.offsetAt(pointer, value)
+          copy(_markers = o.errors.map(Marker.fromError(offsetAt)), typedJson = typedJson)
         }
-      case _ => this
-    }
-  }
+      }
+      .getOrElse(this)
 
   @JSExport
   def markers(): js.Array[Marker] = {
-    val markers = (keywords, value, result) match {
-      case (Some(Right(_)), Some(value), Some(Right(result))) if !result.valid =>
-        val offsetAt = pointer => TypedJsonFactory.offsetAt(pointer, value)
-        result.output
-          .map(_.errors)
-          .getOrElse(Seq())
-          .map(Marker.fromError(offsetAt))
-      case (Some(Left(problems)), _, _) => problems.errors.map(Marker.fromSchemaError) // TODO not needed?
-      case (_, _, Some(Left(error))) =>
-        Seq(Marker.fromParsingError(error))
-      case _ => Seq.empty
-    }
-    js.Array(markers*)
+    js.Array(_markers*)
   }
 
   @JSExport
   def suggestAt(offset: Int): js.Array[Suggestions] = {
-    val suggestions = keywords match {
-      case Some(Right(keywords)) =>
-        value match {
-          case Some(value) =>
-            val pointer   = TypedJsonFactory.pointerAt(value, offset)
-            val evaluator = Evaluator(keywords, SuggestionProcessing(pointer))
-            val result    = evaluator(InnerValue(Offset.withoutOffset(value)))
-            val offsetAt  = pointer => TypedJsonFactory.offsetAt(pointer, value)
-            Seq(Suggestions(offsetAt)(pointer, result))
-          case None =>
-            Seq.empty
+    val suggestions = value
+      .flatMap { value =>
+        val at                         = TypedJsonFactory.pointerAt(value, offset)
+        given OutputOps[SuggestOutput] = SuggestOutput.outputOps(at)
+        val (o, _)                     = this.typedJson.eval(value)
+        o.map { o =>
+          val suggestions = Suggest.suggestions(at, o)
+          val offsetAt    = pointer => TypedJsonFactory.offsetAt(pointer, value)
+          Suggestions(offsetAt)(at, suggestions)
         }
-      case _ => Seq.empty
-    }
+      }
+      .map(Seq(_))
+      .getOrElse(Seq())
     js.Array(suggestions*)
   }
 }
@@ -151,15 +139,15 @@ case class Marker(
 object Marker {
   def fromSchemaError(error: SchemaProblems.SchemaError): Marker = {
     // TODO localized messages
-    val message = error.result.toString
+    val message = error.value.toString
     Marker(0, 0, error.pointer.toString, message, "error")
   }
 
-  def fromError(offsetAt: Pointer => Option[Offset])(error: ValidationOutput.Error): Marker = {
+  def fromError(offsetAt: Pointer => Option[Offset])(error: SimpleOutput.Error): Marker = {
     val offset       = offsetAt(error.pointer)
     val (start, end) = offset.map(o => (o.start, o.end)).getOrElse((0, 0))
     // TODO localized messages
-    val message = error.result.toString
+    val message = error.value.toString
     Marker(start, end, error.pointer.toString, message, "error")
   }
 
@@ -184,10 +172,10 @@ case class Suggestion(
 )
 
 object Suggestions {
-  def apply(offsetAt: Pointer => Option[Offset])(pointer: Pointer, result: Result[SuggestionOutput]): Suggestions = {
+  def apply(offsetAt: Pointer => Option[Offset])(pointer: Pointer, values: Seq[Value]): Suggestions = {
     val offset       = offsetAt(pointer)
     val (start, end) = offset.map(o => (o.start, o.end)).getOrElse((0, 0))
-    val suggestions  = result.output.map(_.suggestions).getOrElse(Seq()).map(toSuggestion)
+    val suggestions  = values.map(toSuggestion)
     Suggestions(start, end, pointer.toString, js.Array(suggestions.toSeq*))
   }
 

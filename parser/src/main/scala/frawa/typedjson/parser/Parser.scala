@@ -25,11 +25,12 @@ object Parser:
 
 sealed trait Value
 object Value:
-  case class NumberValue(value: BigDecimal)              extends Value
-  case class BoolValue(value: Boolean)                   extends Value
-  case object NullValue                                  extends Value
-  case class StringValue(value: String)                  extends Value
-  case class ArrayValue(items: Seq[Value])               extends Value
+  case class NumberValue(value: BigDecimal) extends Value
+  case class BoolValue(value: Boolean)      extends Value
+  case object NullValue                     extends Value
+  case class StringValue(value: String)     extends Value
+  case class ArrayValue(items: Seq[Value])  extends Value
+
   case class ObjectValue(properties: Map[String, Value]) extends Value
 
   def asString(value: Value): Option[String] = value match
@@ -40,8 +41,16 @@ object Value:
     case BoolValue(v) => Some(v)
     case _            => None
 
+  def asNumber(value: Value): Option[BigDecimal] = value match
+    case NumberValue(v) => Some(v)
+    case _              => None
+
   def asObject(value: Value): Option[Map[String, Value]] = value match
     case ObjectValue(v) => Some(v)
     case _              => None
 
   def asStrings(values: Seq[Value]): Seq[String] = values.flatMap(asString)
+
+  def asArray(value: Value): Option[Seq[Value]] = value match
+    case ArrayValue(v) => Some(v)
+    case _             => None
