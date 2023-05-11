@@ -67,7 +67,7 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
   final def compile(keywords: Keywords, kl: KeywordLocation): Fun[R[O]] =
     val ks  = keywords.keywords.toSeq
     val fun = compileSeq(ks, kl)
-    value => verify.verifyAllOf(fun)(value).map(_.forKeyword(AllOfKeyword(Seq()), kl))
+    value => verify.verifyAllOf(fun)(value).map(_.forKeyword(kl))
 
   private final def compileSeq(ks: Seq[Keyword], kl: KeywordLocation): Fun[R[Seq[O]]] =
     val funs = ks.map(compileOne(_, kl))
@@ -105,7 +105,8 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         val funProperties        = compile(properties, kl)
         val funPatternProperties = compile(patternProperties, kl)
         val funAdditionalProperties = additionalProperties.map(additionalProperties =>
-          verify.verifyAdditionalProperties((compile(additionalProperties, kl)))
+          val fun = verify.verifyAdditionalProperties((compile(additionalProperties, kl)))
+          funForKeyword(fun, kl)
         )
         verify.verfyObjectProperties(funProperties, funPatternProperties, funAdditionalProperties)
       case ObjectRequiredKeyword(names) => verify.verifyObjectRequired(names)
@@ -153,5 +154,8 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case _: WithLocation      => fun
       case _: RefKeyword        => fun
       case _: DynamicRefKeyword => fun
-      case _                    => value => fun(value).map(_.forKeyword(k, kl))
+      case _                    => funForKeyword(fun, kl, Some(k))
     }
+
+  private def funForKeyword(fun: Fun[R[O]], kl: KeywordLocation, k: Option[Keyword] = None): Fun[R[O]] = value =>
+    fun(value).map(_.forKeyword(kl, k))
