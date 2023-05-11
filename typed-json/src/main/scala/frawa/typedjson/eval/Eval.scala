@@ -147,7 +147,7 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case UnevaluatedPropertiesKeyword(pushed, unevaluated) =>
         val funs = pushed.keywords.map(compileOne(_, kl)).toSeq
         verify.verifyUnevaluatedProperties(funs, compile(unevaluated, kl))
-      case WithLocation(_, k, kl)  => compileOne(k, kl)
+      case WithLocation(k, kl)     => compileOne(k, kl)
       case IgnoredKeyword(keyword) => verify.verifyIgnored(keyword)
     }
     k match {

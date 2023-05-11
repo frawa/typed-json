@@ -28,9 +28,6 @@ case class DynamicScope(uris: Seq[URI], kl: KeywordLocation = KeywordLocation.em
     .map(withoutFragement)
     .distinct
 
-  // def parent(): DynamicScope =
-  //   this.copy(uris = uris.dropRight(1))
-
   def push(segment: String): DynamicScope =
     push(_ / segment)
 
@@ -55,7 +52,7 @@ case class DynamicScope(uris: Seq[URI], kl: KeywordLocation = KeywordLocation.em
     push(next).copy(kl = kl.push(pushFun))
 
   def currentLocation: CurrentLocation =
-    CurrentLocation(uris.lastOption.getOrElse(uri("#")), kl)
+    CurrentLocation(kl)
 
 object DynamicScope:
   def empty: DynamicScope = DynamicScope(Seq())

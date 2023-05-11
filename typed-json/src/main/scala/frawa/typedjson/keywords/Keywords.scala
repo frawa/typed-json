@@ -83,10 +83,10 @@ case class DependentRequiredKeyword(required: Map[String, Seq[String]])   extend
 case class DependentSchemasKeyword(keywords: Map[String, Keywords])       extends Keyword
 case class ContainsKeyword(schema: Option[Keywords] = None, min: Option[Int] = None, max: Option[Int] = None)
     extends Keyword
-case class UnevaluatedItemsKeyword(pushed: Keywords, unevaluated: Keywords)                      extends Keyword
-case class UnevaluatedPropertiesKeyword(pushed: Keywords, unevaluated: Keywords)                 extends Keyword
-case class WithLocation(uri: URI, keyword: Keyword, kl: KeywordLocation = KeywordLocation.empty) extends Keyword
-case class IgnoredKeyword(keyword: String)                                                       extends Keyword
+case class UnevaluatedItemsKeyword(pushed: Keywords, unevaluated: Keywords)            extends Keyword
+case class UnevaluatedPropertiesKeyword(pushed: Keywords, unevaluated: Keywords)       extends Keyword
+case class WithLocation(keyword: Keyword, kl: KeywordLocation = KeywordLocation.empty) extends Keyword
+case class IgnoredKeyword(keyword: String)                                             extends Keyword
 
 case class Keywords(
     vocabulary: Vocabulary,
@@ -102,7 +102,7 @@ case class Keywords(
     keywords.flatMap(f).toSeq
 
   private def withLocation(keyword: Keyword)(using location: CurrentLocation): WithLocation =
-    WithLocation(location.uri, keyword, location.kl)
+    WithLocation(keyword, location.kl)
 
   private def add(keyword: Keyword)(using location: CurrentLocation): Keywords =
     this.copy(keywords = keywords + withLocation(keyword))
@@ -378,14 +378,14 @@ case class Keywords(
   )(f: K => K)(using location: CurrentLocation, tt: TypeTest[Keyword, K]): Keywords =
     val keywords0: Set[Keyword] =
       if keywords.exists {
-          case WithLocation(_, _: K, _) => true
-          case _                        => false
+          case WithLocation(_: K, _) => true
+          case _                     => false
         }
       then keywords
       else keywords + withLocation(newKeyword)
     this.copy(keywords = keywords0.map {
-      case WithLocation(uri, keyword: K, kl) => WithLocation(uri, f(keyword), kl)
-      case c @ _                             => c
+      case WithLocation(keyword: K, kl) => WithLocation(f(keyword), kl)
+      case c @ _                        => c
     })
 
   private def updateKeywordsInside[K <: Keyword](

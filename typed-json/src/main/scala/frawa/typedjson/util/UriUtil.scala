@@ -55,7 +55,7 @@ object UriUtil:
     !uri.isOpaque() && uri.getScheme() == null && uri.getAuthority() == null && uri.getPath().isEmpty &&
       uri.getFragment() != null
 
-  case class CurrentLocation(uri: URI, kl: KeywordLocation)
+  case class CurrentLocation(kl: KeywordLocation)
 
   private def escape(value: String): String =
     // this is because the ScalaJS implementation of URI might fail

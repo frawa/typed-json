@@ -54,7 +54,7 @@ class KeywordsTest extends FunSuite:
       assertKeywords(schema) { keywords =>
         assertEquals(
           keywords.keywords,
-          Set(WithLocation(uri("#/type"), NullTypeKeyword, KeywordLocation(Pointer.parse("/type"))))
+          Set(WithLocation(NullTypeKeyword, KeywordLocation(Pointer.parse("/type"))))
         )
       }
     }
@@ -65,7 +65,7 @@ class KeywordsTest extends FunSuite:
       assertKeywords(schema) { keywords =>
         assertEquals(
           keywords.keywords,
-          Set(WithLocation(uri("#/type"), BooleanTypeKeyword, KeywordLocation(Pointer.parse("/type"))))
+          Set(WithLocation(BooleanTypeKeyword, KeywordLocation(Pointer.parse("/type"))))
         )
       }
     }
@@ -74,7 +74,7 @@ class KeywordsTest extends FunSuite:
   test("true schema") {
     withSchema(trueSchema) { schema =>
       assertKeywords(schema) { keywords =>
-        assertEquals(keywords.keywords, Set(WithLocation(uri("#"), TrivialKeyword(true))))
+        assertEquals(keywords.keywords, Set(WithLocation(TrivialKeyword(true))))
       }
     }
   }
@@ -82,7 +82,7 @@ class KeywordsTest extends FunSuite:
   test("false schema") {
     withSchema(falseSchema) { schema =>
       assertKeywords(schema) { keywords =>
-        assertEquals(keywords.keywords, Set(WithLocation(uri("#"), TrivialKeyword(false))))
+        assertEquals(keywords.keywords, Set(WithLocation(TrivialKeyword(false))))
       }
     }
   }
@@ -94,11 +94,10 @@ class KeywordsTest extends FunSuite:
           keywords.keywords,
           Set(
             WithLocation(
-              uri("#/not"),
               NotKeyword(
                 Keywords(
                   vocabularyForTest,
-                  Set(WithLocation(uri("#/not"), TrivialKeyword(false), KeywordLocation(Pointer.parse("/not"))))
+                  Set(WithLocation(TrivialKeyword(false), KeywordLocation(Pointer.parse("/not"))))
                 )
               ),
               KeywordLocation(Pointer.parse("/not"))
@@ -131,7 +130,7 @@ class KeywordsTest extends FunSuite:
   test("empty schema") {
     withSchema(emtpySchema) { schema =>
       assertKeywords(schema) { keywords =>
-        assertEquals(keywords.keywords, Set(WithLocation(uri("#"), TrivialKeyword(true))))
+        assertEquals(keywords.keywords, Set(WithLocation(TrivialKeyword(true))))
       }
     }
   }
@@ -141,7 +140,7 @@ class KeywordsTest extends FunSuite:
       assertKeywords(schema) { keywords =>
         assertEquals(
           keywords.keywords,
-          Set(WithLocation(uri("#/type"), StringTypeKeyword, KeywordLocation(Pointer.parse("/type"))))
+          Set(WithLocation(StringTypeKeyword, KeywordLocation(Pointer.parse("/type"))))
         )
       }
     }
@@ -152,7 +151,7 @@ class KeywordsTest extends FunSuite:
       assertKeywords(schema) { keywords =>
         assertEquals(
           keywords.keywords,
-          Set(WithLocation(uri("#/type"), NumberTypeKeyword, KeywordLocation(Pointer.parse("/type"))))
+          Set(WithLocation(NumberTypeKeyword, KeywordLocation(Pointer.parse("/type"))))
         )
       }
     }
@@ -163,7 +162,7 @@ class KeywordsTest extends FunSuite:
       assertKeywords(schema) { keywords =>
         assertEquals(
           keywords.keywords,
-          Set(WithLocation(uri("#/type"), ArrayTypeKeyword, KeywordLocation(Pointer.parse("/type"))))
+          Set(WithLocation(ArrayTypeKeyword, KeywordLocation(Pointer.parse("/type"))))
         )
       }
     }
@@ -175,16 +174,14 @@ class KeywordsTest extends FunSuite:
         assertEquals(
           keywords.keywords,
           Set(
-            WithLocation(uri("#/type"), ArrayTypeKeyword, KeywordLocation(Pointer.parse("/type"))),
+            WithLocation(ArrayTypeKeyword, KeywordLocation(Pointer.parse("/type"))),
             WithLocation(
-              uri("#/items"),
               ArrayItemsKeyword(
                 Some(
                   Keywords(
                     vocabularyForTest,
                     Set(
                       WithLocation(
-                        uri("#/items/type"),
                         NumberTypeKeyword,
                         KeywordLocation(Pointer.parse("/items/type"))
                       )
@@ -204,14 +201,12 @@ class KeywordsTest extends FunSuite:
           keywords.keywords,
           Set(
             WithLocation(
-              uri("#/items"),
               ArrayItemsKeyword(
                 Some(
                   Keywords(
                     vocabularyForTest,
                     Set(
                       WithLocation(
-                        uri("#/items/type"),
                         NumberTypeKeyword,
                         KeywordLocation(Pointer.parse("/items/type"))
                       )
@@ -221,7 +216,7 @@ class KeywordsTest extends FunSuite:
               ),
               KeywordLocation(Pointer.parse("/items"))
             ),
-            WithLocation(uri("#/type"), ArrayTypeKeyword, KeywordLocation(Pointer.parse("/type")))
+            WithLocation(ArrayTypeKeyword, KeywordLocation(Pointer.parse("/type")))
           )
         )
       }
@@ -234,16 +229,14 @@ class KeywordsTest extends FunSuite:
         assertEquals(
           keywords.keywords,
           Set(
-            WithLocation(uri("#/type"), ObjectTypeKeyword, KeywordLocation(Pointer.parse("/type"))),
+            WithLocation(ObjectTypeKeyword, KeywordLocation(Pointer.parse("/type"))),
             WithLocation(
-              uri("#/properties"),
               ObjectPropertiesKeyword(
                 Map(
                   "toto" -> Keywords(
                     vocabularyForTest,
                     keywords = Set(
                       WithLocation(
-                        uri("#/properties/toto/type"),
                         NumberTypeKeyword,
                         KeywordLocation(Pointer.parse("/properties/toto/type"))
                       )
@@ -253,7 +246,6 @@ class KeywordsTest extends FunSuite:
                     vocabularyForTest,
                     keywords = Set(
                       WithLocation(
-                        uri("#/properties/titi/type"),
                         StringTypeKeyword,
                         KeywordLocation(Pointer.parse("/properties/titi/type"))
                       )
@@ -279,9 +271,8 @@ class KeywordsTest extends FunSuite:
         assertEquals(
           keywords.keywords,
           Set(
-            WithLocation(uri("#/type"), ObjectTypeKeyword, KeywordLocation(Pointer.parse("/type"))),
+            WithLocation(ObjectTypeKeyword, KeywordLocation(Pointer.parse("/type"))),
             WithLocation(
-              uri("#/required"),
               ObjectRequiredKeyword(
                 names = IndexedSeq(
                   "titi"
@@ -302,14 +293,12 @@ class KeywordsTest extends FunSuite:
           keywords.keywords,
           Set(
             WithLocation(
-              uri("#/allOf"),
               AllOfKeyword(
                 Seq(
                   Keywords(
                     vocabularyForTest,
                     keywords = Set(
                       WithLocation(
-                        uri("#/allOf/0/type"),
                         NumberTypeKeyword,
                         KeywordLocation(Pointer.parse("/allOf/0/type"))
                       )
@@ -332,14 +321,12 @@ class KeywordsTest extends FunSuite:
           keywords.keywords,
           Set(
             WithLocation(
-              uri("#/anyOf"),
               AnyOfKeyword(
                 Seq(
                   Keywords(
                     vocabularyForTest,
                     keywords = Set(
                       WithLocation(
-                        uri("#/anyOf/0/type"),
                         NumberTypeKeyword,
                         KeywordLocation(Pointer.parse("/anyOf/0/type"))
                       )
@@ -349,7 +336,6 @@ class KeywordsTest extends FunSuite:
                     vocabularyForTest,
                     keywords = Set(
                       WithLocation(
-                        uri("#/anyOf/1/type"),
                         StringTypeKeyword,
                         KeywordLocation(Pointer.parse("/anyOf/1/type"))
                       )
@@ -372,14 +358,12 @@ class KeywordsTest extends FunSuite:
           keywords.keywords,
           Set(
             WithLocation(
-              uri("#/oneOf"),
               OneOfKeyword(
                 Seq(
                   Keywords(
                     vocabularyForTest,
                     keywords = Set(
                       WithLocation(
-                        uri("#/oneOf/0/type"),
                         NumberTypeKeyword,
                         KeywordLocation(Pointer.parse("/oneOf/0/type"))
                       )
@@ -389,7 +373,6 @@ class KeywordsTest extends FunSuite:
                     vocabularyForTest,
                     keywords = Set(
                       WithLocation(
-                        uri("#/oneOf/1/type"),
                         StringTypeKeyword,
                         KeywordLocation(Pointer.parse("/oneOf/1/type"))
                       )
@@ -412,13 +395,12 @@ class KeywordsTest extends FunSuite:
           keywords.keywords,
           Set(
             WithLocation(
-              uri("#/else"),
               IfThenElseKeyword(
                 Some(
                   Keywords(
                     vocabularyForTest,
                     Set(
-                      WithLocation(uri("#/if/type"), NumberTypeKeyword, KeywordLocation(Pointer.empty / "if" / "type"))
+                      WithLocation(NumberTypeKeyword, KeywordLocation(Pointer.empty / "if" / "type"))
                     ),
                     Seq()
                   )
@@ -428,7 +410,6 @@ class KeywordsTest extends FunSuite:
                     vocabularyForTest,
                     Set(
                       WithLocation(
-                        uri("#/then/type"),
                         NumberTypeKeyword,
                         KeywordLocation(Pointer.empty / "then" / "type")
                       )
@@ -441,7 +422,6 @@ class KeywordsTest extends FunSuite:
                     vocabularyForTest,
                     Set(
                       WithLocation(
-                        uri("#/else/type"),
                         StringTypeKeyword,
                         KeywordLocation(Pointer.empty / "else" / "type")
                       )
@@ -465,11 +445,10 @@ class KeywordsTest extends FunSuite:
           keywords.keywords,
           Set(
             WithLocation(
-              uri("#/type"),
               UnionTypeKeyword(
                 Seq(
-                  WithLocation(uri("#/type"), NullTypeKeyword, KeywordLocation(Pointer.empty / "type")),
-                  WithLocation(uri("#/type"), StringTypeKeyword, KeywordLocation(Pointer.empty / "type"))
+                  WithLocation(NullTypeKeyword, KeywordLocation(Pointer.empty / "type")),
+                  WithLocation(StringTypeKeyword, KeywordLocation(Pointer.empty / "type"))
                 )
               ),
               KeywordLocation(Pointer.empty / "type")
@@ -486,9 +465,8 @@ class KeywordsTest extends FunSuite:
         assertEquals(
           keywords.keywords,
           Set(
-            WithLocation(uri("#/type"), StringTypeKeyword, KeywordLocation(Pointer.empty / "type")),
+            WithLocation(StringTypeKeyword, KeywordLocation(Pointer.empty / "type")),
             WithLocation(
-              uri("#/enum"),
               EnumKeyword(
                 values = Seq(
                   StringValue(
@@ -513,9 +491,8 @@ class KeywordsTest extends FunSuite:
         assertEquals(
           keywords.keywords,
           Set(
-            WithLocation(uri("#/type"), StringTypeKeyword, KeywordLocation(Pointer.empty / "type")),
+            WithLocation(StringTypeKeyword, KeywordLocation(Pointer.empty / "type")),
             WithLocation(
-              uri("#/const"),
               EnumKeyword(
                 values = Seq(
                   StringValue(
