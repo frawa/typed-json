@@ -78,8 +78,8 @@ class OutputJsonTest extends FunSuite:
         case (StringValue(xx), StringValue(yy)) => xx.compareTo(yy)
         case (NumberValue(xx), NumberValue(yy)) => xx.compareTo(yy)
         case (BoolValue(xx), BoolValue(yy))     => xx.compareTo(yy)
-        case (ArrayValue(xx), ArrayValue(yy))   => seqOrdering.compare(xx, yy)
-        case (ObjectValue(xx), ObjectValue(yy)) => seqOrdering.compare(xx.values.toSeq.sorted, yy.values.toSeq.sorted)
+        case (ArrayValue(xx), ArrayValue(yy))   => seqOrdering.compare(xx.sorted, yy.sorted)
+        case (ObjectValue(xx), ObjectValue(yy)) => seqOrdering.compare(xx.toSeq.sorted, yy.toSeq.sorted)
         case _                                  => -1
       }
 
