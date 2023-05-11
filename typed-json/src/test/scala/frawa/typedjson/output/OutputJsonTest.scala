@@ -296,6 +296,8 @@ class OutputJsonTest extends FunSuite:
     assertEquals(detailedJsonString, expectetedJsonString)
   }
 
+  test("validate detailed output".ignore) {}
+
 object Sample:
   val schema: String = """|{
                           |  "$id": "https://example.com/polygon",
