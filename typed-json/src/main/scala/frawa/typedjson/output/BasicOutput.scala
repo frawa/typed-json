@@ -97,7 +97,7 @@ object BasicOutput:
       def isValid: Boolean                                          = o.valid
       def withAnnotations(annotations: Seq[Evaluated]): BasicOutput = o.copy(annotations = o.annotations ++ annotations)
       def getAnnotations(): Seq[Evaluated]                          = o.annotations
-      def forKeyword(k: Keyword, kl: KeywordLocation): BasicOutput =
+      def forKeyword(kl: KeywordLocation, k: Option[Keyword] = None): BasicOutput =
         if o.keywordLocation.isDefined && !o.keywordLocation.contains(kl) then
           // TODO avoid this situation
           // println(s"FW ignore ${kl} keep ${o.keywordLocation}")

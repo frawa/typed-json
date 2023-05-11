@@ -77,7 +77,7 @@ object DetailedOutput:
       def withAnnotations(annotations: Seq[Evaluated]): DetailedOutput =
         o.copy(annotations = o.annotations ++ annotations)
       def getAnnotations(): Seq[Evaluated] = o.annotations
-      def forKeyword(k: Keyword, kl: KeywordLocation): DetailedOutput =
+      def forKeyword(kl: KeywordLocation, k: Option[Keyword] = None): DetailedOutput =
         if o.keywordLocation.isDefined && !o.keywordLocation.contains(kl) then
           // TODO avoid this situation
           // println(s"FW ignore ${kl} keep ${o.keywordLocation}")
