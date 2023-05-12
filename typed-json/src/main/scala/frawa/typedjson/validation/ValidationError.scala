@@ -40,15 +40,14 @@ case class PatternMismatch(pattern: String)                             extends 
 case class FormatMismatch(format: String)                               extends ValidationError
 case class MinimumMismatch(min: BigDecimal, exclude: Boolean)           extends ValidationError
 case class ItemsNotUnique()                                             extends ValidationError
-case class UnsupportedCheck(validate: Keyword)                          extends ValidationError
 case class NotMultipleOf(n: BigDecimal)                                 extends ValidationError
 case class MaximumMismatch(max: BigDecimal, exclude: Boolean)           extends ValidationError
 case class MaxLengthMismatch(max: BigDecimal)                           extends ValidationError
 case class MinLengthMismatch(min: BigDecimal)                           extends ValidationError
-case class MaxItemsMismatch(max: BigDecimal)                            extends ValidationError
+case class MaxItemsMismatch(max: BigDecimal, found: BigDecimal)         extends ValidationError
 case class MinItemsMismatch(min: BigDecimal, found: BigDecimal)         extends ValidationError
-case class MaxPropertiesMismatch(max: BigDecimal)                       extends ValidationError
-case class MinPropertiesMismatch(min: BigDecimal)                       extends ValidationError
+case class MaxPropertiesMismatch(max: BigDecimal, found: BigDecimal)    extends ValidationError
+case class MinPropertiesMismatch(min: BigDecimal, found: BigDecimal)    extends ValidationError
 case class DependentRequiredMissing(missing: Map[String, Seq[String]])  extends ValidationError
 case class NotContains(valid: Int)                                      extends ValidationError
 case class CannotResolve(ref: String, problems: Option[SchemaProblems]) extends ValidationError

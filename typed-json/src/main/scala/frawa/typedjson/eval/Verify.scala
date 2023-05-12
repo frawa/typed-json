@@ -130,13 +130,15 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         }
     }
 
-  private def verifyObjectValue(error: => ValidationError)(validate: Map[String, Value] => Boolean): Fun[R[O]] =
+  private def verifyObjectValue(
+      error: Map[String, Value] => ValidationError
+  )(validate: Map[String, Value] => Boolean): Fun[R[O]] =
     funUnit2 { value =>
       Value
         .asObject(value.value)
-        .map { v =>
-          if validate(v) then ops.valid(value.pointer)
-          else ops.invalid(error, value.pointer)
+        .map { vs =>
+          if validate(vs) then ops.valid(value.pointer)
+          else ops.invalid(error(vs), value.pointer)
         }
     }
 
@@ -283,7 +285,7 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
     }
 
   def verifyMaxItems(max: BigDecimal): Fun[R[O]] =
-    verifyArrayValue(_ => MaxItemsMismatch(max)) { vs =>
+    verifyArrayValue(vs => MaxItemsMismatch(max, vs.length)) { vs =>
       max >= vs.length
     }
 
@@ -362,12 +364,12 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
     }
 
   def verifyMaxProperties(max: BigDecimal): Fun[R[O]] =
-    verifyObjectValue(MaxPropertiesMismatch(max)) { v =>
+    verifyObjectValue(vs => MaxPropertiesMismatch(max, vs.size)) { v =>
       max >= v.keySet.size
     }
 
   def verifyMinProperties(min: BigDecimal): Fun[R[O]] =
-    verifyObjectValue(MinPropertiesMismatch(min)) { v =>
+    verifyObjectValue(vs => MinPropertiesMismatch(min, vs.size)) { v =>
       min <= v.keySet.size
     }
 

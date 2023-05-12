@@ -49,7 +49,7 @@ import frawa.typedjson.validation.MinPropertiesMismatch
 import frawa.typedjson.validation.NotContains
 import frawa.typedjson.validation.DependentRequiredMissing
 import frawa.typedjson.validation.CannotResolveDynamic
-import frawa.typedjson.validation.UnsupportedCheck
+import frawa.typedjson.util.ShowValue.prettyPrint
 
 object OutputJson:
 
@@ -125,9 +125,9 @@ private def toMessage(error: ValidationError): String =
     case SubSchemaFailed()                 => "A subschema had errors."
     case FalseSchemaReason()               => "Always invalid."
     case TypeMismatch(expected)            => s"Wrong type, expecting '${expected}."
-    case NotOneOf(valid)                   => s"Expected one of, but found '${valid} valid."
+    case NotOneOf(valid)                   => s"Expected one, but found '${valid} valid."
     case NotInvalid()                      => "Expected invalid, but found valid."
-    case NotInEnum(values)                 => s"Not in enum values: ${quotedItems(values.map(_.toString))}."
+    case NotInEnum(values)                 => s"Not in enum values: ${quotedItems(values.map(prettyPrint(2)))}."
     case MissingRequiredProperties(Seq(p)) => s"Required property '${p}' not found."
     case MissingRequiredProperties(ps)     => s"Required properties ${quotedItems(ps)} not found."
     case AdditionalPropertyInvalid(p)      => s"Additional property '${p}' found but was invalid."
@@ -139,14 +139,14 @@ private def toMessage(error: ValidationError): String =
     case MaximumMismatch(max, exclude) =>
       if exclude then s"Expected less than ${max}."
       else s"Expected less than or equal to ${max}."
-    case ItemsNotUnique()             => "Items expected to be unique."
-    case NotMultipleOf(n)             => s"Expected to be multiple of ${n}."
-    case MaxLengthMismatch(max)       => s"Expected maximal length of ${max}."
-    case MinLengthMismatch(min)       => s"Expected minimal length of ${min}."
-    case MaxItemsMismatch(max)        => s"Expected at most ${max} items."
-    case MinItemsMismatch(min, found) => s"Expected at least ${min} items but found ${found}."
-    case MaxPropertiesMismatch(max)   => s"Expected at most ${max} properties."
-    case MinPropertiesMismatch(min)   => s"Expected at least ${min} properties."
+    case ItemsNotUnique()                  => "Items expected to be unique."
+    case NotMultipleOf(n)                  => s"Expected to be multiple of ${n}."
+    case MaxLengthMismatch(max)            => s"Expected maximal length of ${max}."
+    case MinLengthMismatch(min)            => s"Expected minimal length of ${min}."
+    case MaxItemsMismatch(max, found)      => s"Expected at most ${max} items but found ${found}."
+    case MinItemsMismatch(min, found)      => s"Expected at least ${min} items but found ${found}."
+    case MaxPropertiesMismatch(max, found) => s"Expected at most ${max} properties but found ${found}."
+    case MinPropertiesMismatch(min, found) => s"Expected at least ${min} properties but found ${found}."
     case DependentRequiredMissing(missing) =>
       s"Missing dependend required properties: ${missing
           .map { (p, vs) =>
@@ -154,7 +154,6 @@ private def toMessage(error: ValidationError): String =
           }
           .mkString(", ")}"
     case NotContains(valid)                         => s"Expected to contain ${valid} items."
-    case UnsupportedCheck(keyword)                  => s"Unsupported keyword ${keyword}."
     case CannotResolve(ref, problems)               => s"Cannot resolve ${ref}: ${problems.mkString(", ")}"
     case CannotResolveDynamic(ref, scope, problems) => s"Cannot resolve dynamically ${ref}: ${problems.mkString(", ")}"
   }

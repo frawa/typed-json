@@ -221,7 +221,7 @@ class EvalKeywordTest extends FunSuite:
           SimpleOutput(
             false,
             Seq(
-              WithPointer(MaxItemsMismatch(2))
+              WithPointer(MaxItemsMismatch(2, 3))
             )
           ),
           SimpleOutput(true)
@@ -269,7 +269,7 @@ class EvalKeywordTest extends FunSuite:
           SimpleOutput(
             false,
             Seq(
-              WithPointer(MaxPropertiesMismatch(2))
+              WithPointer(MaxPropertiesMismatch(2, 3))
             )
           ),
           SimpleOutput(true)
@@ -293,7 +293,7 @@ class EvalKeywordTest extends FunSuite:
           SimpleOutput(
             false,
             Seq(
-              WithPointer(MinPropertiesMismatch(3))
+              WithPointer(MinPropertiesMismatch(3, 2))
             )
           ),
           SimpleOutput(true)
