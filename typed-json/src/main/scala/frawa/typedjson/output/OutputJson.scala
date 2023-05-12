@@ -126,7 +126,7 @@ private def toMessage(error: ValidationError): String =
     case FalseSchemaReason()               => "Always invalid."
     case TypeMismatch(expected)            => s"Wrong type, expecting '${expected}."
     case NotOneOf(valid)                   => s"Expected one of, but found '${valid} valid."
-    case NotInvalid()                      => s"Expected invalid, but found valid."
+    case NotInvalid()                      => "Expected invalid, but found valid."
     case NotInEnum(values)                 => s"Not in enum values: ${quotedItems(values.map(_.toString))}."
     case MissingRequiredProperties(Seq(p)) => s"Required property '${p}' not found."
     case MissingRequiredProperties(ps)     => s"Required properties ${quotedItems(ps)} not found."
@@ -139,15 +139,20 @@ private def toMessage(error: ValidationError): String =
     case MaximumMismatch(max, exclude) =>
       if exclude then s"Expected less than ${max}."
       else s"Expected less than or equal to ${max}."
-    case ItemsNotUnique()                           => s"Items expected to be unique."
-    case NotMultipleOf(n)                           => s"Expected to be multiple of ${n}."
-    case MaxLengthMismatch(max)                     => s"Expected maximal length of ${max}."
-    case MinLengthMismatch(min)                     => s"Expected minimal length of ${min}."
-    case MaxItemsMismatch(max)                      => s"Expected at most ${max} items."
-    case MinItemsMismatch(min, found)               => s"Expected at least ${min} items but found ${found}."
-    case MaxPropertiesMismatch(max)                 => s"Expected at most ${max} properties."
-    case MinPropertiesMismatch(min)                 => s"Expected at least ${min} properties."
-    case DependentRequiredMissing(missing)          => s"FW."
+    case ItemsNotUnique()             => "Items expected to be unique."
+    case NotMultipleOf(n)             => s"Expected to be multiple of ${n}."
+    case MaxLengthMismatch(max)       => s"Expected maximal length of ${max}."
+    case MinLengthMismatch(min)       => s"Expected minimal length of ${min}."
+    case MaxItemsMismatch(max)        => s"Expected at most ${max} items."
+    case MinItemsMismatch(min, found) => s"Expected at least ${min} items but found ${found}."
+    case MaxPropertiesMismatch(max)   => s"Expected at most ${max} properties."
+    case MinPropertiesMismatch(min)   => s"Expected at least ${min} properties."
+    case DependentRequiredMissing(missing) =>
+      s"Missing dependend required properties: ${missing
+          .map { (p, vs) =>
+            s"${p} requires ${quotedItems(vs)}"
+          }
+          .mkString(", ")}"
     case NotContains(valid)                         => s"Expected to contain ${valid} items."
     case UnsupportedCheck(keyword)                  => s"Unsupported keyword ${keyword}."
     case CannotResolve(ref, problems)               => s"Cannot resolve ${ref}: ${problems.mkString(", ")}"
