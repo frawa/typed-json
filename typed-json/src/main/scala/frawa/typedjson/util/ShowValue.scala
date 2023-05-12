@@ -45,7 +45,7 @@ object ShowValue:
     val sep1 = s"\n${ws(indent + 1)}"
     v match {
       case NullValue      => "null"
-      case StringValue(v) => s"'${v}'"
+      case StringValue(v) => s"\"${v}\""
       case NumberValue(v) => s"${v}"
       case BoolValue(v)   => s"${v}"
       case ArrayValue(items) =>
@@ -56,7 +56,7 @@ object ShowValue:
         else
           s"{${sep1}${properties.toSeq.sorted
               .map { (p, v) =>
-                s"${p}:${prettyPrint(indent + 1)(v)}"
+                s"\"${p}\": ${prettyPrint(indent + 1)(v)}"
               }
               .mkString(s",${sep1}")}${sep}}"
     }
