@@ -51,6 +51,7 @@ import frawa.typedjson.validation.{
 import frawa.typedjson.output.OutputOps
 import frawa.typedjson.util.FP
 import frawa.typedjson.keywords.Ignored
+import scala.util.Try
 
 class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 
@@ -350,7 +351,8 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 
   def verifyMultiple(n: BigDecimal): Fun[R[O]] =
     verifyNumberValue(NotMultipleOf(n)) { v =>
-      (v / n).isValidInt
+      if v.isWhole then Try(v % n == 0).getOrElse(false)
+      else (v / n).isValidInt
     }
 
   def verifyMaxLength(max: BigDecimal): Fun[R[O]] =
