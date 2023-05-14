@@ -68,7 +68,14 @@ trait SchemaResolver:
       val pointer = Pointer.parse(uri.getFragment)
       resolve(UriUtil.withoutFragement(uri))
         .flatMap(resolvePointer(_, pointer))
-    else resolve(uri)
+    else
+      resolve(uri)
+        .orElse {
+          if uri.getFragment() != null then
+            resolve(UriUtil.withoutFragement(uri))
+              .flatMap { case SchemaResolution(_, resolver) => resolver.resolve(uri) }
+          else None
+        }
 
   private def resolvePointer(resolution: SchemaResolution, pointer: Pointer): Option[SchemaResolution] =
     val SchemaResolution(schema, resolver) = resolution
