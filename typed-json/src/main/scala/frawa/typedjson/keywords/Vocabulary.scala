@@ -29,6 +29,11 @@ case class Vocabulary(keywords: Map[String, Vocabulary.NestedSchemaType], ids: S
   def defines: String => Boolean = keywords.keySet.contains
   def isFormatAssertion: Boolean = ids.contains(Vocabulary.formatAssertionId)
 
+  def withFormatAssertion(assertion: Boolean): Vocabulary =
+    if assertion && ids.contains(Vocabulary.formatAnnotationId) then
+      combine(Vocabulary.specVocabularies(Vocabulary.formatAssertionId))
+    else this
+
   def nestedSchemas(keyword: String)(value: Value): Option[Seq[Value]] =
     keywords
       .get(keyword)
