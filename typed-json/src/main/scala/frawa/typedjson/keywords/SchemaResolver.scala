@@ -67,7 +67,8 @@ trait SchemaResolver:
     if uri.getFragment() != null && uri.getFragment().startsWith("/") then
       val pointer = Pointer.parse(uri.getFragment)
       resolve(UriUtil.withoutFragement(uri))
-        .flatMap(resolvePointer(_, pointer))
+        .zip(pointer)
+        .flatMap { (resolution, pointer) => resolvePointer(resolution, pointer) }
     else
       resolve(uri)
         .orElse {

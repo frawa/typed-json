@@ -55,10 +55,14 @@ class PointerTest extends FunSuite:
   }
 
   test("parse") {
-    assertEquals(parse("/toto/titi"), empty / "toto" / "titi")
-    assertEquals(parse("/$defs/gnu"), empty / "$defs" / "gnu")
-    assertEquals(parse("/toto~1titi"), empty / "toto/titi")
-    assertEquals(parse("/toto~0titi"), empty / "toto~titi")
+    assertEquals(parse("/toto/titi"), Some(empty / "toto" / "titi"))
+    assertEquals(parse("/$defs/gnu"), Some(empty / "$defs" / "gnu"))
+    assertEquals(parse("/toto~1titi"), Some(empty / "toto/titi"))
+    assertEquals(parse("/toto~0titi"), Some(empty / "toto~titi"))
+  }
+
+  test("invalid escape") {
+    assertEquals(parse("/toto~titi"), None)
   }
 
   test("get root") {
@@ -87,28 +91,28 @@ class PointerTest extends FunSuite:
   }
 
   test("parsing roundtrip") {
-    assertEquals(parse(empty.toString), empty)
+    assertEquals(parse(empty.toString), Some(empty))
     val p1 = empty / "foo"
-    assertEquals(parse(p1.toString), p1)
+    assertEquals(parse(p1.toString), Some(p1))
     val p2 = empty / "foo" / 13
-    assertEquals(parse(p2.toString), p2)
+    assertEquals(parse(p2.toString), Some(p2))
 
     val s1 = ""
-    assertEquals(parse(s1).toString, s1)
+    assertEquals(parse(s1).map(_.toString), Some(s1))
     val s2 = "/foo"
-    assertEquals(parse(s2).toString, s2)
+    assertEquals(parse(s2).map(_.toString), Some(s2))
     val s3 = "/foo/13"
-    assertEquals(parse(s3).toString, s3)
+    assertEquals(parse(s3).map(_.toString), Some(s3))
   }
 
   test("get parsed array item") {
     val value = ArrayValue(Seq(NumberValue(13), NumberValue(14)))
-    assertEquals(parse("/1")(value), Some(NumberValue(14)))
-    assertEquals(parse("/13")(value), None)
+    assertEquals(parse("/1").flatMap(_(value)), Some(NumberValue(14)))
+    assertEquals(parse("/13").flatMap(_(value)), None)
   }
 
   test("parsed object field item") {
     val value = ObjectValue(Map("foo" -> NumberValue(13), "14" -> NumberValue(14)))
-    assertEquals(parse("/foo")(value), Some(NumberValue(13)))
-    assertEquals(parse("/14")(value), Some(NumberValue(14)))
+    assertEquals(parse("/foo").flatMap(_(value)), Some(NumberValue(13)))
+    assertEquals(parse("/14").flatMap(_(value)), Some(NumberValue(14)))
   }
