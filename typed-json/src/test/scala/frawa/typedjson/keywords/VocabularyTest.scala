@@ -30,6 +30,7 @@ class VocabularyTest extends FunSuite:
       .groupBy(_._1)
       .view
       .mapValues(_.map(_._2).sum)
+      .filterNot(_._1 == "format") // format-assertion, format-annotation
       .filter(_._2 > 1)
       .keys
       .toSeq
