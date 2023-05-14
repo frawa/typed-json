@@ -31,9 +31,14 @@ class Draft202012OptionalTest extends JsonSchemaTestSuite:
 //    "bignum.json", // TODO bug/limitation (128bit big decimal?) in Zio parser?, refusing BigDecimal("12345678910111213141516171819202122232425262728293031")
     "ecmascript-regex.json",
     "float-overflow.json",
-    "format-assertion.json",
     "cross-draft.json",
     "dependencies-compatibility.json"
+  )
+
+  override protected val ignoreByExpectation: Map[TestId, Seq[String]] = Map(
+    ("format-assertion.json", "schema that uses custom metaschema with format-assertion: false") -> Seq(
+      "format-assertion: false: invalid string"
+    )
   )
 
   checkFiles(draft202012OptionalFiles)(parseJsonValue)
