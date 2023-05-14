@@ -536,3 +536,33 @@ class EvalSpecDetailsTest extends FunSuite:
       )
     }
   }
+
+  test("anchor within remote ref".only) {
+    val lazyResolver = (uri: URI) => Remotes.lazyResolver(uri)
+    withCompiledSchema(
+      """|{
+         |            "$ref": "http://localhost:1234/draft2020-12/locationIndependentIdentifier.json#foo"
+         |}""".stripMargin,
+      Some(lazyResolver)
+    ) { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
+          Seq(
+            parseJsonValue("""1"""),
+            parseJsonValue(""""a"""")
+          ),
+          { _ => }
+        ),
+        Seq(
+          SimpleOutput(true),
+          SimpleOutput(
+            false,
+            errors = Seq(
+              WithPointer(TypeMismatch("integer"))
+            )
+          )
+        )
+      )
+    }
+  }
