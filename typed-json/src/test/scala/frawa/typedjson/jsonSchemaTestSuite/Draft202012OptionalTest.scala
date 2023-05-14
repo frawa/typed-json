@@ -29,8 +29,8 @@ class Draft202012OptionalTest extends JsonSchemaTestSuite:
   // TODO un-ignore 'em
   override val ignoreFiles: Seq[String] = Seq(
     // "bignum.json", // TODO bug/limitation (128bit big decimal?) in Zio parser?, refusing BigDecimal("12345678910111213141516171819202122232425262728293031")
-    "ecmascript-regex.json",
-    "cross-draft.json"
+    "ecmascript-regex.json", // TODO later
+    "cross-draft.json"       // TODO later
   )
 
   override protected val ignoreByExpectation: Map[TestId, Seq[String]] = Map(
