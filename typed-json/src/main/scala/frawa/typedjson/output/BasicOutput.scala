@@ -36,7 +36,7 @@ import frawa.typedjson.validation.SubSchemaFailed
 
 case class BasicOutput(
     valid: Boolean,
-    annotations: Seq[Evaluated] = Seq.empty,
+    annotations: Seq[OutputOps.Annotation] = Seq.empty,
     error: Option[ValidationError] = None,
     errors: Seq[BasicOutput.Error] = Seq(),
     instanceLocation: Pointer = Pointer.empty,
@@ -94,9 +94,10 @@ object BasicOutput:
       def not(pointer: Pointer): BasicOutput =
         if o.valid then BasicOutput(valid = false, error = Some(NotInvalid()), instanceLocation = pointer)
         else BasicOutput(valid = true, instanceLocation = pointer)
-      def isValid: Boolean                                          = o.valid
-      def withAnnotations(annotations: Seq[Evaluated]): BasicOutput = o.copy(annotations = o.annotations ++ annotations)
-      def getAnnotations(): Seq[Evaluated]                          = o.annotations
+      def isValid: Boolean = o.valid
+      def withAnnotations(annotations: Seq[OutputOps.Annotation]): BasicOutput =
+        o.copy(annotations = o.annotations ++ annotations)
+      def getAnnotations(): Seq[OutputOps.Annotation] = o.annotations
       def forKeyword(kl: KeywordLocation, k: Option[Keyword] = None): BasicOutput =
         if o.keywordLocation.isDefined && !o.keywordLocation.contains(kl) then
           // TODO avoid this situation

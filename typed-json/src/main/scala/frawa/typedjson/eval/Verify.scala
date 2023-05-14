@@ -52,6 +52,7 @@ import frawa.typedjson.output.OutputOps
 import frawa.typedjson.util.FP
 import frawa.typedjson.keywords.Ignored
 import scala.util.Try
+import scala.compiletime.ops.boolean
 
 class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 
@@ -90,14 +91,14 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 
   private def verifyOneOf(os: Seq[O], pointer: Pointer): O =
     val count       = os.count(_.isValid)
-    val annotations = OutputOps.mergeEvaluatedAnnotations(os.filter(_.isValid).flatMap(_.getAnnotations()))
+    val annotations = OutputOps.mergeAnnotations(os.filter(_.isValid).flatMap(_.getAnnotations()))
     if count == 1 then ops.valid(pointer).withAnnotations(annotations)
     else if count == 0 then ops.all(os, None, pointer) // TODO new error NoneOf?
     else ops.invalid(NotOneOf(count), pointer)
 
   private def verifyAnyOf(os: Seq[O], pointer: Pointer): O =
     val valid       = os.exists(_.isValid)
-    val annotations = OutputOps.mergeEvaluatedAnnotations(os.filter(_.isValid).flatMap(_.getAnnotations()))
+    val annotations = OutputOps.mergeAnnotations(os.filter(_.isValid).flatMap(_.getAnnotations()))
     if valid then ops.valid(pointer).withAnnotations(annotations)
     else ops.all(os, None, pointer) // TODO new error NoneOf?
 
@@ -325,16 +326,19 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       }
       .getOrElse(monad.unit(ops.valid(value.pointer)))
 
-  def verifyFormat(format: String): Fun[R[O]] =
+  def verifyFormat(format: String, assertion: Boolean): Fun[R[O]] =
     funUnit2 { value =>
       Formats
         .hasFormat(format)
         .map { pred =>
           Value
             .asString(value.value)
-            .filterNot(pred)
-            .map { _ =>
-              ops.invalid(FormatMismatch(format), value.pointer)
+            .map { v =>
+              val valid = pred(v)
+              val o =
+                if assertion && !valid then ops.invalid(FormatMismatch(format), value.pointer)
+                else ops.valid(value.pointer)
+              o.withAnnotation(Format(valid, format))
             }
             .getOrElse(ops.valid(value.pointer))
         }

@@ -27,9 +27,14 @@ import frawa.typedjson.keywords.KeywordLocation
 
 // see https://json-schema.org/draft/2020-12/json-schema-core.html#name-flag
 
-case class FlagOutput(valid: Boolean, pointer: Pointer = Pointer.empty, annotations: Seq[Evaluated] = Seq.empty)
+case class FlagOutput(
+    valid: Boolean,
+    pointer: Pointer = Pointer.empty,
+    annotations: Seq[OutputOps.Annotation] = Seq.empty
+)
 
 object FlagOutput:
+  import OutputOps.Annotation
   given OutputOps[FlagOutput] with
     def valid(pointer: Pointer): FlagOutput                           = FlagOutput(true, pointer)
     def invalid(error: ValidationError, pointer: Pointer): FlagOutput = FlagOutput(false, pointer)
@@ -38,12 +43,12 @@ object FlagOutput:
       FlagOutput(
         os.forall(_.valid),
         pointer,
-        OutputOps.mergeEvaluatedAnnotations(os.filter(_.pointer == pointer).flatMap(_.annotations))
+        OutputOps.mergeAnnotations(os.filter(_.pointer == pointer).flatMap(_.annotations))
       )
 
     extension (o: FlagOutput)
-      def not(pointer: Pointer): FlagOutput                        = o.copy(valid = !o.valid, annotations = Seq())
-      def isValid: Boolean                                         = o.valid
-      def withAnnotations(annotations: Seq[Evaluated]): FlagOutput = o.copy(annotations = o.annotations ++ annotations)
-      def getAnnotations(): Seq[Evaluated]                         = o.annotations
+      def not(pointer: Pointer): FlagOutput                         = o.copy(valid = !o.valid, annotations = Seq())
+      def isValid: Boolean                                          = o.valid
+      def withAnnotations(annotations: Seq[Annotation]): FlagOutput = o.copy(annotations = o.annotations ++ annotations)
+      def getAnnotations(): Seq[Annotation]                         = o.annotations
       def forKeyword(kl: KeywordLocation, k: Option[Keyword] = None): FlagOutput = o

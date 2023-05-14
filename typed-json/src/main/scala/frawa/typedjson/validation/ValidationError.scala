@@ -26,6 +26,7 @@ import java.util.UUID
 import java.util.regex.Pattern
 import scala.reflect.TypeTest
 import scala.util.Try
+import frawa.typedjson.output.OutputOps
 
 sealed trait ValidationError
 case class SubSchemaFailed()                                            extends ValidationError
@@ -54,5 +55,6 @@ case class CannotResolve(ref: String, problems: Option[SchemaProblems]) extends 
 case class CannotResolveDynamic(ref: String, scope: DynamicScope, problems: Option[SchemaProblems])
     extends ValidationError
 
-sealed trait ValidationAnnotation
-case class UnknownFormat(format: String) extends ValidationAnnotation
+sealed trait ValidationAnnotation                 extends OutputOps.Annotation
+case class Format(valid: Boolean, format: String) extends ValidationAnnotation
+case class UnknownFormat(format: String)          extends ValidationAnnotation

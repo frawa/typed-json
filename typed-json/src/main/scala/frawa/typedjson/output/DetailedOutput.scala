@@ -39,7 +39,7 @@ case class DetailedOutput(
     keywordLocation: Option[KeywordLocation] = None,
     error: Option[ValidationError] = None,
     errors: Seq[DetailedOutput] = Seq(),
-    annotations: Seq[Evaluated] = Seq.empty
+    annotations: Seq[OutputOps.Annotation] = Seq.empty
 )
 
 object DetailedOutput:
@@ -74,9 +74,9 @@ object DetailedOutput:
         if o.valid then DetailedOutput(valid = false, error = Some(NotInvalid()), instanceLocation = pointer)
         else DetailedOutput(valid = true, instanceLocation = pointer)
       def isValid: Boolean = o.valid
-      def withAnnotations(annotations: Seq[Evaluated]): DetailedOutput =
+      def withAnnotations(annotations: Seq[OutputOps.Annotation]): DetailedOutput =
         o.copy(annotations = o.annotations ++ annotations)
-      def getAnnotations(): Seq[Evaluated] = o.annotations
+      def getAnnotations(): Seq[OutputOps.Annotation] = o.annotations
       def forKeyword(kl: KeywordLocation, k: Option[Keyword] = None): DetailedOutput =
         if o.keywordLocation.isDefined && !o.keywordLocation.contains(kl) then
           // TODO avoid this situation

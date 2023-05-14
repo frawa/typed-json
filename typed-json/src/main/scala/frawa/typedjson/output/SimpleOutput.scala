@@ -36,10 +36,12 @@ case class SimpleOutput(
     valid: Boolean,
     errors: Seq[SimpleOutput.Error] = Seq(),
     pointer: Pointer = Pointer.empty,
-    annotations: Seq[Evaluated] = Seq.empty
+    annotations: Seq[OutputOps.Annotation] = Seq.empty
 )
 
 object SimpleOutput:
+  import OutputOps.Annotation
+
   type Error = WithPointer[ValidationError]
 
   given OutputOps[SimpleOutput] with
@@ -64,7 +66,7 @@ object SimpleOutput:
         if o.valid then o.copy(valid = false, errors = Seq(WithPointer(NotInvalid(), pointer)), annotations = Seq())
         else o.copy(valid = true, errors = Seq())
       def isValid: Boolean = o.valid
-      def withAnnotations(annotations: Seq[Evaluated]): SimpleOutput =
+      def withAnnotations(annotations: Seq[Annotation]): SimpleOutput =
         o.copy(annotations = o.annotations ++ annotations)
-      def getAnnotations(): Seq[Evaluated]                                         = o.annotations
+      def getAnnotations(): Seq[Annotation]                                        = o.annotations
       def forKeyword(kl: KeywordLocation, k: Option[Keyword] = None): SimpleOutput = o

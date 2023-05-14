@@ -65,7 +65,7 @@ case class IfThenElseKeyword(
     elseKeywords: Option[Keywords] = None
 ) extends Keyword
 case class PatternKeyword(pattern: String)                                extends Keyword
-case class FormatKeyword(format: String)                                  extends Keyword
+case class FormatKeyword(format: String, assertion: Boolean)              extends Keyword
 case class MinimumKeyword(min: BigDecimal, exclude: Boolean = false)      extends Keyword
 case class UniqueItemsKeyword(unique: Boolean)                            extends Keyword
 case class PropertyNamesKeyword(keywords: Keywords)                       extends Keyword
@@ -263,7 +263,7 @@ case class Keywords(
         Right(add(PatternKeyword(pattern)))
 
       case ("format", StringValue(format)) =>
-        Right(add(FormatKeyword(format)))
+        Right(add(FormatKeyword(format, vocabulary.isFormatAssertion)))
 
       case ("minimum", NumberValue(v)) =>
         Right(add(MinimumKeyword(v)))
