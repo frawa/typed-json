@@ -62,5 +62,5 @@ object SchemaValue:
               Some(properties.view.flatMap { case (k, v) => Value.asBool(v).map(v => (uri(k), v)) }.toMap)
             case _ => None
           }
-          .map(Vocabulary.dialect)
+          .map(ids => Vocabulary.dialect(ids).map(_.combine(parentVocabulary)))
           .getOrElse(Right(parentVocabulary))

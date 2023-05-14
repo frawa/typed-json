@@ -32,11 +32,16 @@ object Util:
     Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId, Vocabulary.unevaluatedId)
   )
 
-  def withKeywords(schema: SchemaValue, lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None)(
+  def withKeywords(
+      schema: SchemaValue,
+      lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None,
+      vocabulary: Option[Vocabulary] = None
+  )(
       f: Keywords => Unit
   ): Unit =
+    val useVocabulary = vocabulary.orElse(vocabularyForTest)
     // TODO avoid lazyResolver
-    Keywords(schema, vocabularyForTest, lazyResolver)
+    Keywords(schema, useVocabulary, lazyResolver)
       .fold(
         errors => throw new IllegalArgumentException(s"no keywords: $errors"),
         keywords => f(keywords)
@@ -54,9 +59,10 @@ object Util:
 
   def withCompiledSchemaValue[R[_], O](
       schema: SchemaValue,
-      lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
+      lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None,
+      vocabulary: Option[Vocabulary] = None
   )(using eval: Eval[R, O])(using TheResultMonad[R, O])(f: AssertingFun[R, O]): Unit =
-    withKeywords(schema, lazyResolver) { keywords =>
+    withKeywords(schema, lazyResolver, vocabulary) { keywords =>
       val compiled         = eval.compile(keywords, KeywordLocation.empty)
       val fun              = eval.fun(compiled)
       given SchemaResolver = LoadedSchemasResolver(schema, lazyResolver)
