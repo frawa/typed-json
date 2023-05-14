@@ -141,6 +141,12 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case DependentRequiredKeyword(required) => verify.verifyDependentRequired(required)
       case DependentSchemasKeyword(keywords)  => verify.verifyDependentSchemas(compile(keywords, kl))
       case ContainsKeyword(schema, min, max)  => verify.verifyContains(schema.map(compile(_, kl)), min, max)
+      case ContentEncodingKeyword(_)          => verify.verifyValid()
+      case ContentMediaTypeKeyword(_)         => verify.verifyValid()
+      case ContentSchemaKeyword(keywords)     =>
+        // TODO
+        // val fun = compile(keywords, kl)
+        verify.verifyValid()
       case UnevaluatedItemsKeyword(pushed, unevaluated) =>
         val funs = pushed.keywords.map(compileOne(_, kl)).toSeq
         verify.verifyUnevaluatedItems(funs, compile(unevaluated, kl))

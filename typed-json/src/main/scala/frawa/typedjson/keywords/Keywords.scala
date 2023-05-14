@@ -83,6 +83,9 @@ case class DependentRequiredKeyword(required: Map[String, Seq[String]])   extend
 case class DependentSchemasKeyword(keywords: Map[String, Keywords])       extends Keyword
 case class ContainsKeyword(schema: Option[Keywords] = None, min: Option[Int] = None, max: Option[Int] = None)
     extends Keyword
+case class ContentEncodingKeyword(encoding: String)                                    extends Keyword
+case class ContentMediaTypeKeyword(mediaType: String)                                  extends Keyword
+case class ContentSchemaKeyword(keywords: Keywords)                                    extends Keyword
 case class UnevaluatedItemsKeyword(pushed: Keywords, unevaluated: Keywords)            extends Keyword
 case class UnevaluatedPropertiesKeyword(pushed: Keywords, unevaluated: Keywords)       extends Keyword
 case class WithLocation(keyword: Keyword, kl: KeywordLocation = KeywordLocation.empty) extends Keyword
@@ -347,6 +350,16 @@ case class Keywords(
       case ("$vocabulary", _) =>
         // vocabulary handled earlier
         Right(this)
+
+      case ("contentEncoding", StringValue(v)) =>
+        Right(add(ContentEncodingKeyword(v)))
+
+      case ("contentMediaType", StringValue(v)) =>
+        Right(add(ContentMediaTypeKeyword(v)))
+
+      case ("contentSchema", v) =>
+        for keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(v)), scope1)
+        yield add(ContentSchemaKeyword(keywords))
 
       // TODO
       // case ("deprecated", v) => {

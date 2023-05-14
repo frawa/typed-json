@@ -154,6 +154,11 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 
   // verifys
 
+  def verifyValid(): Fun[R[O]] =
+    funUnit { value =>
+      ops.valid(value.pointer)
+    }
+
   def verifyType[T <: Value](error: TypeMismatch[T])(using TypeTest[Value, T]): Fun[R[O]] =
     funUnit { value =>
       value.value match

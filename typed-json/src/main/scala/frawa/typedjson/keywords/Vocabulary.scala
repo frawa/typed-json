@@ -95,7 +95,7 @@ object Vocabulary:
   private val contentKeywords: Map[String, NestedSchemaType] = Map(
     "contentEncoding"  -> NoNestedSchema,
     "contentMediaType" -> NoNestedSchema,
-    "contentSchema"    -> NoNestedSchema
+    "contentSchema"    -> NestedObjectSchemas
   )
 
   private val formatAnnotationKeywords: Map[String, NestedSchemaType] = Map(
