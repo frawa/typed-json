@@ -537,7 +537,7 @@ class EvalSpecDetailsTest extends FunSuite:
     }
   }
 
-  test("anchor within remote ref".only) {
+  test("anchor within remote ref") {
     val lazyResolver = (uri: URI) => Remotes.lazyResolver(uri)
     withCompiledSchema(
       """|{
