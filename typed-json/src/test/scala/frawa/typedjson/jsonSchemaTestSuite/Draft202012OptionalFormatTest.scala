@@ -24,6 +24,8 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
 
   private val draft202012OptionalFormatFiles = draft202012.folder("optional/format").files()
 
+  override val useFormatAssertion = true
+
   // TODO un-ignore 'em
   override val ignoreFiles: Seq[String] = Seq(
     "date-time.json",
@@ -106,20 +108,6 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
       "an invalid IRI Reference",
       "an invalid IRI fragment"
     ),
-    ("json-pointer.json", "validation of JSON-pointers (JSON String Representation)") -> Seq(
-      "not a valid JSON-pointer (~ not escaped)",
-      "not a valid JSON-pointer (URI Fragment Identifier) #1",
-      "not a valid JSON-pointer (URI Fragment Identifier) #2",
-      "not a valid JSON-pointer (URI Fragment Identifier) #3",
-      "not a valid JSON-pointer (some escaped, but not all) #1",
-      "not a valid JSON-pointer (some escaped, but not all) #2",
-      "not a valid JSON-pointer (wrong escape character) #1",
-      "not a valid JSON-pointer (wrong escape character) #2",
-      "not a valid JSON-pointer (multiple characters not escaped)",
-      "not a valid JSON-pointer (isn't empty nor starts with /) #1",
-      "not a valid JSON-pointer (isn't empty nor starts with /) #2",
-      "not a valid JSON-pointer (isn't empty nor starts with /) #3"
-    ),
     ("regex.json", "validation of regular expressions") -> Seq(
       "a regular expression with unclosed parens is invalid"
     ),
@@ -130,7 +118,9 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
       "an invalid RJP that is a valid JSON Pointer",
       "explicit positive prefix",
       "zero cannot be followed by other digits, plus json-pointer",
-      "empty string"
+      "empty string",
+      "a valid upwards RJP",
+      "a valid downwards RJP"
     ),
     ("uri.json", "validation of URIs") -> Seq(
       "an invalid URI with comma in scheme", // TODO fails on JS, passes on JVM

@@ -83,9 +83,9 @@ object Formats {
         // see https://datatracker.ietf.org/doc/html/rfc4122
         Some(v => Try(UUID.fromString(v)).isSuccess)
       case "json-pointer" =>
-        Some(v => Pointer.parse(v).toString().equals(v))
+        Some(v => v.isBlank || (v.startsWith("/") && Pointer.parse(v).isDefined))
       case "relative-json-pointer" =>
-        Some(v => !v.isBlank && !v.startsWith("/") && Pointer.parse("/" + v).toString().equals("/" + v))
+        Some(v => !v.isBlank && !v.startsWith("/") && Pointer.parse("/" + v).isDefined)
       case "date-time" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
         val regex_date = "\\d{4}-\\d{2}-\\d{2}"

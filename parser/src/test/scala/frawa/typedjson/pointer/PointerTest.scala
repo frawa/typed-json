@@ -61,8 +61,9 @@ class PointerTest extends FunSuite:
     assertEquals(parse("/toto~0titi"), Some(empty / "toto~titi"))
   }
 
-  test("invalid escape") {
+  test("invalid escapes") {
     assertEquals(parse("/toto~titi"), None)
+    assertEquals(parse("/foo/bar~"), None)
   }
 
   test("get root") {
