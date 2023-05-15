@@ -25,7 +25,7 @@ import java.util.UUID
 import java.util.regex.Pattern
 import scala.util.Try
 
-object Formats {
+object Formats:
   def hasFormat(format: String): Option[String => Boolean] =
     format match
       case "regex" =>
@@ -83,9 +83,19 @@ object Formats {
         // see https://datatracker.ietf.org/doc/html/rfc4122
         Some(v => Try(UUID.fromString(v)).isSuccess)
       case "json-pointer" =>
-        Some(v => v.isBlank || (v.startsWith("/") && Pointer.parse(v).isDefined))
+        // https://www.rfc-editor.org/rfc/rfc6901.txt
+        Some(v => isJsonPointer(v))
       case "relative-json-pointer" =>
-        Some(v => !v.isBlank && !v.startsWith("/") && Pointer.parse("/" + v).isDefined)
+        // https://datatracker.ietf.org/doc/html/draft-handrews-relative-json-pointer-01
+        val pattern = "(0|[1-9][0-9]*)(#|.*)".r
+        Some(v =>
+          v match {
+            case pattern(nr, "#")     => true
+            case pattern(nr, pointer) => isJsonPointer(pointer)
+            case _                    => false
+          }
+        )
+      // Some(v => !v.isBlank && !v.startsWith("/") && Pointer.parse("/" + v).isDefined)
       case "date-time" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
         val regex_date = "\\d{4}-\\d{2}-\\d{2}"
@@ -142,7 +152,11 @@ object Formats {
 //        value => combiner.valid(UnknownFormat(format), value.pointer)
         None
 
-}
+  private def isJsonPointer(v: String): Boolean =
+    v.isBlank || (v.startsWith("/") && Pointer.parse(v).isDefined)
+
+end Formats
+
 // {`dur-minute`})?"
 //         val `dur-day`    = "\\d+D"
 //         val `dur-time`   = s"T(${`dur-hour`}|${`dur-minute`}|${`dur-second`})"
