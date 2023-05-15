@@ -355,7 +355,7 @@ class LoadedSchemasResolverTest extends FunSuite:
   test("lazy resolve with fragment") {
     val exampleUri = "https://example.net/example.json"
     val ref        = s"${exampleUri}#foo"
-    withSchema(s"""|{
+    withSchema("""|{
                    |    "$$defs": {
                    |        "refToInteger": {
                    |            "$$ref": "#foo"
