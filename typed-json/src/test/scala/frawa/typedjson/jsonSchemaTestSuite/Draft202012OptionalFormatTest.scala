@@ -108,19 +108,6 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
       "an invalid IRI Reference",
       "an invalid IRI fragment"
     ),
-    ("regex.json", "validation of regular expressions") -> Seq(
-      "a regular expression with unclosed parens is invalid"
-    ),
-    ("uri.json", "validation of URIs") -> Seq(
-      "an invalid URI with comma in scheme", // TODO fails on JS, passes on JVM
-      "an invalid protocol-relative URI Reference",
-      "an invalid relative URI Reference",
-      "an invalid URI"
-    ),
-    ("uri-reference.json", "validation of URI References") -> Seq(
-      "an invalid URI Reference",
-      "an invalid URI fragment"
-    ),
     ("uuid.json", "uuid format") -> Seq(
       "wrong length",
       "missing section",
