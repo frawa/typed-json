@@ -356,16 +356,16 @@ class LoadedSchemasResolverTest extends FunSuite:
     val exampleUri = "https://example.net/example.json"
     val ref        = s"${exampleUri}#foo"
     withSchema("""|{
-                   |    "$$defs": {
-                   |        "refToInteger": {
-                   |            "$$ref": "#foo"
-                   |        },
-                   |        "A": {
-                   |            "$$anchor": "foo",
-                   |            "type": "integer"
-                   |        }
-                   |    }
-                   |}""".stripMargin) { exampleSchema =>
+                  |    "$defs": {
+                  |        "refToInteger": {
+                  |            "$ref": "#foo"
+                  |        },
+                  |        "A": {
+                  |            "$anchor": "foo",
+                  |            "type": "integer"
+                  |        }
+                  |    }
+                  |}""".stripMargin) { exampleSchema =>
       withLoadedSchemas(Seq()) { resolver0 =>
         val uriExample = uri(exampleUri)
         val lazyResolver: LazyResolver = uri =>
