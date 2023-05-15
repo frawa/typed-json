@@ -42,3 +42,8 @@ class FormatsTest extends FunSuite:
     assertHasNotFormat("relative-json-pointer")("01/a")
     assertHasFormat("relative-json-pointer")("1")
   }
+
+  test("hostname") {
+    assertHasFormat("hostname")("www.example.com")
+    assertHasFormat("hostname")("xn--4gbwdl.xn--wgbh1c")
+  }

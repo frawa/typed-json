@@ -24,6 +24,7 @@ import java.net.URI
 import java.util.UUID
 import java.util.regex.Pattern
 import scala.util.Try
+import java.net.IDN
 
 object Formats:
   def hasFormat(format: String): Option[String => Boolean] =
@@ -41,10 +42,12 @@ object Formats:
           """([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|"([ ]!#-[^-~ \t]|(\\[\t -~]))+")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])""".r
         Some(v => regex.matches(v))
       case "hostname" =>
+        // https://www.rfc-editor.org/rfc/rfc1123.txt
+        // https://www.rfc-editor.org/rfc/rfc5891.txt
         // see https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
-        val regex =
-          """^(([a-zA-Z\\d]|[a-zA-Z\\d][a-zA-Z\\d\-]*[a-zA-Z\\d])\.)*([A-Za-z\\d]|[A-Za-z\\d][A-Za-z\\d\-]*[A-Za-z\\d])$""".r
-        Some(v => regex.matches(v))
+        // val regex =
+        //   """^(([a-zA-Z\\d]|[a-zA-Z\\d][a-zA-Z\\d\-]*[a-zA-Z\\d])\.)*([A-Za-z\\d]|[A-Za-z\\d][A-Za-z\\d\-]*[A-Za-z\\d])$""".r
+        Some(v => Try(IDN.toASCII(v, IDN.USE_STD3_ASCII_RULES)).toOption.isDefined)
       case "idn-hostname" =>
         // see https://stackoverflow.com/questions/11809631/fully-qualified-domain-name-validation/26618995
         val regex =
