@@ -111,17 +111,6 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
     ("regex.json", "validation of regular expressions") -> Seq(
       "a regular expression with unclosed parens is invalid"
     ),
-    ("relative-json-pointer.json", "validation of Relative JSON Pointers (RJP)") -> Seq(
-      "negative prefix",
-      "## is not a valid json-pointer",
-      "zero cannot be followed by other digits, plus octothorpe",
-      "an invalid RJP that is a valid JSON Pointer",
-      "explicit positive prefix",
-      "zero cannot be followed by other digits, plus json-pointer",
-      "empty string",
-      "a valid upwards RJP",
-      "a valid downwards RJP"
-    ),
     ("uri.json", "validation of URIs") -> Seq(
       "an invalid URI with comma in scheme", // TODO fails on JS, passes on JVM
       "an invalid protocol-relative URI Reference",
