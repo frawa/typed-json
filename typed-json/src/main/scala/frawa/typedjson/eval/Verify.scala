@@ -53,6 +53,7 @@ import frawa.typedjson.util.FP
 import frawa.typedjson.keywords.Ignored
 import scala.util.Try
 import scala.compiletime.ops.boolean
+import frawa.typedjson.formats.Formats
 
 class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 

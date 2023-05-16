@@ -106,6 +106,7 @@ lazy val root = project
   .aggregate(parserJawn.projectRefs: _*)
   .aggregate(parserZio.projectRefs: _*)
   .aggregate(macros)
+  .aggregate(formats.projectRefs: _*)
   .aggregate(typedJson.projectRefs: _*)
   .aggregate(typedJsonJsExport)
 
@@ -181,13 +182,26 @@ lazy val macros = project
   .dependsOn(parserJawn.jvm(scalaVersion3))
 
 lazy val ESVersion = org.scalajs.linker.interface.ESVersion
-lazy val jsSettingsTypeJson = Seq(
+lazy val jsSettingsES2018 = Seq(
   // fixes regex error: Look-behind group is not supported because it requires RegExp features of ECMAScript 2018.
   scalaJSLinkerConfig ~= { _.withESFeatures(_.withESVersion(ESVersion.ES2018)) }
   // jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(
   //   org.scalajs.jsenv.nodejs.NodeJSEnv.Config().withArgs(List("--stack-size=2013"))
   // )
 )
+
+lazy val formats = projectMatrix
+  .in(file("formats"))
+  .settings(
+    name := "typed-json-formats"
+  )
+  .settings(sharedSettings)
+  .settings(sharedScalacSettings)
+  .settings(strictScalacSettings)
+  .settings(sharedTestSettings)
+  .jvmPlatform(sharedPlatformSettings)
+  .jsPlatform(sharedPlatformSettings, jsSettingsES2018)
+  .dependsOn(parser) // TODO just for Pointer
 
 lazy val typedJson =
   projectMatrix
@@ -206,8 +220,9 @@ lazy val typedJson =
     .settings(strictScalacSettings)
     .settings(sharedTestSettings)
     .jvmPlatform(sharedPlatformSettings)
-    .jsPlatform(sharedPlatformSettings, jsSettingsTypeJson)
+    .jsPlatform(sharedPlatformSettings, jsSettingsES2018)
     .dependsOn(parser)
+    .dependsOn(formats)
     .configure(p => p.dependsOn(macros))
     .dependsOn(parserJawn % "test")
 

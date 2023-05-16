@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.eval
+package frawa.typedjson.formats
 
 import munit.FunSuite
 
