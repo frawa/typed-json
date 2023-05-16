@@ -47,6 +47,15 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
       "invalid non-ASCII '\u09e8' (a Bengali 2)",
       "element without unit"
     ),
+    ("hostname.json", "validation of host names") -> Seq(
+      "a host name containing illegal characters",
+      "a host name with a component too long",
+      "contains underscore",
+      "exceeds maximum label length"
+    ),
+    ("uri.json", "validation of URIs") -> Seq(
+      "an invalid URI with comma in scheme"
+    ),
     ("idn-email.json", "validation of an internationalized e-mail addresses") -> Seq(
       "a valid idn e-mail (example@example.test in Hangul)",
       "an invalid idn e-mail address",
