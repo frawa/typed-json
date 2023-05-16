@@ -25,21 +25,37 @@ object Pointer:
   def apply(index: Int): Pointer    = Pointer.empty / index
   def apply(field: String): Pointer = Pointer.empty / field
 
-  def parse(spec: String): Pointer =
-    if spec == null then Pointer.empty
+  def parse(spec: String): Option[Pointer] =
+    if spec == null then Some(Pointer.empty)
     else
-      Pointer(
+      sequence(
         spec
           .split("/", -1)
           .toIndexedSeq
-          .map(field =>
-            field
-              .replace("~1", "/")
-              .replace("~0", "~")
-          )
+          .map(unescape)
           .drop(1)
-          .map(t => t.toIntOption.map(ArrayIndexToken.apply).getOrElse(FieldToken(t)))
       )
+        .map { fields =>
+          fields.map(t => t.toIntOption.map(ArrayIndexToken.apply).getOrElse(FieldToken(t)))
+        }
+        .map(tokens => Pointer(tokens))
+
+  private def sequence[A](cs: Seq[Option[A]]): Option[Seq[A]] =
+    cs.foldLeft(Option(Seq.empty[A])) { (acc, c) =>
+      acc.flatMap(cs => c.map(cs :+ _))
+    }
+
+  private def unescape(field: String): Option[String] =
+    field
+      .foldLeft(Option(("", false))) {
+        case (Some((s, false)), '~') => Some((s, true))
+        case (Some((s, true)), '0')  => Some((s :+ '~', false))
+        case (Some((s, true)), '1')  => Some((s :+ '/', false))
+        case (Some((s, false)), c)   => Some((s :+ c, false))
+        case _                       => None
+      }
+      .filterNot(_._2)
+      .map(_._1)
 
 case class Pointer(segments: Seq[Token], isInsideKey: Boolean = false):
   override def toString: String =

@@ -180,7 +180,7 @@ class EvalResolveTest extends FunSuite:
             Seq(
               WithPointer(
                 AdditionalPropertyInvalid("foo"),
-                pointer = Pointer.parse("/$defs/foo")
+                pointer = Pointer.parse("/$defs/foo").get
               ),
               WithPointer(
                 NotInEnum(
@@ -194,13 +194,13 @@ class EvalResolveTest extends FunSuite:
                     "string"
                   ).map(StringValue.apply)
                 ),
-                pointer = Pointer.parse("/$defs/foo/type")
+                pointer = Pointer.parse("/$defs/foo/type").get
               ),
               WithPointer(
                 TypeMismatch(
                   expected = "array"
                 ),
-                pointer = Pointer.parse("/$defs/foo/type")
+                pointer = Pointer.parse("/$defs/foo/type").get
               )
             )
           )

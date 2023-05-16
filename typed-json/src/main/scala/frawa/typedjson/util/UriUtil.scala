@@ -62,4 +62,5 @@ object UriUtil:
     value.replace("\\", "_")
 
   def push(uri: URI, pushFun: Pointer => Pointer): URI =
-    withFragment(uri, pushFun(Pointer.parse(uri.getFragment)))
+    val pushedPointer = Pointer.parse(uri.getFragment).map(pushFun).getOrElse(Pointer.empty)
+    withFragment(uri, pushedPointer)

@@ -26,6 +26,8 @@ import frawa.typedjson.keywords.Ignored
 import frawa.typedjson.keywords.KeywordLocation
 
 trait OutputOps[O]: // extends Monoid[O]:
+  import OutputOps.Annotation
+
   def valid(pointer: Pointer): O
   def invalid(error: ValidationError, pointer: Pointer): O
 
@@ -34,13 +36,20 @@ trait OutputOps[O]: // extends Monoid[O]:
   extension (o: O)
     def not(pointer: Pointer): O
     def isValid: Boolean
-    def withAnnotation(annotation: Evaluated): O = withAnnotations(Seq(annotation))
-    def withAnnotations(annotations: Seq[Evaluated]): O
-    def getAnnotations(): Seq[Evaluated]
+    def withAnnotation(annotation: Annotation): O = withAnnotations(Seq(annotation))
+    def withAnnotations(annotations: Seq[Annotation]): O
+    def getAnnotations(): Seq[Annotation]
     def forKeyword(kl: KeywordLocation, k: Option[Keyword] = None): O
 
 object OutputOps:
-  def mergeEvaluatedAnnotations(es: Seq[Evaluated]): Seq[Evaluated] =
+  trait Annotation
+
+  def mergeAnnotations(es: Seq[Annotation]): Seq[Annotation] =
+    val es1 = mergeEvaluatedAnnotations(es.filter(_.isInstanceOf[Evaluated]).map(_.asInstanceOf[Evaluated]))
+    val es2 = es.filterNot(_.isInstanceOf[Evaluated])
+    es1 ++ es2
+
+  private def mergeEvaluatedAnnotations(es: Seq[Evaluated]): Seq[Annotation] =
     val indices = es.flatMap {
       case EvaluatedIndices(indices) => indices
       case _                         => Set()
@@ -49,18 +58,11 @@ object OutputOps:
       case EvaluatedProperties(properties) => properties
       case _                               => Set()
     }.toSet
-    val es1 = if indices.nonEmpty then Seq(EvaluatedIndices(indices)) else Seq()
-    val es2 = if properties.nonEmpty then Seq(EvaluatedProperties(properties)) else Seq()
-    es1 ++ es2
-
-  def mergeAnnotations(es: Seq[Evaluated]): Seq[Evaluated] =
-    val es1     = mergeEvaluatedAnnotations(es)
-    val ignored = ignoredKeywords(es)
-    val es2     = if ignored.nonEmpty then Seq(Ignored(ignored)) else Seq()
-    es1 ++ es2
-
-  def ignoredKeywords(es: Seq[Evaluated]): Set[String] =
-    es.flatMap {
+    val ignored = es.flatMap {
       case Ignored(keywords) => keywords
       case _                 => Set()
     }.toSet
+    val es1 = if indices.nonEmpty then Seq(EvaluatedIndices(indices)) else Seq()
+    val es2 = if properties.nonEmpty then Seq(EvaluatedProperties(properties)) else Seq()
+    val es3 = if ignored.nonEmpty then Seq(Ignored(ignored)) else Seq()
+    es1 ++ es2 ++ es3

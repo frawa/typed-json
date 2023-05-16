@@ -29,9 +29,4 @@ class Draft202012Test extends JsonSchemaTestSuite:
     // Some("neither anyOf valid (complex)")
     None
 
-  // TODO un-ignore 'em
-  override val ignoreFiles: Seq[String] = Seq(
-    "content.json" // TODO keywords contentMediaType, contentEncoding, contentSchema
-  )
-
   checkFiles(draft202012Files)(parseJsonValue)

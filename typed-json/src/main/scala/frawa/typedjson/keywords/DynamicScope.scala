@@ -45,7 +45,7 @@ case class DynamicScope(uris: Seq[URI], kl: KeywordLocation = KeywordLocation.em
     val pointer = uris.lastOption
       .map(_.getFragment())
       .filter(_ != null)
-      .map(Pointer.parse(_))
+      .flatMap(Pointer.parse(_))
       .getOrElse(Pointer.empty)
     val pushPointer = pushFun(pointer)
     val next        = withFragment(uri1, pushPointer)

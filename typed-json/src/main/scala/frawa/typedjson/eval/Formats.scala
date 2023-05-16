@@ -25,7 +25,7 @@ import java.util.UUID
 import java.util.regex.Pattern
 import scala.util.Try
 
-object Formats {
+object Formats:
   def hasFormat(format: String): Option[String => Boolean] =
     format match
       case "regex" =>
@@ -41,15 +41,15 @@ object Formats {
           """([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|"([ ]!#-[^-~ \t]|(\\[\t -~]))+")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])""".r
         Some(v => regex.matches(v))
       case "hostname" =>
+        // https://www.rfc-editor.org/rfc/rfc1123.txt
+        // https://www.rfc-editor.org/rfc/rfc5891.txt
         // see https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
-        val regex =
-          """^(([a-zA-Z\\d]|[a-zA-Z\\d][a-zA-Z\\d\-]*[a-zA-Z\\d])\.)*([A-Za-z\\d]|[A-Za-z\\d][A-Za-z\\d\-]*[A-Za-z\\d])$""".r
-        Some(v => regex.matches(v))
+        // val pattern = raw"^[a-zA-Z0-9\p{L}][a-zA-Z0-9\p{L}-\.]{1,61}[a-zA-Z0-9\p{L}]\.[a-zA-Z\p{L}]{2,}$$/gmu".r
+        val pattern = raw"^(?:[\p{L}\p{N}][\p{L}\p{N}-_]*.)+[\p{L}\p{N}]{2,}$$".r
+        Some(v => pattern.matches(v))
       case "idn-hostname" =>
-        // see https://stackoverflow.com/questions/11809631/fully-qualified-domain-name-validation/26618995
-        val regex =
-          """(?=^.{4,253}$)(^((?!-)[a-zA-Z\\d-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)""".r
-        Some(v => regex.matches(v))
+        val pattern = raw"^[a-zA-Z0-9\p{L}][a-zA-Z0-9\p{L}-\.]{1,61}[a-zA-Z0-9\p{L}]\.[a-zA-Z\p{L}]{2,}$$/gmu".r
+        Some(v => pattern.matches(v))
       case "ipv4" =>
         // see https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
         val regex =
@@ -83,9 +83,19 @@ object Formats {
         // see https://datatracker.ietf.org/doc/html/rfc4122
         Some(v => Try(UUID.fromString(v)).isSuccess)
       case "json-pointer" =>
-        Some(v => Pointer.parse(v).toString().equals(v))
+        // https://www.rfc-editor.org/rfc/rfc6901.txt
+        Some(v => isJsonPointer(v))
       case "relative-json-pointer" =>
-        Some(v => !v.isBlank && !v.startsWith("/") && Pointer.parse("/" + v).toString().equals("/" + v))
+        // https://datatracker.ietf.org/doc/html/draft-handrews-relative-json-pointer-01
+        val pattern = "(0|[1-9][0-9]*)(#|.*)".r
+        Some(v =>
+          v match {
+            case pattern(nr, "#")     => true
+            case pattern(nr, pointer) => isJsonPointer(pointer)
+            case _                    => false
+          }
+        )
+      // Some(v => !v.isBlank && !v.startsWith("/") && Pointer.parse("/" + v).isDefined)
       case "date-time" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
         val regex_date = "\\d{4}-\\d{2}-\\d{2}"
@@ -142,7 +152,11 @@ object Formats {
 //        value => combiner.valid(UnknownFormat(format), value.pointer)
         None
 
-}
+  private def isJsonPointer(v: String): Boolean =
+    v.isBlank || (v.startsWith("/") && Pointer.parse(v).isDefined)
+
+end Formats
+
 // {`dur-minute`})?"
 //         val `dur-day`    = "\\d+D"
 //         val `dur-time`   = s"T(${`dur-hour`}|${`dur-minute`}|${`dur-second`})"

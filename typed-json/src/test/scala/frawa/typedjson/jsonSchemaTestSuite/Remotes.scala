@@ -32,8 +32,10 @@ object Remotes:
   }
 
   private def resolveRemotes(relative: URI): Option[RootSchemaValue] =
-    val name = relative.getSchemeSpecificPart
-    remotesFiles.get(name).map(SchemaValue.root)
+    if relative.getFragment != null then None
+    else
+      val name = relative.getSchemeSpecificPart
+      remotesFiles.get(name).map(SchemaValue.root)
 
   import frawa.typedjson.macros.Macros.*
 

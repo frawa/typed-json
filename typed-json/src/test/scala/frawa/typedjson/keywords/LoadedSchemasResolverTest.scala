@@ -21,6 +21,7 @@ import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.TestUtil.{*, given}
 import frawa.typedjson.util.UriUtil.*
 import munit.FunSuite
+import frawa.typedjson.keywords.LoadedSchemasResolver.LazyResolver
 
 class LoadedSchemasResolverTest extends FunSuite:
 
@@ -348,5 +349,41 @@ class LoadedSchemasResolverTest extends FunSuite:
                   |}""".stripMargin) { schema =>
       val RootSchemaValue(_, Some(uri1)) = schema: @unchecked
       assertEquals(uri(metaId), uri1)
+    }
+  }
+
+  test("lazy resolve with fragment") {
+    val exampleUri = "https://example.net/example.json"
+    val ref        = s"${exampleUri}#foo"
+    withSchema("""|{
+                  |    "$defs": {
+                  |        "refToInteger": {
+                  |            "$ref": "#foo"
+                  |        },
+                  |        "A": {
+                  |            "$anchor": "foo",
+                  |            "type": "integer"
+                  |        }
+                  |    }
+                  |}""".stripMargin) { exampleSchema =>
+      withLoadedSchemas(Seq()) { resolver0 =>
+        val uriExample = uri(exampleUri)
+        val lazyResolver: LazyResolver = uri =>
+          if uri.toString == exampleUri then Some(RootSchemaValue(exampleSchema.value, Some(uriExample)))
+          else None
+        val resolver = resolver0.withLazyResolver(lazyResolver)
+
+        val Some(schema, resolver1) = resolver.resolveRef(ref): @unchecked
+        assertEquals(resolver1.base, uri(ref))
+        assertEquals(
+          schema.value,
+          ObjectValue(
+            Map(
+              "$anchor" -> StringValue("foo"),
+              "type"    -> StringValue("integer")
+            )
+          )
+        )
+      }
     }
   }

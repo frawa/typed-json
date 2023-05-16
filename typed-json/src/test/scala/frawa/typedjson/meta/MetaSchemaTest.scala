@@ -51,11 +51,17 @@ class MetaSchemaTest extends FunSuite:
       }
     }
 
+  private def ignoredKeywords(annotations: Seq[OutputOps.Annotation]): Set[String] =
+    annotations.flatMap {
+      case Ignored(keywords) => keywords
+      case _                 => Set()
+    }.toSet
+
   test("validate core against core") {
     validateSpec("meta/core", "meta/core")(
       { output =>
         assertEquals(
-          OutputOps.ignoredKeywords(output.annotations),
+          ignoredKeywords(output.annotations),
           Set(
             "properties",
             "type",
@@ -80,7 +86,7 @@ class MetaSchemaTest extends FunSuite:
     validateSpec("meta/core", "meta/validation")(
       { output =>
         assertEquals(
-          OutputOps.ignoredKeywords(output.annotations),
+          ignoredKeywords(output.annotations),
           Set(
             "properties",
             "title"
@@ -104,7 +110,7 @@ class MetaSchemaTest extends FunSuite:
     validateSpec("meta/core", "meta/applicator")(
       { output =>
         assertEquals(
-          OutputOps.ignoredKeywords(output.annotations),
+          ignoredKeywords(output.annotations),
           Set(
             "type",
             "title"
@@ -128,7 +134,7 @@ class MetaSchemaTest extends FunSuite:
     validateSpec("meta/validation", "meta/core")(
       { output =>
         assertEquals(
-          OutputOps.ignoredKeywords(output.annotations),
+          ignoredKeywords(output.annotations),
           Set(
             "properties",
             "type",
@@ -153,7 +159,7 @@ class MetaSchemaTest extends FunSuite:
     validateSpec("meta/validation", "meta/validation")(
       { output =>
         assertEquals(
-          OutputOps.ignoredKeywords(output.annotations),
+          ignoredKeywords(output.annotations),
           Set(
             "properties",
             "title"
@@ -177,7 +183,7 @@ class MetaSchemaTest extends FunSuite:
     validateSpec("meta/validation", "meta/applicator")(
       { output =>
         assertEquals(
-          OutputOps.ignoredKeywords(output.annotations),
+          ignoredKeywords(output.annotations),
           Set(
             "type",
             "title"

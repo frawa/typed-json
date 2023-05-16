@@ -51,12 +51,15 @@ open class JsonSchemaTestSuite extends FunSuite:
 
   private case class Expectation(description: String, data: Value, valid: Boolean)
 
-  private val vocabularyForTest = dialect(
+  protected val useFormatAssertion = false
+
+  private def vocabularyForTest = dialect(
     Seq(
       Vocabulary.coreId,
       Vocabulary.validationId,
       Vocabulary.applicatorId,
-      Vocabulary.formatAnnotationId,
+      if useFormatAssertion then Vocabulary.formatAssertionId
+      else Vocabulary.formatAnnotationId,
       Vocabulary.unevaluatedId,
       Vocabulary.metaDataId
     )
@@ -119,7 +122,7 @@ open class JsonSchemaTestSuite extends FunSuite:
 
     given Eval[R, SimpleOutput]                      = evalBasic
     given Option[LoadedSchemasResolver.LazyResolver] = lr
-    withCompiledSchemaValue(schemaValue, lr) { fun =>
+    withCompiledSchemaValue(schemaValue, lr, vocabularyForTest) { fun =>
 
       val values = expactations.map(_.data)
       val os     = doApplyBulk(fun, values, { _ => })

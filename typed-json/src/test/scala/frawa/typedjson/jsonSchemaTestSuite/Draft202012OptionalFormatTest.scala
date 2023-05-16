@@ -24,6 +24,8 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
 
   private val draft202012OptionalFormatFiles = draft202012.folder("optional/format").files()
 
+  override val useFormatAssertion = true
+
   // TODO un-ignore 'em
   override val ignoreFiles: Seq[String] = Seq(
     "date-time.json",
@@ -32,10 +34,12 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
     "uri-template.json"
   )
 
+  // TODO un-ignore 'em
   override protected val ignoreByExpectation: Map[TestId, Seq[String]] = Map(
     ("hostname.json", "validation of host names") -> Seq(
-      "a valid punycoded IDN hostname",
+      "a host name containing illegal characters",
       "a host name with a component too long",
+      "contains underscore",
       "exceeds maximum label length"
     ),
     ("idn-email.json", "validation of an internationalized e-mail addresses") -> Seq(
@@ -52,16 +56,11 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
     ("iri-reference.json", "validation of IRI References") -> Seq(
       "a valid IRI Reference" // TODO fails on JS, passes on JVM
     ),
-    ("relative-json-pointer.json", "validation of Relative JSON Pointers (RJP)") -> Seq(
-      "negative prefix",
-      "## is not a valid json-pointer",
-      "zero cannot be followed by other digits, plus octothorpe"
+    ("uuid.json", "uuid format") -> Seq(
+      "wrong length"
     ),
     ("uri.json", "validation of URIs") -> Seq(
       "an invalid URI with comma in scheme" // TODO fails on JS, passes on JVM
-    ),
-    ("uuid.json", "uuid format") -> Seq(
-      "wrong length"
     ),
     ("email.json", "validation of e-mail addresses") -> Seq(
       "a quoted string with a space in the local part is valid",

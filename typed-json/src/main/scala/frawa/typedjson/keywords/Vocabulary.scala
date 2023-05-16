@@ -23,17 +23,25 @@ import frawa.typedjson.util.UriUtil.uri
 
 import java.net.URI
 
-case class Vocabulary(keywords: Map[String, Vocabulary.NestedSchemaType]):
+case class Vocabulary(keywords: Map[String, Vocabulary.NestedSchemaType], ids: Set[URI]):
   import Vocabulary.*
 
   def defines: String => Boolean = keywords.keySet.contains
+  def isFormatAssertion: Boolean = ids.contains(Vocabulary.formatAssertionId)
+
+  def withFormatAssertion(assertion: Boolean): Vocabulary =
+    if assertion && ids.contains(Vocabulary.formatAnnotationId) then
+      combine(Vocabulary.specVocabularies(Vocabulary.formatAssertionId))
+    else this
+
   def nestedSchemas(keyword: String)(value: Value): Option[Seq[Value]] =
     keywords
       .get(keyword)
       .flatMap(nestedSchemasGetter)
       .map(_(value))
 
-  def combine(other: Vocabulary): Vocabulary = this.copy(keywords = this.keywords ++ other.keywords)
+  def combine(other: Vocabulary): Vocabulary =
+    this.copy(keywords = this.keywords ++ other.keywords, this.ids ++ other.ids)
 
 object Vocabulary:
 
@@ -92,10 +100,14 @@ object Vocabulary:
   private val contentKeywords: Map[String, NestedSchemaType] = Map(
     "contentEncoding"  -> NoNestedSchema,
     "contentMediaType" -> NoNestedSchema,
-    "contentSchema"    -> NoNestedSchema
+    "contentSchema"    -> NestedObjectSchemas
   )
 
   private val formatAnnotationKeywords: Map[String, NestedSchemaType] = Map(
+    "format" -> NoNestedSchema
+  )
+
+  private val formatAssertionKeywords: Map[String, NestedSchemaType] = Map(
     "format" -> NoNestedSchema
   )
 
@@ -150,18 +162,20 @@ object Vocabulary:
   val applicatorId: URI       = uri("https://json-schema.org/draft/2020-12/vocab/applicator")
   val contentId: URI          = uri("https://json-schema.org/draft/2020-12/vocab/content")
   val formatAnnotationId: URI = uri("https://json-schema.org/draft/2020-12/vocab/format-annotation")
+  val formatAssertionId: URI  = uri("https://json-schema.org/draft/2020-12/vocab/format-assertion")
   val metaDataId: URI         = uri("https://json-schema.org/draft/2020-12/vocab/meta-data")
   val unevaluatedId: URI      = uri("https://json-schema.org/draft/2020-12/vocab/unevaluated")
   val validationId: URI       = uri("https://json-schema.org/draft/2020-12/vocab/validation")
 
   val specVocabularies: Map[URI, Vocabulary] = Map(
-    coreId             -> Vocabulary(coreKeywords),
-    applicatorId       -> Vocabulary(applicatorKeywords),
-    contentId          -> Vocabulary(contentKeywords),
-    formatAnnotationId -> Vocabulary(formatAnnotationKeywords),
-    metaDataId         -> Vocabulary(metaDataKeywords),
-    unevaluatedId      -> Vocabulary(unevaluatedKeywords),
-    validationId       -> Vocabulary(validationKeywords)
+    coreId             -> Vocabulary(coreKeywords, Set(coreId)),
+    applicatorId       -> Vocabulary(applicatorKeywords, Set(applicatorId)),
+    contentId          -> Vocabulary(contentKeywords, Set(contentId)),
+    formatAnnotationId -> Vocabulary(formatAnnotationKeywords, Set(formatAnnotationId)),
+    formatAssertionId  -> Vocabulary(formatAssertionKeywords, Set(formatAssertionId)),
+    metaDataId         -> Vocabulary(metaDataKeywords, Set(metaDataId)),
+    unevaluatedId      -> Vocabulary(unevaluatedKeywords, Set(unevaluatedId)),
+    validationId       -> Vocabulary(validationKeywords, Set(validationId))
   )
 
   val coreVocabulary: Vocabulary = specVocabularies(coreId)

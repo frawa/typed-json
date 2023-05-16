@@ -65,7 +65,7 @@ case class IfThenElseKeyword(
     elseKeywords: Option[Keywords] = None
 ) extends Keyword
 case class PatternKeyword(pattern: String)                                extends Keyword
-case class FormatKeyword(format: String)                                  extends Keyword
+case class FormatKeyword(format: String, assertion: Boolean)              extends Keyword
 case class MinimumKeyword(min: BigDecimal, exclude: Boolean = false)      extends Keyword
 case class UniqueItemsKeyword(unique: Boolean)                            extends Keyword
 case class PropertyNamesKeyword(keywords: Keywords)                       extends Keyword
@@ -83,6 +83,9 @@ case class DependentRequiredKeyword(required: Map[String, Seq[String]])   extend
 case class DependentSchemasKeyword(keywords: Map[String, Keywords])       extends Keyword
 case class ContainsKeyword(schema: Option[Keywords] = None, min: Option[Int] = None, max: Option[Int] = None)
     extends Keyword
+case class ContentEncodingKeyword(encoding: String)                                    extends Keyword
+case class ContentMediaTypeKeyword(mediaType: String)                                  extends Keyword
+case class ContentSchemaKeyword(keywords: Keywords)                                    extends Keyword
 case class UnevaluatedItemsKeyword(pushed: Keywords, unevaluated: Keywords)            extends Keyword
 case class UnevaluatedPropertiesKeyword(pushed: Keywords, unevaluated: Keywords)       extends Keyword
 case class WithLocation(keyword: Keyword, kl: KeywordLocation = KeywordLocation.empty) extends Keyword
@@ -263,7 +266,7 @@ case class Keywords(
         Right(add(PatternKeyword(pattern)))
 
       case ("format", StringValue(format)) =>
-        Right(add(FormatKeyword(format)))
+        Right(add(FormatKeyword(format, vocabulary.isFormatAssertion)))
 
       case ("minimum", NumberValue(v)) =>
         Right(add(MinimumKeyword(v)))
@@ -347,6 +350,16 @@ case class Keywords(
       case ("$vocabulary", _) =>
         // vocabulary handled earlier
         Right(this)
+
+      case ("contentEncoding", StringValue(v)) =>
+        Right(add(ContentEncodingKeyword(v)))
+
+      case ("contentMediaType", StringValue(v)) =>
+        Right(add(ContentMediaTypeKeyword(v)))
+
+      case ("contentSchema", v) =>
+        for keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(v)), scope1)
+        yield add(ContentSchemaKeyword(keywords))
 
       // TODO
       // case ("deprecated", v) => {

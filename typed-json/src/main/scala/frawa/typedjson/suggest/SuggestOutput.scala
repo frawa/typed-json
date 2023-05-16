@@ -60,9 +60,9 @@ object SuggestOutput:
     extension (o: SuggestOutput)
       def not(pointer: Pointer): SuggestOutput = o.copy(simple = o.simple.not(pointer))
       def isValid: Boolean                     = o.simple.valid
-      def withAnnotations(annotations: Seq[Evaluated]): SuggestOutput =
+      def withAnnotations(annotations: Seq[OutputOps.Annotation]): SuggestOutput =
         o.copy(simple = o.simple.withAnnotations(annotations))
-      def getAnnotations(): Seq[Evaluated] = o.simple.annotations
+      def getAnnotations(): Seq[OutputOps.Annotation] = o.simple.annotations
       def forKeyword(kl: KeywordLocation, k: Option[Keyword] = None): SuggestOutput =
         if isAt(o.simple.pointer) then k.map(k => o.copy(keywords = o.keywords :+ k)).getOrElse(o)
         else o
