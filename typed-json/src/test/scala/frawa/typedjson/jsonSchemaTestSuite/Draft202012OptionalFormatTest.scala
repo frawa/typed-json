@@ -28,8 +28,6 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
 
   // TODO un-ignore 'em
   override val ignoreFiles: Seq[String] = Seq(
-    // "date-time.json",
-    // "date.json",
     "idn-hostname.json",
     "uri-template.json"
   )
@@ -86,10 +84,6 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
       "valid leap second, large positive time-offset",
       "valid leap second, negative time-offset",
       "valid leap second, large negative time-offset"
-      //   "a valid time string with case-insensitive Z",
-      //   "an invalid time string with invalid time numoffset hour",
-      //   "an invalid time string with invalid time numoffset minute",
-      //   "an invalid time string with invalid time with both Z and numoffset"
     ),
     ("date-time.json", "validation of date-time strings") -> Seq(
       "a valid date-time with a leap second, UTC",
