@@ -190,6 +190,10 @@ lazy val jsSettingsES2018 = Seq(
   // )
 )
 
+lazy val jsSettingsESModule = Seq(
+  scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }
+)
+
 lazy val formats = projectMatrix
   .in(file("formats"))
   .settings(
@@ -230,7 +234,14 @@ lazy val typedJson =
     .settings(strictScalacSettings)
     .settings(sharedTestSettings)
     .jvmPlatform(sharedPlatformSettings)
-    .jsPlatform(sharedPlatformSettings, jsSettingsES2018)
+    .jsPlatform(
+      sharedPlatformSettings,
+      Seq(),
+      configure = { p =>
+        p.enablePlugins(ScalaJSBundlerPlugin)
+          .settings(jsSettingsES2018)
+      }
+    )
     .dependsOn(parser)
     .dependsOn(formats)
     .configure(p => p.dependsOn(macros))
