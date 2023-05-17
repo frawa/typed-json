@@ -22,6 +22,7 @@ import java.net.URI
 import java.util.UUID
 import java.util.regex.Pattern
 import scala.util.Try
+import frawa.typesjson.formats.Platform
 
 object Formats:
   def hasFormat(format: String): Option[String => Boolean] =
@@ -43,8 +44,9 @@ object Formats:
         // https://www.rfc-editor.org/rfc/rfc5891.txt
         // see https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
         // val pattern = raw"^[a-zA-Z0-9\p{L}][a-zA-Z0-9\p{L}-\.]{1,61}[a-zA-Z0-9\p{L}]\.[a-zA-Z\p{L}]{2,}$$/gmu".r
-        val pattern = raw"^(?:[\p{L}\p{N}][\p{L}\p{N}-_]*.)+[\p{L}\p{N}]{2,}$$".r
-        Some(v => pattern.matches(v))
+        // val pattern = raw"^(?:[\p{L}\p{N}][\p{L}\p{N}-_]*.)+[\p{L}\p{N}]{2,}$$".r
+        // Some(v => pattern.matches(v))
+        Some(Platform.verifyHostname)
       case "idn-hostname" =>
         val pattern = raw"^[a-zA-Z0-9\p{L}][a-zA-Z0-9\p{L}-\.]{1,61}[a-zA-Z0-9\p{L}]\.[a-zA-Z\p{L}]{2,}$$/gmu".r
         Some(v => pattern.matches(v))

@@ -200,7 +200,17 @@ lazy val formats = projectMatrix
   .settings(strictScalacSettings)
   .settings(sharedTestSettings)
   .jvmPlatform(sharedPlatformSettings)
-  .jsPlatform(sharedPlatformSettings, jsSettingsES2018)
+  .jsPlatform(
+    sharedPlatformSettings,
+    Seq(),
+    configure = { p =>
+      p.enablePlugins(ScalaJSBundlerPlugin)
+        .settings(jsSettingsES2018)
+        .settings(
+          Compile / npmDependencies += "punycode" -> "2.3.0"
+        )
+    }
+  )
   .dependsOn(parser) // TODO just for Pointer
 
 lazy val typedJson =

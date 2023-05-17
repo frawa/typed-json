@@ -46,4 +46,6 @@ class FormatsTest extends FunSuite:
   test("hostname") {
     assertHasFormat("hostname")("www.example.com")
     assertHasFormat("hostname")("xn--4gbwdl.xn--wgbh1c")
+    // TODO
+    // assertHasNotFormat("hostname")("not_a_valid_host_name")
   }
