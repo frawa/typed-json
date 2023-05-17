@@ -49,3 +49,16 @@ class FormatsTest extends FunSuite:
     // TODO
     // assertHasNotFormat("hostname")("not_a_valid_host_name")
   }
+
+  test("duration") {
+    // TODO support Years, Months
+    // assertHasFormat("duration")("P4Y")
+    // assertHasFormat("duration")("P1M")
+  }
+
+  test("time") {
+    assertHasNotFormat("time")("12:00:00")
+    // TODO support leap second
+    // assertHasFormat("time")("23:59:60Z")
+    // assertHasFormat("time")("23:59:60+00:00")
+  }
