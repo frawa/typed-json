@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.eval
+package frawa.typedjson.formats
 
-import frawa.typedjson.parser.Value
 import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.validation.{FormatMismatch, UnknownFormat}
 
 import java.net.URI
 import java.util.UUID
 import java.util.regex.Pattern
 import scala.util.Try
+import frawa.typesjson.formats.Platform
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.Duration
+import java.time.OffsetTime
+import java.time.OffsetDateTime
 
 object Formats:
   def hasFormat(format: String): Option[String => Boolean] =
@@ -45,8 +49,9 @@ object Formats:
         // https://www.rfc-editor.org/rfc/rfc5891.txt
         // see https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
         // val pattern = raw"^[a-zA-Z0-9\p{L}][a-zA-Z0-9\p{L}-\.]{1,61}[a-zA-Z0-9\p{L}]\.[a-zA-Z\p{L}]{2,}$$/gmu".r
-        val pattern = raw"^(?:[\p{L}\p{N}][\p{L}\p{N}-_]*.)+[\p{L}\p{N}]{2,}$$".r
-        Some(v => pattern.matches(v))
+        // val pattern = raw"^(?:[\p{L}\p{N}][\p{L}\p{N}-_]*.)+[\p{L}\p{N}]{2,}$$".r
+        // Some(v => pattern.matches(v))
+        Some(Platform.verifyHostname)
       case "idn-hostname" =>
         val pattern = raw"^[a-zA-Z0-9\p{L}][a-zA-Z0-9\p{L}-\.]{1,61}[a-zA-Z0-9\p{L}]\.[a-zA-Z\p{L}]{2,}$$/gmu".r
         Some(v => pattern.matches(v))
@@ -98,55 +103,20 @@ object Formats:
       // Some(v => !v.isBlank && !v.startsWith("/") && Pointer.parse("/" + v).isDefined)
       case "date-time" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
-        val regex_date = "\\d{4}-\\d{2}-\\d{2}"
-        val regex_time = "\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|([+\\-])\\d{2}:\\d{2})"
-        val date_time  = s"${regex_date}T$regex_time"
-        Some(v => date_time.r.matches(v))
+        Some(v => Try(DateTimeFormatter.ISO_DATE_TIME.parse(v)).isSuccess)
       case "date" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
-        val `regex-date` =
-          "\\d{4}-\\d{2}-\\d{2}".r
-        Some(v => `regex-date`.matches(v))
+        Some(v => Try(DateTimeFormatter.ISO_DATE.parse(v)).isSuccess)
       case "time" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
-        val `regex-time` =
-          "(\\d{2}):(\\d{2}):(\\d{2})(\\.\\d+)?(Z|([+\\-]\\d{2}:\\d{2}))".r
         Some(v =>
-          `regex-time`
-            .findFirstMatchIn(v)
-            .exists { m =>
-              val hour   = m.group(1).toInt
-              val minute = m.group(2).toInt
-              val second = m.group(3).toInt
-              Range.inclusive(0, 23).contains(hour) &&
-              Range.inclusive(0, 59).contains(minute) &&
-              Range.inclusive(0, 59).contains(second)
-            }
+          Try(DateTimeFormatter.ISO_OFFSET_TIME.parse(v))
+            // .orElse(Try(DateTimeFormatter.ISO_LOCAL_TIME.parse(v)))
+            .isSuccess
         )
-      //          Try {
-      ////            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss[.SSS]XXX")
-      //            val formatter = DateTimeFormatter
-      //              .ofPattern("HH:mm:ss[.SSS]XXX")
-      //              .withResolverStyle(ResolverStyle.STRICT);
-      //            OffsetTime.parse(v, formatter)
-      //          }.recover { ex =>
-      //            println("FW ?", ex)
-      //            throw ex
-      //          }.isSuccess
       case "duration" =>
         // https://datatracker.ietf.org/doc/html/rfc3339
-        // TODO test me
-        val `dur-second` = "\\d+S"
-        val `dur-minute` = s"\\d+M(${`dur-second`})?"
-        val `dur-hour`   = s"\\d+H(${`dur-minute`})?"
-        val `dur-day`    = "\\d+D"
-        val `dur-time`   = s"T(${`dur-hour`}|${`dur-minute`}|${`dur-second`})"
-        val `dur-week`   = "\\d+W"
-        val `dur-month`  = s"\\d+M(${`dur-day`})?"
-        val `dur-year`   = s"\\d+Y(${`dur-month`})?"
-        val `dur-date`   = s"(${`dur-day`}|${`dur-month`}|${`dur-year`})(${`dur-time`})?"
-        val duration     = s"P(${`dur-date`}|${`dur-time`}|${`dur-week`})"
-        Some(v => duration.r.matches(v))
+        Some(v => Try(Duration.parse(v)).isSuccess)
       case _ =>
         // TODO
 //        value => combiner.valid(UnknownFormat(format), value.pointer)
@@ -156,19 +126,3 @@ object Formats:
     v.isBlank || (v.startsWith("/") && Pointer.parse(v).isDefined)
 
 end Formats
-
-// {`dur-minute`})?"
-//         val `dur-day`    = "\\d+D"
-//         val `dur-time`   = s"T(${`dur-hour`}|${`dur-minute`}|${`dur-second`})"
-//         val `dur-week`   = "\\d+W"
-//         val `dur-month`  = s"\\d+M(${`dur-day`})?"
-//         val `dur-year`   = s"\\d+Y(${`dur-month`})?"
-//         val `dur-date`   = s"(${`dur-day`}|${`dur-month`}|${`dur-year`})(${`dur-time`})?"
-//         val duration     = s"P(${`dur-date`}|${`dur-time`}|${`dur-week`})"
-//         Some(v => duration.r.matches(v))
-//       case _ =>
-//         // TODO
-// //        value => combiner.valid(UnknownFormat(format), value.pointer)
-//         None
-
-// }

@@ -28,8 +28,6 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
 
   // TODO un-ignore 'em
   override val ignoreFiles: Seq[String] = Seq(
-    "date-time.json",
-    "date.json",
     "idn-hostname.json",
     "uri-template.json"
   )
@@ -40,7 +38,13 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
       "a host name containing illegal characters",
       "a host name with a component too long",
       "contains underscore",
-      "exceeds maximum label length"
+      "exceeds maximum label length",
+      // TODO fails on JS, passes on JVM
+      "a host name starting with an illegal character",
+      "starts with hyphen",
+      "ends with hyphen",
+      "starts with underscore",
+      "ends with underscore"
     ),
     ("idn-email.json", "validation of an internationalized e-mail addresses") -> Seq(
       "a valid idn e-mail (example@example.test in Hangul)"
@@ -68,16 +72,26 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
       "an IPv6-address-literal after the @ is valid"
     ),
     ("time.json", "validation of time strings") -> Seq(
+      // TODO java.time does not support leap seconds?!
       "a valid time string with leap second, Zulu",
       "valid leap second, zero time-offset",
       "valid leap second, positive time-offset",
       "valid leap second, large positive time-offset",
       "valid leap second, negative time-offset",
       "valid leap second, large negative time-offset",
-      "a valid time string with case-insensitive Z",
-      "an invalid time string with invalid time numoffset hour",
-      "an invalid time string with invalid time numoffset minute",
-      "an invalid time string with invalid time with both Z and numoffset"
+      // TODO ScalaJS java.time is different?!
+      "an invalid time string with invalid time numoffset hour"
+    ),
+    ("date-time.json", "validation of date-time strings") -> Seq(
+      // TODO java.time does not support leap seconds?!
+      "a valid date-time with a leap second, UTC",
+      "a valid date-time with a leap second, with minus offset"
+    ),
+    ("duration.json", "validation of duration strings") -> Seq(
+      // TODO not supported by java.time?!
+      "four years duration",
+      "one month duration",
+      "two weeks"
     )
   )
 
