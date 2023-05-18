@@ -28,13 +28,13 @@ import frawa.typedjson.util.WithPointer
 class KeywordsTest extends FunSuite:
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId)).get
 
-  private def assertKeywords(schema: SchemaValue)(
+  private def assertKeywords(schema: SchemaValue, vocabulary: Vocabulary = vocabularyForTest)(
       f: Keywords => Unit
   ): Either[Nothing, Unit] =
     val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema)
     val scope                           = DynamicScope.empty
     val withParsed =
-      for keywords <- Keywords.parseKeywords(vocabularyForTest, resolver.push(schema), scope)
+      for keywords <- Keywords.parseKeywords(vocabulary, resolver.push(schema), scope)
       yield f(keywords)
     withParsed.swap
       .map(messages => fail("parsing keywords failed", clues(clue[SchemaProblems](messages))))
@@ -526,6 +526,81 @@ class KeywordsTest extends FunSuite:
         assertEquals(
           keywords.keywords.size,
           2
+        )
+      }
+    }
+  }
+
+  test("meta: title") {
+    val vocabularyWithMeta = vocabularyForTest.combine(Vocabulary.specVocabularies(Vocabulary.metaDataId))
+    withSchema("""{
+                 |"title": "My Title"
+                 |}
+                 |""".stripMargin) { schema =>
+      assertKeywords(schema, vocabularyWithMeta) { keywords =>
+        assertEquals(
+          keywords.keywords,
+          Set(
+            WithLocation(
+              MetaKeyword(Some("My Title")),
+              KeywordLocation(Pointer.empty / "title")
+            )
+          )
+        )
+      }
+    }
+  }
+
+  test("meta: title and description") {
+    val vocabularyWithMeta = vocabularyForTest.combine(Vocabulary.specVocabularies(Vocabulary.metaDataId))
+    withSchema("""{
+                 |"description": "Longer description.",
+                 |"title": "My Title"
+                 |}
+                 |""".stripMargin) { schema =>
+      assertKeywords(schema, vocabularyWithMeta) { keywords =>
+        assertEquals(
+          keywords.keywords,
+          Set(
+            WithLocation(
+              MetaKeyword(Some("My Title"), Some("Longer description.")),
+              KeywordLocation(Pointer.empty / "description")
+            )
+          )
+        )
+      }
+    }
+  }
+
+  test("meta: all") {
+    val vocabularyWithMeta = vocabularyForTest.combine(Vocabulary.specVocabularies(Vocabulary.metaDataId))
+    withSchema("""{
+                 |"description": "Longer description.",
+                 |"title": "My Title",
+                 |"default": ["foo"],
+                 |"deprecated": false,
+                 |"readOnly": false,
+                 |"writeOnly": false,
+                 |"examples": ["bar", 13] 
+                 |}
+                 |""".stripMargin) { schema =>
+      assertKeywords(schema, vocabularyWithMeta) { keywords =>
+        assertEquals(
+          keywords.keywords,
+          Set(
+            WithLocation(
+              MetaKeyword(
+                title = Some("My Title"),
+                description = Some("Longer description."),
+                defaultValue = Some(ArrayValue(Seq(StringValue("foo")))),
+                deprecated = Some(false),
+                readOnly = Some(false),
+                writeOnly = Some(false),
+                examples = Some(Seq(StringValue("bar"), NumberValue(13)))
+              ),
+              KeywordLocation(Pointer.empty / "default")
+            )
+          )
         )
       }
     }
