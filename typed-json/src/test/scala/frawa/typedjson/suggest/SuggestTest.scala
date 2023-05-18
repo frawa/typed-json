@@ -32,24 +32,32 @@ import frawa.typedjson.eval.Util.doApply
 import frawa.typedjson.suggest.Suggest
 import frawa.typedjson.suggest.SuggestOutput
 import frawa.typedjson.output.OutputOps
+import munit.Compare
 
 class SuggestTest extends FunSuite:
 
+  given Compare[SuggestResult, SuggestResult] with
+    def isEqual(obtained: SuggestResult, expected: SuggestResult): Boolean =
+      (obtained, expected) match {
+        case (SuggestResult.Values(vs1), SuggestResult.Values(vs2)) => vs1.toSet.equals(vs2.toSet)
+        case _                                                      => obtained.equals(expected)
+      }
+
   private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
-      f: Set[Value] => Unit
+      f: SuggestResult => Unit
   ) =
     given OutputOps[SuggestOutput] = SuggestOutput.outputOps(at)
     val evalSuggest                = Eval[R, SuggestOutput]
     given Eval[R, SuggestOutput]   = evalSuggest
     val value                      = parseJsonValue(text)
     withCompiledSchemaValue(schema) { fun =>
-      val suggestFun  = Suggest.suggestAt(at)(fun)
-      val output      = doApply(fun, value)
-      val suggestions = Suggest.suggestions(at, output).toSet
-      f(suggestions)
+      val suggestFun = Suggest.suggestAt(at)(fun)
+      val output     = doApply(fun, value)
+      val result     = Suggest.suggestions(at, output)
+      f(result)
     }
 
-  private def assertSuggestForSchema(text: String, at: Pointer)(f: Set[Value] => Unit): Unit =
+  private def assertSuggestForSchema(text: String, at: Pointer)(f: SuggestResult => Unit): Unit =
     val lazyResolver = MetaSchemas.lazyResolver
     val base         = MetaSchemas.draft202012
     val Some(schema) = lazyResolver(base.resolve("schema")): @unchecked
@@ -59,10 +67,10 @@ class SuggestTest extends FunSuite:
     given Eval[R, SuggestOutput]   = evalSuggest
     val value                      = parseJsonValue(text)
     withCompiledSchemaValue(schema, Some(lazyResolver)) { fun =>
-      val suggestFun  = Suggest.suggestAt(at)(fun)
-      val output      = doApply(fun, value)
-      val suggestions = Suggest.suggestions(at, output).toSet
-      f(suggestions)
+      val suggestFun = Suggest.suggestAt(at)(fun)
+      val output     = doApply(fun, value)
+      val result     = Suggest.suggestions(at, output)
+      f(result)
     }
 
   test("suggest one object per property") {
@@ -72,10 +80,12 @@ class SuggestTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Set(
-            ObjectValue(Map()),
-            ObjectValue(Map("toto" -> NumberValue(0))),
-            ObjectValue(Map("titi" -> StringValue("")))
+          SuggestResult.Values(
+            Seq(
+              ObjectValue(Map()),
+              ObjectValue(Map("toto" -> NumberValue(0))),
+              ObjectValue(Map("titi" -> StringValue("")))
+            )
           )
         )
       }
@@ -89,9 +99,11 @@ class SuggestTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Set(
-            StringValue("toto"),
-            StringValue("titi")
+          SuggestResult.Values(
+            Seq(
+              StringValue("toto"),
+              StringValue("titi")
+            )
           )
         )
       }
@@ -117,16 +129,18 @@ class SuggestTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Set(
-            ObjectValue(Map()),
-            ObjectValue(
-              properties = Map(
-                "foo" -> ObjectValue(
-                  properties = Map()
+          SuggestResult.Values(
+            Seq(
+              ObjectValue(Map()),
+              ObjectValue(
+                properties = Map(
+                  "foo" -> ObjectValue(
+                    properties = Map()
+                  )
                 )
-              )
-            ),
-            ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0)))))
+              ),
+              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0)))))
+            )
           )
         )
       }
@@ -158,37 +172,39 @@ class SuggestTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Set(
-            ObjectValue(Map()),
-            ObjectValue(
-              properties = Map(
-                "foo" -> ObjectValue(
-                  properties = Map()
-                )
-              )
-            ),
-            ObjectValue(
-              Map(
-                "foo" -> ObjectValue(
-                  Map(
-                    "bar" ->
-                      NumberValue(0)
+          SuggestResult.Values(
+            Seq(
+              ObjectValue(Map()),
+              ObjectValue(
+                properties = Map(
+                  "foo" -> ObjectValue(
+                    properties = Map()
                   )
                 )
-              )
-            ),
-            ObjectValue(
-              Map(
-                "gnu" ->
-                  ObjectValue(Map())
-              )
-            ),
-            ObjectValue(
-              properties = Map(
-                "gnu" -> ObjectValue(
-                  properties = Map(
-                    "toto" -> StringValue(
-                      value = ""
+              ),
+              ObjectValue(
+                Map(
+                  "foo" -> ObjectValue(
+                    Map(
+                      "bar" ->
+                        NumberValue(0)
+                    )
+                  )
+                )
+              ),
+              ObjectValue(
+                Map(
+                  "gnu" ->
+                    ObjectValue(Map())
+                )
+              ),
+              ObjectValue(
+                properties = Map(
+                  "gnu" -> ObjectValue(
+                    properties = Map(
+                      "toto" -> StringValue(
+                        value = ""
+                      )
                     )
                   )
                 )
@@ -220,33 +236,35 @@ class SuggestTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Set(
-            ObjectValue(
-              properties = Map()
-            ),
-            ObjectValue(
-              properties = Map(
-                "foo" -> ObjectValue(
-                  properties = Map()
-                )
-              )
-            ),
-            ObjectValue(
-              Map(
-                "foo" -> ObjectValue(
-                  Map(
-                    "bar" ->
-                      NumberValue(0)
+          SuggestResult.Values(
+            Seq(
+              ObjectValue(
+                properties = Map()
+              ),
+              ObjectValue(
+                properties = Map(
+                  "foo" -> ObjectValue(
+                    properties = Map()
                   )
                 )
-              )
-            ),
-            ObjectValue(
-              Map(
-                "foo" -> ObjectValue(
-                  Map(
-                    "gnu" ->
-                      NumberValue(0)
+              ),
+              ObjectValue(
+                Map(
+                  "foo" -> ObjectValue(
+                    Map(
+                      "bar" ->
+                        NumberValue(0)
+                    )
+                  )
+                )
+              ),
+              ObjectValue(
+                Map(
+                  "foo" -> ObjectValue(
+                    Map(
+                      "gnu" ->
+                        NumberValue(0)
+                    )
                   )
                 )
               )
@@ -265,13 +283,17 @@ class SuggestTest extends FunSuite:
       assertSuggest("""13""")(schema) { result =>
         assertEquals(
           result,
-          Set(NullValue, NumberValue(0))
+          SuggestResult.Values(
+            Seq(NullValue, NumberValue(0))
+          )
         )
       }
       assertSuggest("""true""")(schema) { result =>
         assertEquals(
           result,
-          Set(NullValue, NumberValue(0))
+          SuggestResult.Values(
+            Seq(NullValue, NumberValue(0))
+          )
         )
       }
     }
@@ -286,13 +308,17 @@ class SuggestTest extends FunSuite:
       assertSuggest("""true""")(schema) { result =>
         assertEquals(
           result,
-          Set(NumberValue(0), NumberValue(13), NumberValue(14))
+          SuggestResult.Values(
+            Seq(NumberValue(0), NumberValue(13), NumberValue(14))
+          )
         )
       }
       assertSuggest("""13""")(schema) { result =>
         assertEquals(
           result,
-          Set(NumberValue(0), NumberValue(13), NumberValue(14))
+          SuggestResult.Values(
+            Seq(NumberValue(0), NumberValue(13), NumberValue(14))
+          )
         )
       }
     }
@@ -307,13 +333,17 @@ class SuggestTest extends FunSuite:
       assertSuggest("""true""")(schema) { result =>
         assertEquals(
           result,
-          Set(BoolValue(true))
+          SuggestResult.Values(
+            Seq(BoolValue(true))
+          )
         )
       }
       assertSuggest("""13""")(schema) { result =>
         assertEquals(
           result,
-          Set(BoolValue(true))
+          SuggestResult.Values(
+            Seq(BoolValue(true))
+          )
         )
       }
     }
@@ -353,92 +383,98 @@ class SuggestTest extends FunSuite:
       assertSuggest("""{}""")(schema) { result =>
         assertEquals(
           result,
-          Set(
-            ObjectValue(
-              properties = Map()
-            ),
-            ObjectValue(
-              properties = Map(
-                "kind" -> StringValue(
-                  value = ""
+          SuggestResult.Values(
+            Seq(
+              ObjectValue(
+                properties = Map()
+              ),
+              ObjectValue(
+                properties = Map(
+                  "gnu" -> NumberValue(
+                    value = 0
+                  )
                 )
-              )
-            ),
-            ObjectValue(
-              properties = Map(
-                "kind" -> StringValue(
-                  value = "first"
+              ),
+              ObjectValue(
+                properties = Map(
+                  "kind" -> StringValue(
+                    value = ""
+                  )
                 )
-              )
-            ),
-            ObjectValue(
-              properties = Map(
-                "gnu" -> NumberValue(
-                  value = 0
+              ),
+              ObjectValue(
+                properties = Map(
+                  "foo" -> BoolValue(
+                    value = true
+                  )
                 )
-              )
-            ),
-            ObjectValue(
-              properties = Map(
-                "kind" -> StringValue(
-                  value = "second"
+              ),
+              ObjectValue(
+                properties = Map(
+                  "kind" -> StringValue(
+                    value = "second"
+                  )
                 )
-              )
-            ),
-            ObjectValue(
-              properties = Map(
-                "foo" -> BoolValue(
-                  value = true
+              ),
+              ObjectValue(
+                properties = Map(
+                  "kind" -> StringValue(
+                    value = "first"
+                  )
                 )
               )
             )
           )
         )
+
       }
       assertSuggest("""{"kind":"first"}""")(schema) { result =>
         assertEquals(
           result,
-          Set(
-            ObjectValue(
-              properties = Map()
-            ),
-            ObjectValue(
-              properties = Map(
-                "kind" -> StringValue(
-                  value = ""
+          SuggestResult.Values(
+            Seq(
+              ObjectValue(
+                properties = Map()
+              ),
+              ObjectValue(
+                properties = Map(
+                  "kind" -> StringValue(
+                    value = ""
+                  )
                 )
-              )
-            ),
-            ObjectValue(
-              properties = Map(
-                "kind" -> StringValue(
-                  value = "first"
+              ),
+              ObjectValue(
+                properties = Map(
+                  "kind" -> StringValue(
+                    value = "first"
+                  )
                 )
-              )
-            ),
-            ObjectValue(
-              properties = Map(
-                "gnu" -> NumberValue(
-                  value = 0
+              ),
+              ObjectValue(
+                properties = Map(
+                  "gnu" -> NumberValue(
+                    value = 0
+                  )
                 )
-              )
-            ),
-            ObjectValue(
-              properties = Map(
-                "kind" -> StringValue(
-                  value = "second"
+              ),
+              ObjectValue(
+                properties = Map(
+                  "kind" -> StringValue(
+                    value = "second"
+                  )
                 )
-              )
-            ),
-            ObjectValue(
-              properties = Map(
-                "foo" -> BoolValue(
-                  value = true
+              ),
+              ObjectValue(
+                properties = Map(
+                  "foo" -> BoolValue(
+                    value = true
+                  )
                 )
               )
             )
           )
         )
+
       }
     }
   }
@@ -463,19 +499,22 @@ class SuggestTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Set(
-            ObjectValue(
-              properties = Map()
-            ),
-            ObjectValue(Map("foo" -> ObjectValue(Map()))),
-            ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0))))),
-            ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(13))))),
-            ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(14))))),
-            ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> StringValue(""))))),
-            ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> StringValue("toto"))))),
-            ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> StringValue("titi")))))
+          SuggestResult.Values(
+            Seq(
+              ObjectValue(
+                properties = Map()
+              ),
+              ObjectValue(Map("foo" -> ObjectValue(Map()))),
+              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0))))),
+              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(13))))),
+              ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(14))))),
+              ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> StringValue(""))))),
+              ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> StringValue("toto"))))),
+              ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> StringValue("titi")))))
+            )
           )
         )
+
       }
     }
   }
@@ -487,17 +526,31 @@ class SuggestTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Set(
-            ObjectValue(Map()),
-            ObjectValue(
-              properties = Map(
-                "toto" -> NullValue,
-                "gnu"  -> NullValue
-              )
-            ),
-            ObjectValue(Map("toto" -> NumberValue(0))),
-            ObjectValue(Map("gnu" -> BoolValue(true))),
-            ObjectValue(Map("titi" -> StringValue("")))
+          SuggestResult.Values(
+            Seq(
+              ObjectValue(properties =
+                Map(
+                  "titi" -> StringValue("")
+                )
+              ),
+              ObjectValue(properties =
+                Map(
+                  "toto" -> NumberValue(0)
+                )
+              ),
+              ObjectValue(properties =
+                Map(
+                  "gnu" -> BoolValue(true)
+                )
+              ),
+              ObjectValue(
+                properties = Map(
+                  "toto" -> NullValue,
+                  "gnu"  -> NullValue
+                )
+              ),
+              ObjectValue(Map())
+            )
           )
         )
       }
@@ -511,9 +564,11 @@ class SuggestTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Set(
-            ArrayValue(Seq()),
-            ArrayValue(Seq(NumberValue(0)))
+          SuggestResult.Values(
+            Seq(
+              ArrayValue(Seq()),
+              ArrayValue(Seq(NumberValue(0)))
+            )
           )
         )
       }
@@ -530,8 +585,10 @@ class SuggestTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Set(
-            NumberValue(0)
+          SuggestResult.Values(
+            Seq(
+              NumberValue(0)
+            )
           )
         )
       }
@@ -548,8 +605,10 @@ class SuggestTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Set(
-            NumberValue(0)
+          SuggestResult.Values(
+            Seq(
+              NumberValue(0)
+            )
           )
         )
       }
@@ -560,8 +619,8 @@ class SuggestTest extends FunSuite:
     assertSuggestForSchema(
       """{}""",
       Pointer.empty.insideKey
-    ) { suggestions =>
-      val suggestedKeys  = suggestions.flatMap(Value.asString).toSet
+    ) { case SuggestResult.Values(vs) =>
+      val suggestedKeys  = vs.flatMap(Value.asString).toSet
       val deprecatedKeys = Vocabulary.deprecatedKeywords
       val actual         = suggestedKeys -- deprecatedKeys
 

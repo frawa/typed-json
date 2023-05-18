@@ -30,6 +30,7 @@ import frawa.typedjson.suggest.Suggest
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSExport, JSExportAll, JSExportTopLevel}
+import frawa.typedjson.suggest.SuggestResult
 
 @JSExportTopLevel("TypedJsonFactory")
 object TypedJsonFactory {
@@ -172,12 +173,18 @@ case class Suggestion(
 )
 
 object Suggestions {
-  def apply(offsetAt: Pointer => Option[Offset])(pointer: Pointer, values: Seq[Value]): Suggestions = {
+  def apply(offsetAt: Pointer => Option[Offset])(pointer: Pointer, result: SuggestResult): Suggestions = {
     val offset       = offsetAt(pointer)
     val (start, end) = offset.map(o => (o.start, o.end)).getOrElse((0, 0))
-    val suggestions  = values.map(toSuggestion)
+    val suggestions  = toSuggestions(result)
     Suggestions(start, end, pointer.toString, js.Array(suggestions.toSeq*))
   }
+
+  private def toSuggestions(result: SuggestResult): Seq[Suggestion] =
+    result match {
+      case SuggestResult.Values(vs)      => vs.map(toSuggestion)
+      case SuggestResult.WithMeta(rs, _) => rs.flatMap(toSuggestions)
+    }
 
   private def toSuggestion(value: Value): Suggestion = {
     Suggestion(toAny(value))

@@ -25,28 +25,39 @@ import java.net.URI
 import frawa.typedjson.keywords.*
 import frawa.typedjson.suggest.SuggestOutput
 
+enum SuggestResult:
+  case Values(vs: Seq[Value])
+  case WithMeta(rs: Seq[SuggestResult], meta: MetaKeyword)
+
 object Suggest:
+
   def suggestAt[R[_], O](at: Pointer)(compiled: Value => R[O]): Value => R[O] =
     // TODO stop evaluation as soon as 'at' is reached
     compiled
 
   def isAt(at: Pointer): Pointer => Boolean = pointer => (at.isInsideKey && at.outer == pointer) || at == pointer
 
-  def suggestions(at: Pointer, output: SuggestOutput): Seq[Value] =
-    val all = output.keywords.flatMap(suggestFor).distinct
+  def suggestions(at: Pointer, output: SuggestOutput): SuggestResult =
+    val result = suggestFor(output.keywords)
     // TODO use more precise replaceAt for better suggestions
-    if at.isInsideKey then onlyKeys(all)
-    else all
+    if at.isInsideKey then SuggestResult.Values(onlyKeys(result))
+    else result
+
+  private def suggestFor(ks: Seq[Keyword]): SuggestResult =
+    val all = ks.flatMap(suggestFor).distinct
+    SuggestResult.Values(all)
 
   private def suggestFor(keyword: Keyword): Set[Value] =
     keyword match
-      case NullTypeKeyword    => Set(NullValue)
-      case BooleanTypeKeyword => Set(BoolValue(true))
-      case StringTypeKeyword  => Set(StringValue(""))
-      case NumberTypeKeyword  => Set(NumberValue(0))
-      case ArrayTypeKeyword   => Set(ArrayValue(Seq()))
-      case ObjectTypeKeyword  => Set(ObjectValue(Map()))
+      case NullTypeKeyword                           => Set(NullValue)
+      case BooleanTypeKeyword                        => Set(BoolValue(true))
+      case StringTypeKeyword                         => Set(StringValue(""))
+      case NumberTypeKeyword                         => Set(NumberValue(0))
+      case ArrayTypeKeyword                          => Set(ArrayValue(Seq()))
+      case ObjectTypeKeyword                         => Set(ObjectValue(Map()))
       case ObjectPropertiesKeyword(properties, _, _) =>
+        // TODO pattern properties?
+        // TODO additional properties
         properties.flatMap { case (prop, keywords) =>
           keywords
             .flatMap(keyword => suggestFor(keyword).toSet)
@@ -93,5 +104,13 @@ object Suggest:
         // Seq(StringValue(keyword.getClass.getSimpleName))
         Set(NullValue)
 
-  private def onlyKeys(suggestions: Seq[Value]): Seq[StringValue] =
-    suggestions.flatMap(Value.asObject).flatMap(_.keys).map(StringValue.apply).distinct
+  private def onlyKeys(result: SuggestResult): Seq[Value] =
+    result match {
+      case SuggestResult.Values(vs) =>
+        onlyKeys(vs)
+      case SuggestResult.WithMeta(rs, meta) =>
+        rs.flatMap(onlyKeys)
+    }
+
+  private def onlyKeys(vs: Seq[Value]): Seq[Value] =
+    vs.flatMap(Value.asObject).flatMap(_.keys).map(StringValue.apply).distinct
