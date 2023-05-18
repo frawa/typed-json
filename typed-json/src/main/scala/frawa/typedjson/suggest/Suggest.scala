@@ -27,7 +27,7 @@ import frawa.typedjson.suggest.SuggestOutput
 
 enum SuggestResult:
   case Values(vs: Seq[Value])
-  case WithMeta(rs: Seq[SuggestResult], meta: MetaKeyword)
+  case WithMeta(vs: Seq[Value], meta: MetaKeyword)
 
 object Suggest:
 
@@ -45,7 +45,16 @@ object Suggest:
 
   private def suggestFor(ks: Seq[Keyword]): SuggestResult =
     val all = ks.flatMap(suggestFor).distinct
-    SuggestResult.Values(all)
+    // println(s"FW all ${ks.map(_.getClass.getSimpleName).mkString("\n\t")}")
+    // println(
+    //   s"FW meta ${ks.filter(_.isInstanceOf[MetaKeyword]).map(_.asInstanceOf[MetaKeyword]).map(_.title).mkString("\n\t")}"
+    // )
+    val meta = ks.findLast(_.isInstanceOf[MetaKeyword]).map(_.asInstanceOf[MetaKeyword])
+    meta
+      .map { meta =>
+        SuggestResult.WithMeta(all, meta)
+      }
+      .getOrElse(SuggestResult.Values(all))
 
   private def suggestFor(keyword: Keyword): Set[Value] =
     keyword match
@@ -98,8 +107,15 @@ object Suggest:
         keywords
           .flatMap(keyword => suggestFor(keyword))
           .toSet
-      case WithLocation(keyword, _) => suggestFor(keyword)
-      case _                        =>
+      case MetaKeyword(_, _, Some(defaultValue), _, _, _, _) =>
+        Set(defaultValue)
+      case MetaKeyword(_, _, _, _, _, _, Some(examples)) =>
+        examples.toSet
+      case WithLocation(keyword, kl) =>
+        // if (keyword.isInstanceOf[MetaKeyword]) then println(s"FW ${kl} ${keyword}")
+        // else println(s"FW ${kl} ${keyword.getClass.getSimpleName}")
+        suggestFor(keyword)
+      case _ =>
         // useful for debugging:
         // Seq(StringValue(keyword.getClass.getSimpleName))
         Set(NullValue)
@@ -108,8 +124,8 @@ object Suggest:
     result match {
       case SuggestResult.Values(vs) =>
         onlyKeys(vs)
-      case SuggestResult.WithMeta(rs, meta) =>
-        rs.flatMap(onlyKeys)
+      case SuggestResult.WithMeta(vs, _) =>
+        onlyKeys(vs)
     }
 
   private def onlyKeys(vs: Seq[Value]): Seq[Value] =

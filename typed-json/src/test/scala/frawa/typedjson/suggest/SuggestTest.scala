@@ -34,14 +34,18 @@ import frawa.typedjson.suggest.SuggestOutput
 import frawa.typedjson.output.OutputOps
 import munit.Compare
 import frawa.typedjson.eval.Util.vocabularyForTest
+import frawa.typedjson.keywords.MetaKeyword
 
 class SuggestTest extends FunSuite:
 
   given Compare[SuggestResult, SuggestResult] with
     def isEqual(obtained: SuggestResult, expected: SuggestResult): Boolean =
       (obtained, expected) match {
-        case (SuggestResult.Values(vs1), SuggestResult.Values(vs2)) => vs1.toSet.equals(vs2.toSet)
-        case _                                                      => obtained.equals(expected)
+        case (SuggestResult.Values(vs1), SuggestResult.Values(vs2)) =>
+          vs1.toSet.equals(vs2.toSet)
+        case (SuggestResult.WithMeta(vs1, meta1), SuggestResult.WithMeta(vs2, meta2)) =>
+          vs1.toSet.equals(vs2.toSet) && meta1.equals(meta2)
+        case _ => obtained.equals(expected)
       }
 
   private val vocabularyWithMeta = vocabularyForTest.map { voc =>
@@ -636,5 +640,64 @@ class SuggestTest extends FunSuite:
 
       val unknown = actual -- availableKeys
       assertEquals(unknown, Set.empty[String], "suggested unknown keywords")
+    }
+  }
+
+  test("meta default") {
+    withSchema("""{
+                 |"default": 13,
+                 |"type": "number"
+                 |}""".stripMargin) { schema =>
+      assertSuggest("""13""")(schema) { result =>
+        assertEquals(
+          result,
+          SuggestResult.Values(
+            Seq(NumberValue(0), NumberValue(13))
+          )
+        )
+      }
+    }
+  }
+
+  test("meta examples") {
+    withSchema("""{
+                 |"examples": [13,14],
+                 |"type": "number"
+                 |}""".stripMargin) { schema =>
+      assertSuggest("""13""")(schema) { result =>
+        assertEquals(
+          result,
+          SuggestResult.Values(
+            Seq(NumberValue(0), NumberValue(13), NumberValue(14))
+          )
+        )
+      }
+    }
+  }
+
+  test("first with title".ignore) {
+    withSchema("""{
+                 |"title": "My Title",
+                 |"type": "number"
+                 |}""".stripMargin) { schema =>
+      assertSuggest("""13""")(schema) { result =>
+        assertEquals(
+          result,
+          SuggestResult.WithMeta(
+            Seq(NullValue, NumberValue(0)),
+            MetaKeyword(title = Some("My Title"))
+          )
+        )
+      }
+    }
+  }
+
+  test("suggest values for schema writing".ignore) {
+    assertSuggestForSchema(
+      """{}""",
+      Pointer.empty
+    ) { result =>
+      // TODO assert different meta schema titles for various suggested values
+      // println(s"FW ${munitPrint(result)}")
     }
   }
