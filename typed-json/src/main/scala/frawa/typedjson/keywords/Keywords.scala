@@ -111,7 +111,7 @@ case class Keywords(
   def map[E](f: Keyword => E): Seq[E] =
     keywords.map(f).toSeq
 
-  def flatMap[E](f: Keyword => Set[E]): Seq[E] =
+  def flatMap[E](f: Keyword => Seq[E]): Seq[E] =
     keywords.flatMap(f).toSeq
 
   private def withLocation(keyword: Keyword)(using location: CurrentLocation): WithLocation =

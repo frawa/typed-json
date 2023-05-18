@@ -68,6 +68,7 @@ object SuggestOutput:
         if isAt(o.simple.pointer) then
           k
             .map { k =>
+              // TODO avoid restoring WithLocation
               k match {
                 case _: WithLocation => o.copy(keywords = o.keywords :+ k)
                 case _               => o.copy(keywords = o.keywords :+ WithLocation(k, kl))

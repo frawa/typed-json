@@ -25,11 +25,19 @@ import java.net.URI
 import frawa.typedjson.keywords.*
 import frawa.typedjson.suggest.SuggestOutput
 
-enum SuggestResult:
+case class SuggestResult(suggestions: Seq[Suggest])
+
+enum Suggest:
+  def values: Seq[Value] = this match {
+    case Values(vs)     => vs
+    case WithDoc(vs, _) => vs
+  }
   case Values(vs: Seq[Value])
-  case WithMeta(vs: Seq[Value], meta: MetaKeyword)
+  case WithDoc(vs: Seq[Value], doc: Suggest.Doc)
 
 object Suggest:
+  // TODO deprecated, readOnly, writeOnly
+  case class Doc(title: Option[String] = None, description: Option[String] = None)
 
   def suggestAt[R[_], O](at: Pointer)(compiled: Value => R[O]): Value => R[O] =
     // TODO stop evaluation as soon as 'at' is reached
@@ -38,94 +46,155 @@ object Suggest:
   def isAt(at: Pointer): Pointer => Boolean = pointer => (at.isInsideKey && at.outer == pointer) || at == pointer
 
   def suggestions(at: Pointer, output: SuggestOutput): SuggestResult =
-    val result = suggestFor(output.keywords)
-    // TODO use more precise replaceAt for better suggestions
-    if at.isInsideKey then SuggestResult.Values(onlyKeys(result))
-    else result
-
-  private def suggestFor(ks: Seq[Keyword]): SuggestResult =
-    val all = ks.flatMap(suggestFor).distinct
-    // println(s"FW all ${ks.map(_.getClass.getSimpleName).mkString("\n\t")}")
-    // println(
-    //   s"FW meta ${ks.filter(_.isInstanceOf[MetaKeyword]).map(_.asInstanceOf[MetaKeyword]).map(_.title).mkString("\n\t")}"
-    // )
-    val meta = ks.findLast(_.isInstanceOf[MetaKeyword]).map(_.asInstanceOf[MetaKeyword])
-    meta
-      .map { meta =>
-        SuggestResult.WithMeta(all, meta)
+    val ws = output.keywords.map(suggestFor)
+    val metaByLoc = output.keywords
+      .groupBy {
+        case WithLocation(meta: MetaKeyword, kl) => Some(kl.parent)
+        case _: MetaKeyword                      => Some(KeywordLocation.empty)
+        case _                                   => None
       }
-      .getOrElse(SuggestResult.Values(all))
+      .filter(_._1.isDefined)
+      .flatMap {
+        case (Some(kl), metas) =>
+          metas
+            .flatMap {
+              case WithLocation(meta: MetaKeyword, _) => Some(meta)
+              case meta: MetaKeyword                  => Some(meta)
+              case _                                  => None
+            }
+            .headOption
+            .map((kl, _))
+        case _ => None
+      }
+      .toMap
+    val suggestions = ws
+      .groupBy(Work.parentLoc)
+      .view
+      .mapValues(_.flatMap(_.values).distinct)
+      .map(toSuggest(metaByLoc.get))
+      .toSeq
+    // TODO use more precise replaceAt for better suggestions
+    if at.isInsideKey then SuggestResult(suggestions.map(onlyKeys))
+    else SuggestResult(suggestions)
 
-  private def suggestFor(keyword: Keyword): Set[Value] =
+  private def toSuggest(
+      findMeta: KeywordLocation => Option[MetaKeyword]
+  )(parent: Option[KeywordLocation], vs: Seq[Value]): Suggest =
+    parent
+      .flatMap(findMeta)
+      .flatMap(toDoc)
+      .map { doc =>
+        Suggest.WithDoc(vs, doc)
+      }
+      .getOrElse(Suggest.Values(vs))
+
+  private def toDoc(meta: MetaKeyword): Option[Doc] =
+    if Seq(meta.title, meta.description).exists(_.isDefined) then Some(Doc(meta.title, meta.description))
+    else None
+
+  private enum Work(vs: Seq[Value]):
+    def values: Seq[Value] = vs
+
+    case Vals(vs: Seq[Value])                         extends Work(vs)
+    case WithLoc(vs: Seq[Value], kl: KeywordLocation) extends Work(vs)
+
+  private object Work {
+    def apply(v: Value): Work =
+      Work.Vals(Seq(v))
+    def apply(vs: Seq[Value]): Work =
+      Work.Vals(vs.distinct)
+    def all(ws: Seq[Work]): Work =
+      Work.Vals(ws.flatMap(_.values).distinct)
+
+    def parentLoc(w: Work): Option[KeywordLocation] = w match {
+      case _: Vals        => None
+      case WithLoc(_, kl) => Some(kl.parent)
+    }
+  }
+
+  // private def suggestFor(ks: Seq[Keyword]): Work =
+  //   val all = ks.flatMap(suggestFor).distinct
+  //   // println(s"FW all ${ks.map(_.getClass.getSimpleName).mkString("\n\t")}")
+  //   // println(
+  //   //   s"FW meta ${ks.filter(_.isInstanceOf[MetaKeyword]).map(_.asInstanceOf[MetaKeyword]).map(_.title).mkString("\n\t")}"
+  //   // )
+  //   val meta = ks.findLast(_.isInstanceOf[MetaKeyword]).map(_.asInstanceOf[MetaKeyword])
+  //   meta
+  //     .map { meta =>
+  //       SuggestResult.WithDoc(all, meta)
+  //     }
+  //     .getOrElse(SuggestResult.Values(all))
+
+  private def suggestFor(keyword: Keyword): Work =
     keyword match
-      case NullTypeKeyword                           => Set(NullValue)
-      case BooleanTypeKeyword                        => Set(BoolValue(true))
-      case StringTypeKeyword                         => Set(StringValue(""))
-      case NumberTypeKeyword                         => Set(NumberValue(0))
-      case ArrayTypeKeyword                          => Set(ArrayValue(Seq()))
-      case ObjectTypeKeyword                         => Set(ObjectValue(Map()))
+      case NullTypeKeyword                           => Work(NullValue)
+      case BooleanTypeKeyword                        => Work(BoolValue(true))
+      case StringTypeKeyword                         => Work(StringValue(""))
+      case NumberTypeKeyword                         => Work(NumberValue(0))
+      case ArrayTypeKeyword                          => Work(ArrayValue(Seq()))
+      case ObjectTypeKeyword                         => Work(ObjectValue(Map()))
       case ObjectPropertiesKeyword(properties, _, _) =>
         // TODO pattern properties?
         // TODO additional properties
-        properties.flatMap { case (prop, keywords) =>
+        Work(properties.flatMap { case (prop, keywords) =>
           keywords
-            .flatMap(keyword => suggestFor(keyword).toSet)
+            .flatMap(keyword => suggestFor(keyword).values)
             .map(v => ObjectValue(Map(prop -> v)))
-        }.toSet
-      case ObjectRequiredKeyword(required) => Set(ObjectValue(Map.from(required.map((_, NullValue)))))
-      case TrivialKeyword(v)               => Set(BoolValue(v))
+        }.toSeq)
+      case ObjectRequiredKeyword(required) => Work(ObjectValue(Map.from(required.map((_, NullValue)))))
+      case TrivialKeyword(v)               => Work(BoolValue(v))
       case IfThenElseKeyword(ifChecks, thenChecks, elseChecks) =>
-        Set(ifChecks, thenChecks, elseChecks).flatten
-          .flatMap(_.flatMap(keyword => suggestFor(keyword).toSet))
+        Work.all(
+          Seq(ifChecks, thenChecks, elseChecks).flatten
+            .flatMap(_.map(keyword => suggestFor(keyword)))
+        )
       case OneOfKeyword(keywords) =>
-        keywords
-          .flatMap(_.flatMap(keyword => suggestFor(keyword)))
-          .toSet
+        Work.all(
+          keywords.flatMap(_.map(keyword => suggestFor(keyword)))
+        )
       case AnyOfKeyword(keywords) =>
-        keywords
-          .flatMap(_.flatMap(keyword => suggestFor(keyword)))
-          .toSet
+        Work.all(
+          keywords.flatMap(_.map(keyword => suggestFor(keyword)))
+        )
       case AllOfKeyword(keywords) =>
         // TODO intersect?
-        keywords
-          .flatMap(_.flatMap(keyword => suggestFor(keyword)))
-          .toSet
-      case EnumKeyword(values) => values.toSet
+        Work.all(
+          keywords.flatMap(_.map(keyword => suggestFor(keyword)))
+        )
+      case EnumKeyword(values) => Work(values)
       case ArrayItemsKeyword(items, prefixItems) =>
         val itemArrays = Seq(items).flatten
-          .flatMap(_.flatMap(keyword => suggestFor(keyword).toSet))
+          .flatMap(_.flatMap(keyword => suggestFor(keyword).values))
           .map(v => ArrayValue(Seq(v)))
         // TODO combinations? might explode?
         val tuplesOfHeads = ArrayValue(
           prefixItems
-            .map(_.flatMap(keyword => suggestFor(keyword).toSet))
+            .map(_.flatMap(keyword => suggestFor(keyword).values))
             .map(_.headOption)
             .map(_.getOrElse(NullValue))
         )
-        (itemArrays :+ tuplesOfHeads).toSet
+        Work(itemArrays :+ tuplesOfHeads)
       case UnionTypeKeyword(keywords) =>
-        keywords
-          .flatMap(keyword => suggestFor(keyword))
-          .toSet
+        Work.all(keywords.map(keyword => suggestFor(keyword)))
       case MetaKeyword(_, _, Some(defaultValue), _, _, _, _) =>
-        Set(defaultValue)
+        Work(defaultValue)
       case MetaKeyword(_, _, _, _, _, _, Some(examples)) =>
-        examples.toSet
+        Work(examples)
       case WithLocation(keyword, kl) =>
         // if (keyword.isInstanceOf[MetaKeyword]) then println(s"FW ${kl} ${keyword}")
         // else println(s"FW ${kl} ${keyword.getClass.getSimpleName}")
-        suggestFor(keyword)
+        Work.WithLoc(suggestFor(keyword).values, kl)
       case _ =>
         // useful for debugging:
         // Seq(StringValue(keyword.getClass.getSimpleName))
-        Set(NullValue)
+        Work(NullValue)
 
-  private def onlyKeys(result: SuggestResult): Seq[Value] =
-    result match {
-      case SuggestResult.Values(vs) =>
-        onlyKeys(vs)
-      case SuggestResult.WithMeta(vs, _) =>
-        onlyKeys(vs)
+  private def onlyKeys(w: Suggest): Suggest =
+    w match {
+      case Suggest.Values(vs) =>
+        Suggest.Values(onlyKeys(vs))
+      case Suggest.WithDoc(vs, doc) =>
+        Suggest.WithDoc(onlyKeys(vs), doc)
     }
 
   private def onlyKeys(vs: Seq[Value]): Seq[Value] =
