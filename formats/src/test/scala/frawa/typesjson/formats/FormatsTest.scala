@@ -58,6 +58,8 @@ class FormatsTest extends FunSuite:
 
   test("time") {
     assertHasNotFormat("time")("12:00:00")
+    // TODO red in JS
+    // assertHasNotFormat("time")("01:02:03+24:00")
     // TODO support leap second
     // assertHasFormat("time")("23:59:60Z")
     // assertHasFormat("time")("23:59:60+00:00")

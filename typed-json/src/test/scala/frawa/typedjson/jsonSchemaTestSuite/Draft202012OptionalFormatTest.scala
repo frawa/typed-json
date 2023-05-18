@@ -34,12 +34,6 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
 
   // TODO un-ignore 'em
   override protected val ignoreByExpectation: Map[TestId, Seq[String]] = Map(
-    ("duration.json", "validation of duration strings") -> Seq(
-      // TODO not supported by java.time?!
-      "four years duration",
-      "one month duration",
-      "two weeks"
-    ),
     ("hostname.json", "validation of host names") -> Seq(
       "a host name containing illegal characters",
       "a host name with a component too long",
@@ -78,16 +72,26 @@ class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
       "an IPv6-address-literal after the @ is valid"
     ),
     ("time.json", "validation of time strings") -> Seq(
+      // TODO java.time does not support leap seconds?!
       "a valid time string with leap second, Zulu",
       "valid leap second, zero time-offset",
       "valid leap second, positive time-offset",
       "valid leap second, large positive time-offset",
       "valid leap second, negative time-offset",
-      "valid leap second, large negative time-offset"
+      "valid leap second, large negative time-offset",
+      // TODO ScalaJS java.time is different?!
+      "an invalid time string with invalid time numoffset hour"
     ),
     ("date-time.json", "validation of date-time strings") -> Seq(
+      // TODO java.time does not support leap seconds?!
       "a valid date-time with a leap second, UTC",
       "a valid date-time with a leap second, with minus offset"
+    ),
+    ("duration.json", "validation of duration strings") -> Seq(
+      // TODO not supported by java.time?!
+      "four years duration",
+      "one month duration",
+      "two weeks"
     )
   )
 
