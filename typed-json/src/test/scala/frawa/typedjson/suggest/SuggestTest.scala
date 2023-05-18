@@ -33,6 +33,7 @@ import frawa.typedjson.suggest.Suggest
 import frawa.typedjson.suggest.SuggestOutput
 import frawa.typedjson.output.OutputOps
 import munit.Compare
+import frawa.typedjson.eval.Util.vocabularyForTest
 
 class SuggestTest extends FunSuite:
 
@@ -43,6 +44,10 @@ class SuggestTest extends FunSuite:
         case _                                                      => obtained.equals(expected)
       }
 
+  private val vocabularyWithMeta = vocabularyForTest.map { voc =>
+    voc.combine(Vocabulary.specVocabularies(Vocabulary.metaDataId))
+  }
+
   private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
       f: SuggestResult => Unit
   ) =
@@ -50,7 +55,7 @@ class SuggestTest extends FunSuite:
     val evalSuggest                = Eval[R, SuggestOutput]
     given Eval[R, SuggestOutput]   = evalSuggest
     val value                      = parseJsonValue(text)
-    withCompiledSchemaValue(schema) { fun =>
+    withCompiledSchemaValue(schema, vocabulary = vocabularyWithMeta) { fun =>
       val suggestFun = Suggest.suggestAt(at)(fun)
       val output     = doApply(fun, value)
       val result     = Suggest.suggestions(at, output)
@@ -66,7 +71,7 @@ class SuggestTest extends FunSuite:
     val evalSuggest                = Eval[R, SuggestOutput]
     given Eval[R, SuggestOutput]   = evalSuggest
     val value                      = parseJsonValue(text)
-    withCompiledSchemaValue(schema, Some(lazyResolver)) { fun =>
+    withCompiledSchemaValue(schema, Some(lazyResolver), vocabularyWithMeta) { fun =>
       val suggestFun = Suggest.suggestAt(at)(fun)
       val output     = doApply(fun, value)
       val result     = Suggest.suggestions(at, output)
@@ -625,18 +630,11 @@ class SuggestTest extends FunSuite:
       val actual         = suggestedKeys -- deprecatedKeys
 
       val availableKeys = Vocabulary.specDialect().keywords.keys.toSet
-      // see frawa.typedjson.keywords.Vocabulary.metaDataKeywords
-      val todoKeywords = Set(
-        "deprecated",
-        "readOnly",
-        "writeOnly",
-        "examples"
-      )
 
       val notSuggested = availableKeys -- actual
       assertEquals(notSuggested, Set.empty[String], "not suggested known keywords")
 
-      val unknown = actual -- (availableKeys ++ todoKeywords)
+      val unknown = actual -- availableKeys
       assertEquals(unknown, Set.empty[String], "suggested unknown keywords")
     }
   }
