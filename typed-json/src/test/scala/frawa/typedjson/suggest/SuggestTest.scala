@@ -35,6 +35,7 @@ import frawa.typedjson.output.OutputOps
 import munit.Compare
 import frawa.typedjson.eval.Util.vocabularyForTest
 import frawa.typedjson.keywords.MetaKeyword
+import frawa.typedjson.util.UriUtil.uri
 
 class SuggestTest extends FunSuite:
 
@@ -593,7 +594,7 @@ class SuggestTest extends FunSuite:
     }
   }
 
-  test("first with title".ignore) {
+  test("first with title") {
     withSchema("""{
                  |"title": "My Title",
                  |"type": "number"
@@ -611,12 +612,46 @@ class SuggestTest extends FunSuite:
     }
   }
 
-  test("suggest values for schema writing".ignore) {
+  test("suggest values for schema writing") {
     assertSuggestForSchema(
       """{}""",
       Pointer.empty
     ) { result =>
-      // TODO assert different meta schema titles for various suggested values
-      // println(s"FW ${munitPrint(result)}")
+      assertEquals(result.suggestions.size, 8)
+
+      val docIds = result.suggestions.flatMap {
+        case Suggest.WithDoc(_, doc) => doc.id
+        case _                       => None
+      }
+      assertEquals(
+        docIds,
+        Seq(
+          uri("https://json-schema.org/draft/2020-12/meta/core#"),
+          uri("https://json-schema.org/draft/2020-12/meta/validation#"),
+          uri("https://json-schema.org/draft/2020-12/meta/unevaluated#"),
+          uri("https://json-schema.org/draft/2020-12/meta/content#"),
+          uri("https://json-schema.org/draft/2020-12/meta/meta-data#"),
+          uri("https://json-schema.org/draft/2020-12/meta/format-annotation#"),
+          uri("https://json-schema.org/draft/2020-12/meta/applicator#")
+        )
+      )
+
+      val docTitles = result.suggestions.flatMap {
+        case Suggest.WithDoc(_, doc) => doc.title
+        case _                       => None
+      }
+      assertEquals(
+        docTitles,
+        Seq(
+          "Core vocabulary meta-schema",
+          "Core and Validation specifications meta-schema",
+          "Validation vocabulary meta-schema",
+          "Unevaluated applicator vocabulary meta-schema",
+          "Content vocabulary meta-schema",
+          "Meta-data vocabulary meta-schema",
+          "Format vocabulary meta-schema for annotation results",
+          "Applicator vocabulary meta-schema"
+        )
+      )
     }
   }
