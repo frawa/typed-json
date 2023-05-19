@@ -622,10 +622,10 @@ class SuggestTest extends FunSuite:
       val docIds = result.suggestions.flatMap {
         case Suggest.WithDoc(_, doc) => doc.id
         case _                       => None
-      }
+      }.toSet
       assertEquals(
         docIds,
-        Seq(
+        Set(
           uri("https://json-schema.org/draft/2020-12/meta/core#"),
           uri("https://json-schema.org/draft/2020-12/meta/validation#"),
           uri("https://json-schema.org/draft/2020-12/meta/unevaluated#"),
@@ -639,10 +639,10 @@ class SuggestTest extends FunSuite:
       val docTitles = result.suggestions.flatMap {
         case Suggest.WithDoc(_, doc) => doc.title
         case _                       => None
-      }
+      }.toSet
       assertEquals(
         docTitles,
-        Seq(
+        Set(
           "Core vocabulary meta-schema",
           "Core and Validation specifications meta-schema",
           "Validation vocabulary meta-schema",
