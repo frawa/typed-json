@@ -37,7 +37,7 @@ enum Suggest:
 
 object Suggest:
   // TODO deprecated, readOnly, writeOnly
-  case class Doc(id: Option[URI], title: Option[String] = None, description: Option[String] = None)
+  case class Doc(id: Option[URI] = None, title: Option[String] = None, description: Option[String] = None)
 
   def suggestAt[R[_], O](at: Pointer)(compiled: Value => R[O]): Value => R[O] =
     // TODO stop evaluation as soon as 'at' is reached
@@ -115,19 +115,6 @@ object Suggest:
       case WithLoc(_, kl) => Some(kl.parent)
     }
   }
-
-  // private def suggestFor(ks: Seq[Keyword]): Work =
-  //   val all = ks.flatMap(suggestFor).distinct
-  //   // println(s"FW all ${ks.map(_.getClass.getSimpleName).mkString("\n\t")}")
-  //   // println(
-  //   //   s"FW meta ${ks.filter(_.isInstanceOf[MetaKeyword]).map(_.asInstanceOf[MetaKeyword]).map(_.title).mkString("\n\t")}"
-  //   // )
-  //   val meta = ks.findLast(_.isInstanceOf[MetaKeyword]).map(_.asInstanceOf[MetaKeyword])
-  //   meta
-  //     .map { meta =>
-  //       SuggestResult.WithDoc(all, meta)
-  //     }
-  //     .getOrElse(SuggestResult.Values(all))
 
   private def suggestFor(keyword: Keyword): Work =
     keyword match
