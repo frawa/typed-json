@@ -178,7 +178,9 @@ object SuggestionsResult {
     val (start, end) = offset.map(o => (o.start, o.end)).getOrElse((0, 0))
     val suggestions  = toSuggestions(result)
     // TODO dedup ealier?
-    val dedup = suggestions.groupBy(_.value).flatMap(_._2.headOption)
+    val dedup = suggestions
+      .groupBy(s => js.JSON.stringify(s.value))
+      .flatMap(_._2.headOption)
     SuggestionsResult(start, end, pointer.toString, js.Array(dedup.toSeq*))
   }
 
