@@ -30,7 +30,7 @@ jobs:
         check-latest: true
         cache: 'sbt'
     - name: Run tests
-      run: sbt test
+      run: sbt lint test
 
   publish:
     runs-on: ubuntu-latest
