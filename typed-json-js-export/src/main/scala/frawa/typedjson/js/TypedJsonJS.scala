@@ -181,7 +181,9 @@ object Suggestions {
     val offset       = offsetAt(pointer)
     val (start, end) = offset.map(o => (o.start, o.end)).getOrElse((0, 0))
     val suggestions  = toSuggestions(result)
-    Suggestions(start, end, pointer.toString, js.Array(suggestions.toSeq*))
+    // TODO dedup ealier?
+    val dedup = suggestions.groupBy(_.value).flatMap(_._2.headOption)
+    Suggestions(start, end, pointer.toString, js.Array(dedup.toSeq*))
   }
 
   private def toSuggestions(result: SuggestResult): Seq[Suggestion] =
