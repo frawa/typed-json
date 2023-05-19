@@ -113,21 +113,17 @@ case class TypedJsonJS(
   }
 
   @JSExport
-  def suggestAt(offset: Int): js.Array[Suggestions] = {
-    val suggestions = value
-      .flatMap { value =>
-        val at                         = TypedJsonFactory.pointerAt(value, offset)
-        given OutputOps[SuggestOutput] = SuggestOutput.outputOps(at)
-        val (o, _)                     = this.typedJson.eval(value)
-        o.map { o =>
-          val suggestions = Suggest.suggestions(at, o)
-          val offsetAt    = pointer => TypedJsonFactory.offsetAt(pointer, value)
-          Suggestions(offsetAt)(at, suggestions)
-        }
+  def suggestionsAt(offset: Int): js.UndefOr[SuggestionsResult] = {
+    value.flatMap { value =>
+      val at                         = TypedJsonFactory.pointerAt(value, offset)
+      given OutputOps[SuggestOutput] = SuggestOutput.outputOps(at)
+      val (o, _)                     = this.typedJson.eval(value)
+      o.map { o =>
+        val result   = Suggest.suggestions(at, o)
+        val offsetAt = pointer => TypedJsonFactory.offsetAt(pointer, value)
+        SuggestionsResult(offsetAt)(at, result)
       }
-      .map(Seq(_))
-      .getOrElse(Seq())
-    js.Array(suggestions*)
+    }.orUndefined
   }
 }
 
@@ -160,9 +156,9 @@ object Marker {
   }
 }
 
-@JSExportTopLevel("Suggestions")
+@JSExportTopLevel("SuggestionsResult")
 @JSExportAll
-case class Suggestions(
+case class SuggestionsResult(
     start: Int,
     end: Int,
     pointer: String,
@@ -176,14 +172,14 @@ case class Suggestion(
     documentationMarkdown: js.UndefOr[String] = js.undefined
 )
 
-object Suggestions {
-  def apply(offsetAt: Pointer => Option[Offset])(pointer: Pointer, result: SuggestResult): Suggestions = {
+object SuggestionsResult {
+  def apply(offsetAt: Pointer => Option[Offset])(pointer: Pointer, result: SuggestResult): SuggestionsResult = {
     val offset       = offsetAt(pointer)
     val (start, end) = offset.map(o => (o.start, o.end)).getOrElse((0, 0))
     val suggestions  = toSuggestions(result)
     // TODO dedup ealier?
     val dedup = suggestions.groupBy(_.value).flatMap(_._2.headOption)
-    Suggestions(start, end, pointer.toString, js.Array(dedup.toSeq*))
+    SuggestionsResult(start, end, pointer.toString, js.Array(dedup.toSeq*))
   }
 
   private def toSuggestions(result: SuggestResult): Seq[Suggestion] =
