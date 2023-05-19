@@ -111,7 +111,7 @@ languages.registerCompletionItemProvider("json", {
     }
     // TODO 
     const start = model.getPositionAt(result.start)
-    const end = model.getPositionAt(result.end + 1)
+    const end = model.getPositionAt(result.end)
     const suggestions: languages.CompletionItem[] = result.suggestions.map(s => {
       const value = s.value
       const label = JSON.stringify(value)
