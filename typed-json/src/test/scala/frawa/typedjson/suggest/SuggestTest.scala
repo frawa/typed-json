@@ -100,8 +100,7 @@ class SuggestTest extends FunSuite:
         assertEquals(
           result,
           suggests(
-            ObjectValue(Map("titi" -> StringValue(""))),
-            ObjectValue(Map("toto" -> NumberValue(0))),
+            ObjectValue(Map("titi" -> StringValue(""), "toto" -> NumberValue(0))),
             ObjectValue(Map())
           )
         )
@@ -146,13 +145,6 @@ class SuggestTest extends FunSuite:
           result,
           suggests(
             ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0))))),
-            ObjectValue(
-              properties = Map(
-                "foo" -> ObjectValue(
-                  properties = Map()
-                )
-              )
-            ),
             ObjectValue(Map())
           )
         )
@@ -187,24 +179,14 @@ class SuggestTest extends FunSuite:
           result,
           suggests(
             ObjectValue(
-              Map(
+              properties = Map(
                 "foo" -> ObjectValue(
-                  Map(
-                    "bar" ->
-                      NumberValue(0)
+                  properties = Map(
+                    "bar" -> NumberValue(
+                      value = 0
+                    )
                   )
-                )
-              )
-            ),
-            ObjectValue(
-              properties = Map(
-                "foo" -> ObjectValue(
-                  properties = Map()
-                )
-              )
-            ),
-            ObjectValue(
-              properties = Map(
+                ),
                 "gnu" -> ObjectValue(
                   properties = Map(
                     "toto" -> StringValue(
@@ -212,12 +194,6 @@ class SuggestTest extends FunSuite:
                     )
                   )
                 )
-              )
-            ),
-            ObjectValue(
-              Map(
-                "gnu" ->
-                  ObjectValue(Map())
               )
             ),
             ObjectValue(Map())
@@ -253,25 +229,10 @@ class SuggestTest extends FunSuite:
                 "foo" -> ObjectValue(
                   Map(
                     "bar" ->
-                      NumberValue(0)
-                  )
-                )
-              )
-            ),
-            ObjectValue(
-              Map(
-                "foo" -> ObjectValue(
-                  Map(
+                      NumberValue(0),
                     "gnu" ->
                       NumberValue(0)
                   )
-                )
-              )
-            ),
-            ObjectValue(
-              properties = Map(
-                "foo" -> ObjectValue(
-                  properties = Map()
                 )
               )
             ),
@@ -389,13 +350,6 @@ class SuggestTest extends FunSuite:
               )
             ),
             ObjectValue(
-              properties = Map(
-                "kind" -> StringValue(
-                  value = ""
-                )
-              )
-            ),
-            ObjectValue(
               properties = Map()
             ),
             ObjectValue(
@@ -431,13 +385,6 @@ class SuggestTest extends FunSuite:
               properties = Map(
                 "kind" -> StringValue(
                   value = "first"
-                )
-              )
-            ),
-            ObjectValue(
-              properties = Map(
-                "kind" -> StringValue(
-                  value = ""
                 )
               )
             ),
@@ -493,13 +440,16 @@ class SuggestTest extends FunSuite:
         assertEquals(
           result,
           suggests(
-            ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(13))))),
-            ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> StringValue("toto"))))),
-            ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> StringValue("titi"))))),
-            ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0))))),
-            ObjectValue(Map("foo" -> ObjectValue(Map()))),
-            ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(14))))),
-            ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> StringValue(""))))),
+            ObjectValue(
+              Map(
+                "foo" -> ObjectValue(
+                  Map(
+                    "bar" -> NumberValue(14),
+                    "gnu" -> StringValue("titi")
+                  )
+                )
+              )
+            ),
             ObjectValue(Map())
           )
         )
@@ -518,26 +468,18 @@ class SuggestTest extends FunSuite:
           suggests(
             ObjectValue(properties =
               Map(
-                "gnu" -> BoolValue(true)
-              )
-            ),
-            ObjectValue(properties =
-              Map(
-                "titi" -> StringValue("")
-              )
-            ),
-            ObjectValue(properties =
-              Map(
+                "gnu"  -> BoolValue(true),
+                "titi" -> StringValue(""),
                 "toto" -> NumberValue(0)
               )
             ),
+            ObjectValue(Map()),
             ObjectValue(
               properties = Map(
                 "toto" -> NullValue,
                 "gnu"  -> NullValue
               )
-            ),
-            ObjectValue(Map())
+            )
           )
         )
 

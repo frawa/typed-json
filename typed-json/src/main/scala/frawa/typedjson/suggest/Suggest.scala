@@ -118,20 +118,28 @@ object Suggest:
 
   private def suggestFor(keyword: Keyword): Work =
     keyword match
-      case NullTypeKeyword                           => Work(NullValue)
-      case BooleanTypeKeyword                        => Work(BoolValue(true))
-      case StringTypeKeyword                         => Work(StringValue(""))
-      case NumberTypeKeyword                         => Work(NumberValue(0))
-      case ArrayTypeKeyword                          => Work(ArrayValue(Seq()))
-      case ObjectTypeKeyword                         => Work(ObjectValue(Map()))
-      case ObjectPropertiesKeyword(properties, _, _) =>
-        // TODO pattern properties?
-        // TODO additional properties
-        Work(properties.flatMap { case (prop, keywords) =>
-          keywords
-            .flatMap(keyword => suggestFor(keyword).values)
-            .map(v => ObjectValue(Map(prop -> v)))
-        }.toSeq)
+      case NullTypeKeyword    => Work(NullValue)
+      case BooleanTypeKeyword => Work(BoolValue(true))
+      case StringTypeKeyword  => Work(StringValue(""))
+      case NumberTypeKeyword  => Work(NumberValue(0))
+      case ArrayTypeKeyword   => Work(ArrayValue(Seq()))
+      case ObjectTypeKeyword  => Work(ObjectValue(Map()))
+      case ObjectPropertiesKeyword(properties, patternProperties, additional) =>
+        val allProperties = ObjectValue(Map.from(properties.flatMap { case (prop, keywords) =>
+          useBestValue(
+            keywords.flatMap(keyword => suggestFor(keyword).values)
+          ).map(v => (prop -> v))
+        }))
+        val allPatternProperties = ObjectValue(Map.from(patternProperties.flatMap { case (prop, keywords) =>
+          useBestValue(
+            keywords.flatMap(keyword => suggestFor(keyword).values)
+          ).map(v => (prop -> v))
+        }))
+        val additionals =
+          additional.flatMap { additional =>
+            useBestValue(additional.keywords.toSeq.flatMap(keyword => suggestFor(keyword).values))
+          }.toSeq
+        Work(Seq(allProperties, allPatternProperties) ++ additionals)
       case ObjectRequiredKeyword(required) => Work(ObjectValue(Map.from(required.map((_, NullValue)))))
       case TrivialKeyword(v)               => Work(BoolValue(v))
       case IfThenElseKeyword(ifChecks, thenChecks, elseChecks) =>
@@ -155,16 +163,15 @@ object Suggest:
       case EnumKeyword(values) => Work(values)
       case ArrayItemsKeyword(items, prefixItems) =>
         val itemArrays = Seq(items).flatten
-          .flatMap(_.flatMap(keyword => suggestFor(keyword).values))
+          .flatMap(ks => useBestValue(ks.flatMap(keyword => suggestFor(keyword).values)))
           .map(v => ArrayValue(Seq(v)))
         // TODO combinations? might explode?
-        val tuplesOfHeads = ArrayValue(
+        val tuplesOfDeeptest = ArrayValue(
           prefixItems
-            .map(_.flatMap(keyword => suggestFor(keyword).values))
-            .map(_.headOption)
+            .map(ks => useBestValue(ks.flatMap(keyword => suggestFor(keyword).values)))
             .map(_.getOrElse(NullValue))
         )
-        Work(itemArrays :+ tuplesOfHeads)
+        Work(itemArrays :+ tuplesOfDeeptest)
       case UnionTypeKeyword(keywords) =>
         Work.all(keywords.map(keyword => suggestFor(keyword)))
       case MetaKeyword(_, _, Some(defaultValue), _, _, _, _) =>
@@ -180,6 +187,9 @@ object Suggest:
         // Seq(StringValue(keyword.getClass.getSimpleName))
         Work(NullValue)
 
+  private def useBestValue(vs: Seq[Value]): Option[Value] =
+    vs.sortBy(score).lastOption
+
   private def onlyKeys(w: Suggest): Suggest =
     w match {
       case Suggest.Values(vs) =>
@@ -190,3 +200,11 @@ object Suggest:
 
   private def onlyKeys(vs: Seq[Value]): Seq[Value] =
     vs.flatMap(Value.asObject).flatMap(_.keys).map(StringValue.apply).distinct
+
+  def score(v: Value): Int =
+    v match
+      case ArrayValue(vs)  => 1 + vs.map(score).maxOption.map(_ + 1).getOrElse(0)
+      case ObjectValue(ps) => 1 + ps.values.map(score).maxOption.map(_ + 1).getOrElse(0)
+      case NumberValue(v)  => if v != 0 then 1 else 0
+      case StringValue(v)  => if v.nonEmpty then 1 else 0
+      case _               => 0
