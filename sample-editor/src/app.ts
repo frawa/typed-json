@@ -114,7 +114,7 @@ languages.registerCompletionItemProvider("json", {
     const end = model.getPositionAt(result.end + 1)
     const suggestions: languages.CompletionItem[] = result.suggestions.map(s => {
       const value = s.value
-      const label = JSON.stringify(value).slice(0, 21)
+      const label = JSON.stringify(value)
       const pretty = JSON.stringify(value, null, 2)
       const detail = `${result.pointer} ${start.lineNumber}:${start.column}-${end.lineNumber}:${end.column}`
       return {
