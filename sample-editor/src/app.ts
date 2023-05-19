@@ -108,10 +108,9 @@ languages.registerCompletionItemProvider("json", {
       }
     }
     const theSuggestion = typedJsonSuggetions[0];
-    // TODO
+    // TODO 
     const start = model.getPositionAt(theSuggestion.start)
     const end = model.getPositionAt(theSuggestion.end + 1)
-    // console.log("FW suggestions", typedJsonSuggetions.length, theSuggestion.suggestions)
     const suggestions: languages.CompletionItem[] = theSuggestion.suggestions.map(s => {
       const value = s.value
       const label = JSON.stringify(value).slice(0, 21)
@@ -122,7 +121,7 @@ languages.registerCompletionItemProvider("json", {
         kind: 0,
         detail,
         documentation: {
-          value: "```\n" + pretty + "\n```",
+          value: (s.documentationMarkdown ?? "") + "```\n" + pretty + "\n```",
         },
         insertText: '',
         range: {

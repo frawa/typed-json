@@ -255,13 +255,10 @@ lazy val typedJsonJsExport = project
   .settings(
     name := "typed-json-js-export"
   )
-  .enablePlugins(ScalaJSPlugin)
+  .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin)
   .settings(sharedSettings)
   .settings(sharedScalacSettings)
   .settings(strictScalacSettings)
-  .settings(
-    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }
-  )
   .settings(jsSettingsJawn)
   .settings(
     // TODO testing
@@ -278,7 +275,7 @@ npmCI := {
 }
 
 npmRunCI := {
-  val doit = (typedJsonJsExport / Compile / fastOptJS).value
+  val doit = (typedJsonJsExport / Compile / fastOptJS / webpack).value
 
   import scala.sys.process._
   val log = streams.value.log

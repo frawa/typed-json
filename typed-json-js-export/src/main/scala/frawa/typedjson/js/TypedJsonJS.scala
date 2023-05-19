@@ -30,7 +30,10 @@ import frawa.typedjson.suggest.Suggest
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSExport, JSExportAll, JSExportTopLevel}
+import scala.scalajs.js.JSConverters._
+
 import frawa.typedjson.suggest.SuggestResult
+import frawa.typedjson.suggest.Suggest.Doc
 
 @JSExportTopLevel("TypedJsonFactory")
 object TypedJsonFactory {
@@ -169,7 +172,8 @@ case class Suggestions(
 @JSExportTopLevel("Suggestion")
 @JSExportAll
 case class Suggestion(
-    value: js.Any
+    value: js.Any,
+    documentationMarkdown: js.UndefOr[String] = js.undefined
 )
 
 object Suggestions {
@@ -181,13 +185,13 @@ object Suggestions {
   }
 
   private def toSuggestions(result: SuggestResult): Seq[Suggestion] =
-    result match {
-      case SuggestResult.Values(vs)      => vs.map(toSuggestion)
-      case SuggestResult.WithMeta(rs, _) => rs.flatMap(toSuggestions)
+    result.suggestions.flatMap {
+      case Suggest.Values(vs)       => vs.map(toSuggestion(None))
+      case Suggest.WithDoc(vs, doc) => vs.map(toSuggestion(toMarkdown(doc)))
     }
 
-  private def toSuggestion(value: Value): Suggestion = {
-    Suggestion(toAny(value))
+  private def toSuggestion(doc: Option[String])(value: Value): Suggestion = {
+    Suggestion(toAny(value), doc.orUndefined)
   }
 
   private def toAny(value: Value): js.Any = {
@@ -202,4 +206,27 @@ object Suggestions {
         js.Dictionary(pairs*)
     }
   }
+
+  private def toMarkdown(doc: Doc): Option[String] =
+    doc.title
+      .zip(doc.description)
+      .map { (title, description) =>
+        s"""|### ${title}
+            |
+            |${description}
+            |""".stripMargin
+      }
+      .orElse {
+        doc.title.map { title =>
+          s"""|### ${title}
+              |""".stripMargin
+        }
+      }
+      .orElse {
+        doc.description.map { description =>
+          s"""|${description}
+              |""".stripMargin
+        }
+      }
+
 }

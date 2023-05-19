@@ -45,5 +45,6 @@ declare module "typedjson" {
 
     export interface Suggestion {
         value: unknown
+        documentationMarkdown?: string
     }
 }
