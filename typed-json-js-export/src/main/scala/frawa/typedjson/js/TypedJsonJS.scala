@@ -34,6 +34,7 @@ import scala.scalajs.js.JSConverters._
 
 import frawa.typedjson.suggest.SuggestResult
 import frawa.typedjson.suggest.Suggest.Doc
+import frawa.typedjson.output.OutputJson
 
 @JSExportTopLevel("TypedJsonFactory")
 object TypedJsonFactory {
@@ -150,8 +151,7 @@ object Marker {
   def fromError(offsetAt: Pointer => Option[Offset])(error: SimpleOutput.Error): Marker = {
     val offset       = offsetAt(error.pointer)
     val (start, end) = offset.map(o => (o.start, o.end)).getOrElse((0, 0))
-    // TODO localized messages
-    val message = error.value.toString
+    val message      = OutputJson.toMessage(error.value)
     Marker(start, end, error.pointer.toString, message, "error")
   }
 
