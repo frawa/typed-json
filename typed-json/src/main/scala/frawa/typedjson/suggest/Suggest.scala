@@ -37,7 +37,7 @@ enum Suggest:
 
 object Suggest:
   // TODO deprecated, readOnly, writeOnly
-  case class Doc(title: Option[String] = None, description: Option[String] = None)
+  case class Doc(id: Option[URI], title: Option[String] = None, description: Option[String] = None)
 
   def suggestAt[R[_], O](at: Pointer)(compiled: Value => R[O]): Value => R[O] =
     // TODO stop evaluation as soon as 'at' is reached
@@ -82,14 +82,18 @@ object Suggest:
   )(parent: Option[KeywordLocation], vs: Seq[Value]): Suggest =
     parent
       .flatMap(findMeta)
-      .flatMap(toDoc)
+      .flatMap(toDoc(parent, _))
       .map { doc =>
         Suggest.WithDoc(vs, doc)
       }
       .getOrElse(Suggest.Values(vs))
 
-  private def toDoc(meta: MetaKeyword): Option[Doc] =
-    if Seq(meta.title, meta.description).exists(_.isDefined) then Some(Doc(meta.title, meta.description))
+  private def toDoc(kl: Option[KeywordLocation], meta: MetaKeyword): Option[Doc] =
+    val location = kl flatMap {
+      case KeywordLocation.Dereferenced(_, absolute) => Some(absolute)
+      case _                                         => None
+    }
+    if Seq(meta.title, meta.description).exists(_.isDefined) then Some(Doc(location, meta.title, meta.description))
     else None
 
   private enum Work(vs: Seq[Value]):

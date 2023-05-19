@@ -208,7 +208,7 @@ object Suggestions {
   }
 
   private def toMarkdown(doc: Doc): Option[String] =
-    doc.title
+    val md = doc.title
       .zip(doc.description)
       .map { (title, description) =>
         s"""|### ${title}
@@ -228,5 +228,12 @@ object Suggestions {
               |""".stripMargin
         }
       }
+    md.zip(doc.id)
+      .map { (md, id) =>
+        s"""|*[${id}](${id})*
+            |${md}
+            |""".stripMargin
+      }
+      .orElse(md)
 
 }
