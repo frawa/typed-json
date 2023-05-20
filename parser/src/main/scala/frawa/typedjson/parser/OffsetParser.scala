@@ -28,56 +28,54 @@ object OffsetParser:
   case class ParseError(offset: Int, message: String, recoveredValue: Option[Offset.Value])
 
   def pointerAt(value: Offset.Value)(at: Int): Pointer =
-    def go(value: Offset.Value): Option[Pointer] =
-      if value.offset.contains(at) then
-        value match
-          case Offset.ArrayValue(offset, vs) =>
-            vs.zipWithIndex
-              .find(_._1.offset.contains(at))
-              .flatMap { (v, i) =>
-                go(v).map(Pointer.empty / i / _)
-              }
-              .orElse {
-                if offset.end == at then Some(Pointer.empty)
-                else
-                  vs.zipWithIndex
-                    .filter(_._1.offset.end <= at)
-                    .sortBy(_._1.offset.end)
-                    .lastOption
-                    .map((_, i) => (Pointer.empty / i))
-              }
-              .orElse {
-                Some(Pointer.empty)
-              }
-          case Offset.ObjectValue(offset, properties) =>
-            properties
-              .find(_._2.offset.contains(at))
-              .flatMap { case (k, v) =>
-                val prefix = Pointer.empty / k.value.toString
-                go(v).map(prefix / _).orElse(Some(prefix))
-              }
-              .orElse(
-                properties.keys
-                  .find(_.offset.contains(at))
-                  .map(k => (Pointer.empty / k.value.toString).insideKey)
-              )
-              .orElse {
-                if offset.end == at then Some(Pointer.empty)
-                else
-                  properties.keys.toSeq
-                    .filter(_.offset.end <= at)
-                    .sortBy(_.offset.end)
-                    .lastOption
-                    .map(k => (Pointer.empty / k.value.toString))
-              }
-              .orElse {
-                Some(Pointer.empty)
-              }
-          case _ => Some(Pointer.empty)
-      else Some(Pointer.empty)
+    def go(value: Offset.Value): Pointer =
+      value match
+        case Offset.ArrayValue(offset, vs) =>
+          vs.zipWithIndex
+            .find(_._1.offset.contains(at))
+            .flatMap { (v, i) =>
+              Some(Pointer.empty / i / go(v))
+            }
+            .orElse {
+              if offset.end == at then Some(Pointer.empty)
+              else
+                vs.zipWithIndex
+                  .filter(_._1.offset.end <= at)
+                  .sortBy(_._1.offset.end)
+                  .lastOption
+                  .map((_, i) => (Pointer.empty / i))
+            }
+            .getOrElse {
+              Pointer.empty
+            }
+        case Offset.ObjectValue(offset, properties) =>
+          properties
+            .find(_._2.offset.contains(at))
+            .flatMap { case (k, v) =>
+              val prefix = Pointer.empty / k.value.toString
+              Some(prefix / go(v))
+            }
+            .orElse(
+              properties.keys
+                .find(_.offset.contains(at))
+                .map(k => (Pointer.empty / k.value.toString).insideKey)
+            )
+            .orElse {
+              if offset.end == at then Some(Pointer.empty)
+              else
+                properties.keys.toSeq
+                  .filter(_.offset.end <= at)
+                  .sortBy(_.offset.end)
+                  .lastOption
+                  .map(k => (Pointer.empty / k.value.toString))
+            }
+            .getOrElse {
+              Pointer.empty
+            }
+        case _ => Pointer.empty
     Some(value)
       .filter(_.offset.contains(at))
-      .flatMap(go)
+      .map(go)
       .getOrElse(Pointer.empty)
 
   def offsetAt(value: Offset.Value)(pointer: Pointer): Option[Offset] =
