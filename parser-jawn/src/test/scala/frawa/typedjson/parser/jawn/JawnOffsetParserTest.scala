@@ -125,6 +125,10 @@ class JawnOffsetParserTest extends FunSuite {
     parser.parseWithOffset(json).map(OffsetParser.pointerAt(_)(at))
   }
 
+  private def pointerAt(value: Value)(at: Int): Pointer = {
+    OffsetParser.pointerAt(value)(at)
+  }
+
   test("pointerAt is empty on basic types") {
     assertEquals(pointerAt("""13""")(0), Right(Pointer.empty))
     assertEquals(pointerAt("""13""")(1), Right(Pointer.empty))
@@ -186,9 +190,13 @@ class JawnOffsetParserTest extends FunSuite {
   }
 
   test("pointerAt at array end") {
+    assertEquals(pointerAt("""[1]""")(1), Right(Pointer.empty / 0))
     assertEquals(pointerAt("""[1]""")(2), Right(Pointer.empty / 0))
+    assertEquals(pointerAt("""[1]""")(3), Right(Pointer.empty))
+    assertEquals(pointerAt("""[1,[2]]""")(4), Right(Pointer.empty / 1 / 0))
     assertEquals(pointerAt("""[1,[2]]""")(5), Right(Pointer.empty / 1 / 0))
     assertEquals(pointerAt("""[1,[2]]""")(6), Right(Pointer.empty / 1))
+    assertEquals(pointerAt("""[1,[2]]""")(7), Right(Pointer.empty))
   }
 
   test("pointerAt object") {
@@ -199,8 +207,8 @@ class JawnOffsetParserTest extends FunSuite {
     assertEquals(pointerAt("""{"toto": 13}""")(4), Right((Pointer.empty / "toto").insideKey))
     assertEquals(pointerAt("""{"toto": 13}""")(5), Right((Pointer.empty / "toto").insideKey))
     assertEquals(pointerAt("""{"toto": 13}""")(6), Right((Pointer.empty / "toto").insideKey))
-    assertEquals(pointerAt("""{"toto": 13}""")(7), Right((Pointer.empty / "toto").insideKey))
-    assertEquals(pointerAt("""{"toto": 13}""")(8), Right(Pointer.empty))
+    assertEquals(pointerAt("""{"toto": 13}""")(7), Right((Pointer.empty / "toto")))
+    assertEquals(pointerAt("""{"toto": 13}""")(8), Right(Pointer.empty / "toto"))
     assertEquals(pointerAt("""{"toto": 13}""")(9), Right(Pointer.empty / "toto"))
     assertEquals(pointerAt("""{"toto": 13}""")(10), Right(Pointer.empty / "toto"))
     assertEquals(pointerAt("""{"toto": 13}""")(11), Right(Pointer.empty / "toto"))
@@ -217,8 +225,8 @@ class JawnOffsetParserTest extends FunSuite {
     assertEquals(pointerAt(value)(4), Right((Pointer.empty / "toto").insideKey))
     assertEquals(pointerAt(value)(5), Right((Pointer.empty / "toto").insideKey))
     assertEquals(pointerAt(value)(6), Right((Pointer.empty / "toto").insideKey))
-    assertEquals(pointerAt(value)(7), Right((Pointer.empty / "toto").insideKey))
-    assertEquals(pointerAt(value)(8), Right(Pointer.empty))
+    assertEquals(pointerAt(value)(7), Right((Pointer.empty / "toto")))
+    assertEquals(pointerAt(value)(8), Right(Pointer.empty / "toto"))
     assertEquals(pointerAt(value)(9), Right(Pointer.empty / "toto"))
     assertEquals(pointerAt(value)(10), Right(Pointer.empty / "toto" / 0))
     assertEquals(pointerAt(value)(11), Right(Pointer.empty / "toto" / 0))
@@ -226,23 +234,23 @@ class JawnOffsetParserTest extends FunSuite {
     assertEquals(pointerAt(value)(13), Right(Pointer.empty / "toto" / 1))
     assertEquals(pointerAt(value)(14), Right(Pointer.empty / "toto"))
     assertEquals(pointerAt(value)(14), Right(Pointer.empty / "toto"))
-    assertEquals(pointerAt(value)(15), Right(Pointer.empty))
+    assertEquals(pointerAt(value)(15), Right(Pointer.empty / "toto"))
     assertEquals(pointerAt(value)(16), Right((Pointer.empty / "titi").insideKey))
     assertEquals(pointerAt(value)(17), Right((Pointer.empty / "titi").insideKey))
     assertEquals(pointerAt(value)(18), Right((Pointer.empty / "titi").insideKey))
     assertEquals(pointerAt(value)(19), Right((Pointer.empty / "titi").insideKey))
     assertEquals(pointerAt(value)(20), Right((Pointer.empty / "titi").insideKey))
     assertEquals(pointerAt(value)(21), Right((Pointer.empty / "titi").insideKey))
-    assertEquals(pointerAt(value)(22), Right((Pointer.empty / "titi").insideKey))
-    assertEquals(pointerAt(value)(23), Right(Pointer.empty))
+    assertEquals(pointerAt(value)(22), Right((Pointer.empty / "titi")))
+    assertEquals(pointerAt(value)(23), Right(Pointer.empty / "titi"))
     assertEquals(pointerAt(value)(24), Right(Pointer.empty / "titi"))
     assertEquals(pointerAt(value)(25), Right((Pointer.empty / "titi" / "foo").insideKey))
     assertEquals(pointerAt(value)(26), Right((Pointer.empty / "titi" / "foo").insideKey))
     assertEquals(pointerAt(value)(27), Right((Pointer.empty / "titi" / "foo").insideKey))
     assertEquals(pointerAt(value)(28), Right((Pointer.empty / "titi" / "foo").insideKey))
     assertEquals(pointerAt(value)(29), Right((Pointer.empty / "titi" / "foo").insideKey))
-    assertEquals(pointerAt(value)(30), Right((Pointer.empty / "titi" / "foo").insideKey))
-    assertEquals(pointerAt(value)(31), Right(Pointer.empty / "titi"))
+    assertEquals(pointerAt(value)(30), Right((Pointer.empty / "titi" / "foo")))
+    assertEquals(pointerAt(value)(31), Right(Pointer.empty / "titi" / "foo"))
     assertEquals(pointerAt(value)(32), Right(Pointer.empty / "titi" / "foo"))
     assertEquals(pointerAt(value)(33), Right(Pointer.empty / "titi" / "foo"))
     assertEquals(pointerAt(value)(34), Right(Pointer.empty / "titi" / "foo"))
@@ -338,6 +346,23 @@ class JawnOffsetParserTest extends FunSuite {
         )
       )
     )
+  }
+
+  test("pointerAt broken object") {
+    // like during editing
+    val value     = """{"toto":  }"""
+    val recovered = recoveredValue(value).get
+    assertEquals(
+      recovered,
+      ObjectValue(
+        Offset(0, 11),
+        Map(
+          StringValue(Offset(1, 7), "toto") -> NullValue(Offset(10, 10))
+        )
+      )
+    )
+    assertEquals(pointerAt(recovered)(9), Pointer.empty / "toto")
+    assertEquals(pointerAt(recovered)(4), (Pointer.empty / "toto").insideKey)
   }
 
   private def offsetAt(json: String)(at: Pointer): Either[OffsetParser.ParseError, Option[Offset]] = {
