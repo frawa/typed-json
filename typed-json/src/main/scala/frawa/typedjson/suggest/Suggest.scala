@@ -165,7 +165,6 @@ object Suggest:
         val itemArrays = Seq(items).flatten
           .flatMap(ks => useBestValue(ks.flatMap(keyword => suggestFor(keyword).values)))
           .map(v => ArrayValue(Seq(v)))
-        // TODO combinations? might explode?
         val tuplesOfDeeptest = ArrayValue(
           prefixItems
             .map(ks => useBestValue(ks.flatMap(keyword => suggestFor(keyword).values)))
@@ -179,13 +178,11 @@ object Suggest:
       case MetaKeyword(_, _, _, _, _, _, Some(examples)) =>
         Work(examples)
       case WithLocation(keyword, kl) =>
-        // if (keyword.isInstanceOf[MetaKeyword]) then println(s"FW ${kl} ${keyword}")
-        // else println(s"FW ${kl} ${keyword.getClass.getSimpleName}")
         Work.WithLoc(suggestFor(keyword).values, kl)
-      case _ =>
-        // useful for debugging:
-        // Seq(StringValue(keyword.getClass.getSimpleName))
-        Work(NullValue)
+      case MinimumKeyword(min, exclude) => Work(NumberValue(min))
+      case MaximumKeyword(max, exclude) => Work(NumberValue(max))
+      case MultipleOfKeyword(n)         => Work(NumberValue(n))
+      case _                            => Work(NullValue)
 
   private def useBestValue(vs: Seq[Value]): Option[Value] =
     vs.sortBy(score).lastOption
