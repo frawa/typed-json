@@ -29,6 +29,7 @@ import frawa.typedjson.output.SimpleOutput
 import frawa.typedjson.output.OutputOps
 import frawa.typedjson.suggest.Suggest
 import frawa.typedjson.keywords.KeywordLocation
+import frawa.typedjson.keywords.WithLocation
 
 case class SuggestOutput(
     simple: SimpleOutput,
@@ -64,5 +65,14 @@ object SuggestOutput:
         o.copy(simple = o.simple.withAnnotations(annotations))
       def getAnnotations(): Seq[OutputOps.Annotation] = o.simple.annotations
       def forKeyword(kl: KeywordLocation, k: Option[Keyword] = None): SuggestOutput =
-        if isAt(o.simple.pointer) then k.map(k => o.copy(keywords = o.keywords :+ k)).getOrElse(o)
+        if isAt(o.simple.pointer) then
+          k
+            .map { k =>
+              // TODO avoid restoring WithLocation
+              k match {
+                case _: WithLocation => o.copy(keywords = o.keywords :+ k)
+                case _               => o.copy(keywords = o.keywords :+ WithLocation(k, kl))
+              }
+            }
+            .getOrElse(o)
         else o

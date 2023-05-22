@@ -83,9 +83,19 @@ case class DependentRequiredKeyword(required: Map[String, Seq[String]])   extend
 case class DependentSchemasKeyword(keywords: Map[String, Keywords])       extends Keyword
 case class ContainsKeyword(schema: Option[Keywords] = None, min: Option[Int] = None, max: Option[Int] = None)
     extends Keyword
-case class ContentEncodingKeyword(encoding: String)                                    extends Keyword
-case class ContentMediaTypeKeyword(mediaType: String)                                  extends Keyword
-case class ContentSchemaKeyword(keywords: Keywords)                                    extends Keyword
+case class ContentEncodingKeyword(encoding: String)   extends Keyword
+case class ContentMediaTypeKeyword(mediaType: String) extends Keyword
+case class ContentSchemaKeyword(keywords: Keywords)   extends Keyword
+case class MetaKeyword(
+    title: Option[String] = None,
+    description: Option[String] = None,
+    defaultValue: Option[Value] = None,
+    deprecated: Option[Boolean] = None,
+    readOnly: Option[Boolean] = None,
+    writeOnly: Option[Boolean] = None,
+    examples: Option[Seq[Value]] = None
+) extends Keyword
+
 case class UnevaluatedItemsKeyword(pushed: Keywords, unevaluated: Keywords)            extends Keyword
 case class UnevaluatedPropertiesKeyword(pushed: Keywords, unevaluated: Keywords)       extends Keyword
 case class WithLocation(keyword: Keyword, kl: KeywordLocation = KeywordLocation.empty) extends Keyword
@@ -101,7 +111,7 @@ case class Keywords(
   def map[E](f: Keyword => E): Seq[E] =
     keywords.map(f).toSeq
 
-  def flatMap[E](f: Keyword => Set[E]): Seq[E] =
+  def flatMap[E](f: Keyword => Seq[E]): Seq[E] =
     keywords.flatMap(f).toSeq
 
   private def withLocation(keyword: Keyword)(using location: CurrentLocation): WithLocation =
@@ -250,18 +260,6 @@ case class Keywords(
         // only for schema authors and readers
         Right(this)
 
-      case ("title", StringValue(_)) =>
-        // ignore annotations
-        Right(this)
-
-      case ("default", _) =>
-        // ignore annotations
-        Right(this)
-
-      case ("description", StringValue(_)) =>
-        // ignore annotations
-        Right(this)
-
       case ("pattern", StringValue(pattern)) =>
         Right(add(PatternKeyword(pattern)))
 
@@ -361,10 +359,26 @@ case class Keywords(
         for keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(v)), scope1)
         yield add(ContentSchemaKeyword(keywords))
 
-      // TODO
-      // case ("deprecated", v) => {
-      //   Right(this)
-      // }
+      case ("title", StringValue(v)) =>
+        Right(updateKeyword(MetaKeyword())(keyword => keyword.copy(title = Some(v))))
+
+      case ("description", StringValue(v)) =>
+        Right(updateKeyword(MetaKeyword())(keyword => keyword.copy(description = Some(v))))
+
+      case ("default", v) =>
+        Right(updateKeyword(MetaKeyword())(keyword => keyword.copy(defaultValue = Some(v))))
+
+      case ("deprecated", BoolValue(v)) =>
+        Right(updateKeyword(MetaKeyword())(keyword => keyword.copy(deprecated = Some(v))))
+
+      case ("readOnly", BoolValue(v)) =>
+        Right(updateKeyword(MetaKeyword())(keyword => keyword.copy(readOnly = Some(v))))
+
+      case ("writeOnly", BoolValue(v)) =>
+        Right(updateKeyword(MetaKeyword())(keyword => keyword.copy(writeOnly = Some(v))))
+
+      case ("examples", ArrayValue(vs)) =>
+        Right(updateKeyword(MetaKeyword())(keyword => keyword.copy(examples = Some(vs))))
 
       case _ =>
         Left(SchemaProblems(UnsupportedKeyword(keyword)))

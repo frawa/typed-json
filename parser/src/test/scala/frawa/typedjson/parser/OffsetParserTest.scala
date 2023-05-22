@@ -48,7 +48,7 @@ class OffsetParserTest extends FunSuite:
 
   test("pointerAt array") {
     // [13,14]
-    val v = ArrayValue(Offset(0, 7), Seq(NumberValue(Offset(1, 3), 13), NumberValue(Offset(4, 6), 14)))
+    val v = ArrayValue(Offset(0, 8), Seq(NumberValue(Offset(1, 3), 13), NumberValue(Offset(4, 6), 14)))
     assertEquals(pointerAt(v)(0), Pointer.empty)
     assertEquals(pointerAt(v)(1), Pointer.empty / 0)
     assertEquals(pointerAt(v)(4), Pointer.empty / 1)
@@ -59,15 +59,15 @@ class OffsetParserTest extends FunSuite:
   test("pointerAt nested array") {
     // [1,[2]]
     val v = ArrayValue(
-      Offset(0, 7),
-      Seq(NumberValue(Offset(1, 2), 1), ArrayValue(Offset(3, 6), Seq(NumberValue(Offset(4, 5), 2))))
+      Offset(0, 8),
+      Seq(NumberValue(Offset(1, 2), 1), ArrayValue(Offset(3, 7), Seq(NumberValue(Offset(4, 5), 2))))
     )
     assertEquals(pointerAt(v)(0), Pointer.empty)
     assertEquals(pointerAt(v)(1), Pointer.empty / 0)
     assertEquals(pointerAt(v)(3), Pointer.empty / 1)
     assertEquals(pointerAt(v)(4), Pointer.empty / 1 / 0)
-    assertEquals(pointerAt(v)(6), Pointer.empty / 1)
-    assertEquals(pointerAt(v)(7), Pointer.empty)
+    assertEquals(pointerAt(v)(7), Pointer.empty / 1)
+    assertEquals(pointerAt(v)(8), Pointer.empty)
   }
 
   test("pointerAt object") {
@@ -82,11 +82,11 @@ class OffsetParserTest extends FunSuite:
   test("pointerAt nested object") {
     // {"toto": 1, "titi": {"foo": true}}
     val v = ObjectValue(
-      Offset(0, 34),
+      Offset(0, 35),
       Map(
         StringValue(Offset(1, 8), "toto") -> NumberValue(Offset(9, 10), 1),
         StringValue(Offset(12, 19), "titi") -> ObjectValue(
-          Offset(20, 33),
+          Offset(20, 34),
           Map(
             StringValue(Offset(21, 27), "foo") -> BoolValue(Offset(29, 32), value = true)
           )
@@ -100,6 +100,8 @@ class OffsetParserTest extends FunSuite:
     assertEquals(pointerAt(v)(20), Pointer.empty / "titi")
     assertEquals(pointerAt(v)(21), (Pointer.empty / "titi" / "foo").insideKey)
     assertEquals(pointerAt(v)(29), Pointer.empty / "titi" / "foo")
-    assertEquals(pointerAt(v)(33), Pointer.empty / "titi")
-    assertEquals(pointerAt(v)(34), Pointer.empty)
+    assertEquals(pointerAt(v)(34), Pointer.empty / "titi")
+    assertEquals(pointerAt(v)(35), Pointer.empty)
   }
+
+  test("parse 1") {}

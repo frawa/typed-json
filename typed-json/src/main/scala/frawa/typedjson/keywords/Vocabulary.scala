@@ -114,12 +114,11 @@ object Vocabulary:
   private val metaDataKeywords: Map[String, NestedSchemaType] = Map(
     "title"       -> NoNestedSchema,
     "description" -> NoNestedSchema,
-    "default"     -> NoNestedSchema
-    // TODO
-//    "deprecated"  -> NoNestedSchema,
-//    "readOnly"    -> NoNestedSchema,
-//    "writeOnly"   -> NoNestedSchema,
-//    "examples"    -> NoNestedSchema
+    "default"     -> NoNestedSchema,
+    "deprecated"  -> NoNestedSchema,
+    "readOnly"    -> NoNestedSchema,
+    "writeOnly"   -> NoNestedSchema,
+    "examples"    -> NoNestedSchema
   )
 
   private val unevaluatedKeywords: Map[String, NestedSchemaType] = Map(

@@ -32,24 +32,47 @@ import frawa.typedjson.eval.Util.doApply
 import frawa.typedjson.suggest.Suggest
 import frawa.typedjson.suggest.SuggestOutput
 import frawa.typedjson.output.OutputOps
+import munit.Compare
+import frawa.typedjson.eval.Util.vocabularyForTest
+import frawa.typedjson.keywords.MetaKeyword
+import frawa.typedjson.util.UriUtil.uri
 
 class SuggestTest extends FunSuite:
 
+  // TODO avoid?
+  given Compare[SuggestResult, SuggestResult] with
+    def isEqual(obtained: SuggestResult, expected: SuggestResult): Boolean =
+      obtained.suggestions.toSet.equals(expected.suggestions.toSet)
+
+  given Compare[Suggest, Suggest] with
+    def isEqual(obtained: Suggest, expected: Suggest): Boolean =
+      (obtained, expected) match {
+        case (Suggest.Values(vs1), Suggest.Values(vs2)) =>
+          vs1.toSet.equals(vs2.toSet)
+        case (Suggest.WithDoc(vs1, doc1), Suggest.WithDoc(vs2, doc2)) =>
+          vs1.toSet.equals(vs2.toSet) && doc1.equals(doc2)
+        case _ => false
+      }
+
+  private val vocabularyWithMeta = vocabularyForTest.map { voc =>
+    voc.combine(Vocabulary.specVocabularies(Vocabulary.metaDataId))
+  }
+
   private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
-      f: Set[Value] => Unit
+      f: SuggestResult => Unit
   ) =
     given OutputOps[SuggestOutput] = SuggestOutput.outputOps(at)
     val evalSuggest                = Eval[R, SuggestOutput]
     given Eval[R, SuggestOutput]   = evalSuggest
     val value                      = parseJsonValue(text)
-    withCompiledSchemaValue(schema) { fun =>
-      val suggestFun  = Suggest.suggestAt(at)(fun)
-      val output      = doApply(fun, value)
-      val suggestions = Suggest.suggestions(at, output).toSet
-      f(suggestions)
+    withCompiledSchemaValue(schema, vocabulary = vocabularyWithMeta) { fun =>
+      val suggestFun = Suggest.suggestAt(at)(fun)
+      val output     = doApply(fun, value)
+      val result     = Suggest.suggestions(at, output)
+      f(result)
     }
 
-  private def assertSuggestForSchema(text: String, at: Pointer)(f: Set[Value] => Unit): Unit =
+  private def assertSuggestForSchema(text: String, at: Pointer)(f: SuggestResult => Unit): Unit =
     val lazyResolver = MetaSchemas.lazyResolver
     val base         = MetaSchemas.draft202012
     val Some(schema) = lazyResolver(base.resolve("schema")): @unchecked
@@ -58,12 +81,17 @@ class SuggestTest extends FunSuite:
     val evalSuggest                = Eval[R, SuggestOutput]
     given Eval[R, SuggestOutput]   = evalSuggest
     val value                      = parseJsonValue(text)
-    withCompiledSchemaValue(schema, Some(lazyResolver)) { fun =>
-      val suggestFun  = Suggest.suggestAt(at)(fun)
-      val output      = doApply(fun, value)
-      val suggestions = Suggest.suggestions(at, output).toSet
-      f(suggestions)
+    withCompiledSchemaValue(schema, Some(lazyResolver), vocabularyWithMeta) { fun =>
+      val suggestFun = Suggest.suggestAt(at)(fun)
+      val output     = doApply(fun, value)
+      val result     = Suggest.suggestions(at, output)
+      f(result)
     }
+
+  private def suggests(vs: Value*): SuggestResult =
+    SuggestResult(Seq(Suggest.Values(vs)))
+  private def suggestWith(doc: Suggest.Doc, vs: Value*): SuggestResult =
+    SuggestResult(Seq(Suggest.WithDoc(vs, doc)))
 
   test("suggest one object per property") {
     withSchema(totoObjectSchema) { schema =>
@@ -72,10 +100,9 @@ class SuggestTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Set(
-            ObjectValue(Map()),
-            ObjectValue(Map("toto" -> NumberValue(0))),
-            ObjectValue(Map("titi" -> StringValue("")))
+          suggests(
+            ObjectValue(Map("titi" -> StringValue(""), "toto" -> NumberValue(0))),
+            ObjectValue(Map())
           )
         )
       }
@@ -89,9 +116,9 @@ class SuggestTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Set(
-            StringValue("toto"),
-            StringValue("titi")
+          suggests(
+            StringValue("titi"),
+            StringValue("toto")
           )
         )
       }
@@ -117,16 +144,9 @@ class SuggestTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Set(
-            ObjectValue(Map()),
-            ObjectValue(
-              properties = Map(
-                "foo" -> ObjectValue(
-                  properties = Map()
-                )
-              )
-            ),
-            ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0)))))
+          suggests(
+            ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0))))),
+            ObjectValue(Map())
           )
         )
       }
@@ -158,33 +178,16 @@ class SuggestTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Set(
-            ObjectValue(Map()),
+          suggests(
             ObjectValue(
               properties = Map(
                 "foo" -> ObjectValue(
-                  properties = Map()
-                )
-              )
-            ),
-            ObjectValue(
-              Map(
-                "foo" -> ObjectValue(
-                  Map(
-                    "bar" ->
-                      NumberValue(0)
+                  properties = Map(
+                    "bar" -> NumberValue(
+                      value = 0
+                    )
                   )
-                )
-              )
-            ),
-            ObjectValue(
-              Map(
-                "gnu" ->
-                  ObjectValue(Map())
-              )
-            ),
-            ObjectValue(
-              properties = Map(
+                ),
                 "gnu" -> ObjectValue(
                   properties = Map(
                     "toto" -> StringValue(
@@ -193,7 +196,8 @@ class SuggestTest extends FunSuite:
                   )
                 )
               )
-            )
+            ),
+            ObjectValue(Map())
           )
         )
       }
@@ -220,36 +224,21 @@ class SuggestTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Set(
-            ObjectValue(
-              properties = Map()
-            ),
-            ObjectValue(
-              properties = Map(
-                "foo" -> ObjectValue(
-                  properties = Map()
-                )
-              )
-            ),
+          suggests(
             ObjectValue(
               Map(
                 "foo" -> ObjectValue(
                   Map(
                     "bar" ->
+                      NumberValue(0),
+                    "gnu" ->
                       NumberValue(0)
                   )
                 )
               )
             ),
             ObjectValue(
-              Map(
-                "foo" -> ObjectValue(
-                  Map(
-                    "gnu" ->
-                      NumberValue(0)
-                  )
-                )
-              )
+              properties = Map()
             )
           )
         )
@@ -265,13 +254,13 @@ class SuggestTest extends FunSuite:
       assertSuggest("""13""")(schema) { result =>
         assertEquals(
           result,
-          Set(NullValue, NumberValue(0))
+          suggests(NullValue, NumberValue(0))
         )
       }
       assertSuggest("""true""")(schema) { result =>
         assertEquals(
           result,
-          Set(NullValue, NumberValue(0))
+          suggests(NullValue, NumberValue(0))
         )
       }
     }
@@ -286,13 +275,13 @@ class SuggestTest extends FunSuite:
       assertSuggest("""true""")(schema) { result =>
         assertEquals(
           result,
-          Set(NumberValue(0), NumberValue(13), NumberValue(14))
+          suggests(NumberValue(13), NumberValue(14), NumberValue(0))
         )
       }
       assertSuggest("""13""")(schema) { result =>
         assertEquals(
           result,
-          Set(NumberValue(0), NumberValue(13), NumberValue(14))
+          suggests(NumberValue(13), NumberValue(14), NumberValue(0))
         )
       }
     }
@@ -307,13 +296,13 @@ class SuggestTest extends FunSuite:
       assertSuggest("""true""")(schema) { result =>
         assertEquals(
           result,
-          Set(BoolValue(true))
+          suggests(BoolValue(true))
         )
       }
       assertSuggest("""13""")(schema) { result =>
         assertEquals(
           result,
-          Set(BoolValue(true))
+          suggests(BoolValue(true))
         )
       }
     }
@@ -353,23 +342,16 @@ class SuggestTest extends FunSuite:
       assertSuggest("""{}""")(schema) { result =>
         assertEquals(
           result,
-          Set(
-            ObjectValue(
-              properties = Map()
-            ),
-            ObjectValue(
-              properties = Map(
-                "kind" -> StringValue(
-                  value = ""
-                )
-              )
-            ),
+          suggests(
             ObjectValue(
               properties = Map(
                 "kind" -> StringValue(
                   value = "first"
                 )
               )
+            ),
+            ObjectValue(
+              properties = Map()
             ),
             ObjectValue(
               properties = Map(
@@ -394,27 +376,21 @@ class SuggestTest extends FunSuite:
             )
           )
         )
+
       }
       assertSuggest("""{"kind":"first"}""")(schema) { result =>
         assertEquals(
           result,
-          Set(
-            ObjectValue(
-              properties = Map()
-            ),
-            ObjectValue(
-              properties = Map(
-                "kind" -> StringValue(
-                  value = ""
-                )
-              )
-            ),
+          suggests(
             ObjectValue(
               properties = Map(
                 "kind" -> StringValue(
                   value = "first"
                 )
               )
+            ),
+            ObjectValue(
+              properties = Map()
             ),
             ObjectValue(
               properties = Map(
@@ -439,6 +415,7 @@ class SuggestTest extends FunSuite:
             )
           )
         )
+
       }
     }
   }
@@ -463,19 +440,21 @@ class SuggestTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Set(
+          suggests(
             ObjectValue(
-              properties = Map()
+              Map(
+                "foo" -> ObjectValue(
+                  Map(
+                    "bar" -> NumberValue(14),
+                    "gnu" -> StringValue("titi")
+                  )
+                )
+              )
             ),
-            ObjectValue(Map("foo" -> ObjectValue(Map()))),
-            ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(0))))),
-            ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(13))))),
-            ObjectValue(Map("foo" -> ObjectValue(Map("bar" -> NumberValue(14))))),
-            ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> StringValue(""))))),
-            ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> StringValue("toto"))))),
-            ObjectValue(Map("foo" -> ObjectValue(Map("gnu" -> StringValue("titi")))))
+            ObjectValue(Map())
           )
         )
+
       }
     }
   }
@@ -487,19 +466,24 @@ class SuggestTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Set(
+          suggests(
+            ObjectValue(properties =
+              Map(
+                "gnu"  -> BoolValue(true),
+                "titi" -> StringValue(""),
+                "toto" -> NumberValue(0)
+              )
+            ),
             ObjectValue(Map()),
             ObjectValue(
               properties = Map(
                 "toto" -> NullValue,
                 "gnu"  -> NullValue
               )
-            ),
-            ObjectValue(Map("toto" -> NumberValue(0))),
-            ObjectValue(Map("gnu" -> BoolValue(true))),
-            ObjectValue(Map("titi" -> StringValue("")))
+            )
           )
         )
+
       }
     }
   }
@@ -511,9 +495,9 @@ class SuggestTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Set(
-            ArrayValue(Seq()),
-            ArrayValue(Seq(NumberValue(0)))
+          suggests(
+            ArrayValue(Seq(NumberValue(0))),
+            ArrayValue(Seq())
           )
         )
       }
@@ -530,7 +514,7 @@ class SuggestTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Set(
+          suggests(
             NumberValue(0)
           )
         )
@@ -548,7 +532,7 @@ class SuggestTest extends FunSuite:
       ) { result =>
         assertEquals(
           result,
-          Set(
+          suggests(
             NumberValue(0)
           )
         )
@@ -560,24 +544,114 @@ class SuggestTest extends FunSuite:
     assertSuggestForSchema(
       """{}""",
       Pointer.empty.insideKey
-    ) { suggestions =>
-      val suggestedKeys  = suggestions.flatMap(Value.asString).toSet
+    ) { result =>
+      val suggestedKeys  = result.suggestions.flatMap(_.values).flatMap(Value.asString).toSet
       val deprecatedKeys = Vocabulary.deprecatedKeywords
       val actual         = suggestedKeys -- deprecatedKeys
 
       val availableKeys = Vocabulary.specDialect().keywords.keys.toSet
-      // see frawa.typedjson.keywords.Vocabulary.metaDataKeywords
-      val todoKeywords = Set(
-        "deprecated",
-        "readOnly",
-        "writeOnly",
-        "examples"
-      )
 
       val notSuggested = availableKeys -- actual
       assertEquals(notSuggested, Set.empty[String], "not suggested known keywords")
 
-      val unknown = actual -- (availableKeys ++ todoKeywords)
+      val unknown = actual -- availableKeys
       assertEquals(unknown, Set.empty[String], "suggested unknown keywords")
+    }
+  }
+
+  test("meta default") {
+    withSchema("""{
+                 |"default": 13,
+                 |"type": "number"
+                 |}""".stripMargin) { schema =>
+      assertSuggest("""13""")(schema) { result =>
+        assertEquals(
+          result,
+          suggests(
+            NumberValue(13),
+            NumberValue(0)
+          )
+        )
+      }
+    }
+  }
+
+  test("meta examples") {
+    withSchema("""{
+                 |"examples": [13,14],
+                 |"type": "number"
+                 |}""".stripMargin) { schema =>
+      assertSuggest("""13""")(schema) { result =>
+        assertEquals(
+          result,
+          suggests(
+            NumberValue(13),
+            NumberValue(14),
+            NumberValue(0)
+          )
+        )
+      }
+    }
+  }
+
+  test("first with title") {
+    withSchema("""{
+                 |"title": "My Title",
+                 |"type": "number"
+                 |}""".stripMargin) { schema =>
+      assertSuggest("""13""")(schema) { result =>
+        assertEquals(
+          result,
+          suggestWith(
+            Suggest.Doc(title = Some("My Title")),
+            NullValue,
+            NumberValue(0)
+          )
+        )
+      }
+    }
+  }
+
+  test("suggest values for schema writing") {
+    assertSuggestForSchema(
+      """{}""",
+      Pointer.empty
+    ) { result =>
+      assertEquals(result.suggestions.size, 8)
+
+      val docIds = result.suggestions.flatMap {
+        case Suggest.WithDoc(_, doc) => doc.id
+        case _                       => None
+      }.toSet
+      assertEquals(
+        docIds,
+        Set(
+          uri("https://json-schema.org/draft/2020-12/meta/core#"),
+          uri("https://json-schema.org/draft/2020-12/meta/validation#"),
+          uri("https://json-schema.org/draft/2020-12/meta/unevaluated#"),
+          uri("https://json-schema.org/draft/2020-12/meta/content#"),
+          uri("https://json-schema.org/draft/2020-12/meta/meta-data#"),
+          uri("https://json-schema.org/draft/2020-12/meta/format-annotation#"),
+          uri("https://json-schema.org/draft/2020-12/meta/applicator#")
+        )
+      )
+
+      val docTitles = result.suggestions.flatMap {
+        case Suggest.WithDoc(_, doc) => doc.title
+        case _                       => None
+      }.toSet
+      assertEquals(
+        docTitles,
+        Set(
+          "Core vocabulary meta-schema",
+          "Core and Validation specifications meta-schema",
+          "Validation vocabulary meta-schema",
+          "Unevaluated applicator vocabulary meta-schema",
+          "Content vocabulary meta-schema",
+          "Meta-data vocabulary meta-schema",
+          "Format vocabulary meta-schema for annotation results",
+          "Applicator vocabulary meta-schema"
+        )
+      )
     }
   }

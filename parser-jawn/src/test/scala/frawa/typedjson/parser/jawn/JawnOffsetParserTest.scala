@@ -102,7 +102,7 @@ class JawnOffsetParserTest extends FunSuite {
       parser.parseWithOffset("""{"toto":"titi"}"""),
       Right(
         ObjectValue(
-          Offset(0, 14),
+          Offset(0, 15),
           Map(StringValue(Offset(1, 7), "toto") -> StringValue(Offset(8, 14), "titi"))
         )
       )
@@ -111,7 +111,7 @@ class JawnOffsetParserTest extends FunSuite {
       parser.parseWithOffset("""{"toto":"titi", "foo": 13 }"""),
       Right(
         ObjectValue(
-          Offset(0, 26),
+          Offset(0, 27),
           Map(
             StringValue(Offset(1, 7), "toto")  -> StringValue(Offset(8, 14), "titi"),
             StringValue(Offset(16, 21), "foo") -> NumberValue(Offset(23, 25), 13)
@@ -248,7 +248,7 @@ class JawnOffsetParserTest extends FunSuite {
     assertEquals(pointerAt(value)(34), Right(Pointer.empty / "titi" / "foo"))
     assertEquals(pointerAt(value)(35), Right(Pointer.empty / "titi" / "foo"))
     assertEquals(pointerAt(value)(36), Right(Pointer.empty / "titi" / "foo"))
-    assertEquals(pointerAt(value)(37), Right(Pointer.empty))
+    assertEquals(pointerAt(value)(37), Right(Pointer.empty / "titi"))
     assertEquals(pointerAt(value)(38), Right(Pointer.empty))
     assertEquals(pointerAt(value)(39), Right(Pointer.empty))
   }
@@ -306,7 +306,7 @@ class JawnOffsetParserTest extends FunSuite {
       recoveredValue("""{"a":"b",}"""),
       Some(
         ObjectValue(
-          Offset(0, 9),
+          Offset(0, 10),
           Map(
             StringValue(Offset(1, 4), "a") -> StringValue(Offset(5, 8), "b")
           )
@@ -320,7 +320,7 @@ class JawnOffsetParserTest extends FunSuite {
       recoveredValue("""{"a"}"""),
       Some(
         ObjectValue(
-          Offset(0, 4),
+          Offset(0, 5),
           Map(
             StringValue(Offset(1, 4), "a") -> NullValue(Offset(4, 4))
           )
@@ -331,7 +331,7 @@ class JawnOffsetParserTest extends FunSuite {
       recoveredValue("""{"a":}"""),
       Some(
         ObjectValue(
-          Offset(0, 5),
+          Offset(0, 6),
           Map(
             StringValue(Offset(1, 4), "a") -> NullValue(Offset(5, 5))
           )
@@ -387,12 +387,12 @@ class JawnOffsetParserTest extends FunSuite {
   }
 
   test("offsetAt object") {
-    assertEquals(offsetAt("""{}""")(Pointer.empty), Right(Some(Offset(0, 1))))
-    assertEquals(offsetAt("""{"toto":13}""")(Pointer.empty), Right(Some(Offset(0, 10))))
+    assertEquals(offsetAt("""{}""")(Pointer.empty), Right(Some(Offset(0, 2))))
+    assertEquals(offsetAt("""{"toto":13}""")(Pointer.empty), Right(Some(Offset(0, 11))))
     assertEquals(offsetAt("""{"toto":13}""")(Pointer.empty / "toto"), Right(Some(Offset(8, 10))))
     assertEquals(offsetAt("""{"toto":13}""")(Pointer.empty / "missing"), Right(None))
     assertEquals(offsetAt("""{"toto":13}""")(Pointer.empty / 13), Right(None))
-    assertEquals(offsetAt("""{"foo": [13,14], "bar": {"gnu": 13}}""")(Pointer.empty), Right(Some(Offset(0, 35))))
+    assertEquals(offsetAt("""{"foo": [13,14], "bar": {"gnu": 13}}""")(Pointer.empty), Right(Some(Offset(0, 36))))
     assertEquals(
       offsetAt("""{"foo": [13,14], "bar": {"gnu": 13}}""")(Pointer.empty / "foo"),
       Right(Some(Offset(8, 15)))
@@ -403,7 +403,7 @@ class JawnOffsetParserTest extends FunSuite {
     )
     assertEquals(
       offsetAt("""{"foo": [13,14], "bar": {"gnu": 13}}""")(Pointer.empty / "bar"),
-      Right(Some(Offset(24, 34)))
+      Right(Some(Offset(24, 35)))
     )
     assertEquals(
       offsetAt("""{"foo": [13,14], "bar": {"gnu": 13}}""")(Pointer.empty / "bar" / "gnu"),

@@ -117,43 +117,44 @@ object OutputJson:
         )
     }
 
-private def toMessage(error: ValidationError): String =
-  def quotedItems(is: Seq[String]): String =
-    is.map(i => s"'${i}'").mkString(", ")
+  def toMessage(error: ValidationError): String =
+    def quotedItems(is: Seq[String]): String =
+      is.map(i => s"'${i}'").mkString(", ")
 
-  error match {
-    case SubSchemaFailed()                 => "A subschema had errors."
-    case FalseSchemaReason()               => "Always invalid."
-    case TypeMismatch(expected)            => s"Wrong type, expecting '${expected}."
-    case NotOneOf(valid)                   => s"Expected one, but found '${valid} valid."
-    case NotInvalid()                      => "Expected invalid, but found valid."
-    case NotInEnum(values)                 => s"Not in enum values: ${quotedItems(values.map(prettyPrint(2)))}."
-    case MissingRequiredProperties(Seq(p)) => s"Required property '${p}' not found."
-    case MissingRequiredProperties(ps)     => s"Required properties ${quotedItems(ps)} not found."
-    case AdditionalPropertyInvalid(p)      => s"Additional property '${p}' found but was invalid."
-    case PatternMismatch(pattern)          => s"Does not match pattern '${pattern}'."
-    case FormatMismatch(format)            => s"Not of format '${format}'."
-    case MinimumMismatch(min, exclude) =>
-      if exclude then s"Expected greater than ${min}."
-      else s"Expected greater than or equal to ${min}."
-    case MaximumMismatch(max, exclude) =>
-      if exclude then s"Expected less than ${max}."
-      else s"Expected less than or equal to ${max}."
-    case ItemsNotUnique()                  => "Items expected to be unique."
-    case NotMultipleOf(n)                  => s"Expected to be multiple of ${n}."
-    case MaxLengthMismatch(max)            => s"Expected maximal length of ${max}."
-    case MinLengthMismatch(min)            => s"Expected minimal length of ${min}."
-    case MaxItemsMismatch(max, found)      => s"Expected at most ${max} items but found ${found}."
-    case MinItemsMismatch(min, found)      => s"Expected at least ${min} items but found ${found}."
-    case MaxPropertiesMismatch(max, found) => s"Expected at most ${max} properties but found ${found}."
-    case MinPropertiesMismatch(min, found) => s"Expected at least ${min} properties but found ${found}."
-    case DependentRequiredMissing(missing) =>
-      s"Missing dependend required properties: ${missing
-          .map { (p, vs) =>
-            s"${p} requires ${quotedItems(vs)}"
-          }
-          .mkString(", ")}"
-    case NotContains(valid)                         => s"Expected to contain ${valid} items."
-    case CannotResolve(ref, problems)               => s"Cannot resolve ${ref}: ${problems.mkString(", ")}"
-    case CannotResolveDynamic(ref, scope, problems) => s"Cannot resolve dynamically ${ref}: ${problems.mkString(", ")}"
-  }
+    error match {
+      case SubSchemaFailed()                 => "A subschema had errors."
+      case FalseSchemaReason()               => "Always invalid."
+      case TypeMismatch(expected)            => s"Wrong type, expecting '${expected}."
+      case NotOneOf(valid)                   => s"Expected one, but found '${valid} valid."
+      case NotInvalid()                      => "Expected invalid, but found valid."
+      case NotInEnum(values)                 => s"Not in enum values: ${quotedItems(values.map(prettyPrint(2)))}."
+      case MissingRequiredProperties(Seq(p)) => s"Required property '${p}' not found."
+      case MissingRequiredProperties(ps)     => s"Required properties ${quotedItems(ps)} not found."
+      case AdditionalPropertyInvalid(p)      => s"Additional property '${p}' found but was invalid."
+      case PatternMismatch(pattern)          => s"Does not match pattern '${pattern}'."
+      case FormatMismatch(format)            => s"Not of format '${format}'."
+      case MinimumMismatch(min, exclude) =>
+        if exclude then s"Expected greater than ${min}."
+        else s"Expected greater than or equal to ${min}."
+      case MaximumMismatch(max, exclude) =>
+        if exclude then s"Expected less than ${max}."
+        else s"Expected less than or equal to ${max}."
+      case ItemsNotUnique()                  => "Items expected to be unique."
+      case NotMultipleOf(n)                  => s"Expected to be multiple of ${n}."
+      case MaxLengthMismatch(max)            => s"Expected maximal length of ${max}."
+      case MinLengthMismatch(min)            => s"Expected minimal length of ${min}."
+      case MaxItemsMismatch(max, found)      => s"Expected at most ${max} items but found ${found}."
+      case MinItemsMismatch(min, found)      => s"Expected at least ${min} items but found ${found}."
+      case MaxPropertiesMismatch(max, found) => s"Expected at most ${max} properties but found ${found}."
+      case MinPropertiesMismatch(min, found) => s"Expected at least ${min} properties but found ${found}."
+      case DependentRequiredMissing(missing) =>
+        s"Missing dependend required properties: ${missing
+            .map { (p, vs) =>
+              s"${p} requires ${quotedItems(vs)}"
+            }
+            .mkString(", ")}"
+      case NotContains(valid)           => s"Expected to contain ${valid} items."
+      case CannotResolve(ref, problems) => s"Cannot resolve ${ref}: ${problems.mkString(", ")}"
+      case CannotResolveDynamic(ref, scope, problems) =>
+        s"Cannot resolve dynamically ${ref}: ${problems.mkString(", ")}"
+    }

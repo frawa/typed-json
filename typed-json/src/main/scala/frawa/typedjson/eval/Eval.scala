@@ -143,6 +143,7 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case ContainsKeyword(schema, min, max)  => verify.verifyContains(schema.map(compile(_, kl)), min, max)
       case ContentEncodingKeyword(_)          => verify.verifyValid()
       case ContentMediaTypeKeyword(_)         => verify.verifyValid()
+      case _: MetaKeyword                     => verify.verifyValid()
       case ContentSchemaKeyword(keywords)     =>
         // TODO
         // val fun = compile(keywords, kl)

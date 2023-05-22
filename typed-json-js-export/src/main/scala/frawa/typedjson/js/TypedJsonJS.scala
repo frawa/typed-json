@@ -30,6 +30,11 @@ import frawa.typedjson.suggest.Suggest
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSExport, JSExportAll, JSExportTopLevel}
+import scala.scalajs.js.JSConverters._
+
+import frawa.typedjson.suggest.SuggestResult
+import frawa.typedjson.suggest.Suggest.Doc
+import frawa.typedjson.output.OutputJson
 
 @JSExportTopLevel("TypedJsonFactory")
 object TypedJsonFactory {
@@ -108,21 +113,17 @@ case class TypedJsonJS(
   }
 
   @JSExport
-  def suggestAt(offset: Int): js.Array[Suggestions] = {
-    val suggestions = value
-      .flatMap { value =>
-        val at                         = TypedJsonFactory.pointerAt(value, offset)
-        given OutputOps[SuggestOutput] = SuggestOutput.outputOps(at)
-        val (o, _)                     = this.typedJson.eval(value)
-        o.map { o =>
-          val suggestions = Suggest.suggestions(at, o)
-          val offsetAt    = pointer => TypedJsonFactory.offsetAt(pointer, value)
-          Suggestions(offsetAt)(at, suggestions)
-        }
+  def suggestionsAt(offset: Int): js.UndefOr[SuggestionsResult] = {
+    value.flatMap { value =>
+      val at                         = TypedJsonFactory.pointerAt(value, offset)
+      given OutputOps[SuggestOutput] = SuggestOutput.outputOps(at)
+      val (o, _)                     = this.typedJson.eval(value)
+      o.map { o =>
+        val result   = Suggest.suggestions(at, o)
+        val offsetAt = pointer => TypedJsonFactory.offsetAt(pointer, value)
+        SuggestionsResult(offsetAt)(at, result)
       }
-      .map(Seq(_))
-      .getOrElse(Seq())
-    js.Array(suggestions*)
+    }.orUndefined
   }
 }
 
@@ -146,8 +147,7 @@ object Marker {
   def fromError(offsetAt: Pointer => Option[Offset])(error: SimpleOutput.Error): Marker = {
     val offset       = offsetAt(error.pointer)
     val (start, end) = offset.map(o => (o.start, o.end)).getOrElse((0, 0))
-    // TODO localized messages
-    val message = error.value.toString
+    val message      = OutputJson.toMessage(error.value)
     Marker(start, end, error.pointer.toString, message, "error")
   }
 
@@ -156,9 +156,9 @@ object Marker {
   }
 }
 
-@JSExportTopLevel("Suggestions")
+@JSExportTopLevel("SuggestionsResult")
 @JSExportAll
-case class Suggestions(
+case class SuggestionsResult(
     start: Int,
     end: Int,
     pointer: String,
@@ -168,19 +168,30 @@ case class Suggestions(
 @JSExportTopLevel("Suggestion")
 @JSExportAll
 case class Suggestion(
-    value: js.Any
+    value: js.Any,
+    documentationMarkdown: js.UndefOr[String] = js.undefined
 )
 
-object Suggestions {
-  def apply(offsetAt: Pointer => Option[Offset])(pointer: Pointer, values: Seq[Value]): Suggestions = {
+object SuggestionsResult {
+  def apply(offsetAt: Pointer => Option[Offset])(pointer: Pointer, result: SuggestResult): SuggestionsResult = {
     val offset       = offsetAt(pointer)
     val (start, end) = offset.map(o => (o.start, o.end)).getOrElse((0, 0))
-    val suggestions  = values.map(toSuggestion)
-    Suggestions(start, end, pointer.toString, js.Array(suggestions.toSeq*))
+    val suggestions  = toSuggestions(result)
+    // TODO dedup ealier?
+    val dedup = suggestions
+      .groupBy(s => js.JSON.stringify(s.value))
+      .flatMap(_._2.headOption)
+    SuggestionsResult(start, end, pointer.toString, js.Array(dedup.toSeq*))
   }
 
-  private def toSuggestion(value: Value): Suggestion = {
-    Suggestion(toAny(value))
+  private def toSuggestions(result: SuggestResult): Seq[Suggestion] =
+    result.suggestions.flatMap {
+      case Suggest.Values(vs)       => vs.map(toSuggestion(None))
+      case Suggest.WithDoc(vs, doc) => vs.map(toSuggestion(toMarkdown(doc)))
+    }
+
+  private def toSuggestion(doc: Option[String])(value: Value): Suggestion = {
+    Suggestion(toAny(value), doc.orUndefined)
   }
 
   private def toAny(value: Value): js.Any = {
@@ -195,4 +206,34 @@ object Suggestions {
         js.Dictionary(pairs*)
     }
   }
+
+  private def toMarkdown(doc: Doc): Option[String] =
+    val md = doc.title
+      .zip(doc.description)
+      .map { (title, description) =>
+        s"""|### ${title}
+            |
+            |${description}
+            |""".stripMargin
+      }
+      .orElse {
+        doc.title.map { title =>
+          s"""|### ${title}
+              |""".stripMargin
+        }
+      }
+      .orElse {
+        doc.description.map { description =>
+          s"""|${description}
+              |""".stripMargin
+        }
+      }
+    md.zip(doc.id)
+      .map { (md, id) =>
+        s"""|*[${id}](${id})*
+            |${md}
+            |""".stripMargin
+      }
+      .orElse(md)
+
 }

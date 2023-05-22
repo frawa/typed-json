@@ -100,7 +100,7 @@ class JawnParser extends Parser with OffsetParser:
           properties = properties + ((currentKey.get, v))
           currentKey = None
       override def finish(index: Int): Offset.Value =
-        Offset.ObjectValue(Offset(startIndex, index), properties)
+        Offset.ObjectValue(Offset(startIndex, index + 1), properties)
       override def isObj: Boolean = true
 
     override def jnull(index: Int): Offset.Value = Offset.NullValue(Offset(index, index + 4))
