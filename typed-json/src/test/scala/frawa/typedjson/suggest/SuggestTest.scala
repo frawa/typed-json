@@ -58,7 +58,7 @@ class SuggestTest extends FunSuite:
     voc.combine(Vocabulary.specVocabularies(Vocabulary.metaDataId))
   }
 
-  private def assertSuggest(text: String, at: Pointer = Pointer.empty)(schema: SchemaValue)(
+  private def assertSuggest(text: String, at: Pointer = Pointer.empty, onlyKeys: Boolean = false)(schema: SchemaValue)(
       f: SuggestResult => Unit
   ) =
     given OutputOps[SuggestOutput] = SuggestOutput.outputOps(at)
@@ -68,11 +68,11 @@ class SuggestTest extends FunSuite:
     withCompiledSchemaValue(schema, vocabulary = vocabularyWithMeta) { fun =>
       val suggestFun = Suggest.suggestAt(at)(fun)
       val output     = doApply(fun, value)
-      val result     = Suggest.suggestions(at, output)
+      val result     = Suggest.suggestions(at, onlyKeys, output)
       f(result)
     }
 
-  private def assertSuggestForSchema(text: String, at: Pointer)(f: SuggestResult => Unit): Unit =
+  private def assertSuggestForSchema(text: String, at: Pointer, keysOnly: Boolean)(f: SuggestResult => Unit): Unit =
     val lazyResolver = MetaSchemas.lazyResolver
     val base         = MetaSchemas.draft202012
     val Some(schema) = lazyResolver(base.resolve("schema")): @unchecked
@@ -81,10 +81,10 @@ class SuggestTest extends FunSuite:
     val evalSuggest                = Eval[R, SuggestOutput]
     given Eval[R, SuggestOutput]   = evalSuggest
     val value                      = parseJsonValue(text)
-    withCompiledSchemaValue(schema, Some(lazyResolver), vocabularyWithMeta) { fun =>
+    withCompiledSchemaValue(schema, Some(lazyResolver), Some(Vocabulary.specDialect())) { fun =>
       val suggestFun = Suggest.suggestAt(at)(fun)
       val output     = doApply(fun, value)
-      val result     = Suggest.suggestions(at, output)
+      val result     = Suggest.suggestions(at, keysOnly, output)
       f(result)
     }
 
@@ -111,7 +111,7 @@ class SuggestTest extends FunSuite:
 
   test("suggest property names inside key") {
     withSchema(totoObjectSchema) { schema =>
-      assertSuggest("""{"toto": 13}""", (Pointer.empty / "toto").insideKey)(
+      assertSuggest("""{"toto": 13}""", (Pointer.empty).insideKey, true)(
         schema
       ) { result =>
         assertEquals(
@@ -543,19 +543,21 @@ class SuggestTest extends FunSuite:
   test("suggest keys for schema writing") {
     assertSuggestForSchema(
       """{}""",
-      Pointer.empty.insideKey
+      Pointer.empty,
+      true
     ) { result =>
-      val suggestedKeys  = result.suggestions.flatMap(_.values).flatMap(Value.asString).toSet
-      val deprecatedKeys = Vocabulary.deprecatedKeywords
-      val actual         = suggestedKeys -- deprecatedKeys
+      val suggestedKeys = result.suggestions.flatMap(_.values).flatMap(Value.asString)
+      val availableKeys = Vocabulary.specDialect().keywords.keys.toSeq
 
-      val availableKeys = Vocabulary.specDialect().keywords.keys.toSet
+      val deprecatedKeys    = Vocabulary.deprecatedKeywords.toSet
+      val withoutSuggestion = Set() // see Suggest.suggestFor
+      val expectedMissing   = deprecatedKeys ++ withoutSuggestion
 
-      val notSuggested = availableKeys -- actual
-      assertEquals(notSuggested, Set.empty[String], "not suggested known keywords")
+      val expected = suggestedKeys.toSet -- deprecatedKeys
+      assertEquals(expected.toSeq.sorted, availableKeys.sorted, "keywords expected by suggest")
 
-      val unknown = actual -- availableKeys
-      assertEquals(unknown, Set.empty[String], "suggested unknown keywords")
+      val unknown = expected -- availableKeys
+      assertEquals(unknown, Set.empty[String], "no suggested unknown keywords")
     }
   }
 
@@ -604,8 +606,7 @@ class SuggestTest extends FunSuite:
           result,
           suggestWith(
             Suggest.Doc(title = Some("My Title")),
-            NullValue,
-            NumberValue(0)
+            NumberValue(0.0)
           )
         )
       }
@@ -615,7 +616,8 @@ class SuggestTest extends FunSuite:
   test("suggest values for schema writing") {
     assertSuggestForSchema(
       """{}""",
-      Pointer.empty
+      Pointer.empty,
+      false
     ) { result =>
       assertEquals(result.suggestions.size, 8)
 

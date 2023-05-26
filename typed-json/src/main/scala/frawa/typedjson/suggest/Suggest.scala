@@ -45,7 +45,7 @@ object Suggest:
 
   def isAt(at: Pointer): Pointer => Boolean = pointer => (at.isInsideKey && at.outer == pointer) || at == pointer
 
-  def suggestions(at: Pointer, output: SuggestOutput): SuggestResult =
+  def suggestions(at: Pointer, keysOnly: Boolean, output: SuggestOutput): SuggestResult =
     val ws = output.keywords.map(suggestFor)
     val metaByLoc = output.keywords
       .groupBy {
@@ -74,7 +74,7 @@ object Suggest:
       .map(toSuggest(metaByLoc.get))
       .toSeq
     // TODO use more precise replaceAt for better suggestions
-    if at.isInsideKey then SuggestResult(suggestions.map(onlyKeys))
+    if keysOnly then SuggestResult(suggestions.map(onlyKeys))
     else SuggestResult(suggestions)
 
   private def toSuggest(
@@ -121,20 +121,41 @@ object Suggest:
       case NullTypeKeyword    => Work(NullValue)
       case BooleanTypeKeyword => Work(BoolValue(true))
       case StringTypeKeyword  => Work(StringValue(""))
-      case NumberTypeKeyword  => Work(NumberValue(0))
+      case NumberTypeKeyword  => Work(NumberValue(0.0))
+      case IntegerTypeKeyword => Work(NumberValue(0))
       case ArrayTypeKeyword   => Work(ArrayValue(Seq()))
       case ObjectTypeKeyword  => Work(ObjectValue(Map()))
       case ObjectPropertiesKeyword(properties, patternProperties, additional) =>
-        val allProperties = ObjectValue(Map.from(properties.flatMap { case (prop, keywords) =>
-          useBestValue(
-            keywords.flatMap(keyword => suggestFor(keyword).values)
-          ).map(v => (prop -> v))
-        }))
-        val allPatternProperties = ObjectValue(Map.from(patternProperties.flatMap { case (prop, keywords) =>
-          useBestValue(
-            keywords.flatMap(keyword => suggestFor(keyword).values)
-          ).map(v => (prop -> v))
-        }))
+        val allProperties = ObjectValue(
+          Map.from(
+            properties
+              .map { case (prop, keywords) =>
+                useBestValue(
+                  keywords.flatMap(keyword => suggestFor(keyword).values)
+                )
+                  .map(v => (prop -> v))
+                  .getOrElse {
+                    // TODO happens for $ref/$dynamicRef
+                    // TODO find deref
+                    prop -> NullValue
+                  }
+              }
+              .toSeq
+              .sortBy(_._1)
+          )
+        )
+        val allPatternProperties = ObjectValue(
+          Map.from(
+            patternProperties
+              .flatMap { case (prop, keywords) =>
+                useBestValue(
+                  keywords.flatMap(keyword => suggestFor(keyword).values)
+                ).map(v => (prop -> v))
+              }
+              .toSeq
+              .sortBy(_._1)
+          )
+        )
         val additionals =
           additional.flatMap { additional =>
             useBestValue(additional.keywords.toSeq.flatMap(keyword => suggestFor(keyword).values))
@@ -173,16 +194,43 @@ object Suggest:
         Work(itemArrays :+ tuplesOfDeeptest)
       case UnionTypeKeyword(keywords) =>
         Work.all(keywords.map(keyword => suggestFor(keyword)))
+      case ContentSchemaKeyword(keywords) =>
+        Work.all(keywords.map(keyword => suggestFor(keyword)))
       case MetaKeyword(_, _, Some(defaultValue), _, _, _, _) =>
         Work(defaultValue)
       case MetaKeyword(_, _, _, _, _, _, Some(examples)) =>
         Work(examples)
       case WithLocation(keyword, kl) =>
         Work.WithLoc(suggestFor(keyword).values, kl)
-      case MinimumKeyword(min, exclude) => Work(NumberValue(min))
-      case MaximumKeyword(max, exclude) => Work(NumberValue(max))
-      case MultipleOfKeyword(n)         => Work(NumberValue(n))
-      case _                            => Work(NullValue)
+      case MinimumKeyword(min, exclude) =>
+        val v = if exclude then min + 1 else min
+        Work(NumberValue(v))
+      case MaximumKeyword(max, exclude) =>
+        val v = if exclude then max - 1 else max
+        Work(NumberValue(v))
+      case MultipleOfKeyword(n)            => Work(NumberValue(n))
+      case _: FormatKeyword                => Work(StringValue(""))
+      case _: PatternKeyword               => Work(StringValue(""))
+      case _: UniqueItemsKeyword           => Work(ArrayValue(Seq()))
+      case _: PropertyNamesKeyword         => Work(ObjectValue(Map()))
+      case _: MaxLengthKeyword             => Work(StringValue(""))
+      case _: MinLengthKeyword             => Work(StringValue(""))
+      case _: MaxItemsKeyword              => Work(ArrayValue(Seq()))
+      case _: MinItemsKeyword              => Work(ArrayValue(Seq()))
+      case _: MaxPropertiesKeyword         => Work(ObjectValue(Map()))
+      case _: MinPropertiesKeyword         => Work(ObjectValue(Map()))
+      case _: DependentRequiredKeyword     => Work(ObjectValue(Map()))
+      case _: DependentSchemasKeyword      => Work(ObjectValue(Map()))
+      case _: ContainsKeyword              => Work(ArrayValue(Seq()))
+      case _: ContentEncodingKeyword       => Work(Seq())
+      case _: ContentMediaTypeKeyword      => Work(Seq())
+      case _: UnevaluatedItemsKeyword      => Work(Seq())
+      case _: UnevaluatedPropertiesKeyword => Work(Seq())
+      case _: NotKeyword                   => Work(Seq())
+      case _: RefKeyword                   => Work(Seq())
+      case _: DynamicRefKeyword            => Work(Seq())
+      case _: MetaKeyword                  => Work(Seq())
+      case _: IgnoredKeyword               => Work(Seq())
 
   private def useBestValue(vs: Seq[Value]): Option[Value] =
     vs.sortBy(score).lastOption
@@ -196,12 +244,19 @@ object Suggest:
     }
 
   private def onlyKeys(vs: Seq[Value]): Seq[Value] =
-    vs.flatMap(Value.asObject).flatMap(_.keys).map(StringValue.apply).distinct
+    vs.flatMap(Value.asObject)
+      .flatMap { properties =>
+        val keys = properties.keys.toSeq.map(StringValue.apply)
+        val deep = onlyKeys(properties.values.toSeq)
+        keys ++ deep
+      }
+      .distinct
 
   def score(v: Value): Int =
     v match
-      case ArrayValue(vs)  => 1 + vs.map(score).maxOption.map(_ + 1).getOrElse(0)
-      case ObjectValue(ps) => 1 + ps.values.map(score).maxOption.map(_ + 1).getOrElse(0)
-      case NumberValue(v)  => if v != 0 then 1 else 0
-      case StringValue(v)  => if v.nonEmpty then 1 else 0
-      case _               => 0
+      case ArrayValue(vs)  => 2 + vs.map(score).maxOption.map(_ + 1).getOrElse(0)
+      case ObjectValue(ps) => 2 + ps.values.map(score).maxOption.map(_ + 1).getOrElse(0)
+      case NumberValue(v)  => if v != 0 then 2 else 1
+      case StringValue(v)  => if v.nonEmpty then 2 else 1
+      case BoolValue(_)    => 1
+      case NullValue       => 0
