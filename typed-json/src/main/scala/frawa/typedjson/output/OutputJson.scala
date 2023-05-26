@@ -124,8 +124,8 @@ object OutputJson:
     error match {
       case SubSchemaFailed()                 => "A subschema had errors."
       case FalseSchemaReason()               => "Always invalid."
-      case TypeMismatch(expected)            => s"Wrong type, expecting '${expected}."
-      case NotOneOf(valid)                   => s"Expected one, but found '${valid} valid."
+      case TypeMismatch(expected)            => s"Wrong type, expecting '${expected}''."
+      case NotOneOf(valid)                   => s"Expected one, but found ${valid} valid."
       case NotInvalid()                      => "Expected invalid, but found valid."
       case NotInEnum(values)                 => s"Not in enum values: ${quotedItems(values.map(prettyPrint(2)))}."
       case MissingRequiredProperties(Seq(p)) => s"Required property '${p}' not found."
