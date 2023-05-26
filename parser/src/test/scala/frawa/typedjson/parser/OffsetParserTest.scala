@@ -20,7 +20,6 @@ import frawa.typedjson.pointer.Pointer
 import munit.FunSuite
 
 class OffsetParserTest extends FunSuite:
-  import OffsetParser.pointerAt
   import Offset.*
   import OffsetParser.contextAt
   import OffsetContext.*

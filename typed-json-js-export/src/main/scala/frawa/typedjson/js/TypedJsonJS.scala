@@ -132,9 +132,9 @@ case class TypedJsonJS(
         val result = Suggest.suggestions(at.pointer, keysOnly, o)
         val offset = at.offset
         val sep = at match {
-          case OffsetContext.NewKey(_, _)      => Some(":")
-          case OffsetContext.NewValue(_, _, _) => Some(",")
-          case _                               => None
+          case OffsetContext.NewKey(_, _)   => Some(":")
+          case OffsetContext.NewValue(_, _) => Some(",")
+          case _                            => None
         }
         SuggestionsResult(at.pointer, offset, sep, result)
       }
