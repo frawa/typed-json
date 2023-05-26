@@ -27,11 +27,11 @@ class OffsetParserTest extends FunSuite:
 
   test("contextAt around number") {
     val v = NumberValue(Offset(1, 3), 13)
-    assertEquals(contextAt(v)(0), NewValue(Pointer.empty, Offset(0, 0), true))
+    assertEquals(contextAt(v)(0), NewValue(Pointer.empty, Offset(0, 0)))
     assertEquals(contextAt(v)(1), InsideValue(Pointer.empty, Offset(1, 3)))
     assertEquals(contextAt(v)(2), InsideValue(Pointer.empty, Offset(1, 3)))
-    assertEquals(contextAt(v)(3), NewValue(Pointer.empty, Offset(3, 3), false))
-    assertEquals(contextAt(v)(13), NewValue(Pointer.empty, Offset(13, 13), false))
+    assertEquals(contextAt(v)(3), NewValue(Pointer.empty, Offset(3, 3)))
+    assertEquals(contextAt(v)(13), NewValue(Pointer.empty, Offset(13, 13)))
   }
 
   // test("pointerAt is empty on number") {
@@ -43,11 +43,11 @@ class OffsetParserTest extends FunSuite:
 
   test("contextAt around bool") {
     val v = BoolValue(Offset(1, 5), value = true)
-    assertEquals(contextAt(v)(0), NewValue(Pointer.empty, Offset(0, 0), true))
+    assertEquals(contextAt(v)(0), NewValue(Pointer.empty, Offset(0, 0)))
     assertEquals(contextAt(v)(1), InsideValue(Pointer.empty, Offset(1, 5)))
     assertEquals(contextAt(v)(4), InsideValue(Pointer.empty, Offset(1, 5)))
-    assertEquals(contextAt(v)(5), NewValue(Pointer.empty, Offset(5, 5), false))
-    assertEquals(contextAt(v)(13), NewValue(Pointer.empty, Offset(13, 13), false))
+    assertEquals(contextAt(v)(5), NewValue(Pointer.empty, Offset(5, 5)))
+    assertEquals(contextAt(v)(13), NewValue(Pointer.empty, Offset(13, 13)))
   }
 
   // test("pointerAt is empty on bool") {
@@ -69,15 +69,15 @@ class OffsetParserTest extends FunSuite:
   test("contextAt around array") {
     // [13,14]
     val v = ArrayValue(Offset(0, 7), Seq(NumberValue(Offset(1, 3), 13), NumberValue(Offset(4, 6), 14)))
-    assertEquals(contextAt(v)(0), NewValue(Pointer.empty, Offset(0, 0), true))
+    assertEquals(contextAt(v)(0), NewValue(Pointer.empty, Offset(0, 0)))
     assertEquals(contextAt(v)(1), InsideValue(Pointer.empty / 0, Offset(1, 3)))
     assertEquals(contextAt(v)(2), InsideValue(Pointer.empty / 0, Offset(1, 3)))
-    assertEquals(contextAt(v)(3), NewValue(Pointer.empty, Offset(3, 3), false))
+    assertEquals(contextAt(v)(3), NewValue(Pointer.empty, Offset(3, 3)))
     assertEquals(contextAt(v)(4), InsideValue(Pointer.empty / 1, Offset(4, 6)))
     assertEquals(contextAt(v)(5), InsideValue(Pointer.empty / 1, Offset(4, 6)))
-    assertEquals(contextAt(v)(6), NewValue(Pointer.empty, Offset(6, 6), false))
-    assertEquals(contextAt(v)(7), NewValue(Pointer.empty, Offset(7, 7), false))
-    assertEquals(contextAt(v)(13), NewValue(Pointer.empty, Offset(13, 13), false))
+    assertEquals(contextAt(v)(6), NewValue(Pointer.empty, Offset(6, 6)))
+    assertEquals(contextAt(v)(7), NewValue(Pointer.empty, Offset(7, 7)))
+    assertEquals(contextAt(v)(13), NewValue(Pointer.empty, Offset(13, 13)))
   }
 
   // test("pointerAt array") {
@@ -96,15 +96,15 @@ class OffsetParserTest extends FunSuite:
       Offset(0, 7),
       Seq(NumberValue(Offset(1, 2), 1), ArrayValue(Offset(4, 6), Seq(NumberValue(Offset(4, 5), 2))))
     )
-    assertEquals(contextAt(v)(0), NewValue(Pointer.empty, Offset(0, 0), true))
+    assertEquals(contextAt(v)(0), NewValue(Pointer.empty, Offset(0, 0)))
     assertEquals(contextAt(v)(1), InsideValue(Pointer.empty / 0, Offset(1, 2)))
-    assertEquals(contextAt(v)(2), NewValue(Pointer.empty, Offset(2, 2), false))
-    assertEquals(contextAt(v)(3), NewValue(Pointer.empty, Offset(3, 3), false))
+    assertEquals(contextAt(v)(2), NewValue(Pointer.empty, Offset(2, 2)))
+    assertEquals(contextAt(v)(3), NewValue(Pointer.empty, Offset(3, 3)))
     assertEquals(contextAt(v)(4), InsideValue(Pointer.empty / 1 / 0, Offset(4, 5)))
-    assertEquals(contextAt(v)(5), NewValue(Pointer.empty / 1, Offset(5, 5), false))
-    assertEquals(contextAt(v)(6), NewValue(Pointer.empty, Offset(6, 6), false))
-    assertEquals(contextAt(v)(7), NewValue(Pointer.empty, Offset(7, 7), false))
-    assertEquals(contextAt(v)(13), NewValue(Pointer.empty, Offset(13, 13), false))
+    assertEquals(contextAt(v)(5), NewValue(Pointer.empty / 1, Offset(5, 5)))
+    assertEquals(contextAt(v)(6), NewValue(Pointer.empty, Offset(6, 6)))
+    assertEquals(contextAt(v)(7), NewValue(Pointer.empty, Offset(7, 7)))
+    assertEquals(contextAt(v)(13), NewValue(Pointer.empty, Offset(13, 13)))
   }
 
   // test("pointerAt nested array") {
@@ -127,7 +127,7 @@ class OffsetParserTest extends FunSuite:
       Offset(0, 12),
       Map(StringValue(Offset(1, 7), "toto") -> NumberValue(Offset(9, 11), 13))
     )
-    assertEquals(contextAt(v)(0), NewValue(Pointer.empty, Offset(0, 0), true))
+    assertEquals(contextAt(v)(0), NewValue(Pointer.empty, Offset(0, 0)))
     assertEquals(contextAt(v)(1), InsideKey(Pointer.empty / "toto", Offset(1, 7)))
     assertEquals(contextAt(v)(2), InsideKey(Pointer.empty / "toto", Offset(1, 7)))
     assertEquals(contextAt(v)(3), InsideKey(Pointer.empty / "toto", Offset(1, 7)))
@@ -139,8 +139,8 @@ class OffsetParserTest extends FunSuite:
     assertEquals(contextAt(v)(9), InsideValue(Pointer.empty / "toto", Offset(9, 11)))
     assertEquals(contextAt(v)(10), InsideValue(Pointer.empty / "toto", Offset(9, 11)))
     assertEquals(contextAt(v)(11), NewKey(Pointer.empty, Offset(11, 11)))
-    assertEquals(contextAt(v)(12), NewValue(Pointer.empty, Offset(12, 12), false))
-    assertEquals(contextAt(v)(13), NewValue(Pointer.empty, Offset(13, 13), false))
+    assertEquals(contextAt(v)(12), NewValue(Pointer.empty, Offset(12, 12)))
+    assertEquals(contextAt(v)(13), NewValue(Pointer.empty, Offset(13, 13)))
   }
 
   // test("pointerAt object") {
@@ -175,7 +175,7 @@ class OffsetParserTest extends FunSuite:
         )
       )
     )
-    assertEquals(contextAt(v)(0), NewValue(Pointer.empty, Offset(0, 0), true))
+    assertEquals(contextAt(v)(0), NewValue(Pointer.empty, Offset(0, 0)))
     assertEquals(contextAt(v)(1), InsideKey(Pointer.empty / "toto", Offset(1, 7)))
     assertEquals(contextAt(v)(2), InsideKey(Pointer.empty / "toto", Offset(1, 7)))
     assertEquals(contextAt(v)(3), InsideKey(Pointer.empty / "toto", Offset(1, 7)))
@@ -195,7 +195,7 @@ class OffsetParserTest extends FunSuite:
     assertEquals(contextAt(v)(17), InsideKey(Pointer.empty / "titi", Offset(12, 18)))
     assertEquals(contextAt(v)(18), InsideValue(Pointer.empty / "titi", Offset(18, 20)))
     assertEquals(contextAt(v)(19), InsideValue(Pointer.empty / "titi", Offset(19, 20)))
-    assertEquals(contextAt(v)(20), NewValue(Pointer.empty / "titi", Offset(20, 20), true))
+    assertEquals(contextAt(v)(20), NewValue(Pointer.empty / "titi", Offset(20, 20)))
     assertEquals(contextAt(v)(21), InsideKey(Pointer.empty / "titi" / "foo", Offset(21, 26)))
     assertEquals(contextAt(v)(22), InsideKey(Pointer.empty / "titi" / "foo", Offset(21, 26)))
     assertEquals(contextAt(v)(23), InsideKey(Pointer.empty / "titi" / "foo", Offset(21, 26)))
@@ -209,8 +209,8 @@ class OffsetParserTest extends FunSuite:
     assertEquals(contextAt(v)(31), InsideValue(Pointer.empty / "titi" / "foo", Offset(28, 32)))
     assertEquals(contextAt(v)(32), NewKey(Pointer.empty / "titi", Offset(32, 32)))
     assertEquals(contextAt(v)(33), NewKey(Pointer.empty, Offset(33, 33)))
-    assertEquals(contextAt(v)(34), NewValue(Pointer.empty, Offset(34, 34), false))
-    assertEquals(contextAt(v)(42), NewValue(Pointer.empty, Offset(42, 42), false))
+    assertEquals(contextAt(v)(34), NewValue(Pointer.empty, Offset(34, 34)))
+    assertEquals(contextAt(v)(42), NewValue(Pointer.empty, Offset(42, 42)))
   }
 
   // TODO test on recovered values

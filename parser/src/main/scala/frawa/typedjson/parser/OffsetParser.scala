@@ -28,15 +28,14 @@ enum OffsetContext(val pointer: Pointer, val offset: Offset):
   case InsideKey(override val pointer: Pointer, override val offset: Offset)   extends OffsetContext(pointer, offset)
   case InsideValue(override val pointer: Pointer, override val offset: Offset) extends OffsetContext(pointer, offset)
   case NewKey(override val pointer: Pointer, override val offset: Offset)      extends OffsetContext(pointer, offset)
-  case NewValue(override val pointer: Pointer, override val offset: Offset, needSeparator: Boolean)
-      extends OffsetContext(pointer, offset)
+  case NewValue(override val pointer: Pointer, override val offset: Offset)    extends OffsetContext(pointer, offset)
 
   def mapPointer(f: Pointer => Pointer): OffsetContext =
     this match {
-      case InsideKey(pointer, offset)               => InsideKey(f(pointer), offset)
-      case InsideValue(pointer, offset)             => InsideValue(f(pointer), offset)
-      case NewKey(pointer, offset)                  => NewKey(f(pointer), offset)
-      case NewValue(pointer, offset, needSeparator) => NewValue(f(pointer), offset, needSeparator)
+      case InsideKey(pointer, offset)   => InsideKey(f(pointer), offset)
+      case InsideValue(pointer, offset) => InsideValue(f(pointer), offset)
+      case NewKey(pointer, offset)      => NewKey(f(pointer), offset)
+      case NewValue(pointer, offset)    => NewValue(f(pointer), offset)
     }
 object OffsetParser:
   case class ParseError(offset: Int, message: String, recoveredValue: Option[Offset.Value])
@@ -52,13 +51,13 @@ object OffsetParser:
             }
             .orElse {
               vs.zipWithIndex.flatMap { (v, i) =>
-                if at < v.offset.start then Some(OffsetContext.NewValue(Pointer.empty, Offset(at, at), true))
-                else if v.offset.end <= at then Some(OffsetContext.NewValue(Pointer.empty, Offset(at, at), false))
+                if at < v.offset.start then Some(OffsetContext.NewValue(Pointer.empty, Offset(at, at)))
+                else if v.offset.end <= at then Some(OffsetContext.NewValue(Pointer.empty, Offset(at, at)))
                 else None
               }.headOption
             }
             .getOrElse {
-              OffsetContext.NewValue(Pointer.empty, Offset(at, at), vs.nonEmpty)
+              OffsetContext.NewValue(Pointer.empty, Offset(at, at))
             }
         case ObjectValue(offset, properties) =>
           properties
@@ -91,13 +90,13 @@ object OffsetParser:
               }.headOption
             }
             .getOrElse {
-              if at == offset.start then OffsetContext.NewValue(Pointer.empty, Offset(at, at), true)
+              if at == offset.start then OffsetContext.NewValue(Pointer.empty, Offset(at, at))
               else OffsetContext.NewKey(Pointer.empty, Offset(at, at))
             }
         case _ => OffsetContext.InsideValue(Pointer.empty, value.offset)
     if value.offset.contains(at) then go(value)
-    else if value.offset.end <= at then OffsetContext.NewValue(Pointer.empty, Offset(at, at), needSeparator = false)
-    else OffsetContext.NewValue(Pointer.empty, Offset(at, at), true)
+    else if value.offset.end <= at then OffsetContext.NewValue(Pointer.empty, Offset(at, at))
+    else OffsetContext.NewValue(Pointer.empty, Offset(at, at))
 
   def pointerAt(value: Offset.Value)(at: Int): Pointer =
     def go(value: Offset.Value): Pointer =
