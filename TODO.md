@@ -2,41 +2,39 @@
 
 ## Doing
 
-- produce output schema from annotations/errors
+- editing experience in sample editor
+- suggest value in broken state 
+- debug: "$anchor": null
+- cleanup: remove insideKey from Pointer
+- review ignored tests in JawnOffsetParserTest wrt OffsetParserTest
+- suggest to find resolved $ref/$dyndref keywords
 
 ## TODO
 
-- Scala 3?!
-- continue to crystallize API with an example, validation output
-- continue to crystallize API with an example, suggestions
-- support missing formats (all those RFCs ..)
+- use free monad, aka trampoline, aka stack-less
+- cache compiled function, avoid re-parsing keywords
+- add hover (aka lenses?) to sample editor, leverage $comment keyword and annotations
 - validate output against schema, for JsonSchemaTestTestSuite
+- support missing formats (all those RFCs ..)
 - move backlog into issues
 - create GitHub releases
 - benching
-- improve lazy loading of keywords
-- cache keywords for schema values for reuse
-- improve validation errors reported into sample error
 - add hot fixes, for sample editor
-- support meta keywords, deprecated, etc.
 - DX: improve discoverability
 - standalone samples
 - validating lazy loader, which validates against meta schema on the fly
-- post process annotations?
 - latest dependencies
 - update JSON-Schema-Test-Suite
-- do not prefix results, but push value pointer into checker?
 - support earlier version of spec, via JsonSchemaTestTestSuite
 - fix ignored suites in JsonSchemaTestTestSuite
-- compile time json parsing vs runtime?
 - add scala docs
-- latest dependencies
-- CI on GH Actions?
-- integrate with VS Code?
-- support ScalaNative? Or GraalVM?
 
 ## Done
 
+- use released version of JSON-Schema-Test-Suite
+- produce output schema from annotations/errors
+- monadic design for variuous output formats
+- Scala 3
 - fix propagation of schema changes in sample editor
 - smarter suggestions, leverage keywords, formats (and annotations?)
 - update JSON-Schema-Test-Suite
