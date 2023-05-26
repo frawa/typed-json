@@ -109,7 +109,6 @@ languages.registerCompletionItemProvider("json", {
         suggestions: []
       }
     }
-    // TODO 
     const start = model.getPositionAt(result.start)
     const end = model.getPositionAt(result.end)
     const suggestions: languages.CompletionItem[] = result.suggestions.map(s => {
@@ -147,7 +146,7 @@ languages.registerCompletionItemProvider("json", {
             endColumn: end.column,
             endLineNumber: end.lineNumber
           },
-          text: pretty
+          text: pretty + (s.seperator ?? '')
         }]
       };
     });
