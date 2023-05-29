@@ -57,9 +57,6 @@ object TypedJsonFactory {
   def contextAt(value: Offset.Value, at: Int): OffsetContext = {
     OffsetParser.contextAt(value)(at)
   }
-  def pointerAt1(value: Offset.Value, at: Int): Pointer = {
-    OffsetParser.pointerAt(value)(at)
-  }
 
   def offsetAt(pointer: Pointer, value: Offset.Value): Option[Offset] = {
     OffsetParser.offsetAt(value)(pointer)
@@ -120,15 +117,16 @@ case class TypedJsonJS(
   def suggestionsAt(offset: Int): js.UndefOr[SuggestionsResult] = {
     value.flatMap { value =>
       // val at                         = TypedJsonFactory.pointerAt(value, offset)
-      val at                         = TypedJsonFactory.contextAt(value, offset)
-      given OutputOps[SuggestOutput] = SuggestOutput.outputOps(at.pointer)
+      val at = TypedJsonFactory.contextAt(value, offset)
+      val keysOnly = at match {
+        case _: OffsetContext.InsideKey => true
+        case _: OffsetContext.NewKey    => true
+        case _                          => false
+      }
+      val atPointer                  = if keysOnly then at.pointer.outer else at.pointer
+      given OutputOps[SuggestOutput] = SuggestOutput.outputOps(atPointer)
       val (o, _)                     = this.typedJson.eval(value)
       o.map { o =>
-        val keysOnly = at match {
-          case _: OffsetContext.InsideKey => true
-          case _: OffsetContext.NewKey    => true
-          case _                          => false
-        }
         val result = Suggest.suggestions(at.pointer, keysOnly, o)
         val offset = at.offset
         val sep = at match {

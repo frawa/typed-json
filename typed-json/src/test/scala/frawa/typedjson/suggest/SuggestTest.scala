@@ -111,7 +111,7 @@ class SuggestTest extends FunSuite:
 
   test("suggest property names inside key") {
     withSchema(totoObjectSchema) { schema =>
-      assertSuggest("""{"toto": 13}""", (Pointer.empty).insideKey, true)(
+      assertSuggest("""{"toto": 13}""", Pointer.empty, true)(
         schema
       ) { result =>
         assertEquals(

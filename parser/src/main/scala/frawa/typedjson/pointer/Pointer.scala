@@ -57,7 +57,7 @@ object Pointer:
       .filterNot(_._2)
       .map(_._1)
 
-case class Pointer(segments: Seq[Token], isInsideKey: Boolean = false):
+case class Pointer(segments: Seq[Token]):
   override def toString: String =
     if this.segments.isEmpty then ""
     else "/" + this.segments.mkString("/")
@@ -67,10 +67,7 @@ case class Pointer(segments: Seq[Token], isInsideKey: Boolean = false):
   def /(field: String): Pointer =
     Pointer(segments :+ FieldToken(field))
   def /(pointer: Pointer): Pointer =
-    Pointer(segments ++ pointer.segments, isInsideKey = pointer.isInsideKey)
-
-  def insideKey: Pointer =
-    copy(isInsideKey = true)
+    Pointer(segments ++ pointer.segments)
 
   def outer: Pointer =
     Pointer(segments.dropRight(1))

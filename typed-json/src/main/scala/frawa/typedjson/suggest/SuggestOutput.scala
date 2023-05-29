@@ -44,7 +44,7 @@ object SuggestOutput:
 
   private class SuggestOutputOps(private val at: Pointer) extends OutputOps[SuggestOutput]:
     private val bops = summon[OutputOps[SimpleOutput]]
-    private val isAt = Suggest.isAt(at)
+    private val isAt = (pointer: Pointer) => at == pointer
 
     def valid(pointer: Pointer): SuggestOutput =
       SuggestOutput(bops.valid(pointer))

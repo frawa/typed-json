@@ -98,74 +98,15 @@ object OffsetParser:
     else if value.offset.end <= at then OffsetContext.NewValue(Pointer.empty, Offset(at, at))
     else OffsetContext.NewValue(Pointer.empty, Offset(at, at))
 
-  def pointerAt(value: Offset.Value)(at: Int): Pointer =
-    def go(value: Offset.Value): Pointer =
-      value match
-        case Offset.ArrayValue(offset, vs) =>
-          vs.zipWithIndex
-            .find(_._1.offset.contains(at))
-            .flatMap { (v, i) =>
-              Some(Pointer.empty / i / go(v))
-            }
-            .orElse {
-              if offset.end == at then Some(Pointer.empty)
-              else
-                vs.zipWithIndex
-                  .filter(_._1.offset.end <= at)
-                  .sortBy(_._1.offset.end)
-                  .lastOption
-                  .map((_, i) => (Pointer.empty / i))
-            }
-            .getOrElse {
-              Pointer.empty
-            }
-        case Offset.ObjectValue(offset, properties) =>
-          properties
-            .find(_._2.offset.contains(at))
-            .flatMap { case (k, v) =>
-              val prefix = Pointer.empty / k.value.toString
-              Some(prefix / go(v))
-            }
-            .orElse(
-              properties.keys
-                .find(_.offset.contains(at))
-                .map(k => (Pointer.empty / k.value.toString).insideKey)
-            )
-            .orElse {
-              if offset.end == at then Some(Pointer.empty)
-              else
-                properties.view
-                  .flatMap { (k, v) =>
-                    Seq(
-                      // after value: edit next key
-                      (v, Pointer.empty.insideKey),
-                      // after key. edit value
-                      (k, Pointer.empty / k.value.toString)
-                    )
-                  }
-                  .toSeq
-                  .filter(_._1.offset.end <= at)
-                  .sortBy(_._1.offset.end)
-                  .lastOption
-                  .map(_._2)
-            }
-            .getOrElse {
-              Pointer.empty
-            }
-        case _ => Pointer.empty
-    Some(value)
-      .filter(_.offset.contains(at))
-      .map(go)
-      .getOrElse(Pointer.empty)
-
   def offsetAt(value: Offset.Value)(pointer: Pointer): Option[Offset] =
-    if pointer.isInsideKey && pointer.segments.nonEmpty then
-      // TODO move into Pointer
-      val FieldToken(key) = pointer.segments.last: @unchecked
-      pointer.outer(value) match
-        case Some(ObjectValue(_, properties)) => properties.find(_._1.value == key).map(_._1.offset)
-        case _                                => None
-    else pointer(value).map(_.offset)
+    // if pointer.segments.nonEmpty then
+    //   // TODO move into Pointer
+    //   val FieldToken(key) = pointer.segments.last: @unchecked
+    //   pointer.outer(value) match
+    //     case Some(ObjectValue(_, properties)) => properties.find(_._1.value == key).map(_._1.offset)
+    //     case _                                => None
+    // else
+    pointer(value).map(_.offset)
 
 case class Offset(start: Int, end: Int):
   def contains(at: Int): Boolean = start <= at && at < end

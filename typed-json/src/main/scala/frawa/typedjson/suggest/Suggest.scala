@@ -43,8 +43,6 @@ object Suggest:
     // TODO stop evaluation as soon as 'at' is reached
     compiled
 
-  def isAt(at: Pointer): Pointer => Boolean = pointer => (at.isInsideKey && at.outer == pointer) || at == pointer
-
   def suggestions(at: Pointer, keysOnly: Boolean, output: SuggestOutput): SuggestResult =
     val ws = output.keywords.map(suggestFor)
     val metaByLoc = output.keywords
