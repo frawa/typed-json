@@ -102,7 +102,6 @@ languages.registerCompletionItemProvider("json", {
   triggerCharacters: [' '],
 
   provideCompletionItems: (model, position, context) => {
-    // console.log("FW", model.id, model.uri)
     const result = typedJsonById[model.id]().suggestionsAt(model.getOffsetAt(position))
     if (!result) {
       return {

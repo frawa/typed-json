@@ -25,6 +25,5 @@ object Platform:
   def verifyHostname(hostname: String): Boolean =
     Try {
       val puny = Punycode.toASCII(hostname)
-      //   println(s"FW c ${js.JSON.stringify(c)}")
       true
     }.getOrElse(false)
