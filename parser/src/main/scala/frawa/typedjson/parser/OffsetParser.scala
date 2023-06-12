@@ -43,7 +43,7 @@ object OffsetParser:
   def contextAt(value: Offset.Value)(at: Int): OffsetContext =
     def go(value: Offset.Value): OffsetContext =
       value match
-        case Offset.ArrayValue(_, vs) =>
+        case Offset.ArrayValue(offset, vs) =>
           vs.zipWithIndex
             .find(_._1.offset.contains(at))
             .map { (v, i) =>
@@ -51,13 +51,14 @@ object OffsetParser:
             }
             .orElse {
               vs.zipWithIndex.flatMap { (v, i) =>
-                if at < v.offset.start then Some(OffsetContext.NewValue(Pointer.empty, Offset(at, at)))
-                else if v.offset.end <= at then Some(OffsetContext.NewValue(Pointer.empty, Offset(at, at)))
+                if at < v.offset.start then Some(OffsetContext.NewValue(Pointer.empty / i, Offset(at, at)))
+                else if v.offset.end <= at then Some(OffsetContext.NewValue(Pointer.empty / (i + 1), Offset(at, at)))
                 else None
               }.headOption
             }
             .getOrElse {
-              OffsetContext.NewValue(Pointer.empty, Offset(at, at))
+              if offset.start == at then OffsetContext.InsideValue(Pointer.empty, offset)
+              else OffsetContext.NewValue(Pointer.empty / 0, Offset(at, at))
             }
         case ObjectValue(offset, properties) =>
           properties
@@ -79,13 +80,10 @@ object OffsetParser:
             }
             .orElse {
               properties.flatMap { (k, v) =>
-                if offset.start < at && at < k.offset.start then
+                if offset.start < at && at <= k.offset.start then
                   Some(OffsetContext.NewKey(Pointer.empty, Offset(at, at)))
                 else if k.offset.end <= at && at < v.offset.start then
-                  Some(OffsetContext.InsideValue(Pointer.empty / k.value.toString(), Offset(at, v.offset.start)))
-                // else if v.offset.end <= at && at < offset.end then
-                //   println(s"FW ${v.offset.end} at ${at}")
-                //   Some(OffsetContext.NewKey(Pointer.empty, Offset(at, 1300 + at)))
+                  Some(OffsetContext.NewValue(Pointer.empty / k.value.toString(), Offset(at, at)))
                 else None
               }.headOption
             }
@@ -95,17 +93,10 @@ object OffsetParser:
             }
         case _ => OffsetContext.InsideValue(Pointer.empty, value.offset)
     if value.offset.contains(at) then go(value)
-    else if value.offset.end <= at then OffsetContext.NewValue(Pointer.empty, Offset(at, at))
+    // else if value.offset.end <= at then OffsetContext.NewValue(Pointer.empty, Offset(at, at))
     else OffsetContext.NewValue(Pointer.empty, Offset(at, at))
 
   def offsetAt(value: Offset.Value)(pointer: Pointer): Option[Offset] =
-    // if pointer.segments.nonEmpty then
-    //   // TODO move into Pointer
-    //   val FieldToken(key) = pointer.segments.last: @unchecked
-    //   pointer.outer(value) match
-    //     case Some(ObjectValue(_, properties)) => properties.find(_._1.value == key).map(_._1.offset)
-    //     case _                                => None
-    // else
     pointer(value).map(_.offset)
 
 case class Offset(start: Int, end: Int):
