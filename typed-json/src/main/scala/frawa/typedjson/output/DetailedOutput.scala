@@ -80,7 +80,6 @@ object DetailedOutput:
       def forKeyword(kl: KeywordLocation, k: Option[Keyword] = None): DetailedOutput =
         if o.keywordLocation.isDefined && !o.keywordLocation.contains(kl) then
           // TODO avoid this situation
-          // println(s"FW ignore ${kl} keep ${o.keywordLocation}")
           // new RuntimeException().printStackTrace()
           o
         else o.copy(keywordLocation = Some(kl))

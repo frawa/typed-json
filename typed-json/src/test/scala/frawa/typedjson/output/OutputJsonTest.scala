@@ -76,7 +76,6 @@ class OutputJsonTest extends FunSuite:
     val typedJson   = TypedJson.create(Sample.schema).toOption.get
     val (output, _) = typedJson.eval(parseJsonValue(Sample.value))
 
-    // println(s"FW ${munitPrint(output)}")
     val expected =
       BasicOutput(
         false,
@@ -134,8 +133,6 @@ class OutputJsonTest extends FunSuite:
 
     val basicJsonString      = basicJson1.map(prettyPrint(0))
     val expectetedJsonString = expectedJson1.map(prettyPrint(0))
-    // println(s"FW basic ${munitPrint(basicJsonString)}")
-    // println(s"FW expected ${munitPrint(expectetedJsonString)}")
     assertEquals(basicJsonString, expectetedJsonString)
   }
 
@@ -182,7 +179,6 @@ class OutputJsonTest extends FunSuite:
     val typedJson   = TypedJson.create(Sample.schema).toOption.get
     val (output, _) = typedJson.eval(parseJsonValue(Sample.value))
 
-    // println(s"FW ${munitPrint(output)}")
     val expected =
       DetailedOutput(
         false,
@@ -252,8 +248,6 @@ class OutputJsonTest extends FunSuite:
     val detailedJsonString   = detailedJson1.map(prettyPrint(0))
     val expectetedJsonString = expectedJson.map(prettyPrint(0))
 
-    // println(s"FW detailed ${munitPrint(detailedJsonString)}")
-    // println(s"FW expected ${munitPrint(expectetedJsonString)}")
     assertEquals(detailedJsonString, expectetedJsonString)
   }
 

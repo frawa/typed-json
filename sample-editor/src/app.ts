@@ -102,14 +102,12 @@ languages.registerCompletionItemProvider("json", {
   triggerCharacters: [' '],
 
   provideCompletionItems: (model, position, context) => {
-    // console.log("FW", model.id, model.uri)
     const result = typedJsonById[model.id]().suggestionsAt(model.getOffsetAt(position))
     if (!result) {
       return {
         suggestions: []
       }
     }
-    // TODO 
     const start = model.getPositionAt(result.start)
     const end = model.getPositionAt(result.end)
     const suggestions: languages.CompletionItem[] = result.suggestions.map(s => {
@@ -147,7 +145,7 @@ languages.registerCompletionItemProvider("json", {
             endColumn: end.column,
             endLineNumber: end.lineNumber
           },
-          text: pretty
+          text: pretty + (s.seperator ?? '')
         }]
       };
     });

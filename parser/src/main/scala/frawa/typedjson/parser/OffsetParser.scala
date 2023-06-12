@@ -24,50 +24,83 @@ trait OffsetParser:
   import OffsetParser.ParseError
   def parseWithOffset(json: String): Either[ParseError, Value]
 
+enum OffsetContext(val pointer: Pointer, val offset: Offset):
+  case InsideKey(override val pointer: Pointer, override val offset: Offset)   extends OffsetContext(pointer, offset)
+  case InsideValue(override val pointer: Pointer, override val offset: Offset) extends OffsetContext(pointer, offset)
+  case NewKey(override val pointer: Pointer, override val offset: Offset)      extends OffsetContext(pointer, offset)
+  case NewValue(override val pointer: Pointer, override val offset: Offset)    extends OffsetContext(pointer, offset)
+
+  def mapPointer(f: Pointer => Pointer): OffsetContext =
+    this match {
+      case InsideKey(pointer, offset)   => InsideKey(f(pointer), offset)
+      case InsideValue(pointer, offset) => InsideValue(f(pointer), offset)
+      case NewKey(pointer, offset)      => NewKey(f(pointer), offset)
+      case NewValue(pointer, offset)    => NewValue(f(pointer), offset)
+    }
 object OffsetParser:
   case class ParseError(offset: Int, message: String, recoveredValue: Option[Offset.Value])
 
-  def pointerAt(value: Offset.Value)(at: Int): Pointer =
-    def go(value: Offset.Value): Option[Pointer] =
+  def contextAt(value: Offset.Value)(at: Int): OffsetContext =
+    def go(value: Offset.Value): OffsetContext =
       value match
-        case Offset.ArrayValue(_, vs) =>
+        case Offset.ArrayValue(offset, vs) =>
           vs.zipWithIndex
             .find(_._1.offset.contains(at))
-            .flatMap { case (v, i) =>
-              go(v).map(Pointer.empty / i / _)
+            .map { (v, i) =>
+              go(v).mapPointer(Pointer.empty / i / _)
             }
-            .orElse(Some(Pointer.empty))
-        case Offset.ObjectValue(_, properties) =>
+            .orElse {
+              vs.zipWithIndex.flatMap { (v, i) =>
+                if at < v.offset.start then Some(OffsetContext.NewValue(Pointer.empty / i, Offset(at, at)))
+                else if v.offset.end <= at then Some(OffsetContext.NewValue(Pointer.empty / (i + 1), Offset(at, at)))
+                else None
+              }.headOption
+            }
+            .getOrElse {
+              if offset.start == at then OffsetContext.InsideValue(Pointer.empty, offset)
+              else OffsetContext.NewValue(Pointer.empty / 0, Offset(at, at))
+            }
+        case ObjectValue(offset, properties) =>
           properties
             .find(_._2.offset.contains(at))
-            .flatMap { case (k, v) =>
-              val prefix = Pointer.empty / k.value.toString
-              go(v).map(prefix / _).orElse(Some(prefix))
+            .map { (k, v) =>
+              go(v).mapPointer(Pointer.empty / k.value.toString() / _)
             }
-            .orElse(
-              properties.keys
-                .find(_.offset.contains(at))
-                .map(k => (Pointer.empty / k.value.toString).insideKey)
-            )
-            .orElse(Some(Pointer.empty))
-        case _ => Some(Pointer.empty)
-    Some(value)
-      .filter(_.offset.contains(at))
-      .flatMap(go)
-      .getOrElse(Pointer.empty)
+            .orElse {
+              properties
+                .find(_._1.offset.contains(at))
+                .map { (k, _) =>
+                  val keyValue = go(k).mapPointer(Pointer.empty / k.value.toString() / _)
+                  keyValue match {
+                    case OffsetContext.InsideValue(pointer, offset) => OffsetContext.InsideKey(pointer, offset)
+                    case _ => // TODO cannot happen
+                      ???
+                  }
+                }
+            }
+            .orElse {
+              properties.flatMap { (k, v) =>
+                if offset.start < at && at <= k.offset.start then
+                  Some(OffsetContext.NewKey(Pointer.empty, Offset(at, at)))
+                else if k.offset.end <= at && at < v.offset.start then
+                  Some(OffsetContext.NewValue(Pointer.empty / k.value.toString(), Offset(at, at)))
+                else None
+              }.headOption
+            }
+            .getOrElse {
+              if at == offset.start then OffsetContext.NewValue(Pointer.empty, Offset(at, at))
+              else OffsetContext.NewKey(Pointer.empty, Offset(at, at))
+            }
+        case _ => OffsetContext.InsideValue(Pointer.empty, value.offset)
+    if value.offset.contains(at) then go(value)
+    // else if value.offset.end <= at then OffsetContext.NewValue(Pointer.empty, Offset(at, at))
+    else OffsetContext.NewValue(Pointer.empty, Offset(at, at))
 
   def offsetAt(value: Offset.Value)(pointer: Pointer): Option[Offset] =
-    if pointer.isInsideKey then
-      // TODO move into Pointer
-      val FieldToken(key) = pointer.segments.last: @unchecked
-      pointer.outer(value) match
-        case Some(ObjectValue(_, properties)) => properties.find(_._1.value == key).map(_._1.offset)
-        case _                                => None
-    else pointer(value).map(_.offset)
+    pointer(value).map(_.offset)
 
 case class Offset(start: Int, end: Int):
-  // TODO end is exclusive, why is it inclusive here?
-  def contains(at: Int): Boolean = start <= at && at <= end
+  def contains(at: Int): Boolean = start <= at && at < end
 
 object Offset:
   import frawa.typedjson.parser.{Value as ValueWO}

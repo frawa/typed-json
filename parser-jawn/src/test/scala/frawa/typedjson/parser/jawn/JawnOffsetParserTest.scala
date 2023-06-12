@@ -99,6 +99,15 @@ class JawnOffsetParserTest extends FunSuite {
 
   test("object") {
     assertEquals(
+      parser.parseWithOffset("""{"toto": 13}"""),
+      Right(
+        ObjectValue(
+          Offset(0, 12),
+          Map(StringValue(Offset(1, 7), "toto") -> NumberValue(Offset(9, 11), 13))
+        )
+      )
+    )
+    assertEquals(
       parser.parseWithOffset("""{"toto":"titi"}"""),
       Right(
         ObjectValue(
@@ -121,143 +130,213 @@ class JawnOffsetParserTest extends FunSuite {
     )
   }
 
-  private def pointerAt(json: String)(at: Int): Either[OffsetParser.ParseError, Pointer] = {
-    parser.parseWithOffset(json).map(OffsetParser.pointerAt(_)(at))
+  test("object for OffsetParserTest") {
+    assertEquals(
+      parser.parseWithOffset("""{"toto": 13}"""),
+      Right(
+        ObjectValue(
+          Offset(0, 12),
+          Map(StringValue(Offset(1, 7), "toto") -> NumberValue(Offset(9, 11), 13))
+        )
+      )
+    )
+    assertEquals(
+      parser.parseWithOffset("""{"toto": 1, "titi": {"foo": true}}"""),
+      Right(
+        ObjectValue(
+          Offset(0, 34),
+          Map(
+            StringValue(Offset(1, 7), "toto") -> NumberValue(Offset(9, 10), 1),
+            StringValue(Offset(12, 18), "titi") -> ObjectValue(
+              Offset(20, 33),
+              Map(
+                StringValue(Offset(21, 26), "foo") -> BoolValue(Offset(28, 32), true)
+              )
+            )
+          )
+        )
+      )
+    )
   }
 
-  test("pointerAt is empty on basic types") {
-    assertEquals(pointerAt("""13""")(0), Right(Pointer.empty))
-    assertEquals(pointerAt("""13""")(1), Right(Pointer.empty))
-    assertEquals(pointerAt("""13""")(13), Right(Pointer.empty))
-    assertEquals(pointerAt("""true""")(0), Right(Pointer.empty))
-    assertEquals(pointerAt("""true""")(2), Right(Pointer.empty))
-    assertEquals(pointerAt("""null""")(3), Right(Pointer.empty))
-    assertEquals(pointerAt(""""foo"""")(4), Right(Pointer.empty))
+  test("some basic types") {
+    assertEquals(
+      parser.parseWithOffset("""13"""),
+      Right(
+        NumberValue(
+          Offset(0, 2),
+          13
+        )
+      )
+    )
+    assertEquals(
+      parser.parseWithOffset("""true"""),
+      Right(
+        BoolValue(
+          Offset(0, 4),
+          true
+        )
+      )
+    )
+    assertEquals(
+      parser.parseWithOffset("""null"""),
+      Right(
+        NullValue(
+          Offset(0, 4)
+        )
+      )
+    )
+    assertEquals(
+      parser.parseWithOffset(""""foo""""),
+      Right(
+        StringValue(
+          Offset(0, 5),
+          "foo"
+        )
+      )
+    )
   }
 
-  test("pointerAt array") {
-    assertEquals(pointerAt("""[13]""")(0), Right(Pointer.empty))
-    assertEquals(pointerAt("""[13]""")(1), Right(Pointer.empty / 0))
-    assertEquals(pointerAt("""[13]""")(2), Right(Pointer.empty / 0))
-    assertEquals(pointerAt("""[13]""")(3), Right(Pointer.empty / 0))
-    assertEquals(pointerAt("""[13]""")(4), Right(Pointer.empty))
-
-    assertEquals(pointerAt("""[13,14,15]""")(3), Right(Pointer.empty / 0))
-    assertEquals(pointerAt("""[13,14,15]""")(4), Right(Pointer.empty / 1))
-    assertEquals(pointerAt("""[13,14,15]""")(5), Right(Pointer.empty / 1))
-    assertEquals(pointerAt("""[13,14,15]""")(6), Right(Pointer.empty / 1))
-    assertEquals(pointerAt("""[13,14,15]""")(7), Right(Pointer.empty / 2))
-    assertEquals(pointerAt("""[13,14,15]""")(8), Right(Pointer.empty / 2))
-    assertEquals(pointerAt("""[13,14,15]""")(9), Right(Pointer.empty / 2))
-    assertEquals(pointerAt("""[13,14,15]""")(10), Right(Pointer.empty))
-    assertEquals(pointerAt("""[13,14,15]""")(11), Right(Pointer.empty))
+  test("some arrays") {
+    assertEquals(
+      parser.parseWithOffset("""[13]"""),
+      Right(
+        ArrayValue(
+          Offset(0, 4),
+          Seq(NumberValue(Offset(1, 3), 13))
+        )
+      )
+    )
+    assertEquals(
+      parser.parseWithOffset("""[13,14,15]"""),
+      Right(
+        ArrayValue(
+          Offset(0, 10),
+          Seq(NumberValue(Offset(1, 3), 13), NumberValue(Offset(4, 6), 14), NumberValue(Offset(7, 9), 15))
+        )
+      )
+    )
+    assertEquals(
+      parser.parseWithOffset("""[1,[2,[3]]]"""),
+      Right(
+        ArrayValue(
+          Offset(0, 11),
+          Seq(
+            NumberValue(Offset(1, 2), 1),
+            ArrayValue(
+              Offset(3, 10),
+              Seq(
+                NumberValue(Offset(4, 5), 2),
+                ArrayValue(
+                  Offset(6, 9),
+                  Seq(NumberValue(Offset(7, 8), 3))
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+    assertEquals(
+      parser.parseWithOffset("""|{
+                                |  "type": "boolean",
+                                |  "allOf": [ ]
+                                |}
+                                |""".stripMargin),
+      Right(
+        ObjectValue(
+          Offset(0, 39),
+          Map(
+            StringValue(
+              Offset(4, 10),
+              "type"
+            ) -> StringValue(
+              Offset(12, 21),
+              "boolean"
+            ),
+            StringValue(
+              Offset(25, 32),
+              "allOf"
+            ) -> ArrayValue(
+              Offset(34, 37),
+              Seq()
+            )
+          )
+        )
+      )
+    )
+    assertEquals(
+      parser.parseWithOffset("""|{
+                                |  "type": "boolean",
+                                |  "allOf": [ 13 ]
+                                |}
+                                |""".stripMargin),
+      Right(
+        ObjectValue(
+          Offset(0, 42),
+          Map(
+            StringValue(
+              Offset(4, 10),
+              "type"
+            ) -> StringValue(
+              Offset(12, 21),
+              "boolean"
+            ),
+            StringValue(
+              Offset(25, 32),
+              "allOf"
+            ) -> ArrayValue(
+              Offset(34, 40),
+              Seq(NumberValue(Offset(36, 38), 13))
+            )
+          )
+        )
+      )
+    )
   }
 
-  test("pointerAt nested array") {
-    assertEquals(pointerAt("""[1,[2,[3]]]""")(0), Right(Pointer.empty))
-    assertEquals(pointerAt("""[1,[2,[3]]]""")(1), Right(Pointer.empty / 0))
-    assertEquals(pointerAt("""[1,[2,[3]]]""")(2), Right(Pointer.empty / 0))
-    assertEquals(pointerAt("""[1,[2,[3]]]""")(3), Right(Pointer.empty / 1))
-    assertEquals(pointerAt("""[1,[2,[3]]]""")(4), Right(Pointer.empty / 1 / 0))
-    assertEquals(pointerAt("""[1,[2,[3]]]""")(5), Right(Pointer.empty / 1 / 0))
-    assertEquals(pointerAt("""[1,[2,[3]]]""")(6), Right(Pointer.empty / 1 / 1))
-    assertEquals(pointerAt("""[1,[2,[3]]]""")(7), Right(Pointer.empty / 1 / 1 / 0))
-    assertEquals(pointerAt("""[1,[2,[3]]]""")(8), Right(Pointer.empty / 1 / 1 / 0))
-    assertEquals(pointerAt("""[1,[2,[3]]]""")(9), Right(Pointer.empty / 1 / 1))
-    assertEquals(pointerAt("""[1,[2,[3]]]""")(10), Right(Pointer.empty / 1))
-    assertEquals(pointerAt("""[1,[2,[3]]]""")(11), Right(Pointer.empty))
-    assertEquals(pointerAt("""[1,[2,[3]]]""")(12), Right(Pointer.empty))
-  }
-
-  test("pointerAt array with strings") {
-    assertEquals(pointerAt("""["a",["b"]]""")(0), Right(Pointer.empty))
-    assertEquals(pointerAt("""["a",["b"]]""")(1), Right(Pointer.empty / 0))
-    assertEquals(pointerAt("""["a",["b"]]""")(2), Right(Pointer.empty / 0))
-    assertEquals(pointerAt("""["a",["b"]]""")(3), Right(Pointer.empty / 0))
-    assertEquals(pointerAt("""["a",["b"]]""")(4), Right(Pointer.empty / 0))
-    assertEquals(pointerAt("""["a",["b"]]""")(5), Right(Pointer.empty / 1))
-    assertEquals(pointerAt("""["a",["b"]]""")(6), Right(Pointer.empty / 1 / 0))
-    assertEquals(pointerAt("""["a",["b"]]""")(7), Right(Pointer.empty / 1 / 0))
-    assertEquals(pointerAt("""["a",["b"]]""")(8), Right(Pointer.empty / 1 / 0))
-    assertEquals(pointerAt("""["a",["b"]]""")(9), Right(Pointer.empty / 1 / 0))
-    assertEquals(pointerAt("""["a",["b"]]""")(10), Right(Pointer.empty / 1))
-    assertEquals(pointerAt("""["a",["b"]]""")(11), Right(Pointer.empty))
-    assertEquals(pointerAt("""["a",["b"]]""")(12), Right(Pointer.empty))
-  }
-
-  test("pointerAt at array end") {
-    assertEquals(pointerAt("""[1]""")(2), Right(Pointer.empty / 0))
-    assertEquals(pointerAt("""[1,[2]]""")(5), Right(Pointer.empty / 1 / 0))
-    assertEquals(pointerAt("""[1,[2]]""")(6), Right(Pointer.empty / 1))
-  }
-
-  test("pointerAt object") {
-    assertEquals(pointerAt("""{"toto": 13}""")(0), Right(Pointer.empty))
-    assertEquals(pointerAt("""{"toto": 13}""")(1), Right((Pointer.empty / "toto").insideKey))
-    assertEquals(pointerAt("""{"toto": 13}""")(2), Right((Pointer.empty / "toto").insideKey))
-    assertEquals(pointerAt("""{"toto": 13}""")(3), Right((Pointer.empty / "toto").insideKey))
-    assertEquals(pointerAt("""{"toto": 13}""")(4), Right((Pointer.empty / "toto").insideKey))
-    assertEquals(pointerAt("""{"toto": 13}""")(5), Right((Pointer.empty / "toto").insideKey))
-    assertEquals(pointerAt("""{"toto": 13}""")(6), Right((Pointer.empty / "toto").insideKey))
-    assertEquals(pointerAt("""{"toto": 13}""")(7), Right((Pointer.empty / "toto").insideKey))
-    assertEquals(pointerAt("""{"toto": 13}""")(8), Right(Pointer.empty))
-    assertEquals(pointerAt("""{"toto": 13}""")(9), Right(Pointer.empty / "toto"))
-    assertEquals(pointerAt("""{"toto": 13}""")(10), Right(Pointer.empty / "toto"))
-    assertEquals(pointerAt("""{"toto": 13}""")(11), Right(Pointer.empty / "toto"))
-    assertEquals(pointerAt("""{"toto": 13}""")(12), Right(Pointer.empty))
-    assertEquals(pointerAt("""{"toto": 13}""")(13), Right(Pointer.empty))
-  }
-
-  test("pointerAt nested object") {
-    val value = """{"toto": [1,2], "titi": {"foo": true}}"""
-    assertEquals(pointerAt(value)(0), Right(Pointer.empty))
-    assertEquals(pointerAt(value)(1), Right((Pointer.empty / "toto").insideKey))
-    assertEquals(pointerAt(value)(2), Right((Pointer.empty / "toto").insideKey))
-    assertEquals(pointerAt(value)(3), Right((Pointer.empty / "toto").insideKey))
-    assertEquals(pointerAt(value)(4), Right((Pointer.empty / "toto").insideKey))
-    assertEquals(pointerAt(value)(5), Right((Pointer.empty / "toto").insideKey))
-    assertEquals(pointerAt(value)(6), Right((Pointer.empty / "toto").insideKey))
-    assertEquals(pointerAt(value)(7), Right((Pointer.empty / "toto").insideKey))
-    assertEquals(pointerAt(value)(8), Right(Pointer.empty))
-    assertEquals(pointerAt(value)(9), Right(Pointer.empty / "toto"))
-    assertEquals(pointerAt(value)(10), Right(Pointer.empty / "toto" / 0))
-    assertEquals(pointerAt(value)(11), Right(Pointer.empty / "toto" / 0))
-    assertEquals(pointerAt(value)(12), Right(Pointer.empty / "toto" / 1))
-    assertEquals(pointerAt(value)(13), Right(Pointer.empty / "toto" / 1))
-    assertEquals(pointerAt(value)(14), Right(Pointer.empty / "toto"))
-    assertEquals(pointerAt(value)(14), Right(Pointer.empty / "toto"))
-    assertEquals(pointerAt(value)(15), Right(Pointer.empty))
-    assertEquals(pointerAt(value)(16), Right((Pointer.empty / "titi").insideKey))
-    assertEquals(pointerAt(value)(17), Right((Pointer.empty / "titi").insideKey))
-    assertEquals(pointerAt(value)(18), Right((Pointer.empty / "titi").insideKey))
-    assertEquals(pointerAt(value)(19), Right((Pointer.empty / "titi").insideKey))
-    assertEquals(pointerAt(value)(20), Right((Pointer.empty / "titi").insideKey))
-    assertEquals(pointerAt(value)(21), Right((Pointer.empty / "titi").insideKey))
-    assertEquals(pointerAt(value)(22), Right((Pointer.empty / "titi").insideKey))
-    assertEquals(pointerAt(value)(23), Right(Pointer.empty))
-    assertEquals(pointerAt(value)(24), Right(Pointer.empty / "titi"))
-    assertEquals(pointerAt(value)(25), Right((Pointer.empty / "titi" / "foo").insideKey))
-    assertEquals(pointerAt(value)(26), Right((Pointer.empty / "titi" / "foo").insideKey))
-    assertEquals(pointerAt(value)(27), Right((Pointer.empty / "titi" / "foo").insideKey))
-    assertEquals(pointerAt(value)(28), Right((Pointer.empty / "titi" / "foo").insideKey))
-    assertEquals(pointerAt(value)(29), Right((Pointer.empty / "titi" / "foo").insideKey))
-    assertEquals(pointerAt(value)(30), Right((Pointer.empty / "titi" / "foo").insideKey))
-    assertEquals(pointerAt(value)(31), Right(Pointer.empty / "titi"))
-    assertEquals(pointerAt(value)(32), Right(Pointer.empty / "titi" / "foo"))
-    assertEquals(pointerAt(value)(33), Right(Pointer.empty / "titi" / "foo"))
-    assertEquals(pointerAt(value)(34), Right(Pointer.empty / "titi" / "foo"))
-    assertEquals(pointerAt(value)(35), Right(Pointer.empty / "titi" / "foo"))
-    assertEquals(pointerAt(value)(36), Right(Pointer.empty / "titi" / "foo"))
-    assertEquals(pointerAt(value)(37), Right(Pointer.empty / "titi"))
-    assertEquals(pointerAt(value)(38), Right(Pointer.empty))
-    assertEquals(pointerAt(value)(39), Right(Pointer.empty))
+  test("some objects") {
+    assertEquals(
+      parser.parseWithOffset("""{"toto": 13}"""),
+      Right(
+        ObjectValue(
+          Offset(0, 12),
+          Map(StringValue(Offset(1, 7), "toto") -> NumberValue(Offset(9, 11), 13))
+        )
+      )
+    )
+    assertEquals(
+      parser.parseWithOffset("""{"toto": [1,2], "titi": {"foo": true}}"""),
+      Right(
+        ObjectValue(
+          Offset(0, 38),
+          Map(
+            StringValue(Offset(1, 7), "toto") -> ArrayValue(
+              Offset(9, 14),
+              Seq(NumberValue(Offset(10, 11), 1), NumberValue(Offset(12, 13), 2))
+            ),
+            StringValue(Offset(16, 22), "titi") -> ObjectValue(
+              Offset(24, 37),
+              Map(
+                StringValue(Offset(25, 30), "foo") -> BoolValue(
+                  Offset(32, 36),
+                  true
+                )
+              )
+            )
+          )
+        )
+      )
+    )
   }
 
   private def recoveredValue(json: String): Option[Value] = {
     parser
       .parseWithOffset(json)
       .fold(
-        _.recoveredValue,
+        { e =>
+          e.recoveredValue
+        },
         { _ =>
           fail("parsing error expected")
           None
@@ -340,6 +419,24 @@ class JawnOffsetParserTest extends FunSuite {
     )
   }
 
+  test("a recovered broken object") {
+    // like during editing
+    val value     = """{"toto":  }"""
+    val recovered = recoveredValue(value).get
+    assertEquals(
+      recovered,
+      ObjectValue(
+        Offset(0, 11),
+        Map(
+          StringValue(Offset(1, 7), "toto") -> NullValue(Offset(10, 10))
+        )
+      )
+    )
+    // TODO move to OffsetParserTest
+    // assertEquals(pointerAt(recovered)(9), Pointer.empty / "toto")
+    // assertEquals(pointerAt(recovered)(4), (Pointer.empty / "toto"))
+  }
+
   private def offsetAt(json: String)(at: Pointer): Either[OffsetParser.ParseError, Option[Offset]] = {
     parser.parseWithOffset(json).map(OffsetParser.offsetAt(_)(at))
   }
@@ -408,6 +505,67 @@ class JawnOffsetParserTest extends FunSuite {
     assertEquals(
       offsetAt("""{"foo": [13,14], "bar": {"gnu": 13}}""")(Pointer.empty / "bar" / "gnu"),
       Right(Some(Offset(32, 34)))
+    )
+  }
+
+  test("recover missing value before key") {
+    val text = """|{
+                  |  "$anchor":      
+                  |  "type": "boolean"
+                  |}
+                  |""".stripMargin
+    val recovered = recoveredValue(text).get
+    assertEquals(
+      recovered,
+      ObjectValue(
+        Offset(0, 30),
+        Map(
+          StringValue(Offset(4, 13), "$anchor")
+            -> StringValue(Offset(23, 29), "type")
+        )
+      )
+    )
+  }
+
+  test("recover missing value at object end") {
+    val text = """|{
+                  |  "type": "boolean",
+                  |  "$anchor":      
+                  |}
+                  |""".stripMargin
+    val recovered = recoveredValue(text).get
+    assertEquals(
+      recovered,
+      ObjectValue(
+        Offset(0, 43),
+        Map(
+          StringValue(Offset(4, 10), "type")
+            -> StringValue(Offset(12, 21), "boolean"),
+          StringValue(Offset(25, 34), "$anchor")
+            -> NullValue(Offset(42, 42))
+        )
+      )
+    )
+  }
+
+  test("recover missing comma before key") {
+    val text = """|{
+                  |  "type": "boolean"
+                  |   "$anchor": 
+                  |}
+                  |""".stripMargin
+    val recovered = recoveredValue(text).get
+    assertEquals(
+      recovered,
+      ObjectValue(
+        Offset(0, 26),
+        Map(
+          StringValue(Offset(4, 10), "type")
+            -> StringValue(Offset(12, 21), "boolean")
+            // StringValue(Offset(25, 34), "$anchor")
+            //   -> NullValue(Offset(42, 42))
+        )
+      )
     )
   }
 

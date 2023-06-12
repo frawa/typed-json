@@ -35,6 +35,7 @@ import scala.scalajs.js.JSConverters._
 import frawa.typedjson.suggest.SuggestResult
 import frawa.typedjson.suggest.Suggest.Doc
 import frawa.typedjson.output.OutputJson
+import frawa.typedjson.parser.OffsetContext
 
 @JSExportTopLevel("TypedJsonFactory")
 object TypedJsonFactory {
@@ -53,8 +54,8 @@ object TypedJsonFactory {
     parser.parseWithOffset(json)
   }
 
-  def pointerAt(value: Offset.Value, at: Int): Pointer = {
-    OffsetParser.pointerAt(value)(at)
+  def contextAt(value: Offset.Value, at: Int): OffsetContext = {
+    OffsetParser.contextAt(value)(at)
   }
 
   def offsetAt(pointer: Pointer, value: Offset.Value): Option[Offset] = {
@@ -115,13 +116,24 @@ case class TypedJsonJS(
   @JSExport
   def suggestionsAt(offset: Int): js.UndefOr[SuggestionsResult] = {
     value.flatMap { value =>
-      val at                         = TypedJsonFactory.pointerAt(value, offset)
-      given OutputOps[SuggestOutput] = SuggestOutput.outputOps(at)
+      val at = TypedJsonFactory.contextAt(value, offset)
+      val (keysOnly, atPointer) = at match {
+        case _: OffsetContext.InsideKey => (true, at.pointer.outer)
+        case _: OffsetContext.NewKey    => (true, at.pointer)
+        case _                          => (false, at.pointer)
+      }
+
+      given OutputOps[SuggestOutput] = SuggestOutput.outputOps(atPointer)
       val (o, _)                     = this.typedJson.eval(value)
       o.map { o =>
-        val result   = Suggest.suggestions(at, o)
-        val offsetAt = pointer => TypedJsonFactory.offsetAt(pointer, value)
-        SuggestionsResult(offsetAt)(at, result)
+        val result = Suggest.suggestions(at.pointer, keysOnly, o)
+        val offset = at.offset
+        val sep = at match {
+          case OffsetContext.NewKey(_, _)   => Some(":")
+          case OffsetContext.NewValue(_, _) => Some(",")
+          case _                            => None
+        }
+        SuggestionsResult(at.pointer, offset, sep, result)
       }
     }.orUndefined
   }
@@ -169,14 +181,14 @@ case class SuggestionsResult(
 @JSExportAll
 case class Suggestion(
     value: js.Any,
+    seperator: js.UndefOr[String] = js.undefined,
     documentationMarkdown: js.UndefOr[String] = js.undefined
 )
 
 object SuggestionsResult {
-  def apply(offsetAt: Pointer => Option[Offset])(pointer: Pointer, result: SuggestResult): SuggestionsResult = {
-    val offset       = offsetAt(pointer)
-    val (start, end) = offset.map(o => (o.start, o.end)).getOrElse((0, 0))
-    val suggestions  = toSuggestions(result)
+  def apply(pointer: Pointer, offset: Offset, sep: Option[String], result: SuggestResult): SuggestionsResult = {
+    val Offset(start, end) = offset
+    val suggestions        = toSuggestions(result, sep)
     // TODO dedup ealier?
     val dedup = suggestions
       .groupBy(s => js.JSON.stringify(s.value))
@@ -184,14 +196,14 @@ object SuggestionsResult {
     SuggestionsResult(start, end, pointer.toString, js.Array(dedup.toSeq*))
   }
 
-  private def toSuggestions(result: SuggestResult): Seq[Suggestion] =
+  private def toSuggestions(result: SuggestResult, sep: Option[String]): Seq[Suggestion] =
     result.suggestions.flatMap {
-      case Suggest.Values(vs)       => vs.map(toSuggestion(None))
-      case Suggest.WithDoc(vs, doc) => vs.map(toSuggestion(toMarkdown(doc)))
+      case Suggest.Values(vs)       => vs.map(toSuggestion(None, sep))
+      case Suggest.WithDoc(vs, doc) => vs.map(toSuggestion(toMarkdown(doc), sep))
     }
 
-  private def toSuggestion(doc: Option[String])(value: Value): Suggestion = {
-    Suggestion(toAny(value), doc.orUndefined)
+  private def toSuggestion(doc: Option[String], sep: Option[String])(value: Value): Suggestion = {
+    Suggestion(toAny(value), sep.orUndefined, doc.orUndefined)
   }
 
   private def toAny(value: Value): js.Any = {
