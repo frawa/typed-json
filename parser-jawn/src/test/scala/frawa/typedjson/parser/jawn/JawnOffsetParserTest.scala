@@ -237,6 +237,62 @@ class JawnOffsetParserTest extends FunSuite {
         )
       )
     )
+    assertEquals(
+      parser.parseWithOffset("""|{
+                                |  "type": "boolean",
+                                |  "allOf": [ ]
+                                |}
+                                |""".stripMargin),
+      Right(
+        ObjectValue(
+          Offset(0, 39),
+          Map(
+            StringValue(
+              Offset(4, 10),
+              "type"
+            ) -> StringValue(
+              Offset(12, 21),
+              "boolean"
+            ),
+            StringValue(
+              Offset(25, 32),
+              "allOf"
+            ) -> ArrayValue(
+              Offset(34, 37),
+              Seq()
+            )
+          )
+        )
+      )
+    )
+    assertEquals(
+      parser.parseWithOffset("""|{
+                                |  "type": "boolean",
+                                |  "allOf": [ 13 ]
+                                |}
+                                |""".stripMargin),
+      Right(
+        ObjectValue(
+          Offset(0, 42),
+          Map(
+            StringValue(
+              Offset(4, 10),
+              "type"
+            ) -> StringValue(
+              Offset(12, 21),
+              "boolean"
+            ),
+            StringValue(
+              Offset(25, 32),
+              "allOf"
+            ) -> ArrayValue(
+              Offset(34, 40),
+              Seq(NumberValue(Offset(36, 38), 13))
+            )
+          )
+        )
+      )
+    )
   }
 
   test("some objects") {
@@ -278,7 +334,9 @@ class JawnOffsetParserTest extends FunSuite {
     parser
       .parseWithOffset(json)
       .fold(
-        _.recoveredValue,
+        { e =>
+          e.recoveredValue
+        },
         { _ =>
           fail("parsing error expected")
           None
@@ -374,6 +432,7 @@ class JawnOffsetParserTest extends FunSuite {
         )
       )
     )
+    // TODO move to OffsetParserTest
     // assertEquals(pointerAt(recovered)(9), Pointer.empty / "toto")
     // assertEquals(pointerAt(recovered)(4), (Pointer.empty / "toto"))
   }
@@ -484,6 +543,27 @@ class JawnOffsetParserTest extends FunSuite {
             -> StringValue(Offset(12, 21), "boolean"),
           StringValue(Offset(25, 34), "$anchor")
             -> NullValue(Offset(42, 42))
+        )
+      )
+    )
+  }
+
+  test("recover missing comma before key") {
+    val text = """|{
+                  |  "type": "boolean"
+                  |   "$anchor": 
+                  |}
+                  |""".stripMargin
+    val recovered = recoveredValue(text).get
+    assertEquals(
+      recovered,
+      ObjectValue(
+        Offset(0, 26),
+        Map(
+          StringValue(Offset(4, 10), "type")
+            -> StringValue(Offset(12, 21), "boolean")
+            // StringValue(Offset(25, 34), "$anchor")
+            //   -> NullValue(Offset(42, 42))
         )
       )
     )
