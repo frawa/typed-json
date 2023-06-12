@@ -116,14 +116,13 @@ case class TypedJsonJS(
   @JSExport
   def suggestionsAt(offset: Int): js.UndefOr[SuggestionsResult] = {
     value.flatMap { value =>
-      // val at                         = TypedJsonFactory.pointerAt(value, offset)
       val at = TypedJsonFactory.contextAt(value, offset)
-      val keysOnly = at match {
-        case _: OffsetContext.InsideKey => true
-        case _: OffsetContext.NewKey    => true
-        case _                          => false
+      val (keysOnly, atPointer) = at match {
+        case _: OffsetContext.InsideKey => (true, at.pointer.outer)
+        case _: OffsetContext.NewKey    => (true, at.pointer)
+        case _                          => (false, at.pointer)
       }
-      val atPointer                  = if keysOnly then at.pointer.outer else at.pointer
+
       given OutputOps[SuggestOutput] = SuggestOutput.outputOps(atPointer)
       val (o, _)                     = this.typedJson.eval(value)
       o.map { o =>
