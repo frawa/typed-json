@@ -31,7 +31,9 @@ import frawa.typedjson.eval.CacheState
 import frawa.typedjson.output.SimpleOutput
 import frawa.typedjson.output.SimpleOutput.given
 import frawa.typedjson.util.WithPointer
+import scala.annotation.experimental
 
+@experimental
 class EvalResolveTest extends FunSuite:
 
   import Util.*
@@ -143,6 +145,7 @@ class EvalResolveTest extends FunSuite:
   }
 
   test("$ref to validation spec, with two '$ref's") {
+    @experimental
     val lazyResolver = Some(MetaSchemas.lazyResolver)
     withCompiledSchema(refToValidationSpec, lazyResolver) { fun =>
       assertEquals(

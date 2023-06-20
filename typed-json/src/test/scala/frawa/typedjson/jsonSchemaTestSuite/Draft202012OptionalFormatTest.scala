@@ -16,11 +16,12 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import frawa.inlinefiles.InlineFiles.*
-import frawa.typedjson.parser.*
 import frawa.typedjson.testutil.TestUtil.{*, given}
+import scala.annotation.experimental
 
+@experimental
 class Draft202012OptionalFormatTest extends JsonSchemaTestSuite:
+  import frawa.inlinefiles.InlineFilesWithHome.*
 
   private val draft202012OptionalFormatFiles = draft202012.folder("optional/format").files()
 

@@ -36,7 +36,9 @@ import munit.Compare
 import frawa.typedjson.eval.Util.vocabularyForTest
 import frawa.typedjson.keywords.MetaKeyword
 import frawa.typedjson.util.UriUtil.uri
+import scala.annotation.experimental
 
+@experimental
 class SuggestTest extends FunSuite:
 
   // TODO avoid?
@@ -73,6 +75,7 @@ class SuggestTest extends FunSuite:
     }
 
   private def assertSuggestForSchema(text: String, at: Pointer, keysOnly: Boolean)(f: SuggestResult => Unit): Unit =
+    @experimental
     val lazyResolver = MetaSchemas.lazyResolver
     val base         = MetaSchemas.draft202012
     val Some(schema) = lazyResolver(base.resolve("schema")): @unchecked
