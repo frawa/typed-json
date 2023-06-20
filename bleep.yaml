@@ -1,0 +1,145 @@
+$schema: https://raw.githubusercontent.com/oyvindberg/bleep/master/schema.json
+$version: 0.0.2
+projects:
+  scripts:
+    dependencies: build.bleep::bleep-core:${BLEEP_VERSION}
+    platform:
+      name: jvm
+    scala:
+      version: 3.3.0
+  typed-json:
+    dependsOn:
+    - typed-json-formats
+    - typed-json-macros
+    extends:
+    - template-common-main
+    - template-cross-all
+  typed-json-formats:
+    dependencies: io.github.cquiroz::scala-java-time:2.5.0
+    dependsOn: typed-json-parser
+    extends:
+    - template-common-main
+    - template-cross-all
+    folder: ./formats
+  typed-json-formats-test:
+    cross:
+      js3:
+        dependencies: org.scala-js:scalajs-test-bridge_2.13:${PLATFORM_VERSION}
+    dependsOn: typed-json-formats
+    extends:
+    - template-common-test
+    - template-cross-all
+    folder: ./formats
+  typed-json-js-export:
+    dependsOn: typed-json
+    extends:
+    - template-common-main
+    - template-js
+  typed-json-macros:
+    dependencies: io.github.frawa::inline-files:0.1.2+43-09b6826f-SNAPSHOT
+    dependsOn: typed-json-parser-jawn
+    extends:
+    - template-common-main
+    - template-jvm
+    folder: ./macros
+  typed-json-macros-test:
+    dependsOn: typed-json-macros
+    extends:
+    - template-common-test
+    - template-jvm
+    folder: ./macros
+  typed-json-parser:
+    extends:
+    - template-common-main
+    - template-cross-all
+    folder: ./parser
+  typed-json-parser-jawn:
+    dependencies: org.typelevel::jawn-parser:1.5.0
+    dependsOn: typed-json-parser
+    extends:
+    - template-common-main
+    - template-cross-all
+    folder: ./parser-jawn
+  typed-json-parser-jawn-test:
+    cross:
+      js3:
+        dependencies: org.scala-js:scalajs-test-bridge_2.13:${PLATFORM_VERSION}
+    dependsOn: typed-json-parser-jawn
+    extends:
+    - template-common-test
+    - template-cross-all
+    folder: ./parser-jawn
+  typed-json-parser-test:
+    cross:
+      js3:
+        dependencies: org.scala-js:scalajs-test-bridge_2.13:${PLATFORM_VERSION}
+    dependsOn: typed-json-parser
+    extends:
+    - template-common-test
+    - template-cross-all
+    folder: ./parser
+  typed-json-parser-zio:
+    dependencies: dev.zio::zio-json:0.5.0
+    dependsOn: typed-json-parser
+    extends:
+    - template-common-main
+    - template-cross-all
+    folder: ./parser-zio
+  typed-json-parser-zio-test:
+    cross:
+      js3:
+        dependencies: org.scala-js:scalajs-test-bridge_2.13:${PLATFORM_VERSION}
+    dependsOn: typed-json-parser-zio
+    extends:
+    - template-common-test
+    - template-cross-all
+    folder: ./parser-zio
+  typed-json-test:
+    cross:
+      js3:
+        dependencies: org.scala-js:scalajs-test-bridge_2.13:${PLATFORM_VERSION}
+    dependsOn: typed-json
+    extends:
+    - template-common-test
+    - template-cross-all
+    folder: ./typed-json
+resolvers: https://s01.oss.sonatype.org/content/repositories/releases
+templates:
+  template-common:
+    java:
+      options: -J--add-exports -Jjdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED
+        -Jjdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED -Jjdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED
+        -Jjdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED -Jjdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED
+        -build-tool:sbt -sourceroot:${BUILD_DIR} -targetroot:${TARGET_DIR}/meta        
+    scala:
+      options: -Xmigration -deprecation -feature -indent -new-syntax -unchecked 
+        -Xmacro-settings:INLINE_HOME=${PROJECT_DIR}/..
+      version: 3.3.0
+  template-common-main:
+    extends: template-common
+    sbt-scope: main
+  template-common-test:
+    dependencies: org.scalameta::munit:1.0.0-M8
+    extends: template-common
+    isTestProject: true
+    sbt-scope: test
+    testFrameworks: zio.test.sbt.ZTestFramework
+  template-cross-all:
+    cross:
+      js3:
+        extends: template-js
+      jvm3:
+        extends: template-jvm
+    source-layout: sbt-matrix
+  template-js:
+    platform:
+      jsEmitSourceMaps: false
+      jsJsdom: false
+      jsKind: none
+      jsMode: debug
+      jsNodeVersion: 18.4.0
+      jsVersion: 1.13.1
+      name: js
+  template-jvm:
+    platform:
+      name: jvm

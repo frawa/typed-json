@@ -25,7 +25,9 @@ import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.parser.Parser
 import frawa.typedjson.util.WithPointer
 import frawa.typedjson.testutil.TestUtil.parseJsonValue
+import scala.annotation.experimental
 
+@experimental
 class SamplesTest extends FunSuite:
   given Parser = new JawnParser()
 
@@ -40,7 +42,8 @@ class SamplesTest extends FunSuite:
 
   test("use schema to validate several values") {
     val schemaJson = """{"type": "string"}"""
-    val typedJson  = TypedJson.create(schemaJson).toOption.get
+    @experimental
+    val typedJson = TypedJson.create(schemaJson).toOption.get
 
     val validJson       = parseJsonValue(""""foo"""")
     val (o, typedJson1) = typedJson.eval(validJson)

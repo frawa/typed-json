@@ -35,7 +35,9 @@ import java.net.URI
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.jsonSchemaTestSuite.Remotes
 import frawa.typedjson.keywords.Ignored
+import scala.annotation.experimental
 
+@experimental
 class EvalSpecDetailsTest extends FunSuite:
 
   import Util.*
@@ -382,6 +384,7 @@ class EvalSpecDetailsTest extends FunSuite:
   }
 
   test("Location-independent identifier in remote ref") {
+    @experimental
     val lazyResolver = (uri: URI) => MetaSchemas.lazyResolver(uri).orElse(Remotes.lazyResolver(uri))
     withCompiledSchema(
       """|{

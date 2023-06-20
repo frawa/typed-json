@@ -21,7 +21,9 @@ import frawa.typedjson.util.UriUtil.*
 import munit.FunSuite
 
 import java.net.URI
+import scala.annotation.experimental
 
+@experimental
 class SpecMetaSchemasTest extends FunSuite:
 
   val schemaId       = "https://json-schema.org/draft/2020-12/schema"

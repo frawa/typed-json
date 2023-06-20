@@ -16,11 +16,13 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import frawa.inlinefiles.InlineFiles.*
-import frawa.typedjson.macros.Macros
 import frawa.typedjson.testutil.TestUtil.{*, given}
+import scala.annotation.experimental
 
+@experimental
 class Draft202012Test extends JsonSchemaTestSuite:
+  import frawa.inlinefiles.InlineFilesWithHome.*
+
   private val draft202012Files = draft202012.files()
 
   override protected val onlyDescription: Option[String] =

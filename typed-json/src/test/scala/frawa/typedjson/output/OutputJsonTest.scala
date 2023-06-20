@@ -32,7 +32,9 @@ import frawa.typedjson.keywords.KeywordLocation
 import frawa.typedjson.parser.Value
 import frawa.typedjson.validation.AdditionalPropertyInvalid
 import frawa.typedjson.util.ShowValue.prettyPrint
+import scala.annotation.experimental
 
+@experimental
 class OutputJsonTest extends FunSuite:
 
   test("flag valid") {
@@ -60,6 +62,7 @@ class OutputJsonTest extends FunSuite:
     import BasicOutput.given
     given parser: Parser = new JawnParser()
 
+    @experimental
     val typedJson   = TypedJson.create(Sample.schema).toOption.get
     val (output, _) = typedJson.eval(parseJsonValue(Sample.value))
     val basic       = output.map(OutputJson.basic)

@@ -39,6 +39,7 @@ import frawa.typedjson.suggest.Suggest
 import frawa.typedjson.output.OutputOps
 import frawa.typedjson.suggest.SuggestOutput
 import frawa.typedjson.keywords.KeywordLocation
+import scala.annotation.experimental
 
 case class TypedJson(private val state: Option[(Keywords, CacheState)]):
   import TypedJson.*
@@ -97,6 +98,7 @@ object TypedJson:
 
   def create(): TypedJson = new TypedJson(None)
 
+  @experimental
   def create(
       schemaJson: String
   )(using parser: Parser): Either[InputError, TypedJson] =
@@ -107,18 +109,22 @@ object TypedJson:
       .swap
       .flatMap(create(_))
 
+  @experimental
   def create(schema: Value): Either[InputError, TypedJson] =
     createWithSchema(SchemaValue.root(schema))
 
+  @experimental
   def create(schema: Offset.Value): Either[InputError, TypedJson] =
     createWithSchema(SchemaValue.root(Offset.withoutOffset(schema)))
 
+  @experimental
   def createWithMetaSchemas(): TypedJson =
     val lazyResolver = MetaSchemas.lazyResolver
     val base         = MetaSchemas.draft202012
     val Some(schema) = lazyResolver(base.resolve("schema")): @unchecked
     createWithSchema(schema).getOrElse(throw new IllegalStateException("broken meta schemas"))
 
+  @experimental
   def createWithSchema(schema: SchemaValue): Either[InputError, TypedJson] =
     val lazyResolver                   = MetaSchemas.lazyResolver
     val vocabulary                     = Vocabulary.specDialect()

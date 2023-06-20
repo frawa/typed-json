@@ -27,9 +27,12 @@ import frawa.typedjson.output.SimpleOutput
 import frawa.typedjson.output.SimpleOutput.given
 import frawa.typedjson.eval.Util.doApplyWithStats
 import frawa.typedjson.output.OutputOps
+import scala.annotation.experimental
 
+@experimental
 class MetaSchemaTest extends FunSuite:
 
+  @experimental
   private val resolver = MetaSchemas.lazyResolver
   private val base     = MetaSchemas.draft202012
 
