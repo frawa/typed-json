@@ -16,7 +16,7 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import frawa.inlinefiles.InlineFiles
+import frawa.inlinefiles.InlineFilesWithHome
 import frawa.typedjson.eval.CacheState.R
 import frawa.typedjson.eval.*
 import frawa.typedjson.eval.Util.{doApply, withCompiledSchemaValue}
@@ -35,9 +35,13 @@ import frawa.typedjson.output.SimpleOutput.given
 import java.net.URI
 import frawa.typedjson.eval.CacheState
 import frawa.typedjson.eval.Util.doApplyBulk
+import scala.annotation.experimental
 
+@experimental
 open class JsonSchemaTestSuite extends FunSuite:
-  protected val draft202012 = InlineFiles.inlineDeepTextFiles("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
+  @experimental
+  protected val draft202012 =
+    InlineFilesWithHome.inlineDeepTextFiles("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")("INLINE_HOME")
 
   protected val ignoreFiles: Seq[String] = Seq()
 
@@ -116,6 +120,7 @@ open class JsonSchemaTestSuite extends FunSuite:
       case _ => fail("invalid test json")
 
   private def expectAll(schemaValue: SchemaValue, expactations: Seq[Expectation]): Unit =
+    @experimental
     val lazyResolver = (uri: URI) => MetaSchemas.lazyResolver(uri).orElse(Remotes.lazyResolver(uri))
     val lr           = Some(lazyResolver)
     val evalBasic    = Eval[R, SimpleOutput]

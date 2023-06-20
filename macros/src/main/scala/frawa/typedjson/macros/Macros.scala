@@ -22,12 +22,26 @@ import frawa.inlinefiles.compiletime.FileContents
 
 import frawa.typedjson.parser.Value
 import JsonUtils.{given, *}
+import scala.annotation.experimental
+import java.nio.file.Path
+import java.nio.file.Paths
 
+@experimental
 object Macros:
+  import frawa.inlinefiles.InlineFilesWithHome.resolveHome
 
-  inline def inlineJsonContents(path: String, ext: String): Map[String, Value] = ${
-    inlineJsonContents_impl('path, 'ext)
+  inline def inlineJsonContents(path: String, ext: String)(homeSetting: String): Map[String, Value] = ${
+    inlineJsonContents_impl('path, 'ext, 'homeSetting)
   }
 
-  def inlineJsonContents_impl(path: Expr[String], ext: Expr[String])(using Quotes): Expr[Map[String, Value]] =
-    Expr(FileContents.parseTextContentsIn(path.valueOrAbort, ext.valueOrAbort, true)(parseJsonValue))
+  def inlineJsonContents_impl(path: Expr[String], ext: Expr[String], homeSetting: Expr[String])(using
+      Quotes
+  ): Expr[Map[String, Value]] =
+    Expr(
+      FileContents.parseTextContentsIn(
+        path.valueOrAbort,
+        ext.valueOrAbort,
+        true,
+        Some(resolveHome(homeSetting.valueOrAbort))
+      )(parseJsonValue)
+    )

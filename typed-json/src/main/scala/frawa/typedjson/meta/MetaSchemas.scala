@@ -21,19 +21,23 @@ import frawa.typedjson.macros.Macros
 import frawa.typedjson.util.UriUtil.uri
 
 import java.net.URI
+import scala.annotation.experimental
 
 object MetaSchemas:
 
   val draft202012: URI = uri("https://json-schema.org/draft/2020-12/")
 
+  @experimental
   def lazyResolver: LoadedSchemasResolver.LazyResolver = { uri =>
     if uri.getSchemeSpecificPart.startsWith(draft202012.getSchemeSpecificPart) then
       resolve202012(draft202012.relativize(uri))
     else None
   }
 
+  @experimental
   private def resolve202012(relative: URI): Option[RootSchemaValue] =
     val name = relative.getSchemeSpecificPart
     metaSchemas.get(name + ".json").map(SchemaValue.root(_))
 
-  private val metaSchemas = Macros.inlineJsonContents("./metaSchemas", ".json")
+  @experimental
+  private val metaSchemas = Macros.inlineJsonContents("./metaSchemas", ".json")("INLINE_HOME")

@@ -21,7 +21,9 @@ import frawa.typedjson.parser.*
 import frawa.typedjson.util.UriUtil
 
 import java.net.URI
+import scala.annotation.experimental
 
+@experimental
 object Remotes:
   val remotesUri: URI = UriUtil.uri("http://localhost:1234")
 
@@ -31,6 +33,7 @@ object Remotes:
     else None
   }
 
+  @experimental
   private def resolveRemotes(relative: URI): Option[RootSchemaValue] =
     if relative.getFragment != null then None
     else
@@ -39,4 +42,5 @@ object Remotes:
 
   import frawa.typedjson.macros.Macros.*
 
-  private val remotesFiles = inlineJsonContents("./JSON-Schema-Test-Suite/remotes", ".json")
+  @experimental
+  private val remotesFiles = inlineJsonContents("./JSON-Schema-Test-Suite/remotes", ".json")("INLINE_HOME")
