@@ -5,6 +5,7 @@ test-reports/
 .bsp/
 .metals/
 metals.sbt
+.bleep/
 
 .idea
 .vscode
