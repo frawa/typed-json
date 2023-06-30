@@ -348,8 +348,8 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
             }
             .getOrElse(ops.valid(value.pointer))
         }
-    // TODO
-    // ops.invalid(UnknownFormat(format), value.pointer)
+      // TODO
+      // ops.invalid(UnknownFormat(format), value.pointer)
     }
 
   def verifyInteger(): Fun[R[O]] = value =>
