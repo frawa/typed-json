@@ -1,7 +1,7 @@
 addSbtPlugin("com.eed3si9n"      % "sbt-projectmatrix"   % "0.9.1")
 addSbtPlugin("org.scala-js"      % "sbt-scalajs"         % "1.13.2")
 addSbtPlugin("org.scalameta"     % "sbt-scalafmt"        % "2.5.2")
-addSbtPlugin("ch.epfl.scala"     % "sbt-scalafix"        % "0.11.0")
+addSbtPlugin("ch.epfl.scala"     % "sbt-scalafix"        % "0.11.1")
 addSbtPlugin("de.heikoseeberger" % "sbt-header"          % "5.10.0")
 addSbtPlugin("com.github.sbt"    % "sbt-ci-release"      % "1.5.12")
 addSbtPlugin("ch.epfl.scala"     % "sbt-scalajs-bundler" % "0.21.1")
