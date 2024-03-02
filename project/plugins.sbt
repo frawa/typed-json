@@ -1,4 +1,4 @@
-addSbtPlugin("com.eed3si9n"      % "sbt-projectmatrix"   % "0.9.2")
+addSbtPlugin("com.eed3si9n"      % "sbt-projectmatrix"   % "0.10.0")
 addSbtPlugin("org.scala-js"      % "sbt-scalajs"         % "1.15.0")
 addSbtPlugin("org.scalameta"     % "sbt-scalafmt"        % "2.5.2")
 addSbtPlugin("ch.epfl.scala"     % "sbt-scalafix"        % "0.11.1")
