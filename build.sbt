@@ -53,8 +53,8 @@ lazy val sharedScalacSettings = Seq(
             "-unchecked",
             "-Xmigration",
             "-new-syntax",
-            "-indent"
-            // "-Ywarn-unused",
+            "-indent",
+            "-Wunused:linted"
             // "-source:future",
             // "-source:future-migration",
             // "-source:3.2-migration",
@@ -64,7 +64,7 @@ lazy val sharedScalacSettings = Seq(
           )
         case _ =>
           Seq(
-            "-Xfatal-warnings",
+            // "-Xfatal-warnings",
             "-Wunused:imports,privates,locals",
             "-Wvalue-discard"
           )
