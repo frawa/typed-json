@@ -16,6 +16,8 @@
 
 package frawa.typedjson.util
 
+import scala.collection.immutable.Seq
+
 object EitherUtil:
 
   def sequenceAllLefts[E, V](as: Seq[Either[E, V]]): Either[Seq[E], Seq[V]] =

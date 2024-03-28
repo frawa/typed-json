@@ -16,6 +16,8 @@
 
 package frawa.typedjson.testutil
 
+import scala.collection.immutable.Seq
+
 import frawa.typedjson.keywords.*
 import frawa.typedjson.parser.jawn.JawnParser
 import frawa.typedjson.parser.{Parser, Value}

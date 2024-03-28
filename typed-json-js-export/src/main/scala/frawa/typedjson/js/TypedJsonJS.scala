@@ -16,6 +16,8 @@
 
 package frawa.typedjson.js
 
+import scala.collection.immutable.Seq
+
 import frawa.typedjson.{TypedJson}
 import frawa.typedjson.TypedJson.Validation
 import frawa.typedjson.parser.jawn.JawnParser
@@ -92,7 +94,7 @@ case class TypedJsonJS(
       case Right(value) =>
         this.copy(value = Some(value)).validate()
       case Left(error) =>
-        this.copy(value = error.recoveredValue, Seq(Marker.fromParsingError(error)))
+        this.copy(value = error.recoveredValue, _markers = Seq(Marker.fromParsingError(error)))
     }
   }
 

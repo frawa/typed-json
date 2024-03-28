@@ -16,6 +16,8 @@
 
 package frawa.typedjson.suggest
 
+import scala.collection.immutable.Seq
+
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.Value.*

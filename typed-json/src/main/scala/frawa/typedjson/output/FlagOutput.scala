@@ -16,6 +16,8 @@
 
 package frawa.typedjson.output
 
+import scala.collection.immutable.Seq
+
 import frawa.typedjson.validation.ValidationAnnotation
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.validation.ValidationError

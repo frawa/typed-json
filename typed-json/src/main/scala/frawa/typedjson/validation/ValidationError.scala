@@ -16,6 +16,8 @@
 
 package frawa.typedjson.validation
 
+import scala.collection.immutable.Seq
+
 import frawa.typedjson.keywords.*
 import frawa.typedjson.parser.*
 import frawa.typedjson.parser.Value.*

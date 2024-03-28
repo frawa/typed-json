@@ -16,6 +16,8 @@
 
 package frawa.typedjson.keywords
 
+import scala.collection.immutable.Seq
+
 import frawa.typedjson.keywords.SchemaProblems.{
   InvalidSchemaValue,
   MissingDynamicReference,

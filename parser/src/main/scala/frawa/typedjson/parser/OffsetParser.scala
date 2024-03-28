@@ -18,6 +18,7 @@ package frawa.typedjson.parser
 
 import frawa.typedjson.parser.Offset.ObjectValue
 import frawa.typedjson.pointer.{FieldToken, Pointer}
+import scala.collection.immutable.Seq
 
 trait OffsetParser:
   import Offset.*

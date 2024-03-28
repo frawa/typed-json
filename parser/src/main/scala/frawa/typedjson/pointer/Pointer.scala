@@ -19,6 +19,8 @@ package frawa.typedjson.pointer
 import frawa.typedjson.parser.{Offset, Value}
 import frawa.typedjson.parser.Value.{ArrayValue, ObjectValue}
 
+import scala.collection.immutable.Seq
+
 object Pointer:
   def empty = new Pointer(Nil)
 

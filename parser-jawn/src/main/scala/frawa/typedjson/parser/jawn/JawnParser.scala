@@ -23,6 +23,7 @@ import org.typelevel.jawn.{FContext, ParseException}
 
 import scala.annotation.tailrec
 import scala.collection.mutable
+import scala.collection.immutable
 
 class JawnParser extends Parser with OffsetParser:
   import OffsetParser.ParseError
@@ -71,7 +72,7 @@ class JawnParser extends Parser with OffsetParser:
       override def isObj: Boolean = false
 
     override def arrayContext(startIndex: Int): FContext[Offset.Value] = new FContext[Offset.Value]:
-      private var vs: Seq[Offset.Value] = Seq.empty
+      private var vs: immutable.Seq[Offset.Value] = Seq.empty
 
       override def add(s: CharSequence, index: Int): Unit =
         vs = vs :+ string(s, index)
@@ -119,24 +120,24 @@ class JawnParser extends Parser with OffsetParser:
 
   private class RecoveringFacade[T](private val facade: jawn.Facade[T]) extends jawn.Facade[T]:
 
-    private val stack: mutable.Stack[FContext[T]] = mutable.Stack.empty[FContext[T]]
+    private val stack: mutable.ArrayDeque[FContext[T]] = mutable.Stack.empty[FContext[T]]
 
     def recover(index: Int, dummy: T): T =
       @tailrec
       def go(v0: T): T =
         if stack.isEmpty then v0
         else
-          val c = stack.pop()
+          val c = stack.removeHead()
           c.add(v0, index)
           go(c.finish(index))
       go(dummy)
 
     private def delegatingContext(delegate: jawn.FContext[T]): jawn.FContext[T] = new FContext[T]:
-      stack.push(delegate)
+      stack.prepend(delegate)
       override def add(s: CharSequence, index: Int): Unit = delegate.add(s, index)
       override def add(v: T, index: Int): Unit            = delegate.add(v, index)
       override def finish(index: Int): T =
-        stack.pop()
+        stack.removeHead()
         delegate.finish(index)
       override def isObj: Boolean = delegate.isObj
 
