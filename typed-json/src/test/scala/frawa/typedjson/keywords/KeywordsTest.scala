@@ -24,6 +24,7 @@ import frawa.typedjson.testutil.TestUtil.{*, given}
 import frawa.typedjson.util.UriUtil.uri
 import munit.FunSuite
 import frawa.typedjson.util.WithPointer
+import munit.Compare
 
 class KeywordsTest extends FunSuite:
   private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId)).get
@@ -48,6 +49,11 @@ class KeywordsTest extends FunSuite:
     Keywords.parseKeywords(vocabularyForTest, resolver.push(schema), scope) match
       case Right(_)     => fail("parsing keywords expected to fail")
       case Left(errors) => f(errors)
+
+  given Compare[Set[Keyword], Set[WithLocation]] with
+    def isEqual(obtained: Set[Keyword], expected: Set[WithLocation]): Boolean =
+      obtained.filter(_.isInstanceOf[WithLocation]).map(_.asInstanceOf[WithLocation])
+        == expected
 
   test("null") {
     withSchema(nullSchema) { schema =>
