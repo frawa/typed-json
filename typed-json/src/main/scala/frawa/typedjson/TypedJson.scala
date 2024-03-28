@@ -16,6 +16,8 @@
 
 package frawa.typedjson
 
+import scala.collection.immutable.Seq
+
 import frawa.typedjson.parser.Parser
 import frawa.typedjson.keywords.SchemaValue
 import frawa.typedjson.meta.MetaSchemas

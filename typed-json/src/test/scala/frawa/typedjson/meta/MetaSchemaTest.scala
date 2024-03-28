@@ -16,6 +16,8 @@
 
 package frawa.typedjson.meta
 
+import scala.collection.immutable.Seq
+
 import frawa.typedjson.eval.Eval
 import frawa.typedjson.eval.CacheState.R
 import frawa.typedjson.eval.Util.{doApply, withCompiledSchemaValue}

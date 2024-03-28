@@ -16,6 +16,8 @@
 
 package frawa.typedjson.parser
 
+import scala.collection.immutable.Seq
+
 trait Parser:
   def parse(json: String): Either[String, Value]
 

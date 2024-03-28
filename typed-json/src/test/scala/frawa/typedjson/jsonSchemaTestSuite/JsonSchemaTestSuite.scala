@@ -16,6 +16,8 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
+import scala.collection.immutable.Seq
+
 import frawa.inlinefiles.InlineFiles
 import frawa.typedjson.eval.CacheState.R
 import frawa.typedjson.eval.*

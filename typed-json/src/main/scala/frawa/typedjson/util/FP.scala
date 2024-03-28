@@ -16,6 +16,8 @@
 
 package frawa.typedjson.util
 
+import scala.collection.immutable.Seq
+
 object FP:
   def sequence[A, F[A]](cs: Seq[F[A]])(using monad: Monad[F]): F[Seq[A]] =
     cs.foldLeft(monad.unit(Seq.empty)) { (acc, c) =>

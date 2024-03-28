@@ -16,6 +16,8 @@
 
 package frawa.typedjson.util
 
+import scala.collection.immutable.Seq
+
 import frawa.typedjson.util.EitherUtil.*
 import munit.FunSuite
 
