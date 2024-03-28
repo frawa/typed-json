@@ -16,12 +16,12 @@
 
 package frawa.typedjson.macros
 
-import scala.quoted.*
-
 import frawa.inlinefiles.compiletime.FileContents
-
 import frawa.typedjson.parser.Value
-import JsonUtils.{given, *}
+
+import scala.quoted._
+
+import JsonUtils.{given, _}
 
 object Macros:
 
@@ -29,5 +29,9 @@ object Macros:
     inlineJsonContents_impl('path, 'ext)
   }
 
-  def inlineJsonContents_impl(path: Expr[String], ext: Expr[String])(using Quotes): Expr[Map[String, Value]] =
-    Expr(FileContents.parseTextContentsIn(path.valueOrAbort, ext.valueOrAbort, true)(parseJsonValue))
+  def inlineJsonContents_impl(path: Expr[String], ext: Expr[String])(using
+      Quotes
+  ): Expr[Map[String, Value]] =
+    Expr(
+      FileContents.parseTextContentsIn(path.valueOrAbort, ext.valueOrAbort, true)(parseJsonValue)
+    )

@@ -17,17 +17,14 @@
 package frawa.typedjson.formats
 
 import frawa.typedjson.pointer.Pointer
+import frawa.typesjson.formats.Platform
 
 import java.net.URI
+import java.time.Duration
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 import java.util.regex.Pattern
 import scala.util.Try
-import frawa.typesjson.formats.Platform
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.time.Duration
-import java.time.OffsetTime
-import java.time.OffsetDateTime
 
 object Formats:
   def hasFormat(format: String): Option[String => Boolean] =
@@ -53,7 +50,8 @@ object Formats:
         // Some(v => pattern.matches(v))
         Some(Platform.verifyHostname)
       case "idn-hostname" =>
-        val pattern = raw"^[a-zA-Z0-9\p{L}][a-zA-Z0-9\p{L}-\.]{1,61}[a-zA-Z0-9\p{L}]\.[a-zA-Z\p{L}]{2,}$$/gmu".r
+        val pattern =
+          raw"^[a-zA-Z0-9\p{L}][a-zA-Z0-9\p{L}-\.]{1,61}[a-zA-Z0-9\p{L}]\.[a-zA-Z\p{L}]{2,}$$/gmu".r
         Some(v => pattern.matches(v))
       case "ipv4" =>
         // see https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address

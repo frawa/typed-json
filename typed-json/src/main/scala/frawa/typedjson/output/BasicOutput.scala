@@ -16,22 +16,14 @@
 
 package frawa.typedjson.output
 
-import scala.collection.immutable.Seq
-
-import frawa.typedjson.util.WithPointer
-import frawa.typedjson.validation.ValidationError
-import frawa.typedjson.validation.ValidationAnnotation
-import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.keywords.SchemaProblems
-import frawa.typedjson.validation.NotOneOf
-import frawa.typedjson.validation.NotInvalid
-import frawa.typedjson.keywords.Evaluated
 import frawa.typedjson.keywords.Keyword
-import frawa.typedjson.output.OutputOps
 import frawa.typedjson.keywords.KeywordLocation
-import java.awt.event.KeyListener
-import frawa.typedjson.output.BasicOutput
+import frawa.typedjson.pointer.Pointer
+import frawa.typedjson.validation.NotInvalid
 import frawa.typedjson.validation.SubSchemaFailed
+import frawa.typedjson.validation.ValidationError
+
+import scala.collection.immutable.Seq
 
 // TODO this will converge to "basic" output format,
 // see https://json-schema.org/draft/2020-12/json-schema-core.html#name-basic
@@ -60,7 +52,10 @@ object BasicOutput:
     def all(os: Seq[BasicOutput], error: Option[ValidationError], pointer: Pointer): BasicOutput =
       val valid = os.forall(_.valid)
       val annotations =
-        if valid then OutputOps.mergeAnnotations(os.filter(_.instanceLocation == pointer).flatMap(_.annotations))
+        if valid then
+          OutputOps.mergeAnnotations(
+            os.filter(_.instanceLocation == pointer).flatMap(_.annotations)
+          )
         else Seq()
       val errors =
         if valid then Seq()
@@ -94,7 +89,8 @@ object BasicOutput:
 
     extension (o: BasicOutput)
       def not(pointer: Pointer): BasicOutput =
-        if o.valid then BasicOutput(valid = false, error = Some(NotInvalid()), instanceLocation = pointer)
+        if o.valid then
+          BasicOutput(valid = false, error = Some(NotInvalid()), instanceLocation = pointer)
         else BasicOutput(valid = true, instanceLocation = pointer)
       def isValid: Boolean = o.valid
       def withAnnotations(annotations: Seq[OutputOps.Annotation]): BasicOutput =

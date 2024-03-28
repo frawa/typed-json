@@ -16,10 +16,12 @@
 
 package frawa.typedjson.parser.zio
 
-import frawa.typedjson.parser.{Parser, Value}
-import zio.json.*
+import frawa.typedjson.parser.Parser
+import frawa.typedjson.parser.Value
+import zio.json._
 import zio.json.ast.Json
-import zio.json.ast.Json.{Arr, Obj}
+import zio.json.ast.Json.Arr
+import zio.json.ast.Json.Obj
 
 class ZioParser extends Parser:
   import frawa.typedjson.parser.Value.*

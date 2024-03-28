@@ -16,7 +16,7 @@
 
 package frawa.typedjson.keywords
 
-import frawa.typedjson.util.UriUtil.*
+import frawa.typedjson.util.UriUtil._
 import munit.FunSuite
 
 class DynamicScopeTest extends FunSuite:

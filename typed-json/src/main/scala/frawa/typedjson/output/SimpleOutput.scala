@@ -16,20 +16,14 @@
 
 package frawa.typedjson.output
 
-import scala.collection.immutable.Seq
-
-import frawa.typedjson.util.WithPointer
-import frawa.typedjson.validation.ValidationError
-import frawa.typedjson.validation.ValidationAnnotation
-import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.keywords.SchemaProblems
-import frawa.typedjson.validation.NotOneOf
-import frawa.typedjson.validation.NotInvalid
-import frawa.typedjson.keywords.Evaluated
 import frawa.typedjson.keywords.Keyword
-import frawa.typedjson.output.OutputOps
-import frawa.typedjson.output.SimpleOutput
 import frawa.typedjson.keywords.KeywordLocation
+import frawa.typedjson.pointer.Pointer
+import frawa.typedjson.util.WithPointer
+import frawa.typedjson.validation.NotInvalid
+import frawa.typedjson.validation.ValidationError
+
+import scala.collection.immutable.Seq
 
 // TODO this will converge to "basic" output format,
 // see https://json-schema.org/draft/2020-12/json-schema-core.html#name-basic
@@ -54,7 +48,8 @@ object SimpleOutput:
     def all(os: Seq[SimpleOutput], error: Option[ValidationError], pointer: Pointer): SimpleOutput =
       val valid = os.forall(_.valid)
       val annotations =
-        if valid then OutputOps.mergeAnnotations(os.filter(_.pointer == pointer).flatMap(_.annotations))
+        if valid then
+          OutputOps.mergeAnnotations(os.filter(_.pointer == pointer).flatMap(_.annotations))
         else Seq()
       SimpleOutput(
         valid,
@@ -65,7 +60,12 @@ object SimpleOutput:
 
     extension (o: SimpleOutput)
       def not(pointer: Pointer): SimpleOutput =
-        if o.valid then o.copy(valid = false, errors = Seq(WithPointer(NotInvalid(), pointer)), annotations = Seq())
+        if o.valid then
+          o.copy(
+            valid = false,
+            errors = Seq(WithPointer(NotInvalid(), pointer)),
+            annotations = Seq()
+          )
         else o.copy(valid = true, errors = Seq())
       def isValid: Boolean = o.valid
       def withAnnotations(annotations: Seq[Annotation]): SimpleOutput =

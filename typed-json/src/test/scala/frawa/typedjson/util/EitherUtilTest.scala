@@ -16,10 +16,10 @@
 
 package frawa.typedjson.util
 
-import scala.collection.immutable.Seq
-
-import frawa.typedjson.util.EitherUtil.*
+import frawa.typedjson.util.EitherUtil._
 import munit.FunSuite
+
+import scala.collection.immutable.Seq
 
 class EitherUtilTest extends FunSuite:
 

@@ -16,13 +16,12 @@
 
 package frawa.typedjson.keywords
 
-import scala.collection.immutable.Seq
-
 import frawa.typedjson.parser.Value
 import frawa.typedjson.pointer.Pointer
+import frawa.typedjson.util.WithPointer
 
 import java.net.URI
-import frawa.typedjson.util.WithPointer
+import scala.collection.immutable.Seq
 
 case class SchemaProblems(
     errors: Seq[SchemaProblems.SchemaError]

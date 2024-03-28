@@ -16,14 +16,13 @@
 
 package frawa.typedjson.keywords
 
-import scala.collection.immutable.Seq
-
 import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.Value.*
+import frawa.typedjson.parser.Value._
 import frawa.typedjson.util.EitherUtil
 import frawa.typedjson.util.UriUtil.uri
 
 import java.net.URI
+import scala.collection.immutable.Seq
 
 case class Vocabulary(keywords: Map[String, Vocabulary.NestedSchemaType], ids: Set[URI]):
   import Vocabulary.*

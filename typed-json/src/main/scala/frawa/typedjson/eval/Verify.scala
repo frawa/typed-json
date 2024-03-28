@@ -16,46 +16,42 @@
 
 package frawa.typedjson.eval
 
-import scala.collection.immutable.Seq
-
-import frawa.typedjson.keywords.{Keyword}
-import frawa.typedjson.util.WithPointer
-import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.Value.{NullValue, *}
-import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.validation.*
-
-import scala.reflect.TypeTest
+import frawa.typedjson.formats.Formats
 import frawa.typedjson.keywords.EvaluatedIndices
 import frawa.typedjson.keywords.EvaluatedProperties
-import frawa.typedjson.validation.{
-  FormatMismatch,
-  MaxPropertiesMismatch,
-  NotContains,
-  NotInEnum,
-  MissingRequiredProperties,
-  ValidationError,
-  FalseSchemaReason,
-  NotMultipleOf,
-  MaxItemsMismatch,
-  PatternMismatch,
-  NotOneOf,
-  MaximumMismatch,
-  MinItemsMismatch,
-  MinPropertiesMismatch,
-  MinimumMismatch,
-  DependentRequiredMissing,
-  TypeMismatch,
-  MaxLengthMismatch,
-  ItemsNotUnique,
-  MinLengthMismatch
-}
-import frawa.typedjson.output.OutputOps
-import frawa.typedjson.util.FP
 import frawa.typedjson.keywords.Ignored
+import frawa.typedjson.output.OutputOps
+import frawa.typedjson.parser.Value
+import frawa.typedjson.parser.Value.NullValue
+import frawa.typedjson.parser.Value._
+import frawa.typedjson.pointer.Pointer
+import frawa.typedjson.util.FP
+import frawa.typedjson.util.WithPointer
+import frawa.typedjson.validation.DependentRequiredMissing
+import frawa.typedjson.validation.FalseSchemaReason
+import frawa.typedjson.validation.FormatMismatch
+import frawa.typedjson.validation.ItemsNotUnique
+import frawa.typedjson.validation.MaxItemsMismatch
+import frawa.typedjson.validation.MaxLengthMismatch
+import frawa.typedjson.validation.MaxPropertiesMismatch
+import frawa.typedjson.validation.MaximumMismatch
+import frawa.typedjson.validation.MinItemsMismatch
+import frawa.typedjson.validation.MinLengthMismatch
+import frawa.typedjson.validation.MinPropertiesMismatch
+import frawa.typedjson.validation.MinimumMismatch
+import frawa.typedjson.validation.MissingRequiredProperties
+import frawa.typedjson.validation.NotContains
+import frawa.typedjson.validation.NotInEnum
+import frawa.typedjson.validation.NotMultipleOf
+import frawa.typedjson.validation.NotOneOf
+import frawa.typedjson.validation.PatternMismatch
+import frawa.typedjson.validation.TypeMismatch
+import frawa.typedjson.validation.ValidationError
+import frawa.typedjson.validation._
+
+import scala.collection.immutable.Seq
+import scala.reflect.TypeTest
 import scala.util.Try
-import scala.compiletime.ops.boolean
-import frawa.typedjson.formats.Formats
 
 class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 
@@ -105,7 +101,9 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
     if valid then ops.valid(pointer).withAnnotations(annotations)
     else ops.all(os, None, pointer) // TODO new error NoneOf?
 
-  private def verifyNumberValue(error: => ValidationError)(validate: BigDecimal => Boolean): Fun[R[O]] =
+  private def verifyNumberValue(
+      error: => ValidationError
+  )(validate: BigDecimal => Boolean): Fun[R[O]] =
     funUnit2 { value =>
       Value
         .asNumber(value.value)
@@ -125,7 +123,9 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         }
     }
 
-  private def verifyArrayValue(error: => Seq[Value] => ValidationError)(validate: Seq[Value] => Boolean): Fun[R[O]] =
+  private def verifyArrayValue(
+      error: => Seq[Value] => ValidationError
+  )(validate: Seq[Value] => Boolean): Fun[R[O]] =
     funUnit2 { value =>
       Value
         .asArray(value.value)
@@ -261,7 +261,11 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         }
     }
 
-  def verfyIfThenElse(funIf: Option[Fun[R[O]]], funThen: Option[Fun[R[O]]], funElse: Option[Fun[R[O]]]): Fun[R[O]] =
+  def verfyIfThenElse(
+      funIf: Option[Fun[R[O]]],
+      funThen: Option[Fun[R[O]]],
+      funElse: Option[Fun[R[O]]]
+  ): Fun[R[O]] =
     value =>
       funIf
         .map { funIf =>
@@ -271,14 +275,20 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
               if condition.isValid then
                 funThen
                   .map(_(value))
-                  .map(roThen => roThen.map { oThen => ops.all(Seq(condition, oThen), None, value.pointer) })
+                  .map(roThen =>
+                    roThen.map { oThen => ops.all(Seq(condition, oThen), None, value.pointer) }
+                  )
               else
                 funElse
                   .map(_(value))
                   .map(roElse =>
-                    roElse.map { oElse => ops.all(Seq(condition.not(value.pointer), oElse), None, value.pointer) }
+                    roElse.map { oElse =>
+                      ops.all(Seq(condition.not(value.pointer), oElse), None, value.pointer)
+                    }
                   )
-            thenOrElse.getOrElse(monad.unit(ops.valid(value.pointer).withAnnotations(condition.getAnnotations())))
+            thenOrElse.getOrElse(
+              monad.unit(ops.valid(value.pointer).withAnnotations(condition.getAnnotations()))
+            )
           }
         }
         .getOrElse(monad.unit(ops.valid(value.pointer)))
@@ -547,5 +557,10 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
   def verifyAdditionalProperties(fun: Fun[R[O]]): Fun[R[O]] = value =>
     fun(value).map { o =>
       if o.isValid then o
-      else ops.all(Seq(o), Some(AdditionalPropertyInvalid(value.pointer.targetField.getOrElse("?"))), value.pointer)
+      else
+        ops.all(
+          Seq(o),
+          Some(AdditionalPropertyInvalid(value.pointer.targetField.getOrElse("?"))),
+          value.pointer
+        )
     }

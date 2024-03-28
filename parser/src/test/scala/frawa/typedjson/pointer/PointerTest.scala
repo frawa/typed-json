@@ -16,7 +16,7 @@
 
 package frawa.typedjson.pointer
 
-import frawa.typedjson.parser.Value.*
+import frawa.typedjson.parser.Value._
 import munit.FunSuite
 
 // see https://datatracker.ietf.org/doc/html/rfc6901

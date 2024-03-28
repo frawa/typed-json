@@ -16,16 +16,16 @@
 
 package frawa.typedjson.output
 
-import scala.collection.immutable.Seq
-
-import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.validation.ValidationError
 import frawa.typedjson.keywords.Evaluated
 import frawa.typedjson.keywords.EvaluatedIndices
 import frawa.typedjson.keywords.EvaluatedProperties
-import frawa.typedjson.keywords.Keyword
 import frawa.typedjson.keywords.Ignored
+import frawa.typedjson.keywords.Keyword
 import frawa.typedjson.keywords.KeywordLocation
+import frawa.typedjson.pointer.Pointer
+import frawa.typedjson.validation.ValidationError
+
+import scala.collection.immutable.Seq
 
 trait OutputOps[O]: // extends Monoid[O]:
   import OutputOps.Annotation
@@ -47,7 +47,9 @@ object OutputOps:
   trait Annotation
 
   def mergeAnnotations(es: Seq[Annotation]): Seq[Annotation] =
-    val es1 = mergeEvaluatedAnnotations(es.filter(_.isInstanceOf[Evaluated]).map(_.asInstanceOf[Evaluated]))
+    val es1 = mergeEvaluatedAnnotations(
+      es.filter(_.isInstanceOf[Evaluated]).map(_.asInstanceOf[Evaluated])
+    )
     val es2 = es.filterNot(_.isInstanceOf[Evaluated])
     es1 ++ es2
 

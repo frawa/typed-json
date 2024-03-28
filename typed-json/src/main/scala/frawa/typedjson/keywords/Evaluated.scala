@@ -15,8 +15,6 @@
  */
 
 package frawa.typedjson.keywords
-
-import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.output.OutputOps
 
 sealed trait Evaluated                                  extends OutputOps.Annotation

@@ -17,8 +17,8 @@
 package frawa.typedjson.parser.jawn
 
 import frawa.typedjson.parser.Parser
-import frawa.typedjson.parser.Value.*
-import munit.*
+import frawa.typedjson.parser.Value._
+import munit._
 
 class JawnParserTest extends FunSuite {
   given Parser = new JawnParser()

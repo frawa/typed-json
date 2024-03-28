@@ -18,8 +18,8 @@ package frawa.typedjson.keywords
 
 import frawa.typedjson.keywords.SchemaProblems.UnknownRequiredVocabulary
 import frawa.typedjson.util.UriUtil.uri
-import munit.FunSuite
 import frawa.typedjson.util.WithPointer
+import munit.FunSuite
 
 class VocabularyTest extends FunSuite:
   import Vocabulary.*

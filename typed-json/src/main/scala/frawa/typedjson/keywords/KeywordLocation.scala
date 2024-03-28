@@ -17,17 +17,18 @@
 package frawa.typedjson.keywords
 
 import frawa.typedjson.pointer.Pointer
-import java.net.URI
 import frawa.typedjson.util.UriUtil
-import java.awt.RenderingHints.Key
+
+import java.net.URI
 
 enum KeywordLocation:
   case Local(relative: Pointer)
   case Dereferenced(relative: Pointer, absolute: URI)
 
   def push(pushFun: Pointer => Pointer): KeywordLocation = this match {
-    case Local(relative)                  => Local(pushFun(relative))
-    case Dereferenced(relative, absolute) => Dereferenced(pushFun(relative), UriUtil.push(absolute, pushFun))
+    case Local(relative) => Local(pushFun(relative))
+    case Dereferenced(relative, absolute) =>
+      Dereferenced(pushFun(relative), UriUtil.push(absolute, pushFun))
   }
 
   def resolved(base: URI): KeywordLocation = this match {
@@ -36,8 +37,9 @@ enum KeywordLocation:
   }
 
   def parent: KeywordLocation = this match {
-    case Local(relative)                  => Local(relative.outer)
-    case Dereferenced(relative, absolute) => Dereferenced(relative.outer, UriUtil.push(absolute, _.outer))
+    case Local(relative) => Local(relative.outer)
+    case Dereferenced(relative, absolute) =>
+      Dereferenced(relative.outer, UriUtil.push(absolute, _.outer))
   }
 
 object KeywordLocation:

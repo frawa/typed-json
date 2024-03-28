@@ -16,21 +16,21 @@
 
 package frawa.typedjson.eval
 
-import frawa.typedjson.eval.*
-import frawa.typedjson.eval.CacheState.{R, given}
-import frawa.typedjson.keywords.*
+import frawa.typedjson.eval.CacheState.R
+import frawa.typedjson.eval.CacheState.given
+import frawa.typedjson.eval._
+import frawa.typedjson.keywords._
 import frawa.typedjson.meta.MetaSchemas
-import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.Value.*
-import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.testutil.TestSchemas.*
-import frawa.typedjson.testutil.TestUtil.{*, given}
-import frawa.typedjson.validation.*
-import munit.FunSuite
-import frawa.typedjson.eval.CacheState
 import frawa.typedjson.output.SimpleOutput
 import frawa.typedjson.output.SimpleOutput.given
+import frawa.typedjson.parser.Value
+import frawa.typedjson.parser.Value._
+import frawa.typedjson.pointer.Pointer
+import frawa.typedjson.testutil.TestSchemas._
+import frawa.typedjson.testutil.TestUtil.{_, given}
 import frawa.typedjson.util.WithPointer
+import frawa.typedjson.validation._
+import munit.FunSuite
 
 class EvalResolveTest extends FunSuite:
 

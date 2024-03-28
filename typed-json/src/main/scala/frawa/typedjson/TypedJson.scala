@@ -16,31 +16,26 @@
 
 package frawa.typedjson
 
-import scala.collection.immutable.Seq
-
-import frawa.typedjson.parser.Parser
-import frawa.typedjson.keywords.SchemaValue
-import frawa.typedjson.meta.MetaSchemas
-import frawa.typedjson.keywords.Vocabulary
+import frawa.typedjson.eval.CacheState
+import frawa.typedjson.eval.CacheState.R
+import frawa.typedjson.eval.Eval
+import frawa.typedjson.keywords.KeywordLocation
 import frawa.typedjson.keywords.Keywords
+import frawa.typedjson.keywords.LoadedSchemasResolver
 import frawa.typedjson.keywords.SchemaProblems
-import frawa.typedjson.parser.Value
+import frawa.typedjson.keywords.SchemaResolver
+import frawa.typedjson.keywords.SchemaValue
+import frawa.typedjson.keywords.Vocabulary
+import frawa.typedjson.meta.MetaSchemas
+import frawa.typedjson.output.OutputOps
+import frawa.typedjson.output.SimpleOutput
 import frawa.typedjson.parser.Offset
+import frawa.typedjson.parser.Parser
+import frawa.typedjson.parser.Value
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.validation.ValidationError
 
-import frawa.typedjson.eval.CacheState.R
-import frawa.typedjson.eval.TheResultMonad
-import frawa.typedjson.eval.Eval
-import frawa.typedjson.output.SimpleOutput
-import frawa.typedjson.eval.CacheState
-import frawa.typedjson.keywords.LoadedSchemasResolver
-import frawa.typedjson.keywords.SchemaResolver
-import frawa.typedjson.parser.OffsetParser
-import frawa.typedjson.suggest.Suggest
-import frawa.typedjson.output.OutputOps
-import frawa.typedjson.suggest.SuggestOutput
-import frawa.typedjson.keywords.KeywordLocation
+import scala.collection.immutable.Seq
 
 case class TypedJson(private val state: Option[(Keywords, CacheState)]):
   import TypedJson.*
@@ -133,12 +128,6 @@ object TypedJson:
         val cache = CacheState.empty(schemaResolver, keywords.vocabulary)
         new TypedJson(Some(keywords, cache))
       }
-
-  private def compile[R[_], O](keywords: Keywords)(using eval: Eval[R, O])(using
-      TheResultMonad[R, O]
-  ): Eval.EvalFun[R, O] =
-    val compiled = eval.compile(keywords, KeywordLocation.empty)
-    eval.fun(compiled)
 
   object Output:
     val empty: Output = Output(Seq.empty)

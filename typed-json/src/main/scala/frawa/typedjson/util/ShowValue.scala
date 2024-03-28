@@ -16,10 +16,10 @@
 
 package frawa.typedjson.util
 
-import scala.collection.immutable.Seq
-
 import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.Value.*
+import frawa.typedjson.parser.Value._
+
+import scala.collection.immutable.Seq
 
 object ShowValue:
 
@@ -35,8 +35,9 @@ object ShowValue:
         case (NumberValue(xx), NumberValue(yy)) => xx.compareTo(yy)
         case (BoolValue(xx), BoolValue(yy))     => xx.compareTo(yy)
         case (ArrayValue(xx), ArrayValue(yy))   => seqOrdering.compare(xx.sorted, yy.sorted)
-        case (ObjectValue(xx), ObjectValue(yy)) => seqOrdering.compare(xx.toSeq.sorted, yy.toSeq.sorted)
-        case _                                  => -1
+        case (ObjectValue(xx), ObjectValue(yy)) =>
+          seqOrdering.compare(xx.toSeq.sorted, yy.toSeq.sorted)
+        case _ => -1
       }
 
     given Ordering[Seq[Value]] with

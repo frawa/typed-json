@@ -16,27 +16,25 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import scala.collection.immutable.Seq
-
 import frawa.inlinefiles.InlineFiles
+import frawa.typedjson.eval.CacheState
 import frawa.typedjson.eval.CacheState.R
-import frawa.typedjson.eval.*
-import frawa.typedjson.eval.Util.{doApply, withCompiledSchemaValue}
-import frawa.typedjson.keywords.*
-import frawa.typedjson.macros.Macros
+import frawa.typedjson.eval.Util.doApplyBulk
+import frawa.typedjson.eval.Util.withCompiledSchemaValue
+import frawa.typedjson.eval._
+import frawa.typedjson.keywords._
 import frawa.typedjson.meta.MetaSchemas
-import frawa.typedjson.parser.*
-import frawa.typedjson.parser.Value.*
-import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.testutil.TestUtil.*
-import munit.{FunSuite, Location, TestOptions}
-import frawa.typedjson.output.OutputOps
 import frawa.typedjson.output.SimpleOutput
 import frawa.typedjson.output.SimpleOutput.given
+import frawa.typedjson.parser.Value._
+import frawa.typedjson.parser._
+import frawa.typedjson.testutil.TestUtil._
+import munit.FunSuite
+import munit.Location
+import munit.TestOptions
 
 import java.net.URI
-import frawa.typedjson.eval.CacheState
-import frawa.typedjson.eval.Util.doApplyBulk
+import scala.collection.immutable.Seq
 
 open class JsonSchemaTestSuite extends FunSuite:
   protected val draft202012 = InlineFiles.inlineDeepTextFiles("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
@@ -80,8 +78,6 @@ open class JsonSchemaTestSuite extends FunSuite:
       case _ => fail("invalid test json suite")
 
   private def checkTest(file: String, testValue: Value): Unit =
-    import SimpleOutput.given
-    import CacheState.given
 
     testValue match
       case ObjectValue(properties) =>

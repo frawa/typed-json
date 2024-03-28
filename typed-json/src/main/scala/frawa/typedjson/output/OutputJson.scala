@@ -16,42 +16,42 @@
 
 package frawa.typedjson.output
 
-import scala.collection.immutable.Seq
-
-import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.Value.*
-import frawa.typedjson.validation.ValidationError
-import frawa.typedjson.output.BasicOutput
 import frawa.typedjson.TypedJson
-import frawa.typedjson.keywords.KeywordLocation.{Local, Dereferenced}
-import frawa.typedjson.pointer.Pointer
-import java.net.URI
 import frawa.typedjson.keywords.KeywordLocation
-import frawa.typedjson.validation.MissingRequiredProperties
-import frawa.typedjson.validation.MinItemsMismatch
-import frawa.typedjson.validation.AdditionalPropertyInvalid
-import frawa.typedjson.validation.FalseSchemaReason
-import frawa.typedjson.validation.SubSchemaFailed
-import frawa.typedjson.validation.CannotResolve
-import frawa.typedjson.validation.TypeMismatch
-import frawa.typedjson.validation.NotOneOf
-import frawa.typedjson.validation.NotInvalid
-import frawa.typedjson.validation.NotInEnum
-import frawa.typedjson.validation.PatternMismatch
-import frawa.typedjson.validation.FormatMismatch
-import frawa.typedjson.validation.MinimumMismatch
-import frawa.typedjson.validation.ItemsNotUnique
-import frawa.typedjson.validation.NotMultipleOf
-import frawa.typedjson.validation.MaximumMismatch
-import frawa.typedjson.validation.MaxLengthMismatch
-import frawa.typedjson.validation.MinLengthMismatch
-import frawa.typedjson.validation.MaxItemsMismatch
-import frawa.typedjson.validation.MaxPropertiesMismatch
-import frawa.typedjson.validation.MinPropertiesMismatch
-import frawa.typedjson.validation.NotContains
-import frawa.typedjson.validation.DependentRequiredMissing
-import frawa.typedjson.validation.CannotResolveDynamic
+import frawa.typedjson.keywords.KeywordLocation.Dereferenced
+import frawa.typedjson.keywords.KeywordLocation.Local
+import frawa.typedjson.parser.Value
+import frawa.typedjson.parser.Value._
+import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.util.ShowValue.prettyPrint
+import frawa.typedjson.validation.AdditionalPropertyInvalid
+import frawa.typedjson.validation.CannotResolve
+import frawa.typedjson.validation.CannotResolveDynamic
+import frawa.typedjson.validation.DependentRequiredMissing
+import frawa.typedjson.validation.FalseSchemaReason
+import frawa.typedjson.validation.FormatMismatch
+import frawa.typedjson.validation.ItemsNotUnique
+import frawa.typedjson.validation.MaxItemsMismatch
+import frawa.typedjson.validation.MaxLengthMismatch
+import frawa.typedjson.validation.MaxPropertiesMismatch
+import frawa.typedjson.validation.MaximumMismatch
+import frawa.typedjson.validation.MinItemsMismatch
+import frawa.typedjson.validation.MinLengthMismatch
+import frawa.typedjson.validation.MinPropertiesMismatch
+import frawa.typedjson.validation.MinimumMismatch
+import frawa.typedjson.validation.MissingRequiredProperties
+import frawa.typedjson.validation.NotContains
+import frawa.typedjson.validation.NotInEnum
+import frawa.typedjson.validation.NotInvalid
+import frawa.typedjson.validation.NotMultipleOf
+import frawa.typedjson.validation.NotOneOf
+import frawa.typedjson.validation.PatternMismatch
+import frawa.typedjson.validation.SubSchemaFailed
+import frawa.typedjson.validation.TypeMismatch
+import frawa.typedjson.validation.ValidationError
+
+import java.net.URI
+import scala.collection.immutable.Seq
 
 object OutputJson:
 
@@ -73,7 +73,8 @@ object OutputJson:
         )
       )
       val errors = o.errors.map { error =>
-        val props = Seq(toJson(error.error), toJson(error.instanceLocation)) ++ toJson(error.keywordLocation)
+        val props =
+          Seq(toJson(error.error), toJson(error.instanceLocation)) ++ toJson(error.keywordLocation)
         ObjectValue(Map.from(props))
       }
       val props = Seq("valid" -> BoolValue(o.isValid), "errors" -> ArrayValue(error +: errors))
@@ -124,12 +125,12 @@ object OutputJson:
       is.map(i => s"'${i}'").mkString(", ")
 
     error match {
-      case SubSchemaFailed()                 => "A subschema had errors."
-      case FalseSchemaReason()               => "Always invalid."
-      case TypeMismatch(expected)            => s"Wrong type, expecting '${expected}''."
-      case NotOneOf(valid)                   => s"Expected one, but found ${valid} valid."
-      case NotInvalid()                      => "Expected invalid, but found valid."
-      case NotInEnum(values)                 => s"Not in enum values: ${quotedItems(values.map(prettyPrint(2)))}."
+      case SubSchemaFailed()      => "A subschema had errors."
+      case FalseSchemaReason()    => "Always invalid."
+      case TypeMismatch(expected) => s"Wrong type, expecting '${expected}''."
+      case NotOneOf(valid)        => s"Expected one, but found ${valid} valid."
+      case NotInvalid()           => "Expected invalid, but found valid."
+      case NotInEnum(values) => s"Not in enum values: ${quotedItems(values.map(prettyPrint(2)))}."
       case MissingRequiredProperties(Seq(p)) => s"Required property '${p}' not found."
       case MissingRequiredProperties(ps)     => s"Required properties ${quotedItems(ps)} not found."
       case AdditionalPropertyInvalid(p)      => s"Additional property '${p}' found but was invalid."
@@ -141,14 +142,16 @@ object OutputJson:
       case MaximumMismatch(max, exclude) =>
         if exclude then s"Expected less than ${max}."
         else s"Expected less than or equal to ${max}."
-      case ItemsNotUnique()                  => "Items expected to be unique."
-      case NotMultipleOf(n)                  => s"Expected to be multiple of ${n}."
-      case MaxLengthMismatch(max)            => s"Expected maximal length of ${max}."
-      case MinLengthMismatch(min)            => s"Expected minimal length of ${min}."
-      case MaxItemsMismatch(max, found)      => s"Expected at most ${max} items but found ${found}."
-      case MinItemsMismatch(min, found)      => s"Expected at least ${min} items but found ${found}."
-      case MaxPropertiesMismatch(max, found) => s"Expected at most ${max} properties but found ${found}."
-      case MinPropertiesMismatch(min, found) => s"Expected at least ${min} properties but found ${found}."
+      case ItemsNotUnique()             => "Items expected to be unique."
+      case NotMultipleOf(n)             => s"Expected to be multiple of ${n}."
+      case MaxLengthMismatch(max)       => s"Expected maximal length of ${max}."
+      case MinLengthMismatch(min)       => s"Expected minimal length of ${min}."
+      case MaxItemsMismatch(max, found) => s"Expected at most ${max} items but found ${found}."
+      case MinItemsMismatch(min, found) => s"Expected at least ${min} items but found ${found}."
+      case MaxPropertiesMismatch(max, found) =>
+        s"Expected at most ${max} properties but found ${found}."
+      case MinPropertiesMismatch(min, found) =>
+        s"Expected at least ${min} properties but found ${found}."
       case DependentRequiredMissing(missing) =>
         s"Missing dependend required properties: ${missing
             .map { (p, vs) =>

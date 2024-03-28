@@ -16,19 +16,15 @@
 
 package frawa.typedjson.eval
 
-import scala.collection.immutable.Seq
-
-import frawa.typedjson.keywords.*
-import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.Value.*
-import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.validation.{TypeMismatch, ValidationAnnotation, ValidationError}
-
-import java.net.URI
-import scala.reflect.TypeTest
+import frawa.typedjson.keywords._
 import frawa.typedjson.output.OutputOps
+import frawa.typedjson.parser.Value
+import frawa.typedjson.parser.Value._
 import frawa.typedjson.util.FP
 import frawa.typedjson.util.WithPointer
+
+import java.net.URI
+import scala.collection.immutable.Seq
 
 trait TheResultMonad[R[_], O: OutputOps] extends FP.Monad[R]:
   def unit[A](a: A): R[A]
@@ -84,7 +80,10 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
     val funs = kks.map(compile(_, kl))
     funSequence(funs)
 
-  private final def compile(kks: Map[String, Keywords], kl: KeywordLocation): Map[String, Fun[R[O]]] =
+  private final def compile(
+      kks: Map[String, Keywords],
+      kl: KeywordLocation
+  ): Map[String, Fun[R[O]]] =
     kks.view.mapValues(compile(_, kl)).toMap
 
   private def compileOne(k: Keyword, kl: KeywordLocation): Fun[R[O]] =
@@ -141,12 +140,13 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case MaxPropertiesKeyword(max)          => verify.verifyMaxProperties(max)
       case MinPropertiesKeyword(max)          => verify.verifyMinProperties(max)
       case DependentRequiredKeyword(required) => verify.verifyDependentRequired(required)
-      case DependentSchemasKeyword(keywords)  => verify.verifyDependentSchemas(compile(keywords, kl))
-      case ContainsKeyword(schema, min, max)  => verify.verifyContains(schema.map(compile(_, kl)), min, max)
-      case ContentEncodingKeyword(_)          => verify.verifyValid()
-      case ContentMediaTypeKeyword(_)         => verify.verifyValid()
-      case _: MetaKeyword                     => verify.verifyValid()
-      case ContentSchemaKeyword(keywords)     =>
+      case DependentSchemasKeyword(keywords) => verify.verifyDependentSchemas(compile(keywords, kl))
+      case ContainsKeyword(schema, min, max) =>
+        verify.verifyContains(schema.map(compile(_, kl)), min, max)
+      case ContentEncodingKeyword(_)      => verify.verifyValid()
+      case ContentMediaTypeKeyword(_)     => verify.verifyValid()
+      case _: MetaKeyword                 => verify.verifyValid()
+      case ContentSchemaKeyword(keywords) =>
         // TODO
         // val fun = compile(keywords, kl)
         verify.verifyValid()
@@ -166,5 +166,8 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       case _                    => funForKeyword(fun, kl, Some(k))
     }
 
-  private def funForKeyword(fun: Fun[R[O]], kl: KeywordLocation, k: Option[Keyword] = None): Fun[R[O]] = value =>
-    fun(value).map(_.forKeyword(kl, k))
+  private def funForKeyword(
+      fun: Fun[R[O]],
+      kl: KeywordLocation,
+      k: Option[Keyword] = None
+  ): Fun[R[O]] = value => fun(value).map(_.forKeyword(kl, k))

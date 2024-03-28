@@ -16,22 +16,20 @@
 
 package frawa.typedjson.output
 
-import frawa.typedjson.parser.Parser
-import frawa.typedjson.parser.Value.*
-import frawa.typedjson.parser.jawn.JawnParser
-import frawa.typedjson.validation.FalseSchemaReason
-import munit.FunSuite
-import frawa.typedjson.output.BasicOutput
 import frawa.typedjson.TypedJson
-import frawa.typedjson.testutil.TestUtil.parseJsonValue
-import frawa.typedjson.util.WithPointer
-import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.validation.MissingRequiredProperties
-import frawa.typedjson.validation.MinItemsMismatch
 import frawa.typedjson.keywords.KeywordLocation
+import frawa.typedjson.parser.Parser
 import frawa.typedjson.parser.Value
-import frawa.typedjson.validation.AdditionalPropertyInvalid
+import frawa.typedjson.parser.Value._
+import frawa.typedjson.parser.jawn.JawnParser
+import frawa.typedjson.pointer.Pointer
+import frawa.typedjson.testutil.TestUtil.parseJsonValue
 import frawa.typedjson.util.ShowValue.prettyPrint
+import frawa.typedjson.validation.AdditionalPropertyInvalid
+import frawa.typedjson.validation.FalseSchemaReason
+import frawa.typedjson.validation.MinItemsMismatch
+import frawa.typedjson.validation.MissingRequiredProperties
+import munit.FunSuite
 
 class OutputJsonTest extends FunSuite:
 
@@ -76,8 +74,7 @@ class OutputJsonTest extends FunSuite:
     val typedJson   = TypedJson.create(Sample.schema).toOption.get
     val (output, _) = typedJson.eval(parseJsonValue(Sample.value))
 
-    val expected =
-      BasicOutput(
+    BasicOutput(
         false,
         error = None,
         instanceLocation = Pointer.empty,
@@ -179,8 +176,7 @@ class OutputJsonTest extends FunSuite:
     val typedJson   = TypedJson.create(Sample.schema).toOption.get
     val (output, _) = typedJson.eval(parseJsonValue(Sample.value))
 
-    val expected =
-      DetailedOutput(
+    DetailedOutput(
         false,
         error = None,
         instanceLocation = Pointer.empty,

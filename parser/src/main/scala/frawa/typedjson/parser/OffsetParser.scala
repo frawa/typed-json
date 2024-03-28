@@ -17,7 +17,8 @@
 package frawa.typedjson.parser
 
 import frawa.typedjson.parser.Offset.ObjectValue
-import frawa.typedjson.pointer.{FieldToken, Pointer}
+import frawa.typedjson.pointer.Pointer
+
 import scala.collection.immutable.Seq
 
 trait OffsetParser:
@@ -26,10 +27,14 @@ trait OffsetParser:
   def parseWithOffset(json: String): Either[ParseError, Value]
 
 enum OffsetContext(val pointer: Pointer, val offset: Offset):
-  case InsideKey(override val pointer: Pointer, override val offset: Offset)   extends OffsetContext(pointer, offset)
-  case InsideValue(override val pointer: Pointer, override val offset: Offset) extends OffsetContext(pointer, offset)
-  case NewKey(override val pointer: Pointer, override val offset: Offset)      extends OffsetContext(pointer, offset)
-  case NewValue(override val pointer: Pointer, override val offset: Offset)    extends OffsetContext(pointer, offset)
+  case InsideKey(override val pointer: Pointer, override val offset: Offset)
+      extends OffsetContext(pointer, offset)
+  case InsideValue(override val pointer: Pointer, override val offset: Offset)
+      extends OffsetContext(pointer, offset)
+  case NewKey(override val pointer: Pointer, override val offset: Offset)
+      extends OffsetContext(pointer, offset)
+  case NewValue(override val pointer: Pointer, override val offset: Offset)
+      extends OffsetContext(pointer, offset)
 
   def mapPointer(f: Pointer => Pointer): OffsetContext =
     this match {
@@ -52,8 +57,10 @@ object OffsetParser:
             }
             .orElse {
               vs.zipWithIndex.flatMap { (v, i) =>
-                if at < v.offset.start then Some(OffsetContext.NewValue(Pointer.empty / i, Offset(at, at)))
-                else if v.offset.end <= at then Some(OffsetContext.NewValue(Pointer.empty / (i + 1), Offset(at, at)))
+                if at < v.offset.start then
+                  Some(OffsetContext.NewValue(Pointer.empty / i, Offset(at, at)))
+                else if v.offset.end <= at then
+                  Some(OffsetContext.NewValue(Pointer.empty / (i + 1), Offset(at, at)))
                 else None
               }.headOption
             }
@@ -73,7 +80,8 @@ object OffsetParser:
                 .map { (k, _) =>
                   val keyValue = go(k).mapPointer(Pointer.empty / k.value.toString() / _)
                   keyValue match {
-                    case OffsetContext.InsideValue(pointer, offset) => OffsetContext.InsideKey(pointer, offset)
+                    case OffsetContext.InsideValue(pointer, offset) =>
+                      OffsetContext.InsideKey(pointer, offset)
                     case _ => // TODO cannot happen
                       ???
                   }

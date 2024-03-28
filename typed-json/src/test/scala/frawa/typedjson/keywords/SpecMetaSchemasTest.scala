@@ -17,7 +17,7 @@
 package frawa.typedjson.keywords
 
 import frawa.typedjson.meta.MetaSchemas
-import frawa.typedjson.util.UriUtil.*
+import frawa.typedjson.util.UriUtil._
 import munit.FunSuite
 
 import java.net.URI

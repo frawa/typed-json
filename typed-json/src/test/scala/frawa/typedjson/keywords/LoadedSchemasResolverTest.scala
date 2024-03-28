@@ -16,12 +16,12 @@
 
 package frawa.typedjson.keywords
 
-import frawa.typedjson.parser.Value.*
-import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.testutil.TestUtil.{*, given}
-import frawa.typedjson.util.UriUtil.*
-import munit.FunSuite
 import frawa.typedjson.keywords.LoadedSchemasResolver.LazyResolver
+import frawa.typedjson.parser.Value._
+import frawa.typedjson.pointer.Pointer
+import frawa.typedjson.testutil.TestUtil.{_, given}
+import frawa.typedjson.util.UriUtil._
+import munit.FunSuite
 
 class LoadedSchemasResolverTest extends FunSuite:
 

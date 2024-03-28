@@ -16,26 +16,26 @@
 
 package frawa.typedjson.suggest
 
-import frawa.typedjson.keywords.{SchemaValue, Vocabulary}
-import frawa.typedjson.meta.MetaSchemas
-import frawa.typedjson.parser.*
-import frawa.typedjson.parser.Value.*
-import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.testutil.TestSchemas.{numberArraySchema, totoObjectSchema, totoRequiredObjectSchema}
-import frawa.typedjson.testutil.TestUtil.{*, given}
-import munit.FunSuite
-import frawa.typedjson.output.SimpleOutput
-import frawa.typedjson.eval.Eval
 import frawa.typedjson.eval.CacheState.R
-import frawa.typedjson.eval.Util.withCompiledSchemaValue
+import frawa.typedjson.eval.Eval
 import frawa.typedjson.eval.Util.doApply
-import frawa.typedjson.suggest.Suggest
-import frawa.typedjson.suggest.SuggestOutput
-import frawa.typedjson.output.OutputOps
-import munit.Compare
 import frawa.typedjson.eval.Util.vocabularyForTest
-import frawa.typedjson.keywords.MetaKeyword
+import frawa.typedjson.eval.Util.withCompiledSchemaValue
+import frawa.typedjson.keywords.SchemaValue
+import frawa.typedjson.keywords.Vocabulary
+import frawa.typedjson.meta.MetaSchemas
+import frawa.typedjson.output.OutputOps
+import frawa.typedjson.parser.Value._
+import frawa.typedjson.parser._
+import frawa.typedjson.pointer.Pointer
+import frawa.typedjson.suggest.Suggest
+import frawa.typedjson.testutil.TestSchemas.numberArraySchema
+import frawa.typedjson.testutil.TestSchemas.totoObjectSchema
+import frawa.typedjson.testutil.TestSchemas.totoRequiredObjectSchema
+import frawa.typedjson.testutil.TestUtil.{_, given}
 import frawa.typedjson.util.UriUtil.uri
+import munit.Compare
+import munit.FunSuite
 
 class SuggestTest extends FunSuite:
 
@@ -66,7 +66,7 @@ class SuggestTest extends FunSuite:
     given Eval[R, SuggestOutput]   = evalSuggest
     val value                      = parseJsonValue(text)
     withCompiledSchemaValue(schema, vocabulary = vocabularyWithMeta) { fun =>
-      val suggestFun = Suggest.suggestAt(at)(fun)
+      Suggest.suggestAt(at)(fun)
       val output     = doApply(fun, value)
       val result     = Suggest.suggestions(at, onlyKeys, output)
       f(result)
@@ -82,7 +82,7 @@ class SuggestTest extends FunSuite:
     given Eval[R, SuggestOutput]   = evalSuggest
     val value                      = parseJsonValue(text)
     withCompiledSchemaValue(schema, Some(lazyResolver), Some(Vocabulary.specDialect())) { fun =>
-      val suggestFun = Suggest.suggestAt(at)(fun)
+      Suggest.suggestAt(at)(fun)
       val output     = doApply(fun, value)
       val result     = Suggest.suggestions(at, keysOnly, output)
       f(result)
@@ -551,7 +551,7 @@ class SuggestTest extends FunSuite:
 
       val deprecatedKeys    = Vocabulary.deprecatedKeywords.toSet
       val withoutSuggestion = Set() // see Suggest.suggestFor
-      val expectedMissing   = deprecatedKeys ++ withoutSuggestion
+      deprecatedKeys ++ withoutSuggestion
 
       val expected = suggestedKeys.toSet -- deprecatedKeys
       assertEquals(expected.toSeq.sorted, availableKeys.sorted, "keywords expected by suggest")

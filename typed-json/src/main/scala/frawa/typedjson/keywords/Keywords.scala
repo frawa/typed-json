@@ -16,22 +16,17 @@
 
 package frawa.typedjson.keywords
 
-import scala.collection.immutable.Seq
-
-import frawa.typedjson.keywords.SchemaProblems.{
-  InvalidSchemaValue,
-  MissingDynamicReference,
-  MissingReference,
-  UnsupportedKeyword
-}
-import frawa.typedjson.parser.*
-import frawa.typedjson.parser.Value.*
+import frawa.typedjson.keywords.SchemaProblems.InvalidSchemaValue
+import frawa.typedjson.keywords.SchemaProblems.UnsupportedKeyword
+import frawa.typedjson.parser.Value._
+import frawa.typedjson.parser._
 import frawa.typedjson.pointer.Pointer
+import frawa.typedjson.util.EitherUtil._
 import frawa.typedjson.util.UriUtil
 import frawa.typedjson.util.UriUtil.CurrentLocation
-import frawa.typedjson.util.EitherUtil.*
 
 import java.net.URI
+import scala.collection.immutable.Seq
 import scala.reflect.TypeTest
 
 sealed trait Keyword
@@ -83,8 +78,11 @@ case class MaxPropertiesKeyword(max: BigDecimal)                          extend
 case class MinPropertiesKeyword(min: BigDecimal)                          extends Keyword
 case class DependentRequiredKeyword(required: Map[String, Seq[String]])   extends Keyword
 case class DependentSchemasKeyword(keywords: Map[String, Keywords])       extends Keyword
-case class ContainsKeyword(schema: Option[Keywords] = None, min: Option[Int] = None, max: Option[Int] = None)
-    extends Keyword
+case class ContainsKeyword(
+    schema: Option[Keywords] = None,
+    min: Option[Int] = None,
+    max: Option[Int] = None
+) extends Keyword
 case class ContentEncodingKeyword(encoding: String)   extends Keyword
 case class ContentMediaTypeKeyword(mediaType: String) extends Keyword
 case class ContentSchemaKeyword(keywords: Keywords)   extends Keyword
@@ -98,10 +96,11 @@ case class MetaKeyword(
     examples: Option[Seq[Value]] = None
 ) extends Keyword
 
-case class UnevaluatedItemsKeyword(pushed: Keywords, unevaluated: Keywords)            extends Keyword
-case class UnevaluatedPropertiesKeyword(pushed: Keywords, unevaluated: Keywords)       extends Keyword
-case class WithLocation(keyword: Keyword, kl: KeywordLocation = KeywordLocation.empty) extends Keyword
-case class IgnoredKeyword(keyword: String)                                             extends Keyword
+case class UnevaluatedItemsKeyword(pushed: Keywords, unevaluated: Keywords)      extends Keyword
+case class UnevaluatedPropertiesKeyword(pushed: Keywords, unevaluated: Keywords) extends Keyword
+case class WithLocation(keyword: Keyword, kl: KeywordLocation = KeywordLocation.empty)
+    extends Keyword
+case class IgnoredKeyword(keyword: String) extends Keyword
 
 case class Keywords(
     vocabulary: Vocabulary,
@@ -168,15 +167,24 @@ case class Keywords(
         Right(add(UnionTypeKeyword(keywords)))
 
       case ("not", value) =>
-        for keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(value)), scope1)
+        for keywords <- Keywords.parseKeywords(
+            vocabulary,
+            resolver.push(SchemaValue(value)),
+            scope1
+          )
         yield add(NotKeyword(keywords))
 
       case ("items", value) =>
-        for keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(value)), scope1)
+        for keywords <- Keywords.parseKeywords(
+            vocabulary,
+            resolver.push(SchemaValue(value)),
+            scope1
+          )
         yield updateKeyword(ArrayItemsKeyword())(check => check.copy(items = Some(keywords)))
 
       case ("prefixItems", ArrayValue(vs)) =>
-        val keywords0 = vs.map(v => Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(v)), scope1))
+        val keywords0 =
+          vs.map(v => Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(v)), scope1))
         for keywords <- combineAllLefts(keywords0)(SchemaProblems.combine)
         yield updateKeyword(ArrayItemsKeyword())(check => check.copy(prefixItems = keywords))
 
@@ -186,21 +194,33 @@ case class Keywords(
 
       case ("properties", ObjectValue(properties)) =>
         mapKeywordsFor(properties, resolver, scope1) { keywords =>
-          updateKeyword(ObjectPropertiesKeyword())(keyword => keyword.copy(properties = keyword.properties ++ keywords))
+          updateKeyword(ObjectPropertiesKeyword())(keyword =>
+            keyword.copy(properties = keyword.properties ++ keywords)
+          )
         }
 
       case ("patternProperties", ObjectValue(properties)) =>
         mapKeywordsFor(properties, resolver, scope1) { keywords =>
-          updateKeyword(ObjectPropertiesKeyword())(keyword => keyword.copy(patternProperties = keywords))
+          updateKeyword(ObjectPropertiesKeyword())(keyword =>
+            keyword.copy(patternProperties = keywords)
+          )
         }
 
       case ("additionalProperties", value) =>
-        for keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(value)), scope1)
-        yield updateKeyword(ObjectPropertiesKeyword())(keyword => keyword.copy(additionalProperties = Some(keywords)))
+        for keywords <- Keywords.parseKeywords(
+            vocabulary,
+            resolver.push(SchemaValue(value)),
+            scope1
+          )
+        yield updateKeyword(ObjectPropertiesKeyword())(keyword =>
+          keyword.copy(additionalProperties = Some(keywords))
+        )
 
       case ("unevaluatedProperties", v) =>
         for keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(v)), scope1)
-        yield addLast(pushed => Keywords(vocabulary).add(UnevaluatedPropertiesKeyword(pushed, keywords)))
+        yield addLast(pushed =>
+          Keywords(vocabulary).add(UnevaluatedPropertiesKeyword(pushed, keywords))
+        )
 
       case ("required", ArrayValue(values)) =>
         def names = Value.asStrings(values)
@@ -216,18 +236,21 @@ case class Keywords(
         addAll(values.map(SchemaValue(_)), resolver, scope1)(OneOfKeyword.apply)
 
       case ("if", value) =>
-        updateKeywordsInside(resolver.push(SchemaValue(value)), scope1)(IfThenElseKeyword()) { (keywords, keyword) =>
-          keyword.copy(ifKeywords = Some(keywords))
+        updateKeywordsInside(resolver.push(SchemaValue(value)), scope1)(IfThenElseKeyword()) {
+          (keywords, keyword) =>
+            keyword.copy(ifKeywords = Some(keywords))
         }
 
       case ("then", value) =>
-        updateKeywordsInside(resolver.push(SchemaValue(value)), scope1)(IfThenElseKeyword()) { (keywords, keyword) =>
-          keyword.copy(thenKeywords = Some(keywords))
+        updateKeywordsInside(resolver.push(SchemaValue(value)), scope1)(IfThenElseKeyword()) {
+          (keywords, keyword) =>
+            keyword.copy(thenKeywords = Some(keywords))
         }
 
       case ("else", value) =>
-        updateKeywordsInside(resolver.push(SchemaValue(value)), scope1)(IfThenElseKeyword()) { (keywords, keyword) =>
-          keyword.copy(elseKeywords = Some(keywords))
+        updateKeywordsInside(resolver.push(SchemaValue(value)), scope1)(IfThenElseKeyword()) {
+          (keywords, keyword) =>
+            keyword.copy(elseKeywords = Some(keywords))
         }
 
       case ("enum", ArrayValue(values)) =>
@@ -281,7 +304,11 @@ case class Keywords(
         Right(add(UniqueItemsKeyword(v)))
 
       case ("propertyNames", value) =>
-        for keywords <- Keywords.parseKeywords(vocabulary, resolver.push(SchemaValue(value)), scope1)
+        for keywords <- Keywords.parseKeywords(
+            vocabulary,
+            resolver.push(SchemaValue(value)),
+            scope1
+          )
         yield add(PropertyNamesKeyword(keywords))
 
       case ("multipleOf", NumberValue(v)) if v > 0 =>
@@ -385,7 +412,11 @@ case class Keywords(
       case _ =>
         Left(SchemaProblems(UnsupportedKeyword(keyword)))
 
-  private def mapKeywordsFor(props: Map[String, Value], resolver: SchemaResolver, scope: DynamicScope)(
+  private def mapKeywordsFor(
+      props: Map[String, Value],
+      resolver: SchemaResolver,
+      scope: DynamicScope
+  )(
       f: Map[String, Keywords] => Keywords
   ): Either[SchemaProblems, Keywords] =
     val propKeywords0 = props.view
@@ -422,7 +453,9 @@ case class Keywords(
       scope: DynamicScope
   )(
       newKeyword: => K
-  )(f: (Keywords, K) => K)(using CurrentLocation, TypeTest[Keyword, K]): Either[SchemaProblems, Keywords] =
+  )(
+      f: (Keywords, K) => K
+  )(using CurrentLocation, TypeTest[Keyword, K]): Either[SchemaProblems, Keywords] =
     for keywords <- Keywords.parseKeywords(vocabulary, resolution, scope)
     yield updateKeyword(newKeyword)(f(keywords, _))
 
@@ -472,23 +505,24 @@ object Keywords:
         if properties.isEmpty then Right(keywords.add(TrivialKeyword(true)))
         else
           properties
-            .foldLeft[Either[SchemaProblems, Keywords]](Right(keywords)) { case (keywords, (keyword, value)) =>
-              val prefix = Pointer.empty / keyword
-              accumulate(
-                keywords,
-                keywords
-                  .flatMap { keywords =>
-                    if vocabulary.defines(keyword) then {
-                      keywords
-                        .withKeyword(keyword, value, resolver, scope1)
-                        .swap
-                        .map(_.prefix(prefix))
-                        .swap
-                    } else {
-                      Right(keywords.add(IgnoredKeyword(keyword)))
+            .foldLeft[Either[SchemaProblems, Keywords]](Right(keywords)) {
+              case (keywords, (keyword, value)) =>
+                val prefix = Pointer.empty / keyword
+                accumulate(
+                  keywords,
+                  keywords
+                    .flatMap { keywords =>
+                      if vocabulary.defines(keyword) then {
+                        keywords
+                          .withKeyword(keyword, value, resolver, scope1)
+                          .swap
+                          .map(_.prefix(prefix))
+                          .swap
+                      } else {
+                        Right(keywords.add(IgnoredKeyword(keyword)))
+                      }
                     }
-                  }
-              )
+                )
             }
             .map(_.doneParsing())
       case _ => Left(SchemaProblems(InvalidSchemaValue(schema.value)))

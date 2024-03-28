@@ -16,11 +16,10 @@
 
 package frawa.typedjson.keywords
 
-import scala.collection.immutable.Seq
-
 import frawa.typedjson.pointer.Pointer
 
 import java.net.URI
+import scala.collection.immutable.Seq
 
 case class DynamicScope(uris: Seq[URI], kl: KeywordLocation = KeywordLocation.empty):
 

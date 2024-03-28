@@ -16,16 +16,12 @@
 
 package frawa.typedjson.output
 
-import scala.collection.immutable.Seq
-
-import frawa.typedjson.validation.ValidationAnnotation
+import frawa.typedjson.keywords.Keyword
+import frawa.typedjson.keywords.KeywordLocation
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.validation.ValidationError
-import frawa.typedjson.keywords.SchemaProblems
-import frawa.typedjson.keywords.Evaluated
-import frawa.typedjson.keywords.Keyword
-import frawa.typedjson.output.OutputOps
-import frawa.typedjson.keywords.KeywordLocation
+
+import scala.collection.immutable.Seq
 
 // see https://json-schema.org/draft/2020-12/json-schema-core.html#name-flag
 
@@ -49,8 +45,9 @@ object FlagOutput:
       )
 
     extension (o: FlagOutput)
-      def not(pointer: Pointer): FlagOutput                         = o.copy(valid = !o.valid, annotations = Seq())
-      def isValid: Boolean                                          = o.valid
-      def withAnnotations(annotations: Seq[Annotation]): FlagOutput = o.copy(annotations = o.annotations ++ annotations)
-      def getAnnotations(): Seq[Annotation]                         = o.annotations
+      def not(pointer: Pointer): FlagOutput = o.copy(valid = !o.valid, annotations = Seq())
+      def isValid: Boolean                  = o.valid
+      def withAnnotations(annotations: Seq[Annotation]): FlagOutput =
+        o.copy(annotations = o.annotations ++ annotations)
+      def getAnnotations(): Seq[Annotation]                                      = o.annotations
       def forKeyword(kl: KeywordLocation, k: Option[Keyword] = None): FlagOutput = o

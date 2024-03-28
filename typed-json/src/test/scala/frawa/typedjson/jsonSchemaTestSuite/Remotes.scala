@@ -16,8 +16,10 @@
 
 package frawa.typedjson.jsonSchemaTestSuite
 
-import frawa.typedjson.keywords.{LoadedSchemasResolver, RootSchemaValue, SchemaValue}
-import frawa.typedjson.parser.*
+import frawa.typedjson.keywords.LoadedSchemasResolver
+import frawa.typedjson.keywords.RootSchemaValue
+import frawa.typedjson.keywords.SchemaValue
+import frawa.typedjson.parser._
 import frawa.typedjson.util.UriUtil
 
 import java.net.URI

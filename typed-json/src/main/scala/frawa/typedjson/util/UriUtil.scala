@@ -16,10 +16,10 @@
 
 package frawa.typedjson.util
 
+import frawa.typedjson.keywords.KeywordLocation
 import frawa.typedjson.pointer.Pointer
 
 import java.net.URI
-import frawa.typedjson.keywords.KeywordLocation
 
 object UriUtil:
 
@@ -52,7 +52,8 @@ object UriUtil:
     else base.resolve(uri)
 
   private def isFragment(uri: URI): Boolean =
-    !uri.isOpaque() && uri.getScheme() == null && uri.getAuthority() == null && uri.getPath().isEmpty &&
+    !uri.isOpaque() && uri.getScheme() == null && uri
+      .getAuthority() == null && uri.getPath().isEmpty &&
       uri.getFragment() != null
 
   case class CurrentLocation(kl: KeywordLocation)

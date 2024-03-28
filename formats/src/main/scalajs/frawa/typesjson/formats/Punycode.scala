@@ -18,7 +18,6 @@ package frawa.typesjson.formats
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSImport
-import scala.scalajs.js.UndefOr
 
 // see https://github.com/garycourt/uri-js
 

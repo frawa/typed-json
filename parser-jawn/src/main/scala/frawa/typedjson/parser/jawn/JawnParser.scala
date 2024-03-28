@@ -16,14 +16,18 @@
 
 package frawa.typedjson.parser.jawn
 
+import frawa.typedjson.parser.Offset
 import frawa.typedjson.parser.Offset.NullValue
-import frawa.typedjson.parser.{Offset, OffsetParser, Parser, Value}
+import frawa.typedjson.parser.OffsetParser
+import frawa.typedjson.parser.Parser
+import frawa.typedjson.parser.Value
 import org.typelevel.jawn
-import org.typelevel.jawn.{FContext, ParseException}
+import org.typelevel.jawn.FContext
+import org.typelevel.jawn.ParseException
 
 import scala.annotation.tailrec
-import scala.collection.mutable
 import scala.collection.immutable
+import scala.collection.mutable
 
 class JawnParser extends Parser with OffsetParser:
   import OffsetParser.ParseError
@@ -83,26 +87,27 @@ class JawnParser extends Parser with OffsetParser:
 
       override def isObj: Boolean = false
 
-    override def objectContext(startIndex: Int): FContext[Offset.Value] = new FContext[Offset.Value]:
-      private var currentKey: Option[Offset.StringValue]            = None
-      private var properties: Map[Offset.StringValue, Offset.Value] = Map.empty
-      override def add(s: CharSequence, index: Int): Unit =
-        if currentKey.isEmpty then currentKey = Some(string(s, index))
-        else
-          properties = properties + (
-            (
-              currentKey.get,
-              string(s, index)
+    override def objectContext(startIndex: Int): FContext[Offset.Value] =
+      new FContext[Offset.Value]:
+        private var currentKey: Option[Offset.StringValue]            = None
+        private var properties: Map[Offset.StringValue, Offset.Value] = Map.empty
+        override def add(s: CharSequence, index: Int): Unit =
+          if currentKey.isEmpty then currentKey = Some(string(s, index))
+          else
+            properties = properties + (
+              (
+                currentKey.get,
+                string(s, index)
+              )
             )
-          )
-          currentKey = None
-      override def add(v: Offset.Value, index: Int): Unit =
-        if currentKey.isDefined then
-          properties = properties + ((currentKey.get, v))
-          currentKey = None
-      override def finish(index: Int): Offset.Value =
-        Offset.ObjectValue(Offset(startIndex, index + 1), properties)
-      override def isObj: Boolean = true
+            currentKey = None
+        override def add(v: Offset.Value, index: Int): Unit =
+          if currentKey.isDefined then
+            properties = properties + ((currentKey.get, v))
+            currentKey = None
+        override def finish(index: Int): Offset.Value =
+          Offset.ObjectValue(Offset(startIndex, index + 1), properties)
+        override def isObj: Boolean = true
 
     override def jnull(index: Int): Offset.Value = Offset.NullValue(Offset(index, index + 4))
 
@@ -141,9 +146,15 @@ class JawnParser extends Parser with OffsetParser:
         delegate.finish(index)
       override def isObj: Boolean = delegate.isObj
 
-    override def singleContext(index: Int): FContext[T] = delegatingContext(facade.singleContext(index))
-    override def arrayContext(index: Int): FContext[T]  = delegatingContext(facade.arrayContext(index))
-    override def objectContext(index: Int): FContext[T] = delegatingContext(facade.objectContext(index))
+    override def singleContext(index: Int): FContext[T] = delegatingContext(
+      facade.singleContext(index)
+    )
+    override def arrayContext(index: Int): FContext[T] = delegatingContext(
+      facade.arrayContext(index)
+    )
+    override def objectContext(index: Int): FContext[T] = delegatingContext(
+      facade.objectContext(index)
+    )
 
     override def jnull(index: Int): T  = facade.jnull(index)
     override def jfalse(index: Int): T = facade.jfalse(index)

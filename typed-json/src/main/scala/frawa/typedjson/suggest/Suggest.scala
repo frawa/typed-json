@@ -16,16 +16,14 @@
 
 package frawa.typedjson.suggest
 
-import scala.collection.immutable.Seq
-
-import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.Value.*
 import frawa.typedjson.keywords.Keyword
-import frawa.typedjson.keywords.DynamicScope
+import frawa.typedjson.keywords._
+import frawa.typedjson.parser.Value
+import frawa.typedjson.parser.Value._
+import frawa.typedjson.pointer.Pointer
+
 import java.net.URI
-import frawa.typedjson.keywords.*
-import frawa.typedjson.suggest.SuggestOutput
+import scala.collection.immutable.Seq
 
 case class SuggestResult(suggestions: Seq[Suggest])
 
@@ -39,7 +37,11 @@ enum Suggest:
 
 object Suggest:
   // TODO deprecated, readOnly, writeOnly
-  case class Doc(id: Option[URI] = None, title: Option[String] = None, description: Option[String] = None)
+  case class Doc(
+      id: Option[URI] = None,
+      title: Option[String] = None,
+      description: Option[String] = None
+  )
 
   def suggestAt[R[_], O](at: Pointer)(compiled: Value => R[O]): Value => R[O] =
     // TODO stop evaluation as soon as 'at' is reached
@@ -93,7 +95,8 @@ object Suggest:
       case KeywordLocation.Dereferenced(_, absolute) => Some(absolute)
       case _                                         => None
     }
-    if Seq(meta.title, meta.description).exists(_.isDefined) then Some(Doc(location, meta.title, meta.description))
+    if Seq(meta.title, meta.description).exists(_.isDefined) then
+      Some(Doc(location, meta.title, meta.description))
     else None
 
   private enum Work(vs: Seq[Value]):
@@ -161,8 +164,9 @@ object Suggest:
             useBestValue(additional.keywords.toSeq.flatMap(keyword => suggestFor(keyword).values))
           }.toSeq
         Work(Seq(allProperties, allPatternProperties) ++ additionals)
-      case ObjectRequiredKeyword(required) => Work(ObjectValue(Map.from(required.map((_, NullValue)))))
-      case TrivialKeyword(v)               => Work(BoolValue(v))
+      case ObjectRequiredKeyword(required) =>
+        Work(ObjectValue(Map.from(required.map((_, NullValue)))))
+      case TrivialKeyword(v) => Work(BoolValue(v))
       case IfThenElseKeyword(ifChecks, thenChecks, elseChecks) =>
         Work.all(
           Seq(ifChecks, thenChecks, elseChecks).flatten

@@ -16,18 +16,14 @@
 
 package frawa.typedjson.eval
 
-import scala.collection.immutable.Seq
-
-import frawa.typedjson.eval.CacheState.R
-import frawa.typedjson.keywords.*
+import frawa.typedjson.eval.CacheState
+import frawa.typedjson.keywords._
+import frawa.typedjson.output.OutputOps
 import frawa.typedjson.parser.Value
-import frawa.typedjson.testutil.TestUtil.{*, given}
-import frawa.typedjson.util.UriUtil
-import frawa.typedjson.validation.CannotResolve
+import frawa.typedjson.testutil.TestUtil.{_, given}
 
 import java.net.URI
-import frawa.typedjson.eval.CacheState
-import frawa.typedjson.output.OutputOps
+import scala.collection.immutable.Seq
 
 object Util:
   val vocabularyForTest: Option[Vocabulary] = dialect(
@@ -71,7 +67,7 @@ object Util:
       f(fun)
     }
 
-  import frawa.typedjson.eval.CacheState.{*, given}
+  import frawa.typedjson.eval.CacheState.*
 
   def doApplyWithStats[O: OutputOps](fun: Value => R[O], value: Value)(using
       resolver: SchemaResolver

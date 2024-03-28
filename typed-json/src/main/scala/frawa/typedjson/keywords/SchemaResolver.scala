@@ -18,7 +18,7 @@ package frawa.typedjson.keywords
 
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.util.UriUtil
-import frawa.typedjson.util.UriUtil.*
+import frawa.typedjson.util.UriUtil._
 
 import java.net.URI
 
@@ -78,7 +78,10 @@ trait SchemaResolver:
           else None
         }
 
-  private def resolvePointer(resolution: SchemaResolution, pointer: Pointer): Option[SchemaResolution] =
+  private def resolvePointer(
+      resolution: SchemaResolution,
+      pointer: Pointer
+  ): Option[SchemaResolution] =
     val SchemaResolution(schema, resolver) = resolution
-    val resolver1                          = resolver.withBase(UriUtil.withFragment(resolver.base, pointer))
+    val resolver1 = resolver.withBase(UriUtil.withFragment(resolver.base, pointer))
     pointer(schema.value).map(SchemaValue(_)).map(SchemaResolution(_, resolver1))

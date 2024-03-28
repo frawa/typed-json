@@ -16,17 +16,14 @@
 
 package frawa.typedjson.eval
 
-import scala.collection.immutable.Seq
-
-import frawa.typedjson.keywords.*
-import frawa.typedjson.parser.Value
+import frawa.typedjson.keywords._
+import frawa.typedjson.output.OutputOps
+import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.util.UriUtil
 import frawa.typedjson.validation.CannotResolve
 
 import java.net.URI
-import frawa.typedjson.output.OutputOps
-import frawa.typedjson.validation.TypeMismatch
-import frawa.typedjson.pointer.Pointer
+import scala.collection.immutable.Seq
 
 case class CacheState(
     rootResolver: SchemaResolver,
@@ -48,7 +45,11 @@ object CacheState:
   case class Stats(binds: Int, hits: Int, cached: Int)
 
   def stats(state: CacheState): Stats =
-    Stats(binds = state.countBind, hits = state.hits.map(_._2).sum, cached = state.cache.keySet.size)
+    Stats(
+      binds = state.countBind,
+      hits = state.hits.map(_._2).sum,
+      cached = state.cache.keySet.size
+    )
 
   def unit[A](a: A): R[A] = s => (a, s)
 

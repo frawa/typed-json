@@ -17,11 +17,10 @@
 package frawa.typedjson.parser.zio
 
 import frawa.typedjson.parser.Parser
-import munit.*
+import munit._
 
 class ZioParserTest extends FunSuite:
   import frawa.typedjson.parser.Value.*
-  import frawa.typedjson.parser.zio.ZioParser
 
   given Parser = new ZioParser()
 

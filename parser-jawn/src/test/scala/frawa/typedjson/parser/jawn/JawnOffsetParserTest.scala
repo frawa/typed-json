@@ -16,10 +16,11 @@
 
 package frawa.typedjson.parser.jawn
 
-import frawa.typedjson.parser.{Offset, OffsetParser}
-import frawa.typedjson.pointer.Pointer
-import munit.*
+import frawa.typedjson.parser.Offset
+import frawa.typedjson.parser.OffsetParser
 import frawa.typedjson.parser.OffsetParser.ParseError
+import frawa.typedjson.pointer.Pointer
+import munit._
 
 class JawnOffsetParserTest extends FunSuite {
   given parser: OffsetParser = new JawnParser()

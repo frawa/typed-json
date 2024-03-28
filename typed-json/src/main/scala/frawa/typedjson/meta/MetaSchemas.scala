@@ -16,7 +16,9 @@
 
 package frawa.typedjson.meta
 
-import frawa.typedjson.keywords.{LoadedSchemasResolver, RootSchemaValue, SchemaValue}
+import frawa.typedjson.keywords.LoadedSchemasResolver
+import frawa.typedjson.keywords.RootSchemaValue
+import frawa.typedjson.keywords.SchemaValue
 import frawa.typedjson.macros.Macros
 import frawa.typedjson.util.UriUtil.uri
 

@@ -16,14 +16,16 @@
 
 package frawa.typedjson.testutil
 
-import scala.collection.immutable.Seq
-
-import frawa.typedjson.keywords.*
+import frawa.typedjson.keywords._
+import frawa.typedjson.parser.Parser
+import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.jawn.JawnParser
-import frawa.typedjson.parser.{Parser, Value}
-import munit.Assertions.{assertEquals, clue, clues, fail}
+import munit.Assertions.clue
+import munit.Assertions.clues
+import munit.Assertions.fail
 
 import java.net.URI
+import scala.collection.immutable.Seq
 
 object TestUtil:
   given Parser                                     = new JawnParser

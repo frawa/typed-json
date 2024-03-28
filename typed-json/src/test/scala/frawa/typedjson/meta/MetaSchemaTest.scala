@@ -16,19 +16,18 @@
 
 package frawa.typedjson.meta
 
-import scala.collection.immutable.Seq
-
-import frawa.typedjson.eval.Eval
-import frawa.typedjson.eval.CacheState.R
-import frawa.typedjson.eval.Util.{doApply, withCompiledSchemaValue}
-import frawa.typedjson.keywords.*
-import frawa.typedjson.testutil.TestUtil.*
-import munit.FunSuite
 import frawa.typedjson.eval.CacheState
+import frawa.typedjson.eval.CacheState.R
+import frawa.typedjson.eval.Eval
+import frawa.typedjson.eval.Util.doApplyWithStats
+import frawa.typedjson.eval.Util.withCompiledSchemaValue
+import frawa.typedjson.keywords._
+import frawa.typedjson.output.OutputOps
 import frawa.typedjson.output.SimpleOutput
 import frawa.typedjson.output.SimpleOutput.given
-import frawa.typedjson.eval.Util.doApplyWithStats
-import frawa.typedjson.output.OutputOps
+import munit.FunSuite
+
+import scala.collection.immutable.Seq
 
 class MetaSchemaTest extends FunSuite:
 

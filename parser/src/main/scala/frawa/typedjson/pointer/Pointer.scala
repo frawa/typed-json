@@ -16,8 +16,10 @@
 
 package frawa.typedjson.pointer
 
-import frawa.typedjson.parser.{Offset, Value}
-import frawa.typedjson.parser.Value.{ArrayValue, ObjectValue}
+import frawa.typedjson.parser.Offset
+import frawa.typedjson.parser.Value
+import frawa.typedjson.parser.Value.ArrayValue
+import frawa.typedjson.parser.Value.ObjectValue
 
 import scala.collection.immutable.Seq
 
@@ -94,23 +96,26 @@ case class Pointer(segments: Seq[Token]):
   }
 
   // TODO dedup wrt apply(value: Value)
-  def apply(value: Offset.Value): Option[Offset.Value] = segments.foldLeft(Option(value)) { case (v, segment) =>
-    v.flatMap(v =>
-      segment match {
-        case ArrayIndexToken(index) =>
-          v match {
-            case Offset.ArrayValue(_, vs)          => vs.lift(index)
-            case Offset.ObjectValue(_, properties) => properties.find(_._1.value == index.toString).map(_._2)
-            case _                                 => None
-          }
-        case FieldToken(field) =>
-          v match {
-            case Offset.ObjectValue(_, properties) => properties.find(_._1.value == field).map(_._2)
-            case _                                 => None
-          }
-        case _ => None
-      }
-    )
+  def apply(value: Offset.Value): Option[Offset.Value] = segments.foldLeft(Option(value)) {
+    case (v, segment) =>
+      v.flatMap(v =>
+        segment match {
+          case ArrayIndexToken(index) =>
+            v match {
+              case Offset.ArrayValue(_, vs) => vs.lift(index)
+              case Offset.ObjectValue(_, properties) =>
+                properties.find(_._1.value == index.toString).map(_._2)
+              case _ => None
+            }
+          case FieldToken(field) =>
+            v match {
+              case Offset.ObjectValue(_, properties) =>
+                properties.find(_._1.value == field).map(_._2)
+              case _ => None
+            }
+          case _ => None
+        }
+      )
   }
 
   def targetField: Option[String] =

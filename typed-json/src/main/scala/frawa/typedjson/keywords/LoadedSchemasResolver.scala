@@ -16,15 +16,13 @@
 
 package frawa.typedjson.keywords
 
-import scala.collection.immutable.Seq
-
 import frawa.typedjson.parser.Value
-import frawa.typedjson.parser.Value.*
+import frawa.typedjson.parser.Value._
 import frawa.typedjson.util.UriUtil
-import frawa.typedjson.util.UriUtil.*
+import frawa.typedjson.util.UriUtil._
 
 import java.net.URI
-import frawa.typedjson.util.Debug
+import scala.collection.immutable.Seq
 
 object LoadedSchemasResolver:
   type LazyResolver = URI => Option[RootSchemaValue]

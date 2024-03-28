@@ -16,22 +16,15 @@
 
 package frawa.typedjson.suggest
 
-import scala.collection.immutable.Seq
-
-import frawa.typedjson.util.WithPointer
-import frawa.typedjson.validation.ValidationError
-import frawa.typedjson.validation.ValidationAnnotation
-import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.keywords.SchemaProblems
-import frawa.typedjson.validation.NotOneOf
-import frawa.typedjson.validation.NotInvalid
-import frawa.typedjson.keywords.Evaluated
 import frawa.typedjson.keywords.Keyword
-import frawa.typedjson.output.SimpleOutput
-import frawa.typedjson.output.OutputOps
-import frawa.typedjson.suggest.Suggest
 import frawa.typedjson.keywords.KeywordLocation
 import frawa.typedjson.keywords.WithLocation
+import frawa.typedjson.output.OutputOps
+import frawa.typedjson.output.SimpleOutput
+import frawa.typedjson.pointer.Pointer
+import frawa.typedjson.validation.ValidationError
+
+import scala.collection.immutable.Seq
 
 case class SuggestOutput(
     simple: SimpleOutput,
@@ -54,7 +47,11 @@ object SuggestOutput:
     def invalid(error: ValidationError, pointer: Pointer): SuggestOutput =
       SuggestOutput(bops.invalid(error, pointer))
 
-    def all(os: Seq[SuggestOutput], error: Option[ValidationError], pointer: Pointer): SuggestOutput =
+    def all(
+        os: Seq[SuggestOutput],
+        error: Option[ValidationError],
+        pointer: Pointer
+    ): SuggestOutput =
       SuggestOutput(
         bops.all(os.map(_.simple), error, pointer),
         os.flatMap(_.keywords)

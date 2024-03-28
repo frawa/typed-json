@@ -59,8 +59,12 @@ object SchemaValue:
         (Pointer.empty / "$vocabulary")(value)
           .flatMap {
             case ObjectValue(properties) =>
-              Some(properties.view.flatMap { case (k, v) => Value.asBool(v).map(v => (uri(k), v)) }.toMap)
+              Some(properties.view.flatMap { case (k, v) =>
+                Value.asBool(v).map(v => (uri(k), v))
+              }.toMap)
             case _ => None
           }
-          .map(ids => Vocabulary.dialect(ids).map(_.withFormatAssertion(parentVocabulary.isFormatAssertion)))
+          .map(ids =>
+            Vocabulary.dialect(ids).map(_.withFormatAssertion(parentVocabulary.isFormatAssertion))
+          )
           .getOrElse(Right(parentVocabulary))

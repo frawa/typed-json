@@ -16,19 +16,12 @@
 
 package frawa.typedjson.validation
 
-import scala.collection.immutable.Seq
-
-import frawa.typedjson.keywords.*
-import frawa.typedjson.parser.*
-import frawa.typedjson.parser.Value.*
-import frawa.typedjson.pointer.Pointer
-
-import java.net.URI
-import java.util.UUID
-import java.util.regex.Pattern
-import scala.reflect.TypeTest
-import scala.util.Try
+import frawa.typedjson.keywords._
 import frawa.typedjson.output.OutputOps
+import frawa.typedjson.parser.Value._
+import frawa.typedjson.parser._
+
+import scala.collection.immutable.Seq
 
 sealed trait ValidationError
 case class SubSchemaFailed()                                            extends ValidationError

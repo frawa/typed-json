@@ -16,28 +16,28 @@
 
 package frawa.typedjson.js
 
-import scala.collection.immutable.Seq
-
-import frawa.typedjson.{TypedJson}
-import frawa.typedjson.TypedJson.Validation
-import frawa.typedjson.parser.jawn.JawnParser
-import frawa.typedjson.keywords.*
-import frawa.typedjson.meta.MetaSchemas
-import frawa.typedjson.parser.{Offset, OffsetParser, Value}
-import frawa.typedjson.pointer.Pointer
+import frawa.typedjson.TypedJson
+import frawa.typedjson.keywords._
+import frawa.typedjson.output.OutputJson
 import frawa.typedjson.output.OutputOps
 import frawa.typedjson.output.SimpleOutput
-import frawa.typedjson.suggest.SuggestOutput
-import frawa.typedjson.suggest.Suggest
-
-import scala.scalajs.js
-import scala.scalajs.js.annotation.{JSExport, JSExportAll, JSExportTopLevel}
-import scala.scalajs.js.JSConverters._
-
-import frawa.typedjson.suggest.SuggestResult
-import frawa.typedjson.suggest.Suggest.Doc
-import frawa.typedjson.output.OutputJson
+import frawa.typedjson.parser.Offset
 import frawa.typedjson.parser.OffsetContext
+import frawa.typedjson.parser.OffsetParser
+import frawa.typedjson.parser.Value
+import frawa.typedjson.parser.jawn.JawnParser
+import frawa.typedjson.pointer.Pointer
+import frawa.typedjson.suggest.Suggest
+import frawa.typedjson.suggest.Suggest.Doc
+import frawa.typedjson.suggest.SuggestOutput
+import frawa.typedjson.suggest.SuggestResult
+
+import scala.collection.immutable.Seq
+import scala.scalajs.js
+import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.annotation.JSExport
+import scala.scalajs.js.annotation.JSExportAll
+import scala.scalajs.js.annotation.JSExportTopLevel
 
 @JSExportTopLevel("TypedJsonFactory")
 object TypedJsonFactory {
@@ -188,7 +188,12 @@ case class Suggestion(
 )
 
 object SuggestionsResult {
-  def apply(pointer: Pointer, offset: Offset, sep: Option[String], result: SuggestResult): SuggestionsResult = {
+  def apply(
+      pointer: Pointer,
+      offset: Offset,
+      sep: Option[String],
+      result: SuggestResult
+  ): SuggestionsResult = {
     val Offset(start, end) = offset
     val suggestions        = toSuggestions(result, sep)
     // TODO dedup ealier?

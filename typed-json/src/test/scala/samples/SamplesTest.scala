@@ -16,15 +16,13 @@
 
 package samples
 
-import munit.FunSuite
-
 import frawa.typedjson.TypedJson
-import frawa.typedjson.parser.jawn.JawnParser
-import frawa.typedjson.validation.TypeMismatch
-import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.parser.Parser
-import frawa.typedjson.util.WithPointer
+import frawa.typedjson.parser.jawn.JawnParser
 import frawa.typedjson.testutil.TestUtil.parseJsonValue
+import frawa.typedjson.util.WithPointer
+import frawa.typedjson.validation.TypeMismatch
+import munit.FunSuite
 
 class SamplesTest extends FunSuite:
   given Parser = new JawnParser()
