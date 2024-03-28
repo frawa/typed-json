@@ -121,7 +121,7 @@ case class Keywords(
   private def add(keyword: Keyword)(using location: CurrentLocation): Keywords =
     this.copy(keywords = keywords + withLocation(keyword))
 
-  private def addLast(push: Keywords => Keywords)(using location: CurrentLocation): Keywords =
+  private def addLast(push: Keywords => Keywords)(using CurrentLocation): Keywords =
     this.copy(lastKeywords = lastKeywords :+ push)
 
   private def addAll(schemas: Seq[SchemaValue], resolver: SchemaResolver, scope: DynamicScope)(

@@ -37,7 +37,8 @@ import java.net.URI
 import scala.collection.immutable.Seq
 
 open class JsonSchemaTestSuite extends FunSuite:
-  protected val draft202012 = InlineFiles.inlineDeepTextFiles("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
+  protected val draft202012 =
+    InlineFiles.inlineDeepTextFiles("./JSON-Schema-Test-Suite/tests/draft2020-12", ".json")
 
   protected val ignoreFiles: Seq[String] = Seq()
 
@@ -78,7 +79,6 @@ open class JsonSchemaTestSuite extends FunSuite:
       case _ => fail("invalid test json suite")
 
   private def checkTest(file: String, testValue: Value): Unit =
-
     testValue match
       case ObjectValue(properties) =>
         val StringValue(description: String) = properties("description"): @unchecked
@@ -118,8 +118,8 @@ open class JsonSchemaTestSuite extends FunSuite:
     val lr           = Some(lazyResolver)
     val evalBasic    = Eval[R, SimpleOutput]
 
-    given Eval[R, SimpleOutput]                      = evalBasic
-    given Option[LoadedSchemasResolver.LazyResolver] = lr
+    given Eval[R, SimpleOutput] = evalBasic
+    // given Option[LoadedSchemasResolver.LazyResolver] = lr
     withCompiledSchemaValue(schemaValue, lr, vocabularyForTest) { fun =>
 
       val values = expactations.map(_.data)

@@ -221,7 +221,7 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
             .get(p)
             .toSeq
           val funsPattern = patternProperties
-            .filter { (regex, f) =>
+            .filter { (regex, _) =>
               val r = regex.r
               r.findFirstIn(p).isDefined
             }
@@ -485,7 +485,7 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
             lazy val all  = Seq.range(0, vs.length).toSet
             val remaining = if evaluated.isEmpty then all else all.filterNot(evaluated.contains)
             val remainingIndexed = vs.zipWithIndex
-              .filter { (v, index) =>
+              .filter { (_, index) =>
                 remaining.contains(index)
               }
               .map { case (v, index) =>
