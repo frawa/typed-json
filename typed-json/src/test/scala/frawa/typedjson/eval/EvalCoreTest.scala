@@ -85,14 +85,20 @@ class EvalCoreTest extends FunSuite:
 
   test("false with errors") {
     withCompiledSchema(falseSchema) { fun =>
-      assertEquals(doApply(fun, parseJsonValue("{}")), SimpleOutput(false, Seq(WithPointer(FalseSchemaReason()))))
+      assertEquals(
+        doApply(fun, parseJsonValue("{}")),
+        SimpleOutput(false, Seq(WithPointer(FalseSchemaReason())))
+      )
     }
   }
 
   test("boolean") {
     withCompiledSchema(boolSchema) { fun =>
       assertEquals(doApply(fun, parseJsonValue("true")), SimpleOutput(true))
-      assertEquals(doApply(fun, parseJsonValue("13")), SimpleOutput(false, Seq(WithPointer(TypeMismatch("boolean")))))
+      assertEquals(
+        doApply(fun, parseJsonValue("13")),
+        SimpleOutput(false, Seq(WithPointer(TypeMismatch("boolean"))))
+      )
     }
   }
 
@@ -106,9 +112,18 @@ class EvalCoreTest extends FunSuite:
 
   test("false schema") {
     withCompiledSchema(falseSchema) { fun =>
-      assertEquals(doApply(fun, parseJsonValue("null")), SimpleOutput(false, Seq(WithPointer(FalseSchemaReason()))))
-      assertEquals(doApply(fun, parseJsonValue("13")), SimpleOutput(false, Seq(WithPointer(FalseSchemaReason()))))
-      assertEquals(doApply(fun, parseJsonValue("{}")), SimpleOutput(false, Seq(WithPointer(FalseSchemaReason()))))
+      assertEquals(
+        doApply(fun, parseJsonValue("null")),
+        SimpleOutput(false, Seq(WithPointer(FalseSchemaReason())))
+      )
+      assertEquals(
+        doApply(fun, parseJsonValue("13")),
+        SimpleOutput(false, Seq(WithPointer(FalseSchemaReason())))
+      )
+      assertEquals(
+        doApply(fun, parseJsonValue("{}")),
+        SimpleOutput(false, Seq(WithPointer(FalseSchemaReason())))
+      )
     }
   }
 
@@ -132,23 +147,38 @@ class EvalCoreTest extends FunSuite:
 
   test("not empty schema") {
     withCompiledSchema("""{"not": {}}""") { fun =>
-      assertEquals(doApply(fun, parseJsonValue("null")), SimpleOutput(false, Seq(WithPointer(NotInvalid()))))
-      assertEquals(doApply(fun, parseJsonValue("13")), SimpleOutput(false, Seq(WithPointer(NotInvalid()))))
-      assertEquals(doApply(fun, parseJsonValue("{}")), SimpleOutput(false, Seq(WithPointer(NotInvalid()))))
+      assertEquals(
+        doApply(fun, parseJsonValue("null")),
+        SimpleOutput(false, Seq(WithPointer(NotInvalid())))
+      )
+      assertEquals(
+        doApply(fun, parseJsonValue("13")),
+        SimpleOutput(false, Seq(WithPointer(NotInvalid())))
+      )
+      assertEquals(
+        doApply(fun, parseJsonValue("{}")),
+        SimpleOutput(false, Seq(WithPointer(NotInvalid())))
+      )
     }
   }
 
   test("string") {
     withCompiledSchema(stringSchema) { fun =>
       assertEquals(doApply(fun, parseJsonValue(""""hello"""")), SimpleOutput(true))
-      assertEquals(doApply(fun, parseJsonValue("13")), SimpleOutput(false, Seq(WithPointer(TypeMismatch("string")))))
+      assertEquals(
+        doApply(fun, parseJsonValue("13")),
+        SimpleOutput(false, Seq(WithPointer(TypeMismatch("string"))))
+      )
     }
   }
 
   test("number") {
     withCompiledSchema(numberSchema) { fun =>
       assertEquals(doApply(fun, parseJsonValue("13")), SimpleOutput(true))
-      assertEquals(doApply(fun, parseJsonValue("null")), SimpleOutput(false, Seq(WithPointer(TypeMismatch("number")))))
+      assertEquals(
+        doApply(fun, parseJsonValue("null")),
+        SimpleOutput(false, Seq(WithPointer(TypeMismatch("number"))))
+      )
     }
   }
 
@@ -308,7 +338,10 @@ class EvalCoreTest extends FunSuite:
                          |""".stripMargin) { fun =>
       assertEquals(
         doApply(fun, parseJsonValue("1313")),
-        SimpleOutput(false, Seq(WithPointer(TypeMismatch("string")), WithPointer(TypeMismatch("boolean"))))
+        SimpleOutput(
+          false,
+          Seq(WithPointer(TypeMismatch("string")), WithPointer(TypeMismatch("boolean")))
+        )
       )
     }
   }
@@ -433,7 +466,10 @@ class EvalCoreTest extends FunSuite:
       )
       assertEquals(
         doApply(fun, parseJsonValue("13")),
-        SimpleOutput(false, Seq(WithPointer(TypeMismatch("null")), WithPointer(TypeMismatch("string"))))
+        SimpleOutput(
+          false,
+          Seq(WithPointer(TypeMismatch("null")), WithPointer(TypeMismatch("string")))
+        )
       )
     }
   }

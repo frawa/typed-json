@@ -75,43 +75,46 @@ class OutputJsonTest extends FunSuite:
     val (output, _) = typedJson.eval(parseJsonValue(Sample.value))
 
     BasicOutput(
-        false,
-        error = None,
-        instanceLocation = Pointer.empty,
-        keywordLocation = None,
-        errors = Seq(
-          // TODO 1: failed at Pointer.empty, "keywordLocation": """, "instanceLocation": "",
-          // TODO 2: failed at Pointer.empty / 1, "keywordLocation": "/items/$ref", "absoluteKeywordLocation": "https://example.com/polygon#/$defs/point",
+      false,
+      error = None,
+      instanceLocation = Pointer.empty,
+      keywordLocation = None,
+      errors = Seq(
+        // TODO 1: failed at Pointer.empty, "keywordLocation": """, "instanceLocation": "",
+        // TODO 2: failed at Pointer.empty / 1, "keywordLocation": "/items/$ref", "absoluteKeywordLocation": "https://example.com/polygon#/$defs/point",
 
-          BasicOutput.Error(
-            AdditionalPropertyInvalid("z"),
-            Pointer.empty / 1 / "z",
-            KeywordLocation(
-              "/items/$ref/additionalProperties",
-              "https://example.com/polygon#/$defs/point/additionalProperties"
-            )
-          ),
-          BasicOutput.Error(
-            FalseSchemaReason(),
-            Pointer.empty / 1,
-            KeywordLocation(
-              "/items/$ref",
-              "https://example.com/polygon#/$defs/point"
-            )
-          ),
-          BasicOutput.Error(
-            MissingRequiredProperties(Seq("y")),
-            Pointer.empty / 1,
-            KeywordLocation("/items/$ref/required", "https://example.com/polygon#/$defs/point/required")
-          ),
-          BasicOutput.Error(
-            MinItemsMismatch(3, 2),
-            Pointer.empty,
-            KeywordLocation("/minItems")
+        BasicOutput.Error(
+          AdditionalPropertyInvalid("z"),
+          Pointer.empty / 1 / "z",
+          KeywordLocation(
+            "/items/$ref/additionalProperties",
+            "https://example.com/polygon#/$defs/point/additionalProperties"
           )
         ),
-        annotations = Seq()
-      )
+        BasicOutput.Error(
+          FalseSchemaReason(),
+          Pointer.empty / 1,
+          KeywordLocation(
+            "/items/$ref",
+            "https://example.com/polygon#/$defs/point"
+          )
+        ),
+        BasicOutput.Error(
+          MissingRequiredProperties(Seq("y")),
+          Pointer.empty / 1,
+          KeywordLocation(
+            "/items/$ref/required",
+            "https://example.com/polygon#/$defs/point/required"
+          )
+        ),
+        BasicOutput.Error(
+          MinItemsMismatch(3, 2),
+          Pointer.empty,
+          KeywordLocation("/minItems")
+        )
+      ),
+      annotations = Seq()
+    )
     // TODO
     // assertEquals(Some(expected), output)
 
@@ -177,59 +180,64 @@ class OutputJsonTest extends FunSuite:
     val (output, _) = typedJson.eval(parseJsonValue(Sample.value))
 
     DetailedOutput(
-        false,
-        error = None,
-        instanceLocation = Pointer.empty,
-        keywordLocation = Some(KeywordLocation.empty),
-        errors = Seq(
-          DetailedOutput(
-            valid = false,
-            error = None,
-            instanceLocation = Pointer.empty / 1,
-            keywordLocation = Some(KeywordLocation("/items/$ref", "https://example.com/polygon#/$defs/point")),
-            errors = Seq(
-              DetailedOutput(
-                valid = false,
-                error = Some(AdditionalPropertyInvalid("z")),
-                instanceLocation = Pointer.empty / 1 / "z",
-                keywordLocation = Some(
-                  KeywordLocation(
-                    "/items/$ref/additionalProperties",
-                    "https://example.com/polygon#/$defs/point/additionalProperties"
-                  )
-                ),
-                errors = Seq(
-                  DetailedOutput(
-                    valid = false,
-                    error = Some(FalseSchemaReason()),
-                    instanceLocation = Pointer.empty / 1 / "z",
-                    keywordLocation = Some(
-                      KeywordLocation(
-                        "/items/$ref/additionalProperties",
-                        "https://example.com/polygon#/$defs/point/additionalProperties"
-                      )
+      false,
+      error = None,
+      instanceLocation = Pointer.empty,
+      keywordLocation = Some(KeywordLocation.empty),
+      errors = Seq(
+        DetailedOutput(
+          valid = false,
+          error = None,
+          instanceLocation = Pointer.empty / 1,
+          keywordLocation =
+            Some(KeywordLocation("/items/$ref", "https://example.com/polygon#/$defs/point")),
+          errors = Seq(
+            DetailedOutput(
+              valid = false,
+              error = Some(AdditionalPropertyInvalid("z")),
+              instanceLocation = Pointer.empty / 1 / "z",
+              keywordLocation = Some(
+                KeywordLocation(
+                  "/items/$ref/additionalProperties",
+                  "https://example.com/polygon#/$defs/point/additionalProperties"
+                )
+              ),
+              errors = Seq(
+                DetailedOutput(
+                  valid = false,
+                  error = Some(FalseSchemaReason()),
+                  instanceLocation = Pointer.empty / 1 / "z",
+                  keywordLocation = Some(
+                    KeywordLocation(
+                      "/items/$ref/additionalProperties",
+                      "https://example.com/polygon#/$defs/point/additionalProperties"
                     )
                   )
                 )
-              ),
-              DetailedOutput(
-                valid = false,
-                error = Some(MissingRequiredProperties(Seq("y"))),
-                instanceLocation = Pointer.empty / 1,
-                keywordLocation =
-                  Some(KeywordLocation("/items/$ref/required", "https://example.com/polygon#/$defs/point/required"))
+              )
+            ),
+            DetailedOutput(
+              valid = false,
+              error = Some(MissingRequiredProperties(Seq("y"))),
+              instanceLocation = Pointer.empty / 1,
+              keywordLocation = Some(
+                KeywordLocation(
+                  "/items/$ref/required",
+                  "https://example.com/polygon#/$defs/point/required"
+                )
               )
             )
-          ),
-          DetailedOutput(
-            valid = false,
-            error = Some(MinItemsMismatch(3, 2)),
-            instanceLocation = Pointer.empty,
-            keywordLocation = Some(KeywordLocation("/minItems"))
           )
         ),
-        annotations = Seq()
-      )
+        DetailedOutput(
+          valid = false,
+          error = Some(MinItemsMismatch(3, 2)),
+          instanceLocation = Pointer.empty,
+          keywordLocation = Some(KeywordLocation("/minItems"))
+        )
+      ),
+      annotations = Seq()
+    )
     // assertEquals(output, Some(expected))
 
     val detailedJson = output.map(OutputJson.detailed)
@@ -282,79 +290,81 @@ object Sample:
                          |]
                          |""".stripMargin
 
-  val expectedBasic: String = """|{
-                                 |  "valid": false,
-                                 |  "errors": [
-                                 |    {
-                                 |      "keywordLocation": "/minItems",
-                                 |      "instanceLocation": "",
-                                 |      "error": "Expected at least 3 items but found 2."
-                                 |    },                               
-                                 |    {
-                                 |      "keywordLocation": "",
-                                 |      "instanceLocation": "",
-                                 |      "error": "A subschema had errors."
-                                 |    },
-                                 |    {
-                                 |      "keywordLocation": "/items/$ref",
-                                 |      "absoluteKeywordLocation":
-                                 |        "https://example.com/polygon#/$defs/point",
-                                 |      "instanceLocation": "/1",
-                                 |      "error": "A subschema had errors."
-                                 |    },
-                                 |    {
-                                 |      "keywordLocation": "/items/$ref/required",
-                                 |      "absoluteKeywordLocation":
-                                 |        "https://example.com/polygon#/$defs/point/required",
-                                 |      "instanceLocation": "/1",
-                                 |      "error": "Required property 'y' not found."
-                                 |    },
-                                 |    {
-                                 |      "keywordLocation": "/items/$ref/additionalProperties",
-                                 |      "absoluteKeywordLocation":
-                                 |        "https://example.com/polygon#/$defs/point/additionalProperties",
-                                 |      "instanceLocation": "/1/z",
-                                 |      "error": "Additional property 'z' found but was invalid."
-                                 |    }                                 
-                                 |  ]
-                                 |}
-                                 |""".stripMargin
+  val expectedBasic: String =
+    """|{
+       |  "valid": false,
+       |  "errors": [
+       |    {
+       |      "keywordLocation": "/minItems",
+       |      "instanceLocation": "",
+       |      "error": "Expected at least 3 items but found 2."
+       |    },                               
+       |    {
+       |      "keywordLocation": "",
+       |      "instanceLocation": "",
+       |      "error": "A subschema had errors."
+       |    },
+       |    {
+       |      "keywordLocation": "/items/$ref",
+       |      "absoluteKeywordLocation":
+       |        "https://example.com/polygon#/$defs/point",
+       |      "instanceLocation": "/1",
+       |      "error": "A subschema had errors."
+       |    },
+       |    {
+       |      "keywordLocation": "/items/$ref/required",
+       |      "absoluteKeywordLocation":
+       |        "https://example.com/polygon#/$defs/point/required",
+       |      "instanceLocation": "/1",
+       |      "error": "Required property 'y' not found."
+       |    },
+       |    {
+       |      "keywordLocation": "/items/$ref/additionalProperties",
+       |      "absoluteKeywordLocation":
+       |        "https://example.com/polygon#/$defs/point/additionalProperties",
+       |      "instanceLocation": "/1/z",
+       |      "error": "Additional property 'z' found but was invalid."
+       |    }                                 
+       |  ]
+       |}
+       |""".stripMargin
 
-  val expectedDetailed = """|{
-                            |  "valid": false,
-                            |  "keywordLocation": "",
-                            |  "instanceLocation": "",
-                            |  "errors": [
-                            |    {
-                            |      "valid": false,
-                            |      "keywordLocation": "/items/$ref",
-                            |      "absoluteKeywordLocation":
-                            |        "https://example.com/polygon#/$defs/point",
-                            |      "instanceLocation": "/1",
-                            |      "errors": [
-                            |        {
-                            |          "valid": false,
-                            |          "keywordLocation": "/items/$ref/required",
-                            |          "absoluteKeywordLocation":
-                            |            "https://example.com/polygon#/$defs/point/required",
-                            |          "instanceLocation": "/1",
-                            |          "error": "Required property 'y' not found."
-                            |        },
-                            |        {
-                            |          "valid": false,
-                            |          "keywordLocation": "/items/$ref/additionalProperties",
-                            |          "absoluteKeywordLocation":
-                            |            "https://example.com/polygon#/$defs/point/additionalProperties",
-                            |          "instanceLocation": "/1/z",
-                            |          "error": "Additional property 'z' found but was invalid."
-                            |        }
-                            |      ]
-                            |    },
-                            |    {
-                            |      "valid": false,
-                            |      "keywordLocation": "/minItems",
-                            |      "instanceLocation": "",
-                            |      "error": "Expected at least 3 items but found 2."
-                            |    }
-                            |  ]
-                            |}""".stripMargin
+  val expectedDetailed =
+    """|{
+       |  "valid": false,
+       |  "keywordLocation": "",
+       |  "instanceLocation": "",
+       |  "errors": [
+       |    {
+       |      "valid": false,
+       |      "keywordLocation": "/items/$ref",
+       |      "absoluteKeywordLocation":
+       |        "https://example.com/polygon#/$defs/point",
+       |      "instanceLocation": "/1",
+       |      "errors": [
+       |        {
+       |          "valid": false,
+       |          "keywordLocation": "/items/$ref/required",
+       |          "absoluteKeywordLocation":
+       |            "https://example.com/polygon#/$defs/point/required",
+       |          "instanceLocation": "/1",
+       |          "error": "Required property 'y' not found."
+       |        },
+       |        {
+       |          "valid": false,
+       |          "keywordLocation": "/items/$ref/additionalProperties",
+       |          "absoluteKeywordLocation":
+       |            "https://example.com/polygon#/$defs/point/additionalProperties",
+       |          "instanceLocation": "/1/z",
+       |          "error": "Additional property 'z' found but was invalid."
+       |        }
+       |      ]
+       |    },
+       |    {
+       |      "valid": false,
+       |      "keywordLocation": "/minItems",
+       |      "instanceLocation": "",
+       |      "error": "Expected at least 3 items but found 2."
+       |    }
+       |  ]
+       |}""".stripMargin

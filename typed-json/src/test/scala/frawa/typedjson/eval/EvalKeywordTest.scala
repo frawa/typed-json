@@ -619,27 +619,30 @@ class EvalKeywordTest extends FunSuite:
   }
 
   test("unevaluatedItems with prefixItems") {
-    withCompiledSchema("""{ "prefixItems": [{ "type": "boolean" }], "unevaluatedItems": { "type": "string" } }""") {
-      fun =>
-        assertEquals(
-          doApplyBulk(
-            fun,
-            Seq(
-              parseJsonValue("""[true, "foo"]"""),
-              parseJsonValue("""[true, 13]""")
-            ),
-            state => {}
-          ),
+    withCompiledSchema(
+      """{ "prefixItems": [{ "type": "boolean" }], "unevaluatedItems": { "type": "string" } }"""
+    ) { fun =>
+      assertEquals(
+        doApplyBulk(
+          fun,
           Seq(
-            SimpleOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1)))),
-            SimpleOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
-          )
+            parseJsonValue("""[true, "foo"]"""),
+            parseJsonValue("""[true, 13]""")
+          ),
+          state => {}
+        ),
+        Seq(
+          SimpleOutput(true, annotations = Seq(EvaluatedIndices(Set(0, 1)))),
+          SimpleOutput(false, Seq(WithPointer(TypeMismatch("string"), Pointer.empty / 1)))
         )
+      )
     }
   }
 
   test("unevaluatedItems with contains") {
-    withCompiledSchema("""{ "unevaluatedItems": { "type": "string" }, "contains": {"type": "boolean"}  }""") { fun =>
+    withCompiledSchema(
+      """{ "unevaluatedItems": { "type": "string" }, "contains": {"type": "boolean"}  }"""
+    ) { fun =>
       assertEquals(
         doApplyBulk(
           fun,

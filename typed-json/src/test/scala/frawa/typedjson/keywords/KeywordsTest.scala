@@ -26,7 +26,9 @@ import munit.Compare
 import munit.FunSuite
 
 class KeywordsTest extends FunSuite:
-  private val vocabularyForTest = dialect(Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId)).get
+  private val vocabularyForTest = dialect(
+    Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId)
+  ).get
 
   private def assertKeywords(schema: SchemaValue, vocabulary: Vocabulary = vocabularyForTest)(
       f: Keywords => Unit
@@ -102,7 +104,9 @@ class KeywordsTest extends FunSuite:
               NotKeyword(
                 Keywords(
                   vocabularyForTest,
-                  Set(WithLocation(TrivialKeyword(false), KeywordLocation(Pointer.parse("/not").get)))
+                  Set(
+                    WithLocation(TrivialKeyword(false), KeywordLocation(Pointer.parse("/not").get))
+                  )
                 )
               ),
               KeywordLocation(Pointer.parse("/not").get)
@@ -126,7 +130,9 @@ class KeywordsTest extends FunSuite:
       assertSchemaProblems(schema) { problems =>
         assertEquals(
           problems,
-          SchemaProblems(Seq(WithPointer(InvalidSchemaValue(StringValue("gnu")), Pointer.empty / "not")))
+          SchemaProblems(
+            Seq(WithPointer(InvalidSchemaValue(StringValue("gnu")), Pointer.empty / "not"))
+          )
         )
       }
     }
@@ -405,7 +411,10 @@ class KeywordsTest extends FunSuite:
                   Keywords(
                     vocabularyForTest,
                     Set(
-                      WithLocation(NumberTypeKeyword, KeywordLocation(Pointer.empty / "if" / "type"))
+                      WithLocation(
+                        NumberTypeKeyword,
+                        KeywordLocation(Pointer.empty / "if" / "type")
+                      )
                     ),
                     Seq()
                   )
@@ -537,7 +546,8 @@ class KeywordsTest extends FunSuite:
   }
 
   test("meta: title") {
-    val vocabularyWithMeta = vocabularyForTest.combine(Vocabulary.specVocabularies(Vocabulary.metaDataId))
+    val vocabularyWithMeta =
+      vocabularyForTest.combine(Vocabulary.specVocabularies(Vocabulary.metaDataId))
     withSchema("""{
                  |"title": "My Title"
                  |}
@@ -557,7 +567,8 @@ class KeywordsTest extends FunSuite:
   }
 
   test("meta: title and description") {
-    val vocabularyWithMeta = vocabularyForTest.combine(Vocabulary.specVocabularies(Vocabulary.metaDataId))
+    val vocabularyWithMeta =
+      vocabularyForTest.combine(Vocabulary.specVocabularies(Vocabulary.metaDataId))
     withSchema("""{
                  |"description": "Longer description.",
                  |"title": "My Title"
@@ -578,7 +589,8 @@ class KeywordsTest extends FunSuite:
   }
 
   test("meta: all") {
-    val vocabularyWithMeta = vocabularyForTest.combine(Vocabulary.specVocabularies(Vocabulary.metaDataId))
+    val vocabularyWithMeta =
+      vocabularyForTest.combine(Vocabulary.specVocabularies(Vocabulary.metaDataId))
     withSchema("""{
                  |"description": "Longer description.",
                  |"title": "My Title",

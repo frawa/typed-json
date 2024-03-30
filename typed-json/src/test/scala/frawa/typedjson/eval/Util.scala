@@ -27,7 +27,12 @@ import scala.collection.immutable.Seq
 
 object Util:
   val vocabularyForTest: Option[Vocabulary] = dialect(
-    Seq(Vocabulary.coreId, Vocabulary.validationId, Vocabulary.applicatorId, Vocabulary.unevaluatedId)
+    Seq(
+      Vocabulary.coreId,
+      Vocabulary.validationId,
+      Vocabulary.applicatorId,
+      Vocabulary.unevaluatedId
+    )
   )
 
   def withKeywords(
@@ -80,8 +85,8 @@ object Util:
     // println(s"counted ${s.count} binds")
     o
 
-  def doApplyBulk[O: OutputOps](fun: Value => R[O], values: Seq[Value], fun2: CacheState => Unit)(using
-      resolver: SchemaResolver
+  def doApplyBulk[O: OutputOps](fun: Value => R[O], values: Seq[Value], fun2: CacheState => Unit)(
+      using resolver: SchemaResolver
   ): Seq[O] =
     val emptyCache = empty(resolver, vocabularyForTest.get)
     val (s, os) = values
