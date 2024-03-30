@@ -485,7 +485,10 @@ class EvalSpecDetailsTest extends FunSuite:
           { _ => }
         ),
         Seq(
-          SimpleOutput(true, annotations = Seq(EvaluatedProperties(Set("alpha")), Ignored(Set("title")))),
+          SimpleOutput(
+            true,
+            annotations = Seq(EvaluatedProperties(Set("alpha")), Ignored(Set("title")))
+          ),
           SimpleOutput(
             false,
             errors = Seq(

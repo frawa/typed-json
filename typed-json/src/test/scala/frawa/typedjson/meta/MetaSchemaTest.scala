@@ -38,7 +38,10 @@ class MetaSchemaTest extends FunSuite:
     val Some(schema) = resolver(base.resolve(name)): @unchecked
     f(schema)
 
-  def validateSpec(valueName: String, schemaName: String)(f: SimpleOutput => Unit, g: CacheState.Stats => Unit): Unit =
+  def validateSpec(valueName: String, schemaName: String)(
+      f: SimpleOutput => Unit,
+      g: CacheState.Stats => Unit
+  ): Unit =
     val evalBasic               = Eval[R, SimpleOutput]
     given Eval[R, SimpleOutput] = evalBasic
     withSchemaSpec(schemaName) { schema =>

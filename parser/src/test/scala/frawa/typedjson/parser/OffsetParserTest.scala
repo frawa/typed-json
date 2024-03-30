@@ -44,7 +44,8 @@ class OffsetParserTest extends FunSuite:
 
   test("contextAt around array") {
     // [13,14]
-    val v = ArrayValue(Offset(0, 7), Seq(NumberValue(Offset(1, 3), 13), NumberValue(Offset(4, 6), 14)))
+    val v =
+      ArrayValue(Offset(0, 7), Seq(NumberValue(Offset(1, 3), 13), NumberValue(Offset(4, 6), 14)))
     assertEquals(contextAt(v)(0), NewValue(Pointer.empty / 0, Offset(0, 0)))
     assertEquals(contextAt(v)(1), InsideValue(Pointer.empty / 0, Offset(1, 3)))
     assertEquals(contextAt(v)(2), InsideValue(Pointer.empty / 0, Offset(1, 3)))

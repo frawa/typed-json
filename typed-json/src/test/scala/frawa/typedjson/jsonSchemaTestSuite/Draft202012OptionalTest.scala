@@ -35,7 +35,10 @@ class Draft202012OptionalTest extends JsonSchemaTestSuite:
   )
 
   override protected val ignoreByExpectation: Map[TestId, Seq[String]] = Map(
-    ("format-assertion.json", "schema that uses custom metaschema with format-assertion: false") -> Seq(
+    (
+      "format-assertion.json",
+      "schema that uses custom metaschema with format-assertion: false"
+    ) -> Seq(
       "format-assertion: false: invalid string"
     ),
     ("dependencies-compatibility.json", "multiple dependents required") -> Seq(

@@ -58,7 +58,9 @@ class SuggestTest extends FunSuite:
     voc.combine(Vocabulary.specVocabularies(Vocabulary.metaDataId))
   }
 
-  private def assertSuggest(text: String, at: Pointer = Pointer.empty, onlyKeys: Boolean = false)(schema: SchemaValue)(
+  private def assertSuggest(text: String, at: Pointer = Pointer.empty, onlyKeys: Boolean = false)(
+      schema: SchemaValue
+  )(
       f: SuggestResult => Unit
   ) =
     given OutputOps[SuggestOutput] = SuggestOutput.outputOps(at)
@@ -67,12 +69,14 @@ class SuggestTest extends FunSuite:
     val value                      = parseJsonValue(text)
     withCompiledSchemaValue(schema, vocabulary = vocabularyWithMeta) { fun =>
       Suggest.suggestAt(at)(fun)
-      val output     = doApply(fun, value)
-      val result     = Suggest.suggestions(at, onlyKeys, output)
+      val output = doApply(fun, value)
+      val result = Suggest.suggestions(at, onlyKeys, output)
       f(result)
     }
 
-  private def assertSuggestForSchema(text: String, at: Pointer, keysOnly: Boolean)(f: SuggestResult => Unit): Unit =
+  private def assertSuggestForSchema(text: String, at: Pointer, keysOnly: Boolean)(
+      f: SuggestResult => Unit
+  ): Unit =
     val lazyResolver = MetaSchemas.lazyResolver
     val base         = MetaSchemas.draft202012
     val Some(schema) = lazyResolver(base.resolve("schema")): @unchecked
@@ -83,8 +87,8 @@ class SuggestTest extends FunSuite:
     val value                      = parseJsonValue(text)
     withCompiledSchemaValue(schema, Some(lazyResolver), Some(Vocabulary.specDialect())) { fun =>
       Suggest.suggestAt(at)(fun)
-      val output     = doApply(fun, value)
-      val result     = Suggest.suggestions(at, keysOnly, output)
+      val output = doApply(fun, value)
+      val result = Suggest.suggestions(at, keysOnly, output)
       f(result)
     }
 

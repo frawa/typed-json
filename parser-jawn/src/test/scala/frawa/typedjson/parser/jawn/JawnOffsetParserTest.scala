@@ -74,7 +74,10 @@ class JawnOffsetParserTest extends FunSuite {
       Right(
         ArrayValue(
           Offset(0, 11),
-          Seq(NumberValue(Offset(1, 3), 13), ArrayValue(Offset(4, 10), Seq(BoolValue(Offset(5, 9), value = true))))
+          Seq(
+            NumberValue(Offset(1, 3), 13),
+            ArrayValue(Offset(4, 10), Seq(BoolValue(Offset(5, 9), value = true)))
+          )
         )
       )
     )
@@ -213,7 +216,11 @@ class JawnOffsetParserTest extends FunSuite {
       Right(
         ArrayValue(
           Offset(0, 10),
-          Seq(NumberValue(Offset(1, 3), 13), NumberValue(Offset(4, 6), 14), NumberValue(Offset(7, 9), 15))
+          Seq(
+            NumberValue(Offset(1, 3), 13),
+            NumberValue(Offset(4, 6), 14),
+            NumberValue(Offset(7, 9), 15)
+          )
         )
       )
     )
@@ -438,7 +445,9 @@ class JawnOffsetParserTest extends FunSuite {
     // assertEquals(pointerAt(recovered)(4), (Pointer.empty / "toto"))
   }
 
-  private def offsetAt(json: String)(at: Pointer): Either[OffsetParser.ParseError, Option[Offset]] = {
+  private def offsetAt(
+      json: String
+  )(at: Pointer): Either[OffsetParser.ParseError, Option[Offset]] = {
     parser.parseWithOffset(json).map(OffsetParser.offsetAt(_)(at))
   }
 
@@ -490,7 +499,10 @@ class JawnOffsetParserTest extends FunSuite {
     assertEquals(offsetAt("""{"toto":13}""")(Pointer.empty / "toto"), Right(Some(Offset(8, 10))))
     assertEquals(offsetAt("""{"toto":13}""")(Pointer.empty / "missing"), Right(None))
     assertEquals(offsetAt("""{"toto":13}""")(Pointer.empty / 13), Right(None))
-    assertEquals(offsetAt("""{"foo": [13,14], "bar": {"gnu": 13}}""")(Pointer.empty), Right(Some(Offset(0, 36))))
+    assertEquals(
+      offsetAt("""{"foo": [13,14], "bar": {"gnu": 13}}""")(Pointer.empty),
+      Right(Some(Offset(0, 36)))
+    )
     assertEquals(
       offsetAt("""{"foo": [13,14], "bar": {"gnu": 13}}""")(Pointer.empty / "foo"),
       Right(Some(Offset(8, 15)))

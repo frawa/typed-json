@@ -211,16 +211,18 @@ object TestSchemas:
                                   |}
                                   |}""".stripMargin
 
-  val refToValidationSpec: String = """{
-                                      |"$id": "https://json-schema.org/draft/2020-12/partial",
-                                      |"$dynamicAnchor": "meta",
-                                      |"allOf": [
-                                      |  {"$ref": "https://json-schema.org/draft/2020-12/meta/validation"},
-                                      |  {"$ref": "https://json-schema.org/draft/2020-12/meta/core"}
-                                      |]
-                                      |}""".stripMargin
+  val refToValidationSpec: String =
+    """{
+      |"$id": "https://json-schema.org/draft/2020-12/partial",
+      |"$dynamicAnchor": "meta",
+      |"allOf": [
+      |  {"$ref": "https://json-schema.org/draft/2020-12/meta/validation"},
+      |  {"$ref": "https://json-schema.org/draft/2020-12/meta/core"}
+      |]
+      |}""".stripMargin
 
-  val refIndirectToValidationSpec: String = """{
-                                              |"$id": "https://example.net/root.json",
-                                              |"$ref": "https://json-schema.org/draft/2020-12/schema"
-                                              |}""".stripMargin
+  val refIndirectToValidationSpec: String =
+    """{
+      |"$id": "https://example.net/root.json",
+      |"$ref": "https://json-schema.org/draft/2020-12/schema"
+      |}""".stripMargin

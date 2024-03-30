@@ -335,7 +335,10 @@ class LoadedSchemasResolverTest extends FunSuite:
       val Some(SchemaResolution(schema, resolver2)) = resolver1.resolveRef("cache-me"): @unchecked
       assertEquals(schema, SchemaValue.root(NullValue))
       assertEquals(resolver2.isInstanceOf[LoadedSchemasResolver], true)
-      assertEquals(resolver2.asInstanceOf[LoadedSchemasResolver].schemas.keySet, Set(uri("cache-me")))
+      assertEquals(
+        resolver2.asInstanceOf[LoadedSchemasResolver].schemas.keySet,
+        Set(uri("cache-me"))
+      )
     }
   }
 
@@ -369,7 +372,8 @@ class LoadedSchemasResolverTest extends FunSuite:
       withLoadedSchemas(Seq()) { resolver0 =>
         val uriExample = uri(exampleUri)
         val lazyResolver: LazyResolver = uri =>
-          if uri.toString == exampleUri then Some(RootSchemaValue(exampleSchema.value, Some(uriExample)))
+          if uri.toString == exampleUri then
+            Some(RootSchemaValue(exampleSchema.value, Some(uriExample)))
           else None
         val resolver = resolver0.withLazyResolver(lazyResolver)
 

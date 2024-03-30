@@ -35,7 +35,10 @@ class JawnParserTest extends FunSuite {
   }
 
   test("object") {
-    assertEquals(Parser("""{"toto":"titi"}"""), Right(ObjectValue(Map("toto" -> StringValue("titi")))))
+    assertEquals(
+      Parser("""{"toto":"titi"}"""),
+      Right(ObjectValue(Map("toto" -> StringValue("titi"))))
+    )
   }
 
   test("big number") {
