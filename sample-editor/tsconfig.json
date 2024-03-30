@@ -3,7 +3,8 @@
     "baseUrl": ".", // This must be specified if "paths" is.
     "paths": {
       "typedjson": [
-        "../typed-json-js-export/target/scala-3.4.1/typed-json-js-export-fastopt"
+        //"../typed-json-js-export/target/scala-4.1.2/typed-json-js-export-fastopt"
+        "../target/js/typed-json-js-export-fastopt"
       ]
     },
     /* Visit https://aka.ms/tsconfig.json to read more about this file */

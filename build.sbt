@@ -254,6 +254,14 @@ lazy val typedJsonJsExport = project
   .settings(
     name := "typed-json-js-export"
   )
+  .settings(
+    webpack / version                 := "5.88.2",
+    webpackCliVersion                 := "5.1.4",
+    startWebpackDevServer / version   := "4.15.1",
+    Compile / npmUpdate / crossTarget := file("target/js"),
+    Compile / fullOptJS / crossTarget := file("target/js"),
+    Compile / fullOptJS / crossTarget := file("target/js")
+  )
   .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin)
   .settings(sharedSettings)
   .settings(sharedScalacSettings)

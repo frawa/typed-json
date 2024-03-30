@@ -11,9 +11,8 @@ module.exports = {
     resolve: {
         extensions: ['.ts', '.js'],
         alias: {
-            // 'typedjson': path.resolve(__dirname, '../typed-json-js-export/target/scala-3.2.2/typed-json-js-export-fastopt.js'),
-            // 'typedjson': path.resolve(__dirname, '../typed-json-js-export/target/scala-3.2.2/scalajs-bundler/main/typed-json-js-export-fastopt-bundle.js'),
-            'typedjson': path.resolve(__dirname, '../typed-json-js-export/target/scala-3.4.1/scalajs-bundler/main/typed-json-js-export-fastopt.js'),
+            // 'typedjson': path.resolve(__dirname, '../typed-json-js-export/target/scala-3.4.1/scalajs-bundler/main/typed-json-js-export-fastopt.js'),
+            'typedjson': path.resolve(__dirname, '../target/js/typed-json-js-export-fastopt-bundle.js'),
         },
     },
     output: {
