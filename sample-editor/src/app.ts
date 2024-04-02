@@ -117,6 +117,12 @@ languages.registerCompletionItemProvider("json", {
       const label = JSON.stringify(value)
       const pretty = JSON.stringify(value, null, 2)
       const detail = `${result.pointer} ${start.lineNumber}:${start.column}-${end.lineNumber}:${end.column}`
+      const range = {
+        startColumn: start.column,
+        startLineNumber: start.lineNumber,
+        endColumn: end.column,
+        endLineNumber: end.lineNumber
+      }
       return {
         label,
         kind: 0,
@@ -124,31 +130,8 @@ languages.registerCompletionItemProvider("json", {
         documentation: {
           value: (s.documentationMarkdown ?? "") + "```\n" + pretty + "\n```",
         },
-        insertText: '',
-        range: {
-          startColumn: position.column,
-          startLineNumber: position.lineNumber,
-          endColumn: position.column,
-          endLineNumber: position.lineNumber,
-        },
-        // TODO aggressive replace from typedJson suggestion        
-        additionalTextEdits: [{
-          //   range: {
-          //     startColumn: model.getWordAtPosition(position)?.startColumn ?? position.column,
-          //     startLineNumber: position.lineNumber,
-          //     endColumn: position.column,
-          //     endLineNumber: position.lineNumber
-          //   },
-          //   text: pretty
-          // }, {
-          range: {
-            startColumn: start.column,
-            startLineNumber: start.lineNumber,
-            endColumn: end.column,
-            endLineNumber: end.lineNumber
-          },
-          text: pretty + (s.seperator ?? '')
-        }]
+        range,
+        insertText: pretty + (s.seperator ?? ''),
       };
     });
     return {
