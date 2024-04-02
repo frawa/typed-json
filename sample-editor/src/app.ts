@@ -55,6 +55,7 @@ const editorJson = editor.create(document.getElementById('editor')!, {
   language: 'json',
   ...common,
   theme: "vs-dark",
+  formatOnType: true
 });
 
 const editorSchema = editor.create(document.getElementById('editorSchema')!, {
@@ -62,6 +63,7 @@ const editorSchema = editor.create(document.getElementById('editorSchema')!, {
   language: 'json',
   ...common,
   theme: "vs-dark",
+  formatOnType: true
 });
 
 // WTF?
@@ -182,6 +184,7 @@ function validateAndSetMarkers(tj: TypedJson, e: editor.IStandaloneCodeEditor): 
 
 function replaceSchemaBy(value: string) {
   editorSchema.setValue(value)
+  editorSchema.trigger(null, 'editor.action.formatDocument', {});
 }
 
 document.querySelector<HTMLSelectElement>("#sample-schema")?.addEventListener("change", (e) => {
