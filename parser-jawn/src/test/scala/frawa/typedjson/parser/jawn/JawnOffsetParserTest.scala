@@ -19,6 +19,7 @@ package frawa.typedjson.parser.jawn
 import frawa.typedjson.parser.Offset
 import frawa.typedjson.parser.OffsetParser
 import frawa.typedjson.parser.OffsetParser.ParseError
+import frawa.typedjson.parser.OffsetContext.*
 import frawa.typedjson.pointer.Pointer
 import munit._
 
@@ -440,9 +441,15 @@ class JawnOffsetParserTest extends FunSuite {
         )
       )
     )
-    // TODO move to OffsetParserTest
-    // assertEquals(pointerAt(recovered)(9), Pointer.empty / "toto")
-    // assertEquals(pointerAt(recovered)(4), (Pointer.empty / "toto"))
+    // TODO move to OffsetParserTest?
+    assertEquals(
+      OffsetParser.contextAt(recovered)(9),
+      NewValue(Pointer.empty / "toto", Offset(9, 9))
+    )
+    assertEquals(
+      OffsetParser.contextAt(recovered)(4),
+      InsideKey(Pointer.empty / "toto", Offset(1, 7))
+    )
   }
 
   private def offsetAt(
@@ -579,6 +586,66 @@ class JawnOffsetParserTest extends FunSuite {
             //   -> NullValue(Offset(42, 42))
         )
       )
+    )
+  }
+
+  test("recover array in object") {
+    val text = """|{
+                  |  "type": [,]
+                  |}
+                  |""".stripMargin
+    val recovered = recoveredValue(text).get
+    assertEquals(
+      recovered,
+      ObjectValue(
+        Offset(0, 14),
+        Map(
+          StringValue(Offset(4, 10), "type")
+            -> ArrayValue(Offset(12, 14), Seq(NullValue(Offset(13, 13))))
+        )
+      )
+    )
+    assertEquals(
+      OffsetParser.contextAt(recovered)(12),
+      NewValue(Pointer.empty / "type" / 0, Offset(12, 12))
+    )
+    assertEquals(
+      OffsetParser.contextAt(recovered)(13),
+      InsideValue(Pointer.empty / "type" / 0, Offset(13, 13))
+    )
+    assertEquals(
+      OffsetParser.contextAt(recovered)(14),
+      NewValue(Pointer.empty / "type" / 1, Offset(14, 14))
+    )
+  }
+
+  test("recover array in object 2") {
+    val text = """|{
+                  |  "type":[,]
+                  |}
+                  |""".stripMargin
+    val recovered = recoveredValue(text).get
+    assertEquals(
+      recovered,
+      ObjectValue(
+        Offset(0, 13),
+        Map(
+          StringValue(Offset(4, 10), "type")
+            -> ArrayValue(Offset(11, 13), Seq(NullValue(Offset(12, 12))))
+        )
+      )
+    )
+    assertEquals(
+      OffsetParser.contextAt(recovered)(11),
+      NewValue(Pointer.empty / "type" / 0, Offset(11, 11))
+    )
+    assertEquals(
+      OffsetParser.contextAt(recovered)(12),
+      InsideValue(Pointer.empty / "type" / 0, Offset(12, 12))
+    )
+    assertEquals(
+      OffsetParser.contextAt(recovered)(13),
+      NewValue(Pointer.empty / "type" / 1, Offset(13, 13))
     )
   }
 

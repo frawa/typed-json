@@ -124,6 +124,7 @@ case class TypedJsonJS(
         case _: OffsetContext.NewKey    => (true, at.pointer)
         case _                          => (false, at.pointer)
       }
+      println(("FW", at, keysOnly, atPointer))
 
       given OutputOps[SuggestOutput] = SuggestOutput.outputOps(atPointer)
       val (o, _)                     = this.typedJson.eval(value)
