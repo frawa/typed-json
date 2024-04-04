@@ -24,16 +24,19 @@ import frawa.typedjson.pointer.Pointer
 
 import java.net.URI
 import scala.collection.immutable.Seq
+import frawa.typedjson.parser.Offset
 
 case class SuggestResult(suggestions: Seq[Suggest])
 
 enum Suggest:
   def values: Seq[Value] = this match {
-    case Values(vs)     => vs
-    case WithDoc(vs, _) => vs
+    case Values(vs)        => vs
+    case WithDoc(s, _)     => s.values
+    case WithReplace(s, _) => s.values
   }
   case Values(vs: Seq[Value])
-  case WithDoc(vs: Seq[Value], doc: Suggest.Doc)
+  case WithDoc(s: Suggest, doc: Suggest.Doc)
+  case WithReplace(s: Suggest, replace: Offset)
 
 object Suggest:
   // TODO deprecated, readOnly, writeOnly
@@ -86,7 +89,7 @@ object Suggest:
       .flatMap(findMeta)
       .flatMap(toDoc(parent, _))
       .map { doc =>
-        Suggest.WithDoc(vs, doc)
+        Suggest.WithDoc(Suggest.Values(vs), doc)
       }
       .getOrElse(Suggest.Values(vs))
 
@@ -241,10 +244,9 @@ object Suggest:
 
   private def onlyKeys(w: Suggest): Suggest =
     w match {
-      case Suggest.Values(vs) =>
-        Suggest.Values(onlyKeys(vs))
-      case Suggest.WithDoc(vs, doc) =>
-        Suggest.WithDoc(onlyKeys(vs), doc)
+      case Suggest.Values(vs)            => Suggest.Values(onlyKeys(vs))
+      case Suggest.WithDoc(s, doc)       => Suggest.WithDoc(onlyKeys(s), doc)
+      case Suggest.WithReplace(s, range) => Suggest.WithReplace(onlyKeys(s), range)
     }
 
   private def onlyKeys(vs: Seq[Value]): Seq[Value] =

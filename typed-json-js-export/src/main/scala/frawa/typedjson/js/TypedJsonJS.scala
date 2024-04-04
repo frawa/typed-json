@@ -215,13 +215,25 @@ object SuggestionsResult {
     TextRange(offset.start, offset.end)
 
   private def toSuggestions(result: SuggestResult, sep: Option[String]): Seq[Suggestion] =
-    result.suggestions.flatMap {
-      case Suggest.Values(vs)       => vs.map(toSuggestion(None, sep))
-      case Suggest.WithDoc(vs, doc) => vs.map(toSuggestion(toMarkdown(doc), sep))
+
+    def go(s: Suggest): Seq[Suggestion] = s match {
+      case Suggest.Values(vs)            => vs.map(toSuggestion(sep))
+      case Suggest.WithDoc(s, doc)       => go(s).map(withDoc(toMarkdown(doc)))
+      case Suggest.WithReplace(s, range) => go(s).map(withReplace(toTextRange(range)))
     }
 
-  private def toSuggestion(doc: Option[String], sep: Option[String])(value: Value): Suggestion = {
-    Suggestion(toAny(value), seperator = sep.orUndefined, documentationMarkdown = doc.orUndefined)
+    result.suggestions.flatMap(go)
+
+  private def toSuggestion(sep: Option[String])(value: Value): Suggestion = {
+    Suggestion(toAny(value), seperator = sep.orUndefined)
+  }
+
+  private def withDoc(doc: Option[String])(suggestion: Suggestion): Suggestion = {
+    suggestion.copy(documentationMarkdown = doc.orUndefined)
+  }
+
+  private def withReplace(replace: TextRange)(suggestion: Suggestion): Suggestion = {
+    suggestion.copy(replace = replace)
   }
 
   private def toAny(value: Value): js.Any = {

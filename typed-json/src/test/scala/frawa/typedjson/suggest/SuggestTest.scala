@@ -49,8 +49,10 @@ class SuggestTest extends FunSuite:
       (obtained, expected) match {
         case (Suggest.Values(vs1), Suggest.Values(vs2)) =>
           vs1.toSet.equals(vs2.toSet)
-        case (Suggest.WithDoc(vs1, doc1), Suggest.WithDoc(vs2, doc2)) =>
-          vs1.toSet.equals(vs2.toSet) && doc1.equals(doc2)
+        case (Suggest.WithDoc(s1, doc1), Suggest.WithDoc(s2, doc2)) =>
+          s1.equals(s2) && doc1.equals(doc2)
+        case (Suggest.WithReplace(s1, offset1), Suggest.WithReplace(s2, offset2)) =>
+          s1.equals(s2) && offset1.equals(offset2)
         case _ => false
       }
 
@@ -95,7 +97,7 @@ class SuggestTest extends FunSuite:
   private def suggests(vs: Value*): SuggestResult =
     SuggestResult(Seq(Suggest.Values(vs)))
   private def suggestWith(doc: Suggest.Doc, vs: Value*): SuggestResult =
-    SuggestResult(Seq(Suggest.WithDoc(vs, doc)))
+    SuggestResult(Seq(Suggest.WithDoc(Suggest.Values(vs), doc)))
 
   test("suggest one object per property") {
     withSchema(totoObjectSchema) { schema =>
