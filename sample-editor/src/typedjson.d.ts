@@ -20,7 +20,6 @@ declare module "typedjson" {
         static withMetaSchema(): TypedJson
     }
 
-
     export class TypedJson {
         withSchema(typedJson: TypedJson): TypedJson
         forValue(json: string): TypedJson
@@ -29,23 +28,28 @@ declare module "typedjson" {
     }
 
     export interface Marker {
-        start: number,
-        end: number,
-        pointer: string,
-        message: string,
+        start: number
+        end: number
+        pointer: string
+        message: string
         severity: string
     }
 
     export interface SuggestsResult {
-        start: number,
-        end: number,
-        pointer: string,
+        range: TextRange
+        pointer: string
         suggestions: Suggestion[]
     }
 
     export interface Suggestion {
         value: unknown
-        seperator?: string;
+        replace: TextRange
+        seperator?: string
         documentationMarkdown?: string
+    }
+
+    export interface TextRange {
+        start: number
+        end: number
     }
 }
