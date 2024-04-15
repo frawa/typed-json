@@ -353,7 +353,6 @@ class SuggestTest extends FunSuite:
             """{ "foo":true}"""
           )
         )
-
       }
     }
   }
@@ -379,8 +378,9 @@ class SuggestTest extends FunSuite:
         assertEquals(
           result,
           suggests(
-            """{ "foo":{ "bar":14,
-           "gnu":"titi"}}""",
+            """|{
+               | "foo":{ "bar":14, "gnu":"titi"}
+               |}""".stripMargin,
             """{ }"""
           )
         )
@@ -421,7 +421,7 @@ class SuggestTest extends FunSuite:
     }
   }
 
-  test("suggest at inside object") {
+  test("suggest inside object") {
     withSchema(totoObjectSchema) { schema =>
       assertSuggest(
         """{"toto": 13}""",
@@ -439,7 +439,7 @@ class SuggestTest extends FunSuite:
     }
   }
 
-  test("suggest item inside array") {
+  test("suggest inside array") {
     withSchema(numberArraySchema) { schema =>
       assertSuggest(
         """[ 13, 14 ]""",
