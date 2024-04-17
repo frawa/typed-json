@@ -175,7 +175,7 @@ lazy val macros = project
   .settings(sharedScalacSettings)
   .settings(sharedTestSettings)
   .settings(
-    libraryDependencies += "io.github.frawa" %%% "inline-files" % "0.7.0"
+    libraryDependencies += "io.github.frawa" %%% "inline-files" % "0.7.1"
   )
   .dependsOn(parser.jvm(scalaVersion3))
   .dependsOn(parserJawn.jvm(scalaVersion3))
@@ -226,7 +226,7 @@ lazy val typedJson =
       name := "typed-json"
     )
     .settings(
-      libraryDependencies += "io.github.frawa" %%% "inline-files" % "0.7.0" % Test
+      libraryDependencies += "io.github.frawa" %%% "inline-files" % "0.7.1" % Test
     )
     .settings(
       unmanagedSources / excludeFilter := "*/suggestion/*" || "*/validation/*"
