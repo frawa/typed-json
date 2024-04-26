@@ -70,9 +70,9 @@ class SuggestTest extends FunSuite:
     given Eval[R, SuggestOutput]   = evalSuggest
     val value                      = parseJsonValue(text)
     withCompiledSchemaValue(schema, vocabulary = vocabularyWithMeta) { fun =>
-      Suggest.suggestAt(at)(fun)
-      val output = doApply(fun, value)
-      val result = Suggest.suggestions(at, onlyKeys, output)
+      val suggestFun = Suggest.suggestAt(at)(fun)
+      val output     = doApply(suggestFun, value)
+      val result     = Suggest.suggestions(at, onlyKeys, output)
       f(result)
     }
 
@@ -299,46 +299,50 @@ class SuggestTest extends FunSuite:
     }
   }
 
+  val descriminatorScheme =
+    """|{
+       |  "$id": "testme",
+       |"oneOf": [{
+       |  "if": { 
+       |    "type": "object",
+       |    "properties": { 
+       |      "kind": { "type": "string", "const": "first" }
+       |    }
+       |  },
+       |  "then": {
+       |    "type": "object",
+       |    "properties": { 
+       |      "gnu": { "type": "number" }
+       |    }
+       |  }
+       |},{
+       |  "if": { 
+       |    "type": "object",
+       |    "properties": { 
+       |      "kind": { "type": "string", "const": "second" }
+       |    }
+       |  },
+       |  "then": {
+       |    "type": "object",
+       |    "properties": { 
+       |      "gnu": { "type": "boolean" },
+       |      "bar": { "type": "boolean" }
+       |    }
+       |  }
+       |}]
+       |}""".stripMargin
+
   test("discriminator") {
-    withSchema("""{
-                 |"$id": "testme",
-                 |"oneOf": [{
-                 |  "if": { 
-                 |    "type": "object",
-                 |    "properties": { 
-                 |      "kind": { "type": "string", "const": "first" }
-                 |    }
-                 |  },
-                 |  "then": {
-                 |    "type": "object",
-                 |    "properties": { 
-                 |      "gnu": { "type": "number" }
-                 |    }
-                 |  }
-                 |},{
-                 |  "if": { 
-                 |    "type": "object",
-                 |    "properties": { 
-                 |      "kind": { "type": "string", "const": "second" }
-                 |    }
-                 |  },
-                 |  "then": {
-                 |    "type": "object",
-                 |    "properties": { 
-                 |      "foo": { "type": "boolean" }
-                 |    }
-                 |  }
-                 |}]
-                 |}""".stripMargin) { schema =>
+    withSchema(descriminatorScheme) { schema =>
       assertSuggest("""{}""")(schema) { result =>
         assertEquals(
           result,
           suggests(
             """{ "kind":"first"}""",
             """{ }""",
-            """{ "gnu":0}""",
+            """{ "gnu":0.0}""",
             """{ "kind":"second"}""",
-            """{ "foo":true}"""
+            """{ "gnu":true,"bar":true }"""
           )
         )
       }
@@ -350,7 +354,28 @@ class SuggestTest extends FunSuite:
             """{ }""",
             """{ "gnu":0}""",
             """{ "kind":"second"}""",
-            """{ "foo":true}"""
+            """{ "gnu":true,"bar":true }"""
+          )
+        )
+      }
+    }
+  }
+
+  test("discriminator inside") {
+    withSchema(descriminatorScheme) { schema =>
+      assertSuggest("""{"kind":"first", "gnu":{}}""", Pointer.empty / "gnu")(schema) { result =>
+        assertEquals(
+          result,
+          suggests(
+            "0"
+          )
+        )
+      }
+      assertSuggest("""{"kind":"second", "gnu":{}}""", Pointer.empty / "gnu")(schema) { result =>
+        assertEquals(
+          result,
+          suggests(
+            "true"
           )
         )
       }
