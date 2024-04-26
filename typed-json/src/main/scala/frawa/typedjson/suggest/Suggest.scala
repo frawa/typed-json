@@ -18,13 +18,13 @@ package frawa.typedjson.suggest
 
 import frawa.typedjson.keywords.Keyword
 import frawa.typedjson.keywords._
+import frawa.typedjson.parser.Offset
 import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.Value._
 import frawa.typedjson.pointer.Pointer
 
 import java.net.URI
 import scala.collection.immutable.Seq
-import frawa.typedjson.parser.Offset
 
 case class SuggestResult(suggestions: Seq[Suggest])
 
@@ -72,29 +72,27 @@ object Suggest:
         case _ => None
       }
       .toMap
+    val byMeta = Work.parentLoc.andThen(_.flatMap(p => metaByLoc.get(p).map((_, p))))
     val suggestions = ws
-      .groupBy(Work.parentLoc)
+      .groupBy(byMeta)
       .view
-      .mapValues(_.flatMap(_.values).distinct)
-      .map(toSuggest(metaByLoc.get))
+      .map(toSuggest.tupled)
       .toSeq
     // TODO use more precise replaceAt for better suggestions
     if keysOnly then SuggestResult(suggestions.map(onlyKeys))
     else SuggestResult(suggestions)
 
-  private def toSuggest(
-      findMeta: KeywordLocation => Option[MetaKeyword]
-  )(parent: Option[KeywordLocation], vs: Seq[Value]): Suggest =
-    parent
-      .flatMap(findMeta)
-      .flatMap(toDoc(parent, _))
+  private def toSuggest(group: Option[(MetaKeyword, KeywordLocation)], vs: Seq[Work]): Suggest =
+    val values = vs.flatMap(_.values).distinct
+    group
+      .flatMap(toDoc.tupled)
       .map { doc =>
-        Suggest.WithDoc(Suggest.Values(vs), doc)
+        Suggest.WithDoc(Suggest.Values(values), doc)
       }
-      .getOrElse(Suggest.Values(vs))
+      .getOrElse(Suggest.Values(values))
 
-  private def toDoc(kl: Option[KeywordLocation], meta: MetaKeyword): Option[Doc] =
-    val location = kl flatMap {
+  private def toDoc(meta: MetaKeyword, kl: KeywordLocation): Option[Doc] =
+    val location = kl match {
       case KeywordLocation.Dereferenced(_, absolute) => Some(absolute)
       case _                                         => None
     }
