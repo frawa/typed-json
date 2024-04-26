@@ -36,6 +36,8 @@ import frawa.typedjson.testutil.TestUtil.{_, given}
 import frawa.typedjson.util.UriUtil.uri
 import munit.Compare
 import munit.FunSuite
+import frawa.typedjson.util.ShowValue.prettyPrint
+import frawa.typedjson.util.ShowValue.flatPrint
 
 class SuggestTest extends FunSuite:
 
@@ -152,7 +154,7 @@ class SuggestTest extends FunSuite:
         assertEquals(
           result,
           suggests(
-            """{ "foo":{ "bar":0}}""",
+            """{ "foo":{ "bar":0.0}}""",
             """{ }"""
           )
         )
@@ -233,7 +235,7 @@ class SuggestTest extends FunSuite:
           result,
           suggests(
             """null""",
-            """0"""
+            """0.0"""
           )
         )
       }
@@ -242,7 +244,7 @@ class SuggestTest extends FunSuite:
           result,
           suggests(
             """null""",
-            """0"""
+            """0.0"""
           )
         )
       }
@@ -335,6 +337,7 @@ class SuggestTest extends FunSuite:
   test("discriminator") {
     withSchema(descriminatorScheme) { schema =>
       assertSuggest("""{}""")(schema) { result =>
+        // println("FW" + result.suggestions.map(_.values).map(_.map(flatPrint)).mkString("\n"))
         assertEquals(
           result,
           suggests(
