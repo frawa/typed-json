@@ -36,8 +36,6 @@ import frawa.typedjson.testutil.TestUtil.{_, given}
 import frawa.typedjson.util.UriUtil.uri
 import munit.Compare
 import munit.FunSuite
-import frawa.typedjson.util.ShowValue.prettyPrint
-import frawa.typedjson.util.ShowValue.flatPrint
 
 class SuggestTest extends FunSuite:
 

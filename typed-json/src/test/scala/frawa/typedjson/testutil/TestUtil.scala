@@ -19,6 +19,12 @@ package frawa.typedjson.testutil
 import frawa.typedjson.keywords._
 import frawa.typedjson.parser.Parser
 import frawa.typedjson.parser.Value
+import frawa.typedjson.parser.Value.ArrayValue
+import frawa.typedjson.parser.Value.BoolValue
+import frawa.typedjson.parser.Value.NullValue
+import frawa.typedjson.parser.Value.NumberValue
+import frawa.typedjson.parser.Value.ObjectValue
+import frawa.typedjson.parser.Value.StringValue
 import frawa.typedjson.parser.jawn.JawnParser
 import munit.Assertions.clue
 import munit.Assertions.clues
@@ -26,12 +32,6 @@ import munit.Assertions.fail
 
 import java.net.URI
 import scala.collection.immutable.Seq
-import frawa.typedjson.parser.Value.NumberValue
-import frawa.typedjson.parser.Value.BoolValue
-import frawa.typedjson.parser.Value.NullValue
-import frawa.typedjson.parser.Value.StringValue
-import frawa.typedjson.parser.Value.ArrayValue
-import frawa.typedjson.parser.Value.ObjectValue
 
 object TestUtil:
   given Parser                                     = new JawnParser
