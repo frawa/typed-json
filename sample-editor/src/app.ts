@@ -110,19 +110,20 @@ languages.registerCompletionItemProvider("json", {
         suggestions: []
       }
     }
-    const start = model.getPositionAt(result.start)
-    const end = model.getPositionAt(result.end)
     const suggestions: languages.CompletionItem[] = result.suggestions.map(s => {
       const value = s.value
       const label = JSON.stringify(value)
       const pretty = JSON.stringify(value, null, 2)
-      const detail = `${result.pointer} ${start.lineNumber}:${start.column}-${end.lineNumber}:${end.column}`
+      const replace = s.replace ?? result.range
+      const start = model.getPositionAt(replace.start)
+      const end = model.getPositionAt(replace.end)
       const range = {
         startColumn: start.column,
         startLineNumber: start.lineNumber,
         endColumn: end.column,
         endLineNumber: end.lineNumber
       }
+      const detail = `${result.pointer} ${range.startLineNumber}:${range.startColumn}-${range.endLineNumber}:${range.endColumn}`
       return {
         label,
         kind: 0,

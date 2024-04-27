@@ -18,6 +18,7 @@ package frawa.typedjson.suggest
 
 import frawa.typedjson.keywords.Keyword
 import frawa.typedjson.keywords._
+import frawa.typedjson.parser.Offset
 import frawa.typedjson.parser.Value
 import frawa.typedjson.parser.Value._
 import frawa.typedjson.pointer.Pointer
@@ -29,11 +30,13 @@ case class SuggestResult(suggestions: Seq[Suggest])
 
 enum Suggest:
   def values: Seq[Value] = this match {
-    case Values(vs)     => vs
-    case WithDoc(vs, _) => vs
+    case Values(vs)        => vs
+    case WithDoc(s, _)     => s.values
+    case WithReplace(s, _) => s.values
   }
   case Values(vs: Seq[Value])
-  case WithDoc(vs: Seq[Value], doc: Suggest.Doc)
+  case WithDoc(s: Suggest, doc: Suggest.Doc)
+  case WithReplace(s: Suggest, replace: Offset)
 
 object Suggest:
   // TODO deprecated, readOnly, writeOnly
@@ -69,29 +72,27 @@ object Suggest:
         case _ => None
       }
       .toMap
+    val byMeta = Work.parentLoc.andThen(_.flatMap(p => metaByLoc.get(p).map((_, p))))
     val suggestions = ws
-      .groupBy(Work.parentLoc)
+      .groupBy(byMeta)
       .view
-      .mapValues(_.flatMap(_.values).distinct)
-      .map(toSuggest(metaByLoc.get))
+      .map(toSuggest.tupled)
       .toSeq
     // TODO use more precise replaceAt for better suggestions
     if keysOnly then SuggestResult(suggestions.map(onlyKeys))
     else SuggestResult(suggestions)
 
-  private def toSuggest(
-      findMeta: KeywordLocation => Option[MetaKeyword]
-  )(parent: Option[KeywordLocation], vs: Seq[Value]): Suggest =
-    parent
-      .flatMap(findMeta)
-      .flatMap(toDoc(parent, _))
+  private def toSuggest(group: Option[(MetaKeyword, KeywordLocation)], vs: Seq[Work]): Suggest =
+    val values = vs.flatMap(_.values).distinct
+    group
+      .flatMap(toDoc.tupled)
       .map { doc =>
-        Suggest.WithDoc(vs, doc)
+        Suggest.WithDoc(Suggest.Values(values), doc)
       }
-      .getOrElse(Suggest.Values(vs))
+      .getOrElse(Suggest.Values(values))
 
-  private def toDoc(kl: Option[KeywordLocation], meta: MetaKeyword): Option[Doc] =
-    val location = kl flatMap {
+  private def toDoc(meta: MetaKeyword, kl: KeywordLocation): Option[Doc] =
+    val location = kl match {
       case KeywordLocation.Dereferenced(_, absolute) => Some(absolute)
       case _                                         => None
     }
@@ -241,10 +242,9 @@ object Suggest:
 
   private def onlyKeys(w: Suggest): Suggest =
     w match {
-      case Suggest.Values(vs) =>
-        Suggest.Values(onlyKeys(vs))
-      case Suggest.WithDoc(vs, doc) =>
-        Suggest.WithDoc(onlyKeys(vs), doc)
+      case Suggest.Values(vs)            => Suggest.Values(onlyKeys(vs))
+      case Suggest.WithDoc(s, doc)       => Suggest.WithDoc(onlyKeys(s), doc)
+      case Suggest.WithReplace(s, range) => Suggest.WithReplace(onlyKeys(s), range)
     }
 
   private def onlyKeys(vs: Seq[Value]): Seq[Value] =

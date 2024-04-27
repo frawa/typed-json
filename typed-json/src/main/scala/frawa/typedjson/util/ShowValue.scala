@@ -23,7 +23,10 @@ import scala.collection.immutable.Seq
 
 object ShowValue:
 
-  def prettyPrint(indent: Int = 0)(v: Value): String =
+  def flatPrint: Value => String =
+    prettyPrint(0, true)
+
+  def prettyPrint(indent: Int = 0, flat: Boolean = false)(v: Value): String =
     def ws(indent: Int): String =
       String(Array.fill(2 * indent)(' '))
 
@@ -44,8 +47,8 @@ object ShowValue:
       def compare(x: Seq[Value], y: Seq[Value]): Int =
         seqOrdering.compare(x, y)
 
-    val sep  = s"\n${ws(indent)}"
-    val sep1 = s"\n${ws(indent + 1)}"
+    val sep  = if flat then "" else s"\n${ws(indent)}"
+    val sep1 = if flat then "" else s"\n${ws(indent + 1)}"
     v match {
       case NullValue      => "null"
       case StringValue(v) => s"\"${v}\""

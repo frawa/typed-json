@@ -59,7 +59,7 @@ object OffsetParser:
               vs.zipWithIndex.flatMap { (v, i) =>
                 if at < v.offset.start then
                   Some(OffsetContext.NewValue(Pointer.empty / i, Offset(at, at)))
-                else if v.offset.end <= at then
+                else if v.offset.end < at then
                   Some(OffsetContext.NewValue(Pointer.empty / (i + 1), Offset(at, at)))
                 else None
               }.headOption
@@ -89,9 +89,9 @@ object OffsetParser:
             }
             .orElse {
               properties.flatMap { (k, v) =>
-                if offset.start < at && at <= k.offset.start then
+                if offset.start < at && at < k.offset.start then
                   Some(OffsetContext.NewKey(Pointer.empty, Offset(at, at)))
-                else if k.offset.end <= at && at < v.offset.start then
+                else if k.offset.end < at && at < v.offset.start then
                   Some(OffsetContext.NewValue(Pointer.empty / k.value.toString(), Offset(at, at)))
                 else None
               }.headOption
@@ -109,7 +109,7 @@ object OffsetParser:
     pointer(value).map(_.offset)
 
 case class Offset(start: Int, end: Int):
-  def contains(at: Int): Boolean = start <= at && at < end
+  def contains(at: Int): Boolean = start <= at && at <= end
 
 object Offset:
   import frawa.typedjson.parser.{Value as ValueWO}

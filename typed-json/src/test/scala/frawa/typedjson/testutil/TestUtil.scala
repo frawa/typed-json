@@ -19,6 +19,12 @@ package frawa.typedjson.testutil
 import frawa.typedjson.keywords._
 import frawa.typedjson.parser.Parser
 import frawa.typedjson.parser.Value
+import frawa.typedjson.parser.Value.ArrayValue
+import frawa.typedjson.parser.Value.BoolValue
+import frawa.typedjson.parser.Value.NullValue
+import frawa.typedjson.parser.Value.NumberValue
+import frawa.typedjson.parser.Value.ObjectValue
+import frawa.typedjson.parser.Value.StringValue
 import frawa.typedjson.parser.jawn.JawnParser
 import munit.Assertions.clue
 import munit.Assertions.clues
@@ -39,6 +45,23 @@ object TestUtil:
       .swap
       .toOption
       .get
+
+  def serializeJsonValue(value: Value): String =
+    def serializeString(s: String): String =
+      s"\"$s\""
+
+    value match
+      case NumberValue(value) => value.toString()
+      case BoolValue(value)   => value.toString()
+      case NullValue          => "null"
+      case StringValue(value) => serializeString(value)
+      case ArrayValue(items)  => s"[${items.map(serializeJsonValue).mkString(",")}]"
+      case ObjectValue(properties) =>
+        s"{ ${properties
+            .map { (k, v) =>
+              serializeString(k) + ":" + serializeJsonValue(v)
+            }
+            .mkString(", ")}}"
 
   def withSchema(text: String)(f: SchemaValue => Unit)(using parser: Parser): Unit =
     f(SchemaValue.root(parseJsonValue(text)))

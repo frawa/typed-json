@@ -25,19 +25,21 @@ class OffsetParserTest extends FunSuite:
   import OffsetContext.*
 
   test("contextAt around number") {
-    val v = NumberValue(Offset(1, 3), 13)
+    // _13
+    val v = NumberValue(Offset(1, 2), 13)
     assertEquals(contextAt(v)(0), NewValue(Pointer.empty, Offset(0, 0)))
-    assertEquals(contextAt(v)(1), InsideValue(Pointer.empty, Offset(1, 3)))
-    assertEquals(contextAt(v)(2), InsideValue(Pointer.empty, Offset(1, 3)))
+    assertEquals(contextAt(v)(1), InsideValue(Pointer.empty, Offset(1, 2)))
+    assertEquals(contextAt(v)(2), InsideValue(Pointer.empty, Offset(1, 2)))
     assertEquals(contextAt(v)(3), NewValue(Pointer.empty, Offset(3, 3)))
     assertEquals(contextAt(v)(13), NewValue(Pointer.empty, Offset(13, 13)))
   }
 
   test("contextAt around bool") {
-    val v = BoolValue(Offset(1, 5), value = true)
+    // _true
+    val v = BoolValue(Offset(1, 4), value = true)
     assertEquals(contextAt(v)(0), NewValue(Pointer.empty, Offset(0, 0)))
-    assertEquals(contextAt(v)(1), InsideValue(Pointer.empty, Offset(1, 5)))
-    assertEquals(contextAt(v)(4), InsideValue(Pointer.empty, Offset(1, 5)))
+    assertEquals(contextAt(v)(1), InsideValue(Pointer.empty, Offset(1, 4)))
+    assertEquals(contextAt(v)(4), InsideValue(Pointer.empty, Offset(1, 4)))
     assertEquals(contextAt(v)(5), NewValue(Pointer.empty, Offset(5, 5)))
     assertEquals(contextAt(v)(13), NewValue(Pointer.empty, Offset(13, 13)))
   }
@@ -45,13 +47,13 @@ class OffsetParserTest extends FunSuite:
   test("contextAt around array") {
     // [13,14]
     val v =
-      ArrayValue(Offset(0, 7), Seq(NumberValue(Offset(1, 3), 13), NumberValue(Offset(4, 6), 14)))
+      ArrayValue(Offset(0, 6), Seq(NumberValue(Offset(1, 2), 13), NumberValue(Offset(4, 5), 14)))
     assertEquals(contextAt(v)(0), NewValue(Pointer.empty / 0, Offset(0, 0)))
-    assertEquals(contextAt(v)(1), InsideValue(Pointer.empty / 0, Offset(1, 3)))
-    assertEquals(contextAt(v)(2), InsideValue(Pointer.empty / 0, Offset(1, 3)))
+    assertEquals(contextAt(v)(1), InsideValue(Pointer.empty / 0, Offset(1, 2)))
+    assertEquals(contextAt(v)(2), InsideValue(Pointer.empty / 0, Offset(1, 2)))
     assertEquals(contextAt(v)(3), NewValue(Pointer.empty / 1, Offset(3, 3)))
-    assertEquals(contextAt(v)(4), InsideValue(Pointer.empty / 1, Offset(4, 6)))
-    assertEquals(contextAt(v)(5), InsideValue(Pointer.empty / 1, Offset(4, 6)))
+    assertEquals(contextAt(v)(4), InsideValue(Pointer.empty / 1, Offset(4, 5)))
+    assertEquals(contextAt(v)(5), InsideValue(Pointer.empty / 1, Offset(4, 5)))
     assertEquals(contextAt(v)(6), NewValue(Pointer.empty / 1, Offset(6, 6)))
     assertEquals(contextAt(v)(7), NewValue(Pointer.empty, Offset(7, 7)))
     assertEquals(contextAt(v)(13), NewValue(Pointer.empty, Offset(13, 13)))
@@ -60,37 +62,33 @@ class OffsetParserTest extends FunSuite:
   test("contextAt around nested array") {
     // [1,[2]]
     val v = ArrayValue(
-      Offset(0, 7),
-      Seq(NumberValue(Offset(1, 2), 1), ArrayValue(Offset(4, 6), Seq(NumberValue(Offset(4, 5), 2))))
+      Offset(0, 6),
+      Seq(NumberValue(Offset(1, 1), 1), ArrayValue(Offset(3, 5), Seq(NumberValue(Offset(4, 4), 2))))
     )
-    // assertEquals(contextAt(v)(0), NewValue(Pointer.empty / 0, Offset(0, 0)))
-    // assertEquals(contextAt(v)(1), InsideValue(Pointer.empty / 0, Offset(1, 2)))
-    // assertEquals(contextAt(v)(2), NewValue(Pointer.empty / 0, Offset(2, 2)))
-    // assertEquals(contextAt(v)(3), NewValue(Pointer.empty / 0, Offset(3, 3)))
-    // assertEquals(contextAt(v)(4), InsideValue(Pointer.empty / 1 / 0, Offset(4, 5)))
-    // assertEquals(contextAt(v)(5), NewValue(Pointer.empty / 1 / 0, Offset(5, 5)))
+    assertEquals(contextAt(v)(3), NewValue(Pointer.empty / 1 / 0, Offset(3, 3)))
+    assertEquals(contextAt(v)(4), InsideValue(Pointer.empty / 1 / 0, Offset(4, 4)))
+    assertEquals(contextAt(v)(5), NewValue(Pointer.empty / 1 / 1, Offset(5, 5)))
     assertEquals(contextAt(v)(6), NewValue(Pointer.empty / 1, Offset(6, 6)))
-    assertEquals(contextAt(v)(7), NewValue(Pointer.empty, Offset(7, 7)))
     assertEquals(contextAt(v)(13), NewValue(Pointer.empty, Offset(13, 13)))
   }
 
   test("contextAt around object") {
     // {"toto": 13}
     val v = ObjectValue(
-      Offset(0, 12),
-      Map(StringValue(Offset(1, 7), "toto") -> NumberValue(Offset(9, 11), 13))
+      Offset(0, 11),
+      Map(StringValue(Offset(1, 6), "toto") -> NumberValue(Offset(9, 10), 13))
     )
     assertEquals(contextAt(v)(0), NewValue(Pointer.empty, Offset(0, 0)))
-    assertEquals(contextAt(v)(1), InsideKey(Pointer.empty / "toto", Offset(1, 7)))
-    assertEquals(contextAt(v)(2), InsideKey(Pointer.empty / "toto", Offset(1, 7)))
-    assertEquals(contextAt(v)(3), InsideKey(Pointer.empty / "toto", Offset(1, 7)))
-    assertEquals(contextAt(v)(4), InsideKey(Pointer.empty / "toto", Offset(1, 7)))
-    assertEquals(contextAt(v)(5), InsideKey(Pointer.empty / "toto", Offset(1, 7)))
-    assertEquals(contextAt(v)(6), InsideKey(Pointer.empty / "toto", Offset(1, 7)))
+    assertEquals(contextAt(v)(1), InsideKey(Pointer.empty / "toto", Offset(1, 6)))
+    assertEquals(contextAt(v)(2), InsideKey(Pointer.empty / "toto", Offset(1, 6)))
+    assertEquals(contextAt(v)(3), InsideKey(Pointer.empty / "toto", Offset(1, 6)))
+    assertEquals(contextAt(v)(4), InsideKey(Pointer.empty / "toto", Offset(1, 6)))
+    assertEquals(contextAt(v)(5), InsideKey(Pointer.empty / "toto", Offset(1, 6)))
+    assertEquals(contextAt(v)(6), InsideKey(Pointer.empty / "toto", Offset(1, 6)))
     assertEquals(contextAt(v)(7), NewValue(Pointer.empty / "toto", Offset(7, 7)))
     assertEquals(contextAt(v)(8), NewValue(Pointer.empty / "toto", Offset(8, 8)))
-    assertEquals(contextAt(v)(9), InsideValue(Pointer.empty / "toto", Offset(9, 11)))
-    assertEquals(contextAt(v)(10), InsideValue(Pointer.empty / "toto", Offset(9, 11)))
+    assertEquals(contextAt(v)(9), InsideValue(Pointer.empty / "toto", Offset(9, 10)))
+    assertEquals(contextAt(v)(10), InsideValue(Pointer.empty / "toto", Offset(9, 10)))
     assertEquals(contextAt(v)(11), NewKey(Pointer.empty, Offset(11, 11)))
     assertEquals(contextAt(v)(12), NewValue(Pointer.empty, Offset(12, 12)))
     assertEquals(contextAt(v)(13), NewValue(Pointer.empty, Offset(13, 13)))
@@ -99,49 +97,49 @@ class OffsetParserTest extends FunSuite:
   test("contextAt around nexted object") {
     // {"toto": 1, "titi": {"foo": true}}
     val v = ObjectValue(
-      Offset(0, 34),
+      Offset(0, 33),
       Map(
-        StringValue(Offset(1, 7), "toto") -> NumberValue(Offset(9, 10), 1),
-        StringValue(Offset(12, 18), "titi") -> ObjectValue(
-          Offset(20, 33),
+        StringValue(Offset(1, 6), "toto") -> NumberValue(Offset(9, 9), 1),
+        StringValue(Offset(12, 17), "titi") -> ObjectValue(
+          Offset(20, 32),
           Map(
-            StringValue(Offset(21, 26), "foo") -> BoolValue(Offset(28, 32), true)
+            StringValue(Offset(21, 25), "foo") -> BoolValue(Offset(28, 31), true)
           )
         )
       )
     )
     assertEquals(contextAt(v)(0), NewValue(Pointer.empty, Offset(0, 0)))
-    assertEquals(contextAt(v)(1), InsideKey(Pointer.empty / "toto", Offset(1, 7)))
-    assertEquals(contextAt(v)(2), InsideKey(Pointer.empty / "toto", Offset(1, 7)))
-    assertEquals(contextAt(v)(3), InsideKey(Pointer.empty / "toto", Offset(1, 7)))
-    assertEquals(contextAt(v)(4), InsideKey(Pointer.empty / "toto", Offset(1, 7)))
-    assertEquals(contextAt(v)(5), InsideKey(Pointer.empty / "toto", Offset(1, 7)))
-    assertEquals(contextAt(v)(6), InsideKey(Pointer.empty / "toto", Offset(1, 7)))
+    assertEquals(contextAt(v)(1), InsideKey(Pointer.empty / "toto", Offset(1, 6)))
+    assertEquals(contextAt(v)(2), InsideKey(Pointer.empty / "toto", Offset(1, 6)))
+    assertEquals(contextAt(v)(3), InsideKey(Pointer.empty / "toto", Offset(1, 6)))
+    assertEquals(contextAt(v)(4), InsideKey(Pointer.empty / "toto", Offset(1, 6)))
+    assertEquals(contextAt(v)(5), InsideKey(Pointer.empty / "toto", Offset(1, 6)))
+    assertEquals(contextAt(v)(6), InsideKey(Pointer.empty / "toto", Offset(1, 6)))
     assertEquals(contextAt(v)(7), NewValue(Pointer.empty / "toto", Offset(7, 7)))
     assertEquals(contextAt(v)(8), NewValue(Pointer.empty / "toto", Offset(8, 8)))
-    assertEquals(contextAt(v)(9), InsideValue(Pointer.empty / "toto", Offset(9, 10)))
+    assertEquals(contextAt(v)(9), InsideValue(Pointer.empty / "toto", Offset(9, 9)))
     assertEquals(contextAt(v)(10), NewKey(Pointer.empty, Offset(10, 10)))
     assertEquals(contextAt(v)(11), NewKey(Pointer.empty, Offset(11, 11)))
-    assertEquals(contextAt(v)(12), InsideKey(Pointer.empty / "titi", Offset(12, 18)))
-    assertEquals(contextAt(v)(13), InsideKey(Pointer.empty / "titi", Offset(12, 18)))
-    assertEquals(contextAt(v)(14), InsideKey(Pointer.empty / "titi", Offset(12, 18)))
-    assertEquals(contextAt(v)(15), InsideKey(Pointer.empty / "titi", Offset(12, 18)))
-    assertEquals(contextAt(v)(16), InsideKey(Pointer.empty / "titi", Offset(12, 18)))
-    assertEquals(contextAt(v)(17), InsideKey(Pointer.empty / "titi", Offset(12, 18)))
+    assertEquals(contextAt(v)(12), InsideKey(Pointer.empty / "titi", Offset(12, 17)))
+    assertEquals(contextAt(v)(13), InsideKey(Pointer.empty / "titi", Offset(12, 17)))
+    assertEquals(contextAt(v)(14), InsideKey(Pointer.empty / "titi", Offset(12, 17)))
+    assertEquals(contextAt(v)(15), InsideKey(Pointer.empty / "titi", Offset(12, 17)))
+    assertEquals(contextAt(v)(16), InsideKey(Pointer.empty / "titi", Offset(12, 17)))
+    assertEquals(contextAt(v)(17), InsideKey(Pointer.empty / "titi", Offset(12, 17)))
     assertEquals(contextAt(v)(18), NewValue(Pointer.empty / "titi", Offset(18, 18)))
     assertEquals(contextAt(v)(19), NewValue(Pointer.empty / "titi", Offset(19, 19)))
     assertEquals(contextAt(v)(20), NewValue(Pointer.empty / "titi", Offset(20, 20)))
-    assertEquals(contextAt(v)(21), InsideKey(Pointer.empty / "titi" / "foo", Offset(21, 26)))
-    assertEquals(contextAt(v)(22), InsideKey(Pointer.empty / "titi" / "foo", Offset(21, 26)))
-    assertEquals(contextAt(v)(23), InsideKey(Pointer.empty / "titi" / "foo", Offset(21, 26)))
-    assertEquals(contextAt(v)(24), InsideKey(Pointer.empty / "titi" / "foo", Offset(21, 26)))
-    assertEquals(contextAt(v)(25), InsideKey(Pointer.empty / "titi" / "foo", Offset(21, 26)))
+    assertEquals(contextAt(v)(21), InsideKey(Pointer.empty / "titi" / "foo", Offset(21, 25)))
+    assertEquals(contextAt(v)(22), InsideKey(Pointer.empty / "titi" / "foo", Offset(21, 25)))
+    assertEquals(contextAt(v)(23), InsideKey(Pointer.empty / "titi" / "foo", Offset(21, 25)))
+    assertEquals(contextAt(v)(24), InsideKey(Pointer.empty / "titi" / "foo", Offset(21, 25)))
+    assertEquals(contextAt(v)(25), InsideKey(Pointer.empty / "titi" / "foo", Offset(21, 25)))
     assertEquals(contextAt(v)(26), NewValue(Pointer.empty / "titi" / "foo", Offset(26, 26)))
     assertEquals(contextAt(v)(27), NewValue(Pointer.empty / "titi" / "foo", Offset(27, 27)))
-    assertEquals(contextAt(v)(28), InsideValue(Pointer.empty / "titi" / "foo", Offset(28, 32)))
-    assertEquals(contextAt(v)(29), InsideValue(Pointer.empty / "titi" / "foo", Offset(28, 32)))
-    assertEquals(contextAt(v)(30), InsideValue(Pointer.empty / "titi" / "foo", Offset(28, 32)))
-    assertEquals(contextAt(v)(31), InsideValue(Pointer.empty / "titi" / "foo", Offset(28, 32)))
+    assertEquals(contextAt(v)(28), InsideValue(Pointer.empty / "titi" / "foo", Offset(28, 31)))
+    assertEquals(contextAt(v)(29), InsideValue(Pointer.empty / "titi" / "foo", Offset(28, 31)))
+    assertEquals(contextAt(v)(30), InsideValue(Pointer.empty / "titi" / "foo", Offset(28, 31)))
+    assertEquals(contextAt(v)(31), InsideValue(Pointer.empty / "titi" / "foo", Offset(28, 31)))
     assertEquals(contextAt(v)(32), NewKey(Pointer.empty / "titi", Offset(32, 32)))
     assertEquals(contextAt(v)(33), NewKey(Pointer.empty, Offset(33, 33)))
     assertEquals(contextAt(v)(34), NewValue(Pointer.empty, Offset(34, 34)))
@@ -155,27 +153,27 @@ class OffsetParserTest extends FunSuite:
     // }
     //
     val v = ObjectValue(
-      Offset(0, 39),
+      Offset(0, 38),
       Map(
         StringValue(
-          Offset(4, 10),
+          Offset(4, 9),
           "type"
         ) -> StringValue(
-          Offset(12, 21),
+          Offset(12, 20),
           "boolean"
         ),
         StringValue(
-          Offset(25, 32),
+          Offset(25, 31),
           "allOf"
         ) -> ArrayValue(
-          Offset(34, 37),
+          Offset(34, 36),
           Seq()
         )
       )
     )
     assertEquals(contextAt(v)(32), NewValue(Pointer.empty / "allOf", Offset(32, 32)))
     assertEquals(contextAt(v)(33), NewValue(Pointer.empty / "allOf", Offset(33, 33)))
-    assertEquals(contextAt(v)(34), InsideValue(Pointer.empty / "allOf", Offset(34, 37)))
+    assertEquals(contextAt(v)(34), InsideValue(Pointer.empty / "allOf", Offset(34, 36)))
     assertEquals(contextAt(v)(35), NewValue(Pointer.empty / "allOf" / 0, Offset(35, 35)))
     assertEquals(contextAt(v)(36), NewValue(Pointer.empty / "allOf" / 0, Offset(36, 36)))
     assertEquals(contextAt(v)(37), NewKey(Pointer.empty, Offset(37, 37)))
@@ -187,29 +185,29 @@ class OffsetParserTest extends FunSuite:
     //  "allOf": [ 13 ]
     // }
     val v = ObjectValue(
-      Offset(0, 42),
+      Offset(0, 41),
       Map(
         StringValue(
-          Offset(4, 10),
+          Offset(4, 9),
           "type"
         ) -> StringValue(
-          Offset(12, 21),
+          Offset(12, 20),
           "boolean"
         ),
         StringValue(
-          Offset(25, 32),
+          Offset(25, 31),
           "allOf"
         ) -> ArrayValue(
-          Offset(34, 40),
-          Seq(NumberValue(Offset(36, 38), 13))
+          Offset(34, 39),
+          Seq(NumberValue(Offset(36, 37), 13))
         )
       )
     )
     assertEquals(contextAt(v)(33), NewValue(Pointer.empty / "allOf", Offset(33, 33)))
     assertEquals(contextAt(v)(34), NewValue(Pointer.empty / "allOf" / 0, Offset(34, 34)))
     assertEquals(contextAt(v)(35), NewValue(Pointer.empty / "allOf" / 0, Offset(35, 35)))
-    assertEquals(contextAt(v)(36), InsideValue(Pointer.empty / "allOf" / 0, Offset(36, 38)))
-    assertEquals(contextAt(v)(37), InsideValue(Pointer.empty / "allOf" / 0, Offset(36, 38)))
+    assertEquals(contextAt(v)(36), InsideValue(Pointer.empty / "allOf" / 0, Offset(36, 37)))
+    assertEquals(contextAt(v)(37), InsideValue(Pointer.empty / "allOf" / 0, Offset(36, 37)))
     assertEquals(contextAt(v)(38), NewValue(Pointer.empty / "allOf" / 1, Offset(38, 38)))
     assertEquals(contextAt(v)(39), NewValue(Pointer.empty / "allOf" / 1, Offset(39, 39)))
     assertEquals(contextAt(v)(40), NewKey(Pointer.empty, Offset(40, 40)))

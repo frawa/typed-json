@@ -124,6 +124,7 @@ case class TypedJsonJS(
         case _: OffsetContext.NewKey    => (true, at.pointer)
         case _                          => (false, at.pointer)
       }
+      // println(("FW", at, keysOnly, atPointer))
 
       given OutputOps[SuggestOutput] = SuggestOutput.outputOps(atPointer)
       val (o, _)                     = this.typedJson.eval(value)
@@ -173,8 +174,7 @@ object Marker {
 @JSExportTopLevel("SuggestionsResult")
 @JSExportAll
 case class SuggestionsResult(
-    start: Int,
-    end: Int,
+    range: TextRange,
     pointer: String,
     suggestions: js.Array[Suggestion]
 )
@@ -183,8 +183,16 @@ case class SuggestionsResult(
 @JSExportAll
 case class Suggestion(
     value: js.Any,
+    replace: js.UndefOr[TextRange] = js.undefined,
     seperator: js.UndefOr[String] = js.undefined,
     documentationMarkdown: js.UndefOr[String] = js.undefined
+)
+
+@JSExportTopLevel("TextRange")
+@JSExportAll
+case class TextRange(
+    start: Int,
+    end: Int
 )
 
 object SuggestionsResult {
@@ -194,23 +202,38 @@ object SuggestionsResult {
       sep: Option[String],
       result: SuggestResult
   ): SuggestionsResult = {
-    val Offset(start, end) = offset
-    val suggestions        = toSuggestions(result, sep)
+    val range       = toTextRange(offset)
+    val suggestions = toSuggestions(result, sep)
     // TODO dedup ealier?
     val dedup = suggestions
       .groupBy(s => js.JSON.stringify(s.value))
       .flatMap(_._2.headOption)
-    SuggestionsResult(start, end, pointer.toString, js.Array(dedup.toSeq*))
+    SuggestionsResult(range, pointer.toString, js.Array(dedup.toSeq*))
   }
 
+  private def toTextRange(offset: Offset): TextRange =
+    TextRange(offset.start, offset.end)
+
   private def toSuggestions(result: SuggestResult, sep: Option[String]): Seq[Suggestion] =
-    result.suggestions.flatMap {
-      case Suggest.Values(vs)       => vs.map(toSuggestion(None, sep))
-      case Suggest.WithDoc(vs, doc) => vs.map(toSuggestion(toMarkdown(doc), sep))
+
+    def go(s: Suggest): Seq[Suggestion] = s match {
+      case Suggest.Values(vs)            => vs.map(toSuggestion(sep))
+      case Suggest.WithDoc(s, doc)       => go(s).map(withDoc(toMarkdown(doc)))
+      case Suggest.WithReplace(s, range) => go(s).map(withReplace(toTextRange(range)))
     }
 
-  private def toSuggestion(doc: Option[String], sep: Option[String])(value: Value): Suggestion = {
-    Suggestion(toAny(value), sep.orUndefined, doc.orUndefined)
+    result.suggestions.flatMap(go)
+
+  private def toSuggestion(sep: Option[String])(value: Value): Suggestion = {
+    Suggestion(toAny(value), seperator = sep.orUndefined)
+  }
+
+  private def withDoc(doc: Option[String])(suggestion: Suggestion): Suggestion = {
+    suggestion.copy(documentationMarkdown = doc.orUndefined)
+  }
+
+  private def withReplace(replace: TextRange)(suggestion: Suggestion): Suggestion = {
+    suggestion.copy(replace = replace)
   }
 
   private def toAny(value: Value): js.Any = {

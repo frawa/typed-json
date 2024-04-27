@@ -41,11 +41,15 @@ object SuggestOutput:
     private val bops = summon[OutputOps[SimpleOutput]]
     private val isAt = (pointer: Pointer) => at == pointer
 
+    // TODO avoid cheating via local mutation
+    import scala.collection.mutable
+    private val keywordsAt = mutable.ArrayBuffer.empty[Keyword]
+
     def valid(pointer: Pointer): SuggestOutput =
-      SuggestOutput(bops.valid(pointer))
+      SuggestOutput(bops.valid(pointer), keywordsAt.toSeq.distinct)
 
     def invalid(error: ValidationError, pointer: Pointer): SuggestOutput =
-      SuggestOutput(bops.invalid(error, pointer))
+      SuggestOutput(bops.invalid(error, pointer), keywordsAt.toSeq.distinct)
 
     def all(
         os: Seq[SuggestOutput],
@@ -54,7 +58,8 @@ object SuggestOutput:
     ): SuggestOutput =
       SuggestOutput(
         bops.all(os.map(_.simple), error, pointer),
-        os.flatMap(_.keywords)
+        // os.flatMap(_.keywords)
+        keywordsAt.toSeq.distinct
       )
 
     extension (o: SuggestOutput)
@@ -69,8 +74,15 @@ object SuggestOutput:
             .map { k =>
               // TODO avoid restoring WithLocation
               k match {
-                case _: WithLocation => o.copy(keywords = o.keywords :+ k)
-                case _               => o.copy(keywords = o.keywords :+ WithLocation(k, kl))
+                case _: WithLocation =>
+                  keywordsAt.addOne(k)
+                  // o.copy(keywords = o.keywords :+ k)
+                  o
+                case _ =>
+                  val k_ = WithLocation(k, kl)
+                  keywordsAt.addOne(k_)
+                  o
+                // o.copy(keywords = o.keywords :+ k_)
               }
             }
             .getOrElse(o)
