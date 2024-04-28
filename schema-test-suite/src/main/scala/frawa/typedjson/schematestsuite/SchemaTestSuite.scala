@@ -130,11 +130,3 @@ abstract class SchemaTestSuite extends FunSuite:
       }
       .flatten
     assertEquals(actual, expected, clue(hints))
-    // expectations.zip(actuals).foreach { (expectation, actual) =>
-    //   val (valid, hints) = actual
-    //   assertEquals(
-    //     s"'${expectation.description}' is ${valid}",
-    //     s"'${expectation.description}' is ${expectation.valid}",
-    //     clues(clue[String](expectation.description), clue[Seq[String]](hints))
-    //   )
-    // }

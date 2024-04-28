@@ -232,11 +232,9 @@ lazy val schemaTestSuite = projectMatrix
   .settings(sharedSettings)
   .settings(sharedScalacSettings)
   .settings(strictScalacSettings)
-  // .settings(sharedTestSettings)
   .jvmPlatform(sharedPlatformSettings)
   .jsPlatform(sharedPlatformSettings)
   .dependsOn(parser)
-// .configure(p => p.dependsOn(macros))
 
 lazy val typedJson =
   projectMatrix
@@ -264,7 +262,6 @@ lazy val typedJson =
     .dependsOn(formats)
     .configure(p => p.dependsOn(macros))
     .dependsOn(parserJawn % "test")
-    // .dependsOn(schemaTestSuite % "test")
     .dependsOn(schemaTestSuite)
 
 lazy val typedJsonJsExport = project
