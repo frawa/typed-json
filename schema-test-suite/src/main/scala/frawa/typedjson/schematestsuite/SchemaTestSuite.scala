@@ -109,18 +109,23 @@ abstract class SchemaTestSuite extends FunSuite:
     val values  = expectations.map(_.data)
     val actuals = validator(values)
     val expected = expectations.map { e =>
-      s"${e.description} is ${e.valid}"
+      s"'${e.description}' is ${e.valid}"
     }
     val actual =
       expectations.zip(actuals).map { case (e, (valid, _)) =>
-        s"${e.description} is ${valid}"
+        s"'${e.description}' is ${valid}"
       }
 
     val hints = expectations
       .zip(actuals)
       .map { case (e, (valid, errors)) =>
         if e.valid != valid
-        then Some((e.description, errors))
+        then
+          val withErrors =
+            if errors.nonEmpty
+            then ": " + errors.mkString(",")
+            else ""
+          Some(s"${e.description}${withErrors}")
         else None
       }
       .flatten
