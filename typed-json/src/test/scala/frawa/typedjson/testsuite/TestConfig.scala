@@ -27,9 +27,9 @@ import frawa.typedjson.output.SimpleOutput
 import frawa.typedjson.output.SimpleOutput.given
 import frawa.typedjson.parser.Value._
 import frawa.typedjson.parser._
+import frawa.typedjson.schematestsuite.SchemaTestSuite.BatchValidator
 import frawa.typedjson.schematestsuite.SchemaTestSuite.Config
 import frawa.typedjson.schematestsuite.SchemaTestSuite.TestId
-import frawa.typedjson.schematestsuite.SchemaTestSuite.BatchValidator
 import frawa.typedjson.testutil.TestUtil._
 
 import java.net.URI

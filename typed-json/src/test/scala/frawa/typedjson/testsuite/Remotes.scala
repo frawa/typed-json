@@ -20,10 +20,10 @@ import frawa.typedjson.keywords.LoadedSchemasResolver
 import frawa.typedjson.keywords.RootSchemaValue
 import frawa.typedjson.keywords.SchemaValue
 import frawa.typedjson.parser._
+import frawa.typedjson.schematestsuite.data.Draft202012
 import frawa.typedjson.util.UriUtil
 
 import java.net.URI
-import frawa.typedjson.schematestsuite.data.Draft202012
 
 object Remotes:
   val remotesUri: URI = UriUtil.uri("http://localhost:1234")
