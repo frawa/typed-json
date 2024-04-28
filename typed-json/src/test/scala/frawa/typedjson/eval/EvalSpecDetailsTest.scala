@@ -17,7 +17,7 @@
 package frawa.typedjson.eval
 
 import frawa.typedjson.eval.CacheState.R
-import frawa.typedjson.jsonSchemaTestSuite.Remotes
+import frawa.typedjson.testsuite.Remotes
 import frawa.typedjson.keywords.EvaluatedIndices
 import frawa.typedjson.keywords.EvaluatedProperties
 import frawa.typedjson.keywords.Ignored

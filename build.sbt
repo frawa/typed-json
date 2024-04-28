@@ -104,7 +104,8 @@ lazy val root = project
   .aggregate(parser.projectRefs: _*)
   .aggregate(parserJawn.projectRefs: _*)
   .aggregate(parserZio.projectRefs: _*)
-  .aggregate(macros)
+  // .aggregate(macros)
+  .aggregate(schemaTestSuite.projectRefs: _*)
   .aggregate(formats.projectRefs: _*)
   .aggregate(typedJson.projectRefs: _*)
   .aggregate(typedJsonJsExport)
@@ -219,14 +220,29 @@ lazy val formats = projectMatrix
   )
   .dependsOn(parser) // TODO just for Pointer
 
+lazy val schemaTestSuite = projectMatrix
+  .in(file("schema-test-suite"))
+  .settings(
+    name := "schema-test-suite"
+  )
+  .settings(
+    libraryDependencies += "io.github.frawa" %%% "inline-files" % "0.7.1",
+    libraryDependencies += "org.scalameta"   %%% "munit"        % "1.0.0-RC1"
+  )
+  .settings(sharedSettings)
+  .settings(sharedScalacSettings)
+  .settings(strictScalacSettings)
+  // .settings(sharedTestSettings)
+  .jvmPlatform(sharedPlatformSettings)
+  .jsPlatform(sharedPlatformSettings)
+  .dependsOn(parser)
+// .configure(p => p.dependsOn(macros))
+
 lazy val typedJson =
   projectMatrix
     .in(file("typed-json"))
     .settings(
       name := "typed-json"
-    )
-    .settings(
-      libraryDependencies += "io.github.frawa" %%% "inline-files" % "0.7.1" % Test
     )
     .settings(
       unmanagedSources / excludeFilter := "*/suggestion/*" || "*/validation/*"
@@ -248,6 +264,8 @@ lazy val typedJson =
     .dependsOn(formats)
     .configure(p => p.dependsOn(macros))
     .dependsOn(parserJawn % "test")
+    // .dependsOn(schemaTestSuite % "test")
+    .dependsOn(schemaTestSuite)
 
 lazy val typedJsonJsExport = project
   .in(file("typed-json-js-export"))

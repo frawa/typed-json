@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package frawa.typedjson.jsonSchemaTestSuite
+package frawa.typedjson.testsuite
 
-import frawa.inlinefiles.InlineFiles._
-import frawa.typedjson.testutil.TestUtil.{_, given}
+import frawa.typedjson.schematestsuite.Draft202012TestSuite
+import frawa.typedjson.testutil.TestUtil.given
 
-class Draft202012Test extends JsonSchemaTestSuite:
-  private val draft202012Files = draft202012.files()
-
-  override protected val onlyDescription: Option[String] =
-    // Some("allOf.json - allOf")
-    // Some("validate definition against metaschema")
-    // Some("neither anyOf valid (complex)")
-    None
-
-  checkFiles(draft202012Files)(parseJsonValue)
+class Draft202012Test extends Draft202012TestSuite:
+  val config = TestConfig()
+  suite(config)
