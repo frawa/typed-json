@@ -17,7 +17,6 @@
 package frawa.typedjson.eval
 
 import frawa.typedjson.eval.CacheState.R
-import frawa.typedjson.jsonSchemaTestSuite.Remotes
 import frawa.typedjson.keywords.EvaluatedIndices
 import frawa.typedjson.keywords.EvaluatedProperties
 import frawa.typedjson.keywords.Ignored
@@ -27,6 +26,7 @@ import frawa.typedjson.output.FlagOutput.given
 import frawa.typedjson.output.SimpleOutput
 import frawa.typedjson.output.SimpleOutput.given
 import frawa.typedjson.pointer.Pointer
+import frawa.typedjson.testsuite.Remotes
 import frawa.typedjson.testutil.TestUtil.{_, given}
 import frawa.typedjson.util.WithPointer
 import frawa.typedjson.validation._

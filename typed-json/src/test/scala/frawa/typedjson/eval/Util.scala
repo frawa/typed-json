@@ -35,13 +35,13 @@ object Util:
     )
   )
 
-  def withKeywords(
+  def withKeywords[T](
       schema: SchemaValue,
       lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None,
       vocabulary: Option[Vocabulary] = None
   )(
-      f: Keywords => Unit
-  ): Unit =
+      f: Keywords => T
+  ): T =
     val useVocabulary = vocabulary.orElse(vocabularyForTest)
     // TODO avoid lazyResolver
     Keywords(schema, useVocabulary, lazyResolver)
@@ -50,21 +50,21 @@ object Util:
         keywords => f(keywords)
       )
 
-  type AssertingFun[R[_], O] = SchemaResolver ?=> (Value => R[O]) => Unit
+  type AssertingFun[R[_], O, T] = SchemaResolver ?=> (Value => R[O]) => T
 
   def withCompiledSchema[R[_], O](
       schema: String,
       lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None
-  )(using eval: Eval[R, O])(using TheResultMonad[R, O])(f: AssertingFun[R, O]): Unit =
+  )(using eval: Eval[R, O])(using TheResultMonad[R, O])(f: AssertingFun[R, O, Unit]): Unit =
     withSchema(schema) { schema =>
       withCompiledSchemaValue(schema, lazyResolver)(f)
     }
 
-  def withCompiledSchemaValue[R[_], O](
+  def withCompiledSchemaValue[R[_], O, T](
       schema: SchemaValue,
       lazyResolver: Option[LoadedSchemasResolver.LazyResolver] = None,
       vocabulary: Option[Vocabulary] = None
-  )(using eval: Eval[R, O])(using TheResultMonad[R, O])(f: AssertingFun[R, O]): Unit =
+  )(using eval: Eval[R, O])(using TheResultMonad[R, O])(f: AssertingFun[R, O, T]): T =
     withKeywords(schema, lazyResolver, vocabulary) { keywords =>
       val compiled         = eval.compile(keywords, KeywordLocation.empty)
       val fun              = eval.fun(compiled)
