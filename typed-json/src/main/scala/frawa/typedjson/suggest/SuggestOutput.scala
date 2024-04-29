@@ -53,11 +53,11 @@ object SuggestOutput:
 
     def all(
         os: Seq[SuggestOutput],
-        error: Option[ValidationError],
-        pointer: Pointer
+        pointer: Pointer,
+        error: Option[ValidationError]
     ): SuggestOutput =
       SuggestOutput(
-        bops.all(os.map(_.simple), error, pointer),
+        bops.all(os.map(_.simple), pointer, error),
         // os.flatMap(_.keywords)
         keywordsAt.toSeq.distinct
       )

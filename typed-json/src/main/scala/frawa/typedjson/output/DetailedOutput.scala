@@ -45,8 +45,8 @@ object DetailedOutput:
 
     def all(
         os: Seq[DetailedOutput],
-        error: Option[ValidationError],
-        pointer: Pointer
+        pointer: Pointer,
+        error: Option[ValidationError]
     ): DetailedOutput =
       val valid = os.forall(_.valid)
       val annotations =

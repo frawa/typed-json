@@ -33,7 +33,7 @@ trait OutputOps[O]: // extends Monoid[O]:
   def valid(pointer: Pointer): O
   def invalid(error: ValidationError, pointer: Pointer): O
 
-  def all(os: Seq[O], error: Option[ValidationError], pointer: Pointer): O
+  def all(os: Seq[O], pointer: Pointer, error: Option[ValidationError] = None): O
 
   extension (o: O)
     def not(pointer: Pointer): O

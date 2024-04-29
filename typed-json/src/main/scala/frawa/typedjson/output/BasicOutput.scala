@@ -49,7 +49,7 @@ object BasicOutput:
     def invalid(error: ValidationError, pointer: Pointer): BasicOutput =
       BasicOutput(false, error = Some(error), instanceLocation = pointer)
 
-    def all(os: Seq[BasicOutput], error: Option[ValidationError], pointer: Pointer): BasicOutput =
+    def all(os: Seq[BasicOutput], pointer: Pointer, error: Option[ValidationError]): BasicOutput =
       val valid = os.forall(_.valid)
       val annotations =
         if valid then

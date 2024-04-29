@@ -45,7 +45,7 @@ object SimpleOutput:
     def invalid(error: ValidationError, pointer: Pointer): SimpleOutput =
       SimpleOutput(false, Seq(WithPointer(error, pointer)), pointer)
 
-    def all(os: Seq[SimpleOutput], error: Option[ValidationError], pointer: Pointer): SimpleOutput =
+    def all(os: Seq[SimpleOutput], pointer: Pointer, error: Option[ValidationError]): SimpleOutput =
       val valid = os.forall(_.valid)
       val annotations =
         if valid then

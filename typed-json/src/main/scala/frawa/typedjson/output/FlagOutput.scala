@@ -37,7 +37,7 @@ object FlagOutput:
     def valid(pointer: Pointer): FlagOutput                           = FlagOutput(true, pointer)
     def invalid(error: ValidationError, pointer: Pointer): FlagOutput = FlagOutput(false, pointer)
 
-    def all(os: Seq[FlagOutput], error: Option[ValidationError], pointer: Pointer): FlagOutput =
+    def all(os: Seq[FlagOutput], pointer: Pointer, error: Option[ValidationError]): FlagOutput =
       FlagOutput(
         os.forall(_.valid),
         pointer,
