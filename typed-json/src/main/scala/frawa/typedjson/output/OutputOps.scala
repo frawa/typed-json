@@ -33,7 +33,7 @@ trait OutputOps[O]: // extends Monoid[O]:
   def valid(pointer: Pointer): O
   def invalid(error: ValidationError, pointer: Pointer): O
 
-  def all(os: Seq[O], pointer: Pointer, error: Option[ValidationError] = None): O
+  def all(os: Seq[O], pointer: Pointer): O
 
   extension (o: O)
     def not(pointer: Pointer): O
@@ -42,6 +42,7 @@ trait OutputOps[O]: // extends Monoid[O]:
     def withAnnotations(annotations: Seq[Annotation]): O
     def getAnnotations(): Seq[Annotation]
     def forKeyword(kl: KeywordLocation, k: Option[Keyword] = None): O
+    def withError(error: ValidationError): O
 
 object OutputOps:
   trait Annotation

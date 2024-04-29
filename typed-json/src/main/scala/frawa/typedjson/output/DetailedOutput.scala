@@ -43,11 +43,7 @@ object DetailedOutput:
     def invalid(error: ValidationError, pointer: Pointer): DetailedOutput =
       DetailedOutput(false, error = Some(error), instanceLocation = pointer)
 
-    def all(
-        os: Seq[DetailedOutput],
-        pointer: Pointer,
-        error: Option[ValidationError]
-    ): DetailedOutput =
+    def all(os: Seq[DetailedOutput], pointer: Pointer): DetailedOutput =
       val valid = os.forall(_.valid)
       val annotations =
         if valid then
@@ -58,13 +54,12 @@ object DetailedOutput:
       val errors =
         if valid then Seq()
         else os.filterNot(_.valid)
-      if errors.size == 1 && error.isEmpty then
+      if errors.size == 1 then
         // TODO really?
         errors(0)
       else
         DetailedOutput(
           valid,
-          error = error,
           errors = errors,
           instanceLocation = pointer,
           annotations = annotations
@@ -85,3 +80,4 @@ object DetailedOutput:
           // new RuntimeException().printStackTrace()
           o
         else o.copy(keywordLocation = Some(kl))
+      def withError(error: ValidationError): DetailedOutput = o.copy(error = Some(error))

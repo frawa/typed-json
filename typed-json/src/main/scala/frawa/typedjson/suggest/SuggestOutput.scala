@@ -53,11 +53,10 @@ object SuggestOutput:
 
     def all(
         os: Seq[SuggestOutput],
-        pointer: Pointer,
-        error: Option[ValidationError]
+        pointer: Pointer
     ): SuggestOutput =
       SuggestOutput(
-        bops.all(os.map(_.simple), pointer, error),
+        bops.all(os.map(_.simple), pointer),
         // os.flatMap(_.keywords)
         keywordsAt.toSeq.distinct
       )
@@ -87,3 +86,5 @@ object SuggestOutput:
             }
             .getOrElse(o)
         else o
+      def withError(error: ValidationError): SuggestOutput =
+        o.copy(simple = o.simple.withError(error))

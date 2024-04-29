@@ -558,9 +558,10 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
     fun(value).map { o =>
       if o.isValid then o
       else
-        ops.all(
-          Seq(o),
-          value.pointer,
-          Some(AdditionalPropertyInvalid(value.pointer.targetField.getOrElse("?")))
-        )
+        ops
+          .all(
+            Seq(o),
+            value.pointer
+          )
+          .withError(AdditionalPropertyInvalid(value.pointer.targetField.getOrElse("?")))
     }
