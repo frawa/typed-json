@@ -103,3 +103,5 @@ object BasicOutput:
         else o.copy(keywordLocation = Some(kl))
       def withError(error: ValidationError): BasicOutput =
         o.copy(error = Some(error))
+      def isAggregating(os: Seq[BasicOutput]): BasicOutput =
+        o

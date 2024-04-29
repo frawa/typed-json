@@ -74,3 +74,5 @@ object SimpleOutput:
       def forKeyword(kl: KeywordLocation, k: Option[Keyword] = None): SimpleOutput = o
       def withError(error: ValidationError): SimpleOutput =
         o.copy(errors = WithPointer(error, o.pointer) +: o.errors)
+      def isAggregating(os: Seq[SimpleOutput]): SimpleOutput =
+        o

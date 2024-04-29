@@ -91,14 +91,14 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
   private def verifyOneOf(os: Seq[O], pointer: Pointer): O =
     val count       = os.count(_.isValid)
     val annotations = OutputOps.mergeAnnotations(os.filter(_.isValid).flatMap(_.getAnnotations()))
-    if count == 1 then ops.valid(pointer).withAnnotations(annotations)
+    if count == 1 then ops.valid(pointer).withAnnotations(annotations).isAggregating(os)
     else if count == 0 then ops.all(os, pointer) // TODO new error NoneOf?
-    else ops.invalid(NotOneOf(count), pointer)
+    else ops.invalid(NotOneOf(count), pointer).isAggregating(os)
 
   private def verifyAnyOf(os: Seq[O], pointer: Pointer): O =
     val valid       = os.exists(_.isValid)
     val annotations = OutputOps.mergeAnnotations(os.filter(_.isValid).flatMap(_.getAnnotations()))
-    if valid then ops.valid(pointer).withAnnotations(annotations)
+    if valid then ops.valid(pointer).withAnnotations(annotations).isAggregating(os)
     else ops.all(os, pointer) // TODO new error NoneOf?
 
   private def verifyNumberValue(
@@ -202,7 +202,8 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       .map { ros =>
         FP.sequence(ros).map { os =>
           val o = ops.all(os, value.pointer)
-          if o.isValid then o.withAnnotation(EvaluatedIndices(Seq.range(0, os.size).toSet))
+          if o.isValid then
+            o.withAnnotation(EvaluatedIndices(Seq.range(0, os.size).toSet)).isAggregating(os)
           else o
         }
       }
@@ -286,9 +287,15 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
                       ops.all(Seq(condition.not(value.pointer), oElse), value.pointer)
                     }
                   )
-            thenOrElse.getOrElse(
-              monad.unit(ops.valid(value.pointer).withAnnotations(condition.getAnnotations()))
-            )
+            thenOrElse.getOrElse {
+              val os = Seq()
+              monad.unit(
+                ops
+                  .valid(value.pointer)
+                  .withAnnotations(condition.getAnnotations())
+                  .isAggregating(os)
+              )
+            }
           }
         }
         .getOrElse(monad.unit(ops.valid(value.pointer)))

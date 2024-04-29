@@ -52,3 +52,4 @@ object FlagOutput:
       def getAnnotations(): Seq[Annotation]                                      = o.annotations
       def forKeyword(kl: KeywordLocation, k: Option[Keyword] = None): FlagOutput = o
       def withError(error: ValidationError): FlagOutput                          = o
+      def isAggregating(os: Seq[FlagOutput]): FlagOutput                         = o

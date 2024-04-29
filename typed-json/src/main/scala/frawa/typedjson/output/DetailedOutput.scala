@@ -80,4 +80,7 @@ object DetailedOutput:
           // new RuntimeException().printStackTrace()
           o
         else o.copy(keywordLocation = Some(kl))
-      def withError(error: ValidationError): DetailedOutput = o.copy(error = Some(error))
+      def withError(error: ValidationError): DetailedOutput =
+        o.copy(error = Some(error))
+      def isAggregating(os: Seq[DetailedOutput]): DetailedOutput =
+        o

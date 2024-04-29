@@ -43,6 +43,7 @@ trait OutputOps[O]: // extends Monoid[O]:
     def getAnnotations(): Seq[Annotation]
     def forKeyword(kl: KeywordLocation, k: Option[Keyword] = None): O
     def withError(error: ValidationError): O
+    def isAggregating(os: Seq[O]): O
 
 object OutputOps:
   trait Annotation
