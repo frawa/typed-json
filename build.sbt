@@ -134,7 +134,7 @@ lazy val parserZio =
     .settings(strictScalacSettings)
     .settings(sharedTestSettings)
     .settings(
-      libraryDependencies += "dev.zio" %%% "zio-json" % "0.6.2"
+      libraryDependencies += "dev.zio" %%% "zio-json" % "0.7.0"
     )
     .jvmPlatform(sharedPlatformSettings)
     .jsPlatform(sharedPlatformSettings)
