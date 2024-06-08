@@ -204,7 +204,7 @@ lazy val formats = projectMatrix
   .settings(strictScalacSettings)
   .settings(sharedTestSettings)
   .settings(
-    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.5.0"
+    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.6.0"
   )
   .jvmPlatform(sharedPlatformSettings)
   .jsPlatform(
