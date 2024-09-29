@@ -15,8 +15,6 @@
  */
 
 package frawa.typedjson.suggest
-
-import frawa.typedjson.keywords.Keyword
 import frawa.typedjson.keywords._
 import frawa.typedjson.parser.Offset
 import frawa.typedjson.parser.Value

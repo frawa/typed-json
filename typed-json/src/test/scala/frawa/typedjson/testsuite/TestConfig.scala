@@ -15,8 +15,6 @@
  */
 
 package frawa.typedjson.testsuite
-
-import frawa.typedjson.eval.CacheState
 import frawa.typedjson.eval.CacheState.R
 import frawa.typedjson.eval.Util.doApplyBulk
 import frawa.typedjson.eval.Util.withCompiledSchemaValue
@@ -25,7 +23,6 @@ import frawa.typedjson.keywords._
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.output.SimpleOutput
 import frawa.typedjson.output.SimpleOutput.given
-import frawa.typedjson.parser.Value._
 import frawa.typedjson.parser._
 import frawa.typedjson.schematestsuite.SchemaTestSuite.BatchValidator
 import frawa.typedjson.schematestsuite.SchemaTestSuite.Config

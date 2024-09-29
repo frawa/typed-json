@@ -25,10 +25,8 @@ import frawa.typedjson.keywords.SchemaValue
 import frawa.typedjson.keywords.Vocabulary
 import frawa.typedjson.meta.MetaSchemas
 import frawa.typedjson.output.OutputOps
-import frawa.typedjson.parser.Value._
 import frawa.typedjson.parser._
 import frawa.typedjson.pointer.Pointer
-import frawa.typedjson.suggest.Suggest
 import frawa.typedjson.testutil.TestSchemas.numberArraySchema
 import frawa.typedjson.testutil.TestSchemas.totoObjectSchema
 import frawa.typedjson.testutil.TestSchemas.totoRequiredObjectSchema

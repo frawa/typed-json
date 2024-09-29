@@ -15,8 +15,6 @@
  */
 
 package frawa.typedjson.eval
-
-import frawa.typedjson.eval.CacheState
 import frawa.typedjson.keywords._
 import frawa.typedjson.output.OutputOps
 import frawa.typedjson.parser.Value

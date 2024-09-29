@@ -18,7 +18,6 @@ package frawa.typedjson.eval
 
 import frawa.typedjson.eval.CacheState.R
 import frawa.typedjson.eval.CacheState.given
-import frawa.typedjson.eval._
 import frawa.typedjson.keywords._
 import frawa.typedjson.output.SimpleOutput
 import frawa.typedjson.output.SimpleOutput.given
