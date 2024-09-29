@@ -50,7 +50,6 @@ import frawa.typedjson.validation.SubSchemaFailed
 import frawa.typedjson.validation.TypeMismatch
 import frawa.typedjson.validation.ValidationError
 
-import java.net.URI
 import scala.collection.immutable.Seq
 
 object OutputJson:
