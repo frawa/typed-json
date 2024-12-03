@@ -88,7 +88,7 @@ lazy val strictScalacSettings = Seq(
 )
 
 lazy val sharedTestSettings = Seq(
-  libraryDependencies += "org.scalameta" %%% "munit" % "1.0.2" % Test,
+  libraryDependencies += "org.scalameta" %%% "munit" % "1.0.3" % Test,
   // Test / testOptions += Tests.Argument("+l", "-q", "--summary=0")
   // perferred to copy&paste expectations into tests:
   Test / testOptions += Tests.Argument("-q", "--summary=0")
@@ -227,7 +227,7 @@ lazy val schemaTestSuite = projectMatrix
   )
   .settings(
     libraryDependencies += "io.github.frawa" %%% "inline-files" % "0.7.1",
-    libraryDependencies += "org.scalameta"   %%% "munit"        % "1.0.2"
+    libraryDependencies += "org.scalameta"   %%% "munit"        % "1.0.3"
   )
   .settings(sharedSettings)
   .settings(sharedScalacSettings)
