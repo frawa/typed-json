@@ -20,7 +20,6 @@ import frawa.typedjson.output.OutputOps
 import frawa.typedjson.parser.Value
 import frawa.typedjson.testutil.TestUtil.{_, given}
 
-import java.net.URI
 import scala.collection.immutable.Seq
 
 object Util:
