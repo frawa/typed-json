@@ -21,7 +21,6 @@ import frawa.typedjson.eval.CacheState.given
 import frawa.typedjson.keywords._
 import frawa.typedjson.output.SimpleOutput
 import frawa.typedjson.output.SimpleOutput.given
-import frawa.typedjson.parser.Value
 import frawa.typedjson.pointer.Pointer
 import frawa.typedjson.testutil.TestUtil.{_, given}
 import frawa.typedjson.util.WithPointer
