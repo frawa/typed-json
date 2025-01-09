@@ -45,7 +45,6 @@ class ZioParserTest extends FunSuite:
   test("big number") {
     assertEquals(
       Parser("98249283749234923498293171823948729348710298301928331"),
-//      Right(NumberValue(BigDecimal("98249283749234923498293171823948729348710298301928331")))
-      Left("(expected a 128 BigDecimal)")
+      Right(NumberValue(BigDecimal("98249283749234923498293171823948729348710298301928331")))
     )
   }
