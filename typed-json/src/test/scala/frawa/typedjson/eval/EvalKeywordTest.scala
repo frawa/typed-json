@@ -661,8 +661,8 @@ class EvalKeywordTest extends FunSuite:
   test("unevaluatedItems with prefixItems and contains") {
     withCompiledSchema("""|{
                           |"prefixItems": [{"type": "boolean"}],
-                          |"unevaluatedItems": { "type": "string" }, 
-                          |"contains": {"type": "array"}  
+                          |"unevaluatedItems": { "type": "string" },
+                          |"contains": {"type": "array"}
                           |}""".stripMargin) { fun =>
       assertEquals(
         doApplyBulk(

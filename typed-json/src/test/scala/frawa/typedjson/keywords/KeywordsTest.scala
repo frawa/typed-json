@@ -598,7 +598,7 @@ class KeywordsTest extends FunSuite:
                  |"deprecated": false,
                  |"readOnly": false,
                  |"writeOnly": false,
-                 |"examples": ["bar", 13] 
+                 |"examples": ["bar", 13]
                  |}
                  |""".stripMargin) { schema =>
       assertKeywords(schema, vocabularyWithMeta) { keywords =>

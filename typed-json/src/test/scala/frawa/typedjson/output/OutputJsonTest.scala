@@ -298,7 +298,7 @@ object Sample:
        |      "keywordLocation": "/minItems",
        |      "instanceLocation": "",
        |      "error": "Expected at least 3 items but found 2."
-       |    },                               
+       |    },
        |    {
        |      "keywordLocation": "",
        |      "instanceLocation": "",
@@ -324,7 +324,7 @@ object Sample:
        |        "https://example.com/polygon#/$defs/point/additionalProperties",
        |      "instanceLocation": "/1/z",
        |      "error": "Additional property 'z' found but was invalid."
-       |    }                                 
+       |    }
        |  ]
        |}
        |""".stripMargin

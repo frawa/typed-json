@@ -133,15 +133,15 @@ class SuggestTest extends FunSuite:
   test("suggest deep") {
     withSchema("""{
                  |"$id": "testme",
-                 |"type": "object", 
-                 |"properties": { 
-                 |  "foo": { 
-                 |    "type": "object", 
-                 |    "properties": { 
+                 |"type": "object",
+                 |"properties": {
+                 |  "foo": {
+                 |    "type": "object",
+                 |    "properties": {
                  |      "bar": { "type": "number" }
                  |    }
                  |  }
-                 |} 
+                 |}
                  |}
                  |""".stripMargin) { schema =>
       assertSuggest("""{"foo": {}}""")(
@@ -161,21 +161,21 @@ class SuggestTest extends FunSuite:
   test("suggest several values") {
     withSchema("""{
                  |"$id": "testme",
-                 |"type": "object", 
-                 |"properties": { 
-                 |  "foo": { 
-                 |    "type": "object", 
-                 |    "properties": { 
+                 |"type": "object",
+                 |"properties": {
+                 |  "foo": {
+                 |    "type": "object",
+                 |    "properties": {
                  |      "bar": { "type": "number" }
                  |    }
                  |  },
-                 |  "gnu": { 
-                 |    "type": "object", 
-                 |    "properties": { 
+                 |  "gnu": {
+                 |    "type": "object",
+                 |    "properties": {
                  |      "toto": { "type": "string" }
                  |    }
                  |  }
-                 |} 
+                 |}
                  |}
                  |""".stripMargin) { schema =>
       assertSuggest("""{"foo": {}}""")(
@@ -195,16 +195,16 @@ class SuggestTest extends FunSuite:
   test("suggestions for several properties") {
     withSchema("""{
                  |"$id": "testme",
-                 |"type": "object", 
-                 |"properties": { 
-                 |  "foo": { 
-                 |    "type": "object", 
-                 |    "properties": { 
+                 |"type": "object",
+                 |"properties": {
+                 |  "foo": {
+                 |    "type": "object",
+                 |    "properties": {
                  |      "bar": { "type": "number" },
                  |      "gnu": { "type": "number" }
                  |    }
                  |  }
-                 |} 
+                 |}
                  |}
                  |""".stripMargin) { schema =>
       assertSuggest("""{"foo": {}}""")(
@@ -251,7 +251,7 @@ class SuggestTest extends FunSuite:
     withSchema("""{
                  |"$id": "testme",
                  |"type": "number",
-                 |"enum": [13, 14]                
+                 |"enum": [13, 14]
                  |}""".stripMargin) { schema =>
       assertSuggest("""true""")(schema) { result =>
         assertEquals(
@@ -280,7 +280,7 @@ class SuggestTest extends FunSuite:
     withSchema("""{
                  |"$id": "testme",
                  |"type": "boolean",
-                 |"const": true               
+                 |"const": true
                  |}""".stripMargin) { schema =>
       assertSuggest("""true""")(schema) { result =>
         assertEquals(
@@ -301,28 +301,28 @@ class SuggestTest extends FunSuite:
     """|{
        |  "$id": "testme",
        |"oneOf": [{
-       |  "if": { 
+       |  "if": {
        |    "type": "object",
-       |    "properties": { 
+       |    "properties": {
        |      "kind": { "type": "string", "const": "first" }
        |    }
        |  },
        |  "then": {
        |    "type": "object",
-       |    "properties": { 
+       |    "properties": {
        |      "gnu": { "type": "number" }
        |    }
        |  }
        |},{
-       |  "if": { 
+       |  "if": {
        |    "type": "object",
-       |    "properties": { 
+       |    "properties": {
        |      "kind": { "type": "string", "const": "second" }
        |    }
        |  },
        |  "then": {
        |    "type": "object",
-       |    "properties": { 
+       |    "properties": {
        |      "gnu": { "type": "boolean" },
        |      "bar": { "type": "boolean" }
        |    }
@@ -384,16 +384,16 @@ class SuggestTest extends FunSuite:
   test("suggestions enum properties") {
     withSchema("""{
                  |"$id": "testme",
-                 |"type": "object", 
-                 |"properties": { 
-                 |  "foo": { 
-                 |    "type": "object", 
-                 |    "properties": { 
+                 |"type": "object",
+                 |"properties": {
+                 |  "foo": {
+                 |    "type": "object",
+                 |    "properties": {
                  |      "bar": { "type": "number", "enum": [13, 14] },
                  |      "gnu": { "type": "string", "enum": ["toto", "titi"] }
                  |    }
                  |  }
-                 |} 
+                 |}
                  |}
                  |""".stripMargin) { schema =>
       assertSuggest("""{"foo": {}}""")(

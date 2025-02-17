@@ -203,7 +203,7 @@ object TestSchemas:
                                   |             }
                                   |           ]
                                   |         }
-                                  |      }  
+                                  |      }
                                   |    },
                                   |    "numberType": {
                                   |       "type": "number"

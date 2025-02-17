@@ -530,7 +530,7 @@ class JawnOffsetParserTest extends FunSuite {
 
   test("recover missing value before key") {
     val text = """|{
-                  |  "$anchor":      
+                  |  "$anchor":
                   |  "type": "boolean"
                   |}
                   |""".stripMargin
@@ -550,7 +550,7 @@ class JawnOffsetParserTest extends FunSuite {
   test("recover missing value at object end") {
     val text = """|{
                   |  "type": "boolean",
-                  |  "$anchor":      
+                  |  "$anchor":
                   |}
                   |""".stripMargin
     val recovered = recoveredValue(text).get
@@ -571,7 +571,7 @@ class JawnOffsetParserTest extends FunSuite {
   test("recover missing comma before key") {
     val text = """|{
                   |  "type": "boolean"
-                  |   "$anchor": 
+                  |   "$anchor":
                   |}
                   |""".stripMargin
     val recovered = recoveredValue(text).get
