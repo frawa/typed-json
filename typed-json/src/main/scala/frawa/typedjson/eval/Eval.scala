@@ -88,23 +88,23 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
 
   private def compileOne(k: Keyword, kl: KeywordLocation): Fun[R[O]] =
     val fun = k match {
-      case NullTypeKeyword      => verify.verifyType(verify.nullTypeMismatch)
-      case TrivialKeyword(v)    => verify.verifyTrivial(v)
-      case BooleanTypeKeyword   => verify.verifyType(verify.booleanTypeMismatch)
-      case NumberTypeKeyword    => verify.verifyType(verify.numberTypeMismatch)
-      case IntegerTypeKeyword   => verify.verifyInteger()
-      case StringTypeKeyword    => verify.verifyType(verify.stringTypeMismatch)
-      case ArrayTypeKeyword     => verify.verifyType(verify.arrayTypeMismatch)
-      case ObjectTypeKeyword    => verify.verifyType(verify.objectTypeMismatch)
-      case UnionTypeKeyword(ks) => verify.verifyUnion(compileSeq(ks, kl))
-      case NotKeyword(kk)       => verify.verifyNot(compile(kk, kl))
+      case NullTypeKeyword                       => verify.verifyType(verify.nullTypeMismatch)
+      case TrivialKeyword(v)                     => verify.verifyTrivial(v)
+      case BooleanTypeKeyword                    => verify.verifyType(verify.booleanTypeMismatch)
+      case NumberTypeKeyword                     => verify.verifyType(verify.numberTypeMismatch)
+      case IntegerTypeKeyword                    => verify.verifyInteger()
+      case StringTypeKeyword                     => verify.verifyType(verify.stringTypeMismatch)
+      case ArrayTypeKeyword                      => verify.verifyType(verify.arrayTypeMismatch)
+      case ObjectTypeKeyword                     => verify.verifyType(verify.objectTypeMismatch)
+      case UnionTypeKeyword(ks)                  => verify.verifyUnion(compileSeq(ks, kl))
+      case NotKeyword(kk)                        => verify.verifyNot(compile(kk, kl))
       case ArrayItemsKeyword(items, prefixItems) =>
         val funItems       = items.map(compile(_, kl))
         val funPrefixItems = prefixItems.map(compile(_, kl))
         verify.verifyArrayItems(funItems, funPrefixItems)
       case ObjectPropertiesKeyword(properties, patternProperties, additionalProperties) =>
-        val funProperties        = compile(properties, kl)
-        val funPatternProperties = compile(patternProperties, kl)
+        val funProperties           = compile(properties, kl)
+        val funPatternProperties    = compile(patternProperties, kl)
         val funAdditionalProperties = additionalProperties.map(additionalProperties =>
           val fun = verify.verifyAdditionalProperties((compile(additionalProperties, kl)))
           funForKeyword(fun, kl)
@@ -119,7 +119,7 @@ class Eval[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         val funThen = ksThen.map(compile(_, kl))
         val funElse = ksElse.map(compile(_, kl))
         verify.verfyIfThenElse(funIf, funThen, funElse)
-      case EnumKeyword(vs) => verify.verifyEnum(vs)
+      case EnumKeyword(vs)              => verify.verifyEnum(vs)
       case RefKeyword(ref, base, scope) =>
         given Eval[R, O] = this
         monad.resolve(ref, base, scope)

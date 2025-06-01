@@ -106,8 +106,8 @@ abstract class SchemaTestSuite extends FunSuite:
       .validator(schema)
       .fold(error => fail(s"no validator: ${error}"), v => v)
 
-    val values  = expectations.map(_.data)
-    val actuals = validator(values)
+    val values   = expectations.map(_.data)
+    val actuals  = validator(values)
     val expected = expectations.map { e =>
       s"'${e.description}' is ${e.valid}"
     }

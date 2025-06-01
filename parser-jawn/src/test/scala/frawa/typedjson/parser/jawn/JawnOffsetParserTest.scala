@@ -151,7 +151,7 @@ class JawnOffsetParserTest extends FunSuite {
         ObjectValue(
           Offset(0, 34),
           Map(
-            StringValue(Offset(1, 7), "toto") -> NumberValue(Offset(9, 10), 1),
+            StringValue(Offset(1, 7), "toto")   -> NumberValue(Offset(9, 10), 1),
             StringValue(Offset(12, 18), "titi") -> ObjectValue(
               Offset(20, 33),
               Map(

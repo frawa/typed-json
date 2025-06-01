@@ -102,7 +102,7 @@ case class Pointer(segments: Seq[Token]):
         segment match {
           case ArrayIndexToken(index) =>
             v match {
-              case Offset.ArrayValue(_, vs) => vs.lift(index)
+              case Offset.ArrayValue(_, vs)          => vs.lift(index)
               case Offset.ObjectValue(_, properties) =>
                 properties.find(_._1.value == index.toString).map(_._2)
               case _ => None

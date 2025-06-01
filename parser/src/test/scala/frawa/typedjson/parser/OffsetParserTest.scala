@@ -99,7 +99,7 @@ class OffsetParserTest extends FunSuite:
     val v = ObjectValue(
       Offset(0, 33),
       Map(
-        StringValue(Offset(1, 6), "toto") -> NumberValue(Offset(9, 9), 1),
+        StringValue(Offset(1, 6), "toto")   -> NumberValue(Offset(9, 9), 1),
         StringValue(Offset(12, 17), "titi") -> ObjectValue(
           Offset(20, 32),
           Map(

@@ -97,9 +97,9 @@ object CacheState:
       eval: Eval[R, O]
   ): Eval.Fun[R[O]] = value =>
     state =>
-      val ops  = summon[OutputOps[O]]
-      val uri0 = UriUtil.absolute(ref, base)
-      val uri  = uri0.toString
+      val ops           = summon[OutputOps[O]]
+      val uri0          = UriUtil.absolute(ref, base)
+      val uri           = uri0.toString
       val alreadyCached = state.cache
         .get(uri)
         .map { cached =>
@@ -118,8 +118,8 @@ object CacheState:
           (r, v)
         }
         .map { rv =>
-          val key  = uri
-          val key2 = rv._1.resolver.base.toString
+          val key           = uri
+          val key2          = rv._1.resolver.base.toString
           lazy val newCache =
             if key == key2 then {
               state.cache + (key -> rv)

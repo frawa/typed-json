@@ -51,11 +51,11 @@ object TestUtil:
       s"\"$s\""
 
     value match
-      case NumberValue(value) => value.toString()
-      case BoolValue(value)   => value.toString()
-      case NullValue          => "null"
-      case StringValue(value) => serializeString(value)
-      case ArrayValue(items)  => s"[${items.map(serializeJsonValue).mkString(",")}]"
+      case NumberValue(value)      => value.toString()
+      case BoolValue(value)        => value.toString()
+      case NullValue               => "null"
+      case StringValue(value)      => serializeString(value)
+      case ArrayValue(items)       => s"[${items.map(serializeJsonValue).mkString(",")}]"
       case ObjectValue(properties) =>
         s"{ ${properties
             .map { (k, v) =>

@@ -42,7 +42,7 @@ case class DynamicScope(uris: Seq[URI], kl: KeywordLocation = KeywordLocation.em
     copy(kl = kl.resolved(base))
 
   private def push(pushFun: Pointer => Pointer): DynamicScope =
-    val uri1 = uris.lastOption.getOrElse(uri(""))
+    val uri1    = uris.lastOption.getOrElse(uri(""))
     val pointer = uris.lastOption
       .map(_.getFragment())
       .filter(_ != null)

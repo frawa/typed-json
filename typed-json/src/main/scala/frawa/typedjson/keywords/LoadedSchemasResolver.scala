@@ -94,7 +94,7 @@ object LoadedSchemasResolver:
 
   private type NestedSchemaGetter = Value => Seq[Value]
 
-  private def selfSchema: NestedSchemaGetter = v => Seq(v)
+  private def selfSchema: NestedSchemaGetter   = v => Seq(v)
   private def arraySchemas: NestedSchemaGetter =
     case ArrayValue(vs) => vs
     case _              => Seq.empty

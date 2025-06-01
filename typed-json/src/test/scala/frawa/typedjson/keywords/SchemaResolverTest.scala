@@ -26,7 +26,7 @@ class SchemaResolverTest extends FunSuite:
   val fooId       = "https://example.net/foo.json"
   val fooUri: URI = uri(fooId)
 
-  val gnuUri: URI = uri("https://example.net/foo.json#gnu")
+  val gnuUri: URI            = uri("https://example.net/foo.json#gnu")
   val gnuSchema: SchemaValue =
     SchemaValue(
       value = ObjectValue(

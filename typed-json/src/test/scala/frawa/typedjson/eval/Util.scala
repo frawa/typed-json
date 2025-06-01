@@ -86,7 +86,7 @@ object Util:
       using resolver: SchemaResolver
   ): Seq[O] =
     val emptyCache = empty(resolver, vocabularyForTest.get)
-    val (s, os) = values
+    val (s, os)    = values
       .foldLeft((emptyCache, Seq.empty[O])) { case ((state, os), v) =>
         val (o, state1) = fun(v)(state)
         (state1, os :+ o)

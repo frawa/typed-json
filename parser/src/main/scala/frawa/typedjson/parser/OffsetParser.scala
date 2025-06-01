@@ -126,11 +126,11 @@ object Offset:
 
   def withoutOffset(value: Value): ValueWO =
     value match
-      case Offset.NumberValue(_, value) => ValueWO.NumberValue(value)
-      case Offset.BoolValue(_, value)   => ValueWO.BoolValue(value)
-      case Offset.NullValue(_)          => ValueWO.NullValue
-      case Offset.StringValue(_, value) => ValueWO.StringValue(value.toString)
-      case Offset.ArrayValue(_, vs)     => ValueWO.ArrayValue(vs.map(withoutOffset))
+      case Offset.NumberValue(_, value)      => ValueWO.NumberValue(value)
+      case Offset.BoolValue(_, value)        => ValueWO.BoolValue(value)
+      case Offset.NullValue(_)               => ValueWO.NullValue
+      case Offset.StringValue(_, value)      => ValueWO.StringValue(value.toString)
+      case Offset.ArrayValue(_, vs)          => ValueWO.ArrayValue(vs.map(withoutOffset))
       case Offset.ObjectValue(_, properties) =>
         ValueWO.ObjectValue(
           properties
