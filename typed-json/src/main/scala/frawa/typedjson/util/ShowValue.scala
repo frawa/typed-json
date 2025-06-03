@@ -50,10 +50,10 @@ object ShowValue:
     val sep  = if flat then "" else s"\n${ws(indent)}"
     val sep1 = if flat then "" else s"\n${ws(indent + 1)}"
     v match {
-      case NullValue      => "null"
-      case StringValue(v) => s"\"${v}\""
-      case NumberValue(v) => s"${v}"
-      case BoolValue(v)   => s"${v}"
+      case NullValue         => "null"
+      case StringValue(v)    => s"\"${v}\""
+      case NumberValue(v)    => s"${v}"
+      case BoolValue(v)      => s"${v}"
       case ArrayValue(items) =>
         if items.isEmpty then "[]"
         else s"[${items.sorted.map(prettyPrint(indent + 1)).mkString(s",${sep1}")}${sep}]"

@@ -35,7 +35,7 @@ class KeywordsTest extends FunSuite:
   ): Either[Nothing, Unit] =
     val resolver: LoadedSchemasResolver = LoadedSchemasResolver(schema)
     val scope                           = DynamicScope.empty
-    val withParsed =
+    val withParsed                      =
       for keywords <- Keywords.parseKeywords(vocabulary, resolver.push(schema), scope)
       yield f(keywords)
     withParsed.swap

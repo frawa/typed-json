@@ -26,7 +26,7 @@ object FP:
 
   trait State[S]: // extends Monad[[A] =>> State[A] => (A, State[A])]:
     type S1[A] = S => (A, S)
-    def pure[A](a: A): S1[A] = s => (a, s)
+    def pure[A](a: A): S1[A]                          = s => (a, s)
     def flatMap[A, B](a: S1[A])(f: A => S1[B]): S1[B] = s0 =>
       val (aa, s1) = a(s0)
       f(aa)(s1)

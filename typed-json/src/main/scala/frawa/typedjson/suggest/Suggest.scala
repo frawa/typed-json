@@ -49,7 +49,7 @@ object Suggest:
     compiled
 
   def suggestions(at: Pointer, keysOnly: Boolean, output: SuggestOutput): SuggestResult =
-    val ws = output.keywords.map(suggestFor)
+    val ws        = output.keywords.map(suggestFor)
     val metaByLoc = output.keywords
       .groupBy {
         case WithLocation(meta: MetaKeyword, kl) => Some(kl.parent)
@@ -70,7 +70,7 @@ object Suggest:
         case _ => None
       }
       .toMap
-    val byMeta = Work.parentLoc.andThen(_.flatMap(p => metaByLoc.get(p).map((_, p))))
+    val byMeta      = Work.parentLoc.andThen(_.flatMap(p => metaByLoc.get(p).map((_, p))))
     val suggestions = ws
       .groupBy(byMeta)
       .view
@@ -165,7 +165,7 @@ object Suggest:
         Work(Seq(allProperties, allPatternProperties) ++ additionals)
       case ObjectRequiredKeyword(required) =>
         Work(ObjectValue(Map.from(required.map((_, NullValue)))))
-      case TrivialKeyword(v) => Work(BoolValue(v))
+      case TrivialKeyword(v)                                   => Work(BoolValue(v))
       case IfThenElseKeyword(ifChecks, thenChecks, elseChecks) =>
         Work.all(
           Seq(ifChecks, thenChecks, elseChecks).flatten
@@ -184,7 +184,7 @@ object Suggest:
         Work.all(
           keywords.flatMap(_.map(keyword => suggestFor(keyword)))
         )
-      case EnumKeyword(values) => Work(values)
+      case EnumKeyword(values)                   => Work(values)
       case ArrayItemsKeyword(items, prefixItems) =>
         val itemArrays = Seq(items).flatten
           .flatMap(ks => useBestValue(ks.flatMap(keyword => suggestFor(keyword).values)))

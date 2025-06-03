@@ -246,7 +246,7 @@ class LoadedSchemasResolverTest extends FunSuite:
       Pointer.empty / "$comment"
 
       val scope = DynamicScope.empty.push(uriRoot)
-      val ok = for
+      val ok    = for
         SchemaResolution(schema1, resolver1) <- resolver.resolveRef(id)
         id1                                  <- SchemaValue.id(schema1)
         SchemaResolution(schema2, _)         <- resolver1.resolveDynamicRef("#items", scope)
@@ -308,7 +308,7 @@ class LoadedSchemasResolverTest extends FunSuite:
       val getType          = Pointer.empty / "type"
 
       val scope = DynamicScope.empty.push(uriRoot)
-      val ok = for
+      val ok    = for
         SchemaResolution(schema1, resolver1) <- resolver.resolveRef(id)
         id1                                  <- SchemaValue.id(schema1)
         SchemaResolution(schema2, _)         <- resolver1.resolveDynamicRef("#items", scope)
@@ -370,7 +370,7 @@ class LoadedSchemasResolverTest extends FunSuite:
                   |    }
                   |}""".stripMargin) { exampleSchema =>
       withLoadedSchemas(Seq()) { resolver0 =>
-        val uriExample = uri(exampleUri)
+        val uriExample                 = uri(exampleUri)
         val lazyResolver: LazyResolver = uri =>
           if uri.toString == exampleUri then
             Some(RootSchemaValue(exampleSchema.value, Some(uriExample)))

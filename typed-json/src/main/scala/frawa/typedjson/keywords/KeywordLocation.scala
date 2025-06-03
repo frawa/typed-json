@@ -26,7 +26,7 @@ enum KeywordLocation:
   case Dereferenced(relative: Pointer, absolute: URI)
 
   def push(pushFun: Pointer => Pointer): KeywordLocation = this match {
-    case Local(relative) => Local(pushFun(relative))
+    case Local(relative)                  => Local(pushFun(relative))
     case Dereferenced(relative, absolute) =>
       Dereferenced(pushFun(relative), UriUtil.push(absolute, pushFun))
   }
@@ -37,7 +37,7 @@ enum KeywordLocation:
   }
 
   def parent: KeywordLocation = this match {
-    case Local(relative) => Local(relative.outer)
+    case Local(relative)                  => Local(relative.outer)
     case Dereferenced(relative, absolute) =>
       Dereferenced(relative.outer, UriUtil.push(absolute, _.outer))
   }

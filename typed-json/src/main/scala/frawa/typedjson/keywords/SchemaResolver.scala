@@ -53,7 +53,7 @@ trait SchemaResolver:
     val resolved = resolveRef(uri)
 
     val fragment = uri.getFragment
-    val dynamic = isDynamic(uri) ||
+    val dynamic  = isDynamic(uri) ||
       scope.candidates.lastOption.map(UriUtil.withFragment(_, fragment)).exists(isDynamic)
     if dynamic && fragment != null then
       scope.candidates

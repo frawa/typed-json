@@ -181,7 +181,7 @@ lazy val macros = project
   .dependsOn(parser.jvm(scalaVersion3))
   .dependsOn(parserJawn.jvm(scalaVersion3))
 
-lazy val ESVersion = org.scalajs.linker.interface.ESVersion
+lazy val ESVersion        = org.scalajs.linker.interface.ESVersion
 lazy val jsSettingsES2018 = Seq(
   // fixes regex error: Look-behind group is not supported because it requires RegExp features of ECMAScript 2018.
   scalaJSLinkerConfig ~= { _.withESFeatures(_.withESVersion(ESVersion.ES2018)) }

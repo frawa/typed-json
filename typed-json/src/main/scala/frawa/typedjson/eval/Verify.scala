@@ -207,7 +207,7 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
             .map(_._2)
             .toSeq
           val funs = funProperties ++ funsPattern
-          val f =
+          val f    =
             if funs.isEmpty then additionalProperties
             else if funs.size == 1 then Some(funs(0))
             else Some(funAll(funs))
@@ -314,7 +314,7 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
       .asObject(value.value)
       .map { vs =>
         val names = vs.keySet
-        val ros = names.map { name =>
+        val ros   = names.map { name =>
           (name, f(WithPointer(StringValue(name), value.pointer / name)))
         }.toSeq
         // val validNames = os.filter(_._2.isValid).map(_._1).toSet
@@ -332,7 +332,7 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
             .asString(value.value)
             .map { v =>
               val valid = pred(v)
-              val o =
+              val o     =
                 if assertion && !valid then ops.invalid(FormatMismatch(format), value.pointer)
                 else ops.valid(value.pointer)
               o.withAnnotation(Format(valid, format))
@@ -423,7 +423,7 @@ class Verify[R[_], O](using TheResultMonad[R, O], OutputOps[O]):
         schema.map(indexed.map(_)).map { ros =>
           FP.sequence(ros).map { os =>
             val count = os.count(_.isValid)
-            val o =
+            val o     =
               if min.getOrElse(1) <= count && !max.exists(count > _) then ops.valid(value.pointer)
               else ops.invalid(NotContains(count), value.pointer)
             val validIndices = os.zipWithIndex

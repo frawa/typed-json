@@ -51,11 +51,11 @@ class JawnParser extends Parser with OffsetParser:
       )
 
   private val valueFacade: jawn.Facade[Value] = new jawn.Facade.SimpleFacade[Value]:
-    override def jarray(vs: List[Value]): Value         = Value.ArrayValue(vs)
-    override def jobject(vs: Map[String, Value]): Value = Value.ObjectValue(vs)
-    override def jnull: Value                           = Value.NullValue
-    override def jfalse: Value                          = Value.BoolValue(false)
-    override def jtrue: Value                           = Value.BoolValue(true)
+    override def jarray(vs: List[Value]): Value                             = Value.ArrayValue(vs)
+    override def jobject(vs: Map[String, Value]): Value                     = Value.ObjectValue(vs)
+    override def jnull: Value                                               = Value.NullValue
+    override def jfalse: Value                                              = Value.BoolValue(false)
+    override def jtrue: Value                                               = Value.BoolValue(true)
     override def jnum(s: CharSequence, decIndex: Int, expIndex: Int): Value =
       Value.NumberValue(BigDecimal.exact(s.toString))
     override def jstring(s: CharSequence): Value = Value.StringValue(s.toString)
@@ -66,7 +66,7 @@ class JawnParser extends Parser with OffsetParser:
       Offset.StringValue(Offset(index, index + s.length() + 2), s)
 
     override def singleContext(index: Int): FContext[Offset.Value] = new FContext[Offset.Value]:
-      private var current: Option[Offset.Value] = None
+      private var current: Option[Offset.Value]           = None
       override def add(s: CharSequence, index: Int): Unit =
         current = Some(string(s, index))
       override def add(v: Offset.Value, index: Int): Unit =
@@ -91,7 +91,7 @@ class JawnParser extends Parser with OffsetParser:
       new FContext[Offset.Value]:
         private var currentKey: Option[Offset.StringValue]            = None
         private var properties: Map[Offset.StringValue, Offset.Value] = Map.empty
-        override def add(s: CharSequence, index: Int): Unit =
+        override def add(s: CharSequence, index: Int): Unit           =
           if currentKey.isEmpty then currentKey = Some(string(s, index))
           else
             properties = properties + (
@@ -141,7 +141,7 @@ class JawnParser extends Parser with OffsetParser:
       stack.prepend(delegate)
       override def add(s: CharSequence, index: Int): Unit = delegate.add(s, index)
       override def add(v: T, index: Int): Unit            = delegate.add(v, index)
-      override def finish(index: Int): T =
+      override def finish(index: Int): T                  =
         stack.removeHead()
         delegate.finish(index)
       override def isObj: Boolean = delegate.isObj

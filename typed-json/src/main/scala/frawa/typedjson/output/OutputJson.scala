@@ -135,7 +135,7 @@ object OutputJson:
       case AdditionalPropertyInvalid(p)      => s"Additional property '${p}' found but was invalid."
       case PatternMismatch(pattern)          => s"Does not match pattern '${pattern}'."
       case FormatMismatch(format)            => s"Not of format '${format}'."
-      case MinimumMismatch(min, exclude) =>
+      case MinimumMismatch(min, exclude)     =>
         if exclude then s"Expected greater than ${min}."
         else s"Expected greater than or equal to ${min}."
       case MaximumMismatch(max, exclude) =>

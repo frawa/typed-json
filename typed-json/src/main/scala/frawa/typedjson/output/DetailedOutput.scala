@@ -48,7 +48,7 @@ object DetailedOutput:
         error: Option[ValidationError],
         pointer: Pointer
     ): DetailedOutput =
-      val valid = os.forall(_.valid)
+      val valid       = os.forall(_.valid)
       val annotations =
         if valid then
           OutputOps.mergeAnnotations(
@@ -75,10 +75,10 @@ object DetailedOutput:
         if o.valid then
           DetailedOutput(valid = false, error = Some(NotInvalid()), instanceLocation = pointer)
         else DetailedOutput(valid = true, instanceLocation = pointer)
-      def isValid: Boolean = o.valid
+      def isValid: Boolean                                                        = o.valid
       def withAnnotations(annotations: Seq[OutputOps.Annotation]): DetailedOutput =
         o.copy(annotations = o.annotations ++ annotations)
-      def getAnnotations(): Seq[OutputOps.Annotation] = o.annotations
+      def getAnnotations(): Seq[OutputOps.Annotation]                                = o.annotations
       def forKeyword(kl: KeywordLocation, k: Option[Keyword] = None): DetailedOutput =
         if o.keywordLocation.isDefined && !o.keywordLocation.contains(kl) then
           // TODO avoid this situation

@@ -160,7 +160,7 @@ case class Keywords(
 
       case ("type", ArrayValue(values)) =>
         def typeNames = Value.asStrings(values)
-        def keywords = typeNames
+        def keywords  = typeNames
           .flatMap(getTypeCheck)
           .map(withLocation(_))
 
@@ -492,14 +492,14 @@ object Keywords:
       scope: DynamicScope
   ): Either[SchemaProblems, Keywords] =
     val SchemaResolution(schema, resolver) = resolution
-    val scope1: DynamicScope = SchemaValue
+    val scope1: DynamicScope               = SchemaValue
       .id(schema)
       .map(id => scope.push(resolver.absolute(id)))
       .getOrElse(scope)
     given CurrentLocation = scope1.currentLocation
 
     schema.value match
-      case BoolValue(v) => Right(Keywords(vocabulary).add(TrivialKeyword(v)))
+      case BoolValue(v)            => Right(Keywords(vocabulary).add(TrivialKeyword(v)))
       case ObjectValue(properties) =>
         val keywords = Keywords(vocabulary)
         if properties.isEmpty then Right(keywords.add(TrivialKeyword(true)))

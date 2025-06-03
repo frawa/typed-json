@@ -118,7 +118,7 @@ case class TypedJsonJS(
   @JSExport
   def suggestionsAt(offset: Int): js.UndefOr[SuggestionsResult] = {
     value.flatMap { value =>
-      val at = TypedJsonFactory.contextAt(value, offset)
+      val at                    = TypedJsonFactory.contextAt(value, offset)
       val (keysOnly, atPointer) = at match {
         case _: OffsetContext.InsideKey => (true, at.pointer.outer)
         case _: OffsetContext.NewKey    => (true, at.pointer)
@@ -131,7 +131,7 @@ case class TypedJsonJS(
       o.map { o =>
         val result = Suggest.suggestions(at.pointer, keysOnly, o)
         val offset = at.offset
-        val sep = at match {
+        val sep    = at match {
           case OffsetContext.NewKey(_, _)   => Some(":")
           case OffsetContext.NewValue(_, _) => Some(",")
           case _                            => None
@@ -238,11 +238,11 @@ object SuggestionsResult {
 
   private def toAny(value: Value): js.Any = {
     value match {
-      case Value.NumberValue(value) => value.toDouble
-      case Value.BoolValue(value)   => value
-      case Value.NullValue          => null
-      case Value.StringValue(value) => value
-      case Value.ArrayValue(items)  => js.Array(items.map(toAny)*)
+      case Value.NumberValue(value)      => value.toDouble
+      case Value.BoolValue(value)        => value
+      case Value.NullValue               => null
+      case Value.StringValue(value)      => value
+      case Value.ArrayValue(items)       => js.Array(items.map(toAny)*)
       case Value.ObjectValue(properties) =>
         val pairs = properties.map(t => (t._1, toAny(t._2))).toSeq
         js.Dictionary(pairs*)
